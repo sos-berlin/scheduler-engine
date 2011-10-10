@@ -1,13 +1,8 @@
 package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.google.common.collect.Iterators;
-import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.Configuration.configFilenames;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.Configuration.jobFilenames;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -15,13 +10,26 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.ClassRule;
 import org.junit.Test;
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.Configuration.*;
+import org.junit.rules.TestRule;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Iterators;
+import com.google.common.io.Files;
+import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.junit.SlowTestRule;
+import com.sos.scheduler.engine.kernel.util.Time;
 
 
 public class Js644Test extends SchedulerTest {
     private static final Time orderTimeout = Time.of(10);
     private static final Charset encoding = Charsets.UTF_8;
+    @ClassRule public static TestRule slowTestRule = SlowTestRule.singleton;
 
     private final BlockingQueue<Boolean> eventReceivedQueue = new ArrayBlockingQueue<Boolean>(1);
 
