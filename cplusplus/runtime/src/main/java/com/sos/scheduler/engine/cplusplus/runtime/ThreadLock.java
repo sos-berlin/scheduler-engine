@@ -65,7 +65,7 @@ public class ThreadLock {
             callersData.forget();
         }
 
-        private class CallersData {
+        private static class CallersData {
             private volatile Thread lockingThread = null;
             private volatile Exception lockingStackTrace = null;
         

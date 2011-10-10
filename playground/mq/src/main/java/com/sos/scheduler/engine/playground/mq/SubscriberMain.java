@@ -52,7 +52,7 @@ public final class SubscriberMain {
     }
 
 
-    private class MyListener implements javax.jms.MessageListener {
+    private static class MyListener implements javax.jms.MessageListener {
         @Override public void onMessage(Message message) {
             // Läuft in einem Thread von JMS
             try {
