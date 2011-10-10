@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
-
 /**
  * \file OrderStepEndedEvent.java
  * \brief This event is fired if a step of an order ended. 
@@ -24,21 +23,17 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStepEndedEvent extends OrderEvent {
-	
+public class OrderStepEndedEvent extends UnmodifiableOrderEvent {
 	private final boolean ok;
 
-    
     public OrderStepEndedEvent(UnmodifiableOrder order, boolean ok) {
         super(order);
         this.ok = ok;
     }
 
-
-    public final boolean getOk() { 
+    public final boolean getOk() {
         return ok;
     }
-
 
     @Override public final String toString() {
         return super.toString() + ", ok=" + ok;

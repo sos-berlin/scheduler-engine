@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
-
 /**
  * \file OrderSuspendedEvent.java
  * \brief This event fired if an order was suspended 
@@ -24,7 +23,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderSuspendedEvent extends OrderEvent {
+public class OrderSuspendedEvent extends UnmodifiableOrderEvent {
     public OrderSuspendedEvent(UnmodifiableOrder order) {
         super(order);
     }

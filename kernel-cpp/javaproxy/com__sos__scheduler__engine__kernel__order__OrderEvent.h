@@ -8,10 +8,9 @@
 #include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__GenericOrderEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct GenericOrderEvent; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct ObjectEvent; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -21,8 +20,8 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct OrderEvent__class;
 
-struct OrderEvent : ::zschimmer::javabridge::proxy_jobject< OrderEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::GenericOrderEvent {
-    static OrderEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0);
+struct OrderEvent : ::zschimmer::javabridge::proxy_jobject< OrderEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent {
+    static OrderEvent new_instance();
 
     OrderEvent(jobject = NULL);
 
@@ -45,10 +44,11 @@ struct OrderEvent : ::zschimmer::javabridge::proxy_jobject< OrderEvent >, ::java
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< OrderEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::order::GenericOrderEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent::set_jobject(jo);
     }
   public:
 
+    ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder getOrder();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

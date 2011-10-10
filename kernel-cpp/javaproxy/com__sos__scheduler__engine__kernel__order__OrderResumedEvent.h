@@ -8,12 +8,12 @@
 #include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__GenericOrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrderEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderEvent; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrderEvent; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -22,7 +22,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct OrderResumedEvent__class;
 
-struct OrderResumedEvent : ::zschimmer::javabridge::proxy_jobject< OrderResumedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent {
+struct OrderResumedEvent : ::zschimmer::javabridge::proxy_jobject< OrderResumedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrderEvent {
     static OrderResumedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0);
 
     OrderResumedEvent(jobject = NULL);
@@ -46,7 +46,7 @@ struct OrderResumedEvent : ::zschimmer::javabridge::proxy_jobject< OrderResumedE
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< OrderResumedEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrderEvent::set_jobject(jo);
     }
   public:
 

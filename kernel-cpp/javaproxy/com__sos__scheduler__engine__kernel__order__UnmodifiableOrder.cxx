@@ -29,7 +29,7 @@ const ::zschimmer::javabridge::class_factory< UnmodifiableOrder__class > Unmodif
 UnmodifiableOrder__class::UnmodifiableOrder__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_getEndState____method(this, "getEndState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
-    ,_getFilePath____method(this, "getFilePath", "()V")
+    ,_getFilePath____method(this, "getFilePath", "()Ljava/lang/String;")
     ,_getId____method(this, "getId", "()Lcom/sos/scheduler/engine/kernel/order/OrderId;")
     ,_getState____method(this, "getState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
     ,_getTitle____method(this, "getTitle", "()Ljava/lang/String;"){}
@@ -60,10 +60,12 @@ UnmodifiableOrder::~UnmodifiableOrder() { assign_(NULL); }
     return result;
 }
 
-void UnmodifiableOrder::getFilePath() {
+::javaproxy::java::lang::String UnmodifiableOrder::getFilePath() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     UnmodifiableOrder__class* cls = _class.get();
-    cls->_getFilePath____method.call(get_jobject(), parameter_list);
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getFilePath____method.jobject_call(get_jobject(), parameter_list));
+    return result;
 }
 
 ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId UnmodifiableOrder::getId() {

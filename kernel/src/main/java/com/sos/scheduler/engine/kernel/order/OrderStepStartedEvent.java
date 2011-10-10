@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
-
 /**
  * \file OrderStepStartedEvent.java
  * \brief This event is fired before the execution of an order step begins 

@@ -29,7 +29,6 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__log__LogEvent.o\
  com__sos__scheduler__engine__kernel__log__PrefixLog.o\
  com__sos__scheduler__engine__kernel__main__SchedulerStateHandler.o\
- com__sos__scheduler__engine__kernel__order__GenericOrderEvent.o\
  com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.o\
  com__sos__scheduler__engine__kernel__order__Order.o\
  com__sos__scheduler__engine__kernel__order__OrderEvent.o\
@@ -43,6 +42,7 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__order__OrderSuspendedEvent.o\
  com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.o\
  com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.o\
+ com__sos__scheduler__engine__kernel__order__UnmodifiableOrderEvent.o\
  com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.o\
  com__sos__scheduler__engine__kernel__scripting__ScriptInstance.o\
  com__sos__scheduler__engine__kernel__util__StringValue.o\

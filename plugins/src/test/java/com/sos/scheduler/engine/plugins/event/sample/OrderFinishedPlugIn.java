@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.order.OrderEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
@@ -60,8 +60,8 @@ public class OrderFinishedPlugIn extends AbstractEventPlugin {
 	public void onEvent(Event e) throws Exception {
 
 		try {
-			if (e instanceof OrderEvent) {
-				OrderEvent orderEvent = (OrderEvent)e;
+			if (e instanceof UnmodifiableOrderEvent) {
+				UnmodifiableOrderEvent orderEvent = (UnmodifiableOrderEvent)e;
 				if (e instanceof OrderFinishedEvent) {
 					logger.info("Order " + orderEvent.getOrder().getId() + ": " + orderEvent.getOrder().getTitle() + " finished");
 				}

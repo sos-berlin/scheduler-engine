@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
-
 /**
  * \file OrderTouchedEvent.java
  * \brief This event fired if an order scheduled by the JS 

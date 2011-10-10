@@ -8,7 +8,6 @@
 #include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__GenericOrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "java__lang__Object.h"
 

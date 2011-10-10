@@ -1,31 +1,25 @@
 package com.sos.scheduler.engine.kernelcpptest.order.test1
 
-import java.lang.Override
-import com.sos.scheduler.engine.kernel.order.OrderEvent
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
-import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent
-import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent
-import com.sos.scheduler.engine.kernel.order.OrderStepEndedEvent
-import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent
+import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernelcpptest.ScalaEventThread
 import com.sos.scheduler.engine.kernelcpptest.ScalaSchedulerTest
-
+import org.junit.{Ignore, Test}
 
 // Wie die Java-Klasse ExampleTest. scheduler.xml steht deshalb im Java-Verzeichnis, dasselbe Paket.
 class ExampleScalaTest extends ScalaSchedulerTest {
     private val eventTimeout = Time.of(3)
 
-//    @Ignore	//FIXME Test wieder laufen lassen, wenn OrderStepBeginEvent usw. laufen
-//    @Test def test() {
-//        strictSubscribeEvents(new MyEventThread)
-//        runScheduler(shortTimeout)
-//    }
+    @Ignore	//FIXME Test wieder laufen lassen, wenn OrderStepBeginEvent usw. laufen
+    @Test def test() {
+        controller.strictSubscribeEvents(new MyEventThread)
+        controller.runScheduler(shortTimeout)
+    }
 
     class MyEventThread extends ScalaEventThread {
-        filter { case e: OrderEvent => e.getOrder.getId == "id.1" }
+        filter { case e: UnmodifiableOrderEvent => e.getOrder.getId == "id.1" }
 
-        @Override protected def runEventThread() {
+        override protected def runEventThread() {
             expectEvent(eventTimeout) { case e: OrderTouchedEvent      => e.getOrder.getState == "state.1" }
             expectEvent(eventTimeout) { case e: OrderStepStartedEvent  => e.getOrder.getState == "state.1" }
             expectEvent(eventTimeout) { case e: OrderStepEndedEvent    => e.getOrder.getState == "state.1" }

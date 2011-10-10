@@ -6,7 +6,7 @@ import static com.sos.scheduler.engine.kernel.util.Util.*;
 
 abstract public class ObjectEvent extends AbstractEvent {
     /** Nur gültig während des Events. 
-     * Danach kann das Objekt ungültig geworden sein und es gibt es den Fehler Z-JAVA-111. */
+     * Danach kann das Objekt ungültig geworden sein und es gibt den Fehler Z-JAVA-111. */
     abstract protected SchedulerObject getObject();
 
     @Override public String toString() {

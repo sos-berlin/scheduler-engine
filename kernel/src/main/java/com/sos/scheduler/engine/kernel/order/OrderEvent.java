@@ -1,7 +1,12 @@
 package com.sos.scheduler.engine.kernel.order;
 
-abstract public class OrderEvent extends GenericOrderEvent<UnmodifiableOrder> {
-    public OrderEvent(UnmodifiableOrder o) {
-        super(o);
+import com.sos.scheduler.engine.kernel.SchedulerObject;
+import com.sos.scheduler.engine.kernel.event.ObjectEvent;
+
+public abstract class OrderEvent extends ObjectEvent {
+    @Override protected final SchedulerObject getObject() {
+        return getOrder();
     }
+
+    public abstract UnmodifiableOrder getOrder();
 }

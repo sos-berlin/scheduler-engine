@@ -36,7 +36,7 @@ const ::zschimmer::javabridge::class_factory< Order__class > Order__class::class
 Order__class::Order__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_getEndState____method(this, "getEndState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
-    ,_getFilePath____method(this, "getFilePath", "()V")
+    ,_getFilePath____method(this, "getFilePath", "()Ljava/lang/String;")
     ,_getId____method(this, "getId", "()Lcom/sos/scheduler/engine/kernel/order/OrderId;")
     ,_getParameters____method(this, "getParameters", "()Lcom/sos/scheduler/engine/kernel/VariableSet;")
     ,_getState____method(this, "getState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
@@ -71,10 +71,12 @@ Order::~Order() { assign_(NULL); }
     return result;
 }
 
-void Order::getFilePath() {
+::javaproxy::java::lang::String Order::getFilePath() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Order__class* cls = _class.get();
-    cls->_getFilePath____method.call(get_jobject(), parameter_list);
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getFilePath____method.jobject_call(get_jobject(), parameter_list));
+    return result;
 }
 
 ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId Order::getId() {

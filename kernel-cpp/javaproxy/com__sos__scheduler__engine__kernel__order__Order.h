@@ -54,7 +54,7 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
   public:
 
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getEndState();
-    void getFilePath();
+    ::javaproxy::java::lang::String getFilePath();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId getId();
     ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet getParameters();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getState();

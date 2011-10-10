@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
-
 /**
  * \file OrderFinishedEvent.java
  * \brief This event fired if an order reach the end state 
@@ -24,7 +23,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderFinishedEvent extends OrderEvent {
+public class OrderFinishedEvent extends UnmodifiableOrderEvent {
     public OrderFinishedEvent(UnmodifiableOrder order) {
         super(order);
     }

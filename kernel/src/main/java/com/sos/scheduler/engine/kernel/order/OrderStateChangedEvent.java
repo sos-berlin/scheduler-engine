@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
-
 /**
  * \file OrderStateChangeEvent.java
  * \brief This event fired if the order of a job chain changed the state (next state starts) 
@@ -25,20 +24,17 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStateChangedEvent extends OrderEvent {
+public class OrderStateChangedEvent extends UnmodifiableOrderEvent {
 	private final OrderState previousState;
 
-    
     public OrderStateChangedEvent(UnmodifiableOrder order, OrderState previousState) {
         super(order);
         this.previousState = previousState;
     }
 
-
     public final OrderState getPreviousState() { 
         return previousState;
     }
-
 
     @Override public final String toString() {
         return super.toString() + ", previousState=" + previousState;
