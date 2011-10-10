@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 
 /**
  * \file JS746.java
@@ -52,7 +52,7 @@ import com.sos.scheduler.engine.kernel.test.SchedulerTest;
  * </div>
  */
 @SuppressWarnings("deprecation")
-public class JS746 extends SchedulerTest {
+public class JS746 extends SuperSchedulerTest {
 	private static final Logger logger = LoggerFactory.getLogger(JS746.class);
 
 	private static DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sos.JSHelper.Logging.Log4JHelper;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -51,7 +51,7 @@ import com.sos.scheduler.model.events.Event;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class JS461 extends SchedulerTest {
+public class JS461 extends SuperSchedulerTest {
 
 	private final String ORDER = "js-461-order";
 	private final String JOB_CHAIN = "js-461";

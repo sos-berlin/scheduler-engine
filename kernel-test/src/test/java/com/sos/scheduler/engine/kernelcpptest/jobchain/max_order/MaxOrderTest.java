@@ -1,26 +1,29 @@
 package com.sos.scheduler.engine.kernelcpptest.jobchain.max_order;
 
+import static java.lang.Math.max;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+
+import org.apache.log4j.Logger;
+import org.junit.Test;
+
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
-import org.apache.log4j.*;
-import org.junit.Test;
-import static java.lang.Math.max;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 
 public class MaxOrderTest extends SchedulerTest {
     private static final int maxOrders = 3;         // Derselbe Wert wie <job_chain max_orders="">
     private static final int addedOrderCount = 9;   // Anzahl der <add_order>
-    private static final Logger logger = Logger.getLogger(MaxOrderTest.class);
+    private static final Logger log = Logger.getLogger(MaxOrderTest.class);
 
 
     @Test public void test() throws Exception {
-        strictSubscribeEvents(new MyEventSubscriber());
-        runScheduler(shortTimeout);
+        controller().strictSubscribeEvents(new MyEventSubscriber());
+        controller().runScheduler(shortTimeout);
     }
 
 

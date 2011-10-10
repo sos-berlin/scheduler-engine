@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 
 import org.junit.Ignore;
 //import org.junit.Test;
@@ -8,7 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 
-public class DatabaseQueryPluginTest extends SchedulerTest {
+public class DatabaseQueryPluginTest extends SuperSchedulerTest {
     public DatabaseQueryPluginTest() throws Exception {
         startScheduler("-e");
         waitForTaskTermination();

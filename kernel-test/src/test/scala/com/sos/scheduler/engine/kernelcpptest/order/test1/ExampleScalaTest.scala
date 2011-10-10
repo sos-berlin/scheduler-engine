@@ -1,8 +1,6 @@
 package com.sos.scheduler.engine.kernelcpptest.order.test1
 
 import java.lang.Override
-import org.junit.Ignore
-import org.junit.Test
 import com.sos.scheduler.engine.kernel.order.OrderEvent
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent

@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sos.JSHelper.Logging.Log4JHelper;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -56,7 +56,7 @@ import com.sos.scheduler.model.events.EventOrderFinished;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class JS628 extends SchedulerTest {
+public class JS628 extends SuperSchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */

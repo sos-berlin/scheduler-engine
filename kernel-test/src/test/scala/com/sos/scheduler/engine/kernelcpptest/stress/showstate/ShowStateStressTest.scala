@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernelcpptest.stress.showstate
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest
 import com.sos.scheduler.engine.cplusplus.scalautil.io.Util._
 import java.io._
 import java.net._
@@ -8,7 +8,7 @@ import java.nio.charset.Charset
 import org.junit._
 
 
-class ShowStateStressTest extends SchedulerTest {
+class ShowStateStressTest extends SuperSchedulerTest {
     import ShowStateStressTest._
     
     @Ignore @Test def test1() {

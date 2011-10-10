@@ -5,12 +5,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Connector;
 
 
-public class OrderStepEventsTest extends SchedulerTest {
+public class OrderStepEventsTest extends SuperSchedulerTest {
 
     private static final Time schedulerTimeout = Time.of(15);
     private static Logger logger;

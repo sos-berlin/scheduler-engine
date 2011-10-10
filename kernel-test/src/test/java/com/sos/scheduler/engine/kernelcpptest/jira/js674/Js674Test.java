@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.kernel.test.OperatingSystem;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import org.apache.log4j.*;
 import org.junit.*;
 
@@ -13,7 +13,7 @@ import org.junit.*;
  *
  * @author Joacim Zschimmer
  */
-public class Js674Test extends SchedulerTest {
+public class Js674Test extends SuperSchedulerTest {
     private static final Logger logger = Logger.getLogger(Js674Test.class);
     private static final Time myTimeout = Time.of(10+5);   // Länger als der Job im Fehlerfall läuft. Siehe blockedSignal.job.xml
 

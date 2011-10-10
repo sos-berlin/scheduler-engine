@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -19,7 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 
-public class JmsPlugInTest extends SchedulerTest {
+public class JmsPlugInTest extends SuperSchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 

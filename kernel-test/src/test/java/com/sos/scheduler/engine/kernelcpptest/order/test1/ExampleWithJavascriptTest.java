@@ -4,11 +4,11 @@ import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.main.event.EventThread;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.test.JavascriptEventPredicateEngine;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import org.junit.Test;
 
 
-public class ExampleWithJavascriptTest extends SchedulerTest {
+public class ExampleWithJavascriptTest extends SuperSchedulerTest {
     private static final Time eventTimeout = Time.of(10);
 
     @Test public void test() throws Exception {

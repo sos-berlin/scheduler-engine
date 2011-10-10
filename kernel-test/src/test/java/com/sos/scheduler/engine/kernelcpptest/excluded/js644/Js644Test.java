@@ -21,11 +21,11 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import com.sos.scheduler.engine.kernel.test.junit.SlowTestRule;
 import com.sos.scheduler.engine.kernel.util.Time;
 
-public class Js644Test extends SchedulerTest {
+public class Js644Test extends SuperSchedulerTest {
     private static final Time orderTimeout = Time.of(10);
     private static final Charset encoding = Charsets.UTF_8;
     @ClassRule public static TestRule slowTestRule = SlowTestRule.singleton;
@@ -36,7 +36,7 @@ public class Js644Test extends SchedulerTest {
     @Test public void test() throws Exception {
         strictSubscribeEvents(new MyEventSubscriber());
         startScheduler("-e");
-        Thread fileModifierThread = new FileModifierThread(getDirectory());
+        Thread fileModifierThread = new FileModifierThread(controller().directory());
         fileModifierThread.start();
         try {
             for (int i = 0; i < 1000; i++) {

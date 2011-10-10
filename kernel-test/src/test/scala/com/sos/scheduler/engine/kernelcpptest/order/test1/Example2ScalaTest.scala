@@ -12,8 +12,8 @@ class Example2ScalaTest extends ScalaSchedulerTest {
     private val eventTimeout = Time.of(3)
 
     @Test def test() {
-        strictSubscribeEvents(new MyEventThread)
-        runScheduler(shortTimeout)
+        controller.strictSubscribeEvents(new MyEventThread)
+        controller.runScheduler(shortTimeout)
     }
 
     class MyEventThread extends ScalaEventThread {

@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.kernelcpptest.scheduler.option;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 import org.apache.log4j.*;
 import org.junit.*;
 import static org.junit.Assert.*;
 
 
-public class InvalidOptionTest extends SchedulerTest {
+public class InvalidOptionTest extends SuperSchedulerTest {
     private static final Logger logger = Logger.getLogger(InvalidOptionTest.class);
 
 

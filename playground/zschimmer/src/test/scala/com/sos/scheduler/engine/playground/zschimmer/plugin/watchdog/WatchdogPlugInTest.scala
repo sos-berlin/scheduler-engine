@@ -14,8 +14,8 @@ class WatchdogPlugInTest extends ScalaSchedulerTest {
     private val watchdogPeriod = Time.of(1)
 
     @Test def test() {
-        strictSubscribeEvents(new MyEventSubscriber)
-        runScheduler(schedulerTimeout, "-e")
+        controller.strictSubscribeEvents(new MyEventSubscriber)
+        controller.runScheduler(schedulerTimeout, "-e")
     }
 
     class MyEventSubscriber extends EventSubscriber {

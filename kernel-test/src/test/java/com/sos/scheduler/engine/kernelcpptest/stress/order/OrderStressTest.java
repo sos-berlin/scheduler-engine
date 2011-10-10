@@ -1,27 +1,25 @@
 package com.sos.scheduler.engine.kernelcpptest.stress.order;
 
-import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import org.junit.Test;
 
+import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.util.Time;
 
 public class OrderStressTest extends SchedulerTest {
     // In Maven setzen mit -DargLine=-DOrderStressTest.limit=26 (Surefire plugin 2.6), 2010-11-28
     // Zum Beispiel: mvn test -Dtest=OrderStressTest -DargLine=-DOrderStressTest.limit=26
     private static final int testLimit = Integer.parseInt(System.getProperty("OrderStressTest.limit", "100"));
 
-
     @Test public void test() throws Exception {
         runTest(testLimit);
     }
 
-
     private void runTest(int limit) {
-        strictSubscribeEvents(new MyEventSubscriber(limit));
-        runScheduler(Time.of(3600));
+        controller().strictSubscribeEvents(new MyEventSubscriber(limit));
+        controller().runScheduler(Time.of(3600));
     }
     
 

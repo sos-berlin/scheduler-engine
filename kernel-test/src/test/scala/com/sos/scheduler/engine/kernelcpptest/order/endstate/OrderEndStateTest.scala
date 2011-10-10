@@ -1,8 +1,5 @@
 package com.sos.scheduler.engine.kernelcpptest.order.endstate
 
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.kernel.order.OrderId
-import com.sos.scheduler.engine.kernel.order.OrderState
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernelcpptest._
 import org.junit._

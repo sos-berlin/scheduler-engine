@@ -6,11 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
-import com.sos.scheduler.engine.plugins.event.Connector;
+import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 
-
-public class SimpleEventTest extends SchedulerTest {
+public class SimpleEventTest extends SuperSchedulerTest {
 
     private static final Time schedulerTimeout = Time.of(10);
     private static Logger logger;
