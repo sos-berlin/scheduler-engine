@@ -20,12 +20,12 @@ import com.sos.scheduler.engine.kernel.util.Time;
 public class TestSchedulerController implements SchedulerController {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
 
-    private final SchedulerController controller;
+    private final SchedulerController delegate;
     private final Environment env;
     private Scheduler scheduler = null;
 
     public TestSchedulerController(Package pack, File testDirectory) {
-        controller = new SchedulerThreadController();
+        delegate = new SchedulerThreadController();
         env = new Environment(pack, testDirectory);
     }
 
@@ -34,11 +34,11 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public final void strictSubscribeEvents(EventSubscriber s) {
-        controller.subscribeEvents(new StrictEventSubscriber(s));
+        delegate.subscribeEvents(new StrictEventSubscriber(s));
     }
 
     @Override public void subscribeEvents(EventSubscriber s) {
-        controller.subscribeEvents(s);
+        delegate.subscribeEvents(s);
     }
 
     public final void runScheduler(Time timeout, String... args) {
@@ -49,7 +49,7 @@ public class TestSchedulerController implements SchedulerController {
 
     public final void startScheduler(String... args) {
         Iterable<String> allArgs = concat(env.standardArgs(), Arrays.asList(args));
-        controller.startScheduler(toArray(allArgs, String.class));
+        delegate.startScheduler(toArray(allArgs, String.class));
     }
 
     public final Scheduler scheduler() {
@@ -60,33 +60,33 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public final Scheduler waitUntilSchedulerIsRunning() {
-        scheduler = controller.waitUntilSchedulerIsRunning();
+        scheduler = delegate.waitUntilSchedulerIsRunning();
         return scheduler;
     }
 
     @Override public void terminateScheduler() {
-        controller.terminateScheduler();
+        delegate.terminateScheduler();
     }
 
     @Override public void terminateAfterException(Throwable x) {
-        controller.terminateAfterException(x);
+        delegate.terminateAfterException(x);
     }
 
     @Override public void terminateAndWait() {
-        controller.terminateAndWait();
+        delegate.terminateAndWait();
     }
 
     @Override public final void waitForTermination(Time timeout) {
-        controller.waitForTermination(timeout);
+        delegate.waitForTermination(timeout);
     }
 
     @Override public int exitCode() {
-        return controller.exitCode();
+        return delegate.exitCode();
     }
 
     @After public final void terminateAndCleanUp() throws Throwable {
         try {
-            controller.terminateAndWait();
+            delegate.terminateAndWait();
         }
         catch (Throwable x) {
             logger.error(TestSchedulerController.class.getName() + " @After: " + x, x);
@@ -98,8 +98,8 @@ public class TestSchedulerController implements SchedulerController {
         return env.getDirectory();
     }
 
-    public final SchedulerController controller() {
-        return controller;
+    public final SchedulerController delegate() {
+        return delegate;
     }
 
     public static TestSchedulerController of(Package pack, TemporaryFolder f) {

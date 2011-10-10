@@ -9,15 +9,13 @@ import org.junit.rules.TemporaryFolder;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 public abstract class SchedulerTest {
     public static final Time shortTimeout = Time.of(10);
 
     @Rule public final TemporaryFolder folder = new TemporaryFolder();
-    private TestSchedulerController testSchedulerController = null;
-    private SchedulerController schedulerController = null;
+    private TestSchedulerController controller = null;
 
     protected SchedulerTest() {}
 
@@ -26,16 +24,19 @@ public abstract class SchedulerTest {
     }
 
     @Before public final void schedulerTestBefore() {
-        testSchedulerController = TestSchedulerController.of(getClass().getPackage(), folder);
-        schedulerController = testSchedulerController.controller();
+        controller = TestSchedulerController.of(getClass().getPackage(), folder);
+    }
+
+    @After public final void terminateAndCleanUp() throws Throwable {
+        controller.terminateAndCleanUp();
     }
 
     public final void strictSubscribeEvents() {
-        testSchedulerController.strictSubscribeEvents();
+        controller.strictSubscribeEvents();
     }
 
     public final void strictSubscribeEvents(EventSubscriber s) {
-        testSchedulerController.strictSubscribeEvents(s);
+        controller.strictSubscribeEvents(s);
     }
 
     public final void runScheduler(Time timeout, String... args) {
@@ -45,30 +46,26 @@ public abstract class SchedulerTest {
     }
 
     public final void startScheduler(String... args) {
-        testSchedulerController.startScheduler(args);
+        controller.startScheduler(args);
     }
 
     public final void waitUntilSchedulerIsRunning() {
-        testSchedulerController.waitUntilSchedulerIsRunning();
+        controller.waitUntilSchedulerIsRunning();
     }
 
     public final Scheduler scheduler() {
-        return testSchedulerController.scheduler();
+        return controller.scheduler();
     }
 
     public final void waitForTermination(Time timeout) {
-        testSchedulerController.waitForTermination(timeout);
+        controller.waitForTermination(timeout);
     }
 
-    @After public final void terminateAndCleanUp() throws Throwable {
-        testSchedulerController.terminateAndCleanUp();
-    }
-
-    public final SchedulerController controller() {
-        return schedulerController;
+    public final TestSchedulerController controller() {
+        return controller;
     }
 
     public final File getDirectory() {
-        return testSchedulerController.directory();
+        return controller.directory();
     }
 }
