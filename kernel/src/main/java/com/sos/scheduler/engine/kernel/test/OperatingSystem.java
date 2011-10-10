@@ -1,8 +1,11 @@
 package com.sos.scheduler.engine.kernel.test;
 
 import com.google.common.base.Joiner;
+
 import java.io.File;
+
 import org.apache.log4j.Logger;
+
 import static com.google.common.base.Strings.*;
 import static com.google.common.collect.ObjectArrays.*;
 
@@ -13,7 +16,7 @@ public abstract class OperatingSystem {
     public static final boolean isUnix = !isWindows;
     public static final OperatingSystem singleton = isWindows? new Windows() : new Unix();
     public static final String javaLibraryPathPropertyName = "java.library.path";
-    private static final Logger logger = Logger.getLogger(OperatingSystem.class);
+    private static final Logger log = Logger.getLogger(OperatingSystem.class);
     
     public final String makeModuleFilename(String path) {
         File file = new File(path);
@@ -22,6 +25,30 @@ public abstract class OperatingSystem {
     
     public abstract String makeExecutableFilename(String name);
     public abstract String getDynamicLibraryEnvironmentVariableName();
+//    protected abstract void removeAbsoluteDirectoryRecursivly(File directory);
+//
+//    public void removeDirectoryRecursivly(File directory) {
+//        try {
+//            File dir = directory.getCanonicalFile();
+//            checkArgument(dir.isDirectory(), "Not a directory: %s", directory);
+//            removeAbsoluteDirectoryRecursivly(dir);
+//            if (directory.exists())  throw new RuntimeException("Removal of directory failed: " + directory);
+//        } catch (IOException x) { throw new RuntimeException(x); }
+//    }
+//
+//    public void executeShell(File program, String... arguments) {
+//        try {
+//            checkArgument(program.isFile(), "Not a file: %s", program);
+//            String[] commandAndArguments = ObjectArrays.concat(new String[]{program.toString()}, arguments, String.class);
+//            if (log.isDebugEnabled()) log.debug("exec " + Joiner.on(' ').join(commandAndArguments));
+//            Process process = Runtime.getRuntime().exec(commandAndArguments);
+//            *** Hier muss vermutlich process.getOutputStream() und .getErrorStream() ausgelesen werden, um Blockade zu vermeiden ***
+//            process.waitFor();
+//            if (process.exitValue() != 0)
+//                throw new RuntimeException("Execution of program failed with exit code " + process.exitValue() + ": " + program);
+//        } catch (IOException x) { throw new RuntimeException(x); }
+//        catch (InterruptedException x) { throw new RuntimeException(x); }
+//    }
     
 
     public static class Windows extends OperatingSystem {
@@ -32,6 +59,22 @@ public abstract class OperatingSystem {
         @Override public final String getDynamicLibraryEnvironmentVariableName() {
             return "PATH";
         }
+
+//        @Override public void removeAbsoluteDirectoryRecursivly(File directory) {
+//            executeShell(commandFile(), "rd", "/s", directory.toString());
+//        }
+//
+//        private File commandFile() {
+//            return new File(windowsDirectory() + File.separator + "system32", "cmd.exe");
+//        }
+//
+//        private File windowsDirectory() {
+//            String windir = System.getenv("WINDIR");
+//            if (isNullOrEmpty(windir))  throw new RuntimeException("Environment variable WINDIR is missing");
+//            File result = new File(windir);
+//            assert result.isDirectory();
+//            return result;
+//        }
     }
     
 
@@ -43,18 +86,20 @@ public abstract class OperatingSystem {
         @Override public final String getDynamicLibraryEnvironmentVariableName() {
             return "LD_LIBRARY_PATH";
         }
-    }
 
+//        @Override public void removeAbsoluteDirectoryRecursivly(File directory) {
+//            executeShell(new File("/bin/rm"), "-rf", directory.toString());
+//        }
+    }
 
     public static void prependJavaLibraryPath(File f) {
         String a = System.getProperty(javaLibraryPathPropertyName);
         String c = concatFileAndPathChain(f, nullToEmpty(a));
         if (!c.equals(a)) {
             System.setProperty(javaLibraryPathPropertyName, c);
-            logger.debug("Property " + javaLibraryPathPropertyName + "=" + c);
+            log.debug("Property " + javaLibraryPathPropertyName + "=" + c);
         }
     }
-
 
     public static String concatFileAndPathChain(File f, String pathChain) {
         String abs = f.getAbsolutePath();

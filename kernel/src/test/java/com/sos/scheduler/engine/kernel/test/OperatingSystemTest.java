@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
 
+import javax.annotation.Nullable;
 
 public class OperatingSystemTest {
     @Test public void testMakeModuleFilename() {
@@ -49,7 +50,21 @@ public class OperatingSystemTest {
         checkAppendJavaLibraryPath(old, f, old);
     }
 
-    private static void checkAppendJavaLibraryPath(String old, File added, String result) {
+//    @Test public void testDirectoryRecursivly() throws IOException {
+//        File dir  = Files.createTempDir();
+//        File a = new File(dir, "a");
+//        assertTrue(a.mkdir());
+//        File b = new File(a, "b");
+//        assertTrue(b.mkdir());
+//        assertTrue(a.isDirectory());
+//        new FileOutputStream(new File(b, "c")).close();
+//        OperatingSystem.singleton.removeDirectoryRecursivly(a);
+//        assertFalse(a.exists());
+//        assertTrue(dir.exists());
+//        OperatingSystem.singleton.removeDirectoryRecursivly(dir);
+//    }
+
+    private static void checkAppendJavaLibraryPath(@Nullable String old, File added, String result) {
         Properties p = new Properties();
         p.putAll(System.getProperties());
         p.remove(javaLibraryPathPropertyName);
