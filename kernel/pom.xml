@@ -24,24 +24,8 @@
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
-<!-- 
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/maven.properties</include>
-                </includes>
- -->
              </resource>
         </resources>
-        
-        <plugins>
-            <!--plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                    <!- - Wird im Artefakt jar zusammengefasst, das freigegeben wird - ->
-                </configuration>
-            </plugin-->
-        </plugins>
     </build>
 
     <dependencies>
