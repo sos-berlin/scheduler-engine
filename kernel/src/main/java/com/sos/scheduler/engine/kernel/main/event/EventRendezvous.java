@@ -5,14 +5,11 @@ import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Rendezvous;
 
-
-public class EventRendezvous extends Rendezvous<Event,Object>
-{
+public class EventRendezvous extends Rendezvous<Event,Object> {
     private static final Object dummyResult = new Object();
 
     private boolean beginTimedOut = false;
     private boolean terminatedEventReceived = false;
-
 
     public final void unlockAndCall(Event e) {
         CppProxy.threadLock.unlock();
@@ -24,9 +21,7 @@ public class EventRendezvous extends Rendezvous<Event,Object>
         }
     }
 
-
     @Override public final Event enter(Time timeout) {
-        //TODO Sollte nicht Methode der Oberklasse überschreiben
         Event result = super.enter(timeout);
         beginTimedOut = result == null;
         if (beginTimedOut)   result = new TimeoutEvent(timeout);
@@ -34,18 +29,14 @@ public class EventRendezvous extends Rendezvous<Event,Object>
         return result;
     }
 
-
     public final void leave() {
         leave(dummyResult);
     }
 
-
     @Override public final void leave(Object result) {
-        //TODO Sollte nicht Methode der Oberklasse überschreiben
         if (!beginTimedOut)
             super.leave(result);
     }
-
 
     public final boolean terminatedEventReceived() {
         return terminatedEventReceived;

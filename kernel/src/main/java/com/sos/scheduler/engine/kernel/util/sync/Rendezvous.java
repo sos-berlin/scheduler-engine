@@ -3,8 +3,10 @@ package com.sos.scheduler.engine.kernel.util.sync;
 import com.sos.scheduler.engine.kernel.util.Time;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
-import org.apache.log4j.Logger;
 
+import javax.annotation.Nullable;
+
+import org.apache.log4j.Logger;
 
 /** Zur Rendezvous-Synchronisierung zweier Threads, also zum synchronsierten Aufruf eines Entrys eines anderen Threads.
  * Der rufende Thread ruft call(ARG a) und wartet damit auf den dienenden Thread, bis dieser enter() erreicht.
@@ -18,12 +20,11 @@ import org.apache.log4j.Logger;
 public class Rendezvous<ARG,RESULT> {
     private static final Logger logger = Logger.getLogger(Rendezvous.class);
 
-    private volatile Thread servingThread = null;
+    @Nullable private volatile Thread servingThread = null;
     private volatile boolean inRendezvous = false;
     private final BlockingQueue<ARG> argumentQueue = new SynchronousQueue<ARG>();
     private final BlockingQueue<Return> returnQueue = new SynchronousQueue<Return>();
     private volatile boolean closed = false;
-
 
     public final void closeServing() {
         assertIsServingThread();
@@ -37,39 +38,32 @@ public class Rendezvous<ARG,RESULT> {
                 leaveException(x);
                 throw x;
             }
-        }
-        finally {
+        } finally {
             servingThread = null;
             closed = true;
         }
     }
 
-    
     public final void beginServing() {
         servingThread = Thread.currentThread();
     }
 
-
     private void assertIsNotClosed() {
         if (closed)  throw new RendezvousException("Rendezvous serving is closed");
     }
-
 
     public final RESULT call(ARG o) {
         asyncCall(o);
         return awaitResult();
     }
 
-
     /** Danach syncResult() aufrufen, bis der Aufruf nicht NULL liefert **/
     public final void asyncCall(ARG o) {
         try {
             assertIsNotClosed();
             argumentQueue.put(o);
-        }
-        catch (InterruptedException x) { throw new RuntimeException(x); }
+        } catch (InterruptedException x) { throw new RuntimeException(x); }
     }
-
 
     public final RESULT awaitResult() {
         return awaitResult(Time.eternal);
@@ -89,12 +83,10 @@ public class Rendezvous<ARG,RESULT> {
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
 
-
     /** Am Ende immer leave aufrufen! */
     public final ARG enter() {
         return enter(Time.eternal);
     }
-
 
     /** Am Ende immer leave() aufrufen! */
     public ARG enter(Time timeout) {
@@ -109,17 +101,14 @@ public class Rendezvous<ARG,RESULT> {
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
 
-
     public void leave(RESULT o) {
         leave(new Return(o));
     }
-
 
     public final void leaveException(Throwable t) {
         RuntimeException x = t instanceof RuntimeException? (RuntimeException)t : new RuntimeException(t);
         leave(new Return(x));
     }
-
 
     private void leave(Return r) {
         try {
@@ -130,23 +119,20 @@ public class Rendezvous<ARG,RESULT> {
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
 
-
     private void assertIsServingThread() {
         if (servingThread == null)  throw new RendezvousException("beginServing() has not been not called");
         if (servingThread != Thread.currentThread())  throw new RendezvousException("Method must be called in serving thread only");
     }
 
-
     public final boolean isInRendezvous() {
         return inRendezvous;
     }
-
 
     private final class Return {
         private final RESULT result;
         private final RuntimeException runtimeException;
         
-        private Return(RESULT r, RuntimeException x) { result = r; runtimeException = x; }
+        private Return(@Nullable RESULT r, @Nullable RuntimeException x) { result = r; runtimeException = x; }
         private Return(RESULT r) { this(r, null); }
         private Return(RuntimeException x) { this(null, x); }
     }
