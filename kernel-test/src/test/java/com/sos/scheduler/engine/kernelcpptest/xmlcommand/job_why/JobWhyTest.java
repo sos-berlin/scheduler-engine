@@ -14,20 +14,17 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.sos.scheduler.engine.kernel.test.TestSchedulerController;
 
-public class JobWhyTest {
+public final class JobWhyTest {
     private static final Logger logger = Logger.getLogger(JobWhyTest.class);
 
-    @ClassRule public static final TemporaryFolder folder = new TemporaryFolder();
-    private static final TestSchedulerController controller = TestSchedulerController.of(JobWhyTest.class.getPackage(), folder);
+    private static final TestSchedulerController controller = new TestSchedulerController(JobWhyTest.class.getPackage());
     private static Map<String,Element> results = null;
 
     @BeforeClass public static void beforeClass() {

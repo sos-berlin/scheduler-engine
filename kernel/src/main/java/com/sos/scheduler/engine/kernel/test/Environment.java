@@ -3,13 +3,14 @@ package com.sos.scheduler.engine.kernel.test;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.io.Files.createParentDirs;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.concatFileAndPathChain;
+import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
+import static com.sos.scheduler.engine.kernel.util.Files.removeDirectoryRecursivly;
 
 import java.io.File;
 import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.main.CppModule;
-import com.sos.scheduler.engine.kernel.util.Lazy;
 
 /**
  * \file Environment.java
@@ -29,23 +30,35 @@ import com.sos.scheduler.engine.kernel.util.Lazy;
  * </div>
  */
 final class Environment {
-    private final Lazy<File> directoryLazy;
-    private File directory = null;
-    private File logDirectory = null;
-    private final Package pack;
     private final CppModule module;
+    private final Package pack;
+    private final boolean directoryIsTemporary;
+    private final File directory;
+    private final File logDirectory;
 
-    Environment(CppModule module, Package pack, Lazy<File> directory) {
+    Environment(CppModule module, Package pack) {
+        this(module, pack, makeTemporaryDirectory(), true);
+    }
+
+    Environment(CppModule module, Package pack, File directory) {
+        this(module, pack, directory, false);
+    }
+
+    private Environment(CppModule module, Package pack, File directory, boolean isTemporary) {
         this.module = module;
-        this.directoryLazy = directory;
         this.pack = pack;
+        this.directory = directory;
+        directoryIsTemporary = isTemporary;
+        logDirectory = new File(directory, "log");
     }
 
     void start() {
-        this.directory = directoryLazy.apply();
-        logDirectory = new File(directory, "log");
         prepareTemporaryConfigurationDirectory();
-        //addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
+    }
+
+    void close() {
+        if (directoryIsTemporary)
+            removeDirectoryRecursivly(directory);
     }
 
     private void prepareTemporaryConfigurationDirectory() {
@@ -55,10 +68,6 @@ final class Environment {
             EnvironmentFiles.copy(pack, directory);
         } catch (IOException e) { throw new RuntimeException(e); }
     }
-
-//    private static void addSchedulerPathToJavaLibraryPath() {
-//        prependJavaLibraryPath(binDirectory());
-//    }
 
     ImmutableList<String> standardArgs() {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();

@@ -14,7 +14,7 @@ public class FilesTest {
     private final File dir = makeTemporaryDirectory();
 
     @After public void after() {
-        removeDirectoryRecursivlyFollowingLinks(dir);
+        removeDirectoryRecursivly(dir);
     }
 
     @Test public void testDeleteFile() throws Exception {
@@ -43,7 +43,7 @@ public class FilesTest {
         assertTrue(b.mkdir());
         assertTrue(a.isDirectory());
         new FileOutputStream(new File(b, "c")).close();
-        removeDirectoryRecursivlyFollowingLinks(a);
+        removeDirectoryRecursivly(a);
         assertFalse(a.exists());
         assertTrue(dir.exists());
     }

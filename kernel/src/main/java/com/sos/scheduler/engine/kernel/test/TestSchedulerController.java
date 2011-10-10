@@ -1,22 +1,18 @@
 package com.sos.scheduler.engine.kernel.test;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
-import static com.sos.scheduler.engine.kernel.util.Files.makeDirectory;
 
 import java.io.File;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.junit.rules.TemporaryFolder;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
-import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 public class TestSchedulerController implements SchedulerController {
@@ -27,9 +23,9 @@ public class TestSchedulerController implements SchedulerController {
     private final Environment environment;
     private Scheduler scheduler = null;
 
-    public TestSchedulerController(Package pack, Lazy<File> testDirectory) {
+    public TestSchedulerController(Package pack) {
         delegated = new SchedulerThreadController();
-        environment = new Environment(cppModule, pack, testDirectory);
+        environment = new Environment(cppModule, pack);
     }
 
     public final void strictSubscribeEvents() {
@@ -95,28 +91,11 @@ public class TestSchedulerController implements SchedulerController {
         }
         catch (Throwable x) {
             logger.error(TestSchedulerController.class.getName() + ".close(): " + x, x);
-            propagate(x);
+            throw propagate(x);
         }
     }
 
     public final File directory() {
         return environment.getDirectory();
-    }
-
-    public static TestSchedulerController of(Package pack, final TemporaryFolder temporaryFolder) {
-        Lazy<File> dirLazy = new Lazy<File>() {
-            public File compute() {
-                assert temporaryFolder.getRoot() != null : "TemporaryFolder.@Before has not been executed?";
-                String prop = System.getProperty("test.scheduler.dir");
-                if (isNullOrEmpty(prop))
-                    return temporaryFolder.getRoot();
-                else {
-                    File result = new File(prop);
-                    makeDirectory(result);
-                    return result;
-                }
-            }
-        };
-        return new TestSchedulerController(pack, dirLazy);
     }
 }
