@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.command;
 
 
 class BCommandExecutor extends GenericCommandExecutor<BCommand,BResult> {
-    static BCommandExecutor singleton = new BCommandExecutor();
+    static final BCommandExecutor singleton = new BCommandExecutor();
 
 
     public BCommandExecutor() {

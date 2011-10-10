@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.command;
 
 
 class ACommandExecutor extends GenericCommandExecutor<ACommand,AResult> {
-    static ACommandExecutor singleton = new ACommandExecutor();
+    static final ACommandExecutor singleton = new ACommandExecutor();
 
 
     public ACommandExecutor() {

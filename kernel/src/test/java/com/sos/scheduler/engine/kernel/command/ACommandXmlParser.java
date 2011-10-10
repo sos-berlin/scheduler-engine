@@ -4,7 +4,7 @@ import org.w3c.dom.Element;
 
 
 class ACommandXmlParser extends SingleCommandXmlParser {
-    static ACommandXmlParser singleton = new ACommandXmlParser();
+    static final ACommandXmlParser singleton = new ACommandXmlParser();
 
     public ACommandXmlParser() {
         super("a");

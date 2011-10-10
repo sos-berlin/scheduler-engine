@@ -5,7 +5,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
 
 class AResultXmlizer extends GenericResultXmlizer<AResult> {
-    static AResultXmlizer singleton = new AResultXmlizer();
+    static final AResultXmlizer singleton = new AResultXmlizer();
 
 
     public AResultXmlizer() {
