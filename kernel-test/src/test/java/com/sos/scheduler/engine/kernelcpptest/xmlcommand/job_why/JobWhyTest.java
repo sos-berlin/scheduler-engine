@@ -27,16 +27,16 @@ public class JobWhyTest {
     private static final Logger logger = Logger.getLogger(JobWhyTest.class);
 
     @ClassRule public static final TemporaryFolder folder = new TemporaryFolder();
-    private static TestSchedulerController controller = TestSchedulerController.of(JobWhyTest.class.getPackage(), folder);
+    private static final TestSchedulerController controller = TestSchedulerController.of(JobWhyTest.class.getPackage(), folder);
     private static Map<String,Element> results = null;
-    
+
     @BeforeClass public static void beforeClass() {
         controller.startScheduler();
         results = executeJobWhy();
     }
 
-    @AfterClass public static void afterClass() throws Throwable {
-        controller.terminateAndCleanUp();
+    @AfterClass public static void afterClass() {
+        controller.close();
     }
 
     private static Map<String,Element> executeJobWhy() {
@@ -65,10 +65,8 @@ public class JobWhyTest {
     }
 
     @Test public void testJobchain() {
-        for (String jobName: results.keySet()) {
-            Element e = results.get(jobName);
-            elementXPath(e, jobchainXPath(jobName));
-        }
+        for (Map.Entry<String,Element> i: results.entrySet())
+            elementXPath(i.getValue(), jobchainXPath(i.getKey()));
     }
 
     @Test public void testJobchainStopped() {

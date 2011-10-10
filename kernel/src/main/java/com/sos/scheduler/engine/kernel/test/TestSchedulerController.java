@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.test;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 
@@ -8,7 +9,6 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
 import org.junit.rules.TemporaryFolder;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -86,13 +86,13 @@ public class TestSchedulerController implements SchedulerController {
         return delegate.exitCode();
     }
 
-    @After public final void terminateAndCleanUp() throws Throwable {
+    public final void close() {
         try {
             delegate.terminateAndWait();
         }
         catch (Throwable x) {
-            logger.error(TestSchedulerController.class.getName() + " @After: " + x, x);
-            throw x;
+            logger.error(TestSchedulerController.class.getName() + ".close(): " + x, x);
+            propagate(x);
         }
     }
 
