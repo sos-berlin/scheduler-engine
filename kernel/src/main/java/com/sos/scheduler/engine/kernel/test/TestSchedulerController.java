@@ -4,6 +4,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
+import static com.sos.scheduler.engine.kernel.util.Files.makeDirectory;
 
 import java.io.File;
 import java.util.Arrays;
@@ -109,7 +110,13 @@ public class TestSchedulerController implements SchedulerController {
             public File compute() {
                 assert temporaryFolder.getRoot() != null : "TemporaryFolder.@Before has not been executed?";
                 String prop = System.getProperty("test.scheduler.dir");
-                return isNullOrEmpty(prop)? temporaryFolder.getRoot() : new File(prop);
+                if (isNullOrEmpty(prop))
+                    return temporaryFolder.getRoot();
+                else {
+                    File result = new File(prop);
+                    makeDirectory(result);
+                    return result;
+                }
             }
         };
         return new TestSchedulerController(pack, dirLazy);
