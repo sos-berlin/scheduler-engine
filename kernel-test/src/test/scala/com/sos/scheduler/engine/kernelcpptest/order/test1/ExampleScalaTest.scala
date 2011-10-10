@@ -17,7 +17,7 @@ class ExampleScalaTest extends ScalaSchedulerTest {
     }
 
     class MyEventThread extends ScalaEventThread {
-        filter { case e: UnmodifiableOrderEvent => e.getOrder.getId == "id.1" }
+        filter { case e: OrderEvent => e.getOrder.getId == "id.1" }
 
         override protected def runEventThread() {
             expectEvent(eventTimeout) { case e: OrderTouchedEvent      => e.getOrder.getState == "state.1" }

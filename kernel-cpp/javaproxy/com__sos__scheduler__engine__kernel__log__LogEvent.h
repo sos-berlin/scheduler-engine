@@ -19,7 +19,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct LogEvent__class;
 
 struct LogEvent : ::zschimmer::javabridge::proxy_jobject< LogEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::event::AbstractEvent {
-    static LogEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
+  private:
+    static LogEvent new_instance();  // Not implemented
+  public:
 
     LogEvent(jobject = NULL);
 
@@ -46,6 +48,7 @@ struct LogEvent : ::zschimmer::javabridge::proxy_jobject< LogEvent >, ::javaprox
     }
   public:
 
+    ::javaproxy::java::lang::String toString();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

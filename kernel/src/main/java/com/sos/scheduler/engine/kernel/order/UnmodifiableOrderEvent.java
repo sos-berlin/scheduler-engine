@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.order;
 
-public abstract class UnmodifiableOrderEvent extends OrderEvent {
+abstract class UnmodifiableOrderEvent extends OrderEvent {
     private final UnmodifiableOrder order;
 
-    public UnmodifiableOrderEvent(UnmodifiableOrder o) {
+    protected UnmodifiableOrderEvent(UnmodifiableOrder o) {
         order = o;
     }
 

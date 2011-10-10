@@ -13,7 +13,7 @@ struct LogEvent__class : ::zschimmer::javabridge::Class
     LogEvent__class(const string& class_name);
    ~LogEvent__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Ljava_lang_String_2__method;
+    ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< LogEvent__class > class_factory;
 };
@@ -22,21 +22,11 @@ const ::zschimmer::javabridge::class_factory< LogEvent__class > LogEvent__class:
 
 LogEvent__class::LogEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Ljava_lang_String_2__method(this, "<init>", "(Ljava/lang/String;)V"){}
+    ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
 
 LogEvent__class::~LogEvent__class() {}
 
 
-
-LogEvent LogEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    LogEvent result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    LogEvent__class* cls = result._class.get();
-    cls->__constructor__Ljava_lang_String_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 LogEvent::LogEvent(jobject jo) { if (jo) assign_(jo); }
@@ -51,6 +41,14 @@ LogEvent::~LogEvent() { assign_(NULL); }
 
 
 
+
+::javaproxy::java::lang::String LogEvent::toString() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    LogEvent__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_toString____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
 
 
 ::zschimmer::javabridge::Class* LogEvent::java_object_class_() { return _class.get(); }

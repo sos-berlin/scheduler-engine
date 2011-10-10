@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.order;
 public abstract class ModifiableOrderEvent extends OrderEvent {
 	private final Order order;
 	
-    public ModifiableOrderEvent(Order o) {
+    protected ModifiableOrderEvent(Order o) {
         this.order = o;
     }
 

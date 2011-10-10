@@ -22,7 +22,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct UnmodifiableOrderEvent__class;
 
 struct UnmodifiableOrderEvent : ::zschimmer::javabridge::proxy_jobject< UnmodifiableOrderEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent {
-    static UnmodifiableOrderEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0);
+  private:
+    static UnmodifiableOrderEvent new_instance();  // Not implemented
+  public:
 
     UnmodifiableOrderEvent(jobject = NULL);
 

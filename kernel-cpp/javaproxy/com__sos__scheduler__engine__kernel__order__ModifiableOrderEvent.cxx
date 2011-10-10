@@ -14,7 +14,6 @@ struct ModifiableOrderEvent__class : ::zschimmer::javabridge::Class
     ModifiableOrderEvent__class(const string& class_name);
    ~ModifiableOrderEvent__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method;
     ::zschimmer::javabridge::Method const _getOrder____method;
 
     static const ::zschimmer::javabridge::class_factory< ModifiableOrderEvent__class > class_factory;
@@ -24,22 +23,11 @@ const ::zschimmer::javabridge::class_factory< ModifiableOrderEvent__class > Modi
 
 ModifiableOrderEvent__class::ModifiableOrderEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/Order;)V")
     ,_getOrder____method(this, "getOrder", "()Lcom/sos/scheduler/engine/kernel/order/Order;"){}
 
 ModifiableOrderEvent__class::~ModifiableOrderEvent__class() {}
 
 
-
-ModifiableOrderEvent ModifiableOrderEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0) {
-    ModifiableOrderEvent result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    ModifiableOrderEvent__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 ModifiableOrderEvent::ModifiableOrderEvent(jobject jo) { if (jo) assign_(jo); }

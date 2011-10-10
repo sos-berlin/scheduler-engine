@@ -27,9 +27,9 @@ import com.sos.scheduler.engine.kernel.log.LogSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.main.SchedulerStateHandler;
-import com.sos.scheduler.engine.kernel.monitorwindow.Monitor;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PlugInSubsystem;
+import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 
 @ForCpp
 public final class Scheduler implements HasPlatform, Sister { // extends SchedulerObject

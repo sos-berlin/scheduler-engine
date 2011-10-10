@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.event;
 
-import com.sos.scheduler.engine.kernel.SchedulerCloseEvent;
+import com.sos.scheduler.engine.kernel.order.OrderEvent;
+import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
@@ -50,9 +50,9 @@ public class JMSEventAdapter {
 
 		}
 
-		if (event instanceof UnmodifiableOrderEvent) {
+		if (event instanceof OrderEvent) {
 
-			UnmodifiableOrderEvent kernelEvent = (UnmodifiableOrderEvent)event;
+			OrderEvent kernelEvent = (OrderEvent)event;
 
 			if (event instanceof OrderStateChangedEvent) {
 				ev = objFactory.createEvent("EventOrderStateChanged");

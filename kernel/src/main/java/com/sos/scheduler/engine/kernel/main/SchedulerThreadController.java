@@ -5,7 +5,7 @@ import java.io.File;
 import javax.annotation.Nullable;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.SchedulerCloseEvent;
+import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;

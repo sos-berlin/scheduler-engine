@@ -4,10 +4,10 @@ import com.sos.scheduler.engine.kernel.NullSchedulerObject;
 import com.sos.scheduler.engine.kernel.SchedulerObject;
 import static com.sos.scheduler.engine.kernel.util.Util.*;
 
-abstract public class ObjectEvent extends AbstractEvent {
+public abstract class ObjectEvent extends AbstractEvent {
     /** Nur gültig während des Events. 
      * Danach kann das Objekt ungültig geworden sein und es gibt den Fehler Z-JAVA-111. */
-    abstract protected SchedulerObject getObject();
+    protected abstract SchedulerObject getObject();
 
     @Override public String toString() {
         StringBuilder result = new StringBuilder(200);
