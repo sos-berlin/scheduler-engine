@@ -1,6 +1,18 @@
+# .gitignore
+
+# SUBVERSION
 .svn/
-.project
-.classpath
-.scala_dependencies
-.settings/
+
+# MAVEN
 /target/
+
+# ECLIPSE
+.classpath
+.project
+.settings/
+.scala_dependencies
+
+# INTELLIJ IDEA
+/.idea/
+/out/
+*.iml
