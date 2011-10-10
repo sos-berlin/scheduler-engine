@@ -21,7 +21,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Assert;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,21 +54,18 @@ import com.sos.scheduler.engine.kernel.util.Time;
  */
 @SuppressWarnings("deprecation")
 public class JS746 extends SchedulerTest {
+	private static final Logger logger = LoggerFactory.getLogger(JS746.class);
 
-	private static final Time schedulerTimeout = Time.of(10);
-	private static Logger logger;
-	
 	private static DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		logger = LoggerFactory.getLogger(JS746.class);
-		logger.debug("starting test for " + JS746.class.getName());
+    public static void setUpBeforeClass() throws Exception {
+        logger.debug("starting test for " + JS746.class.getName());
 	}
 
 	@Test
 	public void test() throws Exception {
-		runScheduler(schedulerTimeout, "-e log-level=warn");
+		startScheduler("-e log-level=warn");
 
 		// single_start: taeglich 12 Uhr
 		testRange("2011-09-01T11:59:00", "2011-09-05T12:01:00", "single_start",	5);
@@ -88,6 +84,8 @@ public class JS746 extends SchedulerTest {
 
 		// repeat: period_2 von 10-18Uhr 1x stündlich
 		testRange("2011-09-01T17:30:00", "2011-09-01T20:00:00", "period_2", 1);
+
+        getScheduler().terminate();
 	}
 
 	private void testRange(String from, String to, String jobname,
@@ -99,7 +97,7 @@ public class JS746 extends SchedulerTest {
 	}
 
 	private Document show_calendar(String from, String to) throws Exception {
-		String result = scheduler.executeXml("<show_calendar before='" + to
+		String result = getScheduler().executeXml("<show_calendar before='" + to
 				+ "' from='" + from + "' limit='100' what='orders'/>");
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
