@@ -32,10 +32,10 @@ import org.xml.sax.InputSource;
 import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
 
 /**
- * \file JS746.java
+ * \file JS746Test.java
  * \brief js-746: test show_calendar
  * 
- * \class JS746
+ * \class JS746Test
  * \brief js-746: test show_calendar
  * 
  * \details
@@ -52,14 +52,14 @@ import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
  * </div>
  */
 @SuppressWarnings("deprecation")
-public class JS746 extends SuperSchedulerTest {
-	private static final Logger logger = LoggerFactory.getLogger(JS746.class);
+public class JS746Test extends SuperSchedulerTest {
+	private static final Logger logger = LoggerFactory.getLogger(JS746Test.class);
 
 	private static DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        logger.debug("starting test for " + JS746.class.getName());
+        logger.debug("starting test for " + JS746Test.class.getName());
 	}
 
 	@Test

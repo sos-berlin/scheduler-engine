@@ -28,10 +28,10 @@ import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 
 /**
- * \file JS461.java
+ * \file JS461Test.java
  * \brief js-461: modify order set state to endstate 
  *  
- * \class JS461
+ * \class JS461Test
  * \brief js-461: modify order set state to endstate 
  * 
  * \details
@@ -51,7 +51,7 @@ import com.sos.scheduler.model.events.Event;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class JS461 extends SuperSchedulerTest {
+public class JS461Test extends SuperSchedulerTest {
 
 	private final String ORDER = "js-461-order";
 	private final String JOB_CHAIN = "js-461";
@@ -78,11 +78,11 @@ public class JS461 extends SuperSchedulerTest {
     public static void setUpBeforeClass () throws Exception {
 		// this file contains appender for ActiveMQ logging
 		new Log4JHelper("src/test/resources/log4j.properties");
-		logger = LoggerFactory.getLogger(JS461.class);
+		logger = LoggerFactory.getLogger(JS461Test.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
     
-    public JS461() throws Exception {
+    public JS461Test() throws Exception {
     	
     	topicSubscriber = newTopicSubscriber();
         topicSubscriber.setMessageListener(new MyListener());

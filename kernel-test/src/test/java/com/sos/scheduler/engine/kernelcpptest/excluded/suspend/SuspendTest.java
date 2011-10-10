@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest.jira.js628;
+package com.sos.scheduler.engine.kernelcpptest.excluded.suspend;
 
 import static org.junit.Assert.*;
 import java.util.Iterator;
@@ -30,33 +30,41 @@ import com.sos.scheduler.model.events.EventOrderFinished;
 
 /**
  * \file JS628.java
- * \brief Testcase für JS-628 
+ * \brief 
  *  
  * \class JS628
- * \brief Testcase für JS-628 
+ * \brief 
  * 
  * \details
- * This test contain four jobchains for various combinations of the result from spooler_process and
- * spooler_process_before:
- * 
- * spooler_process 		spooler_process_before 		result				job_chain
- * ================== 	======================== 	=================	=====================
- * true					false						error				js628_chain_fail_1  
- * false				false						error				js628_chain_fail_2
- * false				true						error				js628_chain_fail_3
- * true					true						success				js628_chain_success
  *
- * It should be clarify that the job ends only if the tesult of spooler_process AND spooler_process_before
- * is true.
- * 
- * The test estimate that one job_chain ends with success and three job_chains ends with a failure.
+ * \code
+  \endcode
  *
+ * \author schaedi
+ * \version 1.0 - 25.05.2011 19:07:16
+ * <div class="sos_branding">
+ *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+ * </div>
+ */
+/**
+ * \file JS628.java
+ * \brief 
+ *  
+ * \class JS628
+ * \brief 
+ * 
+ * \details
+ *
+ * \code
+  \endcode
+ *
+ * \author schaedi
  * \version 1.0 - 25.05.2011 19:07:21
  * <div class="sos_branding">
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class JS628 extends SuperSchedulerTest {
+public class SuspendTest extends SuperSchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
@@ -81,11 +89,11 @@ public class JS628 extends SuperSchedulerTest {
     public static void setUpBeforeClass () throws Exception {
 		// this file contains appender for ActiveMQ logging
 		new Log4JHelper("src/test/resources/log4j.properties");
-		logger = LoggerFactory.getLogger(JS628.class);
+		logger = LoggerFactory.getLogger(SuspendTest.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
     
-    public JS628() throws Exception {
+    public SuspendTest() throws Exception {
     	
     	topicSubscriber = newTopicSubscriber();
         topicSubscriber.setMessageListener(new MyListener());
