@@ -1,21 +1,15 @@
 package com.sos.scheduler.engine.kernel.test;
 
-import org.springframework.core.io.Resource;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.common.io.Files.createParentDirs;
+import static com.sos.scheduler.engine.kernel.test.OperatingSystem.concatFileAndPathChain;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+
 import org.apache.log4j.Logger;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import static com.google.common.base.Strings.*;
-import static com.google.common.io.Files.*;
-import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
-import static org.apache.commons.io.FileUtils.copyURLToFile;
-import static java.util.Arrays.asList;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * \file Environment.java
@@ -35,201 +29,77 @@ import static java.util.Arrays.asList;
  * </div>
  */
 public final class Environment {
+    private static final Logger logger = Logger.getLogger(Environment.class);
 
-	private static final Logger logger = Logger.getLogger(Environment.class);
-    private static final String kernelCppDirName = "kernel-cpp";
-    private static final String moduleBase = schedulerLibDir() + "/" + "scheduler";
-//    private static final String moduleBase = kernelCppDir() + "/"+ bin() + "/" + "scheduler";
-    private static final OperatingSystem os = OperatingSystem.singleton;
-    private static final File schedulerModuleFile = new File(os.makeModuleFilename(moduleBase)).getAbsoluteFile();
-    private static final File schedulerExeFile = new File(os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
-    private static final List<String> defaultFiles = Arrays.asList("scheduler.xml", "factory.ini", "sos.ini");
-
-    private final Iterable<String> otherResourceNames;
     private final File directory;
-    private final Object mainObject;
     private final File logDirectory;
+    private final Package pack;
+    private final SchedulerCppModule module = new SchedulerCppModule();
 
-    public Environment(Object mainObject, Iterable<String> otherResourceNames) {
+    public Environment(Package pack, File directory) {
+        this.directory = directory;
+        logDirectory = new File(directory, "log");
+        this.pack = pack;
+        module.load();
+        prepareTemporaryConfigurationDirectory();
+        //addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
+    }
+
+    private void prepareTemporaryConfigurationDirectory() {
         try {
-            this.otherResourceNames = otherResourceNames;
-            this.mainObject = mainObject;
-            directory = File.createTempFile("sos", ".tmp");
-            logDirectory = new File(directory, "log");
-            prepareConfigurationFiles();
-            //addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
-        }
-        catch(IOException x) { throw new RuntimeException(x); }
+            createParentDirs(new File(directory, "x"));
+            createParentDirs(new File(logDirectory, "x"));
+            EnvironmentFiles.copy(pack, directory);
+        } catch (IOException e) { throw new RuntimeException(e); }
     }
 
-    /**
-     * \brief Determine the library for the scheduler binary
-     * \detail
-     * For running the JobScheduler in a Java Environment it is neccessary to know where the binary of the 
-     * Scheduler kernel is stored. In a development landscape it is placed normally in the artifakt 'kernel-cpp' 
-     * in a subfolder called 'bind'. 
-     * Use the Scheduler in a single project, e.g. a test case, the scheduler binary has to place in a subfolder
-     * called 'lib'.
-     *
-     * @return String - the name of the library in which the scheduler binary has to put in
-     */
-    private static String schedulerLibDir() {
-        File result = new File("./target/lib");
-        if (result.exists()) {
-        	logger.debug("expecting scheduler binary in '" + result + "'.");
-        	return result + "";
-        }
-        logger.debug("Subdirectory 'lib' not found.");
-
-        result = kernelCppDir();
-        if (result.exists()) {
-        	String resultString = result + "/" + bin();
-        	logger.debug("expecting scheduler binary in '" + resultString + "'.");
-        	return resultString;
-        }
-        logger.debug("Subdirectory '" + result + "' not found.");
-        
-        String msg = "No location for the scheduler binary found - no parent has subdirectory '" + kernelCppDirName + "' and subolder './target/lib' does not exist.";
-        logger.error(msg);
-        throw new RuntimeException(msg);
-    }
-
-    private static File kernelCppDir() {
-    	File dir = new File(".");
-        while (dir.exists()) {
-            File result = new File(dir, kernelCppDirName);
-            if (result.exists()) return result;
-            dir = new File(dir, "..");
-        }
-        logger.debug("No parent directory has a subdirectory '" + kernelCppDirName + "'");
-        return dir;
-//        throw new RuntimeException("No parent directory has a subdirectory '" + kernelCppDirName + "'");
-    }
-
-    
-    private static String bin() {
-        return isWindows? "bind"  // Die scheduler.dll wird nur für die Debug-Variante erzeugt
-          : "bin";
-    }
-
-
-    private void prepareConfigurationFiles() {
-        loadSchedulerModule();
-        directory.delete();
-        directory.mkdir();
-        logDirectory.mkdir();
-        copyResources();
-    }
-
-
-    private static void loadSchedulerModule() {
-   		System.load(schedulerModuleFile.getPath());
-    }
-
-    
 //    private static void addSchedulerPathToJavaLibraryPath() {
-//        prependJavaLibraryPath(schedulerBinDirectory());
+//        prependJavaLibraryPath(binDirectory());
 //    }
 
-
-    private static File schedulerBinDirectory() {
-        return schedulerModuleFile.getAbsoluteFile().getParentFile();
-    }
-
-    
-    private void copyResources() {
-        copyDefaultResource();
-        copyOtherResources();
-    }
-
-
-    private void copyDefaultResource() {
-        for (String n: defaultFiles)  copyResource(n);
-    }
-
-    
-    private void copyOtherResources() {
-        //TODO Wie die Resourcen eines Package auflisten? Mit Spring?
-        //class.getResource(packageName), file: und jar: unterscheiden, dann direkten Zugriff auf Dateien oder Jar-Elemente.
-        //C++/Java-Brücke kann Jar-Elemente auflisten
-        for (String n: otherResourceNames)  copyResource(n);
-    }
-
-
-    private List<Resource> resources() {
-        try {
-            PathMatchingResourcePatternResolver r = new PathMatchingResourcePatternResolver();
-            return asList(r.getResources(resourceDirectory() + "/*.xml"));
-        } catch (IOException x) { throw new RuntimeException(x); }
-    }
-
-
-    private String resourceDirectory() {
-        List<String> p = new ArrayList<String>();
-        for (String s: Splitter.on(resourceClass().getName()).split("."))  p.add(s);
-        p.remove(p.size() - 1);
-        return Joiner.on("/").join(p);
-    }
-
-    
-    private void copyResource(String name) {
-        copyResource(name, null);
-    }
-
-
-    private void copyResource(String name, File destinationOrNull) {
-        try {
-            File dest = destinationOrNull != null? destinationOrNull : new File(directory, name);
-            URL url = resourceClass().getResource(name);
-            if (url == null) {
-                url = Environment.class.getResource(name);
-                if (url == null)  throw new RuntimeException("Resource '" + name + "' is missing");
-            }
-            copyURLToFile(url, dest);
-        }
-        catch(IOException x) { throw new RuntimeException(x); }
-    }
-
-
-    private Class<?> resourceClass() {
-        return mainObject.getClass();
-    }
-
-
-    public String[] standardArgs() {
-        List<String> result = new ArrayList<String>(Arrays.asList(
-            schedulerExeFile.getPath(),
-            "-sos.ini=" + new File(directory, "sos.ini").getAbsolutePath(),  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
-            "-ini=" + new File(directory, "factory.ini").getAbsolutePath(),  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
-            "-log-dir=" + logDirectory.getPath(),
-            "-log=" + new File(logDirectory, "scheduler.log").getPath(),
-            "-java-events"));
-
-        if (OperatingSystem.isUnix) {
-            // Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann
-            String varName = OperatingSystem.singleton.getDynamicLibraryEnvironmentVariableName();
-            String p = nullToEmpty(System.getenv(varName));
-            String arg = "-env=" + varName + "=" + concatFileAndPathChain(schedulerBinDirectory(), p);
-            result.add(arg);
-        }
-
+    public ImmutableList<String> standardArgs() {
+        ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
+        result.add(module.exeFile.getPath());
+        result.add("-sos.ini=" + new File(directory, "sos.ini").getAbsolutePath());  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
+        result.add("-ini=" + new File(directory, "factory.ini").getAbsolutePath());  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
+        result.add("-log-dir=" + logDirectory.getPath());
+        result.add("-log=" + new File(logDirectory, "scheduler.log").getPath());
+        result.add("-java-events");
+        if (OperatingSystem.isUnix)
+            result.add("-env=" + spidermonkeyLibraryPathEnv());
         result.add(directory.getPath());
-        return result.toArray(new String[0]);
+        return result.build();
     }
 
-
-    public void cleanUp() {
-        try {
-            if (directory != null)
-                deleteRecursively(directory);
-        } catch(IOException x) { 
-            logger.error(x); 
-            //throw new RuntimeException(x); 
-        }
+    /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
+    private String spidermonkeyLibraryPathEnv() {
+        String varName = OperatingSystem.singleton.getDynamicLibraryEnvironmentVariableName();
+        String previous = nullToEmpty(System.getenv(varName));
+        return varName + "=" + concatFileAndPathChain(module.binDirectory(), previous);
     }
 
-
-    public final File getDirectory() {
+    public File getDirectory() {
         return directory;
     }
+
+//    public static Environment of(Package pack) {
+//        return new Environment(pack, MavenDirectory.newDirectory());
+//    }
+//
+//    private static class MavenDirectory {
+//        private static final ResourceProperties p = new ResourceProperties(resourceUrl(Environment.class, "maven.properties"));
+//        private static final File baseDirectory = new File(p.get("project.build.directory"), "SchedulerTest");
+//
+//        /** Nicht thread-sicher. */
+//        private static File newDirectory() {
+//            makeDirectory(baseDirectory);
+//            for (int i = 1;; i++) {
+//                File f = new File(baseDirectory, Integer.toString(i));
+//                if (f.exists()) {
+//                    makeDirectory(f);
+//                    return f;
+//                }
+//            }
+//        }
+//    }
 }
