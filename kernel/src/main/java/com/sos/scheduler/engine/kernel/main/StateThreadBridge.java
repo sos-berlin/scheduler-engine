@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /** Die Event-Handler onX() nehmen Status-Änderungen und das {@link Scheduler}-Objekt vom {@link SchedulerThread} entgegen
  * und stellen sie dem aufrufenden Threadn ({@link SchedulerController}) zur Verfügung. */
-class StateThreadBridge {
+final class StateThreadBridge {
     private final AtomicReference<Scheduler> schedulerAtom = new AtomicReference<Scheduler>();
     private volatile boolean terminateSchedulerWhenPossible = false;
     private volatile SchedulerState state = starting;
@@ -35,27 +35,14 @@ class StateThreadBridge {
     }
 
     synchronized Scheduler waitWhileSchedulerIsStarting() throws InterruptedException {
-        Scheduler result;
         while (state == starting)
             wait();
-        result = schedulerAtom.get();
-        return result;
+        return schedulerAtom.get();
     }
 
-    void terminate() {
-        Scheduler scheduler;
-        synchronized (this) {
-            scheduler = schedulerAtom.get();
-            if (scheduler == null)  terminateSchedulerWhenPossible = true;
-        }
-        if (scheduler != null)  scheduler.terminate();
+    synchronized void terminate() {
+        Scheduler scheduler = schedulerAtom.get();
+        if (scheduler == null) terminateSchedulerWhenPossible = true;
+        else scheduler.terminate();
     }
-
-//    Scheduler getScheduler() {
-//        return schedulerAtom.get();
-//    }
-//
-//    SchedulerState getState() {
-//        return state;
-//    }
 }
