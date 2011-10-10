@@ -65,10 +65,11 @@ public class SchedulerThread extends Thread implements SchedulerController {
 
 
     @Override public final void terminateAndWait() {
-        terminateScheduler();
-        waitForTermination(Time.eternal);
+        if (isAlive()) {
+            terminateScheduler();
+            waitForTermination(Time.eternal);
+        }
     }
-
 
     @Override public final void waitForTermination(Time timeout) {
         try {
