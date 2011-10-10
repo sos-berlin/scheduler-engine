@@ -19,10 +19,6 @@ public abstract class SchedulerTest {
 
     protected SchedulerTest() {}
 
-    protected SchedulerTest(Iterable<String> configFilenames) {
-        this();
-    }
-
     @Before public final void schedulerTestBefore() {
         controller = TestSchedulerController.of(getClass().getPackage(), folder);
     }
