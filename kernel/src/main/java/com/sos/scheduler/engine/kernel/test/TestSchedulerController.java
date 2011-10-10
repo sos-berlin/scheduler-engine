@@ -36,7 +36,7 @@ public class TestSchedulerController implements SchedulerController {
         delegated.subscribeEvents(new StrictEventSubscriber(s));
     }
 
-    @Override public void subscribeEvents(EventSubscriber s) {
+    @Override public final void subscribeEvents(EventSubscriber s) {
         delegated.subscribeEvents(s);
     }
 
@@ -46,7 +46,7 @@ public class TestSchedulerController implements SchedulerController {
         waitForTermination(timeout);
     }
 
-    public final void startScheduler(String... args) {
+    @Override public final void startScheduler(String... args) {
         delegated.loadModule(cppModule.moduleFile());
         environment.start();
         Iterable<String> allArgs = concat(environment.standardArgs(), Arrays.asList(args));
@@ -60,20 +60,20 @@ public class TestSchedulerController implements SchedulerController {
         return scheduler;
     }
 
-    public final Scheduler waitUntilSchedulerIsRunning() {
+    @Override public final Scheduler waitUntilSchedulerIsRunning() {
         scheduler = delegated.waitUntilSchedulerIsRunning();
         return scheduler;
     }
 
-    @Override public void terminateScheduler() {
+    @Override public final void terminateScheduler() {
         delegated.terminateScheduler();
     }
 
-    @Override public void terminateAfterException(Throwable x) {
+    @Override public final void terminateAfterException(Throwable x) {
         delegated.terminateAfterException(x);
     }
 
-    @Override public void terminateAndWait() {
+    @Override public final void terminateAndWait() {
         delegated.terminateAndWait();
     }
 
@@ -81,7 +81,7 @@ public class TestSchedulerController implements SchedulerController {
         delegated.waitForTermination(timeout);
     }
 
-    @Override public int exitCode() {
+    @Override public final int exitCode() {
         return delegated.exitCode();
     }
 
