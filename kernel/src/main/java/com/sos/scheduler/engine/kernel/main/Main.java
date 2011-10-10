@@ -6,6 +6,7 @@ public class Main {
     private final SchedulerController schedulerController = new SchedulerThreadController();
 
     public final int apply(String[] args) {
+        CppScheduler.loadModuleFromPath();  // TODO Methode nur provisorisch. Besser den genauen Pfad übergeben, als Kommandozeilenparameter.
         schedulerController.startScheduler(args);
         schedulerController.waitForTermination(Time.eternal);
         return schedulerController.exitCode();

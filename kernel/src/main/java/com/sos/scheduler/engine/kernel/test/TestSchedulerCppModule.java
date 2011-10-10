@@ -1,32 +1,32 @@
 package com.sos.scheduler.engine.kernel.test;
 
-import static com.google.common.base.Throwables.propagate;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.isWindows;
 
 import java.io.File;
 
 import org.apache.log4j.Logger;
 
-final class SchedulerCppModule {
-    private static final Logger logger = Logger.getLogger(SchedulerCppModule.class);
+import com.sos.scheduler.engine.kernel.main.CppModule;
+
+final class TestSchedulerCppModule implements CppModule {
+    private static final Logger logger = Logger.getLogger(TestSchedulerCppModule.class);
     private static final String kernelCppDirName = "kernel-cpp";
     private static final String bin = isWindows? "bind" : "bin"; // Die scheduler.dll wird nur für die Debug-Variante erzeugt
 
     private final String moduleBase = moduleDirectory() + "/" + "scheduler";
-    final File exeFile = new File(OperatingSystem.singleton.makeExecutableFilename(moduleBase)).getAbsoluteFile();
-    final File moduleFile = new File(OperatingSystem.singleton.makeModuleFilename(moduleBase)).getAbsoluteFile();
+    private final File exeFile = new File(OperatingSystem.singleton.makeExecutableFilename(moduleBase)).getAbsoluteFile();
+    private final File moduleFile = new File(OperatingSystem.singleton.makeModuleFilename(moduleBase)).getAbsoluteFile();
 
-    void load() {
-        try {
-            logger.debug("load('"+moduleFile+"'), java.library.path="+System.getProperty("java.library.path"));
-   		    System.load(moduleFile.getPath());
-        } catch (Throwable t) {
-            logger.error("load('"+moduleFile+"'): "+t+" - java.library.path="+System.getProperty("java.library.path"));
-            throw propagate(t);
-        }
+
+    @Override public File moduleFile() {
+        return moduleFile;
     }
 
-    File binDirectory() {
+    @Override public File exeFile() {
+        return exeFile;
+    }
+
+    @Override public File spidermonkeyModuleDirectory() {
         return moduleFile.getAbsoluteFile().getParentFile();
     }
 

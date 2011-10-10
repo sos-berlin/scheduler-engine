@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.kernel.main.CppModule;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 
 /**
@@ -32,9 +33,10 @@ final class Environment {
     private File directory = null;
     private File logDirectory = null;
     private final Package pack;
-    private final SchedulerCppModule module = new SchedulerCppModule();
+    private final CppModule module;
 
-    Environment(Package pack, Lazy<File> directory) {
+    Environment(CppModule module, Package pack, Lazy<File> directory) {
+        this.module = module;
         this.directoryLazy = directory;
         this.pack = pack;
     }
@@ -42,7 +44,6 @@ final class Environment {
     void start() {
         this.directory = directoryLazy.apply();
         logDirectory = new File(directory, "log");
-        module.load();
         prepareTemporaryConfigurationDirectory();
         //addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
     }
@@ -61,7 +62,7 @@ final class Environment {
 
     ImmutableList<String> standardArgs() {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
-        result.add(module.exeFile.getPath());
+        result.add(module.exeFile().getPath());
         result.add("-sos.ini=" + new File(directory, "sos.ini").getAbsolutePath());  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
         result.add("-ini=" + new File(directory, "factory.ini").getAbsolutePath());  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
         result.add("-log-dir=" + logDirectory.getPath());
@@ -77,7 +78,7 @@ final class Environment {
     private String spidermonkeyLibraryPathEnv() {
         String varName = OperatingSystem.singleton.getDynamicLibraryEnvironmentVariableName();
         String previous = nullToEmpty(System.getenv(varName));
-        return varName + "=" + concatFileAndPathChain(module.binDirectory(), previous);
+        return varName + "=" + concatFileAndPathChain(module.spidermonkeyModuleDirectory(), previous);
     }
 
     public File getDirectory() {

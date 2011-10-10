@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel.main;
 
+import java.io.File;
+
 import javax.annotation.Nullable;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -16,17 +18,24 @@ import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 public class SchedulerThreadController implements SchedulerController {
     //private static final Time terminationTimeout = Time.of(10);
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
-    private final SchedulerThread thread = new SchedulerThread(new MyStateHandler());
+    private final SchedulerThread thread;
     private final StateThreadBridge stateThreadBridge = new StateThreadBridge();
     private EventSubscriber eventSubscriber = EventSubscriber.empty;
+
+    public SchedulerThreadController() {
+        thread =  new SchedulerThread(new MyStateHandler());
+    }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
         assert s != null;
         eventSubscriber = s;
     }
 
+    public final void loadModule(File cppModuleFile) {
+        thread.loadModule(cppModuleFile);
+    }
+
     @Override public final void startScheduler(String... args) {
-        thread.loadModule();
         thread.startThread(args);
     }
 

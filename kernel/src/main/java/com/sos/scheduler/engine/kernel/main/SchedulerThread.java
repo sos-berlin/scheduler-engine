@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.main;
 
+import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.sos.scheduler.engine.kernel.SchedulerException;
@@ -16,8 +17,8 @@ class SchedulerThread extends Thread {
         setName("Scheduler");
     }
 
-    final void loadModule() {
-        cppScheduler.loadModule();
+    final void loadModule(File f) {
+        cppScheduler.loadModule(f);
     }
 
     final void startThread(String[] args) {
