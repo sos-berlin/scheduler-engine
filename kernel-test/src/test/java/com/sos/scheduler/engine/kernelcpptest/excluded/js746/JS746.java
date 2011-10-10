@@ -30,7 +30,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
 
 /**
  * \file JS746.java
@@ -85,7 +84,7 @@ public class JS746 extends SchedulerTest {
 		// repeat: period_2 von 10-18Uhr 1x stündlich
 		testRange("2011-09-01T17:30:00", "2011-09-01T20:00:00", "period_2", 1);
 
-        getScheduler().terminate();
+        scheduler().terminate();
 	}
 
 	private void testRange(String from, String to, String jobname,
@@ -97,7 +96,7 @@ public class JS746 extends SchedulerTest {
 	}
 
 	private Document show_calendar(String from, String to) throws Exception {
-		String result = getScheduler().executeXml("<show_calendar before='" + to
+		String result = scheduler().executeXml("<show_calendar before='" + to
 				+ "' from='" + from + "' limit='100' what='orders'/>");
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();

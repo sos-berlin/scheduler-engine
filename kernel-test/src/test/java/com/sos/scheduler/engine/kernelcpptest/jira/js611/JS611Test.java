@@ -19,14 +19,14 @@ public class JS611Test extends SchedulerTest {
         MyEventSubscriber eventSubscriber = new MyEventSubscriber();
         strictSubscribeEvents(eventSubscriber);
         startScheduler("-e");
-        getScheduler().executeXml("<scheduler_log.log_categories.set category='JS-611'/>");
+        scheduler().executeXml("<scheduler_log.log_categories.set category='JS-611'/>");
         addOrders(orderCount);
         waitForTermination(myTimeout);
     }
     
     private void addOrders(int n) {
     	for (int i = 0; i < n; i++)
-    		getScheduler().executeXml("<add_order job_chain='/A' id='" + i + "'/>");
+    		scheduler().executeXml("<add_order job_chain='/A' id='" + i + "'/>");
     }
 
 

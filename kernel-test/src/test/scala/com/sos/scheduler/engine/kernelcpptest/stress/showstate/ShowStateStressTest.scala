@@ -11,21 +11,19 @@ import org.junit._
 class ShowStateStressTest extends SchedulerTest {
     import ShowStateStressTest._
     
-    private val sleepTime = 0
-    
-    @Ignore @Test def test1 {
+    @Ignore @Test def test1() {
         startScheduler("-e", "-log-level=warn")
         waitUntilSchedulerIsRunning()
-        closingFinally(new Connection(new InetSocketAddress("localhost", getScheduler.getTcpPort))) { connection =>
+        closingFinally(new Connection(new InetSocketAddress("localhost", scheduler.getTcpPort))) { connection =>
             1 to 1000 foreach { i => connection.sendAndReceive(emptyCommand) }
         }
     }
 }
 
-
 object ShowStateStressTest {
-    def emptyCommand = //<params/>.toString
-        <commands><subsystem.show what="statistics"/><show_state what="folders cluster remote_schedulers schedules" subsystems="lock schedule process_class folder"/></commands>.toString
+    def emptyCommand = (  //<params/>.toString
+        <commands><subsystem.show what="statistics"/><show_state what="folders cluster remote_schedulers schedules" subsystems="lock schedule process_class folder"/></commands>
+    ).toString()
     
     def main(args: Array[String]) {
         implicit def inetSocketAddress(a: String) = {
@@ -37,7 +35,7 @@ object ShowStateStressTest {
         1 to Int.MaxValue foreach { i => connection.sendAndReceive(emptyCommand) }
     }
 
-    
+
     class Connection(val address: InetSocketAddress) {
         private def encoding = Charset.forName("UTF-8")     //TODO XML-Routinen verwenden, OutputStream statt Writer/Reader
         private val socket = new Socket()
@@ -58,7 +56,7 @@ object ShowStateStressTest {
 
 
     class SplitReader(reader: Reader, separator: Char) extends Closeable {
-        def close() { reader.close }
+        def close() { reader.close() }
 
         def read(): String = {
             val result = new StringBuilder
@@ -67,7 +65,7 @@ object ShowStateStressTest {
                 result.append(c.toChar)
                 c = reader.read()
             }
-            result.toString
+            result.toString()
         }
     }
 }

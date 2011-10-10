@@ -146,8 +146,8 @@ public class JS461 extends SchedulerTest {
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
                 logger.info("CATCH EVENT: " + ev.getName());
                 if (ev.getEventOrderSuspended() != null) {
-                	scheduler.executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' state='success'/>");
-                	scheduler.executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' suspended='no'/>");
+                	scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' state='success'/>");
+                	scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' suspended='no'/>");
                 }
                 result = ev.getName();
             }

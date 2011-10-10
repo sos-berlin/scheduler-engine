@@ -45,7 +45,7 @@ public class MaxOrderTest extends SchedulerTest {
 
         private void finish() {
             check();
-            schedulerController.terminateScheduler();
+            controller().terminateScheduler();
         }
 
         private void check() {

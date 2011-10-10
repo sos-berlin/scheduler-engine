@@ -46,6 +46,6 @@ public class DatabaseQueryPluginTest extends SchedulerTest {
                 "<plugin.command plugin_class='" + DatabaseQueryPlugin.class.getName() + "'>" +
                 subcommandXml +
                 "</plugin.command>";
-        return getScheduler().executeXml(commandXml);
+        return scheduler().executeXml(commandXml);
     }
 }

@@ -16,9 +16,8 @@ public abstract class SchedulerTest {
     public static final Time shortTimeout = Time.of(10);
 
     @Rule public final TemporaryFolder folder = new TemporaryFolder();
-    private TestSchedulerController testSchedulerController;
-    protected SchedulerController schedulerController;
-    protected Scheduler scheduler = null;
+    private TestSchedulerController testSchedulerController = null;
+    private SchedulerController schedulerController = null;
 
     protected SchedulerTest() {}
 
@@ -53,7 +52,7 @@ public abstract class SchedulerTest {
         testSchedulerController.waitUntilSchedulerIsRunning();
     }
 
-    public final Scheduler getScheduler() {
+    public final Scheduler scheduler() {
         return testSchedulerController.scheduler();
     }
 

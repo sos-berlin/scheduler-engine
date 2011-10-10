@@ -37,7 +37,7 @@ public class OrderStressTest extends SchedulerTest {
             if (e instanceof OrderTouchedEvent) {   // OrderFinishedEvent wird nicht ausgelöst, weil der Auftrag vorher mit add_or_replace() ersetzt wird.
                 touchedOrderCount++;
                 if (touchedOrderCount > limit)
-                    schedulerController.terminateScheduler();
+                    controller().terminateScheduler();
             }
         }
     }

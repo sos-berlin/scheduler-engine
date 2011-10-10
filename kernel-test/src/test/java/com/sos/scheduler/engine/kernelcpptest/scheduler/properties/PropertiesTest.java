@@ -12,10 +12,10 @@ public class PropertiesTest extends SchedulerTest {
     @Test public void test1() throws Exception {
         try {
             startScheduler();
-            System.out.println("port=" + getScheduler().getTcpPort());
-            System.out.println("host=" + getScheduler().getHostname());
-            System.out.println("host_complete=" + getScheduler().getHostnameLong());
-            schedulerController.terminateAndWait();
+            System.out.println("port=" + scheduler().getTcpPort());
+            System.out.println("host=" + scheduler().getHostname());
+            System.out.println("host_complete=" + scheduler().getHostnameLong());
+            controller().terminateAndWait();
 //            fail("Exception expected");
         }
         catch (Exception x) {
