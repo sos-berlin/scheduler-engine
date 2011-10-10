@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.test;
 
+import static com.google.common.base.Throwables.propagate;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.isWindows;
 
 import java.io.File;
@@ -9,16 +10,20 @@ import org.apache.log4j.Logger;
 final class SchedulerCppModule {
     private static final Logger logger = Logger.getLogger(SchedulerCppModule.class);
     private static final String kernelCppDirName = "kernel-cpp";
-    private static String bin = isWindows? "bind" : "bin"; // Die scheduler.dll wird nur für die Debug-Variante erzeugt
+    private static final String bin = isWindows? "bind" : "bin"; // Die scheduler.dll wird nur für die Debug-Variante erzeugt
 
-    private final String moduleBase = schedulerLibDir() + "/" + "scheduler";
+    private final String moduleBase = moduleDirectory() + "/" + "scheduler";
     final File exeFile = new File(OperatingSystem.singleton.makeExecutableFilename(moduleBase)).getAbsoluteFile();
     final File moduleFile = new File(OperatingSystem.singleton.makeModuleFilename(moduleBase)).getAbsoluteFile();
 
-    SchedulerCppModule() {}
-
     void load() {
-   		System.load(moduleFile.getPath());
+        try {
+            logger.debug("load('"+moduleFile+"'), java.library.path="+System.getProperty("java.library.path"));
+   		    System.load(moduleFile.getPath());
+        } catch (Throwable t) {
+            logger.error("load('"+moduleFile+"'): "+t+" - java.library.path="+System.getProperty("java.library.path"));
+            throw propagate(t);
+        }
     }
 
     File binDirectory() {
@@ -36,7 +41,7 @@ final class SchedulerCppModule {
      *
      * @return String - the name of the library in which the scheduler binary has to put in
      */
-    String schedulerLibDir() {
+    private static String moduleDirectory() {
         File result = new File("./target/lib");
         if (result.exists()) {
         	logger.debug("expecting scheduler binary in '" + result + "'.");
