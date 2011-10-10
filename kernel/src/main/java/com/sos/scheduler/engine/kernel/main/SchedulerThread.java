@@ -11,7 +11,6 @@ import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 import java.util.concurrent.atomic.AtomicReference;
 
-
 /** Der Scheduler in einem eigenen Thread. */
 public class SchedulerThread extends Thread implements SchedulerController {
     //TODO Thread auslagern, um nicht zwei Interfaces zu haben. Dann kann getSchedulerState() wieder getState() heißen.
@@ -21,35 +20,29 @@ public class SchedulerThread extends Thread implements SchedulerController {
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private EventSubscriber eventSubscriber = EventSubscriber.empty;
     private String[] arguments = {};
-    
 
     public SchedulerThread() {
         setName("Scheduler");
     }
 
-
     @Override public final void loadModule() {
         cppScheduler.loadModule();
     }
-
 
     @Override public final void subscribeEvents(EventSubscriber s) {
         assert s != null;
         eventSubscriber = s;
     }
 
-
     @Override public final void runScheduler(String... arguments) {
         startScheduler(arguments);
         waitForTermination(terminationTimeout);
     }
 
-
     @Override public final void startScheduler(String... args) {
         this.arguments = args;
         start();  // Thread läuft in run()
     }
-
 
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
         try {
@@ -62,7 +55,6 @@ public class SchedulerThread extends Thread implements SchedulerController {
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
-
 
     @Override public final void terminateAndWait() {
         if (isAlive()) {
@@ -80,17 +72,14 @@ public class SchedulerThread extends Thread implements SchedulerController {
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
 
-
     @Override public final void terminateAfterException(Throwable x) {
         throwableMailbox.setIfFirst(x);
         terminateScheduler();
     }
 
-
     @Override public final void terminateScheduler() {
         coOp.terminate();
     }
-
 
 //    @Override public final Scheduler getScheduler() {
 //        Scheduler result = coOp.getScheduler();
@@ -98,17 +87,14 @@ public class SchedulerThread extends Thread implements SchedulerController {
 //        return result;
 //    }
 
-
     @Override public final int getExitCode() {
         assert !isAlive();
         return exitCodeAtom.get();
     }
 
-
-    @Override public final SchedulerState getSchedulerState() {
-        return coOp.getState();
-    }
-
+//    @Override public final SchedulerState getSchedulerState() {
+//        return coOp.getState();
+//    }
 
     @Override public final void run() {
         int exitCode = -1;
@@ -133,7 +119,6 @@ public class SchedulerThread extends Thread implements SchedulerController {
         }
     }
 
-
     private class MyMainContext implements MainContext {
         private MyEventSubscriber myEventSubscriber = new MyEventSubscriber();
         private Scheduler scheduler = null;
@@ -157,7 +142,6 @@ public class SchedulerThread extends Thread implements SchedulerController {
         }
     }
 
-    
     private void strictReportEvent(Event e) {
         try { 
             eventSubscriber.onEvent(e);
