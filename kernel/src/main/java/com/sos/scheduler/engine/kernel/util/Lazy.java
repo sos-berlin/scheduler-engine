@@ -4,7 +4,7 @@ public abstract class Lazy<T> {
     private boolean computed = false;
     private T value = null;
 
-    public T apply() {
+    public final T apply() {
         if (!computed) {
             value = compute();
             computed = true;
