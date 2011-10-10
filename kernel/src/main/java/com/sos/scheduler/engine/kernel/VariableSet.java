@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
+import javax.annotation.Nullable;
+
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -17,12 +19,12 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
     @Override public void onCppProxyInvalidated() {
     }
 
-	public final String get(String name) {
+	@Override @Nullable public final String tryGet(String name) {
         return cppProxy.get_string(name);
     }
 
-	public final String getStrictly(String name) {
-        String result = get(name);
+	@Override public final String get(String name) {
+        String result = tryGet(name);
         if (result == null)  throw new SchedulerException("Missing parameter '" + name + "'");
         return result;
     }
@@ -30,7 +32,6 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
     public final void put(String name, String value) { 
         cppProxy.set_var(name, value);
     }
-
 
     public static class Type implements SisterType<VariableSet, Variable_setC> {
         @Override public final VariableSet sister(Variable_setC proxy, Sister context) {

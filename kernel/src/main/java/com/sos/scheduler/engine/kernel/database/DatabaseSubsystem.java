@@ -30,10 +30,10 @@ public class DatabaseSubsystem implements Subsystem {
 
 //    private static DatabaseConfiguration config(VariableSet p) {
 //        return new DatabaseConfiguration(); // Ist noch leer
-//        String jdbcDriverClassName = p.getStrictly("jdbc.driver");
-//        String url = p.getStrictly("path");
-//        String userName = p.getStrictly("userName");
-//        String password = p.getStrictly("password");
+//        String jdbcDriverClassName = p.get("jdbc.driver");
+//        String url = p.get("path");
+//        String userName = p.get("userName");
+//        String password = p.get("password");
 //        return new DatabaseConfiguration(jdbcDriverClassName, url, userName, password);
 //    }
     
@@ -60,10 +60,10 @@ public class DatabaseSubsystem implements Subsystem {
     private Map<String,String> entityManagerProperties() {
         Map<String,String> result = new HashMap<String,String>();
         UnmodifiableVariableSet p = getProperties();
-        result.put("javax.persistence.jdbc.driver", p.getStrictly("jdbc.driverClass"));
-        result.put("javax.persistence.jdbc.url", p.getStrictly("path"));
-        result.put("javax.persistence.jdbc.user", p.getStrictly("user"));
-        result.put("javax.persistence.jdbc.password", p.getStrictly("password"));
+        result.put("javax.persistence.jdbc.driver", p.get("jdbc.driverClass"));
+        result.put("javax.persistence.jdbc.url", p.get("path"));
+        result.put("javax.persistence.jdbc.user", p.get("user"));
+        result.put("javax.persistence.jdbc.password", p.get("password"));
         return result;
     }
 
