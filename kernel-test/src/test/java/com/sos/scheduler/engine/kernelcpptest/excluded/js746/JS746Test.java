@@ -21,7 +21,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -29,7 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
 /**
  * \file JS746Test.java
@@ -52,7 +51,7 @@ import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
  * </div>
  */
 @SuppressWarnings("deprecation")
-public class JS746Test extends SuperSchedulerTest {
+public class JS746Test extends SchedulerTest {
 	private static final Logger logger = LoggerFactory.getLogger(JS746Test.class);
 
 	private static DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;
@@ -64,7 +63,7 @@ public class JS746Test extends SuperSchedulerTest {
 
 	@Test
 	public void test() throws Exception {
-		startScheduler("-e log-level=warn");
+		controller().startScheduler("-e log-level=warn");
 
 		// single_start: taeglich 12 Uhr
 		testRange("2011-09-01T11:59:00", "2011-09-05T12:01:00", "single_start",	5);
@@ -84,7 +83,7 @@ public class JS746Test extends SuperSchedulerTest {
 		// repeat: period_2 von 10-18Uhr 1x stündlich
 		testRange("2011-09-01T17:30:00", "2011-09-01T20:00:00", "period_2", 1);
 
-        scheduler().terminate();
+		controller().scheduler().terminate();
 	}
 
 	private void testRange(String from, String to, String jobname,

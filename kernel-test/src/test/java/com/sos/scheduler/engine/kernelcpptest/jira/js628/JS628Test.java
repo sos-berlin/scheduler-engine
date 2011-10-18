@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.kernelcpptest.jira.js628;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -19,8 +21,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sos.JSHelper.Logging.Log4JHelper;
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -56,7 +57,7 @@ import com.sos.scheduler.model.events.EventOrderFinished;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class JS628Test extends SuperSchedulerTest {
+public class JS628Test extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
@@ -79,8 +80,6 @@ public class JS628Test extends SuperSchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		// this file contains appender for ActiveMQ logging
-		new Log4JHelper("src/test/resources/log4j.properties");
 		logger = LoggerFactory.getLogger(JS628Test.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
@@ -120,7 +119,7 @@ public class JS628Test extends SuperSchedulerTest {
      */
     @Test 
     public void test() throws Exception {
-        runScheduler(schedulerTimeout, "-e");
+        controller().runScheduler(schedulerTimeout, "-e");
         assertState("success",1);										// one order has to end with 'success'
         assertState("error",3);											// three order has to end with 'error'
         assertEquals("total number of events",4,resultQueue.size());	// totaly 4 OrderFinishedEvents

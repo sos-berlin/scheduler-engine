@@ -1,25 +1,30 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import javax.jms.Session;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
+
+import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.apache.log4j.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.util.Time;
 
 
-public class JmsPlugInTest extends SuperSchedulerTest {
+public class JmsPlugInTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
@@ -48,7 +53,7 @@ public class JmsPlugInTest extends SuperSchedulerTest {
 
     
     @Test public void test() throws Exception {
-        runScheduler(schedulerTimeout, "-e");
+        controller().runScheduler(schedulerTimeout, "-e");
         assertThat(resultQueue.poll(0, TimeUnit.SECONDS), equalTo(true));
     }
 

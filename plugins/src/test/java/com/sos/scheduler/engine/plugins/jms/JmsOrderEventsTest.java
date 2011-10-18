@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.engine.plugins.event.Connector;
@@ -28,7 +28,7 @@ import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 
 
-public class JmsOrderEventsTest extends SuperSchedulerTest {
+public class JmsOrderEventsTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
@@ -79,7 +79,7 @@ public class JmsOrderEventsTest extends SuperSchedulerTest {
     
     @Test public void test() throws Exception {
     	try {
-	        runScheduler(schedulerTimeout, "-e -loglevel=warn");
+	        controller().runScheduler(schedulerTimeout, "-e -loglevel=warn");
 //	        runScheduler(schedulerTimeout, "-e");
 	        assertEvent("EventOrderTouched",2);
 	        assertEvent("EventOrderStateChanged",4);

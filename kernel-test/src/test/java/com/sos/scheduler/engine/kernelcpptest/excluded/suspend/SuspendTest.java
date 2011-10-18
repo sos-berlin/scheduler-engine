@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.kernelcpptest.excluded.suspend;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -19,13 +21,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sos.JSHelper.Logging.Log4JHelper;
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
-import com.sos.scheduler.model.events.EventOrderFinished;
+import com.sos.scheduler.model.events.EventOrderSuspended;
 
 
 /**
@@ -64,7 +65,7 @@ import com.sos.scheduler.model.events.EventOrderFinished;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class SuspendTest extends SuperSchedulerTest {
+public class SuspendTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
@@ -73,7 +74,7 @@ public class SuspendTest extends SuperSchedulerTest {
     private static final Time schedulerTimeout = Time.of(5);
     private static Configuration conf;
 
-    private static Logger logger;
+	private static final Logger logger = LoggerFactory.getLogger(SuspendTest.class);
     private final Topic topic = conf.topic;
     private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
     private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
@@ -87,9 +88,6 @@ public class SuspendTest extends SuperSchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		// this file contains appender for ActiveMQ logging
-		new Log4JHelper("src/test/resources/log4j.properties");
-		logger = LoggerFactory.getLogger(SuspendTest.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
     
@@ -100,7 +98,7 @@ public class SuspendTest extends SuperSchedulerTest {
         topicConnection.start();
 
         //TODO Connect with hostname & port from the scheduler intance
-		objFactory = new SchedulerObjectFactory("localhost", 4444);
+		objFactory = new SchedulerObjectFactory( "localhost", 4444);
 		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
     }
 
@@ -112,7 +110,7 @@ public class SuspendTest extends SuperSchedulerTest {
      * @throws JMSException
      */
     private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = "eventName = 'EventOrderFinished'";
+        String messageSelector = "eventName = 'EventOrderSuspended'";
         boolean noLocal = false;
         logger.debug("eventFilter is: " + messageSelector);
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
@@ -128,10 +126,8 @@ public class SuspendTest extends SuperSchedulerTest {
      */
     @Test 
     public void test() throws Exception {
-        runScheduler(schedulerTimeout, "-e");
-        assertState("success",1);										// one order has to end with 'success'
-        assertState("error",3);											// three order has to end with 'error'
-        assertEquals("total number of events",4,resultQueue.size());	// totaly 4 OrderFinishedEvents
+        controller().runScheduler(schedulerTimeout, "-e");
+        assertState("state2",1);										// order has to end in 'state2'
     }
     
     private void assertState(String stateName, int exceptedHits) {
@@ -156,9 +152,9 @@ public class SuspendTest extends SuperSchedulerTest {
                 TextMessage textMessage = (TextMessage) message;
                 String xmlContent = textMessage.getText();
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
-               	assertNotNull(ev.getEventOrderFinished());
+               	assertNotNull(ev.getEventOrderSuspended());
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                EventOrderFinished ov = ev.getEventOrderFinished();
+                EventOrderSuspended ov = ev.getEventOrderSuspended();
                 textMessage.acknowledge();
                 result = ov.getInfoOrder().getState();
                 logger.info("order " + ov.getInfoOrder().getId() + " ended with state " + ov.getInfoOrder().getState() );

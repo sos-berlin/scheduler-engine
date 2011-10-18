@@ -1,19 +1,20 @@
 package com.sos.scheduler.engine.kernelcpptest.order.test1;
 
-import com.sos.scheduler.engine.kernel.util.Time;
+import org.junit.Test;
+
 import com.sos.scheduler.engine.kernel.main.event.EventThread;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.test.JavascriptEventPredicateEngine;
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
-import org.junit.Test;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.util.Time;
 
 
-public class ExampleWithJavascriptTest extends SuperSchedulerTest {
+public class ExampleWithJavascriptTest extends SchedulerTest {
     private static final Time eventTimeout = Time.of(10);
 
     @Test public void test() throws Exception {
-        strictSubscribeEvents(new MyEventThread());
-        runScheduler(shortTimeout);
+        controller().strictSubscribeEvents(new MyEventThread());
+        controller().runScheduler(shortTimeout);
     }
 
 

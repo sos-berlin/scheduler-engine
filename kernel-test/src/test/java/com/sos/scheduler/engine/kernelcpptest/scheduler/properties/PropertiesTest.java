@@ -1,18 +1,17 @@
 package com.sos.scheduler.engine.kernelcpptest.scheduler.properties;
 
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
-
-import org.apache.log4j.*;
-import org.junit.*;
-
 import static com.google.common.base.Strings.nullToEmpty;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
-public class PropertiesTest extends SuperSchedulerTest {
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+
+public class PropertiesTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(PropertiesTest.class);
 
     @Test public void test1() throws Exception {
         try {
-            startScheduler();
+            controller().startScheduler();
             System.out.println("port=" + scheduler().getTcpPort());
             System.out.println("host=" + scheduler().getHostname());
             System.out.println("host_complete=" + scheduler().getHostnameLong());

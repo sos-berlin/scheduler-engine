@@ -1,22 +1,19 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
-
-import org.junit.Ignore;
-//import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import org.junit.Ignore;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
-
-public class DatabaseQueryPluginTest extends SuperSchedulerTest {
+public class DatabaseQueryPluginTest extends SchedulerTest {
     public DatabaseQueryPluginTest() throws Exception {
-        startScheduler("-e");
+        controller().startScheduler("-e");
         waitForTaskTermination();
     }
 
 
     private void waitForTaskTermination() throws Exception {
-        waitUntilSchedulerIsRunning();
+    	controller().waitUntilSchedulerIsRunning();
         Thread.sleep(10*1000);   // TODO Besser TerminatedTaskEvent abwarten, daber das haben wir noch nicht.
     }
 

@@ -4,12 +4,12 @@ import org.junit.Test;
 
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.test.SuperSchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 //TODO Wie prüfen wir das? Erstmal durch Blick ins scheduler.log: {JS-611}.
 /** Test, ob Scheduler Log-Dateien verübergehen schließt, wenn mehr Logs als festgelegt geschrieben werden. */
-public class JS611Test extends SuperSchedulerTest {
+public class JS611Test extends SchedulerTest {
     //private static final Logger logger = Logger.getLogger(JS611Test.class);
 	private static final int orderCount = 10;
     private static final Time myTimeout = Time.of(orderCount * 1.1);
@@ -17,11 +17,11 @@ public class JS611Test extends SuperSchedulerTest {
 
     @Test public void test() throws Exception {
         MyEventSubscriber eventSubscriber = new MyEventSubscriber();
-        strictSubscribeEvents(eventSubscriber);
-        startScheduler("-e");
-        scheduler().executeXml("<scheduler_log.log_categories.set category='JS-611'/>");
+        controller().strictSubscribeEvents(eventSubscriber);
+        controller().startScheduler("-e");
+        controller().scheduler().executeXml("<scheduler_log.log_categories.set category='JS-611'/>");
         addOrders(orderCount);
-        waitForTermination(myTimeout);
+        controller().waitForTermination(myTimeout);
     }
     
     private void addOrders(int n) {
