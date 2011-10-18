@@ -1630,10 +1630,12 @@ void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_
     xml::Node_ptr    node_before     = element.lastChild();
     xml::Element_ptr setback_element;
 
-    if( is_processable()  &&  !_setback.is_never() )
+    if( is_processable()  &&  !_setback.is_never() && _setback_count > 0 )
     {
-        setback_element = new_calendar_dom_element( element.ownerDocument(), _setback );
-        element.appendChild( setback_element );
+       if (_setback >= options->_from && _setback < options->_before) {
+         setback_element = new_calendar_dom_element( element.ownerDocument(), _setback );
+         element.appendChild( setback_element );
+       }
     }
 
 
