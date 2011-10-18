@@ -34,7 +34,7 @@
 		<appender-ref ref="console"/>
 	</logger>
 
-	<logger name="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugIn">
+	<logger name="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugIn" additivity="false">
 		<level value="info"/>
 		<appender-ref ref="console"/>
 	</logger>
