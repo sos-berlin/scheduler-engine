@@ -313,6 +313,8 @@ struct Order : Com_order,
 
   private:
     void                        postprocessing2         ( Job* last_job );
+    xml::Element_ptr            append_calendar_dom_element_for_setback(  const xml::Element_ptr& element, Show_calendar_options* options );
+    void                        set_attributes_and_remove_duplicates( const xml::Element_ptr& element, xml::Simple_node_ptr node, xml::Element_ptr setback_element );
     bool                        order_is_removable_or_replaceable();
 
 

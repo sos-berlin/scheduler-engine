@@ -180,7 +180,7 @@ public class JS746Test extends SchedulerTest {
 	private static void testResult(Document doc, SchedulerLiveObject object, DateTime dtFrom,
 			DateTime dtTo, int expectedHits) throws Exception {
 		NodeList result = getResultSet(doc, object);
-		logger.debug("time range is: " + dtFrom.toString(formatISO) + " - " + dtTo.toString(formatISO) );
+		logger.info(object.getType().getText() + " " + object.getName() + ": time range is: " + dtFrom.toString(formatISO) + " - " + dtTo.toString(formatISO) );
 		assertEquals(object.getName() + " [" + dtFrom.toString(format) + "-" + dtTo.toString(format)
 				+ "]", expectedHits, result.getLength());
 		for (int i = 0; i < result.getLength(); i++) {

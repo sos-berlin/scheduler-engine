@@ -120,13 +120,14 @@ public class SuspendTest extends SchedulerTest {
     /**
      * \brief Test ausführen
      * \detail
-     * Es werden 2 OrderFinishedEvents erwartet (und sonst nichts)
+     * One OrderSuspendedEvent expected
      *
      * @throws Exception
      */
     @Test 
     public void test() throws Exception {
-        controller().runScheduler(schedulerTimeout, "-e");
+        controller().startScheduler("-e");
+        controller().waitUntilSchedulerIsRunning();
         assertState("state2",1);										// order has to end in 'state2'
     }
     
@@ -158,6 +159,7 @@ public class SuspendTest extends SchedulerTest {
                 textMessage.acknowledge();
                 result = ov.getInfoOrder().getState();
                 logger.info("order " + ov.getInfoOrder().getId() + " ended with state " + ov.getInfoOrder().getState() );
+                controller().terminateScheduler();
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {

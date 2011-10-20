@@ -1628,8 +1628,18 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
     xml::Node_ptr    node_before     = element.lastChild();
-    xml::Element_ptr setback_element;
 
+    xml::Element_ptr setback_element = append_calendar_dom_element_for_setback(element, options);
+    _schedule_use->append_calendar_dom_elements( element, options );
+    xml::Simple_node_ptr node = node_before ? node_before.nextSibling() : element.firstChild();
+    set_attributes_and_remove_duplicates( element, node, setback_element );
+}
+
+//---------------------------------------------------Order::append_calendar_dom_element_for_setback
+
+xml::Element_ptr Order::append_calendar_dom_element_for_setback(  const xml::Element_ptr& element, Show_calendar_options* options )
+{
+    xml::Element_ptr setback_element;
     if( is_processable()  &&  !_setback.is_never() && _setback_count > 0 )
     {
        if (_setback >= options->_from && _setback < options->_before) {
@@ -1637,13 +1647,18 @@ void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_
          element.appendChild( setback_element );
        }
     }
+    return setback_element;
+}
 
+//-------------------------------------------------------Order::set_attributes_and_remove_duplicate
 
-    _schedule_use->append_calendar_dom_elements( element, options );
-
-    for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
-         node;
-         node = node.nextSibling() )
+void Order::set_attributes_and_remove_duplicates(
+      const xml::Element_ptr& element, 
+      xml::Simple_node_ptr node, 
+      xml::Element_ptr setback_element
+)
+{
+    for( node; node; node = node.nextSibling() )
     {
         if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
         {

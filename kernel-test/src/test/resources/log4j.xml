@@ -25,7 +25,7 @@
 	</appender>
 
     <logger name="com.sos.scheduler.engine.kernelcpptest">
-        <level value="debug"/>
+        <level value="info"/>
     </logger>
 
     <logger name="com.sos.scheduler.engine.kernel">

@@ -41,13 +41,13 @@
         			<period repeat="01:00" begin="10:00" end="18:00"/>
 			    </run_time>
 			</job>		
-			<job name="order_job_1">
+			<job name="order_job_1" order="yes">
     			<script language="shell">
         			<![CDATA[echo hello world]]>
     			</script>
     			<run_time />
 			</job>		
-			<job name="order_job_2">
+			<job name="order_job_2" order="yes">
     			<script language="shell">
         			<![CDATA[echo hello world]]>
     			</script>
@@ -81,16 +81,16 @@
 				</run_time>
 			</add_order>
 			<add_order job_chain="order_jobs" id="order_single_start_monday">
-		    	<run_time>
+			   	<run_time>
         			<weekdays>
             			<day day="1">
-                			<period single_start="15:00"/>
+	               			<period single_start="15:00"/>
                 			<period single_start="18:00"/>
                 		</day>
         			</weekdays>
     			</run_time>
 			</add_order>
 		</commands>
-
+		
 	</config>
 </spooler>
