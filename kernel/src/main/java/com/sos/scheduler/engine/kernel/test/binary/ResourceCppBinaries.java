@@ -1,14 +1,17 @@
 package com.sos.scheduler.engine.kernel.test.binary;
 
+import static com.sos.scheduler.engine.kernel.test.OperatingSystem.isUnix;
 import static com.sos.scheduler.engine.kernel.test.binary.ResourcesAsFilesProvider.provideResourcesAsFiles;
 
 import java.io.File;
 
 import org.springframework.core.io.Resource;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.main.CppBinaries;
+import com.sos.scheduler.engine.kernel.test.OperatingSystem;
 
 /** Ablage der Scheduler-Binärdateien, die nötigenfalls aus der kernelcpp.jar entladen werden. */
 public final class ResourceCppBinaries implements CppBinaries {
@@ -18,10 +21,20 @@ public final class ResourceCppBinaries implements CppBinaries {
         File directory = temporaryBinDirectory.getAbsoluteFile();
         resourceFiles = provideResourcesAsFiles(resources, directory);
         checkFiles();
+        if (isUnix)
+            setExecutable();
     }
 
     private void checkFiles() {
         for (CppBinary o: CppBinary.values()) file(o);
+    }
+
+    private void setExecutable() {
+        ResourceFile r = resourceFiles.get(CppBinary.exeFilename.filename());
+        if (r.isCopied()) {
+            boolean ok = r.getFile().setExecutable(true);
+            if (!ok)  throw new RuntimeException("setExecutable() failed on "+r.getFile());
+        }
     }
 
     boolean someResourceHasBeenCopied() {
