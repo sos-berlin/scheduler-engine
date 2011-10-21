@@ -38,7 +38,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\bind\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../generated-java-resources/test/com/sos/scheduler/engine/kernelcpp/bin-test/</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</EmbedManifest>
@@ -75,9 +75,9 @@
     <Link>
       <OutputFile>$(OutDir)scheduler.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetPath).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>../generated-java-resources/test-debug/com/sos/scheduler/engine/kernelcpp/bin-test/$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(TargetPath).map</MapFileName>
+      <MapFileName>../generated-java-resources/test-debug/com/sos/scheduler/engine/kernelcpp/bin-test/$(TargetName).map</MapFileName>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
