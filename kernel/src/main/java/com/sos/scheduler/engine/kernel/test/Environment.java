@@ -4,6 +4,7 @@ import static com.google.common.base.Strings.nullToEmpty;
 import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.kernel.util.Files.removeDirectoryRecursivly;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
 import java.io.File;
 
@@ -88,7 +89,7 @@ public final class Environment {
 
     /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
     private static String libraryPathEnv(File directory) {
-        String varName = OperatingSystem.singleton.getDynamicLibraryEnvironmentVariableName();
+        String varName = operatingSystem.getDynamicLibraryEnvironmentVariableName();
         String previous = nullToEmpty(System.getenv(varName));
         return varName + "=" + OperatingSystem.concatFileAndPathChain(directory, previous);
     }

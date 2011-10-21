@@ -9,12 +9,13 @@ import org.apache.log4j.Logger;
 import static com.google.common.base.Strings.*;
 import static com.google.common.collect.ObjectArrays.*;
 
-
 public abstract class OperatingSystem {
     public static final String name = System.getProperty("os.name");
     public static final boolean isWindows = name.startsWith("Windows");
     public static final boolean isUnix = !isWindows;
-    public static final OperatingSystem singleton = isWindows? new Windows() : new Unix();
+    public static final Unix unix = new Unix();
+    public static final Windows windows = new Windows();
+    public static final OperatingSystem operatingSystem = isWindows? windows : unix;
     public static final String javaLibraryPathPropertyName = "java.library.path";
     private static final Logger log = Logger.getLogger(OperatingSystem.class);
     

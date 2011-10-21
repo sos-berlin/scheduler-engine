@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.util;
 
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.javaLibraryPathPropertyName;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.prependJavaLibraryPath;
@@ -15,11 +16,11 @@ import org.junit.Test;
 
 public final class OperatingSystemTest {
     @Test public void testMakeModuleFilename() {
-        assertThat(OperatingSystem.singleton.makeModuleFilename("xx"), isWindows? equalTo("xx.dll") : equalTo("libxx.so"));
+        assertThat(operatingSystem.makeModuleFilename("xx"), isWindows? equalTo("xx.dll") : equalTo("libxx.so"));
     }
 
     @Test public void testMakeExecutableFilename() {
-        assertThat(OperatingSystem.singleton.makeExecutableFilename("xx"), isWindows? equalTo("xx.exe") : equalTo("xx"));
+        assertThat(operatingSystem.makeExecutableFilename("xx"), isWindows? equalTo("xx.exe") : equalTo("xx"));
     }
 
     @Test public void testPrependJavaLibraryPath() {
@@ -62,10 +63,10 @@ public final class OperatingSystemTest {
 //        assertTrue(b.mkdir());
 //        assertTrue(a.isDirectory());
 //        new FileOutputStream(new File(b, "c")).close();
-//        OperatingSystem.singleton.removeDirectoryRecursivly(a);
+//        OperatingSystem.operatingSystem.removeDirectoryRecursivly(a);
 //        assertFalse(a.exists());
 //        assertTrue(dir.exists());
-//        OperatingSystem.singleton.removeDirectoryRecursivly(dir);
+//        OperatingSystem.operatingSystem.removeDirectoryRecursivly(dir);
 //    }
 
     private static void checkAppendJavaLibraryPath(@Nullable String old, File added, String result) {

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.test.binary;
 
+import static com.sos.scheduler.engine.kernel.util.Files.makeExecutable;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isUnix;
 import static com.sos.scheduler.engine.kernel.test.binary.ResourcesAsFilesProvider.provideResourcesAsFiles;
 
@@ -19,8 +20,7 @@ public final class ResourceCppBinaries implements CppBinaries {
         File directory = temporaryBinDirectory.getAbsoluteFile();
         resourceFiles = provideResourcesAsFiles(resources, directory);
         checkFiles();
-        if (isUnix)
-            setExecutable();
+        setExecutable();
     }
 
     private void checkFiles() {
@@ -29,10 +29,8 @@ public final class ResourceCppBinaries implements CppBinaries {
 
     private void setExecutable() {
         ResourceFile r = resourceFiles.get(CppBinary.exeFilename.filename());
-        if (r.isCopied()) {
-            boolean ok = r.getFile().setExecutable(true);
-            if (!ok)  throw new RuntimeException("setExecutable() failed on "+r.getFile());
-        }
+        if (r.isCopied())
+            makeExecutable(r.getFile());
     }
 
     boolean someResourceHasBeenCopied() {
@@ -57,7 +55,7 @@ public final class ResourceCppBinaries implements CppBinaries {
 //    public Iterable<File> createdFiles() {
 //        return concat(transform(resourceFiles.values(), new Function<ResourceFile,Iterable<File>>() {
 //            @Override public Iterable<File> apply(ResourceFile o) {
-//                if (o.isCopied()) return Collections.singleton(o.getFile());
+//                if (o.isCopied()) return Collections.ingleton(o.getFile());
 //                else return Collections.emptyList();
 //            }
 //        }));
