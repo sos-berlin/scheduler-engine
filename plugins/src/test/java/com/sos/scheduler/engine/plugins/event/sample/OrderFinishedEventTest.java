@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.event.sample;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class OrderFinishedEventTest extends SchedulerTest {
 		logger.info("Starting test of EventPlugin");
 	}
     
-    @Test
+    @Ignore @Test
     public void test() throws Exception {
         controller().runScheduler(schedulerTimeout, "-e -log-level=warn");
     }
