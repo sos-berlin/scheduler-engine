@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.test.binary;
 
-import static com.sos.scheduler.engine.kernel.test.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
 
 import java.io.File;
 

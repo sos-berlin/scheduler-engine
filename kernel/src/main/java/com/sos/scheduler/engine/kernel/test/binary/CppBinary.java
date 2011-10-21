@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.test.binary;
 
-import com.sos.scheduler.engine.kernel.test.OperatingSystem;
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 
 public enum CppBinary {
     moduleFilename(OperatingSystem.singleton.makeModuleFilename("scheduler")),      // scheduler.dll oder libscheduler.so

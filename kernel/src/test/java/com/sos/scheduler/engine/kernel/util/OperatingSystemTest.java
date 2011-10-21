@@ -1,13 +1,17 @@
-package com.sos.scheduler.engine.kernel.test;
+package com.sos.scheduler.engine.kernel.util;
 
-import java.util.Properties;
-import java.io.File;
-import org.junit.*;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.javaLibraryPathPropertyName;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.prependJavaLibraryPath;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.io.File;
+import java.util.Properties;
 
 import javax.annotation.Nullable;
+
+import org.junit.Test;
 
 public final class OperatingSystemTest {
     @Test public void testMakeModuleFilename() {

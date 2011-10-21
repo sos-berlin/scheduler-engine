@@ -10,6 +10,7 @@ import java.io.File;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.main.CppBinaries;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 
 /**
