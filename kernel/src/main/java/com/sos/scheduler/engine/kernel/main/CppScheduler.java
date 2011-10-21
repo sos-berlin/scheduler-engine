@@ -18,9 +18,9 @@ public class CppScheduler {
 
     public final void loadModule(File moduleFile) {
         try {
-            logger.debug("Load "+moduleFile+", java.library.path="+System.getProperty("java.library.path"));
+            logger.trace("Load "+moduleFile+", java.library.path="+System.getProperty("java.library.path"));
             System.load(moduleFile.getPath());
-            logger.debug(moduleFile.getName() + " loaded");
+            logger.trace(moduleFile.getName() + " loaded");
         } catch (Throwable t) {
             logger.error("Load "+moduleFile+": "+t);
             logger.error("java.library.path=" + System.getProperty("java.library.path"));
