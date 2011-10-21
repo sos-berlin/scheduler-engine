@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.io.Files.createParentDirs;
 import static com.google.common.io.Files.createTempDir;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -24,11 +25,28 @@ public final class Files {
         if (!ok  &&  !dir.isDirectory())  throw new RuntimeException("Directory cannot be created: " + dir);
     }
 
+    public static void makeDirectories(File dir) {
+        try {
+            createParentDirs(new File(dir, "x"));
+        } catch (IOException x) { throw new RuntimeException(x); }
+    }
+
     public static File makeTemporaryDirectory() {
         try {
             return createTempDir().getCanonicalFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean tryRemoveDirectoryRecursivly(File directory) {
+        try {
+            removeDirectoryRecursivly(directory);
+            return true;
+        } catch (Exception x) {
+            logger.error("Error when removing directory '"+directory+"': "+x);
+            logger.trace(x, x);
+            return false;
         }
     }
 
@@ -78,7 +96,7 @@ public final class Files {
                 closeQuietly(in);
             }
         } catch (IOException x) {
-            throw new RuntimeException(x);
+            throw new RuntimeException("copyURLToFile(): "+x, x);
         }
     }
 }
