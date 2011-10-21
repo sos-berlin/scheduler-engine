@@ -7,13 +7,12 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <!-- Dasselbe wie os-unix.xml, weil wir unter Unix keine separaten Debug-Versionen haben. -->
-            <directory>bin</directory>
+            <directory>generated-java-resources/test</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>scheduler</include>
-                <include>javascript</include>
-                <include>libspidermonkey.so</include>
+                <include>com/sos/scheduler/engine/kernelcpp/bin-test/libscheduler.so</include>
+                <include>com/sos/scheduler/engine/kernelcpp/bin-test/scheduler</include>
+                <include>com/sos/scheduler/engine/kernelcpp/bin-test/libspidermonkey.so</include>
             </includes>
         </fileSet>
     </fileSets>

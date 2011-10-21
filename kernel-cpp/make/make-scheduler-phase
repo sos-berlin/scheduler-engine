@@ -134,6 +134,14 @@ function cmd_linux_clean() {
 
 function cmd_linux_compile() {
     make scheduler spidermonkey  || exit
+    provide_binaries_as_resources  || exit
+}
+
+function provide_binaries_as_resources() {
+    rm -rf generated-java-resources/*
+    dir="generated-java-resources/test/com/sos/scheduler/engine/kernelcpp/bin-test"
+    mkdir -p "$dir"
+    ln -s ../../../../../../../../bin/{libscheduler.so,scheduler,libspidermonkey.so} "$dir/"
 }
 
 function searchAndDestroySubDirectory() {
