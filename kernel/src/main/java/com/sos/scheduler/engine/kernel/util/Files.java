@@ -20,6 +20,13 @@ public final class Files {
 
     private Files() {}
 
+    public static void makeExecutable(File f) {
+        if (OperatingSystem.isUnix) {
+            boolean ok = f.setExecutable(true);
+            if (!ok)  throw new RuntimeException("setExecutable() failed on "+f);
+        }
+    }
+
     public static void makeDirectory(File dir) {
         boolean ok = dir.mkdir();
         if (!ok  &&  !dir.isDirectory())  throw new RuntimeException("Directory cannot be created: " + dir);
