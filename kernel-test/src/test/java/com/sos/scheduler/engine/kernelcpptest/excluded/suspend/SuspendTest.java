@@ -66,8 +66,9 @@ import com.sos.scheduler.model.events.EventOrderSuspended;
  * </div>
  */
 public class SuspendTest extends SchedulerTest {
+    //FIXME Unter Unix legen die Jobs die Datei %SCHEDULER_RETURN_VALUES% im Arbeitsverzeichnis an.
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
-	
+
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
