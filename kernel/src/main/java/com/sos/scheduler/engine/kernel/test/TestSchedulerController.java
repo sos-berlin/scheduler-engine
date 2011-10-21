@@ -102,13 +102,13 @@ public class TestSchedulerController implements SchedulerController {
             tryRemoveDirectoryRecursivly(binDirectory);
         }
         catch (Throwable x) {
-            logger.error(TestSchedulerController.class.getName() + ".close(): " + x, x);
+            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
             throw propagate(x);
         }
     }
 
-    public final File directory() {
-        return environment.directory();
+    public final Environment environment() {
+        return environment;
     }
 
     public static TestSchedulerController of(Package p) {

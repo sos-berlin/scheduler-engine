@@ -29,8 +29,7 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath;
  * </div>
  */
 /** Stellt eine Konfigurationsumgebung für den Scheduler bereit. */
-final class Environment {
-    private static final String binSubdir = "bin";
+public final class Environment {
     private static final String configSubdir = "config";
     private static final String logSubdir = "log";
     private final ResourcePath resourcePath;
@@ -86,13 +85,21 @@ final class Environment {
     }
 
     /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
-    private String libraryPathEnv(File directory) {
+    private static String libraryPathEnv(File directory) {
         String varName = OperatingSystem.singleton.getDynamicLibraryEnvironmentVariableName();
         String previous = nullToEmpty(System.getenv(varName));
         return varName + "=" + OperatingSystem.concatFileAndPathChain(directory, previous);
     }
 
-    File directory() {
+    public File directory() {
         return directory;
+    }
+
+    public File configDirectory() {
+        return configDirectory;
+    }
+
+    public File logDirectory() {
+        return logDirectory;
     }
 }
