@@ -4,6 +4,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.isWindows;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.singleton;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
+import static com.sos.scheduler.engine.kernel.util.Util.ignore;
 
 import java.io.File;
 
@@ -12,13 +13,18 @@ import org.apache.log4j.Logger;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.main.CppBinaries;
+import com.sos.scheduler.engine.kernel.util.Lazy;
 
+/** Ablage der Scheduler-Binärdateien, die nötigenfalls aus der kernelcpp.jar entladen werden. */
 final class TestSchedulerCppBinaries implements CppBinaries {
     private static final Logger logger = Logger.getLogger(TestSchedulerCppBinaries.class);
     private static final String binariesTmpdirPropertyName = "scheduler.binaries.tmpdir";
     private static final String moduleBase = "scheduler";
     private static final String spidermonkeyBase = "spidermonkey";
     private static final String kernelCppPackageDirectory = "com/sos/scheduler/engine/kernelcpp/bin-test";
+    private static final Lazy<CppBinaries> cppBinaries = new Lazy<CppBinaries>() {
+        @Override protected CppBinaries compute() { return newCppBinaries(); }
+    };
 
     private final File directory;
     private ImmutableMap<String,ResourceFile> resourceFiles = null;
@@ -84,37 +90,33 @@ final class TestSchedulerCppBinaries implements CppBinaries {
     }
 
     static CppBinaries cppBinaries() {
-        return ThreadSafeInitialization.singleton.cppBinaries;
+        return cppBinaries.apply();
     }
 
-    public static class ThreadSafeInitialization {
-        private static final ThreadSafeInitialization singleton = new ThreadSafeInitialization();
-        private final CppBinaries cppBinaries;
+    private static CppBinaries newCppBinaries() {
+        String d = System.getProperty(binariesTmpdirPropertyName);
+        return isNullOrEmpty(d)? newTemporaryCppBinaries() : newCppBinaries(new File(d));
+    }
 
-        private ThreadSafeInitialization() {
-            String d = System.getProperty(binariesTmpdirPropertyName);
-            cppBinaries = isNullOrEmpty(d)? newTemporaryCppBinaries() : newCppBinaries(new File(d));
-        }
+    private static CppBinaries newTemporaryCppBinaries() {
+        File dir = makeTemporaryDirectory();
+        TestSchedulerCppBinaries result = newCppBinaries(dir);
+        if (result.someResourceHasBeenCopied()) warnUndeletable(dir);
+        result.removeCopiesOnExit();
+        dir.deleteOnExit();
+        return result;
+    }
 
-        private static CppBinaries newTemporaryCppBinaries() {
-            File dir = makeTemporaryDirectory();
-            TestSchedulerCppBinaries result = newCppBinaries(dir);
-            if (result.someResourceHasBeenCopied()) warnUndeletable(dir);
-            result.removeCopiesOnExit();
-            dir.deleteOnExit();
-            return result;
-        }
+    private static TestSchedulerCppBinaries newCppBinaries(File dir) {
+        ignore(dir.mkdir());
+        Preconditions.checkArgument(dir.isDirectory(), "%s must exist and must be a directory", dir);
+        TestSchedulerCppBinaries result = new TestSchedulerCppBinaries(dir);
+        result.provideResourcesAsFiles();
+        return result;
+    }
 
-        private static TestSchedulerCppBinaries newCppBinaries(File dir) {
-            Preconditions.checkArgument(dir.isDirectory(), "%s must be a directory", dir);
-            TestSchedulerCppBinaries result = new TestSchedulerCppBinaries(dir);
-            result.provideResourcesAsFiles();
-            return result;
-        }
-
-        private static void warnUndeletable(File dir) {
-            if (isWindows)
-                logger.warn("Some Scheduler binary files will likely not be deleted in temporary directory "+dir);
-        }
+    private static void warnUndeletable(File dir) {
+        if (isWindows)
+            logger.warn("Some Scheduler binary files will likely not be deleted in temporary directory "+dir);
     }
 }
