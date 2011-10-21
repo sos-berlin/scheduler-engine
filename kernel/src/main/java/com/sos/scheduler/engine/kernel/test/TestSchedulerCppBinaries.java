@@ -9,6 +9,7 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.main.CppBinaries;
 
@@ -105,7 +106,7 @@ final class TestSchedulerCppBinaries implements CppBinaries {
         }
 
         private static TestSchedulerCppBinaries newCppBinaries(File dir) {
-            assert dir.isDirectory() : dir+" is not a directory";
+            Preconditions.checkArgument(dir.isDirectory(), "%s must be a directory", dir);
             TestSchedulerCppBinaries result = new TestSchedulerCppBinaries(dir);
             result.provideResourcesAsFiles();
             return result;
