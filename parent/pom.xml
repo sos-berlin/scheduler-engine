@@ -309,19 +309,23 @@
                 </executions>
             </plugin-->
 
-            <!--plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemProperties>
-                        <property>
+                        <!--property>
                             <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
                             <name>java.io.tmpdir</name>
-                            <value>${basedir}/target/temp</value>
+                            <value>${basedir}/target</value>
+                        </property-->
+                        <property>
+                            <name>scheduler.binaries.tmpdir</name>
+                            <value>${basedir}/target/test-scheduler-binaries</value>
                         </property>
                     </systemProperties>
                 </configuration>
-            </plugin-->
+            </plugin>
             <!--
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
