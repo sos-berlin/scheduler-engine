@@ -40,9 +40,12 @@ final class StateThreadBridge {
         return schedulerAtom.get();
     }
 
-    synchronized void terminate() {
-        Scheduler scheduler = schedulerAtom.get();
-        if (scheduler == null) terminateSchedulerWhenPossible = true;
-        else scheduler.terminate();
+    void terminate() {
+        Scheduler scheduler;
+        synchronized (this) {
+            scheduler = schedulerAtom.get();
+            if (scheduler == null) terminateSchedulerWhenPossible = true;
+        }
+        if (scheduler != null) scheduler.terminate();
     }
 }
