@@ -60,8 +60,6 @@ public class JS746Test extends SchedulerTest {
 	private static DateTimeFormatter dateISO = DateTimeFormat.forPattern("yyyy-MM-dd");;
 	private static DateTimeFormatter formatISO = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-	public static final Time timeout = Time.of(15);
-	
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
         logger.debug("starting test for " + JS746Test.class.getName());
@@ -69,16 +67,15 @@ public class JS746Test extends SchedulerTest {
 
 	@Test
 	public void test() throws Exception {
-		controller().runScheduler(timeout, "-e log-level=warn");
-//		controller().startScheduler("-e log-level=warn");
-//		controller().waitUntilSchedulerIsRunning();
+        controller().startScheduler("-e", "-log-level=warn");
+        controller().waitUntilSchedulerIsRunning();
 		testStandaloneJobs();
 		testOrders();
-//		controller().terminateScheduler();
+        controller().terminateScheduler();
 	}
 
 	public void testStandaloneJobs() throws Exception {
-		
+
 		// tests for one week arround the current date
 		String from = DateTime.now().minusDays(3).toString(dateISO) + "T09:00:00";
 		String to = DateTime.now().plusDays(4).toString(dateISO) + "T09:00:00";
@@ -108,7 +105,7 @@ public class JS746Test extends SchedulerTest {
 	}
 
 	public void testOrders() throws Exception {
-		
+
 		// tests for one week arround the current date
 		String from = DateTime.now().minusDays(3).toString(dateISO) + "T09:00:00";
 		String to = DateTime.now().plusDays(4).toString(dateISO) + "T09:00:00";
@@ -199,7 +196,7 @@ public class JS746Test extends SchedulerTest {
 	}
 
 	/**
-	 * \brief selects a nodelist from the response for a given job 
+     * \brief selects a nodelist from the response for a given job
 	 * \detail
 	 *
 	 * @param doc - the DOM document with the result
@@ -212,7 +209,7 @@ public class JS746Test extends SchedulerTest {
 
 		String name = object.getName();
 		XPath xpath = XPathFactory.newInstance().newXPath();
-		
+
 		String path;
 		if (object.isOrder()) {
 			path = "//*[@order='" + name + "']";
@@ -225,7 +222,7 @@ public class JS746Test extends SchedulerTest {
 		NodeList nodes = (NodeList) result;
 		return nodes;
 	}
-	
+
 	private static String getMessage(SchedulerLiveObject object, DateTime timestamp, DateTime from, DateTime to) {
 		return object.getType().getText() + " " + object.getName() + ": " + timestamp.toString(format) + " is outside the period " + from.toString(format) + "-" + to.toString(format);
 	}
