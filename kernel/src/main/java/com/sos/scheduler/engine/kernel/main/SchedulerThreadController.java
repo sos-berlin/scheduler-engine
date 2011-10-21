@@ -1,8 +1,12 @@
 package com.sos.scheduler.engine.kernel.main;
 
+import static com.google.common.base.Throwables.propagate;
+
 import java.io.File;
 
 import javax.annotation.Nullable;
+
+import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
@@ -17,6 +21,7 @@ import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 /** Steuert den {@link SchedulerThread}. */
 public class SchedulerThreadController implements SchedulerController {
     //private static final Time terminationTimeout = Time.of(10);
+    private static final Logger logger = Logger.getLogger(SchedulerThreadController.class);
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThread thread;
     private final StateThreadBridge stateThreadBridge = new StateThreadBridge();
@@ -52,10 +57,8 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void terminateAndWait() {
-        if (thread.isAlive()) {
-            terminateScheduler();
-            waitForTermination(Time.eternal);
-        }
+        terminateScheduler();
+        waitForTermination(Time.eternal);
     }
 
     @Override public final void waitForTermination(Time timeout) {
@@ -70,6 +73,17 @@ public class SchedulerThreadController implements SchedulerController {
     @Override public final void terminateAfterException(Throwable x) {
         throwableMailbox.setIfFirst(x);
         terminateScheduler();
+    }
+
+    private void tryTerminateScheduler() {
+        try {
+            terminateScheduler();
+        } catch (Exception x) {
+            if (x.toString().contains("Z-JAVA-111"))    // TODO Z-JAVA-111 als eigene Java-Exception zurückgeben
+                logger.warn(x);
+            else
+                throw propagate(x);
+        }
     }
 
     @Override public final void terminateScheduler() {
