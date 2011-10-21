@@ -53,5 +53,5 @@ public final class Util {
     }
 
     @SuppressWarnings("unused")
-    public static void unused(Object unusedVariable) {}
+    public static void ignore(Object unusedVariable) {}
 }
