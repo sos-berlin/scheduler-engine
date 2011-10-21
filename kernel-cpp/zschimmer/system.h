@@ -91,9 +91,6 @@
 #   define Z_DEPRECATED                 __declspec( deprecated )
 #   define __declspec_uuid(UUID)        __declspec( uuid(UUID) )
 
-#   if _MSC_VER >= 1600 
-#       define Z_HAS_MOVE_CONSTRUCTOR
-#   endif
 
 #elif defined __GNUC__
 
@@ -111,10 +108,6 @@
 //# define Z_FUNCTIONAL                 __attribute__(( pure ))         // Echt funktional, liefert bei gleichen Argumenten dasselbe Ergebnis, liest nur Argumente, völlig unabhängig von globalen Variablen
 //# define Z_GNU_PRINT( FORMAT, ... )   do { fprintf( stderr, "%s: ", Z_FUNCTION  ); fprintf( stderr, FORMAT, __VA_ARGS__ ); } while(0)
 #   define Z_INIT_FIRST                 __attribute__((init_priority(101)));
-
-#   if __GNUC_VERSION__ >= 40500  // gcc 4.5.0
-//#       define Z_HAS_MOVE_CONSTRUCTOR
-#   endif	
 
 #endif
 
@@ -353,28 +346,6 @@ typedef unsigned long           ulong32;
 
 #endif
 
-/*
-typedef unsigned short int      uint16;
-
-#ifndef INT16_MAX
-#   define INT16_MAX            ((int16)0x7FFF)
-#endif
-
-#ifndef UINT16_MAX
-#   define UINT16_MAX           ((uint16)0xFFFFu)
-#endif
-
-typedef int                     int32;
-typedef uint                    uint32;
-
-#ifndef INT32_MAX
-#   define INT32_MAX            ((int32)0x7FFFFFFF)
-#endif
-
-#ifndef UINT32_MAX
-#   define UINT32_MAX           ((uint32)0xFFFFFFFFu)
-#endif
-*/
 //-----------------------------------------------------------------------------------string::string
 // gcc 3.2 löst bei string( NULL, 0 )  exception aus. Das wollen wir nicht.
 
@@ -417,6 +388,23 @@ namespace zschimmer
 
 inline const void*              memrchr                     ( const void* s, char c, size_t l )     { return zschimmer::z_memrchr( s, c, l ); }
 
+#endif
+//--------------------------------------------------------------------------------------------C++11
+#if defined _MSC_VER
+#   if _MSC_VER >= 1600 // Visual Studio 2010
+#       define Z_HAS_MOVE_CONSTRUCTOR
+#   endif
+#   define final
+#endif
+
+#ifdef __GNUC__
+#   if __GNUC_VERSION__ >= 40500  // gcc 4.5.0
+//Testen: #       define Z_HAS_MOVE_CONSTRUCTOR
+#   endif	
+#   if __GNUC_VERSION__ >= 40700  // gcc 4.7 soll override kennen
+#       define override
+#   endif
+#   define final
 #endif
 //-------------------------------------------------------------------------------------------------
 
