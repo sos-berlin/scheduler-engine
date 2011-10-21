@@ -1,12 +1,4 @@
 // $Id: spooler_job.cxx 15019 2011-08-24 16:47:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-// §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
-/*
-    Hier sind implementiert
-
-    Job
-*/
-
-
 
 #include "spooler.h"
 #include "../zschimmer/z_signals.h"
@@ -404,8 +396,7 @@ void Combined_job_nodes::close()
 
 void Combined_job_nodes::connect_job_node( Job_node* job_node )
 {
-    //_job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
-
+    Z_LOG2("JS-644", Z_FUNCTION << " " << obj_name() << "::connect_job_node(" << job_node->obj_name() << ")\n");
     _job_node_set.insert( job_node );
 }
 
@@ -782,6 +773,7 @@ bool Job::on_activate()
                     }
                 }
 
+                Z_LOG2("JS-644", Z_FUNCTION << " next_time=" << _next_time << " next_start_time=" << _next_start_time << "\n");
                 set_next_start_time( Time::now() );
 
                 //TODO
@@ -2653,6 +2645,7 @@ bool Job::connect_job_node( Job_node* job_node )
     if( _state >= s_initialized )
     {
         _combined_job_nodes->connect_job_node( job_node );
+        Z_LOG2("JS-644", Z_FUNCTION << " " << obj_name() << "calculate_next_time() state=" << state_name() << "\n");
         calculate_next_time( Time::now() );     // Ruft request_order()
         result = true;
     }

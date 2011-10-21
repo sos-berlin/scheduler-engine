@@ -121,7 +121,7 @@ struct Order : Com_order,
 
     bool                        is_immediately_processable  ( const Time& now );
     bool                        is_processable              ();
-    void                        handle_changed_processable_state ();
+    void                        handle_changed_processable_state();
     void                        signal_job_when_order_has_become_processable();
 
     void                        open_log                ();
@@ -561,7 +561,7 @@ struct Node : Com_job_chain_node,
 
     virtual void                set_action                  ( const string& );
     string               string_action                      () const                                { return string_from_action( _action ); }
-    virtual void                handle_changed_processable_state()                                  {}
+    virtual void                wake_orders                 ()                                      {}
 
 
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
@@ -626,7 +626,7 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     void                    set_action                      ( const string& );
-    void                        handle_changed_processable_state();
+    void                        wake_orders                 ();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
     bool                        is_ready_for_order_processing ();
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
@@ -791,7 +791,7 @@ struct Job_chain : Com_job_chain,
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
     void                    set_stopped                     ( bool );
-    void                        notify_nodes                ();
+    void                        wake_orders                 ();
     void                    set_state                       ( const State& );
     State                       state                       () const                                { return _state; }
     string                      state_name                  () const;
