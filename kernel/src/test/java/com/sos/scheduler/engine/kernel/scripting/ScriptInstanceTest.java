@@ -37,7 +37,7 @@ public class ScriptInstanceTest {
 //	private final static Logger logger = Logger.getLogger(ScriptInstanceTest.class);
 	private final static Logger logger = Logger.getRootLogger();
 	
-	private final static String script_root = "./src/test/scripts/";
+	private final static String script_root = "./src/test/scripts/";    // FIXME Sollte eine Resource im Package sein. Pfad ist in IntelliJ-IDE nicht auffindbar. Zschimmer 20.10.2011
 
 	@Test
 	public void javaScript() {
