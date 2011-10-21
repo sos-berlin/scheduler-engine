@@ -57,7 +57,7 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void terminateAndWait() {
-        terminateScheduler();
+        tryTerminateScheduler();
         waitForTermination(Time.eternal);
     }
 
