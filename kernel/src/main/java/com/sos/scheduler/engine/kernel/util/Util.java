@@ -51,4 +51,7 @@ public final class Util {
         else
             throw new RuntimeException("Invalid boolean value: " + s);
     }
+
+    @SuppressWarnings("unused")
+    public static void unused(Object unusedVariable) {}
 }
