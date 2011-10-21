@@ -17,6 +17,10 @@ public class FilesTest {
         removeDirectoryRecursivly(dir);
     }
 
+    @Test public void testMakeTemporaryDirectory() throws Exception {
+        assertTrue(dir.isDirectory());
+    }
+
     @Test public void testDeleteFile() throws Exception {
         File a =new File(dir, "a");
         new FileOutputStream(a).close();
@@ -28,11 +32,6 @@ public class FilesTest {
     @Test public void testMakeDirectory() throws Exception {
         File a = new File(dir, "a");
         makeDirectory(a);
-        assertTrue(a.isDirectory());
-    }
-
-    @Test public void testMakeTemporaryDirectory() throws Exception {
-        File a = makeTemporaryDirectory();
         assertTrue(a.isDirectory());
     }
 
