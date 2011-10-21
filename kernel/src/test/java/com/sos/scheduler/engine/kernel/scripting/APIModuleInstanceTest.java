@@ -35,7 +35,7 @@ public class APIModuleInstanceTest {
 //		System.out.println("END javascriptApi -----------------------------------------------------------------------");
 //	}
 
-	@Test
+//	@Test
 //	public void javascriptWithoutFunctions() {
 //		System.out.println("START javascriptWithoutFunctions ---------------------------------------------------------------------");
 //		String script =	"print('script ran successfully\\n');\n";
@@ -80,7 +80,7 @@ public class APIModuleInstanceTest {
 	 * jar-file: jython.jar from the jython 2.5.2 RC 2 installation
 	 * jar-file: jython-engine.jar
 	 */
-        @Ignore //TODO 2010-12-30 Zschimmer com.sos.scheduler.engine.kernel.scripting.UnsupportedScriptLanguageException: Scriptlanguage jython is not supported
+//        @Ignore //TODO 2010-12-30 Zschimmer com.sos.scheduler.engine.kernel.scripting.UnsupportedScriptLanguageException: Scriptlanguage jython is not supported
 //	 @Test
 	//	maven dependencies not found for bean
 //	public void jythonScriptFromFile() {
