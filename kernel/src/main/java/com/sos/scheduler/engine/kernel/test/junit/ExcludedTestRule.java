@@ -11,6 +11,11 @@ import org.junit.runners.model.Statement;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
+/** JUnit-{@link TestRule}, die einen Test als ausgeschlossen markiert und ihn nur ausführen lässt,
+ * wenn die Property testExcluded gesetzt ist.
+ *
+ * Wird nicht benutzt und kann vielleicht raus.
+ */
 public class ExcludedTestRule implements TestRule {
     private static final Logger log = Logger.getLogger(ExcludedTestRule.class);
     private static final boolean testExcluded = booleanOf(System.getProperty("testExcluded"), false, true);

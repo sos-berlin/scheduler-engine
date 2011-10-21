@@ -8,6 +8,11 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+/** JUnit-{@link TestRule}, die einen Test als langsam markiert und ihn nur ausführen lässt,
+ * wenn die Property slowTest gesetzt ist.
+ *
+ * Verwendung: @{@link org.junit.ClassRule} public static final TestRule slowTestRule = {@link SlowTestRule}.singleton;
+ */
 public class SlowTestRule implements TestRule {
     private static final Logger log = Logger.getLogger(SlowTestRule.class);
     private static final boolean testSlow = booleanOf(System.getProperty("slowTest"), false, true);
