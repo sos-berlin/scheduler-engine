@@ -3,11 +3,8 @@ package com.sos.scheduler.engine.kernel.test;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
-import static com.sos.scheduler.engine.kernel.test.TestSchedulerCppBinaries.*;
-import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
-import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
+import static com.sos.scheduler.engine.kernel.test.TestSchedulerCppBinaries.cppBinaries;
 
-import java.io.File;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
@@ -25,13 +22,11 @@ public class TestSchedulerController implements SchedulerController {
 
     private final SchedulerThreadController delegated;
     private final Environment environment;
-    private final File binDirectory;
     private Scheduler scheduler = null;
 
     public TestSchedulerController(ResourcePath resourcePath) {
         delegated = new SchedulerThreadController();
         environment = new Environment(resourcePath);
-        binDirectory = makeTemporaryDirectory();
     }
 
     public final void strictSubscribeEvents() {
@@ -99,7 +94,6 @@ public class TestSchedulerController implements SchedulerController {
         try {
             delegated.terminateAndWait();
             environment.close();
-            tryRemoveDirectoryRecursivly(binDirectory);
         }
         catch (Throwable x) {
             logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
