@@ -39,6 +39,7 @@ public final class Js644Test extends SchedulerTest {
         controller().strictSubscribeEvents(new MyEventSubscriber());
         controller().startScheduler("-e");
         Thread modifierThread = new Thread(new ControllerRunnable(new FilesModifierRunnable(jobFiles())));
+        modifierThread.setName("job.xml modifier");
         modifierThread.start();
         try {
             while(true) {
