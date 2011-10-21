@@ -10,7 +10,7 @@ ping -n 3 localhost
 echo Parameter value is: %scheduler_param_my_param%
 echo other_param=999 >> %scheduler_return_values%
 rem exit 0, weil ping machmal versagt, Zschimmer 2011-06-23
-exit 0  
+exit 0
         ]]>
     </script>
     <monitor ordering="0"

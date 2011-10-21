@@ -1,110 +1,107 @@
 package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
 
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.Configuration.jobFilenames;
+import static com.google.common.base.Throwables.propagate;
+import static com.google.common.collect.Iterables.transform;
+import static com.sos.scheduler.engine.kernel.util.Util.sleepUntilInterrupted;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Iterators;
-import com.google.common.io.Files;
+import com.google.common.base.Function;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.test.junit.SlowTestRule;
 import com.sos.scheduler.engine.kernel.util.Time;
 
-public class Js644Test extends SchedulerTest {
+public final class Js644Test extends SchedulerTest {
+    @ClassRule public static final TestRule slowTestRule = SlowTestRule.singleton;
+    private static final Logger logger = Logger.getLogger(Js644Test.class);
+    static final List<String> jobPaths = asList("a", "b", "c");
     private static final Time orderTimeout = Time.of(10);
-    private static final Charset encoding = Charsets.UTF_8;
-    @ClassRule public static TestRule slowTestRule = SlowTestRule.singleton;
 
     private final BlockingQueue<Boolean> eventReceivedQueue = new ArrayBlockingQueue<Boolean>(1);
 
 
-    @Test public void test() throws Exception {
+    @Test public void test() throws InterruptedException {
         controller().strictSubscribeEvents(new MyEventSubscriber());
         controller().startScheduler("-e");
-        Thread fileModifierThread = new FileModifierThread(controller().directory());
-        fileModifierThread.start();
+        Thread modifierThread = new Thread(new ControllerRunnable(new FilesModifierRunnable(jobFiles())));
+        modifierThread.start();
         try {
-            for (int i = 0; i < 1000; i++) {
-                eventReceivedQueue.poll(orderTimeout.getMillis(), TimeUnit.MILLISECONDS);
+            while(true) {
+                // Der Test läuft ewig bis ein Job stehen bleibt und ein Auftrag nicht rechtzeitig verarbeitet worden ist.
+                Boolean ok = eventReceivedQueue.poll(orderTimeout.getMillis(), TimeUnit.MILLISECONDS);
+                if (ok == null) fail("An order has not been processed in time");
+                else if (!ok)  break;
+                logger.debug("An order has been finished");
             }
         } finally {
-            fileModifierThread.interrupt();
+            modifierThread.interrupt();
+            modifierThread.join();
         }
     }
 
+    private Iterable<File> jobFiles() {
+        return transform(jobPaths, new Function<String,File>() {
+            @Override public File apply(String o) { return new File(controller().environment().configDirectory(), o + ".job.xml"); }
+        });
+    }
 
-    private class MyEventSubscriber implements EventSubscriber {
+    private final class MyEventSubscriber implements EventSubscriber {
         @Override public void onEvent(Event event) throws InterruptedException {
-            if (event instanceof OrderFinishedEvent) {
+            logger.debug(event);
+            if (event instanceof OrderStateChangedEvent)
                 eventReceivedQueue.put(true);
-            }
+            else
+            if (event instanceof TerminatedEvent)
+                eventReceivedQueue.put(false);
         }
     }
 
+    private final class ControllerRunnable implements Runnable {
+        private final Runnable runnable;
 
-    private static class FileModifierThread extends Thread {
-        private final FileModifier fileModifier;
-        
-        private FileModifierThread(File directory) {
-            fileModifier = new FileModifier(directory, jobFilenames);
+        ControllerRunnable(Runnable runnable) {
+            this.runnable = runnable;
         }
 
         @Override public void run() {
             try {
-                int pause = 4000 / fileModifier.getFileCount() + 1;   // Mindestens 2s Pause, damit Scheduler Datei als stabil ansieht.
-                while(true) {
-                    fileModifier.modifyNext();
-                    Thread.sleep(pause);
-                }
-            } catch (InterruptedException x) {
-                // Ende
+                runnable.run();
+            } catch (Throwable t) {
+                controller().terminateAfterException(t);
+                throw propagate(t);
             }
         }
     }
 
-    
-    private static class FileModifier {
-        private final File directory;
-        private final Collection<String> files;
-        private Iterator<String> iterator = Iterators.emptyIterator();
+    private static final class FilesModifierRunnable implements Runnable {
+        private final FilesModifier filesModifier;
 
-        private FileModifier(File directory, Collection<String> files) {
-            this.directory = directory;
-            this.files = files;
-        }
-        
-        private void modifyNext() {
-            if (!iterator.hasNext())
-                iterator = files.iterator();
-            modifyFile(iterator.next());
+        FilesModifierRunnable(Iterable<File> files) {
+            filesModifier = new FilesModifier(files);
         }
 
-
-        private void modifyFile(String filename) {
-            try {
-                File f = new File(directory, filename);
-                assert f.exists();
-                Files.append("<!-- -->\n", f, encoding);
-            } catch (IOException x) { throw new RuntimeException(x); }
-        }
-
-        private int getFileCount() {
-            return files.size();
+        @Override public void run() {
+            int pause = 4000 / filesModifier.fileCount() + 1;   // Mindestens 2s Pause, damit Scheduler Datei als stabil ansieht.
+            while(true) {
+                filesModifier.modifyNext();
+                boolean interrupted = sleepUntilInterrupted(pause);
+                if (interrupted) break;
+            }
         }
     }
 }
