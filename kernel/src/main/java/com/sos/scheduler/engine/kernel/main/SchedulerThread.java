@@ -46,7 +46,7 @@ class SchedulerThread extends Thread {
         }
     }
 
-    int exitCode() {
+    final int exitCode() {
         if (isAlive())  throw new IllegalStateException("Thread is still alive");
         return exitCodeAtom.get();
     }

@@ -8,9 +8,6 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-
 public class SlowTestRule implements TestRule {
     private static final Logger log = Logger.getLogger(SlowTestRule.class);
     private static final boolean testSlow = booleanOf(System.getProperty("slowTest"), false, true);

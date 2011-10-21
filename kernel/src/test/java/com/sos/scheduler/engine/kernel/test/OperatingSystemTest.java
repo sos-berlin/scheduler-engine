@@ -9,7 +9,7 @@ import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
 
 import javax.annotation.Nullable;
 
-public class OperatingSystemTest {
+public final class OperatingSystemTest {
     @Test public void testMakeModuleFilename() {
         assertThat(OperatingSystem.singleton.makeModuleFilename("xx"), isWindows? equalTo("xx.dll") : equalTo("libxx.so"));
     }

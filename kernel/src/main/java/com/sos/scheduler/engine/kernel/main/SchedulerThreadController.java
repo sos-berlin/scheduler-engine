@@ -23,7 +23,7 @@ public class SchedulerThreadController implements SchedulerController {
     private EventSubscriber eventSubscriber = EventSubscriber.empty;
 
     public SchedulerThreadController() {
-        thread =  new SchedulerThread(new MyStateHandler());
+        thread = new SchedulerThread(new MyStateHandler());
     }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
@@ -80,17 +80,17 @@ public class SchedulerThreadController implements SchedulerController {
         return thread.exitCode();
     }
 
-    private class MyStateHandler implements SchedulerStateHandler {
+    private final class MyStateHandler implements SchedulerStateHandler {
         private final MyEventSubscriber myEventSubscriber = new MyEventSubscriber();
         private Scheduler scheduler = null;
 
-        @Override public final void onSchedulerStarted(Scheduler s) {
+        @Override public void onSchedulerStarted(Scheduler s) {
             this.scheduler = s;
             stateThreadBridge.onSchedulerStarted(scheduler);
             reportStrictlyEvent(new SchedulerReadyEvent(SchedulerThreadController.this));
         }
 
-        @Override public final void onSchedulerActivated() {
+        @Override public void onSchedulerActivated() {
             //stateThreadBridge.onSchedulerActivated(scheduler);
             scheduler.getEventSubsystem().subscribe(myEventSubscriber);
         }
@@ -110,7 +110,7 @@ public class SchedulerThreadController implements SchedulerController {
         }
     }
 
-    void reportStrictlyEvent(Event e) {
+    final void reportStrictlyEvent(Event e) {
         try { 
             eventSubscriber.onEvent(e);
         }
