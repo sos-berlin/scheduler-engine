@@ -1,17 +1,23 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
-import java.io._
 import org.junit._
-import org.junit.Assert._
 import Util._
 
-
-class UtilTest {
-    @Test def testCloseQuietly {
-        closeQuietly(new StringWriter)
+final class UtilTest {
+    @Test def testCloseQuietly() {
+        val a = new A
+        closeQuietly(a)
+        assert(a.closed)
     }
 
-    @Test def testCloseQuietly2 {
-        closeQuietly(null: StringWriter)
+    @Test def closeQuietlyShouldIgnoreException() {
+        suppressLogging(Util.getClass){ closeQuietly(null) }
+    }
+
+    private class A {
+        var closed = false
+        def close() {
+            closed = true
+        }
     }
 }
