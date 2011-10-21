@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.test;
 
 import static com.google.common.io.Files.createTempDir;
-import static com.sos.scheduler.engine.kernel.test.EnvironmentFiles.directoryOfClass;
+import static com.sos.scheduler.engine.kernel.util.Classes.springPattern;
 import static com.sos.scheduler.engine.kernel.util.Files.removeFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
@@ -15,14 +15,16 @@ import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-public class EnvironmentFilesTest {
+import com.sos.scheduler.engine.kernel.util.ResourcePath;
+
+public final class EnvironmentFilesTest {
     private static final String[] expectedNames = {"scheduler.xml", "factory.ini", "sos.ini"};
 
-    @Test public void test() throws IOException {
+    @Test public void test() {
         File dir = createTempDir();
         try {
             assertThat(dir.list(), emptyArray());
-            EnvironmentFiles.copy(getClass().getPackage(), dir);
+            EnvironmentFiles.copy(new ResourcePath(EnvironmentFilesTest.class.getPackage(), "config"), dir);
             assertThat(dir.list(), arrayContainingInAnyOrder(expectedNames));
         } finally {
             for (String name: expectedNames) removeFile(new File(dir, name));
@@ -32,7 +34,7 @@ public class EnvironmentFilesTest {
 
     @Test public void testSpringGetResources() throws IOException {
         PathMatchingResourcePatternResolver r = new PathMatchingResourcePatternResolver();
-        Resource[] result = r.getResources("classpath*:" + directoryOfClass(getClass()) + "/scheduler.xml");
+        Resource[] result = r.getResources(springPattern(EnvironmentFilesTest.class.getPackage(), "config/scheduler.xml"));
         assertThat(result, arrayWithSize(1));
     }
 }

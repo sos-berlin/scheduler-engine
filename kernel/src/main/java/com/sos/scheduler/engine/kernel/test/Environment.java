@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.kernel.test;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.google.common.io.Files.createParentDirs;
-import static com.sos.scheduler.engine.kernel.test.OperatingSystem.concatFileAndPathChain;
+import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.kernel.util.Files.removeDirectoryRecursivly;
 
 import java.io.File;
-import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.kernel.main.CppModule;
+import com.sos.scheduler.engine.kernel.main.CppBinaries;
+import com.sos.scheduler.engine.kernel.util.ResourcePath;
 
 /**
  * \file Environment.java
@@ -29,68 +28,71 @@ import com.sos.scheduler.engine.kernel.main.CppModule;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
+/** Stellt eine Konfigurationsumgebung für den Scheduler bereit. */
 final class Environment {
-    private final CppModule module;
-    private final Package pack;
-    private final boolean directoryIsTemporary;
+    private static final String binSubdir = "bin";
+    private static final String configSubdir = "config";
+    private static final String logSubdir = "log";
+    private final ResourcePath resourcePath;
+    private final boolean removeDirectoryOnClose;
     private final File directory;
+    private final File configDirectory;
     private final File logDirectory;
 
-    Environment(CppModule module, Package pack) {
-        this(module, pack, makeTemporaryDirectory(), true);
+    Environment(ResourcePath resourcePath) {
+        this(resourcePath, makeTemporaryDirectory(), true);
     }
 
-    Environment(CppModule module, Package pack, File directory) {
-        this(module, pack, directory, false);
+    Environment(ResourcePath resourcePath, File directory) {
+        this(resourcePath, directory, false);
     }
 
-    private Environment(CppModule module, Package pack, File directory, boolean isTemporary) {
-        this.module = module;
-        this.pack = pack;
+    private Environment(ResourcePath resourcePath, File directory, boolean removeDirectoryOnClose) {
+        this.resourcePath = resourcePath;
         this.directory = directory;
-        directoryIsTemporary = isTemporary;
-        logDirectory = new File(directory, "log");
+        this.removeDirectoryOnClose = removeDirectoryOnClose;
+        configDirectory = new File(directory, configSubdir);
+        logDirectory = new File(directory, logSubdir);
     }
 
-    void start() {
+    void prepare() {
         prepareTemporaryConfigurationDirectory();
     }
 
     void close() {
-        if (directoryIsTemporary)
+        if (removeDirectoryOnClose)
             removeDirectoryRecursivly(directory);
     }
 
     private void prepareTemporaryConfigurationDirectory() {
-        try {
-            createParentDirs(new File(directory, "x"));
-            createParentDirs(new File(logDirectory, "x"));
-            EnvironmentFiles.copy(pack, directory);
-        } catch (IOException e) { throw new RuntimeException(e); }
+        makeDirectories(directory);
+        makeDirectories(configDirectory);
+        makeDirectories(logDirectory);
+        EnvironmentFiles.copy(resourcePath, configDirectory);
     }
 
-    ImmutableList<String> standardArgs() {
+    ImmutableList<String> standardArgs(CppBinaries cppBinaries) {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
-        result.add(module.exeFile().getPath());
-        result.add("-sos.ini=" + new File(directory, "sos.ini").getAbsolutePath());  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
-        result.add("-ini=" + new File(directory, "factory.ini").getAbsolutePath());  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
+        result.add(cppBinaries.exeFile().getPath());
+        result.add("-sos.ini=" + new File(configDirectory, "sos.ini").getAbsolutePath());  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
+        result.add("-ini=" + new File(configDirectory, "factory.ini").getAbsolutePath());  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
         result.add("-log-dir=" + logDirectory.getPath());
         result.add("-log=" + new File(logDirectory, "scheduler.log").getPath());
         result.add("-java-events");
         if (OperatingSystem.isUnix)
-            result.add("-env=" + spidermonkeyLibraryPathEnv());
-        result.add(directory.getPath());
+            result.add("-env=" + libraryPathEnv(cppBinaries.directory()));
+        result.add(configDirectory.getPath());
         return result.build();
     }
 
     /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
-    private String spidermonkeyLibraryPathEnv() {
+    private String libraryPathEnv(File directory) {
         String varName = OperatingSystem.singleton.getDynamicLibraryEnvironmentVariableName();
         String previous = nullToEmpty(System.getenv(varName));
-        return varName + "=" + concatFileAndPathChain(module.spidermonkeyModuleDirectory(), previous);
+        return varName + "=" + OperatingSystem.concatFileAndPathChain(directory, previous);
     }
 
-    public File getDirectory() {
+    File directory() {
         return directory;
     }
 }

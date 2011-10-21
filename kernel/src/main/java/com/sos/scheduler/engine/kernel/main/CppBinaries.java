@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.kernel.main;
 
 import java.io.File;
 
-public interface CppModule {
+public interface CppBinaries {
     File moduleFile();
     File exeFile();
-    File spidermonkeyModuleDirectory();
+    File directory();
 }

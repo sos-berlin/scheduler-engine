@@ -6,11 +6,11 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 public abstract class SchedulerTest {
-    public static final Time shortTimeout = Time.of(10);
+    public static final Time shortTimeout = TestSchedulerController.shortTimeout;
 
-    private final TestSchedulerController controller = new TestSchedulerController(getClass().getPackage());
+    private final TestSchedulerController controller = TestSchedulerController.of(getClass().getPackage());
 
-    @After public void schedulerTestClose() {
+    @After public final void schedulerTestClose() {
         controller.close();
     }
 
@@ -18,7 +18,7 @@ public abstract class SchedulerTest {
         return controller;
     }
 
-    /** Zur Bequemlichkeit; dasselbe wie {@link TestSchedulerController#scheduler()}. */
+    /** Zur Bequemlichkeit; dasselbe wie {@link com.sos.scheduler.engine.kernel.test.TestSchedulerController#scheduler()}. */
     protected final Scheduler scheduler() {
         return controller().scheduler();
     }

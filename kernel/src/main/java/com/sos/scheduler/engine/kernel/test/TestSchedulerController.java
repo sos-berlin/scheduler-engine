@@ -3,6 +3,9 @@ package com.sos.scheduler.engine.kernel.test;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
+import static com.sos.scheduler.engine.kernel.test.TestSchedulerCppBinaries.*;
+import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
+import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
 
 import java.io.File;
 import java.util.Arrays;
@@ -13,19 +16,22 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
+import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 public class TestSchedulerController implements SchedulerController {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
+    public static final Time shortTimeout = Time.of(10);
 
-    private final TestSchedulerCppModule cppModule = new TestSchedulerCppModule();
     private final SchedulerThreadController delegated;
     private final Environment environment;
+    private final File binDirectory;
     private Scheduler scheduler = null;
 
-    public TestSchedulerController(Package pack) {
+    public TestSchedulerController(ResourcePath resourcePath) {
         delegated = new SchedulerThreadController();
-        environment = new Environment(cppModule, pack);
+        environment = new Environment(resourcePath);
+        binDirectory = makeTemporaryDirectory();
     }
 
     public final void strictSubscribeEvents() {
@@ -47,10 +53,14 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     @Override public final void startScheduler(String... args) {
-        delegated.loadModule(cppModule.moduleFile());
-        environment.start();
-        Iterable<String> allArgs = concat(environment.standardArgs(), Arrays.asList(args));
+        prepare();
+        Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries()), Arrays.asList(args));
         delegated.startScheduler(toArray(allArgs, String.class));
+    }
+
+    private void prepare() {
+        environment.prepare();
+        delegated.loadModule(cppBinaries().moduleFile());
     }
 
     public final Scheduler scheduler() {
@@ -88,6 +98,8 @@ public class TestSchedulerController implements SchedulerController {
     public final void close() {
         try {
             delegated.terminateAndWait();
+            environment.close();
+            tryRemoveDirectoryRecursivly(binDirectory);
         }
         catch (Throwable x) {
             logger.error(TestSchedulerController.class.getName() + ".close(): " + x, x);
@@ -96,6 +108,10 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public final File directory() {
-        return environment.getDirectory();
+        return environment.directory();
+    }
+
+    public static TestSchedulerController of(Package p) {
+        return new TestSchedulerController(new ResourcePath(p));
     }
 }

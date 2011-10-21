@@ -101,8 +101,8 @@
                 </dependencies>
             </plugin>
 
-            <!-- generates a header file with information about the current version -->
             <plugin>
+                <!-- generates a header file with information about the current version -->
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -140,7 +140,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>package-all</id>
+                        <id>package-binaries</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -148,6 +148,18 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/os-${osFamily}.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>package-test-binaries</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/os-${osFamily}-test.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
@@ -186,7 +198,6 @@
                   </dependency>
                 </dependencies>
             </plugin>
-
         </plugins>
     </build>
 

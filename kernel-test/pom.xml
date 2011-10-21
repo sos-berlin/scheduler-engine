@@ -103,7 +103,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
             <version>${project.version}</version>
-            <classifier>${osArch}</classifier>
+            <classifier>${osArch}-test</classifier>
         </dependency>
 
         <dependency>
