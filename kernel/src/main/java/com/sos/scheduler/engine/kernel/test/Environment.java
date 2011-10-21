@@ -9,6 +9,7 @@ import java.io.File;
 
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.main.CppBinaries;
+import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 
 /**
@@ -72,7 +73,7 @@ public final class Environment {
 
     ImmutableList<String> standardArgs(CppBinaries cppBinaries) {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
-        result.add(cppBinaries.exeFile().getPath());
+        result.add(cppBinaries.file(CppBinary.exeFilename).getPath());
         result.add("-sos.ini=" + new File(configDirectory, "sos.ini").getAbsolutePath());  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
         result.add("-ini=" + new File(configDirectory, "factory.ini").getAbsolutePath());  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
         result.add("-log-dir=" + logDirectory.getPath());

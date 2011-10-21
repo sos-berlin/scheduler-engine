@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.test;
+package com.sos.scheduler.engine.kernel.test.binary;
 
 import java.io.File;
 

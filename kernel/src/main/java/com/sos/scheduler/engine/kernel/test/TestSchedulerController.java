@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.test;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
-import static com.sos.scheduler.engine.kernel.test.TestSchedulerCppBinaries.cppBinaries;
+import static com.sos.scheduler.engine.kernel.test.binary.TestCppBinaries.cppBinaries;
 
 import java.util.Arrays;
 
@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
+import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
 
@@ -55,7 +56,7 @@ public class TestSchedulerController implements SchedulerController {
 
     private void prepare() {
         environment.prepare();
-        delegated.loadModule(cppBinaries().moduleFile());
+        delegated.loadModule(cppBinaries().file(CppBinary.moduleFilename));
     }
 
     public final Scheduler scheduler() {

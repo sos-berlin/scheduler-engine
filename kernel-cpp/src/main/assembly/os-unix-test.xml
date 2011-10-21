@@ -7,12 +7,12 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>generated-java-resources/test</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>bin</directory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin-test</outputDirectory>
             <includes>
-                <include>com/sos/scheduler/engine/kernelcpp/bin-test/libscheduler.so</include>
-                <include>com/sos/scheduler/engine/kernelcpp/bin-test/scheduler</include>
-                <include>com/sos/scheduler/engine/kernelcpp/bin-test/libspidermonkey.so</include>
+                <include>libscheduler.so</include>
+                <include>scheduler</include>
+                <include>libspidermonkey.so</include>
             </includes>
         </fileSet>
     </fileSets>

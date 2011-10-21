@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.test;
+package com.sos.scheduler.engine.kernel.test.binary;
 
 import static com.sos.scheduler.engine.kernel.util.Files.copyURLToFile;
 import static com.sos.scheduler.engine.kernel.util.Util.ignore;
@@ -24,15 +24,10 @@ class ResourcesAsFilesProvider {
     private final File directory;
     private final ImmutableList<Resource> resources;
 
-    ResourcesAsFilesProvider(String resourcePattern, File directory) {
-        try {
-            this.directory = directory;
-            resources = ImmutableList.copyOf(resourceResolver.getResources(resourcePattern));
-            if (resources.isEmpty())
-                logger.warn("No resources in " + resourcePattern);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private ResourcesAsFilesProvider(ImmutableList<Resource> resources, File directory) {
+        this.directory = directory;
+        this.resources = resources;
+        if (resources.isEmpty()) logger.warn("No resources");
     }
 
     private ImmutableMap<String,ResourceFile> apply() {
@@ -75,11 +70,7 @@ class ResourcesAsFilesProvider {
         return f.exists()  &&  f.lastModified() == r.lastModified()  &&  f.length() == r.contentLength();
     }
 
-//    static ImmutableMap<String,ResourceFile> provideResourcesAsFiles(Package pack, File directory) {
-//        return provideResourcesAsFiles(springPattern(pack), directory);
-//    }
-
-    static ImmutableMap<String,ResourceFile> provideResourcesAsFiles(String resourcePattern, File directory) {
-        return new ResourcesAsFilesProvider(resourcePattern, directory).apply();
+    static ImmutableMap<String,ResourceFile> provideResourcesAsFiles(ImmutableList<Resource> resources, File directory) {
+        return new ResourcesAsFilesProvider(resources, directory).apply();
     }
 }
