@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.test;
 
-import static com.sos.scheduler.engine.kernel.util.Classes.springPattern;
 import static com.sos.scheduler.engine.kernel.util.Files.copyURLToFile;
+import static com.sos.scheduler.engine.kernel.util.Util.ignore;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,6 @@ class ResourcesAsFilesProvider {
     private final ImmutableList<Resource> resources;
 
     ResourcesAsFilesProvider(String resourcePattern, File directory) {
-        logger.info("******************");
         try {
             this.directory = directory;
             resources = ImmutableList.copyOf(resourceResolver.getResources(resourcePattern));
@@ -47,10 +46,9 @@ class ResourcesAsFilesProvider {
 
     private ResourceFile provideResourceAsFile(Resource r) {
         logger.debug(r+": "+r.getClass().getName());
-        if (r instanceof FileSystemResource)
-            return new ResourceFile(((FileSystemResource)r).getFile(), false);
-        else
-            return provideNonfileResourceAsFile(r);
+        return r instanceof FileSystemResource?
+                new ResourceFile(((FileSystemResource)r).getFile(), false)
+                : provideNonfileResourceAsFile(r);
     }
 
     private ResourceFile provideNonfileResourceAsFile(Resource r) {
@@ -68,7 +66,7 @@ class ResourcesAsFilesProvider {
     private static void copyResource(Resource r, File f) throws IOException {
         logger.debug("copyURLToFile(" + r.getURL() + ", " + f + ")");
         copyURLToFile(r.getURL(), f);
-        f.setLastModified(r.lastModified());
+        ignore(f.setLastModified(r.lastModified()));
         logger.debug(r + " extracted to " + f);
         assert resourceSeemsEqualToFile(r, f);
     }
@@ -77,9 +75,9 @@ class ResourcesAsFilesProvider {
         return f.exists()  &&  f.lastModified() == r.lastModified()  &&  f.length() == r.contentLength();
     }
 
-    static ImmutableMap<String,ResourceFile> provideResourcesAsFiles(Package pack, File directory) {
-        return provideResourcesAsFiles(springPattern(pack), directory);
-    }
+//    static ImmutableMap<String,ResourceFile> provideResourcesAsFiles(Package pack, File directory) {
+//        return provideResourcesAsFiles(springPattern(pack), directory);
+//    }
 
     static ImmutableMap<String,ResourceFile> provideResourcesAsFiles(String resourcePattern, File directory) {
         return new ResourcesAsFilesProvider(resourcePattern, directory).apply();
