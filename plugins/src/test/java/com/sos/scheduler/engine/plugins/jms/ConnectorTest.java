@@ -19,8 +19,8 @@ import com.sos.scheduler.engine.plugins.event.Connector;
 public class ConnectorTest {
 	
 	
-	@SuppressWarnings("unused")
-	private static final String tmpDir = Files.createTempDir().getAbsolutePath();
+	//@SuppressWarnings("unused")
+	//private static final String tmpDir = Files.createTempDir().getAbsolutePath();
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
 	private static Connector connector;
