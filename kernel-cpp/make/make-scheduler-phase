@@ -30,7 +30,7 @@ fi
 
 if [ $inWindows ]; then \
     if [ "$SCHEDULER_VISUAL_STUDIO_VERSION" == "9" ]; then :
-        # Sobald wir nicht mehr für Windows 2000 compilieren müssen, können wir Visual Studio 2010 nutzen.
+        # Veraltet, für Windows 2000.
         if test -z "${VISUAL_STUDIO_2008_HOME}"; then :
             echo 'ERROR: Missing environment variable VISUAL_STUDIO_2008_HOME with installation directory of Visual Studio 2008 (for example "c:\Program Files\Microsoft\Visual Studio 9.0")'
             exit 1
@@ -47,7 +47,6 @@ if [ $inWindows ]; then \
             exit 1
         fi
         msbuild=$(cygpath "${WINDOWS_NET_SDK_HOME}")/msbuild.exe
-        echo 'Using Visual Studio 2010 (not for release in 2011, Scheduler is not runnable on Windows 2000)'
         if [ ! -f "$msbuild" ]; then 
             echo "Missing msbuild.exe: $msbuild"
             exit 1
