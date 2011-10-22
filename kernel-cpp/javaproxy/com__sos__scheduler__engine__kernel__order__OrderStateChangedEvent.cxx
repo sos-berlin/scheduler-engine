@@ -15,8 +15,6 @@ struct OrderStateChangedEvent__class : ::zschimmer::javabridge::Class
    ~OrderStateChangedEvent__class();
 
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method;
-    ::zschimmer::javabridge::Method const _getPreviousState____method;
-    ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< OrderStateChangedEvent__class > class_factory;
 };
@@ -25,9 +23,7 @@ const ::zschimmer::javabridge::class_factory< OrderStateChangedEvent__class > Or
 
 OrderStateChangedEvent__class::OrderStateChangedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;Lcom/sos/scheduler/engine/kernel/order/OrderState;)V")
-    ,_getPreviousState____method(this, "getPreviousState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
-    ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
+    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;Lcom/sos/scheduler/engine/kernel/order/OrderState;)V"){}
 
 OrderStateChangedEvent__class::~OrderStateChangedEvent__class() {}
 
@@ -57,22 +53,6 @@ OrderStateChangedEvent::~OrderStateChangedEvent() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderStateChangedEvent::getPreviousState() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderStateChangedEvent__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState result;
-    result.steal_local_ref(cls->_getPreviousState____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::java::lang::String OrderStateChangedEvent::toString() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderStateChangedEvent__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_toString____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* OrderStateChangedEvent::java_object_class_() { return _class.get(); }

@@ -7,8 +7,6 @@
 
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace log { struct PrefixLog; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -19,7 +17,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct Platform__class;
 
 struct Platform : ::zschimmer::javabridge::proxy_jobject< Platform >, ::javaproxy::java::lang::Object {
-    static Platform new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog >& p0);
+  private:
+    static Platform new_instance();  // Not implemented
+  public:
 
     Platform(jobject = NULL);
 
@@ -46,8 +46,6 @@ struct Platform : ::zschimmer::javabridge::proxy_jobject< Platform >, ::javaprox
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog log();
-    static ::javaproxy::com::sos::scheduler::engine::kernel::Platform of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::cplusplus::runtime::Sister >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

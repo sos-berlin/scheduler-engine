@@ -51,7 +51,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     private boolean threadInitiallyLocked = false;
     
     
-    public Scheduler(SpoolerC spoolerC, @Nullable SchedulerStateHandler schedulerStateHandler) {
+    @ForCpp public Scheduler(SpoolerC spoolerC, @Nullable SchedulerStateHandler schedulerStateHandler) {
         this.cppProxy = spoolerC;
         this.schedulerStateHandler = firstNonNull(schedulerStateHandler, SchedulerStateHandler.empty);
         spoolerC.setSister(this);
@@ -63,7 +63,6 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
             threadInitiallyLocked = true;
         }
     }
-
 
     // HasPlatform
 
@@ -81,7 +80,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     @Override public void onCppProxyInvalidated() {}
 
 
-    public void onClose() {
+    @ForCpp public void onClose() {
         try {
             if (eventSubsystem != null)
                 eventSubsystem.report(new SchedulerCloseEvent(this));
@@ -95,16 +94,13 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
                 threadInitiallyLocked = false;
             }
         }
-        
     }
     
-
-    public void onLoad(String configurationXml) {
+    @ForCpp public void onLoad(String configurationXml) {
         Element configElement = loadXml(configurationXml).getDocumentElement();
         addSubsystems(configElement);
         schedulerStateHandler.onSchedulerStarted(this);
     }
-
 
     private void addSubsystems(Element configElement) {
         logSubsystem = new LogSubsystem(new SchedulerLog(cppProxy));
@@ -130,7 +126,6 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         subsystems.add(commandSubsystem);
     }
 
-
     private static Iterable<CommandHandler> getCommandHandlers(Iterable<?> objects) {
         List<CommandHandler> result = new ArrayList<CommandHandler>();
         for (Object o: objects)
@@ -139,25 +134,21 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         return result;
     }
 
-    
-    public void onActivate() {
+    @ForCpp public void onActivate() {
         logSubsystem.activate();
         plugInSubsystem.activate();
         schedulerStateHandler.onSchedulerActivated();
     }
 
-
     public void terminate() {
         cppProxy.cmd_terminate();
     }
 
-
-    public void threadLock() {
+    @ForCpp public void threadLock() {
         CppProxy.threadLock.lock();
     }
 
-
-    public void threadUnlock() {
+    @ForCpp public void threadUnlock() {
         CppProxy.threadLock.unlock();
     }
 
@@ -166,7 +157,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     }
 
     /** Nur für C++, zur Ausführung eines Kommandos in Java */
-    public String javaExecuteXml(String xml) {
+    @ForCpp public String javaExecuteXml(String xml) {
         try {
             return commandSubsystem.executeXml(xml);
         } catch (UnknownCommandException x) {
@@ -177,7 +168,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
 
     public Object getSchedulerStateHandler() { return schedulerStateHandler; }
     public DatabaseSubsystem getDatabaseSubsystem() { return databaseSubsystem; }
-    public EventSubsystem getEventSubsystem() { return eventSubsystem; }
+    @ForCpp public EventSubsystem getEventSubsystem() { return eventSubsystem; }
     public JobSubsystem getJobSubsystem() { return jobSubsystem; }
     public OrderSubsystem getOrderSubsystem() { return orderSubsystem; }
 

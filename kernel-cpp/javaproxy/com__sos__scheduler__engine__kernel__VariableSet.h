@@ -47,10 +47,6 @@ struct VariableSet : ::zschimmer::javabridge::proxy_jobject< VariableSet >, ::ja
     }
   public:
 
-    ::javaproxy::java::lang::String get(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void onCppProxyInvalidated();
-    void put(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
-    ::javaproxy::java::lang::String tryGet(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

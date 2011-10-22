@@ -3,7 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.h"
-#include "com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -14,9 +13,6 @@ struct DatabaseSubsystem__class : ::zschimmer::javabridge::Class
     DatabaseSubsystem__class(const string& class_name);
    ~DatabaseSubsystem__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_DatabaseC_2__method;
-    ::zschimmer::javabridge::Method const _close____method;
-    ::zschimmer::javabridge::Static_method const _idForDatabase__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< DatabaseSubsystem__class > class_factory;
 };
@@ -25,23 +21,11 @@ const ::zschimmer::javabridge::class_factory< DatabaseSubsystem__class > Databas
 
 DatabaseSubsystem__class::DatabaseSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_DatabaseC_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/DatabaseC;)V")
-    ,_close____method(this, "close", "()V")
-    ,_idForDatabase__Ljava_lang_String_2__method(this, "idForDatabase", "(Ljava/lang/String;)Ljava/lang/String;"){}
+{}
 
 DatabaseSubsystem__class::~DatabaseSubsystem__class() {}
 
 
-
-DatabaseSubsystem DatabaseSubsystem::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::DatabaseC >& p0) {
-    DatabaseSubsystem result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    DatabaseSubsystem__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_DatabaseC_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 DatabaseSubsystem::DatabaseSubsystem(jobject jo) { if (jo) assign_(jo); }
@@ -56,21 +40,6 @@ DatabaseSubsystem::~DatabaseSubsystem() { assign_(NULL); }
 
 
 
-
-void DatabaseSubsystem::close() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    DatabaseSubsystem__class* cls = _class.get();
-    cls->_close____method.call(get_jobject(), parameter_list);
-}
-
-::javaproxy::java::lang::String DatabaseSubsystem::idForDatabase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    DatabaseSubsystem__class* cls = DatabaseSubsystem__class::class_factory.clas();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_idForDatabase__Ljava_lang_String_2__method.jobject_call(cls->get_jclass(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* DatabaseSubsystem::java_object_class_() { return _class.get(); }

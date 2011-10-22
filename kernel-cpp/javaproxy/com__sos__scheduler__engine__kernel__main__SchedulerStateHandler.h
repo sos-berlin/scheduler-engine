@@ -7,7 +7,6 @@
 
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Scheduler; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -47,8 +46,6 @@ struct SchedulerStateHandler : ::zschimmer::javabridge::proxy_jobject< Scheduler
     }
   public:
 
-    void onSchedulerActivated();
-    void onSchedulerStarted(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

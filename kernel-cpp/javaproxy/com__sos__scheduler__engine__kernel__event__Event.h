@@ -17,7 +17,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct Event__class;
 
 struct Event : ::zschimmer::javabridge::proxy_jobject< Event >, ::javaproxy::java::lang::Object {
-    static Event new_instance();
+  private:
+    static Event new_instance();  // Not implemented
+  public:
 
     Event(jobject = NULL);
 

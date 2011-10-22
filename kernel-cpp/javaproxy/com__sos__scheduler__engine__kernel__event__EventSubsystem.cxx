@@ -4,7 +4,6 @@
 
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
-#include "com__sos__scheduler__engine__kernel__Platform.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "java__lang__String.h"
 
@@ -15,9 +14,7 @@ struct EventSubsystem__class : ::zschimmer::javabridge::Class
     EventSubsystem__class(const string& class_name);
    ~EventSubsystem__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_Platform_2__method;
     ::zschimmer::javabridge::Method const _report__Lcom_sos_scheduler_engine_kernel_event_Event_2__method;
-    ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< EventSubsystem__class > class_factory;
 };
@@ -26,23 +23,11 @@ const ::zschimmer::javabridge::class_factory< EventSubsystem__class > EventSubsy
 
 EventSubsystem__class::EventSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_Platform_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/Platform;)V")
-    ,_report__Lcom_sos_scheduler_engine_kernel_event_Event_2__method(this, "report", "(Lcom/sos/scheduler/engine/kernel/event/Event;)V")
-    ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
+    ,_report__Lcom_sos_scheduler_engine_kernel_event_Event_2__method(this, "report", "(Lcom/sos/scheduler/engine/kernel/event/Event;)V"){}
 
 EventSubsystem__class::~EventSubsystem__class() {}
 
 
-
-EventSubsystem EventSubsystem::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Platform >& p0) {
-    EventSubsystem result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    EventSubsystem__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_Platform_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 EventSubsystem::EventSubsystem(jobject jo) { if (jo) assign_(jo); }
@@ -63,14 +48,6 @@ void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::java
     parameter_list._jvalues[0].l = p0.get_jobject();
     EventSubsystem__class* cls = _class.get();
     cls->_report__Lcom_sos_scheduler_engine_kernel_event_Event_2__method.call(get_jobject(), parameter_list);
-}
-
-::javaproxy::java::lang::String EventSubsystem::toString() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    EventSubsystem__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_toString____method.jobject_call(get_jobject(), parameter_list));
-    return result;
 }
 
 

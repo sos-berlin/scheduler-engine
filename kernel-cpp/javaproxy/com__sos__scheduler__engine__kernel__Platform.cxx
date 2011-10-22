@@ -3,8 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__Platform.h"
-#include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
-#include "com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -15,9 +13,6 @@ struct Platform__class : ::zschimmer::javabridge::Class
     Platform__class(const string& class_name);
    ~Platform__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_log_PrefixLog_2__method;
-    ::zschimmer::javabridge::Method const _log____method;
-    ::zschimmer::javabridge::Static_method const _of__Lcom_sos_scheduler_engine_cplusplus_runtime_Sister_2__method;
 
     static const ::zschimmer::javabridge::class_factory< Platform__class > class_factory;
 };
@@ -26,23 +21,11 @@ const ::zschimmer::javabridge::class_factory< Platform__class > Platform__class:
 
 Platform__class::Platform__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_log_PrefixLog_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/log/PrefixLog;)V")
-    ,_log____method(this, "log", "()Lcom/sos/scheduler/engine/kernel/log/PrefixLog;")
-    ,_of__Lcom_sos_scheduler_engine_cplusplus_runtime_Sister_2__method(this, "of", "(Lcom/sos/scheduler/engine/cplusplus/runtime/Sister;)Lcom/sos/scheduler/engine/kernel/Platform;"){}
+{}
 
 Platform__class::~Platform__class() {}
 
 
-
-Platform Platform::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog >& p0) {
-    Platform result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    Platform__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_log_PrefixLog_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 Platform::Platform(jobject jo) { if (jo) assign_(jo); }
@@ -57,23 +40,6 @@ Platform::~Platform() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog Platform::log() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Platform__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog result;
-    result.steal_local_ref(cls->_log____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::com::sos::scheduler::engine::kernel::Platform Platform::of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::cplusplus::runtime::Sister >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    Platform__class* cls = Platform__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::kernel::Platform result;
-    result.steal_local_ref(cls->_of__Lcom_sos_scheduler_engine_cplusplus_runtime_Sister_2__method.jobject_call(cls->get_jclass(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* Platform::java_object_class_() { return _class.get(); }

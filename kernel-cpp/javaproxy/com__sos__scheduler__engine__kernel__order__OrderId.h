@@ -18,7 +18,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct OrderId__class;
 
 struct OrderId : ::zschimmer::javabridge::proxy_jobject< OrderId >, ::javaproxy::com::sos::scheduler::engine::kernel::util::StringValue {
-    static OrderId new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
+  private:
+    static OrderId new_instance();  // Not implemented
+  public:
 
     OrderId(jobject = NULL);
 

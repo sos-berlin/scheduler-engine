@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 @ForCpp
 public class ErrorLogEvent extends LogEvent {
-    public ErrorLogEvent(String message) {
+    @ForCpp public ErrorLogEvent(String message) {
         super(message);
     }
 }

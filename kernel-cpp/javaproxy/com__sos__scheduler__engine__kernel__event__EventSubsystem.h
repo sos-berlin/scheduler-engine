@@ -10,7 +10,6 @@
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct Event; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct AbstractHasPlatform; }}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Platform; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -20,7 +19,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct EventSubsystem__class;
 
 struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >, ::javaproxy::com::sos::scheduler::engine::kernel::AbstractHasPlatform {
-    static EventSubsystem new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Platform >& p0);
+  private:
+    static EventSubsystem new_instance();  // Not implemented
+  public:
 
     EventSubsystem(jobject = NULL);
 
@@ -48,7 +49,6 @@ struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >
   public:
 
     void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::event::Event >& p0);
-    ::javaproxy::java::lang::String toString();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

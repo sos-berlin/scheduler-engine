@@ -14,7 +14,6 @@ struct OrderState__class : ::zschimmer::javabridge::Class
    ~OrderState__class();
 
     ::zschimmer::javabridge::Method const __constructor__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Static_method const _of__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< OrderState__class > class_factory;
 };
@@ -23,8 +22,7 @@ const ::zschimmer::javabridge::class_factory< OrderState__class > OrderState__cl
 
 OrderState__class::OrderState__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Ljava_lang_String_2__method(this, "<init>", "(Ljava/lang/String;)V")
-    ,_of__Ljava_lang_String_2__method(this, "of", "(Ljava/lang/String;)Lcom/sos/scheduler/engine/kernel/order/OrderState;"){}
+    ,__constructor__Ljava_lang_String_2__method(this, "<init>", "(Ljava/lang/String;)V"){}
 
 OrderState__class::~OrderState__class() {}
 
@@ -53,15 +51,6 @@ OrderState::~OrderState() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderState::of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    OrderState__class* cls = OrderState__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState result;
-    result.steal_local_ref(cls->_of__Ljava_lang_String_2__method.jobject_call(cls->get_jclass(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* OrderState::java_object_class_() { return _class.get(); }

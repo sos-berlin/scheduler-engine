@@ -11,10 +11,7 @@
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderId; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderState; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct VariableSet; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -53,15 +50,6 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getEndState();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId getId();
-    ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet getParameters();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getState();
-    ::javaproxy::java::lang::String getTitle();
-    void onCppProxyInvalidated();
-    void setEndState(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p0);
-    ::javaproxy::java::lang::String toString();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder unmodifiableDelegate();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

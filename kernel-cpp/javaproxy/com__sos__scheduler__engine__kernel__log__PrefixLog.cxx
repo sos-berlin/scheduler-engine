@@ -3,7 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__log__PrefixLog.h"
-#include "com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -14,12 +13,6 @@ struct PrefixLog__class : ::zschimmer::javabridge::Class
     PrefixLog__class(const string& class_name);
    ~PrefixLog__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_Prefix_1logC_2__method;
-    ::zschimmer::javabridge::Method const _debug__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _debug3__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _error__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _info__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _warn__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< PrefixLog__class > class_factory;
 };
@@ -28,26 +21,11 @@ const ::zschimmer::javabridge::class_factory< PrefixLog__class > PrefixLog__clas
 
 PrefixLog__class::PrefixLog__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_Prefix_1logC_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;)V")
-    ,_debug__Ljava_lang_String_2__method(this, "debug", "(Ljava/lang/String;)V")
-    ,_debug3__Ljava_lang_String_2__method(this, "debug3", "(Ljava/lang/String;)V")
-    ,_error__Ljava_lang_String_2__method(this, "error", "(Ljava/lang/String;)V")
-    ,_info__Ljava_lang_String_2__method(this, "info", "(Ljava/lang/String;)V")
-    ,_warn__Ljava_lang_String_2__method(this, "warn", "(Ljava/lang/String;)V"){}
+{}
 
 PrefixLog__class::~PrefixLog__class() {}
 
 
-
-PrefixLog PrefixLog::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Prefix_logC >& p0) {
-    PrefixLog result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    PrefixLog__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_Prefix_1logC_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 PrefixLog::PrefixLog(jobject jo) { if (jo) assign_(jo); }
@@ -62,41 +40,6 @@ PrefixLog::~PrefixLog() { assign_(NULL); }
 
 
 
-
-void PrefixLog::debug(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    PrefixLog__class* cls = _class.get();
-    cls->_debug__Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
-}
-
-void PrefixLog::debug3(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    PrefixLog__class* cls = _class.get();
-    cls->_debug3__Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
-}
-
-void PrefixLog::error(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    PrefixLog__class* cls = _class.get();
-    cls->_error__Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
-}
-
-void PrefixLog::info(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    PrefixLog__class* cls = _class.get();
-    cls->_info__Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
-}
-
-void PrefixLog::warn(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    PrefixLog__class* cls = _class.get();
-    cls->_warn__Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
-}
 
 
 ::zschimmer::javabridge::Class* PrefixLog::java_object_class_() { return _class.get(); }

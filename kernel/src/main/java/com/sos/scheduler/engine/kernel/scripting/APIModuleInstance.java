@@ -57,7 +57,7 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	List<String> optionalMethods = Arrays.asList(SCHEDULER_INIT, SCHEDULER_OPEN,
 			SCHEDULER_CLOSE, SCHEDULER_ON_SUCCESS, SCHEDULER_EXIT, SCHEDULER_ON_ERROR);
 
-	public APIModuleInstance(String scriptlanguage, String sourcecode) {
+	@ForCpp public APIModuleInstance(String scriptlanguage, String sourcecode) {
 		super(getScriptLanguage(scriptlanguage));
 	
 		JobSchedulerLog4JAppender bapn = null;
@@ -90,6 +90,7 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	}
 	
 	@Override
+    @ForCpp
 	public void addObject(Object object, String name) {
 		if (object instanceof Log) {
 			Log log = (Log) object;		// log object of the scheduler-task
@@ -121,6 +122,7 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	 * @param functionname
 	 */
 	@Override
+    @ForCpp
 	public Object call(String rawfunctionname, Object[] params) {
 		Object result = null;
 		ScriptFunction fobj = new ScriptFunction(rawfunctionname);
@@ -142,6 +144,7 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	}
 
 	@Override
+    @ForCpp
 	public Object call(String rawfunctionname) {
 		return call(rawfunctionname, new Object[] {});
 	}
@@ -154,7 +157,8 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	 * @return true
 	 */
 	@Override
-	public boolean nameExists(String name) {
+	@ForCpp
+    public boolean nameExists(String name) {
 		return true;
 	}
 

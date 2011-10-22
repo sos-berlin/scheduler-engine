@@ -14,8 +14,6 @@ struct OrderStepEndedEvent__class : ::zschimmer::javabridge::Class
    ~OrderStepEndedEvent__class();
 
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Z__method;
-    ::zschimmer::javabridge::Method const _getOk____method;
-    ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< OrderStepEndedEvent__class > class_factory;
 };
@@ -24,9 +22,7 @@ const ::zschimmer::javabridge::class_factory< OrderStepEndedEvent__class > Order
 
 OrderStepEndedEvent__class::OrderStepEndedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Z__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;Z)V")
-    ,_getOk____method(this, "getOk", "()Z")
-    ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
+    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Z__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;Z)V"){}
 
 OrderStepEndedEvent__class::~OrderStepEndedEvent__class() {}
 
@@ -56,20 +52,6 @@ OrderStepEndedEvent::~OrderStepEndedEvent() { assign_(NULL); }
 
 
 
-
-bool OrderStepEndedEvent::getOk() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderStepEndedEvent__class* cls = _class.get();
-    return 0 != cls->_getOk____method.bool_call(get_jobject(), parameter_list);
-}
-
-::javaproxy::java::lang::String OrderStepEndedEvent::toString() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderStepEndedEvent__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_toString____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* OrderStepEndedEvent::java_object_class_() { return _class.get(); }

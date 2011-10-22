@@ -3,7 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__main__SchedulerStateHandler.h"
-#include "com__sos__scheduler__engine__kernel__Scheduler.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -14,8 +13,6 @@ struct SchedulerStateHandler__class : ::zschimmer::javabridge::Class
     SchedulerStateHandler__class(const string& class_name);
    ~SchedulerStateHandler__class();
 
-    ::zschimmer::javabridge::Method const _onSchedulerActivated____method;
-    ::zschimmer::javabridge::Method const _onSchedulerStarted__Lcom_sos_scheduler_engine_kernel_Scheduler_2__method;
 
     static const ::zschimmer::javabridge::class_factory< SchedulerStateHandler__class > class_factory;
 };
@@ -24,8 +21,7 @@ const ::zschimmer::javabridge::class_factory< SchedulerStateHandler__class > Sch
 
 SchedulerStateHandler__class::SchedulerStateHandler__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_onSchedulerActivated____method(this, "onSchedulerActivated", "()V")
-    ,_onSchedulerStarted__Lcom_sos_scheduler_engine_kernel_Scheduler_2__method(this, "onSchedulerStarted", "(Lcom/sos/scheduler/engine/kernel/Scheduler;)V"){}
+{}
 
 SchedulerStateHandler__class::~SchedulerStateHandler__class() {}
 
@@ -44,19 +40,6 @@ SchedulerStateHandler::~SchedulerStateHandler() { assign_(NULL); }
 
 
 
-
-void SchedulerStateHandler::onSchedulerActivated() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    SchedulerStateHandler__class* cls = _class.get();
-    cls->_onSchedulerActivated____method.call(get_jobject(), parameter_list);
-}
-
-void SchedulerStateHandler::onSchedulerStarted(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    SchedulerStateHandler__class* cls = _class.get();
-    cls->_onSchedulerStarted__Lcom_sos_scheduler_engine_kernel_Scheduler_2__method.call(get_jobject(), parameter_list);
-}
 
 
 ::zschimmer::javabridge::Class* SchedulerStateHandler::java_object_class_() { return _class.get(); }

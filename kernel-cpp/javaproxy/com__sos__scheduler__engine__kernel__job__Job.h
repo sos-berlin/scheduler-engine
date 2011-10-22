@@ -48,9 +48,6 @@ struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::so
     }
   public:
 
-    ::javaproxy::java::lang::String getName();
-    ::javaproxy::java::lang::String getPath();
-    void onCppProxyInvalidated();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

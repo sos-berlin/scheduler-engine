@@ -3,8 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
-#include "com__sos__scheduler__engine__kernel__order__OrderId.h"
-#include "com__sos__scheduler__engine__kernel__order__OrderState.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -15,10 +13,6 @@ struct UnmodifiableOrder__class : ::zschimmer::javabridge::Class
     UnmodifiableOrder__class(const string& class_name);
    ~UnmodifiableOrder__class();
 
-    ::zschimmer::javabridge::Method const _getEndState____method;
-    ::zschimmer::javabridge::Method const _getId____method;
-    ::zschimmer::javabridge::Method const _getState____method;
-    ::zschimmer::javabridge::Method const _getTitle____method;
 
     static const ::zschimmer::javabridge::class_factory< UnmodifiableOrder__class > class_factory;
 };
@@ -27,10 +21,7 @@ const ::zschimmer::javabridge::class_factory< UnmodifiableOrder__class > Unmodif
 
 UnmodifiableOrder__class::UnmodifiableOrder__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_getEndState____method(this, "getEndState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
-    ,_getId____method(this, "getId", "()Lcom/sos/scheduler/engine/kernel/order/OrderId;")
-    ,_getState____method(this, "getState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
-    ,_getTitle____method(this, "getTitle", "()Ljava/lang/String;"){}
+{}
 
 UnmodifiableOrder__class::~UnmodifiableOrder__class() {}
 
@@ -49,38 +40,6 @@ UnmodifiableOrder::~UnmodifiableOrder() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState UnmodifiableOrder::getEndState() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    UnmodifiableOrder__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState result;
-    result.steal_local_ref(cls->_getEndState____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId UnmodifiableOrder::getId() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    UnmodifiableOrder__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId result;
-    result.steal_local_ref(cls->_getId____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState UnmodifiableOrder::getState() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    UnmodifiableOrder__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState result;
-    result.steal_local_ref(cls->_getState____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::java::lang::String UnmodifiableOrder::getTitle() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    UnmodifiableOrder__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_getTitle____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* UnmodifiableOrder::java_object_class_() { return _class.get(); }

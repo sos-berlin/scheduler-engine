@@ -50,8 +50,6 @@ struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderSta
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getPreviousState();
-    ::javaproxy::java::lang::String toString();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

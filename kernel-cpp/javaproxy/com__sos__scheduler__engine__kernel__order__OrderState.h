@@ -45,7 +45,6 @@ struct OrderState : ::zschimmer::javabridge::proxy_jobject< OrderState >, ::java
     }
   public:
 
-    static ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

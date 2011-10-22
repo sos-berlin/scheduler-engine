@@ -7,8 +7,6 @@
 
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderId; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderState; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -48,10 +46,6 @@ struct UnmodifiableOrder : ::zschimmer::javabridge::proxy_jobject< UnmodifiableO
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getEndState();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId getId();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getState();
-    ::javaproxy::java::lang::String getTitle();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

@@ -7,7 +7,6 @@
 
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct DatabaseC; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -18,7 +17,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct DatabaseSubsystem__class;
 
 struct DatabaseSubsystem : ::zschimmer::javabridge::proxy_jobject< DatabaseSubsystem >, ::javaproxy::java::lang::Object {
-    static DatabaseSubsystem new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::DatabaseC >& p0);
+  private:
+    static DatabaseSubsystem new_instance();  // Not implemented
+  public:
 
     DatabaseSubsystem(jobject = NULL);
 
@@ -45,8 +46,6 @@ struct DatabaseSubsystem : ::zschimmer::javabridge::proxy_jobject< DatabaseSubsy
     }
   public:
 
-    void close();
-    static ::javaproxy::java::lang::String idForDatabase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

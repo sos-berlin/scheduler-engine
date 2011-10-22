@@ -48,7 +48,6 @@ struct APIModuleInstance : ::zschimmer::javabridge::proxy_jobject< APIModuleInst
 
     void addObject(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
     ::javaproxy::java::lang::Object call(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    ::javaproxy::java::lang::String getSchedulerLanguageId();
     bool nameExists(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();

@@ -9,11 +9,8 @@
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct SpoolerC; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace database { struct DatabaseSubsystem; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct EventSubsystem; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace log { struct PrefixLog; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace main { struct SchedulerStateHandler; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Platform; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -51,26 +48,11 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     }
   public:
 
-    void callCppAndDoNothing();
-    ::javaproxy::java::lang::String executeXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    ::javaproxy::java::lang::String getClusterMemberId();
-    ::javaproxy::com::sos::scheduler::engine::kernel::database::DatabaseSubsystem getDatabaseSubsystem();
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem();
-    ::javaproxy::java::lang::String getHostname();
-    ::javaproxy::java::lang::String getHostnameLong();
-    ::javaproxy::java::lang::String getHttpUrl();
-    ::javaproxy::com::sos::scheduler::engine::kernel::Platform getPlatform();
-    ::javaproxy::java::lang::String getSchedulerId();
-    ::javaproxy::java::lang::Object getSchedulerStateHandler();
-    jint getTcpPort();
-    ::javaproxy::java::lang::String getVersion();
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog log();
     void onActivate();
     void onClose();
-    void onCppProxyInvalidated();
     void onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void terminate();
     void threadLock();
     void threadUnlock();
 

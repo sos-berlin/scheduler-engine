@@ -13,7 +13,6 @@ struct Event__class : ::zschimmer::javabridge::Class
     Event__class(const string& class_name);
    ~Event__class();
 
-    ::zschimmer::javabridge::Method const __constructor____method;
 
     static const ::zschimmer::javabridge::class_factory< Event__class > class_factory;
 };
@@ -22,20 +21,11 @@ const ::zschimmer::javabridge::class_factory< Event__class > Event__class::class
 
 Event__class::Event__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor____method(this, "<init>", "()V"){}
+{}
 
 Event__class::~Event__class() {}
 
 
-
-Event Event::new_instance() {
-    Event result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Event__class* cls = result._class.get();
-    cls->__constructor____method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 Event::Event(jobject jo) { if (jo) assign_(jo); }

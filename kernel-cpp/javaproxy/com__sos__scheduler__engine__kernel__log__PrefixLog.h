@@ -7,7 +7,6 @@
 
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Prefix_logC; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -18,7 +17,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct PrefixLog__class;
 
 struct PrefixLog : ::zschimmer::javabridge::proxy_jobject< PrefixLog >, ::javaproxy::java::lang::Object {
-    static PrefixLog new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Prefix_logC >& p0);
+  private:
+    static PrefixLog new_instance();  // Not implemented
+  public:
 
     PrefixLog(jobject = NULL);
 
@@ -45,11 +46,6 @@ struct PrefixLog : ::zschimmer::javabridge::proxy_jobject< PrefixLog >, ::javapr
     }
   public:
 
-    void debug(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void debug3(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void error(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void info(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void warn(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

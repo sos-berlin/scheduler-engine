@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 @ForCpp
 public class OrderState extends StringValue {
-    public OrderState(String a) {
+    @ForCpp public OrderState(String a) {
         super(a);
     }
     

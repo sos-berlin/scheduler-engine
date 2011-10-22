@@ -13,7 +13,6 @@ struct OrderId__class : ::zschimmer::javabridge::Class
     OrderId__class(const string& class_name);
    ~OrderId__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< OrderId__class > class_factory;
 };
@@ -22,21 +21,11 @@ const ::zschimmer::javabridge::class_factory< OrderId__class > OrderId__class::c
 
 OrderId__class::OrderId__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Ljava_lang_String_2__method(this, "<init>", "(Ljava/lang/String;)V"){}
+{}
 
 OrderId__class::~OrderId__class() {}
 
 
-
-OrderId OrderId::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    OrderId result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    OrderId__class* cls = result._class.get();
-    cls->__constructor__Ljava_lang_String_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 OrderId::OrderId(jobject jo) { if (jo) assign_(jo); }

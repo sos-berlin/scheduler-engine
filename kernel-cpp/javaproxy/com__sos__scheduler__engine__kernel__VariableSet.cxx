@@ -14,10 +14,6 @@ struct VariableSet__class : ::zschimmer::javabridge::Class
     VariableSet__class(const string& class_name);
    ~VariableSet__class();
 
-    ::zschimmer::javabridge::Method const _get__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _onCppProxyInvalidated____method;
-    ::zschimmer::javabridge::Method const _put__Ljava_lang_String_2Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _tryGet__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< VariableSet__class > class_factory;
 };
@@ -26,10 +22,7 @@ const ::zschimmer::javabridge::class_factory< VariableSet__class > VariableSet__
 
 VariableSet__class::VariableSet__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_get__Ljava_lang_String_2__method(this, "get", "(Ljava/lang/String;)Ljava/lang/String;")
-    ,_onCppProxyInvalidated____method(this, "onCppProxyInvalidated", "()V")
-    ,_put__Ljava_lang_String_2Ljava_lang_String_2__method(this, "put", "(Ljava/lang/String;Ljava/lang/String;)V")
-    ,_tryGet__Ljava_lang_String_2__method(this, "tryGet", "(Ljava/lang/String;)Ljava/lang/String;"){}
+{}
 
 VariableSet__class::~VariableSet__class() {}
 
@@ -48,38 +41,6 @@ VariableSet::~VariableSet() { assign_(NULL); }
 
 
 
-
-::javaproxy::java::lang::String VariableSet::get(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    VariableSet__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_get__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-void VariableSet::onCppProxyInvalidated() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    VariableSet__class* cls = _class.get();
-    cls->_onCppProxyInvalidated____method.call(get_jobject(), parameter_list);
-}
-
-void VariableSet::put(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) {
-    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    parameter_list._jvalues[1].l = p1.get_jobject();
-    VariableSet__class* cls = _class.get();
-    cls->_put__Ljava_lang_String_2Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
-}
-
-::javaproxy::java::lang::String VariableSet::tryGet(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    VariableSet__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_tryGet__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* VariableSet::java_object_class_() { return _class.get(); }

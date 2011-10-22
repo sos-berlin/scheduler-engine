@@ -17,7 +17,6 @@ struct APIModuleInstance__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const __constructor__Ljava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _addObject__Ljava_lang_Object_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _call__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _getSchedulerLanguageId____method;
     ::zschimmer::javabridge::Method const _nameExists__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< APIModuleInstance__class > class_factory;
@@ -30,7 +29,6 @@ APIModuleInstance__class::APIModuleInstance__class(const string& class_name) :
     ,__constructor__Ljava_lang_String_2Ljava_lang_String_2__method(this, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V")
     ,_addObject__Ljava_lang_Object_2Ljava_lang_String_2__method(this, "addObject", "(Ljava/lang/Object;Ljava/lang/String;)V")
     ,_call__Ljava_lang_String_2__method(this, "call", "(Ljava/lang/String;)Ljava/lang/Object;")
-    ,_getSchedulerLanguageId____method(this, "getSchedulerLanguageId", "()Ljava/lang/String;")
     ,_nameExists__Ljava_lang_String_2__method(this, "nameExists", "(Ljava/lang/String;)Z"){}
 
 APIModuleInstance__class::~APIModuleInstance__class() {}
@@ -76,14 +74,6 @@ void APIModuleInstance::addObject(const ::zschimmer::javabridge::proxy_jobject< 
     APIModuleInstance__class* cls = _class.get();
     ::javaproxy::java::lang::Object result;
     result.steal_local_ref(cls->_call__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::java::lang::String APIModuleInstance::getSchedulerLanguageId() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    APIModuleInstance__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_getSchedulerLanguageId____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

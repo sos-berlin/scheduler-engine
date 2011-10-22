@@ -14,9 +14,6 @@ struct Job__class : ::zschimmer::javabridge::Class
     Job__class(const string& class_name);
    ~Job__class();
 
-    ::zschimmer::javabridge::Method const _getName____method;
-    ::zschimmer::javabridge::Method const _getPath____method;
-    ::zschimmer::javabridge::Method const _onCppProxyInvalidated____method;
 
     static const ::zschimmer::javabridge::class_factory< Job__class > class_factory;
 };
@@ -25,9 +22,7 @@ const ::zschimmer::javabridge::class_factory< Job__class > Job__class::class_fac
 
 Job__class::Job__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_getName____method(this, "getName", "()Ljava/lang/String;")
-    ,_getPath____method(this, "getPath", "()Ljava/lang/String;")
-    ,_onCppProxyInvalidated____method(this, "onCppProxyInvalidated", "()V"){}
+{}
 
 Job__class::~Job__class() {}
 
@@ -46,28 +41,6 @@ Job::~Job() { assign_(NULL); }
 
 
 
-
-::javaproxy::java::lang::String Job::getName() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Job__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_getName____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::java::lang::String Job::getPath() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Job__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_getPath____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-void Job::onCppProxyInvalidated() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Job__class* cls = _class.get();
-    cls->_onCppProxyInvalidated____method.call(get_jobject(), parameter_list);
-}
 
 
 ::zschimmer::javabridge::Class* Job::java_object_class_() { return _class.get(); }

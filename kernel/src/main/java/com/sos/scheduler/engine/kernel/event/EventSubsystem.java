@@ -20,7 +20,7 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     }
 
 
-    public final void report(Event e) {
+    @ForCpp public final void report(Event e) {
         reportEventNesting++;   // Kann Rekursiv aufgerufen werden.
         try {
             publishEvent(e);

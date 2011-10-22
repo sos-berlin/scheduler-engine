@@ -49,8 +49,6 @@ struct OrderStepEndedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStepEn
     }
   public:
 
-    bool getOk();
-    ::javaproxy::java::lang::String toString();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 
