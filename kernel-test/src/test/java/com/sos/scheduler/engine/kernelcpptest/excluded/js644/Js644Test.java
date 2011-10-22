@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.transform;
 import static com.sos.scheduler.engine.kernel.util.Util.sleepUntilInterrupted;
+import static java.lang.Math.random;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.fail;
 
@@ -29,11 +30,10 @@ import com.sos.scheduler.engine.kernel.util.Time;
 public final class Js644Test extends SchedulerTest {
     @ClassRule public static final TestRule slowTestRule = SlowTestRule.singleton;
     private static final Logger logger = Logger.getLogger(Js644Test.class);
-    static final List<String> jobPaths = asList("a", "b", "c");
+    private static final List<String> jobPaths = asList("a", "b", "c");
     private static final Time orderTimeout = Time.of(10);
 
     private final BlockingQueue<Boolean> eventReceivedQueue = new ArrayBlockingQueue<Boolean>(1);
-
 
     @Test public void test() throws InterruptedException {
         controller().strictSubscribeEvents(new MyEventSubscriber());
@@ -97,9 +97,9 @@ public final class Js644Test extends SchedulerTest {
         }
 
         @Override public void run() {
-            int pause = 4000 / filesModifier.fileCount() + 1;   // Mindestens 2s Pause, damit Scheduler Datei als stabil ansieht.
             while(true) {
                 filesModifier.modifyNext();
+                int pause = 1 + (int)(4000*random()) / filesModifier.fileCount();   // Nach 2s Pause sieht der Scheduler eine Dateiänderung als stabil an
                 boolean interrupted = sleepUntilInterrupted(pause);
                 if (interrupted) break;
             }

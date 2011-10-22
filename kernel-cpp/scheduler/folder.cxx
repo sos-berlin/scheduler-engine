@@ -2160,7 +2160,7 @@ void File_based::set_name( const string& name )
     {
         if( _name_is_fixed )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geändert werden, außer Großschreibung
         _name = name;
-        log()->set_prefix( obj_name() );    // Noch ohne Pfad
+        log()->set_prefix(obj_name() + "*");    // Provisorisch, noch ohne Pfad
 
         if( !has_base_file() )
         {
@@ -2355,6 +2355,7 @@ void Dependant::remove_requisites()
 
 void Dependant::add_requisite( const Requisite_path& r )
 {
+    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " '" << r.obj_name() << "'\n");
     _requisite_sets[ r._subsystem ].insert( r._subsystem->normalized_path( r._path ) );
     r._subsystem->dependencies()->add_requisite( this, r._path );
 }
@@ -2363,6 +2364,7 @@ void Dependant::add_requisite( const Requisite_path& r )
 
 void Dependant::remove_requisite( const Requisite_path& r )
 {
+    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " '" << r.obj_name() << "'\n");
     _requisite_sets[ r._subsystem ].erase( r._subsystem->normalized_path( r._path ) );
     r._subsystem->dependencies()->remove_requisite( this, r._path );
 }
@@ -2512,6 +2514,7 @@ Dependencies::~Dependencies()
 
 void Dependencies::add_requisite( Dependant* dependant, const string& missings_path )
 {
+    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << dependant->obj_name() << " '" << missings_path << "'\n");
     _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( dependant );
 }
 
@@ -2519,6 +2522,7 @@ void Dependencies::add_requisite( Dependant* dependant, const string& missings_p
 
 void Dependencies::remove_requisite( Dependant* dependant, const string& missings_path )
 {
+    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " '" << missings_path << "'\n");
     Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
     
     requestors_set.erase( dependant );
@@ -2529,22 +2533,19 @@ void Dependencies::remove_requisite( Dependant* dependant, const string& missing
 
 void Dependencies::announce_requisite_loaded( File_based* found_missing )
 {
-    Z_LOG2("JS-644", Z_FUNCTION << " " << found_missing->obj_name() << "\n");
+    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << found_missing->obj_name() << "\n");
     assert( found_missing->subsystem() == _subsystem );
 
     Path_requestors_map::iterator it = _path_requestors_map.find( found_missing->normalized_path() );
 
-    if( it != _path_requestors_map.end() )
-    {
+    if( it != _path_requestors_map.end() ) {
         Requestor_set& requestor_set = it->second;
 
-        Z_FOR_EACH( Requestor_set, requestor_set, it2 )
-        {
+        Z_FOR_EACH( Requestor_set, requestor_set, it2 ) {
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Dependant*              dependant = *it2;
         
-            try
-            {
+            try {
                 Z_LOG2("JS-644", Z_FUNCTION << " " << dependant->obj_name() << "->on_requisite_loaded()\n");
                 dependant->on_requisite_loaded( found_missing );
             }
@@ -2563,21 +2564,20 @@ void Dependencies::announce_requisite_loaded( File_based* found_missing )
 bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
 {
     assert( to_be_removed->subsystem() == _subsystem );
+    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << to_be_removed->obj_name() << "\n");
 
     bool result = true;
 
     Path_requestors_map::iterator it = _path_requestors_map.find( to_be_removed->normalized_path() );
 
-    if( it != _path_requestors_map.end() )
-    {
+    if( it != _path_requestors_map.end() ) {
         Requestor_set& requestor_set = it->second;
 
-        Z_FOR_EACH( Requestor_set, requestor_set, it2 )
-        {
+        Z_FOR_EACH( Requestor_set, requestor_set, it2 ) {
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Dependant*              dependant = *it2;
         
-            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << dependant->obj_name() << " on_requisite_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
+            Z_DEBUG_ONLY(Z_LOG2("JS-644", Z_FUNCTION << " " << dependant->obj_name() << "->on_requisite_to_be_removed( " << to_be_removed->obj_name() << " )\n" ));
             result = dependant->on_requisite_to_be_removed( to_be_removed );
             if( !result )  break;
         }
@@ -2603,10 +2603,16 @@ void Dependencies::announce_requisite_removed( File_based* to_be_removed )
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Dependant*              dependant = *it2;
         
-            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << dependant->obj_name() << " on_requisite_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
+            Z_DEBUG_ONLY(Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << dependant->obj_name() << " on_requisite_to_be_removed( " << to_be_removed->obj_name() << " )\n"));
             dependant->on_requisite_removed( to_be_removed );
         }
     }
+}
+
+//---------------------------------------------------------------------------Dependencies::obj_name
+
+string Dependencies::obj_name() const {
+    return S() << "Dependencies(" << _subsystem->obj_name() << ")";
 }
 
 //-------------------------------------------------------------------Base_file_info::Base_file_info

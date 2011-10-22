@@ -21,7 +21,7 @@ const int    database_orders_read_ahead_count           = 1;
 //--------------------------------------------------------------------------------------------const
 
 // Datenbank-Feld distributed_next_time
-const string now_database_distributed_next_time         = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausf�hrbar
+const string now_database_distributed_next_time         = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
 const string never_database_distributed_next_time       = "3111-11-11 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
 const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";        // Auftrag ist auf der schwarzen Liste
 const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
@@ -281,8 +281,8 @@ bool Database_order_detector::async_continue_( Continue_flags )
     
     bool database_can_limit_union_selects = db()->dbms_kind() == dbms_oracle  ||  
                                             db()->dbms_kind() == dbms_oracle_thin;
-    // PostgresQL: Union kann nicht Selects mit einzelnen Limits verkn�pfen, das Limit gilt f�rs ganze Ergebnis,
-    // und die einzelnen Selects k�nnen nicht geordnet werden (wodurch die Limits erst Sinn machen)
+    // PostgresQL: Union kann nicht Selects mit einzelnen Limits verknüpfen, das Limit gilt fürs ganze Ergebnis,
+    // und die einzelnen Selects können nicht geordnet werden (wodurch die Limits erst Sinn machen)
 
     for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
@@ -419,7 +419,7 @@ void Database_order_detector::set_alarm()
 
 void Database_order_detector::request_order()
 
-// Nur einmal f�r einen Job rufen, solange der Job keinen neuen Auftrag bekommen hast! Order_queue::request_order() k�mmert sich darum.
+// Nur einmal für einen Job rufen, solange der Job keinen neuen Auftrag bekommen hast! Order_queue::request_order() kümmert sich darum.
 
 {
     set_alarm();
@@ -494,7 +494,7 @@ bool Order_subsystem_impl::subsystem_load()
 
 bool Order_subsystem_impl::subsystem_activate()
 {
-    _subsystem_state = subsys_active;  // Jetzt schon aktiv f�r die auszuf�hrenden Skript-Funktionen <run_time start_time_function="">
+    _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen <run_time start_time_function="">
 
     file_based_subsystem<Job_chain>::subsystem_activate();
 
@@ -578,7 +578,7 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
 
                 order->schedule_use()->append_calendar_dom_elements( element, options );
             }
-            catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gel�scht worden sein
+            catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
         }
     }
 }
@@ -673,7 +673,7 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
             }
             catch( exception& ) 
             { 
-                result = NULL;  // Jemand hat wohl den Auftrag gel�scht
+                result = NULL;  // Jemand hat wohl den Auftrag gelöscht
             }      
         }
     }
@@ -1030,7 +1030,7 @@ Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )
     
 void Node::close()
 {
-    // Zirkel aufl�sen:
+    // Zirkel auflösen:
     _job_chain  = NULL;
     _next_node  = NULL;
     _error_node = NULL;
@@ -1137,7 +1137,7 @@ void Node::set_next_state( const Order::State& next_state )
     _next_state = normalized_state( next_state );
 
     // Bis initialize() bleibt nicht angegebener Zustand als VT_ERROR/is_missing() (fehlender Parameter) stehen.
-    // initialize() unterscheidet dann die nicht angegebenen Zust�nde von VT_ERROR und setzt Defaults oder VT_EMPTY (au�er <file_order_sink>)
+    // initialize() unterscheidet dann die nicht angegebenen Zustände von VT_ERROR und setzt Defaults oder VT_EMPTY (außer <file_order_sink>)
 }
 
 //----------------------------------------------------------------------------Node::set_error_state
@@ -1148,7 +1148,7 @@ void Node::set_error_state( const Order::State& error_state )
     _error_state = normalized_state( error_state );
 
     // Bis initialize() bleibt nicht angegebener Zustand als VT_ERROR/is_missing() (fehlender Parameter) stehen.
-    // initialize() unterscheidet dann die nicht angegebenen Zust�nde von VT_ERROR und setzt Defaults oder VT_EMPTY (au�er <file_order_sink>)
+    // initialize() unterscheidet dann die nicht angegebenen Zustände von VT_ERROR und setzt Defaults oder VT_EMPTY (außer <file_order_sink>)
 }
 
 //---------------------------------------------------------------------------------Node::set_action
@@ -1485,7 +1485,7 @@ void Job_node::activate()
             catch( exception& x )
             {
                 log()->error( x.what() );
-                // Exception f�r <show_state> aufheben? (Node ist fast sowas wie File_based)
+                // Exception für <show_state> aufheben? (Node ist fast sowas wie File_based)
             }
         }
     }
@@ -1504,7 +1504,7 @@ void Job_node::connect_job( Job* job )
         bool ok = job->connect_job_node( this );
         if( ok )
         {
-            job->set_job_chain_priority( _node_index + 1 );   // Weiter hinten stehende Jobs werden vorrangig ausgef�hrt
+            job->set_job_chain_priority( _node_index + 1 );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
             _job = job;
         }
     }
@@ -1566,8 +1566,10 @@ void Job_node::set_action( const string& action_string )
 void Order_queue_node::wake_orders()
 {
     if( Order* order = _order_queue->first_processable_order() ) {
+        Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << order->obj_name() << "\n");
         order->handle_changed_processable_state();
-    }
+    } else
+        Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " (no processable order)\n");
 }
 
 //----------------------------------------------------------------------------Job_node::dom_element
@@ -1605,7 +1607,7 @@ Job* Job_node::job() const
     assert( _job == spooler()->job_subsystem()->job_or_null( _job_path ) );
 
     return _job? _job
-               : spooler()->job_subsystem()->job( _job_path );      // L�st Exception aus
+               : spooler()->job_subsystem()->job( _job_path );      // Löst Exception aus
 }
 
 //----------------------------------------------------------------------------Job_node::job_or_null
@@ -1671,7 +1673,7 @@ bool Nested_job_chain_node::initialize()
             Z_FOR_EACH( Job_chain::Node_list, nested_job_chain->_node_list, it )   // Nur einfache Verschachtelung ist erlaubt
             {
                 if( Nested_job_chain_node::try_cast( *it ) )  z::throw_xc( "SCHEDULER-412", _job_chain->obj_name() );
-                // Bei mehrfacher Verschachtelung die Order_id_spaces pr�fen, insbesondere connected_job_chains() und disconnect_job_chains().
+                // Bei mehrfacher Verschachtelung die Order_id_spaces prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
             }
         }
         else 
@@ -1693,7 +1695,7 @@ void Nested_job_chain_node::on_releasing_referenced_object( const reference< Nes
 {
     if( _job_chain )
     {
-        // Soll keine Warnung sein, s. eMail von P�schel 2007-11-13 15:33
+        // Soll keine Warnung sein, s. eMail von Püschel 2007-11-13 15:33
         _job_chain->log()->info( message_string( "SCHEDULER-424", ref->obj_name(), obj_name() ) );  
     }
 }
@@ -1791,7 +1793,7 @@ void Job_chain::close()
 
 
 
-    // JOBKETTENKNOTEN SCHLIE�EN
+    // JOBKETTENKNOTEN SCHLIEßEN
 
     Z_FOR_EACH( Node_list, _node_list, it )
     {
@@ -1801,7 +1803,7 @@ void Job_chain::close()
 
 
 
-    // AUFTRAGSQUELLEN SCHLIE�EN
+    // AUFTRAGSQUELLEN SCHLIEßEN
 
     Z_FOR_EACH( Order_sources::Order_source_list, _order_sources._order_source_list, it )
     {
@@ -1825,7 +1827,7 @@ void Job_chain::disconnect_nested_job_chains_and_rebuild_order_id_space()
             if( node->_nested_job_chain )  
             {
                 disconnected_job_chains.insert( node->_nested_job_chain );
-                node->_nested_job_chain = NULL;      // reference<> aufl�sen
+                node->_nested_job_chain = NULL;      // reference<> auflösen
             }
         }
     }
@@ -1870,8 +1872,8 @@ String_set Job_chain::connected_job_chains()
 
 void Job_chain::get_connected_job_chains( String_set* result )
 {
-    // Eine sicherere Implementierung w�rde auf die Rekursion verzichten.
-    // Mit sehr stark verschachtelten Jobketten (>1000?) w�re die Rekursion zu heftig.
+    // Eine sicherere Implementierung würde auf die Rekursion verzichten.
+    // Mit sehr stark verschachtelten Jobketten (>1000?) wäre die Rekursion zu heftig.
 
 
     //result->insert( this );
@@ -1892,7 +1894,7 @@ void Job_chain::get_connected_job_chains( String_set* result )
     }
 
 
-    // Alle �bergeordneten Jobketten aufnehmen
+    // Alle übergeordneten Jobketten aufnehmen
 
     Z_FOR_EACH( Reference_register, _reference_register, it )
     {
@@ -2185,7 +2187,7 @@ void Job_chain::append_calendar_dom_elements( const xml::Element_ptr& element, S
 bool Job_chain::is_ready_for_order_processing() const {
     if (is_to_be_removed())  return false;
     if (replacement()  &&  replacement()->file_based_state() == File_based::s_initialized)  return false;
-    if (state() != Job_chain::s_active)  return false;   // Jobkette wird nicht gel�scht oder ist gestopped (s_stopped)?
+    if (state() != Job_chain::s_active)  return false;   // Jobkette wird nicht gelöscht oder ist gestopped (s_stopped)?
     return !_is_stopped;
 }
 
@@ -2212,7 +2214,7 @@ Order::State normalized_state( const Order::State& state )
 {
     if( state.vt == VT_BSTR  &&  ( state.bstrVal == NULL || SysStringLen( state.bstrVal ) == 0 ) )
     {
-        return Variant( Variant::vt_missing );      // F�r Java
+        return Variant( Variant::vt_missing );      // Für Java
     }
     else
     {
@@ -2324,7 +2326,7 @@ void Job_chain::fill_holes()
     if( !_node_list.empty() )
     {
         Node* node = *_node_list.rbegin();
-        if( !node->is_type( Node::n_end )  &&  node->next_state().is_missing() )  add_end_node( default_end_state_name );    // Endzustand fehlt? Dann hinzuf�gen
+        if( !node->is_type( Node::n_end )  &&  node->next_state().is_missing() )  add_end_node( default_end_state_name );    // Endzustand fehlt? Dann hinzufügen
     }
 
     Z_FOR_EACH( Node_list, _node_list, it )
@@ -2333,7 +2335,7 @@ void Job_chain::fill_holes()
 
         if( node->is_type( Node::n_file_order_sink ) )
         {
-            // _next_state und _error_state unver�ndert lassen
+            // _next_state und _error_state unverändert lassen
         }
         else
         {
@@ -2478,7 +2480,7 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
     
     if( order )  
     {
-        Z_LOG2( "scheduler", "Auftrag aus Datenbank �ndert " << order->path() << "\n" );
+        Z_LOG2( "scheduler", "Auftrag aus Datenbank aendert " << order->path() << "\n" );
         assert( !order->_job_chain );
         assert( !order->_task );
     }
@@ -2547,13 +2549,13 @@ bool Job_chain::on_activate()
 
         set_state( s_active );
 
-        Z_FOR_EACH( Node_list, _node_list, it )  (*it)->activate();     // Nur eimal beim �bergang von s_stopped zu s_active aufrufen!
+        Z_FOR_EACH( Node_list, _node_list, it )  (*it)->activate();     // Nur eimal beim Übergang von s_stopped zu s_active aufrufen!
 
         _order_sources.activate();
 
-        //    // Wird nur von Order_subsystem_impl::activate() f�r beim Start des Schedulers geladene Jobketten gerufen,
-        //    // um nach Start des Scheduler-Skripts die <run_time next_start_function="..."> berechnen zu k�nnen.
-        //    // F�r sp�ter hinzugef�gte Jobketten wird diese Routine nicht gerufen (sie w�rde auch nichts tun).
+        //    // Wird nur von Order_subsystem_impl::activate() für beim Start des Schedulers geladene Jobketten gerufen,
+        //    // um nach Start des Scheduler-Skripts die <run_time next_start_function="..."> berechnen zu können.
+        //    // Für später hinzugefügte Jobketten wird diese Routine nicht gerufen (sie würde auch nichts tun).
         //    Z_FOR_EACH( Order_map, _order_map, o )
         //    {
         //        Order* order = o->second;
@@ -2728,7 +2730,7 @@ void Job_chain::remove_order( Order* order )
 
     if( order->_task )
     {
-        order->_removed_from_job_chain_path = path();      // F�r die Task merken, in welcher Jobkette wir waren
+        order->_removed_from_job_chain_path = path();      // Für die Task merken, in welcher Jobkette wir waren
         order->_moved = true;
     }
 
@@ -2783,7 +2785,7 @@ ptr<Order> Job_chain::order_or_null( const Order::Id& order_id )
     Order_map::iterator it = _order_map.find( Order::string_id( order_id ) );
     return it != _order_map.end()? it->second : NULL;
 
-    // Job_chain::order_or_null_by_string_id() liefert Order* statt ptr<Order>. ptr<Order> scheint unn�tig.
+    // Job_chain::order_or_null_by_string_id() liefert Order* statt ptr<Order>. ptr<Order> scheint unnötig.
 }
 
 //------------------------------------------------------------Job_chain::order_or_null_by_string_id
@@ -2842,7 +2844,7 @@ int Job_chain::order_count( Read_transaction* ta ) const
     }
     else
     {
-      //set<Job*> jobs;             // Jobs k�nnen (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gez�hlt werden.
+      //set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
 
         for( Node_list::const_iterator it = _node_list.begin(); it != _node_list.end(); it++ )
         {
@@ -2942,7 +2944,7 @@ bool file_path_matches( const File_path& path, const File_path& directory, const
 
     if( path.directory() == File_path( directory, "" ).directory() )
     {
-        if( !regex.is_compiled()  ||                        // Kein Regul�rer Ausdruck angegeben
+        if( !regex.is_compiled()  ||                        // Kein Regulärer Ausdruck angegeben
             regex.match( path.name() ) )  result = true;    // oder der angegebene passt
     }
 
@@ -3237,7 +3239,7 @@ void Job_chain::check_max_orders() const
         int count = number_of_touched_orders();
         if (count > _max_orders) {
             _log->error(message_string("SCHEDULER-719", _max_orders, count));
-            //Keine Exception nach Order::occupy_for_task() ausl�sen oder _task=NULL setzen!  Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", _max_orders, count));
+            //Keine Exception nach Order::occupy_for_task() auslösen oder _task=NULL setzen!  Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", _max_orders, count));
         }
     }
 }
@@ -3279,7 +3281,7 @@ int Job_chain::number_of_touched_orders() const
 
 void Job_chain::assert_is_not_distributed( const string& debug_text ) const
 {
-    if( _is_distributed )  z::throw_xc( "SCHEDULER-376", debug_text );  // TODO eigener Fehlercode f�r jobchain
+    if( _is_distributed )  z::throw_xc( "SCHEDULER-376", debug_text );  // TODO eigener Fehlercode für jobchain
 }
 
 //-----------------------------------------------------------------------------Job_chain::set_state
@@ -3356,12 +3358,12 @@ void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* c
         {
             Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
 
-            bool check_duplicate_order_ids = true; //Nur richtig, wenn die Jobketten aus original_job_chain_set zuerst �bernommen werden. Also zwei Schleifen!  !set_includes( original_job_chain_set, connected_job_chain->normalized_path() );
+            bool check_duplicate_order_ids = true; //Nur richtig, wenn die Jobketten aus original_job_chain_set zuerst übernommen werden. Also zwei Schleifen!  !set_includes( original_job_chain_set, connected_job_chain->normalized_path() );
             order_id_space->add_job_chain( connected_job_chain, check_duplicate_order_ids );   // check_duplicate_order_ids: Exception bei doppelter Auftragskennung
         }
 
 
-        // Auftragskennungen sind eindeutig, also k�nnen die Jobketten jetzt dem Order_id_space zugeordnet werden
+        // Auftragskennungen sind eindeutig, also können die Jobketten jetzt dem Order_id_space zugeordnet werden
 
         Z_FOR_EACH_CONST( String_set, connected_job_chains, it )
         {
@@ -3538,8 +3540,8 @@ void Order_id_spaces::self_check()
         hash_set<Job_chain*> combined_job_chains;
 
 
-        // Pr�fen, ob job_chain->order_id_space() zusammenh�ngender Jobketten identisch sind
-        // Pr�fen, ob nested_job_chain() korrekt gesetzt ist
+        // Prüfen, ob job_chain->order_id_space() zusammenhängender Jobketten identisch sind
+        // Prüfen, ob nested_job_chain() korrekt gesetzt ist
 
         FOR_EACH_JOB_CHAIN( job_chain )
         {
@@ -3568,7 +3570,7 @@ void Order_id_spaces::self_check()
         }
 
 
-        // Pr�fen, ob alle Jobketten in den Order_id_space denselben job_chain->order_id_space() haben
+        // Prüfen, ob alle Jobketten in den Order_id_space denselben job_chain->order_id_space() haben
 
         combined_job_chains.clear();
 
@@ -3588,7 +3590,7 @@ void Order_id_spaces::self_check()
         }
 
 
-        // Pr�fen, ob Jobketten au�erhalb jedes Order_id_space kein job_chain->order_id_space() haben
+        // Prüfen, ob Jobketten außerhalb jedes Order_id_space kein job_chain->order_id_space() haben
 
         FOR_EACH_JOB_CHAIN( job_chain )
         {
@@ -3689,8 +3691,8 @@ void Order_id_space::on_order_id_space_added( Job_chain* causing_job_chain )
 //            
 //            add_job_chain( jc );
 //
-//            // jc->set_job_chain_node( this )   wird von Order_id_space::complete_and_add() ausgef�hrt.
-//            // Dieser Aufruf soll noch nicht die Jobketten �ndern, weil eine Exception (doppelte Auftragskennung) auftreten kann.
+//            // jc->set_job_chain_node( this )   wird von Order_id_space::complete_and_add() ausgeführt.
+//            // Dieser Aufruf soll noch nicht die Jobketten ändern, weil eine Exception (doppelte Auftragskennung) auftreten kann.
 //        }
 //    }
 //}
@@ -3720,9 +3722,9 @@ void Order_id_space::add_job_chain( Job_chain* job_chain, bool check_duplicate_o
 
 //void Order_id_space::complete_and_add( Job_chain* causing_job_chain )
 //{
-//    // Wenn eine verschachtelte Jobkette hinzugef�gt wird, 
+//    // Wenn eine verschachtelte Jobkette hinzugefügt wird, 
 //    // werden die vorher getrennten Order_id_space zu einem zusammengefasst.
-//    // Der neue Order_id_space soll den Namen einer alten bekommen, um ein bisschen Kontinuit�t zu wahren.
+//    // Der neue Order_id_space soll den Namen einer alten bekommen, um ein bisschen Kontinuität zu wahren.
 //
 //    stdext::hash_set< ptr<Order_id_space> >  previous_order_id_spaces;
 //
@@ -3831,7 +3833,7 @@ xml::Element_ptr Order_id_space::dom_element( const xml::Document_ptr& document,
 
         xml::Element_ptr job_chain_element = result.append_new_element( "job_chain" );
 
-        if( Job_chain* job_chain = order_subsystem()->job_chain_or_null( job_chain_path ) )  job_chain_path = job_chain->path();    // Originale Gro�schreibung �bernehmen
+        if( Job_chain* job_chain = order_subsystem()->job_chain_or_null( job_chain_path ) )  job_chain_path = job_chain->path();    // Originale Großschreibung übernehmen
         job_chain_element.setAttribute( "job_chain", job_chain_path );
     }
 
@@ -3902,7 +3904,7 @@ Order_queue::~Order_queue()
 
 void Order_queue::close()
 {
-    //_job = NULL;    // Falls Job gel�scht wird
+    //_job = NULL;    // Falls Job gelöscht wird
 
     for( Queue::iterator it = _queue.begin(); it != _queue.end();  )
     {
@@ -4010,7 +4012,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                     element.appendChild( order_element );
                     dom_append_nl( element );
                 }
-                catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gel�scht worden sein
+                catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
             }
         }
     }
@@ -4122,7 +4124,7 @@ void Order_queue::add_order( Order* order, Do_log do_log )
                 if( order->_setback )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
             }
             //else  JS-474
-            //    order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine n�chste Startzeit" ); JS-474
+            //    order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" ); JS-474
         }
     }
     else
@@ -4138,10 +4140,10 @@ void Order_queue::add_order( Order* order, Do_log do_log )
         if( o->_suspended < order->_suspended )  continue;  // False nach vorne!
         if( o->_suspended > order->_suspended )  break;
         
-        if( o->_setback < order->_setback )  continue;      // Fr�here Zeit nach vorne!
+        if( o->_setback < order->_setback )  continue;      // Frühere Zeit nach vorne!
         if( o->_setback > order->_setback )  break;
 
-        if( o->_priority > order->_priority )  continue;    // H�here Priorit�t nach vorne!
+        if( o->_priority > order->_priority )  continue;    // Höhere Priorität nach vorne!
         if( o->_priority < order->_priority )  break;
     }
 
@@ -4180,7 +4182,7 @@ void Order_queue::remove_order( Order* order, Do_log dolog )
     order->_is_in_order_queue = false;
 
     _queue.erase( it );
-    order = NULL;  // order ist jetzt m�glicherweise ung�ltig
+    order = NULL;  // order ist jetzt möglicherweise ungültig
 
     //update_priorities();
 }
@@ -4216,7 +4218,7 @@ bool Order_queue::request_order( const Time& now, const string& cause )
 
     if( !result )
     {
-        // Dateiauft�ge (File_order)
+        // Dateiaufträge (File_order)
 
         Z_FOR_EACH( Order_source_list, _order_source_list, it ) 
         {
@@ -4227,8 +4229,8 @@ bool Order_queue::request_order( const Time& now, const string& cause )
     }
 
 
-    // Jetzt pr�fen wir die verteilten Auftr�ge.
-    // Die k�nnen auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
+    // Jetzt prüfen wir die verteilten Aufträge.
+    // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
 
     if( !result )
     {
@@ -4238,7 +4240,7 @@ bool Order_queue::request_order( const Time& now, const string& cause )
             _next_distributed_order_check_time  = 0;
             _next_distributed_order_check_delay = check_database_orders_period_minimum;
 
-            order_subsystem()->request_order();     // Nur einmal rufen, bis ein neuer Auftrag f�r den Job eingetrifft
+            order_subsystem()->request_order();     // Nur einmal rufen, bis ein neuer Auftrag für den Job eingetrifft
         }
     }
 
@@ -4344,7 +4346,7 @@ void Order_queue::tip_for_new_distributed_order()
 
 Order* Order_queue::first_processable_order() const
 {
-    // at kann 0 sein, dann werden nur Auftr�ge ohne Startzeit beachtet
+    // at kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
 
     Order* result = NULL;
 
@@ -4376,7 +4378,7 @@ bool Order_queue::has_immediately_processable_order(const Time& now)
 
 Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin_is_allowed, const Time& now) const
 {
-    // now kann 0 sein, dann werden nur Auftr�ge ohne Startzeit beachtet
+    // now kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
 
     Order* result = NULL;
 
@@ -4423,24 +4425,24 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
     assert( occupying_task );
 
 
-    // Zuerst Auftr�ge aus unserer Warteschlange im Speicher
+    // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
     Order* order = first_immediately_processable_order(virgin_is_allowed, now);
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
-    // Dann (alte) Auftr�ge aus der Datenbank
-    if( !order  &&  _next_announced_distributed_order_time <= now )   // Auftrag nur lesen, wenn vorher angek�ndigt
+    // Dann (alte) Aufträge aus der Datenbank
+    if( !order  &&  _next_announced_distributed_order_time <= now )   // Auftrag nur lesen, wenn vorher angekündigt
     {
         withdraw_distributed_order_request();
 
         order = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now );
-        // M�glicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
+        // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
         if( order )  assert( order->_is_distributed );
     }
 
 
-    // Die Dateiauftr�ge (File_order_source)
+    // Die Dateiaufträge (File_order_source)
 
     if( !order && virgin_is_allowed)
     {
@@ -4534,8 +4536,8 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* o
                 catch( exception& x ) 
                 { 
                     Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() );
-                    ok = false;      // Jemand hat wohl den Datensatz gel�scht.  
-                                     // Wenn nicht, dann gibt's eine Schleife! Auftrag ung�ltig machen?
+                    ok = false;      // Jemand hat wohl den Datensatz gelöscht.  
+                                     // Wenn nicht, dann gibt's eine Schleife! Auftrag ungültig machen?
                 }
         
                 if( ok )
