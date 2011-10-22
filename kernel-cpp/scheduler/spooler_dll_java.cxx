@@ -83,7 +83,7 @@ JNIEXPORT int JNICALL Java_com_sos_scheduler_engine_kernel_main_CppScheduler_run
     delete[] argv;
 
     //sos::sos_static_ptr()->close();
-    //sos::log_stop();
+    sos::log_stop();
 
     return result;
 }
