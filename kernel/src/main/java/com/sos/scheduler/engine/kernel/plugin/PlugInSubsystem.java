@@ -11,7 +11,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.w3c.dom.Element;
-import static com.sos.scheduler.engine.kernel.util.Util.stackTrace;
+
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 import static java.util.Arrays.asList;
 
@@ -101,6 +102,6 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
 
 
     static void logError(PrefixLog log, String pluginName, Throwable t) {
-        log.error(pluginName + ": " + t + "\n" + stackTrace(t));
+        log.error(pluginName + ": " + t + "\n" + getStackTraceAsString(t));
     }
 }

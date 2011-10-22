@@ -24,13 +24,6 @@ public final class Util {
         } catch (Throwable x) { return x.toString(); }
     }
 
-    public static String stackTrace(Throwable t) {
-        //TODO Durch Guava ersetzbar?
-        StringWriter s = new StringWriter();
-        t.printStackTrace(new PrintWriter(s));
-        return s.toString();
-    }
-
     private static final class WrappedThrowable extends RuntimeException {
         private WrappedThrowable(Throwable t) {
             super(t);
