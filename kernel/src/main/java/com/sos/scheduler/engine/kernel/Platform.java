@@ -12,19 +12,17 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 public class Platform {
     private final PrefixLog log;
 
-
     public Platform(PrefixLog log) {
         this.log = log;
     }
 
-    
-    public final PrefixLog log() { return log; }
-
+    public final PrefixLog log() {
+        return log;
+    }
 
     public static Platform of(Sister scheduler) {
         // In C++ haben wir Platform noch nicht. Also nehmen wir Scheduler.
         assert scheduler instanceof Scheduler;
-        
         return ((Scheduler)scheduler).getPlatform();
     }
 }
