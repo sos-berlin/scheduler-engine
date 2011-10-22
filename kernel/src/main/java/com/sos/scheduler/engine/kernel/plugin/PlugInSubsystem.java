@@ -18,17 +18,17 @@ import static java.util.Arrays.asList;
 
 //TODO Eigenes PrefixLog einführen
 
-public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
+public class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
     private static final String staticFactoryMethodName = "factory";
     private final Scheduler scheduler;
     private final Map<String,PluginAdapter> plugIns = new HashMap<String,PluginAdapter>();
     private final CommandHandler[] commandHandlers = { 
-        new PlugInCommandExecutor(this), 
-        new PlugInCommandCommandXmlParser(this),
+        new PluginCommandExecutor(this),
+        new PluginCommandCommandXmlParser(this),
         new PluginCommandResultXmlizer(this) };
 
     
-    public PlugInSubsystem(Scheduler scheduler) {
+    public PluginSubsystem(Scheduler scheduler) {
         super(scheduler.getPlatform());
         this.scheduler = scheduler;
     }
@@ -37,22 +37,22 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     public final void load(Element root) {
         Element plugInsElement = elementXPathOrNull(root, "config/plugins");
         if (plugInsElement != null) {
-            for (Element e: elementsXPath(plugInsElement, "plugin"))  tryAddPlugIn(e);
+            for (Element e: elementsXPath(plugInsElement, "plugin"))  tryAddPlugin(e);
         }
     }
 
 
-    private void tryAddPlugIn(Element e) {
+    private void tryAddPlugin(Element e) {
         String className = e.getAttribute("java_class");
         if (className.isEmpty())  throw new SchedulerException("Missing attribute java_class in <plugin>");
         Element contentElement = elementXPathOrNull(e, "plugin.config");
-        tryAddPlugIn(className, contentElement);
+        tryAddPlugin(className, contentElement);
     }
     
 
-    private void tryAddPlugIn(String className, Element elementOrNull) {
+    private void tryAddPlugin(String className, Element elementOrNull) {
         try {
-            PlugIn p = newPlugIn(className, elementOrNull);
+            Plugin p = newPlugin(className, elementOrNull);
             PluginAdapter a = p instanceof CommandPlugin? new CommandPluginAdapter((CommandPlugin)p, className, log())
                 : new PluginAdapter(p, className, log());
             plugIns.put(className, a);
@@ -63,9 +63,9 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    private PlugIn newPlugIn(String className, Element elementOrNull) throws Exception {
+    private Plugin newPlugin(String className, Element elementOrNull) throws Exception {
         Class<?> c = Class.forName(className);
-        PlugInFactory f = (PlugInFactory)c.getMethod(staticFactoryMethodName).invoke(null);
+        PluginFactory f = (PluginFactory)c.getMethod(staticFactoryMethodName).invoke(null);
         return f.newInstance(scheduler, elementOrNull);
     }
 

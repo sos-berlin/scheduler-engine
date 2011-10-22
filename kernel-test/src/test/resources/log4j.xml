@@ -41,7 +41,7 @@
 		<level value="warn"/>
 	</logger>
 
-	<logger name="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugIn">
+	<logger name="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugin">
 		<level value="info"/>
 	</logger>
 

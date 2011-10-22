@@ -3,9 +3,9 @@
 	xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
 	<config>
 		<!-- irgendwas.plugin.xml -->
-		<!-- com.sos.scheduler.engine.playground.mq.JMSPlugIn.plugin.xml -->
+		<!-- com.sos.scheduler.engine.playground.mq.JMSPlugin.plugin.xml -->
 		<plugins>
-            <plugin java_class="com.sos.scheduler.engine.plugins.event.JMSEventPlugIn">
+            <plugin java_class="com.sos.scheduler.engine.plugins.event.JMSEventPlugin">
 				<plugin.config>
 					<jms>
 						<connection providerUrl="vm:localhost"

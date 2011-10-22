@@ -3,12 +3,12 @@ package com.sos.scheduler.engine.kernel.plugin;
 import com.sos.scheduler.engine.kernel.command.Command;
 
 
-public class PlugInCommandCommand implements Command {
+public class PluginCommandCommand implements Command {
     private final String pluginClassName;
     private final Command subcommand;
 
 
-    public PlugInCommandCommand(String pluginClassName, Command subcommand) {
+    public PluginCommandCommand(String pluginClassName, Command subcommand) {
         this.pluginClassName = pluginClassName;
         this.subcommand = subcommand;
     }

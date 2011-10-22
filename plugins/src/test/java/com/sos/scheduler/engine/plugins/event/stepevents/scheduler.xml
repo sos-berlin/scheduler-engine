@@ -4,7 +4,7 @@
 >
     <config>
         <plugins>
-            <plugin java_class="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugIn">
+            <plugin java_class="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugin">
                 <plugin.config>
                     <jms>
                         <connection providerUrl="vm:localhost" />

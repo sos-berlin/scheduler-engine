@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
 import com.sos.scheduler.engine.kernel.Scheduler
-import com.sos.scheduler.engine.kernel.plugin.PlugIn
+import com.sos.scheduler.engine.kernel.plugin.Plugin
 import com.sos.scheduler.engine.playground.zschimmer._
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
@@ -10,12 +10,12 @@ import org.apache.log4j.Logger
 
 /** Nicht für Produktion. Spielwiese für Scala-Rendezvous.
  * Prüft periodisch, ob der Scheduler reagiert, also ob er die große Scheduler-Schleife durchläuft und dabei einen API-Aufruf annimmt.
- * Das PlugIn startet zwei Threads. Mit nur einem Thread kämen wir aus, wenn der Scheduler selbst periodisch eine Java-Methode aufriefe
- * (mit Async_operation) und das PlugIn in eimem Thread prüft, ob die Aufrufe rechtzeitig erfolgen.
+ * Das Plugin startet zwei Threads. Mit nur einem Thread kämen wir aus, wenn der Scheduler selbst periodisch eine Java-Methode aufriefe
+ * (mit Async_operation) und das Plugin in eimem Thread prüft, ob die Aufrufe rechtzeitig erfolgen.
  *
  */
-class WatchdogPlugIn(scheduler: Scheduler, confElemOption: Option[xml.Elem]) extends PlugIn {
-    import WatchdogPlugIn._
+class WatchdogPlugin(scheduler: Scheduler, confElemOption: Option[xml.Elem]) extends Plugin {
+    import WatchdogPlugin._
     private val conf = Configuration(confElemOption)
     private val thread1 = new Thread1
     private val thread2 = new Thread2
@@ -59,10 +59,10 @@ class WatchdogPlugIn(scheduler: Scheduler, confElemOption: Option[xml.Elem]) ext
 }
 
 
-object WatchdogPlugIn {
-    private val logger = Logger.getLogger(classOf[WatchdogPlugIn])
+object WatchdogPlugin {
+    private val logger = Logger.getLogger(classOf[WatchdogPlugin])
 
     def factory = new PlugInFactory {
-        def newInstance(scheduler: Scheduler, conf: Option[xml.Elem]) = new WatchdogPlugIn(scheduler, conf)
+        def newInstance(scheduler: Scheduler, conf: Option[xml.Elem]) = new WatchdogPlugin(scheduler, conf)
     }
 }

@@ -15,7 +15,7 @@ import javax.jms.TopicSubscriber;
 
 
 public final class SubscriberMain {
-    /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=http://localhost:61616 */
+    /** Maven: mvn test -Dtest=JmsPluginTest -DargLine=-Djms.providerUrl=http://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", "tcp://localhost:61616");
     private static final Configuration conf = Configuration.newInstance(providerUrl);
     private static final PrintStream err = System.err;

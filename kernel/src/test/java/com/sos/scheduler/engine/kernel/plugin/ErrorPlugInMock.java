@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 
-public class ErrorPlugInMock implements PlugIn {
+public class ErrorPluginMock implements Plugin {
     @Override public void activate() {
         throw new RuntimeException("activate");
     }

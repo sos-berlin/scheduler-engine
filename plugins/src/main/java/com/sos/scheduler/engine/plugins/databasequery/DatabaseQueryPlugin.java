@@ -5,8 +5,9 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.plugin.CommandPlugin;
-import com.sos.scheduler.engine.kernel.plugin.PlugIn;
-import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
+import com.sos.scheduler.engine.kernel.plugin.Plugin;
+import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
+
 import java.util.Collection;
 import org.w3c.dom.Element;
 import static java.util.Arrays.asList;
@@ -29,9 +30,9 @@ public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin
     }
 
 
-	public static PlugInFactory factory() {
-    	return new PlugInFactory() {
-            @Override public PlugIn newInstance(Scheduler scheduler, Element plugInElement) {
+	public static PluginFactory factory() {
+    	return new PluginFactory() {
+            @Override public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
             	return new DatabaseQueryPlugin(scheduler.getDatabaseSubsystem().getEntityManager(),
                         scheduler.getSchedulerId(), scheduler.getClusterMemberId());
             }

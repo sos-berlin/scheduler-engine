@@ -8,11 +8,11 @@ import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
 
-class PlugInCommandCommandXmlParser extends SingleCommandXmlParser {
-    private final PlugInSubsystem subsystem;
+class PluginCommandCommandXmlParser extends SingleCommandXmlParser {
+    private final PluginSubsystem subsystem;
 
 
-    PlugInCommandCommandXmlParser(PlugInSubsystem subsystem) {
+    PluginCommandCommandXmlParser(PluginSubsystem subsystem) {
         super("plugin.command");
         this.subsystem = subsystem;
     }
@@ -22,7 +22,7 @@ class PlugInCommandCommandXmlParser extends SingleCommandXmlParser {
         String className = e.getAttribute("plugin_class");
         CommandPluginAdapter a = subsystem.commandPluginByClassName(className);
         Command subcommand = a.getCommandDispatcher().parse(singleSubcommandElement(e));
-        return new PlugInCommandCommand(className, subcommand);
+        return new PluginCommandCommand(className, subcommand);
     }
 
 

@@ -22,9 +22,7 @@ public class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowT
 
     private TypedQuery<TaskHistoryEntity> createQuery(String schedulerId, String clusterMemberId) {
         TypedQuery<TaskHistoryEntity> result;
-        String sql1 = "select t from " + TaskHistoryEntity.class.getSimpleName() + " t" +
-                " where t.schedulerId = :schedulerId" +
-                " and t.jobPath <> :schedulerDummyJobPath";
+        String sql1 = "select t from TaskHistoryEntity t where t.schedulerId = :schedulerId and t.jobPath <> :schedulerDummyJobPath";
         String orderClause = " order by t.id";
         if (clusterMemberId.isEmpty()) {
             String sql = sql1 + " and t.clusterMemberId is null" + orderClause;

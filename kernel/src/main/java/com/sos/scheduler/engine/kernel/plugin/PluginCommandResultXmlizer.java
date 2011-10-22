@@ -5,10 +5,10 @@ import org.w3c.dom.Element;
 
 
 class PluginCommandResultXmlizer extends GenericResultXmlizer<PluginCommandResult>{
-    private final PlugInSubsystem subsystem;
+    private final PluginSubsystem subsystem;
 
 
-    PluginCommandResultXmlizer(PlugInSubsystem subsystem) {
+    PluginCommandResultXmlizer(PluginSubsystem subsystem) {
         super(PluginCommandResult.class);
         this.subsystem = subsystem;
 

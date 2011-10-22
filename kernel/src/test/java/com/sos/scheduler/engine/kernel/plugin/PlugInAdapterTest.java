@@ -8,55 +8,55 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 
-public class PlugInAdapterTest {
+public class PluginAdapterTest {
     private final Platform platform = PlatformMock.newInstance();
-    private final PluginAdapter plugInAdapter = new PluginAdapter(new PlugInMock(), "plugInMock", platform.log());
-    private final PluginAdapter errorPlugInAdapter = new PluginAdapter(new ErrorPlugInMock(), "errorPlugInMock", platform.log());
+    private final PluginAdapter pluginAdapter = new PluginAdapter(new PluginMock(), "plugInMock", platform.log());
+    private final PluginAdapter errorPluginAdapter = new PluginAdapter(new ErrorPluginMock(), "errorPluginMock", platform.log());
 
 
     @Test public void testActivate() {
-        plugInAdapter.activate();
+        pluginAdapter.activate();
     }
 
 
     @Test(expected=RuntimeException.class) public void testActivate_error() {
-        errorPlugInAdapter.activate();
+        errorPluginAdapter.activate();
     }
 
 
     @Test public void testClose() {
-        plugInAdapter.close();
+        pluginAdapter.close();
     }
 
 
     @Test(expected=RuntimeException.class) public void testClose_error() {
-        errorPlugInAdapter.close();
+        errorPluginAdapter.close();
     }
 
 
     @Test public void testGetXmState() {
-        loadXml(plugInAdapter.getXmlState());
-        errorPlugInAdapter.getXmlState();
+        loadXml(pluginAdapter.getXmlState());
+        errorPluginAdapter.getXmlState();
     }
 
     
     @Test public void testTryActivate() {
-        plugInAdapter.tryActivate();
-        errorPlugInAdapter.tryActivate();
+        pluginAdapter.tryActivate();
+        errorPluginAdapter.tryActivate();
     }
 
 
     @Test public void testTryClose() {
-        plugInAdapter.tryClose();
-        errorPlugInAdapter.tryClose();
+        pluginAdapter.tryClose();
+        errorPluginAdapter.tryClose();
     }
 
     @Test public void testGetXmlState() {
-        loadXml(plugInAdapter.getXmlState());
-        loadXml(errorPlugInAdapter.getXmlState());
+        loadXml(pluginAdapter.getXmlState());
+        loadXml(errorPluginAdapter.getXmlState());
     }
 
     @Test public void testToString() {
-        assertThat(plugInAdapter.toString(), startsWith("Plugin "));
+        assertThat(pluginAdapter.toString(), startsWith("Plugin "));
     }
 }

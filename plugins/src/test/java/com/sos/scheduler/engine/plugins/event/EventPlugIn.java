@@ -2,8 +2,6 @@ package com.sos.scheduler.engine.plugins.event;
 
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 
-import java.lang.reflect.Constructor;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
@@ -11,14 +9,10 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.plugin.PlugIn;
-import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
+import com.sos.scheduler.engine.kernel.plugin.Plugin;
+import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
 import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
-import com.sos.scheduler.engine.kernel.order.OrderState;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.JSEventBase;
 
 /**
  * \file JMSPlugIn.java \brief JS Plugin to connect the JMS
@@ -34,11 +28,11 @@ import com.sos.scheduler.model.events.JSEventBase;
  * </p>
  * </div>
  */
-public class EventPlugIn extends AbstractEventPlugin {
+public class EventPlugin extends AbstractEventPlugin {
 	
-	private static Logger logger = Logger.getLogger(EventPlugIn.class);
+	private static Logger logger = Logger.getLogger(EventPlugin.class);
 
-	EventPlugIn(Scheduler scheduler, Element plugInElement) {
+	EventPlugin(Scheduler scheduler, Element plugInElement) {
 		super(scheduler, plugInElement);
 		String providerUrl = stringXPath(plugInElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
 		logger.debug("providerUrl=" + providerUrl);
@@ -71,11 +65,11 @@ public class EventPlugIn extends AbstractEventPlugin {
 		
 	}
 
-	public static PlugInFactory factory() {
-		return new PlugInFactory() {
+	public static PluginFactory factory() {
+		return new PluginFactory() {
 			@Override
-			public PlugIn newInstance(Scheduler scheduler, Element plugInElement) {
-				return new EventPlugIn(scheduler, plugInElement);
+			public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
+				return new EventPlugin(scheduler, plugInElement);
 			}
 		};
 	}

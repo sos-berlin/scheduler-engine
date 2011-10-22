@@ -28,7 +28,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.main.SchedulerStateHandler;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
-import com.sos.scheduler.engine.kernel.plugin.PlugInSubsystem;
+import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 
 @ForCpp
@@ -42,7 +42,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     private final MavenProperties mavenProperties = new MavenProperties(getClass());
     private LogSubsystem logSubsystem = null;
     private DatabaseSubsystem databaseSubsystem = null;
-    private PlugInSubsystem plugInSubsystem = null;
+    private PluginSubsystem pluginSubsystem = null;
     private JobSubsystem jobSubsystem = null;
     private OrderSubsystem orderSubsystem = null;
     private EventSubsystem eventSubsystem = null;
@@ -118,9 +118,9 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         orderSubsystem = new OrderSubsystem(platform, cppProxy.order_subsystem());
         subsystems.add(orderSubsystem);
 
-        plugInSubsystem = new PlugInSubsystem(this);
-        plugInSubsystem.load(configElement);
-        subsystems.add(plugInSubsystem);
+        pluginSubsystem = new PluginSubsystem(this);
+        pluginSubsystem.load(configElement);
+        subsystems.add(pluginSubsystem);
 
         commandSubsystem = new CommandSubsystem(getCommandHandlers(subsystems));
         subsystems.add(commandSubsystem);
@@ -136,7 +136,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
 
     @ForCpp public void onActivate() {
         logSubsystem.activate();
-        plugInSubsystem.activate();
+        pluginSubsystem.activate();
         schedulerStateHandler.onSchedulerActivated();
     }
 

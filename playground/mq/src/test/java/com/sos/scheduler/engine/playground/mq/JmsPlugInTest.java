@@ -24,13 +24,13 @@ import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 
-public class JmsPlugInTest extends SchedulerTest {
-    /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
+public class JmsPluginTest extends SchedulerTest {
+    /** Maven: mvn test -Dtest=JmsPluginTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
     private static final Time schedulerTimeout = Time.of(5);
     private static final Configuration conf = Configuration.newInstance(providerUrl);
-    private static final Logger logger = Logger.getLogger(JmsPlugInTest.class);
+    private static final Logger logger = Logger.getLogger(JmsPluginTest.class);
 
     private final Topic topic = conf.topic;
     private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
@@ -39,7 +39,7 @@ public class JmsPlugInTest extends SchedulerTest {
     private final BlockingQueue<Boolean> resultQueue = new ArrayBlockingQueue<Boolean>(1);
 
     
-    public JmsPlugInTest() throws Exception {
+    public JmsPluginTest() throws Exception {
         topicSubscriber.setMessageListener(new MyListener());
         topicConnection.start();
     }

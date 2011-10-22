@@ -12,7 +12,7 @@
         </security>
 
         <plugins>
-            <plugin java_class="com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog.WatchdogPlugIn">
+            <plugin java_class="com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog.WatchdogPlugin">
                 <plugin.config checkEvery="1" timeout="5" warnEvery="1"/>
             </plugin>
         </plugins>

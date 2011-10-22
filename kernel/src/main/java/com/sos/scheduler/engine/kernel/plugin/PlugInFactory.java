@@ -6,8 +6,8 @@ import org.w3c.dom.Element;
 /** Ein Plugin muss eine statische Methode implementieren, die Objekt dieser Klasse liefert.
  * Die Methode wird über Reflection aufgerufen.
  * 
- * public static PlugInFactory newFactory();
+ * public static PluginFactory newFactory();
 */
-public interface PlugInFactory {
-    PlugIn newInstance(Scheduler scheduler, Element configurationOrNull);
+public interface PluginFactory {
+    Plugin newInstance(Scheduler scheduler, Element configurationOrNull);
 }

@@ -11,14 +11,14 @@ import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.plugin.PlugIn;
-import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
+import com.sos.scheduler.engine.kernel.plugin.Plugin;
+import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
 
 /**
- * \file OrderFinishedPlugIn.java 
+ * \file OrderFinishedPlugin.java
  * \brief Simple plugin to display all Order finished
  * 
- * \class OrderFinishedPlugIn
+ * \class OrderFinishedPlugin
  * \brief Simple plugin to display all Order finished
  * 
  * \details
@@ -35,9 +35,9 @@ import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
  * The base class AbstractEventPlugin subscribes and unsubscribes the events of the JobScheduler.
  * Additionaly the interface EventSubscriber was implemented. It expects the method onEvent (see below).
  */
-public class OrderFinishedPlugIn extends AbstractEventPlugin {
+public class OrderFinishedPlugin extends AbstractEventPlugin {
 	
-	private static final Logger logger = Logger.getLogger(OrderFinishedPlugIn.class);
+	private static final Logger logger = Logger.getLogger(OrderFinishedPlugin.class);
 
     /**
      * The constructor of an event plugin always gets the instance of the Scheduler and a DOM element containing
@@ -46,7 +46,7 @@ public class OrderFinishedPlugIn extends AbstractEventPlugin {
      * com.sos.scheduler.engine.kernel.util.XmlUtils contains some static methods such as stringXPath or
      * elementXPath.
      */
-	OrderFinishedPlugIn(Scheduler scheduler, Element plugInElement) {
+	OrderFinishedPlugin(Scheduler scheduler, Element plugInElement) {
 		super(scheduler, plugInElement);
 		String server = stringXPath(plugInElement,	"myconfig/myserver/@host", "<unknown>");
 		String port = stringXPath(plugInElement, "myconfig/myserver/@port", "<unknown>");
@@ -74,14 +74,14 @@ public class OrderFinishedPlugIn extends AbstractEventPlugin {
 	
     /**
      * Important!!
-     * Any plugin has to define a static method to return a PlugInFactor object.
+     * Any plugin has to define a static method to return a {@link PluginFactory} object.
      * This is the way to announce the plugin to the Scheduler.
      */
-	public static PlugInFactory factory() {
-		return new PlugInFactory() {
+	public static PluginFactory factory() {
+		return new PluginFactory() {
 			@Override
-			public PlugIn newInstance(Scheduler scheduler, Element plugInElement) {
-				return new OrderFinishedPlugIn(scheduler, plugInElement);
+			public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
+				return new OrderFinishedPlugin(scheduler, plugInElement);
 			}
 		};
 	}

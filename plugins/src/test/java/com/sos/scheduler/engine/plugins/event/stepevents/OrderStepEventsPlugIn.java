@@ -9,8 +9,8 @@ import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.order.OrderStepEndedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent;
-import com.sos.scheduler.engine.kernel.plugin.PlugIn;
-import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
+import com.sos.scheduler.engine.kernel.plugin.Plugin;
+import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
 
 /**
  * \file JMSPlugIn.java \brief JS Plugin to connect the JMS
@@ -26,11 +26,11 @@ import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
  * </p>
  * </div>
  */
-public class OrderStepEventsPlugIn extends AbstractEventPlugin {
+public class OrderStepEventsPlugin extends AbstractEventPlugin {
 	
-	private static Logger logger = Logger.getLogger(OrderStepEventsPlugIn.class);
+	private static Logger logger = Logger.getLogger(OrderStepEventsPlugin.class);
 
-	OrderStepEventsPlugIn(Scheduler scheduler, Element plugInElement) {
+	OrderStepEventsPlugin(Scheduler scheduler, Element plugInElement) {
 		super(scheduler, plugInElement);
 //		String providerUrl = stringXPath(plugInElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
 //		String persistenceDir = stringXPath(plugInElement, "jms/connection/@persistenceDirectory", Configuration.persistenceDirectory);
@@ -62,11 +62,11 @@ public class OrderStepEventsPlugIn extends AbstractEventPlugin {
 //		
 //	}
 
-	public static PlugInFactory factory() {
-		return new PlugInFactory() {
+	public static PluginFactory factory() {
+		return new PluginFactory() {
 			@Override
-			public PlugIn newInstance(Scheduler scheduler, Element plugInElement) {
-				return new OrderStepEventsPlugIn(scheduler, plugInElement);
+			public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
+				return new OrderStepEventsPlugin(scheduler, plugInElement);
 			}
 		};
 	}

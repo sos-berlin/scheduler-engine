@@ -7,7 +7,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 
-public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komplex für public
+public class Configuration { //public nur für JmsPluginTest, Klasse ist zu komplex für public
     public static final String brokerName = "localhost";//"com.sos.scheduler";
     public static final String initialContextFactoryName = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     public static final String topicConnectionFactoryName = "TopicCF";

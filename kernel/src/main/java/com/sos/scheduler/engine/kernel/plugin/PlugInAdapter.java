@@ -5,12 +5,12 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.xmlQuoted;
 
 /** Die Engine spricht das Plugin über diesen Adapter an. */
 class PluginAdapter {
-    private final PlugIn plugin;
+    private final Plugin plugin;
     private final String name;
     private final PrefixLog log;
 
 
-    PluginAdapter(PlugIn plugin, String name, PrefixLog log) {
+    PluginAdapter(Plugin plugin, String name, PrefixLog log) {
         this.plugin = plugin;
         this.name = name;
         this.log = log;
@@ -55,7 +55,7 @@ class PluginAdapter {
 
 
     private void logThrowable(Throwable t) {
-        PlugInSubsystem.logError(log, toString(), t);
+        PluginSubsystem.logError(log, toString(), t);
     }
 
 

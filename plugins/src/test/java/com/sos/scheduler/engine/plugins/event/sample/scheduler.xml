@@ -3,7 +3,7 @@
 >
 	<config>
 		<plugins>
-			<plugin java_class="com.sos.scheduler.engine.plugins.event.sample.OrderFinishedPlugIn">
+			<plugin java_class="com.sos.scheduler.engine.plugins.event.sample.OrderFinishedPlugin">
 				<plugin.config>
 					<myconfig>
 						<myserver host="localhost" port="4711" />
