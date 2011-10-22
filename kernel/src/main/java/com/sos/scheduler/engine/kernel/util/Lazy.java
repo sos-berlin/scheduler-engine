@@ -5,7 +5,7 @@ public abstract class Lazy<T> {
     private volatile boolean computed = false;
     private volatile T value = null;
 
-    public final T apply() {
+    public final T get() {
         if (!computed) {
             synchronized (this) {
                 if (!computed) {

@@ -26,7 +26,7 @@ public final class TestCppBinaries {
     private TestCppBinaries() {}
 
     public static CppBinaries cppBinaries() {
-        return cppBinaries.apply();
+        return cppBinaries.get();
     }
 
     private static final Lazy<CppBinaries> cppBinaries = new Lazy<CppBinaries>() {

@@ -12,7 +12,7 @@ public class LazyTest {
         Lazy<Integer> lazy = new Lazy<Integer>() {
             protected Integer compute() { return ++i; }
         };
-        assertThat(lazy.apply(), equalTo(1));
-        assertThat(lazy.apply(), equalTo(1));
+        assertThat(lazy.get(), equalTo(1));
+        assertThat(lazy.get(), equalTo(1));
     }
 }
