@@ -212,7 +212,6 @@
                 <groupId>org.jdom</groupId>
                 <artifactId>jdom</artifactId>
                 <version>1.1</version>
-                <!-- Version 1.1.1 ist noch nicht im Maven-Repositorium 10.10.2010-->
             </dependency>
 
             <dependency>
@@ -232,11 +231,6 @@
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>1.6.1</version>
             </dependency>
-            <!--dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>1.6.1</version>
-            </dependency-->
 
             <dependency>
                 <groupId>xerces</groupId>
@@ -302,7 +296,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <systemProperties>
+                    <systemPropertyVariables>
                         <!--property>
                             <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
                             <name>java.io.tmpdir</name>
@@ -312,7 +306,7 @@
                             <name>scheduler.binaries.tmpdir</name>
                             <value>${basedir}/target/test-scheduler-binaries</value>
                         </property>
-                    </systemProperties>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <!--
@@ -339,11 +333,6 @@
 
         <pluginManagement>
             <plugins>
-                <!--plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>properties-maven-plugin</artifactId>
-                    <version>1.0-alpha-1</version>
-                </plugin-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
