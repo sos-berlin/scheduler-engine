@@ -7,7 +7,7 @@ public class ExceptionEvent extends MainEvent {
         throwable = x;
     }
 
-    public final Throwable getException() {
+    public final Throwable getThrowable() {
         return throwable;
     }
 

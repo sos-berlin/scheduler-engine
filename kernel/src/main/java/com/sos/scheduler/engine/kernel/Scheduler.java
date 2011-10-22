@@ -131,7 +131,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     }
 
 
-    private Iterable<CommandHandler> getCommandHandlers(Iterable<?> objects) {
+    private static Iterable<CommandHandler> getCommandHandlers(Iterable<?> objects) {
         List<CommandHandler> result = new ArrayList<CommandHandler>();
         for (Object o: objects)
             if (o instanceof HasCommandHandlers)

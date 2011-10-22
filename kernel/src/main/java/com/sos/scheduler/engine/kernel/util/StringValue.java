@@ -27,8 +27,7 @@ public abstract class StringValue {
     @Override public final boolean equals(Object o) {
         if (o == null)  return false;
         if (getClass() == o.getClass())  return string.equals(((StringValue)o).string);
-        if (o.getClass() == String.class)  return string.equals((String)o);
-        return false;
+        return o.getClass() == String.class && string.equals(o);
     }
 
 

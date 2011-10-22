@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
  * @author Zschimmer.sos
  */
 public class OrderQueue extends AbstractHasPlatform implements Sister {  // Iterable<Order>
-    private Order_queueC cppProxy;
+    private final Order_queueC cppProxy;
 
 
     public OrderQueue(Platform platform, Order_queueC cppProxy) {

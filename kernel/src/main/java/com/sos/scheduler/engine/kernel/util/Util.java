@@ -51,8 +51,8 @@ public final class Util {
             throw new RuntimeException("Invalid boolean value: " + s);
     }
 
-    @SuppressWarnings("unused")
-    public static void ignore(Object unusedVariable) {}
+
+    public static void ignore(@SuppressWarnings("unused") Object unusedVariable) {}
 
     /** @return true, wenn {@link InterruptedException} abgefangen worden ist. */
     public static boolean sleepUntilInterrupted(long ms) {

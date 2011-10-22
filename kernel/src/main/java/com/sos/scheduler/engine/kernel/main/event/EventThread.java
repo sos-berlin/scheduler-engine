@@ -8,8 +8,6 @@ import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 import java.util.*;
-import static com.sos.scheduler.engine.kernel.util.Util.*;
-
 
 /** Thread zu Verarbeitung von Scheduler-Ereignissen.
  *
@@ -25,22 +23,18 @@ public abstract class EventThread extends Thread implements EventSubscriber {
     private SchedulerController schedulerController = null;
     private int expectEventCount = 0;
 
-
-    public EventThread() {
+    protected EventThread() {
         setName(getClass().getSimpleName());
     }
-
 
     public final void setEventFilter(EventPredicate... p) {
         setEventFilter(Arrays.asList(p));
     }
 
-    
     public final void setEventFilter(Collection<EventPredicate> c) {
         assert c != null;
         eventPredicates = new ArrayList<EventPredicate>(c);
     }
-
 
     @Override public final void onEvent(Event e) {
         if (e instanceof SchedulerReadyEvent)
@@ -53,13 +47,11 @@ public abstract class EventThread extends Thread implements EventSubscriber {
             rendezvous.unlockAndCall(e);
     }
 
-
     private void onSchedulerThreadReady(SchedulerReadyEvent e) {
         schedulerController = e.getSchedulerController();
         start();  // Thread läuft in run()
         threadIsStarted = true;
     }
-
 
     private void onSchedulerThreadTerminated(TerminatedEvent e) {
         try {
@@ -72,12 +64,10 @@ public abstract class EventThread extends Thread implements EventSubscriber {
         catch (InterruptedException x) { throw new SchedulerException(x); }
     }
 
-
     private boolean eventMatchesPredicate(Event e) {
         for (EventPredicate p: eventPredicates)  if (p.apply(e))  return true;
         return false;
     }
-
 
     @Override public final void run() {
         rendezvous.beginServing();
@@ -100,7 +90,6 @@ public abstract class EventThread extends Thread implements EventSubscriber {
         }
     }
 
-
     private void runEventThreadAndTerminateScheduler() throws Exception {
         try {
             runEventThread();
@@ -113,17 +102,14 @@ public abstract class EventThread extends Thread implements EventSubscriber {
         }
     }
 
-    
     protected abstract void runEventThread() throws Exception;
 
-    
     /**
      * @return Das nicht mehr aktuelle Event, weil der Scheduler schon weiterläuft. Die Objekte am Events sind vielleicht nicht mehr gültig.
      */
-    public final void expectEvent(Time timeout, EventPredicate p) throws InterruptedException {
+    public final void expectEvent(Time timeout, EventPredicate p) {
         expectEvent(new EventExpectation(timeout, p));
     }
-
 
     /**
      * @return Das nicht mehr aktuelle Event, weil der Scheduler schon weiterläuft. Die Objekte am Events sind vielleicht nicht mehr gültig.
@@ -136,16 +122,14 @@ public abstract class EventThread extends Thread implements EventSubscriber {
             if (!p.apply(e)) throw UnexpectedEventException.of(e, p, expectEventCount);
             if (e instanceof ExceptionEvent) {
                 ExceptionEvent xe = (ExceptionEvent)e;
-                throw new SchedulerException("Error while polling event: " + xe.getException(), xe.getException() );
+                Throwable t = xe.getThrowable();
+                throw new SchedulerException("Error while polling event: "+t, t);
             }
-
-            //logger.info("Expected event: " + e);
         }
         finally {
             leaveEventHandling();
         }
     }
-
 
 //    /**
 //     * @return Das nicht mehr aktuelle Event, weil der Scheduler schon weiterläuft. Die Objekte am Events sind vielleicht nicht mehr gültig.
@@ -160,15 +144,13 @@ public abstract class EventThread extends Thread implements EventSubscriber {
 //        }
 //    }
 
-    
 //    @SuppressWarnings("unchecked")
 //    private <T> T castEvent(Class<T> clas, Event e) {
 //        if (!clas.isAssignableFrom(e.getClass()))  throw new SchedulerException(clas.getSimpleName() + " expected instead of " + e);
 //        return (T)e;
 //    }
 
-
-    public final void waitForTerminatedEvent(Time timeout) throws InterruptedException {
+    public final void waitForTerminatedEvent(Time timeout) {
         while(!rendezvous.terminatedEventReceived()) {
             Event e = enterEventHandling(timeout);
             if (e == null)  throw new SchedulerException(terminatedEventName + " expected instead of timeout after " + timeout);
@@ -187,16 +169,13 @@ public abstract class EventThread extends Thread implements EventSubscriber {
         }
     }
 
-
     public final Event enterEventHandling() {
         return enterEventHandling(Time.eternal);
     }
 
-
     public final Event enterEventHandling(Time timeout) {
         return rendezvous.enter(timeout);
     }
-
 
     public final void leaveEventHandling() {
         rendezvous.leave();

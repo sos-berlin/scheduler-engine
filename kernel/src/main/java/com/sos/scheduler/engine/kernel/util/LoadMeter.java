@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +40,8 @@ public class LoadMeter {
     private final long periodDuration;
     private final int maxNumberOfPeriods;
     private boolean initialized = false;
-    private long lastMeterTime;
-    private long periodIndex;   // == clock / periodDuration
+    private long lastMeterTime = 0;
+    private long periodIndex = 0;   // == clock / periodDuration
     private long rateDurationAccumulator = 0;      // load(0...1) * duration, Integral der Last über die aktuelle Periode
     private final History history;
 
@@ -57,11 +59,11 @@ public class LoadMeter {
 
 
     public final void meter(int load, long now) {
-        if (!(load == 0 || load == 1))  throw new IllegalArgumentException("not (load==0 || load==1)");
+        checkArgument(load == 0 || load == 1, "not (load==0 || load==1)");
         long newPeriodIndex = now / periodDuration;
 
         if (!initialized) initialize(now);
-        
+
         if (periodIndex == newPeriodIndex)
             accumulate(load, now - lastMeterTime);
         else
@@ -131,18 +133,18 @@ public class LoadMeter {
     }
 
 
-    private String stringFromMillis(long millis) {
+    private static String stringFromMillis(long millis) {
         return (millis / 1000.0) + "s";
     }
 
 
-    private String stringPercent(float a) {
+    private static String stringPercent(float a) {
         return (int)(100 * a) + "%";
     }
 
     
-    private class History {
-        private List<Float> periodLoads = new ArrayList<Float>(maxNumberOfPeriods);
+    private final class History {
+        private final List<Float> periodLoads = new ArrayList<Float>(maxNumberOfPeriods);
 
         History() {
             for (int i = 0; i < maxNumberOfPeriods; i++)  periodLoads.add((float)0);

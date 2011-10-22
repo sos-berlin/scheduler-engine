@@ -32,7 +32,7 @@ public class ExcludedTestRule implements TestRule {
             return stmt;
     }
 
-    private boolean isExcluded(Class<?> testClass) {
+    private static boolean isExcluded(Class<?> testClass) {
         return !testExcluded || packagePathContains(testClass.getPackage(), "excluded");
     }
 

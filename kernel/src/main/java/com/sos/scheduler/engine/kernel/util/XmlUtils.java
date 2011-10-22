@@ -9,6 +9,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -85,7 +87,7 @@ public final class XmlUtils {
     }
 
 
-    private static Boolean booleanOrNullOf(String s, boolean deflt) {
+    @Nullable private static Boolean booleanOrNullOf(String s, boolean deflt) {
         return s.equals("true")? true :
                s.equals("false")? false :
                s.equals("1")? true :
@@ -104,7 +106,6 @@ public final class XmlUtils {
             throw new SchedulerException("Ungültiger numerischer Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">", x);
         }
     }
-
 
 
     public static Element elementXPath(Node baseNode, String xpathExpression) {

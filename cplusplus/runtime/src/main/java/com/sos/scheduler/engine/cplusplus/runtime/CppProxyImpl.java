@@ -56,7 +56,7 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
 
     /* Wenn C++ ein temporäres Objekt liefert und also den C++-Proxy über JNI sofort wieder freigibt,
      * dann haben wir nur ein (zerstörtes) Ding der Klasse Object. */
-    protected static final void checkIsNotReleased(Class<?> clas, Object o) {
+    protected static void checkIsNotReleased(Class<?> clas, Object o) {
         if (!clas.isInstance(o))
             throw new CppProxyInvalidated(clas);
     }
