@@ -1,11 +1,9 @@
 package com.sos.scheduler.engine.cplusplus.generator.module
 
 import com.sos.scheduler.engine.cplusplus.generator.Configuration._
-import com.sos.scheduler.engine.cplusplus.generator.util.Util._
 
 
-class MakefileInclude(prefix: String, modules: Iterable[Module])
-extends Module {
+class MakefileInclude(prefix: String, modules: Iterable[Module]) extends Module {
     val name = prefix + ".makefile.include"
 
     val codeFiles = List(new CodeFile {

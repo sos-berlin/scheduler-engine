@@ -7,12 +7,8 @@ import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
 import java.lang.Class
-import scala.collection.mutable;
 
-
-class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]])
-extends CppCode
-{
+class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends CppCode {
     private val isCppProxy = classOf[CppProxy] isAssignableFrom javaClass
     private val suppressMethods = isCppProxy
 

@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
  * wenn der Generator mit einem umfassenden Paketnamen aufgerufen wird.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface ForCpp {}

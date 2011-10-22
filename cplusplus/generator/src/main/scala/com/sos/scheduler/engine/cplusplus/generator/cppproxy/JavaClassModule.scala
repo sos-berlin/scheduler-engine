@@ -1,14 +1,12 @@
 package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.module._
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.runtime._
 
 
-class JavaClassModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature])
-extends JavaModule {
+class JavaClassModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature]) extends JavaModule {
     private val interface = config.interface
     private val suffix = "Impl"
     val name = interface.getName + suffix

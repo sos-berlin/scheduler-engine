@@ -2,7 +2,8 @@ package com.sos.scheduler.engine.cplusplus.generator.util
 
 import java.lang.reflect._
 import scala.collection.mutable
-
+import java.lang.annotation.Annotation
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 
 object ClassOps {
     type JavaClass = Class[_]
@@ -43,7 +44,18 @@ object ClassOps {
 
     def validMethods(c: JavaClass) = withoutOverriddenVariantMethods(c.getDeclaredMethods.toList filter memberIsValid)
 
-    def memberIsValid(m: Member) = Modifier.isPublic(m.getModifiers)  //&&  !Modifier.isStatic(m.getModifiers)
+    private def memberIsValid(m: Member) = Modifier.isPublic(m.getModifiers) && memberIsForCppAnnotated(m)
+
+    /** Wenn die Klasse mit {@link ForCpp} annotiert ist, werden nur ebenso annotierte Member für C++ übernommen. */
+    private def memberIsForCppAnnotated(m: Member) =
+        memberIsAnnotated(m, classOf[ForCpp]) || !classIsAnnotated(m.getDeclaringClass, classOf[ForCpp])
+
+    private def classIsAnnotated(c: Class[_], a: Class[_ <: Annotation]) = c.getAnnotation(a) != null
+
+    private def memberIsAnnotated(m: Member, clas: Class[_ <: Annotation]) = m match {
+        case c: Constructor[_] => c.getAnnotation(clas) != null
+        case m: Method => m.getAnnotation(clas) != null
+    }
 
     def typeIsValidClass(t: JavaClass) =
         !t.isPrimitive &&

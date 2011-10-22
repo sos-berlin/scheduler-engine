@@ -4,14 +4,12 @@ import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas._
 import com.sos.scheduler.engine.cplusplus.generator.module._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
-import com.sos.scheduler.engine.cplusplus.generator.util.Util._
 import com.sos.scheduler.engine.cplusplus.generator.visualstudio.VisualStudio
 import com.sos.scheduler.engine.cplusplus.scalautil.io.FileUtil._
 import java.io.File
 
-
 /** Generator für C++-Code der Java-Proxys, also der in C++ zu nutzenden Java-Klassen. */
-class Generator(outputDirectory: File, classes: Set[Class[_]], deep: Boolean=false) {
+private class Generator(outputDirectory: File, classes: Set[Class[_]], deep: Boolean=false) {
     requireDirectoryExists(outputDirectory, "C++")
     
     private val javaProxyOutputDirectory = new File(outputDirectory, cppSubdirectory)
@@ -32,10 +30,16 @@ class Generator(outputDirectory: File, classes: Set[Class[_]], deep: Boolean=fal
     def apply() {
         cppModules foreach { _.writeToDirectory(javaProxyOutputDirectory) }
         pch.writeToDirectory(javaProxyOutputDirectory)
-        val makefileInclude = new MakefileInclude(prefix="javaproxy", cppModules)
+        val makefileInclude = new MakefileInclude(prefix="javaproxy", modules=cppModules)
         makefileInclude.writeToDirectory(javaProxyOutputDirectory)
         VisualStudio.updateProjectFiles(javaProxyOutputDirectory, cppModules)
         
         CppModule.removeFilesBut(javaProxyOutputDirectory, makefileInclude :: pch :: cppModules)
+    }
+}
+
+object Generator {
+    def generate(outputDirectory: File, classes: Set[Class[_]], deep: Boolean=false) {
+        new Generator(outputDirectory, classes, deep).apply()
     }
 }

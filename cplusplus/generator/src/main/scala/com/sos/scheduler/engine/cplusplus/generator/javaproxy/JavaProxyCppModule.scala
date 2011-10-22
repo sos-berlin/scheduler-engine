@@ -1,17 +1,12 @@
 package com.sos.scheduler.engine.cplusplus.generator.javaproxy
 
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.module.CppModule
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Cpp._
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas._
-import com.sos.scheduler.engine.cplusplus.generator.util.Util._
 import JavaProxyCppModule._
 
-
 /** Generator für C++-Code eines Java-Proxys, also der in C++ zu nutzenden Java-Klassen. */
-class JavaProxyCppModule(cppClass: CppClass, knownClasses: Set[Class[_]], includeHeader: String)
-extends CppModule
-{
+class JavaProxyCppModule(cppClass: CppClass, knownClasses: Set[Class[_]], includeHeader: String) extends CppModule {
     val name = fileBasenameOfClass(cppClass.javaClass)
 
     lazy val headerCodeOption = Some(

@@ -1,11 +1,8 @@
 package com.sos.scheduler.engine.cplusplus.generator.main
 
 import com.sos.scheduler.engine.cplusplus.generator._
-import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
-import scala.collection.mutable
 import Main._
-
 
 /** Generiert Java- und C++-Proxys.
  * Für ein C++-Proxy in Java wird ein Java-Interface erwartet, das die C++-Klasse beschreibt.
@@ -14,8 +11,7 @@ import Main._
  * (aber nicht mit @JavaOnlyInterface annotiert sind)
  * oder die Klassen oder Interfaces, die mit @ForCpp annotiert sind.
  */
-class Main(args: Array[String])
-{
+class Main(args: Array[String]) {
     private val parameters = Parameters.ofCommandLine(args)
 
     private val (cppProxyInterfaces, javaProxies) = {
@@ -31,34 +27,20 @@ class Main(args: Array[String])
     }
 
     private def generateCppProxies() {
-        new cppproxy.Generator(
-            cppOutputDirectory = parameters.cppOutputDirectory,
-            javaOutputDirectory = parameters.javaOutputDirectory,
-            interfaces = cppProxyInterfaces
-        ).apply()
+        cppproxy.Generator.generate(parameters.cppOutputDirectory, parameters.javaOutputDirectory, cppProxyInterfaces)
     }
 
     private def generateJavaProxies() {
         parameters.cppOutputDirectory foreach { dir =>
-            new javaproxy.Generator(
-                outputDirectory = dir,
-                classes = javaProxies ++ cppProxyInterfaces,
-                deep = parameters.deep)
-            .apply()
+            javaproxy.Generator.generate(dir, javaProxies ++ cppProxyInterfaces, parameters.deep)
         }
     }
 }
 
 /** Exception nicht nach stderr aus und gibt keinen Exit code zurück (s. MainWithExitCode). */
 object Main {
-    def applicationName = "C++/Java-Bridge"
-
     def main(args: Array[String]) {
-//        try
-            new Main(args).apply()
-//        catch {
-//            case x: Exception => throw new RuntimeException(applicationName + ": " + x, x)
-//        }
+         new Main(args).apply()
     }
 
     def isClassName(x: String) = {

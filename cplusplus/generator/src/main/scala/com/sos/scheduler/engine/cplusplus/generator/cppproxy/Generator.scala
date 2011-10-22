@@ -1,16 +1,14 @@
 package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.module._
 import com.sos.scheduler.engine.cplusplus.generator.visualstudio.VisualStudio
 import com.sos.scheduler.engine.cplusplus.scalautil.io.FileUtil._
 import java.io.File
-import Generator._
-
 
 /** Generator für Java- und C++-Code der C++-Proxys, also der in Java zu nutzenden C++-Klassen. */
-class Generator(cppOutputDirectory: Option[File], javaOutputDirectory: Option[File], interfaces: Iterable[Class[_]])
-{
+private class Generator(cppOutputDirectory: Option[File], javaOutputDirectory: Option[File], interfaces: Iterable[Class[_]]) {
+    import Generator._
+
     javaOutputDirectory foreach { d => requireDirectoryExists(d, "Java") }
     cppOutputDirectory foreach { d => requireDirectoryExists(d, "C++") }
 
@@ -40,8 +38,11 @@ class Generator(cppOutputDirectory: Option[File], javaOutputDirectory: Option[Fi
     }
 }
 
-
 object Generator {
+    def generate(cppOutputDirectory: Option[File], javaOutputDirectory: Option[File], interfaces: Iterable[Class[_]]) {
+        new Generator(cppOutputDirectory, javaOutputDirectory, interfaces).apply()
+    }
+
     private def generateJniForSubdirectory(subdir: File, subJniModules: List[JniModule]) {
         subJniModules foreach { _.writeToDirectory(subdir) }
 
@@ -53,7 +54,7 @@ object Generator {
 
         val modules = registerNativeClassesModule :: subJniModules
 
-        new MakefileInclude(prefix="jni_cppproxy", modules).writeToDirectory(subdir)
+        new MakefileInclude(prefix="jni_cppproxy", modules=modules).writeToDirectory(subdir)
         VisualStudio.updateProjectFiles(subdir, modules)
         JniModule.removeFilesBut(subdir, modules)
     }

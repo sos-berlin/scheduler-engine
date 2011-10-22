@@ -5,9 +5,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import Package._
 
-
-case class Package(name: String)
-{
+case class Package(name: String) {
     def relevantClasses = {
         val allClasses = classesOfPackage(name)
         require(allClasses.nonEmpty, "Package '" + name + "' is empty")
@@ -20,7 +18,7 @@ case class Package(name: String)
         def f(c: Class[_]) = c.getName +
                 " isInterface=" + c.isInterface +
                 " inheritsCppProxy=" + classOf[CppProxy].isAssignableFrom(c) +
-                " cppProxyPackage=" + (c.getPackage() != classOf[CppProxy].getPackage) +
+                " cppProxyPackage=" + (c.getPackage != classOf[CppProxy].getPackage) +
                 " @ForCpp=" + classIsForCpp(c)
         classes map f mkString "\n"
     }
@@ -31,7 +29,7 @@ object Package {
     private def classIsRelevant(c: Class[_]) = classIsCppProxy(c) || classIsForCpp(c)
 
     private def classIsCppProxy(c: Class[_]) = c.isInterface  &&  classOf[CppProxy].isAssignableFrom(c)  &&
-        c.getPackage() != classOf[CppProxy].getPackage
+        c.getPackage != classOf[CppProxy].getPackage
 
     private def classIsForCpp(c: Class[_]) = c.getAnnotation(classOf[ForCpp]) != null
 }
