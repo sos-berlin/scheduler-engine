@@ -54,7 +54,6 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
   public:
 
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getEndState();
-    ::javaproxy::java::lang::String getFilePath();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId getId();
     ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet getParameters();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getState();
@@ -62,6 +61,7 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
     void onCppProxyInvalidated();
     void setEndState(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p0);
     ::javaproxy::java::lang::String toString();
+    ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder unmodifiableDelegate();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

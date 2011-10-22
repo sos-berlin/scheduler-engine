@@ -49,7 +49,6 @@ struct UnmodifiableOrder : ::zschimmer::javabridge::proxy_jobject< UnmodifiableO
   public:
 
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getEndState();
-    ::javaproxy::java::lang::String getFilePath();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId getId();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getState();
     ::javaproxy::java::lang::String getTitle();
