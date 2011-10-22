@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
 
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.transform;
-import static com.sos.scheduler.engine.kernel.util.Util.sleepUntilInterrupted;
-import static java.lang.Math.random;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.Js644Test.E.orderChanged;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.Js644Test.E.terminated;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.fail;
 
@@ -29,30 +29,40 @@ import com.sos.scheduler.engine.kernel.util.Time;
 
 public final class Js644Test extends SchedulerTest {
     @ClassRule public static final TestRule slowTestRule = SlowTestRule.singleton;
+
     private static final Logger logger = Logger.getLogger(Js644Test.class);
     private static final List<String> jobPaths = asList("a", "b", "c");
-    private static final Time orderTimeout = Time.of(10);
+    private static final Time orderTimeout = Time.of(60);
 
-    private final BlockingQueue<Boolean> eventReceivedQueue = new ArrayBlockingQueue<Boolean>(1);
+    enum E { orderChanged, terminated };
+    private final BlockingQueue<E> eventReceivedQueue = new ArrayBlockingQueue<E>(1);
 
     @Test public void test() throws InterruptedException {
         controller().strictSubscribeEvents(new MyEventSubscriber());
         controller().startScheduler("-e");
+        runModifierThreadAndCheckOrderChanges();
+    }
+
+    private void runModifierThreadAndCheckOrderChanges() throws InterruptedException {
         Thread modifierThread = new Thread(new ControllerRunnable(new FilesModifierRunnable(jobFiles())));
         modifierThread.setName("job.xml modifier");
         modifierThread.start();
         try {
-            while(true) {
-                // Der Test läuft ewig bis ein Job stehen bleibt und ein Auftrag nicht rechtzeitig verarbeitet worden ist.
-                Boolean ok = eventReceivedQueue.poll(orderTimeout.getMillis(), TimeUnit.MILLISECONDS);
-                if (ok == null) fail("An order has not been processed in time");
-                else if (!ok)  break;
-                logger.debug("An order has been finished");
+            while(true) { // Der Test läuft ewig bis ein Job stehen bleibt und ein Auftrag nicht rechtzeitig verarbeitet worden ist.
+                E e = waitForChangedOrder();
+                if (e == terminated)  break;
             }
         } finally {
             modifierThread.interrupt();
             modifierThread.join();
         }
+    }
+
+    private E waitForChangedOrder() throws InterruptedException {
+        E e = eventReceivedQueue.poll(orderTimeout.getMillis(), TimeUnit.MILLISECONDS);
+        if (e == null) fail("An order has not been processed in time");
+        if (e == orderChanged) logger.debug("An order has been finished");
+        return e;
     }
 
     private Iterable<File> jobFiles() {
@@ -61,18 +71,19 @@ public final class Js644Test extends SchedulerTest {
         });
     }
 
+
     private final class MyEventSubscriber implements EventSubscriber {
         @Override public void onEvent(Event event) throws InterruptedException {
             logger.debug(event);
             if (event instanceof OrderStateChangedEvent)
-                eventReceivedQueue.put(true);
+                eventReceivedQueue.put(orderChanged);
             else
             if (event instanceof TerminatedEvent)
-                eventReceivedQueue.put(false);
+                eventReceivedQueue.put(terminated);
         }
     }
 
-    private final class ControllerRunnable implements Runnable {
+    final class ControllerRunnable implements Runnable {
         private final Runnable runnable;
 
         ControllerRunnable(Runnable runnable) {
@@ -85,23 +96,6 @@ public final class Js644Test extends SchedulerTest {
             } catch (Throwable t) {
                 controller().terminateAfterException(t);
                 throw propagate(t);
-            }
-        }
-    }
-
-    private static final class FilesModifierRunnable implements Runnable {
-        private final FilesModifier filesModifier;
-
-        FilesModifierRunnable(Iterable<File> files) {
-            filesModifier = new FilesModifier(files);
-        }
-
-        @Override public void run() {
-            while(true) {
-                filesModifier.modifyNext();
-                int pause = 1 + (int)(4000*random()) / filesModifier.fileCount();   // Nach 2s Pause sieht der Scheduler eine Dateiänderung als stabil an
-                boolean interrupted = sleepUntilInterrupted(pause);
-                if (interrupted) break;
             }
         }
     }
