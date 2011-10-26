@@ -6,9 +6,9 @@
 exit 5
         ]]>
     </script>
-    <delay_after_error error_count="5"
+    <delay_after_error error_count="2"
                        delay="5"/>
-    <delay_after_error error_count="10"
+    <delay_after_error error_count="4"
                        delay="stop"/>
     <run_time>
         <period single_start="09:00"/>
