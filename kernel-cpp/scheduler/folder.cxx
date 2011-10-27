@@ -2475,15 +2475,18 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
             Absolute_path path      ( *d );
             File_based*   requisite = subsystem->file_based_or_null( path );
 
-            xml::Element_ptr e = element.append_new_element( "requisite" );
-            e.setAttribute( "type", subsystem->object_type_name() );
-            e.setAttribute( "path", path );
+            // JS-775: default process_class should not displayed
+            if ( !is_default_process_class(subsystem->object_type_name(),path) ) {
+               xml::Element_ptr e = element.append_new_element( "requisite" );
+               e.setAttribute( "type", subsystem->object_type_name() );
+               e.setAttribute( "path", path );
 
-            if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
+               if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
 
-            result++;
+               result++;
 
-            if( requisite )  result += requisite->append_requisite_dom_elements( element );     // Auch indirekte Requisiten (möglicherweise doppelt, könnten identifiziert werden)
+               if( requisite )  result += requisite->append_requisite_dom_elements( element );     // Auch indirekte Requisiten (möglicherweise doppelt, könnten identifiziert werden)
+            }
         }
     }
 
@@ -2493,6 +2496,13 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
     }
 
     return result;
+}
+
+//--------------------------------------------------------------Depandant::is_default_process_class
+
+bool Dependant::is_default_process_class( const string object_type_name, const Absolute_path path )
+{ 
+   return (object_type_name == "Process_class" && path == "");
 }
 
 //-----------------------------------------------------------------------Dependencies::Dependencies

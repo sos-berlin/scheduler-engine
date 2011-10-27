@@ -58,6 +58,7 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     virtual void                on_requisite_removed        ( File_based* );
     virtual Prefix_log*         log                         ()                                      = 0;
     virtual string              obj_name                    () const                                = 0;
+    bool                        is_default_process_class    ( const string object_type_name, const Absolute_path path  );
 
     
   private:
