@@ -92,7 +92,7 @@ public class JMSEventPlugin extends AbstractEventPlugin {
 			setEventProperties(m, ev);
 			connector.publish(m); // publish the text message (xml)
 		} catch(SchedulerException ev) {
-			throw new SchedulerException(ev);
+			logger.warn(ev.getMessage());
 		}
 
 	}
