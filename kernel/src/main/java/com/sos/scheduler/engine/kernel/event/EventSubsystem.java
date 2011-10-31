@@ -6,60 +6,56 @@ import java.util.Collection;
 import java.util.HashSet;
 import org.apache.log4j.*;
 
-
 @ForCpp
 public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 
     private final Collection<EventSubscriber> subscribers = new HashSet<EventSubscriber>();
-    private int reportEventNesting = 0;
-
+    private Event currentEvent = null;
 
     public EventSubsystem(Platform platform) {
         super(platform);
     }
 
-
     @ForCpp public final void report(Event e) {
-        reportEventNesting++;   // Kann Rekursiv aufgerufen werden.
-        try {
-            publishEvent(e);
-        } catch(RecursiveEventException x) {
+        if (currentEvent != null) {
             // Kein log().error(), sonst gibt es wieder eine Rekursion
-            logger.error(getClass().getSimpleName() + ".report(" + e.getClass().getName() + "): " + x);
+            logger.error(EventSubsystem.class.getSimpleName() + ".report(" +e+ "): ignoring the event triggered by handling the event '"+currentEvent+"'");
+        } else {
+            currentEvent = e;
+            try {
+                publishEvent(e);
+            }
+            finally {
+                currentEvent = null;
+            }
         }
-        finally { reportEventNesting--; }
     }
 
-    
     private void publishEvent(Event e) {
-        if (reportEventNesting > 1) {
-            throw new RecursiveEventException(e);  // Das sollte natürlich nicht vorkommen ...
-        }
-        for (EventSubscriber s: subscribers)
-            try { s.onEvent(e); }
-            catch (Exception x) { log().error(s + ": " + x); }
+        logger.trace(e);
+        for (EventSubscriber s: subscribers) publishEvent(e, s);
     }
 
+    private void publishEvent(Event e, EventSubscriber s) {
+        try {
+            s.onEvent(e);
+        }
+        catch (Exception x) {
+            logger.error(s+": "+x, x);
+            log().error(s+": "+x);
+        }
+    }
 
     public final void subscribe(EventSubscriber x) {
         subscribers.add(x);
     }
 
-    
     public final void unsubscribe(EventSubscriber x) { 
         subscribers.remove(x);
     }
 
-
     @Override public final String toString() {
         return getClass().getSimpleName();
-    }
-
-
-    private static final class RecursiveEventException extends SchedulerException {
-        private RecursiveEventException(Event e) {
-            super("Recursive publishing of events: " + e);
-        }
     }
 }
