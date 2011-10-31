@@ -282,7 +282,7 @@
     <ClCompile Include="folder_Requisite_path.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
-  <ClCompile Include="jni__sos__scheduler__Folder_subsystem.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile></ItemGroup>
+  <ClCompile Include="jni__sos__scheduler__Folder_subsystem.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="jni__sos__scheduler__order__job_chain__Job_node.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile></ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
       <Filter>Quellcodedateien</Filter>

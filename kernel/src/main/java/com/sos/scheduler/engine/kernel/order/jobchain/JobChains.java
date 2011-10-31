@@ -11,7 +11,7 @@ public class JobChains {
             @Override public boolean apply(JobChain jobChain) {
                 for (Node node: jobChain.getNodes()) {
                      if (node instanceof JobNode) {
-                         OrderQueueNode n = (OrderQueueNode)node;  // JobNode kennt getJob() noch nicht.
+                         JobNode n = (JobNode)node;
                          if (n.getJob() == job) return true;
                      }
                 }

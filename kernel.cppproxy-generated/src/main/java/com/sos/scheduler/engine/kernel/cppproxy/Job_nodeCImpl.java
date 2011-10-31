@@ -2,11 +2,11 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-final class Order_queue_nodeCImpl
-   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.OrderQueueNode>
-   implements com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC
+final class Job_nodeCImpl
+   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.JobNode>
+   implements com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC
 {
-    private Order_queue_nodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
+    private Job_nodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
 
@@ -23,6 +23,21 @@ final class Order_queue_nodeCImpl
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node__native(long cppReference);
+
+
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.JobC result = job__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.JobC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.JobC job__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node() {

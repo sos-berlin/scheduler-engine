@@ -21,6 +21,7 @@ void register_native_classes(){
     has_proxy< ::sos::scheduler::order::Order >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Order_queue >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Order_subsystem >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::order::job_chain::Job_node >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::job_chain::Node >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::register_cpp_proxy_class_in_java();
 }

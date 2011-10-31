@@ -300,7 +300,7 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     </ClCompile>
     <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx" />
     <ClCompile Include="jni__sos__scheduler__Database.cxx" />
-  <ClCompile Include="jni__sos__scheduler__Folder_subsystem.cxx" /></ItemGroup>
+  <ClCompile Include="jni__sos__scheduler__Folder_subsystem.cxx" /><ClCompile Include="jni__sos__scheduler__order__job_chain__Job_node.cxx" /></ItemGroup>
   <ItemGroup>
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />

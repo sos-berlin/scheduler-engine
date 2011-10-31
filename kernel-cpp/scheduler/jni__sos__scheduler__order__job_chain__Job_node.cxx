@@ -11,7 +11,7 @@ using namespace ::zschimmer::javabridge;
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> const class_factory<Proxy_class> has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::proxy_class_factory("com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeCImpl");
+    template<> const class_factory<Proxy_class> has_proxy< ::sos::scheduler::order::job_chain::Job_node >::proxy_class_factory("com.sos.scheduler.engine.kernel.cppproxy.Job_nodeCImpl");
 
 }}
 
@@ -21,8 +21,25 @@ static jobject JNICALL error_1node(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::error_node()");
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::error_node()");
         return Has_proxy::jobject_of(o_->error_node());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL job(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::job()");
+        return Has_proxy::jobject_of(o_->job());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -38,7 +55,7 @@ static jobject JNICALL next_1node(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::next_node()");
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::next_node()");
         return Has_proxy::jobject_of(o_->next_node());
     }
     catch(const exception& x) {
@@ -55,7 +72,7 @@ static jobject JNICALL order_1queue(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::order_queue()");
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::order_queue()");
         return Has_proxy::jobject_of(o_->order_queue());
     }
     catch(const exception& x) {
@@ -72,7 +89,7 @@ static jstring JNICALL string_1error_1state(JNIEnv* jenv, jobject, jlong cppRefe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_error_state()");
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::string_error_state()");
         return env.jstring_from_string(o_->string_error_state());
     }
     catch(const exception& x) {
@@ -89,7 +106,7 @@ static jstring JNICALL string_1next_1state(JNIEnv* jenv, jobject, jlong cppRefer
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_next_state()");
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::string_next_state()");
         return env.jstring_from_string(o_->string_next_state());
     }
     catch(const exception& x) {
@@ -106,7 +123,7 @@ static jstring JNICALL string_1order_1state(JNIEnv* jenv, jobject, jlong cppRefe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_order_state()");
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::string_order_state()");
         return env.jstring_from_string(o_->string_order_state());
     }
     catch(const exception& x) {
@@ -119,6 +136,7 @@ static jstring JNICALL string_1order_1state(JNIEnv* jenv, jobject, jlong cppRefe
 
 const static JNINativeMethod native_methods[] = {
     { (char*)"error_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/NodeC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::error_1node },
+    { (char*)"job__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job },
     { (char*)"next_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/NodeC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1node },
     { (char*)"order_queue__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Order_queueC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order_1queue },
     { (char*)"string_error_state__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1error_1state },
@@ -128,10 +146,10 @@ const static JNINativeMethod native_methods[] = {
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> void has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::register_cpp_proxy_class_in_java() {
+    template<> void has_proxy< ::sos::scheduler::order::job_chain::Job_node >::register_cpp_proxy_class_in_java() {
         Env env;
-        Class* cls = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 6);
+        Class* cls = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::proxy_class_factory.clas();
+        int ret = env->RegisterNatives(*cls, native_methods, 7);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

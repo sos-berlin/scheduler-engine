@@ -1,22 +1,18 @@
 package com.sos.scheduler.engine.kernel.order.jobchain;
 
-import com.sos.scheduler.engine.kernel.Platform;
-import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC;
-import com.sos.scheduler.engine.kernel.job.Job;
-import com.sos.scheduler.engine.kernel.order.OrderQueue;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
+import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC;
+import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeCI;
+import com.sos.scheduler.engine.kernel.order.OrderQueue;
 
-public class OrderQueueNode extends JobNode {
-    private final Order_queue_nodeC cppProxy;
+public class OrderQueueNode extends Node {
+    private final Order_queue_nodeCI cppProxy;
 
-    private OrderQueueNode(Platform platform, Order_queue_nodeC nodeC) {
+    protected OrderQueueNode(Platform platform, Order_queue_nodeCI nodeC) {
         super(platform, nodeC);
         this.cppProxy = nodeC;
-    }
-
-    public final Job getJob() {     //TODO Gehört zu JobNode
-        return cppProxy.getJob().getSister();
     }
 
     public final OrderQueue getOrderQueue() {

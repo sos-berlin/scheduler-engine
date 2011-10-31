@@ -10,6 +10,7 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__cppproxy__Folder_subsystemC.o\
  com__sos__scheduler__engine__kernel__cppproxy__JobC.o\
  com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.o\
+ com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.o\
  com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.o\
  com__sos__scheduler__engine__kernel__cppproxy__NodeC.o\
  com__sos__scheduler__engine__kernel__cppproxy__OrderC.o\
