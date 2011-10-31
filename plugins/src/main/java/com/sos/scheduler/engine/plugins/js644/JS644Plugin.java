@@ -33,24 +33,16 @@ public class JS644Plugin extends AbstractPlugin {
 
     @EventHandler public SchedulerOperation handleEvent(FileBasedActivatedEvent e) throws Exception {
         if (e.getObject() instanceof Job) {
-            Job job = (Job)e.getObject();
+            final Job job = (Job)e.getObject();
             if (job.isFileBasedReread()) {
-                return new RereadJobchainsCallable(job);
+                return new SchedulerOperation() {
+                    @Override public void execute() throws Exception {
+                        for (JobChain jobChain: orderSubsystem.jobchainsOfJob(job)) jobChain.setForceFileReread();
+                        folderSubsystem.updateFolders(0);
+                    }
+                };
             }
         }
         return null;
-    }
-
-    private class RereadJobchainsCallable implements SchedulerOperation {
-        private final Job job;
-
-        RereadJobchainsCallable(Job job) {
-            this.job = job;
-        }
-
-        @Override public void execute() throws Exception {
-            for (JobChain jobChain: orderSubsystem.jobchainsOfJob(job)) jobChain.setForceFileReread();
-            folderSubsystem.updateFolders(0);
-        }
     }
 }
