@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -191,6 +191,16 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="folder_Base_file_info.cxx" />
+    <ClCompile Include="folder_Dependant.cxx" />
+    <ClCompile Include="folder_Dependencies.cxx" />
+    <ClCompile Include="folder_File_based.cxx" />
+    <ClCompile Include="folder_File_based_subsystem.cxx" />
+    <ClCompile Include="folder_Folder.cxx" />
+    <ClCompile Include="folder_Folder_subsystem.cxx" />
+    <ClCompile Include="folder_Requisite_path.cxx" />
+    <ClCompile Include="folder_Subfolder_folder.cxx" />
+    <ClCompile Include="folder_Typed_folder.cxx" />
     <ClCompile Include="log_cache_Request.cxx" />
     <ClCompile Include="log_cache_Request_cache.cxx" />
     <ClCompile Include="_precompiled_headers.cxx">
@@ -290,7 +300,7 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     </ClCompile>
     <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx" />
     <ClCompile Include="jni__sos__scheduler__Database.cxx" />
-  </ItemGroup>
+  <ClCompile Include="jni__sos__scheduler__Folder_subsystem.cxx" /></ItemGroup>
   <ItemGroup>
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />

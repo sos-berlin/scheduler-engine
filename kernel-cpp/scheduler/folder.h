@@ -164,6 +164,7 @@ struct File_based : Scheduler_object,
                                 File_based                  ( File_based_subsystem*, IUnknown*, Type_code );
     virtual                    ~File_based                  ();
 
+    virtual jobject             java_sister                 ()                                      { return NULL; }
 
     // Scheduler_object
     void                        close                       ();
@@ -205,6 +206,7 @@ struct File_based : Scheduler_object,
     void                        assert_is_active            ();
     void                        assert_is_not_initialized   ();
 
+    void                    set_reloaded                    (bool b)                                { _reloaded = b; }
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     void                        fix_name                    ()                                      { _name_is_fixed = true; }
@@ -218,6 +220,7 @@ struct File_based : Scheduler_object,
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
+    bool                        is_file_based_reloaded      () const                                { return _reloaded; }
     bool                        is_loaded                   () const                                { return _state >= s_loaded  &&  _state < s_closed; }
   //void                    set_defined                     ();                                     // Für Objekte, die kein XML brauchen
 
@@ -269,6 +272,8 @@ struct File_based : Scheduler_object,
     bool                        operator <                  ( const File_based& f ) const           { return _base_file_info < f._base_file_info; }
     static bool                 less_dereferenced           ( const File_based* a, const File_based* b )  { return *a < *b; }
 
+    void                        set_force_file_reload       ()                                      { _force_file_reload = true; }
+    bool                        get_and_clear_force_file_reload()                                   { bool result = _force_file_reload; _force_file_reload = false; return result; }
 
   protected:
     void                    set_base_file_info              ( const Base_file_info& bfi )           { _base_file_info = bfi; }
@@ -286,6 +291,8 @@ struct File_based : Scheduler_object,
     string                     _name;
     State                      _state;
     Base_file_info             _base_file_info;
+    bool                       _force_file_reload;
+    bool                       _reloaded;
     bool                       _name_is_fixed;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
@@ -293,7 +300,7 @@ struct File_based : Scheduler_object,
     int                        _duplicate_version;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
-    Remove_flag               _remove_flag;
+    Remove_flag                _remove_flag;
     Configuration_origin       _configuration_origin;        // Aus live/ oder aus cache/ ?
     ptr<File_based>            _replacement;
     Absolute_path              _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
@@ -783,6 +790,7 @@ struct Configuration
 //---------------------------------------------------------------------------------Folder_subsystem
 
 struct Folder_subsystem : Object,
+                          javabridge::has_proxy<Folder_subsystem>, 
                           file_based_subsystem<Folder>,
                           directory_observer::Directory_observer::Directory_handler
 

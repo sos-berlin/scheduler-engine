@@ -20,7 +20,17 @@ objects = \
  database.o\
  directory_observer.o\
  file_logger.o\
- folder.o\
+ folder_Base_file_info.o\
+ folder_Dependant.o\
+ folder_Dependencies.o\
+ folder_File_based.o\
+ folder_File_based_subsystem.o\
+ folder_Folder.o\
+ folder_Folder_subsystem.o\
+ folder_Requisite_path.o\
+ folder_Subfolder_folder.o\
+ folder_Typed_folder.o\
+ folder_replication.o\
  java_subsystem.o\
  include.o\
  lock.o\

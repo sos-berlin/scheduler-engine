@@ -55,4 +55,17 @@ final class Job_chainCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.OrderC order__native(long cppReference, java.lang.String p0);
 
 
+    @Override public void set_force_file_reload() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_force_file_reload__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_force_file_reload__native(long cppReference);
+
+
 }

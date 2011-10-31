@@ -6,39 +6,40 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
+import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderId;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 
-
 public final class JobChain extends FileBased implements UnmodifiableJobchain {
-    private final Job_chainC jobChainC;
+    private final Job_chainC cppProxy;
 
-
-    private JobChain(Platform platform, Job_chainC jobChainC) {
+    private JobChain(Platform platform, Job_chainC cppProxy) {
         super(platform);
-        this.jobChainC = jobChainC;
+        this.cppProxy = cppProxy;
     }
     
-    @Override public void onCppProxyInvalidated() {
+    @Override public void onCppProxyInvalidated() {}
+
+    public String getName() {
+        return cppProxy.name();
     }
 
-	public String getName() { 
-        return jobChainC.name();
+    /** Markiert, dass das {@link FileBased} beim nächsten Verzeichnisabgleich neu geladen werden soll. */
+    public void setForceFileReload() {
+        cppProxy.set_force_file_reload();
     }
 
 	public ImmutableList<Node> getNodes() { 
-        return ImmutableList.copyOf(jobChainC.java_nodes());
+        return ImmutableList.copyOf(cppProxy.java_nodes());
     }
 
-	public UnmodifiableOrder getUnmodifiableOrder(OrderId id) {
-        return getOrder(id);
-    }
-
-	public UnmodifiableOrder getOrder(OrderId id) {
-        return jobChainC.order(id.getString()).getSister();
+	public Order order(OrderId id) {
+        return cppProxy.order(id.getString()).getSister();
     }
 
     public static class Type implements SisterType<JobChain, Job_chainC> {
-        @Override public final JobChain sister(Job_chainC proxy, Sister context) { return new JobChain(Platform.of(context), proxy); }
+        @Override public final JobChain sister(Job_chainC proxy, Sister context) {
+            return new JobChain(Platform.of(context), proxy);
+        }
     }
 }
