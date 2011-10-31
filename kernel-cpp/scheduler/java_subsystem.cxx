@@ -102,7 +102,6 @@ bool Java_subsystem::subsystem_initialize()
 {
     Java_module_instance::init_java_vm( _java_vm );
     register_native_classes();
-    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j(), _spooler->java_main_context()));
     _subsystem_state = subsys_initialized;
     return true;
 }
@@ -111,6 +110,7 @@ bool Java_subsystem::subsystem_initialize()
 
 bool Java_subsystem::subsystem_load()
 {
+    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j(), _spooler->java_main_context()));
     _schedulerJ.onLoad(string_from_file(_spooler->_configuration_file_path));
     _subsystem_state = subsys_loaded;
     return true;

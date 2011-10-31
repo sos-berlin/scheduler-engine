@@ -1,10 +1,6 @@
 package com.sos.scheduler.engine.kernel.schedulerevent;
 
-import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.event.Event;
 
 /** Wenn das Java_subsystem geschlossen wird. */
-public class SchedulerCloseEvent extends SchedulerEvent {
-    public SchedulerCloseEvent(Scheduler o) {
-        super(o);
-    }
-}
+public class SchedulerCloseEvent extends Event {}
