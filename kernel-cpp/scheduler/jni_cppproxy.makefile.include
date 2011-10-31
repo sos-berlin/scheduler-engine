@@ -3,6 +3,7 @@
 jni_cppproxy_objects=\
  jni__register_native_classes.o\
  jni__sos__scheduler__Database.o\
+ jni__sos__scheduler__Folder_subsystem.o\
  jni__sos__scheduler__Job.o\
  jni__sos__scheduler__Job_subsystem.o\
  jni__sos__scheduler__Prefix_log.o\

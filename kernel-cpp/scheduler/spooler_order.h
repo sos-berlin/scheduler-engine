@@ -72,6 +72,7 @@ struct Order : Com_order,
                                 Order                   ( Standing_order_subsystem* );
                                ~Order                   ();
 
+    javabridge::has_proxy<Order>::java_sister;
 
     // Scheduler_object
 
@@ -761,6 +762,7 @@ struct Job_chain : Com_job_chain,
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Com_job_chain::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Com_job_chain::Release(); }
 
+    javabridge::has_proxy<Job_chain>::java_sister;
 
     // Scheduler_object:
     string                      obj_name                    () const                                { return "Job_chain " + path(); }

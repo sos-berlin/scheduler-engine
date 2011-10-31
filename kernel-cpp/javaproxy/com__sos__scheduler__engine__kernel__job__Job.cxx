@@ -4,7 +4,7 @@
 
 #include "com__sos__scheduler__engine__kernel__job__Job.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
-#include "com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
+#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { 
