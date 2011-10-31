@@ -23,6 +23,13 @@ final class StateThreadBridge {
         if (callTerminate)  scheduler.terminate();
     }
 
+    void onSchedulerActivated() {
+        synchronized (this) {
+            state = active;
+            notify();
+        }
+    }
+
     synchronized void onSchedulerClosed() {
         state = closed;
         schedulerAtom.set(null);
@@ -35,9 +42,13 @@ final class StateThreadBridge {
     }
 
     synchronized Scheduler waitWhileSchedulerIsStarting() throws InterruptedException {
-        while (state == starting)
-            wait();
+        waitUntilSchedulerState(SchedulerState.started);
         return schedulerAtom.get();
+    }
+
+    synchronized void waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
+        while (state.ordinal() < awaitedState.ordinal())
+            wait();
     }
 
     void terminate() {

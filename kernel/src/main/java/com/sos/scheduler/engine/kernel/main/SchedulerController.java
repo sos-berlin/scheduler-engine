@@ -9,6 +9,7 @@ public interface SchedulerController {
     void subscribeEvents(EventSubscriber s);
     void startScheduler(String... arguments);
     Scheduler waitUntilSchedulerIsRunning();
+    void waitUntilSchedulerState(SchedulerState s);
     void waitForTermination(Time timeout);
     void terminateScheduler();
     void terminateAfterException(Throwable x);

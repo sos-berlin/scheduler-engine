@@ -20,6 +20,7 @@ struct Java_subsystem_interface : Object, Subsystem
     virtual SchedulerJ&         schedulerJ                  ()                                      = 0;
   //virtual const PlatformJ&    platformJ                   () const                                = 0;
     virtual xml::Element_ptr    dom_element                 (const xml::Document_ptr&)              = 0;
+    virtual void                on_scheduler_activated      ()                                      = 0;
 
     static string               classname_of_scheduler_object(const string&);
     static ptr<javabridge::Java_idispatch>  instance_of_scheduler_object( IDispatch*, const string&);

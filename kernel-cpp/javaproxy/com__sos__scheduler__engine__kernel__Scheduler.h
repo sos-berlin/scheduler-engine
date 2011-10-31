@@ -51,6 +51,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem();
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
     void onActivate();
+    void onActivated();
     void onClose();
     void onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
     void threadLock();

@@ -2080,6 +2080,7 @@ void Spooler::activate()
     execute_config_commands();                                                                          
 
     set_state( s_running );
+    _java_subsystem->on_scheduler_activated();
 }
 
 //-----------------------------------------------------------------Spooler::execute_config_commands

@@ -34,6 +34,7 @@ struct Java_subsystem : Java_subsystem_interface
     void                        prepend_class_path          ( const string& x )                     { _java_vm->prepend_class_path(x); }
     SchedulerJ&                 schedulerJ                  ()                                      { return _schedulerJ; }
     xml::Element_ptr            dom_element                 (const xml::Document_ptr&);
+    virtual void                on_scheduler_activated      ();
 
   private:
     ptr<javabridge::Vm>        _java_vm;
@@ -122,6 +123,12 @@ bool Java_subsystem::subsystem_activate()
     _schedulerJ.onActivate();
     _subsystem_state = subsys_active;
     return true;
+}
+
+//---------------------------------------------------------------------Java_subsystem::on_activated
+
+void Java_subsystem::on_scheduler_activated() {
+    _schedulerJ.onActivated();
 }
 
 //------------------------------------------Java_subsystem_interface::classname_of_scheduler_object

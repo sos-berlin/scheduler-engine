@@ -9,12 +9,12 @@ import javax.annotation.Nullable;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 
@@ -32,7 +32,6 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
-        assert s != null;
         eventSubscriber = s;
     }
 
@@ -52,6 +51,14 @@ public class SchedulerThreadController implements SchedulerController {
                 throw new SchedulerException("Scheduler aborted before startup");
             }
             return result;
+        }
+        catch (InterruptedException x) { throw new RuntimeException(x); }
+    }
+
+    @Override public final void waitUntilSchedulerState(SchedulerState s) {
+        try {
+            stateThreadBridge.waitUntilSchedulerState(s);
+            throwableMailbox.throwUncheckedIfSet();
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
@@ -105,7 +112,7 @@ public class SchedulerThreadController implements SchedulerController {
         }
 
         @Override public void onSchedulerActivated() {
-            //stateThreadBridge.onSchedulerActivated(scheduler);
+            stateThreadBridge.onSchedulerActivated();
             scheduler.getEventSubsystem().subscribe(myEventSubscriber);
         }
 

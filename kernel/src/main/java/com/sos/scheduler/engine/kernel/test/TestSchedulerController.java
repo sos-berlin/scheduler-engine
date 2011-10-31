@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
+import com.sos.scheduler.engine.kernel.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
@@ -35,7 +36,7 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public final void strictSubscribeEvents(EventSubscriber s) {
-        delegated.subscribeEvents(new StrictEventSubscriber(s));
+        delegated.subscribeEvents(new StrictEventSubscriber(s, delegated));
     }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
@@ -69,6 +70,10 @@ public class TestSchedulerController implements SchedulerController {
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
         scheduler = delegated.waitUntilSchedulerIsRunning();
         return scheduler;
+    }
+
+    @Override public void waitUntilSchedulerState(SchedulerState s) {
+        delegated.waitUntilSchedulerState(s);
     }
 
     @Override public final void terminateScheduler() {

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.main;
 
 /** Die Zustände werden nacheinander, ohne Wiederholung, durchlaufen. */
-enum SchedulerState {
+public enum SchedulerState {
     /** Scheduler startet und kann noch nicht benutzt werden. */
     starting,
 

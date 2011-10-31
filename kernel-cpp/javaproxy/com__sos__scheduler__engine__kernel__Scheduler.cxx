@@ -21,6 +21,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _onActivate____method;
+    ::zschimmer::javabridge::Method const _onActivated____method;
     ::zschimmer::javabridge::Method const _onClose____method;
     ::zschimmer::javabridge::Method const _onLoad__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _threadLock____method;
@@ -37,6 +38,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
     ,_onActivate____method(this, "onActivate", "()V")
+    ,_onActivated____method(this, "onActivated", "()V")
     ,_onClose____method(this, "onClose", "()V")
     ,_onLoad__Ljava_lang_String_2__method(this, "onLoad", "(Ljava/lang/String;)V")
     ,_threadLock____method(this, "threadLock", "()V")
@@ -92,6 +94,12 @@ void Scheduler::onActivate() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_onActivate____method.call(get_jobject(), parameter_list);
+}
+
+void Scheduler::onActivated() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    cls->_onActivated____method.call(get_jobject(), parameter_list);
 }
 
 void Scheduler::onClose() {

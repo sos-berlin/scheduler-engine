@@ -142,6 +142,9 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     @ForCpp public void onActivate() {
         logSubsystem.activate();
         pluginSubsystem.activate();
+    }
+
+    @ForCpp public void onActivated() {
         schedulerStateHandler.onSchedulerActivated();
     }
 
