@@ -10,6 +10,11 @@ public class FolderSubsystem implements Subsystem {
         this.cppProxy = cppProxy;
     }
 
+    /** @see {@link #updateFolders(double)}. */
+    public boolean updateFolders() {
+        return cppProxy.handle_folders(0);
+    }
+
     /** @return true, wenn ein {@link FileBased} geladen worden ist. */
     public boolean updateFolders(double minimumAge) {
         return cppProxy.handle_folders(minimumAge);
