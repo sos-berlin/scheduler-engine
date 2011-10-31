@@ -6,12 +6,13 @@ import java.lang.reflect.Modifier;
 import com.google.common.collect.ImmutableList;
 
 public class AnnotatedEventSubscriber implements EventSubscriber {
-    private final DeferredOperationExecutor deferredOperationExecutor;
+    private final OperationCollector operationCollector;
     private final Object object;
     private final ImmutableList<EventHandlingMethod> methods;
 
-    public AnnotatedEventSubscriber(DeferredOperationExecutor executor, Object object, ImmutableList<EventHandlingMethod> methods) {
-        this.deferredOperationExecutor = executor;
+    public AnnotatedEventSubscriber(OperationCollector operationCollector, Object object,
+            ImmutableList<EventHandlingMethod> methods) {
+        this.operationCollector = operationCollector;
         this.object = object;
         this.methods = methods;
     }
@@ -26,12 +27,12 @@ public class AnnotatedEventSubscriber implements EventSubscriber {
     private void callHandler(Method m, Event e) throws Exception {
         Object response = m.invoke(object, e);
         if (response != null) {
-            deferredOperationExecutor.addOperation((SchedulerOperation)response);
+            operationCollector.addOperation((SchedulerOperation)response);
         }
     }
 
-    public static AnnotatedEventSubscriber of(Object o, DeferredOperationExecutor executor) {
-        return new AnnotatedEventSubscriber(executor, o, eventHandlerMethods(o));
+    public static AnnotatedEventSubscriber of(Object o, OperationCollector operationCollector) {
+        return new AnnotatedEventSubscriber(operationCollector, o, eventHandlerMethods(o));
     }
 
     public static ImmutableList<EventHandlingMethod> eventHandlerMethods(Object o) {

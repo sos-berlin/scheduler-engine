@@ -29,13 +29,11 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         new PluginCommandCommandXmlParser(this),
         new PluginCommandResultXmlizer(this) };
 
-    
     public PluginSubsystem(Scheduler scheduler, EventSubsystem eventSubsystem) {
         super(scheduler.getPlatform());
         this.scheduler = scheduler;
         this.eventSubsystem = eventSubsystem;
     }
-
 
     public void load(Element root) {
         Element plugInsElement = elementXPathOrNull(root, "config/plugins");
@@ -44,14 +42,12 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         }
     }
 
-
     private void tryAddPlugin(Element e) {
         String className = e.getAttribute("java_class");
         if (className.isEmpty())  throw new SchedulerException("Missing attribute java_class in <plugin>");
         Element contentElement = elementXPathOrNull(e, "plugin.config");
         tryAddPlugin(className, contentElement);
     }
-    
 
     private void tryAddPlugin(String className, Element elementOrNull) {
         try {
@@ -65,13 +61,11 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         }
     }
 
-
     private Plugin newPlugin(String className, Element elementOrNull) throws Exception {
         Class<?> c = Class.forName(className);
         PluginFactory f = (PluginFactory)c.getMethod(staticFactoryMethodName).invoke(null);
         return f.newInstance(scheduler, elementOrNull);
     }
-
 
     public void activate() {
         for (PluginAdapter p: plugIns.values()) {
@@ -80,14 +74,12 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         }
     }
 
-
     public void close() {
         for (PluginAdapter p: plugIns.values()) {
             eventSubsystem.unsubscribeAnnotated(p.getPlugin());
             p.tryClose();
         }
     }
-
 
     CommandPluginAdapter commandPluginByClassName(String className) {
         PluginAdapter a = pluginByClassName(className);
@@ -96,7 +88,6 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         return (CommandPluginAdapter)a;
     }
 
-
     private PluginAdapter pluginByClassName(String className) {
         PluginAdapter result = plugIns.get(className);
         if (result == null)
@@ -104,11 +95,9 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         return result;
     }
 
-
     @Override public Collection<CommandHandler> getCommandHandlers() {
         return asList(commandHandlers);
     }
-
 
     static void logError(PrefixLog log, String pluginName, Throwable t) {
         log.error(pluginName + ": " + t + "\n" + getStackTraceAsString(t));

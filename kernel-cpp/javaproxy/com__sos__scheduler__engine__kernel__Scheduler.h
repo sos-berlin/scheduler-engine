@@ -53,6 +53,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     void onActivate();
     void onActivated();
     void onClose();
+    void onEnteringSleepState();
     void onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
     void threadLock();
     void threadUnlock();

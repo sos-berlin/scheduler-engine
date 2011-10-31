@@ -23,6 +23,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _onActivate____method;
     ::zschimmer::javabridge::Method const _onActivated____method;
     ::zschimmer::javabridge::Method const _onClose____method;
+    ::zschimmer::javabridge::Method const _onEnteringSleepState____method;
     ::zschimmer::javabridge::Method const _onLoad__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _threadLock____method;
     ::zschimmer::javabridge::Method const _threadUnlock____method;
@@ -40,6 +41,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_onActivate____method(this, "onActivate", "()V")
     ,_onActivated____method(this, "onActivated", "()V")
     ,_onClose____method(this, "onClose", "()V")
+    ,_onEnteringSleepState____method(this, "onEnteringSleepState", "()V")
     ,_onLoad__Ljava_lang_String_2__method(this, "onLoad", "(Ljava/lang/String;)V")
     ,_threadLock____method(this, "threadLock", "()V")
     ,_threadUnlock____method(this, "threadUnlock", "()V"){}
@@ -106,6 +108,12 @@ void Scheduler::onClose() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_onClose____method.call(get_jobject(), parameter_list);
+}
+
+void Scheduler::onEnteringSleepState() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    cls->_onEnteringSleepState____method.call(get_jobject(), parameter_list);
 }
 
 void Scheduler::onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {

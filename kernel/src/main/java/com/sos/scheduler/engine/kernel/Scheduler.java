@@ -20,7 +20,8 @@ import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
-import com.sos.scheduler.engine.kernel.event.DeferredOperationExecutor;
+import com.sos.scheduler.engine.kernel.event.OperationCollector;
+import com.sos.scheduler.engine.kernel.event.OperationExecutor;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
@@ -51,7 +52,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     private EventSubsystem eventSubsystem = null;
     private final List<Subsystem> subsystems = new ArrayList<Subsystem>();
     private CommandSubsystem commandSubsystem = null;
-    private DeferredOperationExecutor deferredOperationExecutor = null;
+    private final OperationExecutor deferredOperationExecutor;
     private boolean threadInitiallyLocked = false;
     
     
@@ -61,6 +62,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         spoolerC.setSister(this);
         log = new PrefixLog(spoolerC.log());
         platform = new Platform(log);
+        deferredOperationExecutor = new OperationExecutor(log);
 
         if (schedulerStateHandler == null) {  // Wenn wir ein schedulerStateHandler haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
             threadLock();
@@ -102,9 +104,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     
     @ForCpp public void onLoad(String configurationXml) {
         Element configElement = loadXml(configurationXml).getDocumentElement();
-        deferredOperationExecutor = new DeferredOperationExecutor(log());
         addSubsystems(configElement);
-        eventSubsystem.subscribeAnnotated(deferredOperationExecutor);
         pluginSubsystem.load(configElement);
         schedulerStateHandler.onSchedulerStarted(this);
     }
@@ -152,6 +152,10 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         schedulerStateHandler.onSchedulerActivated();
     }
 
+    @ForCpp public void onEnteringSleepState() {
+        deferredOperationExecutor.execute();
+    }
+
     public void terminate() {
         cppProxy.cmd_terminate();
     }
@@ -189,8 +193,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     public JobSubsystem getJobSubsystem() { return jobSubsystem; }
     public OrderSubsystem getOrderSubsystem() { return orderSubsystem; }
 
-    public DeferredOperationExecutor getDeferredOperationExecutor() {
-        assert deferredOperationExecutor != null;
+    public OperationCollector getOperationCollector() {
         return deferredOperationExecutor;
     }
 

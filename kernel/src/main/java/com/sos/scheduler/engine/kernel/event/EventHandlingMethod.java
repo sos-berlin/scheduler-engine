@@ -22,8 +22,8 @@ class EventHandlingMethod {
 
     private static void checkReturnType(Method m) {
         Class<?> c = m.getReturnType();
-        if (!isVoid(c) && !EventResponse.class.isAssignableFrom(c))
-            throw new IllegalArgumentException("Method " +m.getName() + "has an unexpected return type");
+        if (!isVoid(c) && !SchedulerOperation.class.isAssignableFrom(c))
+            throw new IllegalArgumentException("Method " +m.getName() + " has an unexpected return type");
     }
 
     private static boolean isVoid(Class<?> c) {
