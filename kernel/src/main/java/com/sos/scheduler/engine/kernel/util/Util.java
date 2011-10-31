@@ -4,8 +4,13 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collections;
+
+import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.ImmutableList;
 
 public final class Util {
     private static final Logger logger = Logger.getLogger(Util.class);
@@ -56,5 +61,12 @@ public final class Util {
             logger.trace(x, x);
             return true;
         }
+    }
+
+    public static <T> ImmutableList<T> optional(@Nullable T o) {
+        if (o == null)
+            return ImmutableList.of();
+        else
+            return ImmutableList.of(o);
     }
 }
