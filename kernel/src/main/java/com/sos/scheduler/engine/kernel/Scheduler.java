@@ -20,6 +20,7 @@ import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
+import com.sos.scheduler.engine.kernel.event.DeferredOperationExecutor;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
@@ -50,6 +51,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     private EventSubsystem eventSubsystem = null;
     private final List<Subsystem> subsystems = new ArrayList<Subsystem>();
     private CommandSubsystem commandSubsystem = null;
+    private DeferredOperationExecutor deferredOperationExecutor = null;
     private boolean threadInitiallyLocked = false;
     
     
@@ -101,6 +103,8 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     @ForCpp public void onLoad(String configurationXml) {
         Element configElement = loadXml(configurationXml).getDocumentElement();
         addSubsystems(configElement);
+        deferredOperationExecutor = new DeferredOperationExecutor(eventSubsystem);
+        pluginSubsystem.load(configElement);
         schedulerStateHandler.onSchedulerStarted(this);
     }
 
@@ -124,7 +128,6 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         subsystems.add(orderSubsystem);
 
         pluginSubsystem = new PluginSubsystem(this);
-        pluginSubsystem.load(configElement);
         subsystems.add(pluginSubsystem);
 
         commandSubsystem = new CommandSubsystem(getCommandHandlers(subsystems));
@@ -184,6 +187,11 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     @ForCpp public EventSubsystem getEventSubsystem() { return eventSubsystem; }
     public JobSubsystem getJobSubsystem() { return jobSubsystem; }
     public OrderSubsystem getOrderSubsystem() { return orderSubsystem; }
+
+    public DeferredOperationExecutor getDeferredOperationExecutor() {
+        assert deferredOperationExecutor != null;
+        return deferredOperationExecutor;
+    }
 
     public String getSchedulerId() {
         return cppProxy.id();

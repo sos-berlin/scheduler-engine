@@ -19,16 +19,32 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
 
     @ForCpp public final void report(Event e) {
         if (currentEvent != null) {
-            // Kein log().error(), sonst gibt es wieder eine Rekursion
-            logger.error(EventSubsystem.class.getSimpleName() + ".report(" +e+ "): ignoring the event triggered by handling the event '"+currentEvent+"'");
+            onRecursiveEvent(e);
         } else {
-            currentEvent = e;
-            try {
+            if (e instanceof SchedulerIsCallableEvent)
                 publishEvent(e);
-            }
-            finally {
-                currentEvent = null;
-            }
+            else
+                publishNonrecursiveEvent(e);
+        }
+    }
+
+    private void onRecursiveEvent(Event e) {
+        try {
+            // Kein log().error(), sonst gibt es wieder eine Rekursion
+            throw new Exception(EventSubsystem.class.getSimpleName() + ".report(" +e+ "): ignoring the event triggered by handling the event '"+currentEvent+"'");
+        }
+        catch (Exception x) {
+            logger.error(x, x);
+        }
+    }
+
+    private void publishNonrecursiveEvent(Event e) {
+        currentEvent = e;
+        try {
+            publishEvent(e);
+        }
+        finally {
+            currentEvent = null;
         }
     }
 
