@@ -8,6 +8,7 @@ import static java.util.Arrays.asList;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class EnvironmentFiles {
     private final File directory;
     private final ImmutableList<URL> resourceUrls;
     private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+    private final long lastModified = new Date().getTime() - 3000;  // 3s zurück, um bei 1s (oder bei FAT 2s) Zeitraster in der Vergangenheit zu liegen
 
     public EnvironmentFiles(ResourcePath configResourcePath, File directory) {
         this.configResourcePath = configResourcePath;
@@ -58,7 +60,9 @@ public class EnvironmentFiles {
     }
 
     private void copyResource(URL url) {
-        copyURLToFile(url, new File(directory, nameOfUrl(url)));
+        File f = new File(directory, nameOfUrl(url));
+        copyURLToFile(url, f);
+        f.setLastModified(lastModified);
     }
 
 
