@@ -28,8 +28,8 @@ public final class Job extends FileBased implements Sister {
         return cppProxy.name();
     }
 
-    public String getPath() {
-        return cppProxy.path();
+    public AbsolutePath getPath() {
+        return new AbsolutePath(cppProxy.path());
     }
 
     /** @return true, wenn das {@link FileBased} nach einer Änderung erneut geladen worden ist. */
