@@ -1,10 +1,7 @@
 package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Cpp.quoted
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
-import com.sos.scheduler.engine.cplusplus.generator.cpp.javabridge.JavaBridge
-import com.sos.scheduler.engine.cplusplus.generator.module._
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
