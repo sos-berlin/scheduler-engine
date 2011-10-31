@@ -11,6 +11,6 @@ import java.util.ArrayList;
 public interface Order_subsystemC extends CppProxy {
     int finished_orders_count();
     ArrayList<JobChain> java_file_baseds();
-    UnmodifiableJobchain java_file_based_or_null(String p);
+    JobChain java_file_based_or_null(String p);
     //String obj_name();
 }

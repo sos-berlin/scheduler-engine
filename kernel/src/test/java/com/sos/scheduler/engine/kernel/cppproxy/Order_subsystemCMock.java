@@ -19,5 +19,5 @@ public class Order_subsystemCMock extends CppProxyImpl<Sister> implements Order_
 
     @Override public ArrayList<JobChain> java_file_baseds() { return new ArrayList<JobChain>(0); }
 
-    @Override public UnmodifiableJobchain java_file_based_or_null(String p) { return null; }
+    @Override public JobChain java_file_based_or_null(String p) { return null; }
 }
