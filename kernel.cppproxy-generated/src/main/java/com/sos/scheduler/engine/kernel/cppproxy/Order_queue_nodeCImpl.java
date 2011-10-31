@@ -25,6 +25,21 @@ final class Order_queue_nodeCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.JobC result = job__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.JobC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.JobC job__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

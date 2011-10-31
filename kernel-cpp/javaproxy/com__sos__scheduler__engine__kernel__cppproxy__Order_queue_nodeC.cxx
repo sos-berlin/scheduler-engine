@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.h"
+#include "com__sos__scheduler__engine__kernel__cppproxy__JobC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"

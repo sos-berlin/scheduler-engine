@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 public interface Order_queue_nodeC extends NodeCI, CppProxyWithSister<OrderQueueNode>
 {
     OrderQueueNode.Type sisterType = new OrderQueueNode.Type();
-    
+
+    JobC job();
     Order_queueC order_queue();
 }
