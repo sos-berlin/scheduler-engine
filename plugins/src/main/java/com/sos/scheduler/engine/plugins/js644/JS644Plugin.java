@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.plugins.js644;
 
+import java.util.concurrent.Callable;
+
 import org.w3c.dom.Element;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -38,7 +40,7 @@ public class JS644Plugin extends AbstractPlugin {
 
 	public static PluginFactory factory() {
     	return new PluginFactory() {
-            @Override public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
+            @Override public Plugin newInstance(Scheduler scheduler, Element pluginElement) {
             	return new JS644Plugin(scheduler.getEventSubsystem(), scheduler.getFolderSubsystem(), scheduler.getOrderSubsystem());
             }
         };
@@ -50,16 +52,31 @@ public class JS644Plugin extends AbstractPlugin {
                 FileBasedActivatedEvent e = (FileBasedActivatedEvent)event;
                 if (e.getObject() instanceof Job) {
                     Job job = (Job)e.getObject();
-                    if (job.isFileBasedReloaded()) {
-                        onReloadedJobActivated(job);
+                    if (job.isFileBasedReread()) {
+                        onRereadJobActivated(job);
+                        //scheduler().addCallable(new MyCallable(job));
                     }
                 }
             }
         }
 
-        private void onReloadedJobActivated(Job job) {
-            for (JobChain jobChain: orderSubsystem.ofJob(job)) jobChain.setForceFileReload();
+        private void onRereadJobActivated(Job job) {
+            for (JobChain jobChain: orderSubsystem.jobchainsOfJob(job)) jobChain.setForceFileReread();
             folderSubsystem.updateFolders(0);
+        }
+    }
+
+    private class MyCallable implements Callable {
+        private final Job job;
+
+        public MyCallable(Job job) {
+            this.job = job;
+        }
+
+        @Override public Object call() throws Exception {
+            for (JobChain jobChain: orderSubsystem.jobchainsOfJob(job)) jobChain.setForceFileReread();
+            folderSubsystem.updateFolders(0);
+            return null;
         }
     }
 }

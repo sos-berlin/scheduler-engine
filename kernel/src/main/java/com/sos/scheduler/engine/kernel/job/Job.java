@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.JobC;
+import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.folder.FileBasedState;
 
@@ -32,8 +33,12 @@ public final class Job extends FileBased implements Sister {
     }
 
     /** @return true, wenn das {@link FileBased} nach einer Änderung erneut geladen worden ist. */
-    public boolean isFileBasedReloaded() {
-        return cppProxy.is_file_based_reloaded();
+    public boolean isFileBasedReread() {
+        return cppProxy.is_file_based_reread();
+    }
+
+    @Override public String toString() {
+        return getClass().getSimpleName() + " " + getPath();
     }
 
     public static class Type implements SisterType<Job, JobC> {

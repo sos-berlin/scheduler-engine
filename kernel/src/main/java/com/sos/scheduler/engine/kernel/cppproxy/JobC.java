@@ -11,7 +11,7 @@ public interface JobC extends CppProxyWithSister<Job>
     Job.Type sisterType = new Job.Type();
 
     String file_based_state_name();
-    boolean is_file_based_reloaded();
+    boolean is_file_based_reread();
     String name();
     String path();
     //String obj_name();

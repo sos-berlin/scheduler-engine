@@ -25,17 +25,17 @@ final class JobCImpl
     private static native java.lang.String file_based_state_name__native(long cppReference);
 
 
-    @Override public boolean is_file_based_reloaded() {
+    @Override public boolean is_file_based_reread() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return is_file_based_reloaded__native(cppReference());
+            return is_file_based_reread__native(cppReference());
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
-    private static native boolean is_file_based_reloaded__native(long cppReference);
+    private static native boolean is_file_based_reread__native(long cppReference);
 
 
     @Override public java.lang.String name() {

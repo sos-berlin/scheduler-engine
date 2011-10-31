@@ -68,7 +68,7 @@ static jobject JNICALL java_1file_1baseds(JNIEnv* jenv, jobject, jlong cppRefere
 
 const static JNINativeMethod native_methods[] = {
     { (char*)"finished_orders_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::finished_1orders_1count },
-    { (char*)"java_file_based_or_null__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/order/jobchain/UnmodifiableJobchain;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based_1or_1null__Ljava_lang_String_2 },
+    { (char*)"java_file_based_or_null__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/order/jobchain/JobChain;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based_1or_1null__Ljava_lang_String_2 },
     { (char*)"java_file_baseds__native", (char*)"(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1baseds }
 };
 

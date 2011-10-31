@@ -9,8 +9,9 @@ import java.util.List;
 @CppClass(clas="sos::scheduler::order::Job_chain", directory="scheduler", include="spooler.h")
 public interface Job_chainC extends CppProxyWithSister<JobChain> {
     JobChain.Type sisterType = new JobChain.Type();
+
     String name();
-    void set_force_file_reload();
+    void set_force_file_reread();
     List<Node> java_nodes();
     OrderC order(String orderId);
 }

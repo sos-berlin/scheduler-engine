@@ -8,7 +8,6 @@ import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderId;
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 
 public final class JobChain extends FileBased implements UnmodifiableJobchain {
     private final Job_chainC cppProxy;
@@ -24,9 +23,13 @@ public final class JobChain extends FileBased implements UnmodifiableJobchain {
         return cppProxy.name();
     }
 
+//    @Override public AbsolutePath getPath() {
+//        return cppProxy.getPath();
+//    }
+
     /** Markiert, dass das {@link FileBased} beim nächsten Verzeichnisabgleich neu geladen werden soll. */
-    public void setForceFileReload() {
-        cppProxy.set_force_file_reload();
+    public void setForceFileReread() {
+        cppProxy.set_force_file_reread();
     }
 
 	public ImmutableList<Node> getNodes() { 
@@ -35,6 +38,10 @@ public final class JobChain extends FileBased implements UnmodifiableJobchain {
 
 	public Order order(OrderId id) {
         return cppProxy.order(id.getString()).getSister();
+    }
+
+    @Override public String toString() {
+        return JobChain.class.getSimpleName() + " " + getName();
     }
 
     public static class Type implements SisterType<JobChain, Job_chainC> {
