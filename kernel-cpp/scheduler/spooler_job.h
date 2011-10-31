@@ -139,6 +139,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Object::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job>::java_sister(); }
 
     // Scheduler_object:
     virtual string              obj_name                    () const                                { return "Job " + path().without_slash(); }

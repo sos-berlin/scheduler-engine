@@ -24,7 +24,7 @@ struct Has_proxy
 
     jobject                     j                           ()                                      { return java_proxy_jobject(); }
     jobject                     java_proxy_jobject          ();
-    jobject                     java_sister                 (); 
+    virtual jobject             java_sister                 (); 
 
     static jobject              jobject_of                  (Has_proxy* a)                          { return a? a->java_proxy_jobject() : NULL; }
 

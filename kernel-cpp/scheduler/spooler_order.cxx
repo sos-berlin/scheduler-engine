@@ -1429,6 +1429,7 @@ xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& documen
 Job_node::Job_node( Job_chain* job_chain, const Order::State& state, const Absolute_path& job_path ) 
 : 
     Order_queue_node( job_chain, state, n_job ),
+    javabridge::has_proxy<Job_node>(job_chain->spooler()),
     _zero_(this+1),
     _job_path( job_path )
 {

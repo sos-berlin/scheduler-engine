@@ -72,7 +72,7 @@ struct Order : Com_order,
                                 Order                   ( Standing_order_subsystem* );
                                ~Order                   ();
 
-    javabridge::has_proxy<Order>::java_sister;
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Order>::java_sister(); }
 
     // Scheduler_object
 
@@ -619,7 +619,7 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
 
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
 
-                                javabridge::has_proxy<Order_queue_node>::java_sister;
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Order_queue_node>::java_sister(); }
 
     void                        close                       ();
   //void                        replace                     ( Node* old_node );
@@ -640,7 +640,8 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
 //------------------------------------------------------------------------------job_chain::Job_node
 
 struct Job_node : Order_queue_node,
-                  Dependant
+                  Dependant,
+                  javabridge::has_proxy<Job_node>
 {
     typedef Order_queue_node    Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Job_node, n_job )
@@ -648,6 +649,8 @@ struct Job_node : Order_queue_node,
 
                                 Job_node                    ( Job_chain*, const Order::State&, const Absolute_path& job_path );
                                ~Job_node                    ();
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job_node>::java_sister(); }
 
     void                        close                       ();
     bool                        initialize                  ();
@@ -762,7 +765,7 @@ struct Job_chain : Com_job_chain,
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Com_job_chain::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Com_job_chain::Release(); }
 
-    javabridge::has_proxy<Job_chain>::java_sister;
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job_chain>::java_sister(); }
 
     // Scheduler_object:
     string                      obj_name                    () const                                { return "Job_chain " + path(); }
