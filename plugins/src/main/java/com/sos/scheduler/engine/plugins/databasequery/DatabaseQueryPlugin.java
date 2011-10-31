@@ -12,10 +12,8 @@ import java.util.Collection;
 import org.w3c.dom.Element;
 import static java.util.Arrays.asList;
 
-
 public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin {
     private final CommandHandler[] commandHandlers;
-
 
     DatabaseQueryPlugin(EntityManager em, String schedulerId, String clusterMemberId) {
         commandHandlers = new CommandHandler[]{
@@ -24,17 +22,17 @@ public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin
             TaskHistoryEntriesResultXmlizer.singleton };
     }
 
-
     @Override public final Collection<CommandHandler> getCommandHandlers() {
         return asList(commandHandlers);
     }
 
-
 	public static PluginFactory factory() {
     	return new PluginFactory() {
-            @Override public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
-            	return new DatabaseQueryPlugin(scheduler.getDatabaseSubsystem().getEntityManager(),
-                        scheduler.getSchedulerId(), scheduler.getClusterMemberId());
+            @Override public Plugin newInstance(Scheduler scheduler, Element pluginElement) {
+            	return new DatabaseQueryPlugin(
+                        scheduler.getDatabaseSubsystem().getEntityManager(),
+                        scheduler.getSchedulerId(),
+                        scheduler.getClusterMemberId());
             }
         };
     }
