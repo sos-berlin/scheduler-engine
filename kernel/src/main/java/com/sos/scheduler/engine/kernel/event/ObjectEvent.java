@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.event;
 
-import com.sos.scheduler.engine.kernel.NullSchedulerObject;
+import static com.sos.scheduler.engine.kernel.util.Util.stringOrException;
+
 import com.sos.scheduler.engine.kernel.SchedulerObject;
-import static com.sos.scheduler.engine.kernel.util.Util.*;
 
 public abstract class ObjectEvent extends AbstractEvent {
     /** Nur gültig während des Events. 
@@ -13,7 +13,7 @@ public abstract class ObjectEvent extends AbstractEvent {
         StringBuilder result = new StringBuilder(200);
         result.append(super.toString());
         SchedulerObject o = getObject();
-        if (o != NullSchedulerObject.singleton)  result.append(" object=").append(stringOrException(o));
+        result.append(" object=").append(stringOrException(o));
         return result.toString();
     }
 }

@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 
-/**
+/** Stellt eine Konfigurationsumgebung für den Scheduler bereit.
  * \file Environment.java
  * \brief Build the environment for the scheduler binary 
  *  
@@ -31,7 +31,6 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-/** Stellt eine Konfigurationsumgebung für den Scheduler bereit. */
 public final class Environment {
     private static final String configSubdir = "config";
     private static final String logSubdir = "log";
