@@ -1,5 +1,10 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -8,45 +13,54 @@ import com.sos.scheduler.engine.kernel.Subsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.w3c.dom.Element;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
+import static com.sos.scheduler.engine.kernel.util.Util.optional;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 import static java.util.Arrays.asList;
+
+import javax.annotation.Nullable;
 
 //TODO Eigenes PrefixLog einführen
 
 public final class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
     private static final String staticFactoryMethodName = "factory";
+
+    private final CommandHandler[] commandHandlers = {
+    new PluginCommandExecutor(this),
+    new PluginCommandCommandXmlParser(this),
+    new PluginCommandResultXmlizer(this) };
     private final Scheduler scheduler;
     private final EventSubsystem eventSubsystem;
+    private final Injector injector;
     private final Map<String,PluginAdapter> plugIns = new HashMap<String,PluginAdapter>();
-    private final CommandHandler[] commandHandlers = { 
-        new PluginCommandExecutor(this),
-        new PluginCommandCommandXmlParser(this),
-        new PluginCommandResultXmlizer(this) };
 
-    public PluginSubsystem(Scheduler scheduler, EventSubsystem eventSubsystem) {
+    public PluginSubsystem(Scheduler scheduler, EventSubsystem eventSubsystem, Injector injector) {
         super(scheduler.getPlatform());
         this.scheduler = scheduler;
         this.eventSubsystem = eventSubsystem;
+        this.injector = injector;
     }
 
     public void load(Element root) {
         Element plugInsElement = elementXPathOrNull(root, "config/plugins");
         if (plugInsElement != null) {
-            for (Element e: elementsXPath(plugInsElement, "plugin"))  tryAddPlugin(e);
+            for (Element e: elementsXPath(plugInsElement, "plugin"))
+                tryAddPlugin(e);
         }
     }
 
     private void tryAddPlugin(Element e) {
         String className = e.getAttribute("java_class");
         if (className.isEmpty())  throw new SchedulerException("Missing attribute java_class in <plugin>");
-        Element contentElement = elementXPathOrNull(e, "plugin.config");
-        tryAddPlugin(className, contentElement);
+        tryAddPlugin(className, elementXPathOrNull(e, "plugin.config"));
     }
 
     private void tryAddPlugin(String className, Element elementOrNull) {
@@ -61,11 +75,49 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         }
     }
 
-    private Plugin newPlugin(String className, Element elementOrNull) throws Exception {
-        Class<?> c = Class.forName(className);
-        PluginFactory f = (PluginFactory)c.getMethod(staticFactoryMethodName).invoke(null);
+    private Plugin newPlugin(String className, @Nullable Element elementOrNull) throws Exception {
+        Class<? extends Plugin> c = pluginClassForName(className);
+        Method factoryMethod = factoryMethodOrNull(c);
+        return factoryMethod != null? newPluginByFactoryMethod(factoryMethod, elementOrNull)
+                    : newPluginByDI(c, elementOrNull);
+    }
+
+    private Class<? extends Plugin> pluginClassForName(String name) throws ClassNotFoundException {
+        Class<?> c = Class.forName(name);
+        if (!Plugin.class.isAssignableFrom(c))
+            throw new SchedulerException("Plugin does not implement " + Plugin.class.getName());
+        @SuppressWarnings("unchecked")
+        Class<? extends Plugin> result = (Class<? extends Plugin>)c;
+        return result;
+    }
+
+    @Nullable private Method factoryMethodOrNull(Class<?> c) {
+        try {
+            return c.getMethod(staticFactoryMethodName);
+        } catch (NoSuchMethodException x) {
+            return null;
+        }
+    }
+
+    private Plugin newPluginByFactoryMethod(Method m, Element elementOrNull) throws InvocationTargetException, IllegalAccessException {
+        PluginFactory f = (PluginFactory)m.invoke(null);
         return f.newInstance(scheduler, elementOrNull);
     }
+
+    private Plugin newPluginByDI(Class<? extends Plugin> c, @Nullable final Element elementOrNull) {
+        Injector myInjector = injector.createChildInjector(Iterables.transform(optional(elementOrNull), elementToModule));
+        return myInjector.getInstance(c);
+    }
+
+    private static final Function<Element,Module> elementToModule = new Function<Element,Module>() {
+        @Override public Module apply(final Element e) {
+            return new AbstractModule() {
+                @Override protected void configure() {
+                    bind(Element.class).toInstance(e);
+                }
+            };
+        }
+    };
 
     public void activate() {
         for (PluginAdapter p: plugIns.values()) {

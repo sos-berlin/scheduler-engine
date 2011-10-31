@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.plugins.js644;
 
+import javax.inject.Inject;
+
 import org.w3c.dom.Element;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -18,17 +20,9 @@ public class JS644Plugin extends AbstractPlugin {
     private final FolderSubsystem folderSubsystem;
     private final OrderSubsystem orderSubsystem;
 
-    JS644Plugin(FolderSubsystem folderSubsystem, OrderSubsystem orderSubsystem) {
+    @Inject JS644Plugin(FolderSubsystem folderSubsystem, OrderSubsystem orderSubsystem) {
         this.folderSubsystem = folderSubsystem;
         this.orderSubsystem = orderSubsystem;
-    }
-
-	public static PluginFactory factory() {
-    	return new PluginFactory() {
-            @Override public Plugin newInstance(Scheduler scheduler, Element pluginElement) {
-            	return new JS644Plugin(scheduler.getFolderSubsystem(), scheduler.getOrderSubsystem());
-            }
-        };
     }
 
     @EventHandler public SchedulerOperation handleEvent(FileBasedActivatedEvent e) throws Exception {

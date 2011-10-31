@@ -12,6 +12,9 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -21,9 +24,9 @@ import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
+import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.event.OperationCollector;
 import com.sos.scheduler.engine.kernel.event.OperationExecutor;
-import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.log.LogCategory;
@@ -54,7 +57,6 @@ public final class Scheduler implements HasPlatform, Sister {
     private final OrderSubsystem orderSubsystem;
     private final EventSubsystem eventSubsystem;
     private final CommandSubsystem commandSubsystem;
-
     private boolean threadInitiallyLocked = false;
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerStateHandler schedulerStateHandler) {
@@ -66,15 +68,26 @@ public final class Scheduler implements HasPlatform, Sister {
         operationExecutor = new OperationExecutor(log);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
-        databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
         eventSubsystem = new EventSubsystem(platform, operationExecutor);
+        databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());
         orderSubsystem = new OrderSubsystem(platform, this.cppProxy.order_subsystem());
-        pluginSubsystem = new PluginSubsystem(this, eventSubsystem);
+        pluginSubsystem = new PluginSubsystem(this, eventSubsystem, newInjector());
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
         initializeThreadLock();
+    }
+
+    private Injector newInjector() {
+        return Guice.createInjector(new AbstractModule() {
+            @Override protected void configure() {
+                bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
+                bind(FolderSubsystem.class).toInstance(folderSubsystem);
+                bind(JobSubsystem.class).toInstance(jobSubsystem);
+                bind(OrderSubsystem.class).toInstance(orderSubsystem);
+            }
+        });
     }
 
     private static Iterable<CommandHandler> getCommandHandlers(Iterable<?> objects) {
