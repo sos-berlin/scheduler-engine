@@ -40,7 +40,7 @@ class ResourcesAsFilesProvider {
     }
 
     private ResourceFile provideResourceAsFile(Resource r) {
-        logger.debug(r+": "+r.getClass().getName());
+        logger.trace(r+": "+r.getClass().getName());
         return r instanceof FileSystemResource?
                 new ResourceFile(((FileSystemResource)r).getFile(), false)
                 : provideNonfileResourceAsFile(r);
@@ -48,7 +48,7 @@ class ResourcesAsFilesProvider {
 
     private ResourceFile provideNonfileResourceAsFile(Resource r) {
         try {
-            logger.debug("provideNonfileResourceAsFile("+r+")");
+            logger.trace("provideNonfileResourceAsFile("+r+")");
             File f = new File(directory, r.getFilename());
             if (!resourceSeemsEqualToFile(r, f)) {
                 copyResource(r, f);
@@ -62,7 +62,6 @@ class ResourcesAsFilesProvider {
         logger.debug("copyURLToFile(" + r.getURL() + ", " + f + ")");
         copyURLToFile(r.getURL(), f);
         ignore(f.setLastModified(r.lastModified()));
-        logger.debug(r + " extracted to " + f);
         assert resourceSeemsEqualToFile(r, f);
     }
 
