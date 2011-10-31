@@ -16,7 +16,7 @@ public class OrderQueueNode extends JobNode {
     }
 
     public final Job getJob() {     //TODO Gehört zu JobNode
-        return cppProxy.job().getSister();
+        return cppProxy.getJob().getSister();
     }
 
     public final OrderQueue getOrderQueue() {

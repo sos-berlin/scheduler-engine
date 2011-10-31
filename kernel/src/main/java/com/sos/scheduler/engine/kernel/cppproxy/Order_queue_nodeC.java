@@ -10,6 +10,6 @@ public interface Order_queue_nodeC extends NodeCI, CppProxyWithSister<OrderQueue
 {
     OrderQueueNode.Type sisterType = new OrderQueueNode.Type();
 
-    JobC job();
+    JobC getJob();
     Order_queueC order_queue();
 }

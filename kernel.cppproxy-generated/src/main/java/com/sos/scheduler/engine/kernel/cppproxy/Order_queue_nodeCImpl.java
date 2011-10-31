@@ -25,7 +25,7 @@ final class Order_queue_nodeCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node__native(long cppReference);
 
 
-    @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC getJob() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.JobC result = job__native(cppReference());
