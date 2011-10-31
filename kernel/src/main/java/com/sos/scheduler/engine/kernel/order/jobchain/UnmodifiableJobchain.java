@@ -7,5 +7,5 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 public interface UnmodifiableJobchain {
 	String getName();
 	ImmutableList<Node> getNodes();
-	UnmodifiableOrder getUnmodifiableOrder(OrderId id);
+	UnmodifiableOrder order(OrderId id);
 }
