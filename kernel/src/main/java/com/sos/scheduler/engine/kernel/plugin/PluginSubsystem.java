@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.kernel.Subsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import com.sos.scheduler.engine.kernel.util.Lazy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,19 +35,19 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     private static final String staticFactoryMethodName = "factory";
 
     private final CommandHandler[] commandHandlers = {
-    new PluginCommandExecutor(this),
-    new PluginCommandCommandXmlParser(this),
-    new PluginCommandResultXmlizer(this) };
+            new PluginCommandExecutor(this),
+            new PluginCommandCommandXmlParser(this),
+            new PluginCommandResultXmlizer(this) };
     private final Scheduler scheduler;
     private final EventSubsystem eventSubsystem;
-    private final Injector injector;
-    private final Map<String,PluginAdapter> plugIns = new HashMap<String,PluginAdapter>();
+    private final Lazy<Injector> lazyInjector;
+    private final Map<String,PluginAdapter> plugins = new HashMap<String,PluginAdapter>();
 
-    public PluginSubsystem(Scheduler scheduler, EventSubsystem eventSubsystem, Injector injector) {
+    public PluginSubsystem(Scheduler scheduler, EventSubsystem eventSubsystem, Lazy<Injector> injector) {
         super(scheduler.getPlatform());
         this.scheduler = scheduler;
         this.eventSubsystem = eventSubsystem;
-        this.injector = injector;
+        this.lazyInjector = injector;
     }
 
     public void load(Element root) {
@@ -68,7 +69,7 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
             Plugin p = newPlugin(className, elementOrNull);
             PluginAdapter a = p instanceof CommandPlugin? new CommandPluginAdapter((CommandPlugin)p, className, log())
                 : new PluginAdapter(p, className, log());
-            plugIns.put(className, a);
+            plugins.put(className, a);
             log().info(a + " added");
         } catch (Exception x) {
             logError(log(), "Plug-in " + className, x);
@@ -105,29 +106,32 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     }
 
     private Plugin newPluginByDI(Class<? extends Plugin> c, @Nullable final Element elementOrNull) {
-        Injector myInjector = injector.createChildInjector(Iterables.transform(optional(elementOrNull), elementToModule));
+        Injector myInjector = lazyInjector.get().createChildInjector(Iterables.transform(optional(elementOrNull), elementToModule()));
         return myInjector.getInstance(c);
     }
 
-    private static final Function<Element,Module> elementToModule = new Function<Element,Module>() {
-        @Override public Module apply(final Element e) {
-            return new AbstractModule() {
-                @Override protected void configure() {
-                    bind(Element.class).toInstance(e);
-                }
-            };
-        }
-    };
+    private static Function<Element,Module> elementToModule() {
+        // Funktion, damit Abhängigkeit zu DI-Jars erst zur Laufzeit, bei Bedarf, verlangt werden.
+        return new Function<Element,Module>() {
+            @Override public Module apply(final Element e) {
+                return new AbstractModule() {
+                    @Override protected void configure() {
+                        bind(Element.class).toInstance(e);
+                    }
+                };
+            }
+        };
+    }
 
     public void activate() {
-        for (PluginAdapter p: plugIns.values()) {
+        for (PluginAdapter p: plugins.values()) {
             eventSubsystem.subscribeAnnotated(p.getPlugin());
             p.tryActivate();
         }
     }
 
     public void close() {
-        for (PluginAdapter p: plugIns.values()) {
+        for (PluginAdapter p: plugins.values()) {
             eventSubsystem.unsubscribeAnnotated(p.getPlugin());
             p.tryClose();
         }
@@ -141,7 +145,7 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     }
 
     private PluginAdapter pluginByClassName(String className) {
-        PluginAdapter result = plugIns.get(className);
+        PluginAdapter result = plugins.get(className);
         if (result == null)
             throw new SchedulerException("Unknown plugin '" + className + "'");
         return result;

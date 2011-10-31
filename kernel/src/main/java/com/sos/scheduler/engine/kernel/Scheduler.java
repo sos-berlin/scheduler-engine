@@ -37,6 +37,7 @@ import com.sos.scheduler.engine.kernel.main.SchedulerStateHandler;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
+import com.sos.scheduler.engine.kernel.util.Lazy;
 
 @ForCpp
 public final class Scheduler implements HasPlatform, Sister {
@@ -73,7 +74,8 @@ public final class Scheduler implements HasPlatform, Sister {
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());
         orderSubsystem = new OrderSubsystem(platform, this.cppProxy.order_subsystem());
-        pluginSubsystem = new PluginSubsystem(this, eventSubsystem, newInjector());
+        Lazy<Injector> injector = new Lazy<Injector>() { @Override protected Injector compute() { return newInjector(); } };
+        pluginSubsystem = new PluginSubsystem(this, eventSubsystem, injector);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
         initializeThreadLock();
