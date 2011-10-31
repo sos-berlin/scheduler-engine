@@ -28,7 +28,8 @@
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/not_in_recursion.h"
 #include "../zschimmer/file_path.h"
-
+#include "../javaproxy/com__sos__scheduler__engine__kernel__scheduler__event__SchedulerEntersSleepStateEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::kernel::scheduler::event::SchedulerEntersSleepStateEvent SchedulerEntersSleepStateEventJ;
 
 using namespace std;
 using namespace zschimmer::file;
@@ -2649,6 +2650,8 @@ void Spooler::run()
 
             if( nothing_done_count > 0  ||  !wait_handles.signaled() )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {
+                _event_subsystem->report_event(SchedulerEntersSleepStateEventJ::new_instance());
+
                 if( wait_until == 0 )
                 {
                     wait_handles.wait_until( Time(), wait_until_object, Time(), NULL );   // Signale checken
