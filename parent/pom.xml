@@ -296,7 +296,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <systemPropertyVariables>
+                    <systemProperties>
                         <!--property>
                             <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
                             <name>java.io.tmpdir</name>
@@ -306,7 +306,7 @@
                             <name>scheduler.binaries.tmpdir</name>
                             <value>${basedir}/target/test-scheduler-binaries</value>
                         </property>
-                    </systemPropertyVariables>
+                    </systemProperties>
                 </configuration>
             </plugin>
             <!--

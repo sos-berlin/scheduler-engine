@@ -66,6 +66,7 @@ public final class TestCppBinaries {
 
     private static void warnUndeletable(File dir) {
         if (isWindows)
-            logger.warn("Some Scheduler binary files will likely not be deleted in temporary directory "+dir);
+            logger.warn("Some Scheduler binary files will likely not be deleted in temporary directory "+dir+"." +
+                    " Use property "+binariesTmpdirPropertyName);
     }
 }
