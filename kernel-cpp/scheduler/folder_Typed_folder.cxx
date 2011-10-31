@@ -161,90 +161,92 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
     }
 
     try {
-        if (directory_entry && !directory_entry->is_aging()) {
-            string               name              = Folder::object_name_of_filename( directory_entry->_file_info->path().name() );
-            ptr<file::File_info> changed_file_info = directory_entry->_file_info;
-            bool                 file_is_different = false;
+        if (directory_entry) {
+            if (!directory_entry->is_aging()) {
+                string               name              = Folder::object_name_of_filename( directory_entry->_file_info->path().name() );
+                ptr<file::File_info> changed_file_info = directory_entry->_file_info;
+                bool                 file_is_different = false;
                 
-            if( !is_new ) {
-                file_is_different = current_file_based->get_and_clear_force_file_reread() ||
-                                    current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time()  ||
-                                    current_file_based->name() != name;   // Objekt ist unter anderer Großschreibung bekannt?
+                if( !is_new ) {
+                    file_is_different = current_file_based->get_and_clear_force_file_reread() ||
+                                        current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time()  ||
+                                        current_file_based->name() != name;   // Objekt ist unter anderer Großschreibung bekannt?
 
-                if( !file_is_different ) {
-                    changed_file_info = current_file_based->changed_included_file_info();       // <include> geändert?
-                    if( changed_file_info )  file_is_different = true;
-                }
-            }
-
-            if( !is_new  &&  !file_is_different ) {
-                ignore_duplicate_configuration_file( current_file_based, (File_based*)NULL, *directory_entry );
-            } else {
-                z::Xc content_xc;
-                string source_xml;
-
-                try {
-                    source_xml = string_from_file( directory_entry->_file_info->path() );
-                }
-                catch( exception& x ) { content_xc = x; }
-
-                if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() ) {   // ERRNO-2 (Datei gelöscht)?
-                    if( old_file_based ) {
-                        old_file_based->_file_is_removed = true;
-                        old_file_based->remove();
-                        old_file_based = NULL;
+                    if( !file_is_different ) {
+                        changed_file_info = current_file_based->changed_included_file_info();       // <include> geändert?
+                        if( changed_file_info )  file_is_different = true;
                     }
-                } else {   
-                    something_changed = true;
+                }
 
-                    file_based = subsystem()->call_new_file_based();
-                    file_based->set_reread(!is_new);
-                    file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
-                    file_based->set_base_file_info( Base_file_info( *directory_entry ) );
-                    file_based->set_folder_path( folder()->path() );
-                    file_based->set_name( name );
-                    file_based->fix_name();
-                    file_based->_configuration_origin = directory_entry->_configuration_origin;
+                if( !is_new  &&  !file_is_different ) {
+                    ignore_duplicate_configuration_file( current_file_based, (File_based*)NULL, *directory_entry );
+                } else {
+                    z::Xc content_xc;
+                    string source_xml;
 
-                    ignore_duplicate_configuration_file( current_file_based, file_based, *directory_entry );
+                    try {
+                        source_xml = string_from_file( directory_entry->_file_info->path() );
+                    }
+                    catch( exception& x ) { content_xc = x; }
+
+                    if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() ) {   // ERRNO-2 (Datei gelöscht)?
+                        if( old_file_based ) {
+                            old_file_based->_file_is_removed = true;
+                            old_file_based->remove();
+                            old_file_based = NULL;
+                        }
+                    } else {   
+                        something_changed = true;
+
+                        file_based = subsystem()->call_new_file_based();
+                        file_based->set_reread(!is_new);
+                        file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
+                        file_based->set_base_file_info( Base_file_info( *directory_entry ) );
+                        file_based->set_folder_path( folder()->path() );
+                        file_based->set_name( name );
+                        file_based->fix_name();
+                        file_based->_configuration_origin = directory_entry->_configuration_origin;
+
+                        ignore_duplicate_configuration_file( current_file_based, file_based, *directory_entry );
                         
-                    Time   t; 
-                    t.set_utc( changed_file_info->last_write_time() );
+                        Time   t; 
+                        t.set_utc( changed_file_info->last_write_time() );
 
-                    if( old_file_based ) {
-                        old_file_based->log()->info( message_string( "SCHEDULER-892", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
-                        old_file_based->handle_event( File_based::bfevt_modified ); 
-                        old_file_based->set_replacement( file_based );
-                        current_file_based = NULL;
-                    } else {
-                        file_based->log()->info( message_string( "SCHEDULER-891", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
-                        file_based->handle_event( File_based::bfevt_added );
-                        add_file_based( file_based );
-                    }
-                    if( !content_xc.is_empty() )  throw content_xc;
+                        if( old_file_based ) {
+                            old_file_based->log()->info( message_string( "SCHEDULER-892", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
+                            old_file_based->handle_event( File_based::bfevt_modified ); 
+                            old_file_based->set_replacement( file_based );
+                            current_file_based = NULL;
+                        } else {
+                            file_based->log()->info( message_string( "SCHEDULER-891", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
+                            file_based->handle_event( File_based::bfevt_added );
+                            add_file_based( file_based );
+                        }
+                        if( !content_xc.is_empty() )  throw content_xc;
 
-                    xml::Document_ptr dom_document ( source_xml );
-                    xml::Element_ptr  element      = dom_document.documentElement();
-                    subsystem()->assert_xml_element_name( element );
-                    if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
+                        xml::Document_ptr dom_document ( source_xml );
+                        xml::Element_ptr  element      = dom_document.documentElement();
+                        subsystem()->assert_xml_element_name( element );
+                        if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
 
-                    assert_empty_attribute( element, "spooler_id" );
-                    if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
-                    Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml << "\n" );
+                        assert_empty_attribute( element, "spooler_id" );
+                        if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
+                        Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml << "\n" );
 
-                    file_based->set_dom( element );         // Ruft clear_source_xml()
-                    file_based->_source_xml = source_xml;   
-                    file_based->set_file_based_state( File_based::s_not_initialized );
-                    file_based->initialize();
+                        file_based->set_dom( element );         // Ruft clear_source_xml()
+                        file_based->_source_xml = source_xml;   
+                        file_based->set_file_based_state( File_based::s_not_initialized );
+                        file_based->initialize();
 
-                    if( file_based->file_based_state() == File_based::s_initialized ) {
-                        if( !old_file_based )           // Neues Objekt?
-                            file_based->activate();     
-                        else {
-                            old_file_based->prepare_to_replace();
-                            if( old_file_based->can_be_replaced_now() ) {
-                                file_based = old_file_based->replace_now();     
-                                assert( !file_based->replacement() );
+                        if( file_based->file_based_state() == File_based::s_initialized ) {
+                            if( !old_file_based )           // Neues Objekt?
+                                file_based->activate();     
+                            else {
+                                old_file_based->prepare_to_replace();
+                                if( old_file_based->can_be_replaced_now() ) {
+                                    file_based = old_file_based->replace_now();     
+                                    assert( !file_based->replacement() );
+                                }
                             }
                         }
                     }
