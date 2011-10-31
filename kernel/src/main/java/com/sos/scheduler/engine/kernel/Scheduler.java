@@ -21,6 +21,7 @@ import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.kernel.log.LogSubsystem;
@@ -43,6 +44,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     private LogSubsystem logSubsystem = null;
     private DatabaseSubsystem databaseSubsystem = null;
     private PluginSubsystem pluginSubsystem = null;
+    private FolderSubsystem folderSubsystem = null;
     private JobSubsystem jobSubsystem = null;
     private OrderSubsystem orderSubsystem = null;
     private EventSubsystem eventSubsystem = null;
@@ -112,6 +114,9 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         eventSubsystem = new EventSubsystem(platform);
         subsystems.add(eventSubsystem);
 
+        folderSubsystem = new FolderSubsystem(cppProxy.folder_subsystem());
+        subsystems.add(folderSubsystem);
+
         jobSubsystem = new JobSubsystem(platform, cppProxy.job_subsystem());
         subsystems.add(jobSubsystem);
 
@@ -167,6 +172,11 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     }
 
     public Object getSchedulerStateHandler() { return schedulerStateHandler; }
+
+    public FolderSubsystem getFolderSubsystem() {
+        return folderSubsystem;
+    }
+
     public DatabaseSubsystem getDatabaseSubsystem() { return databaseSubsystem; }
     @ForCpp public EventSubsystem getEventSubsystem() { return eventSubsystem; }
     public JobSubsystem getJobSubsystem() { return jobSubsystem; }

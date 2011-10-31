@@ -453,6 +453,21 @@ final class SpoolerCImpl
     private static native java.lang.String execute_xml__native(long cppReference, java.lang.String p0);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC folder_subsystem() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC result = folder_subsystem__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC folder_subsystem__native(long cppReference);
+
+
     @Override public boolean has_any_task() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

@@ -5,15 +5,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppThreadSafe;
 
-
 @CppClass(clas="sos::scheduler::Spooler", directory="scheduler", include="spooler.h")
 public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     Prefix_logC log();
-    
-    // Scheduler_object:
 //    void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
-//
-//
 //    Thread_id                   thread_id                   () const                            { return _thread_id; }
     void set_id(String id);
     String id();
@@ -40,7 +35,6 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     void log_show_state();
     void assign_stdout ();
 //    void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
-
     String execute_xml(String xml);
     void cmd_pause();
     void cmd_continue();
@@ -64,19 +58,15 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
 //??    void                        cmd_load_config             ( const xml::Element_ptr&, const string& source_filename );
     void execute_state_cmd();
     boolean is_termination_state_cmd();
-//
 //    ptr<Task>                   get_task                    ( int task_id );
 //    ptr<Task>                   get_task_or_null            ( int task_id );
-//
     void load_arg();
     void load();
 //    void                        load_config                 ( const xml::Element_ptr& config, const string& source_filename );
-//
 //??    xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
 //??    void                        set_state                   ( State );
     void self_check();
 //??    void                        report_event                ( Scheduler_event* e )              { if( _scheduler_event_manager )  _scheduler_event_manager->report_event( e ); }
-//
     void update_console_title(int level);
     void start();
     void activate();
@@ -107,45 +97,33 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     String distributed_member_id();
     String db_cluster_member_id();
     String db_distributed_member_id();
-
-
 //    Process_id                  get_next_process_id         ()                                  { return _next_process_id++; }
-
     //void wait();
 //--    void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
-
     void signal(String signal_name);
     boolean signaled();
-
     void send_cmd();
-
-    // Prozesse
 //--    void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
 //--    void                        unregister_process_handle   ( Process_handle );                 // Für abort_immediately()
     void register_pid(int pid, boolean is_process_group);
     void register_pid(int pid);
     void unregister_pid(int pid);
-
     boolean is_machine_suspendable();
     void begin_dont_suspend_machine();
     void end_dont_suspend_machine();
     void suspend_machine();
-
 //    Folder*                     root_folder                 ()                                  { return _folder_subsystem->root_folder(); }
-//
     DatabaseC db();
-//    sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
-//
+//    sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }//
     String java_work_dir();
-//
 //    Scheduler_script_subsystem_interface* scheduler_script_subsystem() const                    { return _scheduler_script_subsystem; }
-//    Folder_subsystem*           folder_subsystem            () const                            { return _folder_subsystem; }
+    Folder_subsystemC folder_subsystem();
 //    Process_class_subsystem*    process_class_subsystem     () const;
 //    Task_subsystem*             task_subsystem              () const;
 //    Task_subsystem*             task_subsystem_or_null      () const                            { return _task_subsystem; }
-      Job_subsystemC              job_subsystem               ();
-      Job_subsystemC              job_subsystem_or_null       ();
-      Order_subsystemC            order_subsystem             ();
+    Job_subsystemC job_subsystem();
+    Job_subsystemC job_subsystem_or_null();
+    Order_subsystemC order_subsystem();
 //    Standing_order_subsystem*   standing_order_subsystem    () const;
 //    Schedule_subsystem_interface* schedule_subsystem        () const;
 //    Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
@@ -159,7 +137,6 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
 //
 //    supervisor::Supervisor_client_interface*supervisor_client ();
     boolean has_any_task();
-
     void detect_warning_and_send_mail();
     @CppThreadSafe void write_to_scheduler_log(String category, String text);
 }
