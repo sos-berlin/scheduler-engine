@@ -64,7 +64,7 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
     
     private static class CppProxyInvalidated extends RuntimeException {
         private CppProxyInvalidated(Class<?> c) {
-            super("C++ code has return a temporary, immediately destructed object (was a " + c.getName());
+            super("C++ code has returned a temporary, immediately destructed object (was a " + c.getName()+")");
         }
     }
 }
