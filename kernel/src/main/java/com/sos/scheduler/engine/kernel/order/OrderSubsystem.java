@@ -28,11 +28,11 @@ public class OrderSubsystem extends AbstractHasPlatform implements Subsystem
         return cppProxy.java_file_baseds();
     }
 
-    public Iterable<JobChain> ofJob(Job job) {
+    public Iterable<JobChain> jobchainsOfJob(Job job) {
         return Iterables.filter(jobChains(), jobChainHasJob(job));
     }
 
-    public final UnmodifiableJobchain jobChain(AbsolutePath path) {
+    public final JobChain jobChain(AbsolutePath path) {
         return cppProxy.java_file_based_or_null(path.toString());
     }
 }
