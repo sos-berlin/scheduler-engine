@@ -8,19 +8,21 @@ import org.apache.log4j.Logger;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.scheduler.event.SchedulerEntersSleepStateEvent;
 
-public class DeferredOperationExecutor {
+//TODO SchedulerEntersSleepStateEvent ausbauen und durch JavaSubsystem-Methode ersezten
+public final class DeferredOperationExecutor {
     private static final Logger logger = Logger.getLogger(DeferredOperationExecutor.class);
 
     private final Queue<SchedulerOperation> operations = new LinkedList<SchedulerOperation>();
     private final PrefixLog log;
+    private boolean isEmpty = true;
 
-    public DeferredOperationExecutor(EventSubsystem eventSubsystem) {
-        log = eventSubsystem.log();
-        eventSubsystem.subscribe(new MyEventSubscriber());
+    public DeferredOperationExecutor(PrefixLog log) {
+        this.log = log;     // TODO Eigenes PrefixLog
     }
 
     public void addOperation(SchedulerOperation c) {
         operations.add(c);
+        isEmpty = false;
     }
 
     private void executeOperations() {
@@ -29,6 +31,8 @@ public class DeferredOperationExecutor {
             if (o == null) break;
             executeOperation(o);
         }
+        isEmpty = true;
+        assert(operations.isEmpty());
     }
 
     private void executeOperation(SchedulerOperation c) {
@@ -41,9 +45,9 @@ public class DeferredOperationExecutor {
         }
     }
 
-    private class MyEventSubscriber implements EventSubscriber {
-        @Override public void onEvent(Event e) throws Exception {
-            if (e instanceof SchedulerIsCallableEvent && e instanceof SchedulerEntersSleepStateEvent) {
+    @EventHandler public void handleEvent(SchedulerIsCallableEvent e) throws Exception {
+        if (!isEmpty) {
+            if (e instanceof SchedulerEntersSleepStateEvent) {
                 executeOperations();
             }
         }

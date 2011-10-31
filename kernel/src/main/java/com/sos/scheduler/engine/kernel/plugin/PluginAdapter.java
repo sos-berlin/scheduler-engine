@@ -17,17 +17,17 @@ class PluginAdapter {
     }
 
 
-    void activate() {
+    final void activate() {
         plugin.activate();
     }
 
 
-    void close() {
+    final void close() {
         plugin.close();
     }
 
 
-    String getXmlState() {
+    final String getXmlState() {
         try {
             return plugin.getXmlState();
         } catch (Exception x) {
@@ -36,7 +36,7 @@ class PluginAdapter {
     }
 
 
-    void tryActivate() {
+    final void tryActivate() {
         try {
             plugin.activate();
         } catch (Exception x) {
@@ -45,7 +45,7 @@ class PluginAdapter {
     }
 
 
-    void tryClose() {
+    final void tryClose() {
         try {
             plugin.close();
         } catch (Exception x) {
@@ -59,8 +59,12 @@ class PluginAdapter {
     }
 
 
-    String getPluginClassName() {
+    final String getPluginClassName() {
         return plugin.getClass().getName();
+    }
+
+    final Plugin getPlugin() {
+        return plugin;
     }
 
 

@@ -1,20 +1,29 @@
 package com.sos.scheduler.engine.kernel.event;
 
-import com.sos.scheduler.engine.kernel.*;
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import org.apache.log4j.*;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
+import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.Subsystem;
 
 @ForCpp
 public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 
-    private final Collection<EventSubscriber> subscribers = new HashSet<EventSubscriber>();
+    private final DeferredOperationExecutor deferredOperationExecutor;
+    private final Set<EventSubscriber> subscribers = new HashSet<EventSubscriber>();
+    private final Map<Object,AnnotatedEventSubscriber> annotatedEventSubscriberMap = new HashMap<Object,AnnotatedEventSubscriber>();
     private Event currentEvent = null;
 
-    public EventSubsystem(Platform platform) {
+    public EventSubsystem(Platform platform, DeferredOperationExecutor deferredOperationExecutor) {
         super(platform);
+        this.deferredOperationExecutor = deferredOperationExecutor;
     }
 
     @ForCpp public final void report(Event e) {
@@ -63,12 +72,28 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
         }
     }
 
-    public final void subscribe(EventSubscriber x) {
-        subscribers.add(x);
+    public final void subscribeAnnotated(Object o) {
+        AnnotatedEventSubscriber s = AnnotatedEventSubscriber.of(o, deferredOperationExecutor);
+        if (!s.isEmpty()) {
+            annotatedEventSubscriberMap.put(o, s);
+            subscribe(s);
+        }
     }
 
-    public final void unsubscribe(EventSubscriber x) { 
-        subscribers.remove(x);
+    public final void unsubscribeAnnotated(Object o) {
+        AnnotatedEventSubscriber s =  annotatedEventSubscriberMap.get(o);
+        if (s != null) {
+            unsubscribe(s);
+            annotatedEventSubscriberMap.remove(o);
+        }
+    }
+
+    public final void subscribe(EventSubscriber s) {
+        subscribers.add(s);
+    }
+
+    public final void unsubscribe(EventSubscriber s) {
+        subscribers.remove(s);
     }
 
     @Override public final String toString() {

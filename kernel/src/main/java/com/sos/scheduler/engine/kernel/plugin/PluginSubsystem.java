@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.Subsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
+import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,9 +19,10 @@ import static java.util.Arrays.asList;
 
 //TODO Eigenes PrefixLog einführen
 
-public class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
+public final class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
     private static final String staticFactoryMethodName = "factory";
     private final Scheduler scheduler;
+    private final EventSubsystem eventSubsystem;
     private final Map<String,PluginAdapter> plugIns = new HashMap<String,PluginAdapter>();
     private final CommandHandler[] commandHandlers = { 
         new PluginCommandExecutor(this),
@@ -28,13 +30,14 @@ public class PluginSubsystem extends AbstractHasPlatform implements Subsystem, H
         new PluginCommandResultXmlizer(this) };
 
     
-    public PluginSubsystem(Scheduler scheduler) {
+    public PluginSubsystem(Scheduler scheduler, EventSubsystem eventSubsystem) {
         super(scheduler.getPlatform());
         this.scheduler = scheduler;
+        this.eventSubsystem = eventSubsystem;
     }
 
 
-    public final void load(Element root) {
+    public void load(Element root) {
         Element plugInsElement = elementXPathOrNull(root, "config/plugins");
         if (plugInsElement != null) {
             for (Element e: elementsXPath(plugInsElement, "plugin"))  tryAddPlugin(e);
@@ -70,17 +73,23 @@ public class PluginSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    public final void activate() {
-        for (PluginAdapter p: plugIns.values())  p.tryActivate();
+    public void activate() {
+        for (PluginAdapter p: plugIns.values()) {
+            eventSubsystem.subscribeAnnotated(p.getPlugin());
+            p.tryActivate();
+        }
     }
 
 
-    public final void close() {
-        for (PluginAdapter p: plugIns.values())  p.tryClose();
+    public void close() {
+        for (PluginAdapter p: plugIns.values()) {
+            eventSubsystem.unsubscribeAnnotated(p.getPlugin());
+            p.tryClose();
+        }
     }
 
 
-    final CommandPluginAdapter commandPluginByClassName(String className) {
+    CommandPluginAdapter commandPluginByClassName(String className) {
         PluginAdapter a = pluginByClassName(className);
         if (!(a instanceof CommandPluginAdapter))
             throw new SchedulerException("Plugin is not a " + CommandPlugin.class.getSimpleName());
@@ -96,7 +105,7 @@ public class PluginSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    @Override public final Collection<CommandHandler> getCommandHandlers() {
+    @Override public Collection<CommandHandler> getCommandHandlers() {
         return asList(commandHandlers);
     }
 

@@ -102,8 +102,9 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     
     @ForCpp public void onLoad(String configurationXml) {
         Element configElement = loadXml(configurationXml).getDocumentElement();
+        deferredOperationExecutor = new DeferredOperationExecutor(log());
         addSubsystems(configElement);
-        deferredOperationExecutor = new DeferredOperationExecutor(eventSubsystem);
+        eventSubsystem.subscribeAnnotated(deferredOperationExecutor);
         pluginSubsystem.load(configElement);
         schedulerStateHandler.onSchedulerStarted(this);
     }
@@ -115,7 +116,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         databaseSubsystem = new DatabaseSubsystem(cppProxy.db());
         subsystems.add(databaseSubsystem);
 
-        eventSubsystem = new EventSubsystem(platform);
+        eventSubsystem = new EventSubsystem(platform, deferredOperationExecutor);
         subsystems.add(eventSubsystem);
 
         folderSubsystem = new FolderSubsystem(cppProxy.folder_subsystem());
@@ -127,7 +128,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         orderSubsystem = new OrderSubsystem(platform, cppProxy.order_subsystem());
         subsystems.add(orderSubsystem);
 
-        pluginSubsystem = new PluginSubsystem(this);
+        pluginSubsystem = new PluginSubsystem(this, eventSubsystem);
         subsystems.add(pluginSubsystem);
 
         commandSubsystem = new CommandSubsystem(getCommandHandlers(subsystems));
