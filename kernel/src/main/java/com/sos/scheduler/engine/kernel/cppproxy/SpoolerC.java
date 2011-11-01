@@ -16,6 +16,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     String http_url();
     String name();
     String param();
+    Variable_setC variables();
     int udp_port();
     int tcp_port();
     String hostname();

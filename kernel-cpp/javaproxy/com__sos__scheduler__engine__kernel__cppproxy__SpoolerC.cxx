@@ -8,6 +8,7 @@
 #include "com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"
+#include "com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 

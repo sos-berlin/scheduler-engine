@@ -417,6 +417,7 @@ struct Spooler : Object,
     string                      http_url                    () const;
     string                      name                        () const;                           // "Scheduler -id=... host:port"
     const string&               param                       () const                            { return _spooler_param; }
+    ptr<Com_variable_set>       variables                   () const                            { return _variables; }
     int                         udp_port                    () const                            { return _udp_port; }
     int                         tcp_port                    () const                            { return _tcp_port; }
     string                      hostname                    () const                            { return _short_hostname; } 

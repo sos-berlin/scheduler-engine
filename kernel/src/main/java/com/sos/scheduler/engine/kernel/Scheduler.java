@@ -246,4 +246,8 @@ public final class Scheduler implements HasPlatform, Sister {
     public String getVersion() {
         return mavenProperties.getVersion();
     }
+
+    public VariableSet getVariables() {
+        return cppProxy.variables().getSister();
+    }
 }

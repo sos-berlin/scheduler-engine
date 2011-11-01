@@ -1318,6 +1318,23 @@ static void JNICALL update_1console_1title__I(JNIEnv* jenv, jobject, jlong cppRe
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL variables(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::variables()");
+        return Has_proxy::jobject_of(o_->variables());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static void JNICALL write_1to_1scheduler_1log__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1)
 {
     Env env = jenv;
@@ -1412,6 +1429,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"udp_port__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::udp_1port },
     { (char*)"unregister_pid__native", (char*)"(JI)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::unregister_1pid__I },
     { (char*)"update_console_title__native", (char*)"(JI)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::update_1console_1title__I },
+    { (char*)"variables__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::variables },
     { (char*)"write_to_scheduler_log__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::write_1to_1scheduler_1log__Ljava_lang_String_2Ljava_lang_String_2 }
 };
 
@@ -1420,7 +1438,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Spooler >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Spooler >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 80);
+        int ret = env->RegisterNatives(*cls, native_methods, 81);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

@@ -1087,6 +1087,21 @@ final class SpoolerCImpl
     private static native void update_console_title__native(long cppReference, int p0);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC variables() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = variables__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC variables__native(long cppReference);
+
+
     @Override public void write_to_scheduler_log(java.lang.String p0, java.lang.String p1) {
             write_to_scheduler_log__native(cppReference(), p0, p1);
     }
