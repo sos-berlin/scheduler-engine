@@ -16,7 +16,7 @@ import com.google.common.collect.ImmutableList;
  *
  * Wird nicht benutzt und kann vielleicht raus.
  */
-public class ExcludedTestRule implements TestRule {
+public final class ExcludedTestRule implements TestRule {
     private static final Logger log = Logger.getLogger(ExcludedTestRule.class);
     private static final boolean testExcluded = booleanOf(System.getProperty("testExcluded"), false, true);
     public static final ExcludedTestRule singleton = new ExcludedTestRule();

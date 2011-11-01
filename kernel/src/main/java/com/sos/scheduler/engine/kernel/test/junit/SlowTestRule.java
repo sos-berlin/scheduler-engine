@@ -13,11 +13,10 @@ import org.junit.runners.model.Statement;
  *
  * Verwendung: @{@link org.junit.ClassRule} public static final TestRule slowTestRule = {@link SlowTestRule}.singleton;
  */
-public class SlowTestRule implements TestRule {
+public final class SlowTestRule implements TestRule {
     private static final Logger log = Logger.getLogger(SlowTestRule.class);
     private static final boolean testSlow = booleanOf(System.getProperty("slowTest"), false, true);
     public static final SlowTestRule singleton = new SlowTestRule();
-
 
     private SlowTestRule() {}
 
