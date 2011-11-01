@@ -23,8 +23,7 @@
 			<job title="js-461-1" name="js-461-1" order="yes">
 				<script language="shell">
         <![CDATA[
-echo "Hello %SCHEDULER_PARAM_MY_PARAM% !"
-echo other_param=789 >> %SCHEDULER_RETURN_VALUES%
+echo "Hello world!"
         ]]>
 				</script>
 				<run_time />
@@ -32,8 +31,8 @@ echo other_param=789 >> %SCHEDULER_RETURN_VALUES%
 			<job title="js-461-2" name="js-461-2" stop_on_error="no" order="yes">
 				<script language="shell">
         <![CDATA[
-echo value of other_param: %SCHEDULER_PARAM_OTHER_PARAM%
-exit 5
+echo "Hello world!"
+rem exit 5
         ]]>
 				</script>
 				<run_time />

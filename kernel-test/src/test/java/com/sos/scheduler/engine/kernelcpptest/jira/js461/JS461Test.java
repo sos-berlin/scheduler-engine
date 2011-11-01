@@ -6,25 +6,19 @@ import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
-
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
+import com.sos.scheduler.engine.kernel.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.Event;
 
 /**
  * \file JS461Test.java
@@ -55,54 +49,22 @@ public class JS461Test extends SchedulerTest {
 	private final String ORDER = "js-461-order";
 	private final String JOB_CHAIN = "js-461";
 	
-	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
-    private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
-
     private static final Time schedulerTimeout = Time.of(10);
-    private static Configuration conf;
-
     private static Logger logger;
-    private final Topic topic = conf.topic;
-    private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
-    private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
     
     // Queue for collecting the fired events in the listener thread
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
-    
-    private final TopicSubscriber topicSubscriber;
-    
     private final SchedulerObjectFactory objFactory;
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
 		logger = LoggerFactory.getLogger(JS461Test.class);
-		conf = Configuration.newInstance(providerUrl);
 	}
     
     public JS461Test() throws Exception {
-    	
-    	topicSubscriber = newTopicSubscriber();
-        topicSubscriber.setMessageListener(new MyListener());
-        topicConnection.start();
-
 		objFactory = new SchedulerObjectFactory("localhost", 4444);
 		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
     }
-
-
-    /**
-     * \brief TopicSubscriber erzeugen nur für OrderFinishedEvent erzeugen
-     *
-     * @return
-     * @throws JMSException
-     */
-    private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = "eventName = 'EventOrderResumed' or eventName = 'EventOrderSuspended' or eventName = 'EventOrderFinished'";
-        boolean noLocal = false;
-        logger.debug("eventFilter is: " + messageSelector);
-        return topicSession.createSubscriber(topic, messageSelector, noLocal);
-    }
-
     
     /**
      * \brief Test ausführen
@@ -111,12 +73,13 @@ public class JS461Test extends SchedulerTest {
      *
      * @throws Exception
      */
-    @Test 
+    @Ignore 
     public void test() throws Exception {
+        controller().strictSubscribeEvents(new MyEventSubscriber());
         controller().runScheduler(schedulerTimeout, "-e");
-        assertEvent("EventOrderSuspended",1);										// one order has to end with 'success'
-        assertEvent("EventOrderResumed",1);										// one order has to end with 'success'
-        assertEvent("EventOrderFinished",1);										// one order has to end with 'success'
+        assertEvent("OrderSuspendedEvent",1);										// one order has to end with 'success'
+        assertEvent("OrderResumedEvent",1);										// one order has to end with 'success'
+        assertEvent("OrderFinishedEvent",1);										// one order has to end with 'success'
         assertEquals("total number of events",3,resultQueue.size());	// totaly 4 OrderFinishedEvents
     }
     
@@ -130,38 +93,34 @@ public class JS461Test extends SchedulerTest {
         assertEquals("event '" + eventName + "'",exceptedHits,cnt);
     }
     
-    private class MyListener implements javax.jms.MessageListener {
+    private final class MyEventSubscriber implements EventSubscriber {
 
-        // runs in an own thread
-    	@Override
-        public void onMessage(Message message) {
-            String result = "<unknown event>";
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                String xmlContent = textMessage.getText();
-                Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
-                assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                logger.info("CATCH EVENT: " + ev.getName());
-                if (ev.getEventOrderSuspended() != null) {
-                	scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' state='success'/>");
-                	scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' suspended='no'/>");
-                }
-                result = ev.getName();
-            }
-            catch (JMSException x) { throw new RuntimeException(x); }
+		@Override
+		public void onEvent(com.sos.scheduler.engine.kernel.event.Event event)
+				throws Exception {
+			
+			String result = "<ignored>";
+			try {
+	            if (event instanceof OrderResumedEvent) {
+	            	result = "OrderResumedEvent";
+				}
+	            if (event instanceof OrderFinishedEvent) {
+	            	result = "OrderFinishedEvent";
+				}
+		        if (event instanceof OrderSuspendedEvent) {
+		        	result = "OrderSuspendedEvent";
+		        	scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' state='success'/>");
+		    		scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' suspended='no'/>");
+				}
+			}
             finally {
                 try {
-					resultQueue.put(result);
+					if (!result.equals("<ignored>")) resultQueue.put(result);
 				} catch (InterruptedException e) {
 					logger.error(e.getMessage());
 				}
             }
-        }
-    }
-    
-    private String getTopicname(Message m) throws JMSException {
-    	Topic t = (Topic)m.getJMSDestination();
-    	return (t.getTopicName()!=null) ? t.getTopicName() : "???";
+	    }
     }
 
 }
