@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.main;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 
 import java.io.File;
@@ -24,6 +25,8 @@ import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 public class SchedulerThreadController implements SchedulerController {
     //private static final Time terminationTimeout = Time.of(10);
     private static final Logger logger = Logger.getLogger(SchedulerThreadController.class);
+
+    private boolean started = false;
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThread thread;
     private final StateThreadBridge stateThreadBridge = new StateThreadBridge();
@@ -42,10 +45,13 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void startScheduler(String... args) {
+        checkState(!started, "Scheduler has already been started");
         thread.startThread(args);
+        started = true;
     }
 
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
+        checkState(started, "Scheduler has not been started");
         try {
             Scheduler result = stateThreadBridge.waitWhileSchedulerIsStarting();
             throwableMailbox.throwUncheckedIfSet();
