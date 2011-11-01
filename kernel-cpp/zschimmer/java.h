@@ -79,7 +79,7 @@ struct Env
     jstring                     jstring_from_string         ( const char* );
     jstring                     jstring_from_string         ( const string& );
     jstring                     jstring_from_string         ( const com::Bstr& );
-    jstring                     jstring_from_string         (const wchar_t*, size_t length);
+    jstring                     jstring_from_string         (const OLECHAR*, size_t length);
 
     string                      get_class_name              ( jclass );
     jobject                     new_local_ref               (jobject);
