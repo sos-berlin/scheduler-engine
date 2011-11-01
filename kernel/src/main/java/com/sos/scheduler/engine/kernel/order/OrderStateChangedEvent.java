@@ -25,7 +25,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  */
 @ForCpp
 public class OrderStateChangedEvent extends UnmodifiableOrderEvent {
-	private final OrderState previousState;
+    private final OrderState previousState;
 
     @ForCpp public OrderStateChangedEvent(UnmodifiableOrder order, OrderState previousState) {
         super(order);

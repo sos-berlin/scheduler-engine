@@ -24,7 +24,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  */
 @ForCpp
 public class OrderStepEndedEvent extends UnmodifiableOrderEvent {
-	private final boolean ok;
+    private final boolean ok;
 
     @ForCpp public OrderStepEndedEvent(UnmodifiableOrder order, boolean ok) {
         super(order);

@@ -30,11 +30,11 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
     @Override public void onCppProxyInvalidated() {
     }
 
-	@Override public OrderId getId() {
+    @Override public OrderId getId() {
         return new OrderId(cppProxy.string_id());
     }
 
-	@Override public OrderState getState() {
+    @Override public OrderState getState() {
         return new OrderState(cppProxy.string_state());
     }
 
@@ -46,11 +46,11 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
 //        return cppProxy.file_path();
 //    }
 
-	@Override public OrderState getEndState() {
+    @Override public OrderState getEndState() {
         return new OrderState(cppProxy.string_end_state());
     }
 
-	@Override public String getTitle() {
+    @Override public String getTitle() {
         return cppProxy.title();
     }
 
@@ -60,12 +60,12 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
         return result;
     }
 
-	@Nullable public JobChain jobchainOrNull() {
+    @Nullable public JobChain jobchainOrNull() {
         Job_chainC jobChainC = cppProxy.job_chain();
         return jobChainC == null? null : jobChainC.getSister();
     }
 
-	public VariableSet getParameters() {
+    public VariableSet getParameters() {
         return cppProxy.params().getSister();
     }
 
@@ -79,7 +79,7 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
         return result;
     }
 
-    
+
     public static class Type implements SisterType<Order, OrderC> {
         @Override public Order sister(OrderC proxy, Sister context) {
             return new Order(Platform.of(context), proxy);

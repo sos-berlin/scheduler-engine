@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain;
 import com.google.common.base.Predicate;
 import com.sos.scheduler.engine.kernel.job.Job;
 
-public class JobChains {
+public final class JobChains {
     private JobChains() {}
 
     public static Predicate<JobChain> jobChainHasJob(final Job job) {

@@ -23,7 +23,7 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
     }
 
     private static File kernelCppDir() {
-    	File dir = new File(".");
+        File dir = new File(".");
         while (dir.exists()) {
             File result = new File(dir, kernelCppDirName);
             if (result.exists()) return result.getAbsoluteFile();

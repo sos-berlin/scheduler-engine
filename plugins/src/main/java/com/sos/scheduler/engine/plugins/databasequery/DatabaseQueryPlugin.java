@@ -26,7 +26,7 @@ public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin
         return asList(commandHandlers);
     }
 
-	public static PluginFactory factory() {
+    public static PluginFactory factory() {
     	return new PluginFactory() {
             @Override public Plugin newInstance(Scheduler scheduler, Element pluginElement) {
             	return new DatabaseQueryPlugin(
