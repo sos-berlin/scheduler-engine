@@ -62,6 +62,8 @@ public class JS461Test extends SchedulerTest {
 	}
     
     public JS461Test() throws Exception {
+        controller().setTerminateOnError(false);
+    	
 		objFactory = new SchedulerObjectFactory("localhost", 4444);
 		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
     }
