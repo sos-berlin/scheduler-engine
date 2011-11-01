@@ -72,7 +72,7 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
         }
     }
 
-    public final void subscribeAnnotated(Object o) {
+    public final void subscribeAnnotated(EventHandlerAnnotated o) {
         AnnotatedEventSubscriber s = AnnotatedEventSubscriber.of(o, operationCollector);
         if (!s.isEmpty()) {
             annotatedEventSubscriberMap.put(o, s);

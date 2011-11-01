@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
+import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 
-public interface Plugin {
+public interface Plugin extends EventHandlerAnnotated {
     void activate();
     void close();
     String getXmlState();   // Für <show_state>

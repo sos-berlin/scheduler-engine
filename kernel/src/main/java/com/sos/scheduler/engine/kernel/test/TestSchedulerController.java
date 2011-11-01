@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
@@ -44,7 +45,7 @@ public class TestSchedulerController implements SchedulerController {
         });
     }
 
-    public void subscribeForAnnotatedEventHandlers(final Object annotatedObject) {
+    public void subscribeForAnnotatedEventHandlers(final EventHandlerAnnotated annotatedObject) {
         delegated.subscribeEvents(new EventSubscriber() {
             @Override public void onEvent(Event e) throws Exception {
                 if (e instanceof SchedulerReadyEvent)

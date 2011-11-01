@@ -5,6 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/** Annotiert eine Methode mit einem Parameter einer Unterklasse von {@link Event).
+ * Rückgabe kann void oder {@link SchedulerOperation} sein.
+ * Klasse muss Marker-Interface {@link EventHandlerAnnotated} haben. */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface EventHandler {}

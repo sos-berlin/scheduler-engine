@@ -7,10 +7,10 @@ import com.google.common.collect.ImmutableList;
 
 public class AnnotatedEventSubscriber implements EventSubscriber {
     private final OperationCollector operationCollector;
-    private final Object object;
+    private final EventHandlerAnnotated object;
     private final ImmutableList<EventHandlingMethod> methods;
 
-    public AnnotatedEventSubscriber(OperationCollector operationCollector, Object object,
+    public AnnotatedEventSubscriber(OperationCollector operationCollector, EventHandlerAnnotated object,
             ImmutableList<EventHandlingMethod> methods) {
         this.operationCollector = operationCollector;
         this.object = object;
@@ -31,11 +31,11 @@ public class AnnotatedEventSubscriber implements EventSubscriber {
         }
     }
 
-    public static AnnotatedEventSubscriber of(Object o, OperationCollector operationCollector) {
+    public static AnnotatedEventSubscriber of(EventHandlerAnnotated o, OperationCollector operationCollector) {
         return new AnnotatedEventSubscriber(operationCollector, o, eventHandlerMethods(o));
     }
 
-    public static ImmutableList<EventHandlingMethod> eventHandlerMethods(Object o) {
+    public static ImmutableList<EventHandlingMethod> eventHandlerMethods(EventHandlerAnnotated o) {
         ImmutableList.Builder<EventHandlingMethod> result = new ImmutableList.Builder<EventHandlingMethod>();
         for (Method m: o.getClass().getMethods()) {
             if (!Modifier.isStatic(m.getModifiers())) {

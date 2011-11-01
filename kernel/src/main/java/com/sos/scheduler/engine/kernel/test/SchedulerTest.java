@@ -3,9 +3,10 @@ package com.sos.scheduler.engine.kernel.test;
 import org.junit.After;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.util.Time;
 
-public abstract class SchedulerTest {
+public abstract class SchedulerTest implements EventHandlerAnnotated {
     public static final Time shortTimeout = TestSchedulerController.shortTimeout;
 
     private final TestSchedulerController controller = TestSchedulerController.of(getClass().getPackage());
