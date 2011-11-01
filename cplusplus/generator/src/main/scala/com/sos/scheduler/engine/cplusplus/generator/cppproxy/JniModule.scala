@@ -1,21 +1,19 @@
 package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.generator.Configuration
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Cpp.quoted
 import com.sos.scheduler.engine.cplusplus.generator.cpp.javabridge.JavaBridge
 import com.sos.scheduler.engine.cplusplus.generator.module._
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
-//import JniModule._  // Scala 2.8.0: "illegal cyclic reference involving value <import>"
 
+class JniModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature], javaClassFullName: String) extends CppModule {
+    import JniModule._
 
-class JniModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature], javaClassFullName: String)
-extends CppModule {
     val interface = config.interface
     val className = CppName(config.className)
-    val name = JniModule.namePrefix + className.simpleNames.mkString("__")
+    val name = namePrefix + className.simpleNames.mkString("__")
     val subdirectory = config.directory
     val include = config.includeOption
     
