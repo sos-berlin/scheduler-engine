@@ -17,10 +17,9 @@ public class StrictEventSubscriber implements EventSubscriber {
         schedulerController = controller;
     }
 
-    
+
     @Override public final void onEvent(Event e) {
         try {
-            if (e instanceof ErrorLogEvent) throw new AssertionError(((ErrorLogEvent)e).getMessage().toString());
             eventSubscriber.onEvent(e);
         }
         catch (Exception x) {

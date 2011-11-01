@@ -10,10 +10,13 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
+import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -31,16 +34,35 @@ public class TestSchedulerController implements SchedulerController {
         environment = new Environment(resourcePath);
     }
 
+    /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
+    public void terminateOnErrorEvent() {
+        subscribeEvents(new EventSubscriber() {
+            @Override public void onEvent(Event e) throws Exception {
+                if (e instanceof ErrorLogEvent)
+                    throw new AssertionError(((ErrorLogEvent)e).getMessage().toString());
+            }
+        });
+    }
+
+    public void subscribeForAnnotatedEventHandlers(final Object annotatedObject) {
+        delegated.subscribeEvents(new EventSubscriber() {
+            @Override public void onEvent(Event e) throws Exception {
+                if (e instanceof SchedulerReadyEvent)
+                    scheduler().getEventSubsystem().subscribeAnnotated(annotatedObject);
+            }
+        });
+    }
+
     public final void strictSubscribeEvents() {
         strictSubscribeEvents(EventSubscriber.empty);
     }
 
     public final void strictSubscribeEvents(EventSubscriber s) {
-        delegated.subscribeEvents(new StrictEventSubscriber(s, delegated));
+        subscribeEvents(s);
     }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
-        delegated.subscribeEvents(s);
+        delegated.subscribeEvents(new StrictEventSubscriber(s, delegated));
     }
 
     public final void runScheduler(Time timeout, String... args) {
