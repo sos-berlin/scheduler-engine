@@ -17,6 +17,23 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jint JNICALL count(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::com_objects::Com_variable_set* o_ = has_proxy< ::sos::scheduler::com_objects::Com_variable_set >::of_cpp_reference(cppReference,"::sos::scheduler::com_objects::Com_variable_set::count()");
+        return (o_->count());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jstring JNICALL get_1string__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
     Env env = jenv;
@@ -27,6 +44,23 @@ static jstring JNICALL get_1string__Ljava_lang_String_2(JNIEnv* jenv, jobject, j
     catch(const exception& x) {
         env.set_java_exception(x);
         return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL java_1names(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::com_objects::Com_variable_set* o_ = has_proxy< ::sos::scheduler::com_objects::Com_variable_set >::of_cpp_reference(cppReference,"::sos::scheduler::com_objects::Com_variable_set::java_names()");
+        return (o_->java_names()).local_ref();
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
     }
 }
 
@@ -49,7 +83,9 @@ static void JNICALL set_1var__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jen
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::count },
     { (char*)"get_string__native", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::get_1string__Ljava_lang_String_2 },
+    { (char*)"java_names__native", (char*)"(J)Ljava/util/List;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1names },
     { (char*)"set_var__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1var__Ljava_lang_String_2Ljava_lang_String_2 }
 };
 
@@ -58,7 +94,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::com_objects::Com_variable_set >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::com_objects::Com_variable_set >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 2);
+        int ret = env->RegisterNatives(*cls, native_methods, 4);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

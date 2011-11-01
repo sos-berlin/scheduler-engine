@@ -10,6 +10,19 @@ final class Variable_setCImpl
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public int count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return count__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int count__native(long cppReference);
+
+
     @Override public java.lang.String get_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -23,6 +36,21 @@ final class Variable_setCImpl
     }
 
     private static native java.lang.String get_string__native(long cppReference, java.lang.String p0);
+
+
+    @Override public java.util.List java_names() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.util.List result = java_names__native(cppReference());
+            checkIsNotReleased(java.util.List.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.util.List java_names__native(long cppReference);
 
 
     @Override public void set_var(java.lang.String p0, java.lang.String p1) {

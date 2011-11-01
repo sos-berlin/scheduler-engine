@@ -13,7 +13,7 @@
 //#include "../hostole/hostole.h"
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/com_server.h"
-
+#include "../javaproxy/java__util__List.h"
 
 #ifdef Z_WINDOWS
 #   include <process.h>                    // getpid()
@@ -592,6 +592,15 @@ string Com_variable_set::get_string_by_name( const string& name, bool* name_foun
     *name_found = !result.is_empty();
 
     return string_from_variant( result );
+}
+
+//---------------------------------------------------------------------Com_variable_set::java_names
+
+javaproxy::java::util::List Com_variable_set::java_names() const {
+    javaproxy::java::util::List result = javaproxy::java::util::ArrayList::new_instance(_map.size());
+    Z_FOR_EACH_CONST(Map, _map, it)
+        result.add(javaproxy::java::lang::String(it->second->_name));
+    return result;
 }
 
 //--------------------------------------------------------------------------Com_variable_set::merge

@@ -1,5 +1,9 @@
 package com.sos.scheduler.engine.kernel;
 
+import static org.apache.commons.collections.CollectionUtils.unmodifiableCollection;
+
+import java.util.Collection;
+
 import javax.annotation.Nullable;
 
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
@@ -14,7 +18,14 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
         this.cppProxy = cppProxy;
     }
 
-    @Override public void onCppProxyInvalidated() {
+    @Override public void onCppProxyInvalidated() {}
+
+    public int size() {
+        return cppProxy.count();
+    }
+
+    public Collection<String> names() {
+        return unmodifiableCollection(cppProxy.java_names());
     }
 
     @Override @Nullable public final String tryGet(String name) {
@@ -27,9 +38,35 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
         return result;
     }
 
-    public final void put(String name, String value) { 
+    public final void put(String name, String value) {
         cppProxy.set_var(name, value);
     }
+
+//    public final Map<String,String> asMap() {
+//        final VariableSet variableSet = this;
+//
+//        return new Map<String,String>() {
+//            @Override public int size() {
+//                return variableSet.size();
+//            }
+//
+//            @Override public boolean isEmpty() {
+//                return size() > 0;
+//            }
+//
+//            @Override public boolean containsKey(Object key) {
+//                return get(key) != null;
+//            }
+//
+//            @Override public String get(Object key) {
+//                return key instanceof String? variableSet.tryGet((String)key) : null;
+//            }
+//
+//            @Override public String put(String key, String value) {
+//                variableSet.put(key, value);
+//            }
+//        };
+//    }
 
     public static class Type implements SisterType<VariableSet, Variable_setC> {
         @Override public final VariableSet sister(Variable_setC proxy, Sister context) {
