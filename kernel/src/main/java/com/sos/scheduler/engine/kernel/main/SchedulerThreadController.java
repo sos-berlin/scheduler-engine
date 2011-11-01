@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.kernel.main;
 import static com.google.common.base.Throwables.propagate;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -25,14 +27,14 @@ public class SchedulerThreadController implements SchedulerController {
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThread thread;
     private final StateThreadBridge stateThreadBridge = new StateThreadBridge();
-    private EventSubscriber eventSubscriber = EventSubscriber.empty;
+    private final List<EventSubscriber> eventSubscribers = new ArrayList<EventSubscriber>();
 
     public SchedulerThreadController() {
         thread = new SchedulerThread(new MyStateHandler());
     }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
-        eventSubscriber = s;
+        eventSubscribers.add(s);
     }
 
     public final void loadModule(File cppModuleFile) {
@@ -126,18 +128,22 @@ public class SchedulerThreadController implements SchedulerController {
             @Override public final void onEvent(Event e) throws Exception {
                 if (e instanceof SchedulerCloseEvent)
                     stateThreadBridge.onSchedulerClosed();
-                eventSubscriber.onEvent(e);
+                reportEvent(e);
             }
         }
     }
 
     final void reportStrictlyEvent(Event e) {
         try { 
-            eventSubscriber.onEvent(e);
+            reportEvent(e);
         }
         catch (Throwable x) {
-            //boolean debugOnly = e instanceof TerminatedEvent  &&  x instanceof UnexpectedTerminatedEventException;
-            throwableMailbox.setIfFirst(x); //, debugOnly? Level.DEBUG : Level.ERROR);
+            throwableMailbox.setIfFirst(x);
         }
+    }
+
+    private void reportEvent(Event e) throws Exception {
+        for (EventSubscriber s: eventSubscribers)
+            s.onEvent(e);
     }
 }
