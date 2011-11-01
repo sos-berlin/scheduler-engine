@@ -1,10 +1,7 @@
 package com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas
 
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
 import com.sos.scheduler.engine.cplusplus.generator.cpp.javabridge.JavaBridge
-import com.sos.scheduler.engine.cplusplus.generator.javaproxy._
-
 
 class StringCppObjectClass(cppClass: CppClass) extends CppObjectClass(cppClass)
 {
@@ -14,6 +11,7 @@ class StringCppObjectClass(cppClass: CppClass) extends CppObjectClass(cppClass)
         def headerCode = superclassConstructorsCode.headerCode +
             "    String(const char*);\n" +     // Kompatibilität zu C++-string
             "    String(const string&);\n" +
+            "    String(const ::zschimmer::com::Bstr&);\n" +
             "    operator string() const;\n"
             
         def sourceCode = {
@@ -25,6 +23,7 @@ class StringCppObjectClass(cppClass: CppClass) extends CppObjectClass(cppClass)
             "\n" +
             stringConstructor("const char* s") +
             stringConstructor("const string& s") +
+            stringConstructor("const ::zschimmer::com::Bstr& s") +
             "\n" +
             "String::operator string() const { return " + JavaBridge.namespace + "::Env().string_from_jstring( (jstring)get_jobject() ); }\n"
         }

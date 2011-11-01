@@ -907,10 +907,20 @@ jstring Env::jstring_from_string( const string& str )
 
 jstring Env::jstring_from_string( const char* str, size_t length )
 {
-    JNIEnv*   jenv = jni_env();
-    com::Bstr bstr ( str, length );
+    return jstring_from_string(com::Bstr(str, length));
+}
 
-    return jenv->NewString( (const jchar*)(const OLECHAR*)bstr, bstr.length() );
+//-------------------------------------------------------------------------Env::jstring_from_string
+
+jstring Env::jstring_from_string(const com::Bstr& str) { 
+    return jstring_from_string(str, str.length()); 
+}
+
+//-------------------------------------------------------------------------Env::jstring_from_string
+
+jstring Env::jstring_from_string(const wchar_t* str, size_t length) {
+    JNIEnv* jenv = jni_env();
+    return jenv->NewString( (const jchar*)(const OLECHAR*)str, length);
 }
 
 //--------------------------------------------------------------------------------Env::result_is_ok

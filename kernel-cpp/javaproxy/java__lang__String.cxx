@@ -144,6 +144,7 @@ String::String(jobject jo) { if (jo) assign_(jo); }
 
 String::String(const char* s) { assign_(::zschimmer::javabridge::Env().jstring_from_string(s)); }
 String::String(const string& s) { assign_(::zschimmer::javabridge::Env().jstring_from_string(s)); }
+String::String(const ::zschimmer::com::Bstr& s) { assign_(::zschimmer::javabridge::Env().jstring_from_string(s)); }
 
 String::operator string() const { return ::zschimmer::javabridge::Env().string_from_jstring( (jstring)get_jobject() ); }
 

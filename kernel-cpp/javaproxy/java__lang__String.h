@@ -23,6 +23,7 @@ struct String : ::zschimmer::javabridge::proxy_jobject< String >, ::javaproxy::j
     String(jobject = NULL);
     String(const char*);
     String(const string&);
+    String(const ::zschimmer::com::Bstr&);
     operator string() const;
 
     String(const String&);
