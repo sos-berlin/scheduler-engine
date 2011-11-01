@@ -12,8 +12,8 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     private final TestSchedulerController controller = TestSchedulerController.of(getClass().getPackage());
 
     protected SchedulerTest() {
-        controller.terminateOnErrorEvent();
         controller.subscribeForAnnotatedEventHandlers(this);
+        controller.setTerminateOnError(true);
     }
 
     @After public final void schedulerTestClose() {

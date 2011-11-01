@@ -28,6 +28,7 @@ public class TestSchedulerController implements SchedulerController {
 
     private final SchedulerThreadController delegated;
     private final Environment environment;
+    private boolean terminateOnError = true;
     private Scheduler scheduler = null;
 
     public TestSchedulerController(ResourcePath resourcePath) {
@@ -36,13 +37,8 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
-    public void terminateOnErrorEvent() {
-        subscribeEvents(new EventSubscriber() {
-            @Override public void onEvent(Event e) throws Exception {
-                if (e instanceof ErrorLogEvent)
-                    throw new AssertionError(((ErrorLogEvent)e).getMessage().toString());
-            }
-        });
+    public void setTerminateOnError(boolean o) {
+        terminateOnError = o;
     }
 
     public void subscribeForAnnotatedEventHandlers(final EventHandlerAnnotated annotatedObject) {
@@ -74,8 +70,20 @@ public class TestSchedulerController implements SchedulerController {
 
     @Override public final void startScheduler(String... args) {
         prepare();
+        handleTerminateOnError();
         Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries()), Arrays.asList(args));
         delegated.startScheduler(toArray(allArgs, String.class));
+    }
+
+    private void handleTerminateOnError() {
+        if (terminateOnError) {
+            subscribeEvents(new EventSubscriber() {
+                @Override public void onEvent(Event e) throws Exception {
+                    if (e instanceof ErrorLogEvent)
+                        throw new AssertionError(((ErrorLogEvent)e).getMessage().toString());
+                }
+            });
+        }
     }
 
     private void prepare() {
