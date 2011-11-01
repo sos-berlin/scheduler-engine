@@ -19,8 +19,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 
 import com.google.common.base.Function;
-import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.event.EventHandler;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
@@ -34,11 +33,10 @@ public final class Js644Test extends SchedulerTest {
     private static final List<String> jobPaths = asList("a", "b", "c");
     private static final Time orderTimeout = Time.of(60);
 
-    enum E { orderChanged, terminated };
+    enum E { orderChanged, terminated }
     private final BlockingQueue<E> eventReceivedQueue = new ArrayBlockingQueue<E>(1);
 
     @Test public void test() throws InterruptedException {
-        controller().strictSubscribeEvents(new MyEventSubscriber());
         controller().startScheduler("-e");
         runModifierThreadAndCheckOrderChanges();
     }
@@ -71,16 +69,14 @@ public final class Js644Test extends SchedulerTest {
         });
     }
 
+    @EventHandler public void handleEvent(OrderStateChangedEvent event) throws InterruptedException {
+        logger.debug(event);
+        eventReceivedQueue.put(orderChanged);
+    }
 
-    private final class MyEventSubscriber implements EventSubscriber {
-        @Override public void onEvent(Event event) throws InterruptedException {
-            logger.debug(event);
-            if (event instanceof OrderStateChangedEvent)
-                eventReceivedQueue.put(orderChanged);
-            else
-            if (event instanceof TerminatedEvent)
-                eventReceivedQueue.put(terminated);
-        }
+    @EventHandler public void handleEvent(TerminatedEvent event) throws InterruptedException {
+        logger.debug(event);
+        eventReceivedQueue.put(orderChanged);
     }
 
     final class ControllerRunnable implements Runnable {
