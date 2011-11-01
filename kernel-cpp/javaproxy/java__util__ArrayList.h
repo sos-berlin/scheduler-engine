@@ -12,6 +12,7 @@
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace java { namespace util { struct AbstractList; }}}
+namespace javaproxy { namespace java { namespace util { struct List; }}}
 
 
 namespace javaproxy { namespace java { namespace util { 
