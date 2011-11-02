@@ -85,7 +85,7 @@ static void JNICALL set_1var__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jen
 const static JNINativeMethod native_methods[] = {
     { (char*)"count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::count },
     { (char*)"get_string__native", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::get_1string__Ljava_lang_String_2 },
-    { (char*)"java_names__native", (char*)"(J)Ljava/util/List;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1names },
+    { (char*)"java_names__native", (char*)"(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1names },
     { (char*)"set_var__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1var__Ljava_lang_String_2Ljava_lang_String_2 }
 };
 

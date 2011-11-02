@@ -177,7 +177,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     string                      get_string                  ( const string& name );
     int                         get_int                     ( const string& name, int deflt );
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
-    javaproxy::java::util::List java_names                  () const; 
+    javaproxy::java::util::ArrayList java_names             () const; 
     void                        merge                       ( const Ivariable_set* );
     ptr<Com_variable_set>       clone                       ();
     string                      to_environment_string       () const;

@@ -38,11 +38,11 @@ final class Variable_setCImpl
     private static native java.lang.String get_string__native(long cppReference, java.lang.String p0);
 
 
-    @Override public java.util.List java_names() {
+    @Override public java.util.ArrayList java_names() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.util.List result = java_names__native(cppReference());
-            checkIsNotReleased(java.util.List.class, result);
+            java.util.ArrayList result = java_names__native(cppReference());
+            checkIsNotReleased(java.util.ArrayList.class, result);
             return result;
         }
         finally {
@@ -50,7 +50,7 @@ final class Variable_setCImpl
         }
     }
 
-    private static native java.util.List java_names__native(long cppReference);
+    private static native java.util.ArrayList java_names__native(long cppReference);
 
 
     @Override public void set_var(java.lang.String p0, java.lang.String p1) {

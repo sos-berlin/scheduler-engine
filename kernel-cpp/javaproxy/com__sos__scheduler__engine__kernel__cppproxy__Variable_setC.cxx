@@ -5,7 +5,7 @@
 #include "com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
-#include "java__util__List.h"
+#include "java__util__ArrayList.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 

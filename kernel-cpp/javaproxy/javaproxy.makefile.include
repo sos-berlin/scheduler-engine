@@ -53,5 +53,4 @@ javaproxy_objects=\
  java__lang__String.o\
  java__util__AbstractCollection.o\
  java__util__AbstractList.o\
- java__util__ArrayList.o\
- java__util__List.o
+ java__util__ArrayList.o

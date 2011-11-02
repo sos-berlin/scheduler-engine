@@ -6,7 +6,6 @@
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 #include "java__util__AbstractCollection.h"
-#include "java__util__List.h"
 
 namespace javaproxy { namespace java { namespace util { 
 
@@ -25,7 +24,6 @@ struct AbstractList__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _lastIndexOf__Ljava_lang_Object_2__method;
     ::zschimmer::javabridge::Method const _remove__I__method;
     ::zschimmer::javabridge::Method const _set__ILjava_lang_Object_2__method;
-    ::zschimmer::javabridge::Method const _subList__II__method;
 
     static const ::zschimmer::javabridge::class_factory< AbstractList__class > class_factory;
 };
@@ -43,8 +41,7 @@ AbstractList__class::AbstractList__class(const string& class_name) :
     ,_indexOf__Ljava_lang_Object_2__method(this, "indexOf", "(Ljava/lang/Object;)I")
     ,_lastIndexOf__Ljava_lang_Object_2__method(this, "lastIndexOf", "(Ljava/lang/Object;)I")
     ,_remove__I__method(this, "remove", "(I)Ljava/lang/Object;")
-    ,_set__ILjava_lang_Object_2__method(this, "set", "(ILjava/lang/Object;)Ljava/lang/Object;")
-    ,_subList__II__method(this, "subList", "(II)Ljava/util/List;"){}
+    ,_set__ILjava_lang_Object_2__method(this, "set", "(ILjava/lang/Object;)Ljava/lang/Object;"){}
 
 AbstractList__class::~AbstractList__class() {}
 
@@ -137,16 +134,6 @@ jint AbstractList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::j
     AbstractList__class* cls = _class.get();
     ::javaproxy::java::lang::Object result;
     result.steal_local_ref(cls->_set__ILjava_lang_Object_2__method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
-
-::javaproxy::java::util::List AbstractList::subList(jint p0, jint p1) {
-    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
-    parameter_list._jvalues[0].i = p0;
-    parameter_list._jvalues[1].i = p1;
-    AbstractList__class* cls = _class.get();
-    ::javaproxy::java::util::List result;
-    result.steal_local_ref(cls->_subList__II__method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

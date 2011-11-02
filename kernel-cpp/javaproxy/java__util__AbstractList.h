@@ -11,7 +11,6 @@
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace java { namespace util { struct AbstractCollection; }}}
-namespace javaproxy { namespace java { namespace util { struct List; }}}
 
 
 namespace javaproxy { namespace java { namespace util { 
@@ -59,7 +58,6 @@ struct AbstractList : ::zschimmer::javabridge::proxy_jobject< AbstractList >, ::
     jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
     ::javaproxy::java::lang::Object remove(jint p0);
     ::javaproxy::java::lang::Object set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
-    ::javaproxy::java::util::List subList(jint p0, jint p1);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

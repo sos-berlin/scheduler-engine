@@ -29,7 +29,6 @@
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/java__util__ArrayList.h"
-#include "../javaproxy/java__util__List.h"
 
 namespace sos {
 namespace scheduler {

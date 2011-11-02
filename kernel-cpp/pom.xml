@@ -51,7 +51,6 @@
                                 <argument>-c++-output-directory=${basedir}</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                                 <argument>java.util.ArrayList</argument>
-                                <argument>java.util.List</argument>
                             </arguments>
                         </configuration>
                     </execution>

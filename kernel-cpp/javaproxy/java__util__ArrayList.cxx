@@ -6,7 +6,6 @@
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 #include "java__util__AbstractList.h"
-#include "java__util__List.h"
 
 namespace javaproxy { namespace java { namespace util { 
 
