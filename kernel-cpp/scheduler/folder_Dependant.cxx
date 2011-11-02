@@ -162,7 +162,7 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
             File_based*   requisite = subsystem->file_based_or_null( path );
 
             // JS-775: default process_class should not displayed
-            if ( !is_default_process_class(subsystem->object_type_name(),path) ) {
+            if (requisite->show_requisite_dom_element()) {
                 xml::Element_ptr e = element.append_new_element( "requisite" );
                 e.setAttribute( "type", subsystem->object_type_name() );
                 e.setAttribute( "path", path );
@@ -180,13 +180,6 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
     }
 
     return result;
-}
-
-//--------------------------------------------------------------Dependant::is_default_process_class
-
-bool Dependant::is_default_process_class( const string object_type_name, const Absolute_path path )
-{ 
-    return object_type_name == "Process_class" && path == "";
 }
 
 }}} //namespace sos::scheduler::folder

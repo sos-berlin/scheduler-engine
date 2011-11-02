@@ -161,6 +161,7 @@ struct Use : Object,
     // Dependant:
     bool                        on_requisite_loaded         ( File_based* );
     Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
+    virtual bool                show_requisite_dom_element  ()                                      { return true; }
 
 
     Lock*                       lock                        () const;

@@ -353,6 +353,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     bool                        on_requisite_to_be_removed  ( File_based* );
   //void                        on_requisite_removed        ( File_based* );
     Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
+    virtual bool                show_requisite_dom_element  ()                                      { return true; }
 
 
     void                        disconnect                  ();
