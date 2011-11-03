@@ -1,5 +1,5 @@
 package com.sos.scheduler.engine.kernel.event;
 
-public interface SchedulerOperation {
+public interface SimpleSchedulerOperation {
     void execute() throws Exception;
 }

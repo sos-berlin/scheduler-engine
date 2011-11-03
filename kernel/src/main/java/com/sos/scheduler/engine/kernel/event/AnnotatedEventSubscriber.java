@@ -27,7 +27,7 @@ public class AnnotatedEventSubscriber implements EventSubscriber {
     private void callHandler(Method m, Event e) throws Exception {
         Object response = m.invoke(object, e);
         if (response != null) {
-            operationCollector.addOperation((SchedulerOperation)response);
+            operationCollector.addOperation((SimpleSchedulerOperation)response);
         }
     }
 

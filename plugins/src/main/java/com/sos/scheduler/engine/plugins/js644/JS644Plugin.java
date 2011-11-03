@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.js644;
 import javax.inject.Inject;
 
 import com.sos.scheduler.engine.kernel.event.EventHandler;
-import com.sos.scheduler.engine.kernel.event.SchedulerOperation;
+import com.sos.scheduler.engine.kernel.event.SimpleSchedulerOperation;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.job.Job;
@@ -20,11 +20,11 @@ public class JS644Plugin extends AbstractPlugin {
         this.orderSubsystem = orderSubsystem;
     }
 
-    @EventHandler public SchedulerOperation handleEvent(FileBasedActivatedEvent e) throws Exception {
+    @EventHandler public SimpleSchedulerOperation handleEvent(FileBasedActivatedEvent e) throws Exception {
         if (e.getObject() instanceof Job) {
             final Job job = (Job)e.getObject();
             if (job.isFileBasedReread()) {
-                return new SchedulerOperation() {
+                return new SimpleSchedulerOperation() {
                     @Override public void execute() throws Exception {
                         for (JobChain jobChain: orderSubsystem.jobchainsOfJob(job)) jobChain.setForceFileReread();
                         folderSubsystem.updateFolders();

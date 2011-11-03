@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog;
 public final class OperationExecutor implements OperationCollector {
     private static final Logger logger = Logger.getLogger(OperationExecutor.class);
 
-    private final Queue<SchedulerOperation> operations = new LinkedList<SchedulerOperation>();
+    private final Queue<SimpleSchedulerOperation> operations = new LinkedList<SimpleSchedulerOperation>();
     private final PrefixLog log;
     private boolean isEmpty = true;
 
@@ -18,7 +18,7 @@ public final class OperationExecutor implements OperationCollector {
         this.log = log;     // TODO Eigenes PrefixLog
     }
 
-    @Override public void addOperation(SchedulerOperation c) {
+    @Override public void addOperation(SimpleSchedulerOperation c) {
         operations.add(c);
         isEmpty = false;
     }
@@ -26,7 +26,7 @@ public final class OperationExecutor implements OperationCollector {
     public void execute() {
         if (!isEmpty) {
             while (true) {
-                SchedulerOperation o = operations.poll();
+                SimpleSchedulerOperation o = operations.poll();
                 if (o == null) break;
                 executeOperation(o);
             }
@@ -35,7 +35,7 @@ public final class OperationExecutor implements OperationCollector {
         }
     }
 
-    private void executeOperation(SchedulerOperation c) {
+    private void executeOperation(SimpleSchedulerOperation c) {
         try {
             logger.debug(c);
             c.execute();
