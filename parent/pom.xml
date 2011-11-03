@@ -467,6 +467,11 @@
             <name>SOS Release Repository</name>
             <url>http://archiva.sos:8080/archiva/repository/sos-release</url>
         </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>SOS Snapshot Repository</name>
+            <url>http://archiva.sos:8080/archiva/repository/snapshots</url>
+        </snapshotRepository>
         <!--site>
             <id>sos-http</id>
             <url>scp://www.yourcompany.com/www/docs/project/</url>
