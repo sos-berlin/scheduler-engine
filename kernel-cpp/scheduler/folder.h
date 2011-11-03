@@ -58,7 +58,7 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     virtual void                on_requisite_removed        ( File_based* );
     virtual Prefix_log*         log                         ()                                      = 0;
     virtual string              obj_name                    () const                                = 0;
-    virtual bool                show_requisite_dom_element  ()                                      = 0;
+    virtual bool                is_visible_requisite        ()                                      { return true; }
 
     
   private:
@@ -190,8 +190,6 @@ struct File_based : Scheduler_object,
     virtual void                set_visible                 ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
     virtual void                set_visible                 ( Visibility v )                        { _visible = v; }
     virtual bool                is_visible                  () const                                { return _visible == visible_yes; }
-    virtual bool                show_requisite_dom_element  ()                                      { return true; }
-
 
     File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
     bool                        is_in_folder                () const                                { return _typed_folder != NULL; }

@@ -663,8 +663,6 @@ struct Job_node : Order_queue_node,
     bool                        on_requisite_loaded         ( folder::File_based* found_job );
     string                      obj_name                    () const                                { return Order_queue_node::obj_name(); }
     Prefix_log*                 log                         ()                                      { return Order_queue_node::log(); }
-    virtual bool                show_requisite_dom_element  ()                                      { return true; }
-
 
     string                      job_path                    () const                                { return _job_path; }
     string                      normalized_job_path         () const;

@@ -254,7 +254,7 @@ struct Process_class : Process_class_configuration
     void                        prepare_to_replace          ();
     bool                        can_be_replaced_now         ();
     Process_class*              on_replace_now              ();
-    bool                        show_requisite_dom_element  () { return path() != ""; }   // default process_class will not shown
+    bool                        is_visible_requisite  () { return path() != ""; }   // default process_class will not shown
 
     void                    set_configuration               ( const Process_class_configuration& );
     void                  check_max_processes               ( int ) const;
