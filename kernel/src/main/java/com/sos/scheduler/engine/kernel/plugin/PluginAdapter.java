@@ -9,23 +9,19 @@ class PluginAdapter {
     private final String name;
     private final PrefixLog log;
 
-
     PluginAdapter(Plugin plugin, String name, PrefixLog log) {
         this.plugin = plugin;
         this.name = name;
         this.log = log;
     }
 
-
     final void activate() {
         plugin.activate();
     }
 
-
     final void close() {
         plugin.close();
     }
-
 
     final String getXmlState() {
         try {
@@ -35,7 +31,6 @@ class PluginAdapter {
         }
     }
 
-
     final void tryActivate() {
         try {
             plugin.activate();
@@ -43,7 +38,6 @@ class PluginAdapter {
             logThrowable(x);
         }
     }
-
 
     final void tryClose() {
         try {
@@ -53,11 +47,9 @@ class PluginAdapter {
         }
     }
 
-
     private void logThrowable(Throwable t) {
         PluginSubsystem.logError(log, toString(), t);
     }
-
 
     final String getPluginClassName() {
         return plugin.getClass().getName();
@@ -66,7 +58,6 @@ class PluginAdapter {
     final Plugin getPlugin() {
         return plugin;
     }
-
 
     @Override public String toString() {
         return "Plugin " + name;

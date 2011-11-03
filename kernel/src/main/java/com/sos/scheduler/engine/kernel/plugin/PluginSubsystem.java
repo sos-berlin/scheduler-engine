@@ -1,10 +1,6 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -15,25 +11,18 @@ import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.w3c.dom.Element;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
-import static com.sos.scheduler.engine.kernel.util.Util.optional;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 import static java.util.Arrays.asList;
-
-import javax.annotation.Nullable;
 
 //TODO Eigenes PrefixLog einführen
 
 public final class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
-    private static final String staticFactoryMethodName = "factory";
-
     private final CommandHandler[] commandHandlers = {
             new PluginCommandExecutor(this),
             new PluginCommandCommandXmlParser(this),
@@ -51,76 +40,17 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     }
 
     public void load(Element root) {
+        PluginReader pluginReader = new PluginReader(log(), lazyInjector, scheduler);
         Element plugInsElement = elementXPathOrNull(root, "config/plugins");
         if (plugInsElement != null) {
-            for (Element e: elementsXPath(plugInsElement, "plugin"))
-                tryAddPlugin(e);
-        }
-    }
-
-    private void tryAddPlugin(Element e) {
-        String className = e.getAttribute("java_class");
-        if (className.isEmpty())  throw new SchedulerException("Missing attribute java_class in <plugin>");
-        tryAddPlugin(className, elementXPathOrNull(e, "plugin.config"));
-    }
-
-    private void tryAddPlugin(String className, Element elementOrNull) {
-        try {
-            Plugin p = newPlugin(className, elementOrNull);
-            PluginAdapter a = p instanceof CommandPlugin? new CommandPluginAdapter((CommandPlugin)p, className, log())
-                : new PluginAdapter(p, className, log());
-            plugins.put(className, a);
-            log().info(a + " added");
-        } catch (Exception x) {
-            logError(log(), "Plug-in " + className, x);
-        }
-    }
-
-    private Plugin newPlugin(String className, @Nullable Element elementOrNull) throws Exception {
-        Class<? extends Plugin> c = pluginClassForName(className);
-        Method factoryMethod = factoryMethodOrNull(c);
-        return factoryMethod != null? newPluginByFactoryMethod(factoryMethod, elementOrNull)
-                    : newPluginByDI(c, elementOrNull);
-    }
-
-    private Class<? extends Plugin> pluginClassForName(String name) throws ClassNotFoundException {
-        Class<?> c = Class.forName(name);
-        if (!Plugin.class.isAssignableFrom(c))
-            throw new SchedulerException("Plugin does not implement " + Plugin.class.getName());
-        @SuppressWarnings("unchecked")
-        Class<? extends Plugin> result = (Class<? extends Plugin>)c;
-        return result;
-    }
-
-    @Nullable private Method factoryMethodOrNull(Class<?> c) {
-        try {
-            return c.getMethod(staticFactoryMethodName);
-        } catch (NoSuchMethodException x) {
-            return null;
-        }
-    }
-
-    private Plugin newPluginByFactoryMethod(Method m, Element elementOrNull) throws InvocationTargetException, IllegalAccessException {
-        PluginFactory f = (PluginFactory)m.invoke(null);
-        return f.newInstance(scheduler, elementOrNull);
-    }
-
-    private Plugin newPluginByDI(Class<? extends Plugin> c, @Nullable final Element elementOrNull) {
-        Injector myInjector = lazyInjector.get().createChildInjector(Iterables.transform(optional(elementOrNull), elementToModule()));
-        return myInjector.getInstance(c);
-    }
-
-    private static Function<Element,Module> elementToModule() {
-        // Funktion, damit Abhängigkeit zu DI-Jars erst zur Laufzeit, bei Bedarf, verlangt werden.
-        return new Function<Element,Module>() {
-            @Override public Module apply(final Element e) {
-                return new AbstractModule() {
-                    @Override protected void configure() {
-                        bind(Element.class).toInstance(e);
-                    }
-                };
+            for (Element e: elementsXPath(plugInsElement, "plugin")) {
+                PluginAdapter a = pluginReader.tryReadPlugin(e);
+                if (a != null) {
+                    plugins.put(a.getPluginClassName(), a);
+                    log().info(a + " added");
+                }
             }
-        };
+        }
     }
 
     public void activate() {
