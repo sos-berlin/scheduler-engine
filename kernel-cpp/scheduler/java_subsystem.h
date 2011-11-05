@@ -14,9 +14,8 @@ struct Java_subsystem_interface : Object, Subsystem
 {
                                 Java_subsystem_interface    ( Scheduler* scheduler, Type_code t )   : Subsystem( scheduler, this, t ) {}
 
+    virtual void                initialize_java_sister      ()                                      = 0;
     virtual javabridge::Vm*     java_vm                     ()                                      = 0;
-    virtual void            set_java_options                ( const string& )                       = 0;
-    virtual void                prepend_class_path          ( const string& )                       = 0;
     virtual SchedulerJ&         schedulerJ                  ()                                      = 0;
   //virtual const PlatformJ&    platformJ                   () const                                = 0;
     virtual xml::Element_ptr    dom_element                 (const xml::Document_ptr&)              = 0;
@@ -28,7 +27,7 @@ struct Java_subsystem_interface : Object, Subsystem
 
 //-------------------------------------------------------------------------------------------------
 
-ptr<Java_subsystem_interface>   new_java_subsystem          ( Scheduler* );
+ptr<Java_subsystem_interface>   new_java_subsystem          (Scheduler*, const string& java_options, const string& class_path);
 
 //-------------------------------------------------------------------------------------------------
 

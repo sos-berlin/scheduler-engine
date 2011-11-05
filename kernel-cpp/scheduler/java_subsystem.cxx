@@ -15,9 +15,8 @@ namespace scheduler {
 
 struct Java_subsystem : Java_subsystem_interface
 {
-                                Java_subsystem              ( Scheduler* );
+                                Java_subsystem              (Scheduler*, const string& java_options, const string& class_path);
                                ~Java_subsystem              ();
-
 
     // Subsystem:
     void                        close                       ();
@@ -29,9 +28,8 @@ struct Java_subsystem : Java_subsystem_interface
 
 
     // Java_subsystem_interface:
+    void                        initialize_java_sister      ();
     javabridge::Vm*             java_vm                     ()                                      { return _java_vm; }
-    void                    set_java_options                ( const string& x )                     { _java_vm->set_options(x); }
-    void                        prepend_class_path          ( const string& x )                     { _java_vm->prepend_class_path(x); }
     SchedulerJ&                 schedulerJ                  ()                                      { return _schedulerJ; }
     xml::Element_ptr            dom_element                 (const xml::Document_ptr&);
     virtual void                on_scheduler_activated      ();
@@ -44,25 +42,25 @@ struct Java_subsystem : Java_subsystem_interface
 
 //-------------------------------------------------------------------------------new_java_subsystem
 
-ptr<Java_subsystem_interface> new_java_subsystem( Scheduler* scheduler )
+ptr<Java_subsystem_interface> new_java_subsystem(Scheduler* scheduler, const string& java_options, const string& class_path)
 {
-    ptr<Java_subsystem> java_subsystem = Z_NEW( Java_subsystem( scheduler ) );
+    ptr<Java_subsystem> java_subsystem = Z_NEW(Java_subsystem(scheduler, java_options, class_path));
     return +java_subsystem;
 }
 
 //-------------------------------------------------------------------Java_subsystem::Java_subsystem
 
-Java_subsystem::Java_subsystem( Scheduler* scheduler )
+Java_subsystem::Java_subsystem(Scheduler* scheduler, const string& java_options, const string& class_path)
 : 
     Java_subsystem_interface( scheduler, type_java_subsystem )
 {
     _java_vm = get_java_vm( false );
     _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
     _java_vm->set_log( _log );
-    _java_vm->prepend_class_path( subst_env( read_profile_string( _spooler->_factory_ini, "java", "class_path" ) ) );
+    _java_vm->set_options(java_options);
+    _java_vm->prepend_class_path(class_path);
 
-    if( _spooler->_ignore_process_classes )//||
-        //_spooler->scheduler_script_subsystem()->needs_java() )     // Die Java-Jobs laufen mit unserer JVM
+    if(_spooler->_ignore_process_classes)     // Die Java-Jobs laufen mit unserer JVM
     {
         string java_work_dir = _spooler->java_work_dir();
         _java_vm->set_work_dir( java_work_dir );
@@ -106,11 +104,16 @@ bool Java_subsystem::subsystem_initialize()
     return true;
 }
 
+//-----------------------------------------------------------Java_subsystem::initialize_java_sister
+
+void Java_subsystem::initialize_java_sister() {
+    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j(), _spooler->java_main_context()));
+}
+
 //-------------------------------------------------------------------Java_subsystem::subsystem_load
 
 bool Java_subsystem::subsystem_load()
 {
-    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j(), _spooler->java_main_context()));
     _schedulerJ.onLoad(string_from_file(_spooler->_configuration_file_path));
     _subsystem_state = subsys_loaded;
     return true;

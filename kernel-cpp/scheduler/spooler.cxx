@@ -1738,8 +1738,10 @@ void Spooler::load()
     fetch_hostname();
 
     read_xml_configuration();
+    _db = Z_NEW(Database(this));
     initialize_java_subsystem();
     new_subsystems();
+    _java_subsystem->initialize_java_sister();
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
     initialize_subsystems_after_base_processing();
@@ -1793,12 +1795,11 @@ void Spooler::read_xml_configuration()
 
 void Spooler::initialize_java_subsystem()
 {
-    _java_subsystem = new_java_subsystem(this);
-
     // Java-Optionen und classpath sind nicht in <base> möglich, siehe Meldung SCHEDULER-475.
-    _java_subsystem->set_java_options  ( subst_env( _config_element_to_load.getAttribute( "java_options"    ) ) );
-    _java_subsystem->prepend_class_path( subst_env( _config_element_to_load.getAttribute( "java_class_path" ) ) );
-
+    const string& options = subst_env(_config_element_to_load.getAttribute("java_options"));
+    const string& class_path = subst_env(read_profile_string(_factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + 
+                               subst_env(_config_element_to_load.getAttribute("java_class_path" ));
+    _java_subsystem = new_java_subsystem(this, options, class_path);
     _java_subsystem->switch_subsystem_state( subsys_initialized );
 }
 
@@ -1818,7 +1819,6 @@ void Spooler::new_subsystems()
     _task_subsystem             = Z_NEW( Task_subsystem( this ) );
     _order_subsystem            = new_order_subsystem( this );
     _standing_order_subsystem   = new_standing_order_subsystem( this );
-    _db                         = Z_NEW( Database( this ) );
     _http_server                = http::new_http_server( this );
     _web_services               = new_web_services( this );
     _supervisor                 = supervisor::new_supervisor( this );
