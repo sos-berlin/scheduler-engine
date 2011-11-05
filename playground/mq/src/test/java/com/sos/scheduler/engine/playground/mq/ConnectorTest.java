@@ -1,22 +1,24 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import com.google.common.io.Files;
-import java.io.File;
-import javax.jms.TopicConnection;
-import javax.jms.Topic;
-import javax.jms.TextMessage;
-import org.junit.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.notNullValue;
+
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 
 public class ConnectorTest {
-    private static final File tmpDir = Files.createTempDir();
+    //private static final File tmpDir = Files.createTempDir();
     private static final Connector connector = Connector.newInstance(Configuration.vmProviderUrl);
 
 
     @BeforeClass public static void beforeClass() throws Exception {
-        connector.setPersistenceDirectory(tmpDir);
+        //connector.setPersistenceDirectory(tmpDir);
         connector.start();
     }
 
