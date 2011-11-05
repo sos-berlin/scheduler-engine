@@ -4,8 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import javax.jms.JMSException;
@@ -22,7 +20,7 @@ import org.junit.Test;
 
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
-
+import com.sos.scheduler.engine.kernel.util.sync.Gate;
 
 public class JmsPluginTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPluginTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
@@ -35,12 +33,11 @@ public class JmsPluginTest extends SchedulerTest {
     private final Topic topic = conf.topic;
     private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
     private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-    private final TopicSubscriber topicSubscriber = newTopicSubscriber();
-    private final BlockingQueue<Boolean> resultQueue = new ArrayBlockingQueue<Boolean>(1);
+    private final Gate<Boolean> resultGate = new Gate<Boolean>();
 
     
     public JmsPluginTest() throws Exception {
-        topicSubscriber.setMessageListener(new MyListener());
+        newTopicSubscriber().setMessageListener(new MyListener());
         topicConnection.start();
     }
 
@@ -53,8 +50,8 @@ public class JmsPluginTest extends SchedulerTest {
 
     
     @Test public void test() throws Exception {
-        controller().runScheduler(schedulerTimeout, "-e");
-        assertThat(resultQueue.poll(0, TimeUnit.SECONDS), equalTo(true));
+        controller().startScheduler();
+        assertThat(resultGate.poll(schedulerTimeout), equalTo(true));
     }
 
 
@@ -70,7 +67,7 @@ public class JmsPluginTest extends SchedulerTest {
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {
-                resultQueue.offer(result);
+                resultGate.offer(result);
             }
         }
     }
