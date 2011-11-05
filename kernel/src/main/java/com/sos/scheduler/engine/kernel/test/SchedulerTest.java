@@ -20,7 +20,6 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     protected SchedulerTest(Settings settings) {
         controller = TestSchedulerController.of(getClass().getPackage(), settings);
         controller.subscribeForAnnotatedEventHandlers(this);
-        controller.setTerminateOnError(true);
     }
 
     @After public final void schedulerTestClose() {
