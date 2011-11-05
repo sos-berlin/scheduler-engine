@@ -20,13 +20,14 @@ import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.kernel.util.sync.Gate;
 
 public class JS644PluginSchedulerTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(JS644PluginSchedulerTest.class);
     private static final AbsolutePath jobPath = new AbsolutePath("/A");
     private static final AbsolutePath jobchainPath = new AbsolutePath("/a");
     private static final Time timeout = shortTimeout;
-    enum E { jobActivated, jobchainActivated };
+    enum E { jobActivated, jobchainActivated }
     private final Gate<E> gate = new Gate<E>();
 
     @Test public void test() throws Exception {

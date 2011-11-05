@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.js644;
+package com.sos.scheduler.engine.kernel.util.sync;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -13,6 +13,10 @@ public class Gate<T> {
 
     public void put(T o) throws InterruptedException {
         queue.put(o);
+    }
+
+    public boolean offer(T o)  {
+        return queue.offer(o);
     }
 
     public void expect(T o, Time t) throws InterruptedException {
