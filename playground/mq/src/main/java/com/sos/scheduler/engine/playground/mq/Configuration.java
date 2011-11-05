@@ -12,7 +12,9 @@ public class Configuration { //public nur für JmsPluginTest, Klasse ist zu komp
     public static final String initialContextFactoryName = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     public static final String topicConnectionFactoryName = "TopicCF";
     public static final String topicName = "com.sos.scheduler.engine.Event";   // + hostName + portNumber in Url-Notation tcp://host:4444
-    public static final String vmProviderUrl = "vm:" + brokerName; //tcp://localhost:61616";
+    private static final String nonPersistentVmProviderUrl = "vm://"+brokerName+"?broker.persistent=false";  // Damit wird keine Datenbankdatei im Arbeitsverzeichnis angelegt
+    //private static final String persistentVmProviderUrl = "vm://"+brokerName; //tcp://localhost:61616";
+    public static final String vmProviderUrl = nonPersistentVmProviderUrl;
 
     public final TopicConnectionFactory topicConnectionFactory;
     public final Topic topic;

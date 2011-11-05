@@ -9,14 +9,15 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
-
-
-public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komplex für public
-    public static final String brokerName = "localhost";//"com.sos.scheduler";
+public class Configuration {
+    private static final Logger logger = Logger.getLogger(Configuration.class);
+    public static final String brokerName = "localhost"; //"com.sos.scheduler";
     public static final String initialContextFactoryName = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     public static final String topicConnectionFactoryName = "TopicCF";
     public static final String topicName = "com.sos.scheduler.engine.Event";   // + hostName + portNumber in Url-Notation tcp://host:4444
-    public static final String vmProviderUrl = "vm:" + brokerName; //tcp://localhost:61616";
+    private static final String nonPersistentVmProviderUrl = "vm://"+brokerName+"?broker.persistent=false";  // Damit wird keine Datenbankdatei im Arbeitsverzeichnis angelegt
+    //private static final String persistentVmProviderUrl = "vm://"+brokerName; //tcp://localhost:61616";
+    public static final String vmProviderUrl = nonPersistentVmProviderUrl;
     public static final String persistenceDirectory = "active-mq-data";
 
     public final TopicConnectionFactory topicConnectionFactory;
@@ -27,16 +28,9 @@ public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komp
         topic = t;
     }
 
-
-//    public static Configuration newInstance() {
-//        return newInstance(vmProviderUrl);
-//    }
-
-    
     public static Configuration newInstance(String providerUrl) {
     	try {
-    		Logger logger = Logger.getLogger(Configuration.class);
-            InitialContext c = new InitialContext(jmsProperties(providerUrl));  // Datei jndi.jmsProperties
+            InitialContext c = new InitialContext(jmsProperties(providerUrl));
             TopicConnectionFactory cf = (TopicConnectionFactory)c.lookup(topicConnectionFactoryName);
             Topic topic = (Topic)c.lookup(topicName);
             logger.debug("try to connect with provider " + providerUrl);
