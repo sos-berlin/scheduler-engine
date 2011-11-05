@@ -676,6 +676,7 @@ Spooler::Spooler(jobject java_main_context)
     _communication(this), 
     _base_log(this),
     _wait_handles(this),
+    _modifiable_settings(Z_NEW(Settings)),
     _log_level( log_info ),
     _log_to_stderr_level( log_unknown ),
     _log_file_cache(log::cache::Request_cache::new_instance()),
@@ -744,6 +745,20 @@ Spooler::~Spooler()
     {
         cerr << Z_FUNCTION << " " << x.what() << "\n";
     }
+}
+
+//-----------------------------------------------------------------------Spooler::writable_settings
+
+Settings* Spooler::modifiable_settings() const {
+    if (_settings)  z::throw_xc("SCHEDULER-479");
+    return _modifiable_settings;
+}
+
+//--------------------------------------------------------------------------------Spooler::settings
+
+const Settings* Spooler::settings() const {
+    if (!_settings)  z::throw_xc("settings");   // Sollte nicht passieren
+    return _settings;
 }
 
 //---------------------------------------------------------------------------Spooler::check_licence
@@ -1450,11 +1465,9 @@ void Spooler::read_ini_file()
     _job_history_with_log       =            read_profile_with_log  ( _factory_ini, "spooler", "history_with_log"   , arc_no );
     _order_history_yes          =            read_profile_bool      ( _factory_ini, "spooler", "order_history"      , true );
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
-    _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
+    _modifiable_settings->_db_name =           read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _db_check_integrity         =            read_profile_bool      ( _factory_ini, "spooler", "db_check_integrity" , _db_check_integrity );
     _db_log_level               = make_log_level(read_profile_string( _factory_ini ,"spooler", "db_log_level"       , as_string( _db_log_level ) ) );
-
-    Z_LOG("db-connection=" << _db_name << "\n");
 
     // need_db=yes|no|strict
     string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
@@ -2013,6 +2026,7 @@ string Spooler::configuration_for_single_job_script()
 
 void Spooler::start()
 {
+    _settings = _modifiable_settings;
     static_log_categories.save_to( &_original_log_categories );
     _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.as_time_t());
 
@@ -2036,12 +2050,12 @@ void Spooler::start()
 
     if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
-        if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
+        if( settings()->_db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
     }
 
-    if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
+    if( _need_db  && settings()->_db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
 
-    _db->open( _db_name );
+    _db->open(settings()->_db_name);
     
     assert( !_cluster || _cluster->my_member_id() != "" );
     _db->spooler_start();

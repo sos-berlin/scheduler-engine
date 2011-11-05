@@ -1510,7 +1510,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                 {
                     string body = "This is the " + as_string(_error_count) + ". problem with the database.";
                     if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
-                    body += "\ndb=" + remove_password( _spooler->_db_name ) + "\r\n\r\n" + callers_exception.what() + "\r\n\r\nThe Scheduler is trying to open the database again.";
+                    body += "\ndb=" + remove_password(_db_name) + "\r\n\r\n" + callers_exception.what() + "\r\n\r\nThe Scheduler is trying to open the database again.";
                     //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
                     Scheduler_event scheduler_event ( evt_database_error, log_warn, this );
@@ -1533,7 +1533,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
             {
                 try
                 {
-                    open2( _spooler->_db_name );
+                    open2(_db_name);
                     //open_history_table();
                     THREAD_LOCK( _error_lock )  _error = "";
  
@@ -1573,7 +1573,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                 Mail_defaults mail_defaults ( _spooler );
 
                 mail_defaults.set( "subject", "Scheduler is connected again with the database" );
-                mail_defaults.set( "body"   , "Scheduler continues processing.\n\ndb=" + remove_password( _spooler->_db_name ) );
+                mail_defaults.set( "body"   , "Scheduler continues processing.\n\ndb=" + remove_password(_db_name) );
 
                 scheduler_event.send_mail( mail_defaults );
             }
@@ -1596,7 +1596,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                     Mail_defaults mail_defaults ( _spooler );
 
                     mail_defaults.set( "subject", msg );
-                    mail_defaults.set( "body"   , S() << "db=" << remove_password( _spooler->_db_name ) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
+                    mail_defaults.set( "body"   , S() << "db=" << remove_password( _db_name ) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
 
                     scheduler_event.send_mail( mail_defaults );
                     
@@ -1612,7 +1612,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
 
             Mail_defaults mail_defaults( _spooler );
             mail_defaults.set( "subject", string("SCHEDULER CONTINUES WITHOUT DATABASE AFTER ERRORS: ") + callers_exception.what() );
-            mail_defaults.set( "body"   , S() << "Because of need_db=no\n" "db=" << remove_password( _spooler->_db_name ) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
+            mail_defaults.set( "body"   , S() << "Because of need_db=no\n" "db=" << remove_password(_db_name) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
             
             scheduler_event.send_mail( mail_defaults );
 

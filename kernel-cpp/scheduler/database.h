@@ -67,6 +67,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     void                        open                    ( const string& db_name );
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
+    void                    set_db_name                 (const string& o)                           { _db_name = o; }
     sql::Database_descriptor*   database_descriptor     ()                                          { return &_database_descriptor; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
     bool                        is_waiting              () const                                    { return _waiting; }

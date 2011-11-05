@@ -83,6 +83,8 @@
 #include "../zschimmer/z_io.h"
 #include "../zschimmer/pipe_collector.h"
 
+#include "settings.h"
+
 using namespace zschimmer;
 using namespace zschimmer::com;
 
@@ -411,6 +413,8 @@ struct Spooler : Object,
 
     jobject                     java_main_context           () const                            { return _java_main_context; }
     Thread_id                   thread_id                   () const                            { return _thread_id; }
+    const Settings*             settings                    () const;
+    Settings*                   modifiable_settings         () const;
     void                    set_id                          ( const string& );
     const string&               id                          () const                            { return _spooler_id; }
     string                      id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
@@ -604,6 +608,8 @@ struct Spooler : Object,
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
+    ptr<Settings> const        _modifiable_settings;
+    Settings*                  _settings;
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
@@ -667,7 +673,6 @@ struct Spooler : Object,
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
-    string                     _db_name;
     ptr<Database>              _db;
     bool                       _need_db;                    // need_db=yes|strict  Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
     bool                       _wait_endless_for_db_open;   // need_db=yes

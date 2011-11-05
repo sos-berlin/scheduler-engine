@@ -288,6 +288,9 @@
     <ClCompile Include="jni__sos__scheduler__order__job_chain__Job_node.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
+    <ClCompile Include="Settings.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
@@ -456,6 +459,9 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="log_cache_Request_cache.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
   </ItemGroup>

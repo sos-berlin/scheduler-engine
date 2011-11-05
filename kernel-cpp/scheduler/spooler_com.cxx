@@ -3945,7 +3945,7 @@ STDMETHODIMP Com_spooler::get_Db_name( BSTR* result )
     THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
-        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_db_name );
+        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->settings()->_db_name );
     }
 
     return NOERROR;
