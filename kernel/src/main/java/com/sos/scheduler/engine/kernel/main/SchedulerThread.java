@@ -7,13 +7,13 @@ import com.sos.scheduler.engine.kernel.SchedulerException;
 
 /** Der Scheduler in einem eigenen Thread. */
 class SchedulerThread extends Thread {
-    private final SchedulerStateHandler stateHandler;
+    private final SchedulerControllerBridge controllerBridge;
     private final CppScheduler cppScheduler = new CppScheduler();
     private String[] arguments = {};
     private final AtomicReference<Integer> exitCodeAtom = new AtomicReference<Integer>();
 
-    SchedulerThread(SchedulerStateHandler stateHandler) {
-        this.stateHandler = stateHandler;
+    SchedulerThread(SchedulerControllerBridge controllerBridge) {
+        this.controllerBridge = controllerBridge;
         setName("Scheduler");
     }
 
@@ -30,7 +30,7 @@ class SchedulerThread extends Thread {
         int exitCode = -1;
         Throwable throwable = null;
         try {
-            exitCode = cppScheduler.run(arguments, "", stateHandler);
+            exitCode = cppScheduler.run(arguments, "", controllerBridge);
             synchronized (exitCodeAtom) { exitCodeAtom.set(exitCode); }
             if (exitCode != 0)  throwable = new SchedulerException("Scheduler terminated with exit code " + exitCode);
         }
@@ -42,7 +42,7 @@ class SchedulerThread extends Thread {
             throw x;
         }
         finally {
-            stateHandler.onSchedulerTerminated(exitCode, throwable);
+            controllerBridge.onSchedulerTerminated(exitCode, throwable);
         }
     }
 

@@ -33,7 +33,7 @@ public class SchedulerThreadController implements SchedulerController {
     private final List<EventSubscriber> eventSubscribers = new ArrayList<EventSubscriber>();
 
     public SchedulerThreadController() {
-        thread = new SchedulerThread(new MyStateHandler());
+        thread = new SchedulerThread(new MyControllerBridge());
     }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
@@ -109,7 +109,7 @@ public class SchedulerThreadController implements SchedulerController {
         return thread.exitCode();
     }
 
-    private final class MyStateHandler implements SchedulerStateHandler {
+    private final class MyControllerBridge implements SchedulerControllerBridge {
         private final MyEventSubscriber myEventSubscriber = new MyEventSubscriber();
         private Scheduler scheduler = null;
 

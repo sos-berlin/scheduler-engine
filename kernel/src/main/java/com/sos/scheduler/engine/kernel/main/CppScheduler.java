@@ -28,15 +28,15 @@ public class CppScheduler {
         }
     }
 
-    public  final int run(String[] arguments, String argumentLine, SchedulerStateHandler javaSchedulerStateHandler) {
+    public  final int run(String[] arguments, String argumentLine, SchedulerControllerBridge controllerBridge) {
         CppProxy.threadLock.lock();
         try {
-            return runNative(arguments, argumentLine, javaSchedulerStateHandler);
+            return runNative(arguments, argumentLine, controllerBridge);
         }
         finally {
             CppProxy.threadLock.unlock();
         }
     }
 
-    private native int runNative(String[] arguments, String argumentLine, SchedulerStateHandler javaSchedulerStateHandler);
+    private native int runNative(String[] arguments, String argumentLine, SchedulerControllerBridge controllerBridge);
 }

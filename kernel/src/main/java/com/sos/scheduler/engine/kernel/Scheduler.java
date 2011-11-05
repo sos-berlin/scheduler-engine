@@ -33,7 +33,7 @@ import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.kernel.log.LogSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
-import com.sos.scheduler.engine.kernel.main.SchedulerStateHandler;
+import com.sos.scheduler.engine.kernel.main.SchedulerControllerBridge;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
@@ -45,7 +45,7 @@ public final class Scheduler implements HasPlatform, Sister {
 
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
     private final SpoolerC cppProxy;
-    private final SchedulerStateHandler schedulerStateHandler;
+    private final SchedulerControllerBridge controllerBridge;
     private final PrefixLog log;
     private final Platform platform;
     private final OperationExecutor operationExecutor;
@@ -60,9 +60,9 @@ public final class Scheduler implements HasPlatform, Sister {
     private final CommandSubsystem commandSubsystem;
     private boolean threadInitiallyLocked = false;
 
-    @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerStateHandler schedulerStateHandler) {
+    @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridge) {
         this.cppProxy = cppProxy;
-        this.schedulerStateHandler = firstNonNull(schedulerStateHandler, SchedulerStateHandler.empty);
+        this.controllerBridge = firstNonNull(controllerBridge, SchedulerControllerBridge.empty);
         cppProxy.setSister(this);
         log = new PrefixLog(cppProxy.log());
         platform = new Platform(log);
@@ -133,7 +133,7 @@ public final class Scheduler implements HasPlatform, Sister {
 
     private void onLoad(Element configElement) {
         pluginSubsystem.load(configElement);
-        schedulerStateHandler.onSchedulerStarted(this);
+        controllerBridge.onSchedulerStarted(this);
     }
 
     @ForCpp public void onActivate() {
@@ -142,7 +142,7 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     @ForCpp public void onActivated() {
-        schedulerStateHandler.onSchedulerActivated();
+        controllerBridge.onSchedulerActivated();
     }
 
     @ForCpp public void onEnteringSleepState() {
@@ -154,14 +154,14 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     private void initializeThreadLock() {
-        if (!isStartedByJava()) { // Wenn wir ein schedulerStateHandler haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
+        if (!isStartedByJava()) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
             threadLock();
             threadInitiallyLocked = true;
         }
     }
 
     private boolean isStartedByJava() {
-        return schedulerStateHandler != SchedulerStateHandler.empty;
+        return controllerBridge != SchedulerControllerBridge.empty;
     }
 
     @ForCpp public void threadLock() {
