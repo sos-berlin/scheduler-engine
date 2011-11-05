@@ -33,7 +33,6 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__log__LogEvent.o\
  com__sos__scheduler__engine__kernel__log__PrefixLog.o\
  com__sos__scheduler__engine__kernel__main__SchedulerControllerBridge.o\
- com__sos__scheduler__engine__kernel__main__SchedulerStateHandler.o\
  com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.o\
  com__sos__scheduler__engine__kernel__order__Order.o\
  com__sos__scheduler__engine__kernel__order__OrderEvent.o\
