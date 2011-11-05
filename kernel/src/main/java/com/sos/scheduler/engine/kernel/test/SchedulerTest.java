@@ -4,14 +4,21 @@ import org.junit.After;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
+import com.sos.scheduler.engine.kernel.settings.Settings;
+import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
     public static final Time shortTimeout = TestSchedulerController.shortTimeout;
 
-    private final TestSchedulerController controller = TestSchedulerController.of(getClass().getPackage());
+    private final TestSchedulerController controller;
 
     protected SchedulerTest() {
+        this(DefaultSettings.singleton);
+    }
+
+    protected SchedulerTest(Settings settings) {
+        controller = TestSchedulerController.of(getClass().getPackage(), settings);
         controller.subscribeForAnnotatedEventHandlers(this);
         controller.setTerminateOnError(true);
     }

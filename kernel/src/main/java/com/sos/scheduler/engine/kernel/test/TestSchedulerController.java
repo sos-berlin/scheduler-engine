@@ -18,6 +18,8 @@ import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
+import com.sos.scheduler.engine.kernel.settings.Settings;
+import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -31,8 +33,8 @@ public class TestSchedulerController implements SchedulerController {
     private boolean terminateOnError = true;
     private Scheduler scheduler = null;
 
-    public TestSchedulerController(ResourcePath resourcePath) {
-        delegated = new SchedulerThreadController();
+    public TestSchedulerController(ResourcePath resourcePath, Settings settings) {
+        delegated = new SchedulerThreadController(settings);
         environment = new Environment(resourcePath);
     }
 
@@ -143,6 +145,10 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public static TestSchedulerController of(Package p) {
-        return new TestSchedulerController(new ResourcePath(p));
+        return of(p, DefaultSettings.singleton);
+    }
+
+    public static TestSchedulerController of(Package p, Settings settings) {
+        return new TestSchedulerController(new ResourcePath(p), settings);
     }
 }
