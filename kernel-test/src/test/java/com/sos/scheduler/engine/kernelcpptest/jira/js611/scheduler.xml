@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd">
 	<config>
+        <process_classes>
+            <process_class max_processes="9999"/>
+        </process_classes>
 		<jobs>
-			<job name="a" order="yes" tasks="10000" stop_on_error="no" idle_timeout="60">
+			<job name="a" order="yes" tasks="9999" stop_on_error="no" idle_timeout="60">
 				<script language="javascript"><![CDATA[
 function spooler_process() {
     spooler_log.info("Hej!")
