@@ -4,7 +4,7 @@
 namespace sos {
 namespace scheduler {
 
-struct Settings : z::Object { //, z::javabridge::has_proxy<Settings> {
+struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     virtual                    ~Settings                    ();
     void                        set_db_name                 (const string& o)                       { _db_name = o; }
 

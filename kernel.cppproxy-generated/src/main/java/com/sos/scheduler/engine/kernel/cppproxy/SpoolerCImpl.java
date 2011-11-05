@@ -750,6 +750,21 @@ final class SpoolerCImpl
     private static native void log_show_state__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.SettingsC modifiable_settings() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.SettingsC result = modifiable_settings__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.SettingsC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.SettingsC modifiable_settings__native(long cppReference);
+
+
     @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
