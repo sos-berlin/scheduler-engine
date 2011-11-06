@@ -242,6 +242,7 @@ struct Order : Com_order,
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
     void                        set_next_start_time     ();
+    bool                        is_in_initial_state     ();
     void                    set_task_error              ( const Xc& x )                             { _task_error = x; }
 
     // Auftrag in einer Jobkette:
