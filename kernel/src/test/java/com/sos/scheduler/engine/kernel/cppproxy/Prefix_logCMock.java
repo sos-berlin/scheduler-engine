@@ -37,6 +37,10 @@ public class Prefix_logCMock extends CppProxyImpl<Sister> implements Prefix_logC
         logLine("debug3", line);
     }
 
+    @Override public String java_last(String log_level) {
+        return "";
+    }
+
     private void logLine(String level, String line) {
         try {
             writer.write(level + " " + line + "\n" );

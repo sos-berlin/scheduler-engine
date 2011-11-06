@@ -30,4 +30,9 @@ public final class PrefixLog implements SchedulerLogger {
     @Override public void debug(String s) {
         debug3(s);
     }
+
+    /** @return "", wenn für den Level keine Meldung vorliegt. */
+    public String lastByLevel(SchedulerLogLevel level) {
+        return cppProxy.java_last(level.getCppName());
+    }
 }

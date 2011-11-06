@@ -49,6 +49,21 @@ final class Prefix_logCImpl
     private static native void info__native(long cppReference, java.lang.String p0);
 
 
+    @Override public java.lang.String java_last(java.lang.String p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = java_last__native(cppReference(), p0);
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String java_last__native(long cppReference, java.lang.String p0);
+
+
     @Override public void warn(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

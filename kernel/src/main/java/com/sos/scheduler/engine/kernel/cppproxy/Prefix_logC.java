@@ -10,5 +10,5 @@ public interface Prefix_logC extends CppProxy {
     void warn(String line);
     void error(String line);
     void debug3(String line);
-    //String obj_name();
+    String java_last(String log_level);
 }

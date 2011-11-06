@@ -139,6 +139,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
                                                                                                   return it == _last.end()? "" : it->second; }
     string                      last_line                   () const                            { return last( _last_level ); }
     bool                        has_line_for_level          ( Log_level level ) const           { return _last.find( level ) != _last.end(); }
+    string                      java_last                   (const string& level) const         { return last(make_log_level(level)); }
 
     //int                         counter                     ( Log_level level ) const           { return level >= log_debug9  &&  level <= log_fatal? _counter[ level - log_debug9 ]
     //                                                                                                                                                : 0; }
