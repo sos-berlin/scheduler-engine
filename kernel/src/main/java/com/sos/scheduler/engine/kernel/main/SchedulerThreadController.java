@@ -128,7 +128,7 @@ public class SchedulerThreadController implements SchedulerController {
         @Override public void onSchedulerStarted(Scheduler s) {
             this.scheduler = s;
             stateThreadBridge.onSchedulerStarted(scheduler);
-            reportStrictlyEvent(new SchedulerReadyEvent(SchedulerThreadController.this));
+            reportStrictlyEvent(new SchedulerReadyEvent(SchedulerThreadController.this, scheduler));
         }
 
         @Override public void onSchedulerActivated() {

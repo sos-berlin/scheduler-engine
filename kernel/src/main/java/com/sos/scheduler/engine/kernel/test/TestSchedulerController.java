@@ -10,16 +10,18 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.event.AnnotatedEventSubscriber;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.event.OperationCollector;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
-import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
+import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -28,14 +30,14 @@ public class TestSchedulerController implements SchedulerController {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
     public static final Time shortTimeout = Time.of(10);
 
-    private final SchedulerThreadController delegated;
     private final Environment environment;
+    private final SchedulerThreadController delegated;
     private boolean terminateOnError = true;
     private Scheduler scheduler = null;
 
     public TestSchedulerController(ResourcePath resourcePath, Settings settings) {
-        delegated = new SchedulerThreadController(settings);
         environment = new Environment(resourcePath);
+        delegated = new SchedulerThreadController(settings);
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
@@ -43,11 +45,17 @@ public class TestSchedulerController implements SchedulerController {
         terminateOnError = o;
     }
 
-    public void subscribeForAnnotatedEventHandlers(final EventHandlerAnnotated annotatedObject) {
-        delegated.subscribeEvents(new EventSubscriber() {
+    public void subscribeForAnnotatedEventHandlers(final EventHandlerAnnotated annotated) {
+        // TODO Umstellen auf Guava-EventBus und Code vereinfachen
+        strictSubscribeEvents(new EventSubscriber() {
+            private AnnotatedEventSubscriber subscriber = null;
+
             @Override public void onEvent(Event e) throws Exception {
-                if (e instanceof SchedulerReadyEvent)
-                    scheduler().getEventSubsystem().subscribeAnnotated(annotatedObject);
+                if (subscriber == null && e instanceof SchedulerReadyEvent) {
+                    OperationCollector collector = ((SchedulerReadyEvent)e).getScheduler().getEventSubsystem().getOperationCollector();
+                    subscriber = AnnotatedEventSubscriber.of(annotated, collector);
+                }
+                subscriber.onEvent(e);
             }
         });
     }
@@ -82,7 +90,7 @@ public class TestSchedulerController implements SchedulerController {
             subscribeEvents(new EventSubscriber() {
                 @Override public void onEvent(Event e) throws Exception {
                     if (e instanceof ErrorLogEvent)
-                        throw new AssertionError(((ErrorLogEvent)e).getMessage().toString());
+                        throw throwErrorLogException(((ErrorLogEvent)e).getMessage().toString());
                 }
             });
         }
@@ -94,15 +102,26 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public final Scheduler scheduler() {
-        if (scheduler == null)
-            waitUntilSchedulerIsRunning();
-        assert scheduler != null;
-        return scheduler;
+        return waitUntilSchedulerIsRunning();
     }
 
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
-        scheduler = delegated.waitUntilSchedulerIsRunning();
+        if (scheduler == null) {
+            scheduler = delegated.waitUntilSchedulerIsRunning();
+            if (terminateOnError) checkForErrorLogLine();
+        }
         return scheduler;
+    }
+
+    private void checkForErrorLogLine() {
+        // TODO Prefix_log.last() liefert nur für info die Start-Meldung SCHEDULER-900. Wo sind die anderen Meldungen?
+//        String lastErrorLine = scheduler.log().lastByLevel(SchedulerLogLevel.error);
+//        if (!lastErrorLine.isEmpty())
+//            throw throwErrorLogException(lastErrorLine);
+    }
+
+    private static RuntimeException throwErrorLogException(String errorLine) {
+        throw new AssertionError(errorLine);
     }
 
     @Override public void waitUntilSchedulerState(SchedulerState s) {
