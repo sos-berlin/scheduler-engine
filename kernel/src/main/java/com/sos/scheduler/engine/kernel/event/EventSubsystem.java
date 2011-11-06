@@ -66,9 +66,9 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
         try {
             s.onEvent(e);
         }
-        catch (Exception x) {
+        catch (Throwable x) {   // Der C++-Code soll wirklich keine Exception bekommen.
             logger.error(s+": "+x, x);
-            log().error(s+": "+x);
+            //log().error(s+": "+x);   Löst ein rekursives Event aus. Events sollten in Warteschlange, vielleicht mit Guava-EventBus implementieren
         }
     }
 
@@ -94,6 +94,10 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
 
     public final void unsubscribe(EventSubscriber s) {
         subscribers.remove(s);
+    }
+
+    public final OperationCollector getOperationCollector() {
+        return operationCollector;
     }
 
     @Override public final String toString() {
