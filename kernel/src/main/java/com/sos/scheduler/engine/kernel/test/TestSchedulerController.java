@@ -20,7 +20,6 @@ import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
-import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
@@ -31,13 +30,16 @@ public class TestSchedulerController implements SchedulerController {
     public static final Time shortTimeout = Time.of(10);
 
     private final Environment environment;
-    private final SchedulerThreadController delegated;
+    private final SchedulerThreadController delegated = new SchedulerThreadController();
     private boolean terminateOnError = true;
     private Scheduler scheduler = null;
 
-    public TestSchedulerController(ResourcePath resourcePath, Settings settings) {
+    public TestSchedulerController(ResourcePath resourcePath) {
         environment = new Environment(resourcePath);
-        delegated = new SchedulerThreadController(settings);
+    }
+
+    @Override public void setSettings(Settings o) {
+        delegated.setSettings(o);
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
@@ -164,10 +166,6 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public static TestSchedulerController of(Package p) {
-        return of(p, DefaultSettings.singleton);
-    }
-
-    public static TestSchedulerController of(Package p, Settings settings) {
-        return new TestSchedulerController(new ResourcePath(p), settings);
+        return new TestSchedulerController(new ResourcePath(p));
     }
 }

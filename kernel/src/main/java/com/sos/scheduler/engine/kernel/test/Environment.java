@@ -4,9 +4,12 @@ import static com.google.common.base.Strings.nullToEmpty;
 import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.kernel.util.Files.removeDirectoryRecursivly;
+import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
 import java.io.File;
+
+import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.main.CppBinaries;
@@ -32,6 +35,7 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath;
  * </div>
  */
 public final class Environment {
+    private static final Logger logger = Logger.getLogger(Environment.class);
     private static final String configSubdir = "config";
     private static final String logSubdir = "log";
 
@@ -56,7 +60,7 @@ public final class Environment {
     }
 
     void close() {
-        removeDirectoryRecursivly(directory);
+        tryRemoveDirectoryRecursivly(directory);
     }
 
     private void prepareTemporaryConfigurationDirectory() {

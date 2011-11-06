@@ -22,22 +22,22 @@ import com.sos.scheduler.engine.kernel.util.Time;
 
 public final class JS653Test extends SchedulerTest {
     private static final Joiner commaJoiner = Joiner.on(", ");
-    private static final ImmutableSet<OrderIdAndState> expectedOrders = ImmutableSet.of(
+    private static final ImmutableSet<OrderIdAndState> expectedOrderStarts = ImmutableSet.of(
             new OrderIdAndState(new OrderId("simpleShouldRun"), new OrderState("state.job1")),
             new OrderIdAndState(new OrderId("superShouldRun"), new OrderState("state.nestedA.job1")),
             new OrderIdAndState(new OrderId("superWithStateBShouldRun"), new OrderState("state.nestedB.job1")));
 
-    private final Set<OrderIdAndState> startedOrders = new HashSet<OrderIdAndState>();
+    private final Set<OrderIdAndState> orderStarts = new HashSet<OrderIdAndState>();
 
     @Test public void test() {
-        controller().runScheduler(Time.of(5), "-e");
-        if (!startedOrders.equals(expectedOrders))
+        controller().runScheduler(Time.of(5));
+        if (!orderStarts.equals(expectedOrderStarts))
             fail(differenceMessage());
     }
 
     @EventHandler public void handleEvent(OrderTouchedEvent e) {
         Order o = e.getOrder();
-        startedOrders.add(new OrderIdAndState(o.getId(), o.getState()));
+        orderStarts.add(new OrderIdAndState(o.getId(), o.getState()));
     }
 
     private String differenceMessage() {
@@ -45,12 +45,12 @@ public final class JS653Test extends SchedulerTest {
     }
 
     @Nullable private String wrongStartedString() {
-        Set<OrderIdAndState> wrongStarted = Sets.difference(startedOrders, expectedOrders);
+        Set<OrderIdAndState> wrongStarted = Sets.difference(orderStarts, expectedOrderStarts);
         return wrongStarted.isEmpty()? null : "Unexpectedly started orders: "+ commaJoiner.join(wrongStarted);
     }
 
     @Nullable private String wrongNotStartedString() {
-        Set<OrderIdAndState> wrongNotStarted = Sets.difference(expectedOrders, startedOrders);
+        Set<OrderIdAndState> wrongNotStarted = Sets.difference(expectedOrderStarts, orderStarts);
         return wrongNotStarted.isEmpty()? null : "Missing order starts: "+ commaJoiner.join(wrongNotStarted);
     }
 }

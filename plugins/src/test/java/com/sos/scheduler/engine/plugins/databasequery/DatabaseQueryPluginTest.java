@@ -3,24 +3,16 @@ package com.sos.scheduler.engine.plugins.databasequery;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
-import java.io.File;
-
 import org.apache.log4j.Logger;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
-import com.sos.scheduler.engine.kernel.settings.Settings;
-import com.sos.scheduler.engine.kernel.settings.database.DatabaseSettings;
-import com.sos.scheduler.engine.kernel.settings.database.DefaultDatabaseSettings;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
 public final class DatabaseQueryPluginTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(DatabaseQueryPluginTest.class);
 
     public DatabaseQueryPluginTest() throws Exception {
-        super(temporaryDatabaseSettings());
+        controller().setSettings(temporaryDatabaseSettings());
         controller().startScheduler();
         waitForTaskTermination();
     }

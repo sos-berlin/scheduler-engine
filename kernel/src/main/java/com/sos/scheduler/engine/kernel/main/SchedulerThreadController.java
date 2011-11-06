@@ -17,9 +17,9 @@ import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.kernel.settings.Settings;
-import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
+import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
+import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 
@@ -28,7 +28,7 @@ public class SchedulerThreadController implements SchedulerController {
     //private static final Time terminationTimeout = Time.of(10);
     private static final Logger logger = Logger.getLogger(SchedulerThreadController.class);
 
-    private final Settings settings;
+    private Settings settings = DefaultSettings.singleton;
     private boolean started = false;
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThread thread;
@@ -36,12 +36,12 @@ public class SchedulerThreadController implements SchedulerController {
     private final List<EventSubscriber> eventSubscribers = new ArrayList<EventSubscriber>();
 
     public SchedulerThreadController() {
-        this(DefaultSettings.singleton);
+        thread = new SchedulerThread(new MyControllerBridge());
     }
 
-    public SchedulerThreadController(Settings settings) {
-        this.settings = settings;
-        thread = new SchedulerThread(new MyControllerBridge());
+    @Override public void setSettings(Settings o) {
+        checkState(!started, "Scheduler has already been started");
+        settings = o;
     }
 
     @Override public final void subscribeEvents(EventSubscriber s) {
