@@ -83,15 +83,15 @@ public final class Files {
         remover.apply(dir);
     }
 
-    private static Function<File,Void> removeFile = new Function<File,Void>() {
-        @Override public Void apply(@Nullable File f) {
+    private static final Function<File,Void> removeFile = new Function<File,Void>() {
+        @Override @Nullable public Void apply(@Nullable File f) {
             removeFile(f);
             return null;
         }
     };
 
-    private static Function<File,Void> tryRemoveFile = new Function<File,Void>() {
-        @Override public Void apply(@Nullable File f) {
+    private static final Function<File,Void> tryRemoveFile = new Function<File,Void>() {
+        @Override @Nullable public Void apply(@Nullable File f) {
             try {
                 removeFile(f);
             } catch (Exception x) {
