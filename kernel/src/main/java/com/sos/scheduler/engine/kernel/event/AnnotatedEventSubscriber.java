@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.kernel.event;
 
+import static com.google.common.base.Throwables.propagate;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -24,11 +27,12 @@ public class AnnotatedEventSubscriber implements EventSubscriber {
         }
     }
 
-    private void callHandler(Method m, Event e) throws Exception {
-        Object response = m.invoke(object, e);
-        if (response != null) {
-            operationCollector.addOperation((SimpleSchedulerOperation)response);
-        }
+    private void callHandler(Method m, Event e) throws IllegalAccessException {
+        try {
+            Object response = m.invoke(object, e);
+            if (response != null)
+                operationCollector.addOperation((SimpleSchedulerOperation)response);
+        } catch (InvocationTargetException x) { throw propagate(x.getCause()); }
     }
 
     public static AnnotatedEventSubscriber of(EventHandlerAnnotated o, OperationCollector operationCollector) {
