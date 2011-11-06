@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 	OrderState getState();
 	OrderState getEndState();
 	String getTitle();
-	@Nullable UnmodifiableJobchain jobchainOrNull();
+    UnmodifiableJobchain getJobChain();
+    @Nullable UnmodifiableJobchain getJobChainOrNull();
 	UnmodifiableVariableSet getParameters();
 }

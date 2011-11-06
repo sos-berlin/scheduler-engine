@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.VariableSet;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC;
@@ -55,12 +56,12 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
     }
 
     public JobChain getJobChain() {
-        JobChain result = jobchainOrNull();
-        if (result == null)  throw new NullPointerException(this + ".jobChain");
+        JobChain result = getJobChainOrNull();
+        if (result == null)  throw new SchedulerException("Order is not in a job chain: "+this);
         return result;
     }
 
-    @Nullable public JobChain jobchainOrNull() {
+    @Nullable public JobChain getJobChainOrNull() {
         Job_chainC jobChainC = cppProxy.job_chain();
         return jobChainC == null? null : jobChainC.getSister();
     }

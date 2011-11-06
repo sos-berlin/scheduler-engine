@@ -45,7 +45,7 @@ public class Monitor implements EventSubscriber {
 
     private void processOrderStateChangeEvent(OrderStateChangedEvent e) throws IOException {
         UnmodifiableOrder order = e.getOrder();
-        UnmodifiableJobchain jobChain = order.jobchainOrNull();
+        UnmodifiableJobchain jobChain = order.getJobChainOrNull();
         if (jobChain != null) {
             showJobChain(jobChain);
             output.flush();

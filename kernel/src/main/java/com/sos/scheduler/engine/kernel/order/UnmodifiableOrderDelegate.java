@@ -28,8 +28,12 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
         return order.getTitle();
     }
 
-    @Override public UnmodifiableJobchain jobchainOrNull() {
-        return order.jobchainOrNull();  //TODO Delegate erzeugen
+    @Override public UnmodifiableJobchain getJobChain() {
+        return order.getJobChain();
+    }
+
+    @Override public UnmodifiableJobchain getJobChainOrNull() {
+        return order.getJobChainOrNull();  //TODO Delegate erzeugen
     }
 
     @Override public UnmodifiableVariableSet getParameters() {
@@ -42,5 +46,9 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
 
     @Override public SchedulerLogger log() {
         return order.log();
+    }
+
+    @Override public String toString() {
+        return order.toString();
     }
 }
