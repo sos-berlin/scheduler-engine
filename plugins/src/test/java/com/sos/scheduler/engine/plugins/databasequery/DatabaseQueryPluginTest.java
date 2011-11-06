@@ -18,25 +18,11 @@ import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
 public final class DatabaseQueryPluginTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(DatabaseQueryPluginTest.class);
-    @ClassRule public static final TemporaryFolder tempDir = new TemporaryFolder();
 
     public DatabaseQueryPluginTest() throws Exception {
-        super(settings());
+        super(temporaryDatabaseSettings());
         controller().startScheduler();
         waitForTaskTermination();
-    }
-
-    private static Settings settings() {
-        return new DefaultSettings() {
-            @Override public DatabaseSettings getDatabaseSettings() {
-                return new DefaultDatabaseSettings() {
-                    @Override public String getHostwarePathOrNull() {
-                        File databaseFile = new File(tempDir.getRoot(), "scheduler-database");
-                        return "jdbc -class="+org.h2.Driver.class.getName()+" jdbc:h2:"+databaseFile;
-                    }
-                };
-            }
-        };
     }
 
     private void waitForTaskTermination() throws Exception {
