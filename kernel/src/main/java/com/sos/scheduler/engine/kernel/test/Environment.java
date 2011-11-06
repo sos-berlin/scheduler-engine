@@ -34,24 +34,19 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath;
 public final class Environment {
     private static final String configSubdir = "config";
     private static final String logSubdir = "log";
+
     private final ResourcePath resourcePath;
-    private final boolean removeDirectoryOnClose;
     private final File directory;
     private final File configDirectory;
     private final File logDirectory;
 
     Environment(ResourcePath resourcePath) {
-        this(resourcePath, makeTemporaryDirectory(), true);
+        this(resourcePath, makeTemporaryDirectory());
     }
 
-    Environment(ResourcePath resourcePath, File directory) {
-        this(resourcePath, directory, false);
-    }
-
-    private Environment(ResourcePath resourcePath, File directory, boolean removeDirectoryOnClose) {
+    private Environment(ResourcePath resourcePath, File directory) {
         this.resourcePath = resourcePath;
         this.directory = directory;
-        this.removeDirectoryOnClose = removeDirectoryOnClose;
         configDirectory = new File(directory, configSubdir);
         logDirectory = new File(directory, logSubdir);
     }
@@ -61,8 +56,7 @@ public final class Environment {
     }
 
     void close() {
-        if (removeDirectoryOnClose)
-            removeDirectoryRecursivly(directory);
+        removeDirectoryRecursivly(directory);
     }
 
     private void prepareTemporaryConfigurationDirectory() {
