@@ -38,16 +38,16 @@ public class TestSchedulerController implements SchedulerController {
         environment = new Environment(resourcePath);
     }
 
-    @Override public void setSettings(Settings o) {
+    @Override public final void setSettings(Settings o) {
         delegated.setSettings(o);
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
-    public void setTerminateOnError(boolean o) {
+    public final void setTerminateOnError(boolean o) {
         terminateOnError = o;
     }
 
-    public void subscribeForAnnotatedEventHandlers(final EventHandlerAnnotated annotated) {
+    public final void subscribeForAnnotatedEventHandlers(final EventHandlerAnnotated annotated) {
         // TODO Umstellen auf Guava-EventBus und Code vereinfachen
         strictSubscribeEvents(new EventSubscriber() {
             private AnnotatedEventSubscriber subscriber = null;
@@ -57,7 +57,10 @@ public class TestSchedulerController implements SchedulerController {
                     OperationCollector collector = ((SchedulerReadyEvent)e).getScheduler().getEventSubsystem().getOperationCollector();
                     subscriber = AnnotatedEventSubscriber.of(annotated, collector);
                 }
-                subscriber.onEvent(e);
+                if (subscriber == null)
+                    logger.error("Early event ignored: "+e);
+                else
+                    subscriber.onEvent(e);
             }
         });
     }
@@ -126,7 +129,7 @@ public class TestSchedulerController implements SchedulerController {
         throw new AssertionError(errorLine);
     }
 
-    @Override public void waitUntilSchedulerState(SchedulerState s) {
+    @Override public final void waitUntilSchedulerState(SchedulerState s) {
         delegated.waitUntilSchedulerState(s);
     }
 
