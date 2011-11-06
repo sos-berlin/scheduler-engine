@@ -35,7 +35,7 @@ public class TaskHistoryEntity {
 
 
     public String getSchedulerId() {
-        return schedulerId.equals(DatabaseSubsystem.emptyIdinDatabase)? "" : schedulerId;
+        return schedulerId.equals(DatabaseSubsystem.emptyIdInDatabase)? "" : schedulerId;
     }
 
 

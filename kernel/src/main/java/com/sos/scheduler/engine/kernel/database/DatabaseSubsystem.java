@@ -13,40 +13,21 @@ import javax.persistence.Persistence;
 
 @ForCpp
 public class DatabaseSubsystem implements Subsystem {
-    public static final String emptyIdinDatabase = "-";
+    public static final String emptyIdInDatabase = "-";
     private static final String persistenceUnitName = "schedulerEngine";
 
     private EntityManagerFactory entityManagerFactory = null;
     private EntityManager entityManager = null;
     private final DatabaseC cppProxy;
-//    private final DatabaseConfiguration config;
-
 
     public DatabaseSubsystem(DatabaseC cppProxy) {
         this.cppProxy = cppProxy;
-//        this.config = config(getProperties());
     }
 
-
-//    private static DatabaseConfiguration config(VariableSet p) {
-//        return new DatabaseConfiguration(); // Ist noch leer
-//        String jdbcDriverClassName = p.get("jdbc.driver");
-//        String url = p.get("path");
-//        String userName = p.get("userName");
-//        String password = p.get("password");
-//        return new DatabaseConfiguration(jdbcDriverClassName, url, userName, password);
-//    }
-    
-    
     public final void close() {
         if (entityManagerFactory != null)
             entityManagerFactory.close();   // Schließt auch EntityManager
-//        try {
-//            if (connection != null)
-//                connection.close();
-//        } catch (SQLException x) { throw new SchedulerException(x); }
     }
-
 
     public final EntityManager getEntityManager() {
         if (entityManagerFactory == null)
@@ -55,7 +36,6 @@ public class DatabaseSubsystem implements Subsystem {
             entityManager = entityManagerFactory.createEntityManager();
         return entityManager;
     }
-
 
     private Map<String,String> entityManagerProperties() {
         Map<String,String> result = new HashMap<String,String>();
@@ -67,31 +47,12 @@ public class DatabaseSubsystem implements Subsystem {
         return result;
     }
 
-
     /** Liefert auch "password" */
     public final UnmodifiableVariableSet getProperties() {
         return cppProxy.properties().getSister();
     }
 
-
     public static String idForDatabase(String id) {
-        return id.isEmpty()? emptyIdinDatabase : id;
+        return id.isEmpty()? emptyIdInDatabase : id;
     }
-
-//    public final Connection getConnection() {
-//        if (connection != null)  connection = openConnection();
-//        return connection;
-//    }
-//
-//
-//    private Connection openConnection() {
-//        try {
-//            return DriverManager.getConnection(config.getUrl(), config.getUserName(), config.getPassword());
-//        } catch (SQLException x) { throw new SchedulerException(x); }
-//    }
-
-    
-//    public final DatabaseConfiguration getConfiguration() {
-//        return config;
-//    }
 }
