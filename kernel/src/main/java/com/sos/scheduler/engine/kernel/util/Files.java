@@ -12,8 +12,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+
+import com.google.common.base.Function;
 
 public final class Files {
     private static final Logger logger = Logger.getLogger(Files.class);
@@ -46,25 +50,22 @@ public final class Files {
         }
     }
 
-    public static boolean tryRemoveDirectoryRecursivly(File directory) {
-        try {
-            removeDirectoryRecursivly(directory);
-            return true;
-        } catch (Exception x) {
-            logger.error("Error when removing directory '"+directory+"': "+x);
-            logger.trace(x, x);
-            return false;
-        }
+    public static void tryRemoveDirectoryRecursivly(File directory) {
+        removeDirectoryRecursivly(directory, tryRemoveFile);
     }
 
     public static void removeDirectoryRecursivly(File directory) {
+        removeDirectoryRecursivly(directory, removeFile);
+    }
+
+    public static void removeDirectoryRecursivly(File directory, Function<File,Void> remover) {
         try {
             checkArgument(directory.isDirectory(), "Not a directory: %s", directory);
-            removeAbsoluteDirectoryRecursivly(directory.getCanonicalFile().getAbsoluteFile());
+            removeAbsoluteDirectoryRecursivly(directory.getCanonicalFile().getAbsoluteFile(), remover);
         } catch (IOException x) { throw new RuntimeException(x); }
     }
 
-    private static void removeAbsoluteDirectoryRecursivly(File dir) throws IOException {
+    private static void removeAbsoluteDirectoryRecursivly(File dir, Function<File,Void> remover) throws IOException {
         String[] names = dir.list();
         if (names == null)
             throw new RuntimeException("Error listing files for "+dir);
@@ -74,13 +75,31 @@ public final class Files {
             else {
                 for (String name: names) {
                     File f = new File(dir, name);
-                    if (f.isDirectory()) removeAbsoluteDirectoryRecursivly(f);
-                    else removeFile(f);
+                    if (f.isDirectory()) removeAbsoluteDirectoryRecursivly(f, remover);
+                    else remover.apply(f);
                 }
             }
         }
-        removeFile(dir);
+        remover.apply(dir);
     }
+
+    private static Function<File,Void> removeFile = new Function<File,Void>() {
+        @Override public Void apply(@Nullable File f) {
+            removeFile(f);
+            return null;
+        }
+    };
+
+    private static Function<File,Void> tryRemoveFile = new Function<File,Void>() {
+        @Override public Void apply(@Nullable File f) {
+            try {
+                removeFile(f);
+            } catch (Exception x) {
+                logger.error(x);
+            }
+            return null;
+        }
+    };
 
     private static boolean directoryCouldBeALink(File dir, String someDirectoryEntry) throws IOException {
         return !new File(dir, someDirectoryEntry).getCanonicalFile().getParentFile().equals(dir);
