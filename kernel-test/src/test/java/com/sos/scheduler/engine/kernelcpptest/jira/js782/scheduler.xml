@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd">
+    <config>
+        <commands>
+            <add_order job_chain='a' id='testOrder'/>
+            <modify_order job_chain='a' order='testOrder' suspended='true'/>
+            <modify_order job_chain='a' order='testOrder' state='END'/>
+            <show_job_chain job_chain='a' what='job_chain_orders blacklist'/>
+        </commands>
+    </config>
+</spooler>

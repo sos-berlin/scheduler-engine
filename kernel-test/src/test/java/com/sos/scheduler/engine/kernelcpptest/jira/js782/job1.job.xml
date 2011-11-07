@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+    order="yes" stop_on_error="no"
+>
+    <script language="shell">exit 1</script>
+    <run_time>
+        <at at="2030-31-12 12:00"/>
+    </run_time>
+</job>
