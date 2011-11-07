@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel;
 
-import static org.apache.commons.collections.CollectionUtils.unmodifiableCollection;
+import static org.apache.commons.collections.ListUtils.unmodifiableList;
 
 import java.util.Collection;
 
@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
 
-@ForCpp public class VariableSet implements Sister, UnmodifiableVariableSet {
+@ForCpp public final class VariableSet implements Sister, UnmodifiableVariableSet {
     private final Variable_setC cppProxy;
 
     VariableSet(Variable_setC cppProxy) {
@@ -24,21 +24,22 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
         return cppProxy.count();
     }
 
-    public Collection<String> names() {
-        return unmodifiableCollection(cppProxy.java_names());
+    @SuppressWarnings("unchecked")
+    public Collection<String> getNames() {
+        return unmodifiableList(cppProxy.java_names());
     }
 
-    @Override @Nullable public final String tryGet(String name) {
+    @Override @Nullable public String tryGet(String name) {
         return cppProxy.get_string(name);
     }
 
-    @Override public final String get(String name) {
+    @Override public String get(String name) {
         String result = tryGet(name);
         if (result == null)  throw new SchedulerException("Missing parameter '" + name + "'");
         return result;
     }
 
-    public final void put(String name, String value) {
+    public void put(String name, String value) {
         cppProxy.set_var(name, value);
     }
 

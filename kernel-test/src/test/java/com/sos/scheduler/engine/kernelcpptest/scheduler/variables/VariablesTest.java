@@ -15,7 +15,7 @@ public class VariablesTest extends SchedulerTest {
     @Test public void test() {
         controller().startScheduler();
         VariableSet variables = scheduler().getVariables();
-        Collection<String> names = variables.names();
+        Collection<String> names = variables.getNames();
         assertThat(names, containsInAnyOrder("Ä", "Bb", "Ccc"));
         assertThat(variables.get("Ä"), equalTo("ä"));
         assertThat(variables.get("Bb"), equalTo("bb"));
