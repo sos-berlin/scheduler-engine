@@ -12,7 +12,7 @@ public interface SchedulerController {
     void startScheduler(String... arguments);
     Scheduler waitUntilSchedulerIsRunning();
     void waitUntilSchedulerState(SchedulerState s);
-    void waitForTermination(Time timeout);
+    boolean tryWaitForTermination(Time timeout);
     void terminateScheduler();
     void terminateAfterException(Throwable x);
     void terminateAndWait();

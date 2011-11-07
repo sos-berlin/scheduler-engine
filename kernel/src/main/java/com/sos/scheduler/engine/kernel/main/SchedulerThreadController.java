@@ -81,16 +81,17 @@ public class SchedulerThreadController implements SchedulerController {
 
     @Override public final void terminateAndWait() {
         tryTerminateScheduler();
-        waitForTermination(Time.eternal);
+        tryWaitForTermination(Time.eternal);
     }
 
-    @Override public final void waitForTermination(Time timeout) {
+    @Override public final boolean tryWaitForTermination(Time timeout) {
         try {
             if (timeout == Time.eternal)  thread.join();
             else timeout.unit.timedJoin(thread, timeout.value);
             throwableMailbox.throwUncheckedIfSet();
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
+        return !thread.isAlive();
     }
 
     @Override public final void terminateAfterException(Throwable x) {

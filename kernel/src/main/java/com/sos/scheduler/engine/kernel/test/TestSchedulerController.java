@@ -77,6 +77,7 @@ public class TestSchedulerController implements SchedulerController {
         delegated.subscribeEvents(new StrictEventSubscriber(s, delegated));
     }
 
+    /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
     public final void runScheduler(Time timeout, String... args) {
         startScheduler(args);
         waitUntilSchedulerIsRunning();
@@ -145,8 +146,13 @@ public class TestSchedulerController implements SchedulerController {
         delegated.terminateAndWait();
     }
 
-    @Override public final void waitForTermination(Time timeout) {
-        delegated.waitForTermination(timeout);
+    public final void waitForTermination(Time timeout) {
+        boolean ok = tryWaitForTermination(timeout);
+        if (!ok)  throw new RuntimeException("Scheduler has not been terminated within "+timeout);
+    }
+
+    @Override public final boolean tryWaitForTermination(Time timeout) {
+        return delegated.tryWaitForTermination(timeout);
     }
 
     @Override public final int exitCode() {
