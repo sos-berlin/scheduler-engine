@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
 import static com.google.common.base.Objects.firstNonNull;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 
 import java.util.ArrayList;
@@ -36,8 +37,8 @@ import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.main.SchedulerControllerBridge;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
-import com.sos.scheduler.engine.kernel.settings.CppSettings;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
+import com.sos.scheduler.engine.kernel.settings.CppSettings;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 
 @ForCpp
@@ -176,7 +177,9 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     public String executeXml(String xml) {
-        return cppProxy.execute_xml(xml);
+        checkArgument(!xml.startsWith("<?"), "executeXml() does not accept XML with a prolog");  // Blanks und Kommentare vereiteln diese Prüfung.
+        String prolog = "<?xml version='1.0' encoding='iso-8859-1'?>";   // Für libxml2, damit Umlaute korrekt erkant werden.
+        return cppProxy.execute_xml(prolog + xml);
     }
 
     /** Nur für C++, zur Ausführung eines Kommandos in Java */
