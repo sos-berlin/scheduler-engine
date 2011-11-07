@@ -20,7 +20,9 @@ import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 
+/** @see <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a> */
 public final class JS653Test extends SchedulerTest {
+    private static final Time timeout = Time.of(5);
     private static final Joiner commaJoiner = Joiner.on(", ");
     private static final ImmutableSet<OrderIdAndState> expectedOrderStarts = ImmutableSet.of(
             new OrderIdAndState(new OrderId("simpleShouldRun"), new OrderState("state.job1")),
@@ -30,7 +32,7 @@ public final class JS653Test extends SchedulerTest {
     private final Set<OrderIdAndState> orderStarts = new HashSet<OrderIdAndState>();
 
     @Test public void test() {
-        controller().runScheduler(Time.of(5));
+        controller().runScheduler(timeout);
         if (!orderStarts.equals(expectedOrderStarts))
             fail(differenceMessage());
     }
