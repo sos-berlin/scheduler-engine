@@ -21,7 +21,7 @@ public class SimpleEventTest extends SchedulerTest {
     
     @Test
     public void test() throws Exception {
-        controller().runScheduler(schedulerTimeout, "-e -log-level=warn");
+        controller().runSchedulerAndTerminate(schedulerTimeout, "-e -log-level=warn");
     }
     
 }

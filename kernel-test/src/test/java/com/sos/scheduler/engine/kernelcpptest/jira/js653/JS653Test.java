@@ -32,7 +32,7 @@ public final class JS653Test extends SchedulerTest {
     private final Set<OrderIdAndState> orderStarts = new HashSet<OrderIdAndState>();
 
     @Test public void test() {
-        controller().runScheduler(timeout);
+        controller().runSchedulerAndTerminate(timeout);
         if (!orderStarts.equals(expectedOrderStarts))
             fail(differenceMessage());
     }

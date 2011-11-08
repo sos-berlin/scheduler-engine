@@ -119,7 +119,7 @@ public class JS628Test extends SchedulerTest {
      */
     @Test 
     public void test() throws Exception {
-        controller().runScheduler(schedulerTimeout, "-e");
+        controller().runSchedulerAndTerminate(schedulerTimeout, "-e");
         assertState("success",1);										// one order has to end with 'success'
         assertState("error",3);											// three order has to end with 'error'
         assertEquals("total number of events",4,resultQueue.size());	// totaly 4 OrderFinishedEvents

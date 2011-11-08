@@ -84,6 +84,13 @@ public class TestSchedulerController implements SchedulerController {
         waitForTermination(timeout);
     }
 
+    @Deprecated  // Soll der Scheduler wirklich automatisch beendet werden oder sollte das nicht besser der Test selbst tun? Zschimmer 8.11.2011
+    public final void runSchedulerAndTerminate(Time timeout, String... args) {
+        startScheduler(args);
+        waitUntilSchedulerIsRunning();
+        waitForTermination(timeout);
+    }
+
     @Override public final void startScheduler(String... args) {
         prepare();
         handleTerminateOnError();

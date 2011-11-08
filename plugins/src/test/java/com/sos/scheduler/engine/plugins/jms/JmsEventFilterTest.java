@@ -79,7 +79,7 @@ public class JmsEventFilterTest extends SchedulerTest {
     @Test
     public void test() throws Exception {
     	try {
-	        controller().runScheduler(schedulerTimeout, "-e -log-level=warn");
+	        controller().runSchedulerAndTerminate(schedulerTimeout, "-e -log-level=warn");
 	        assertEquals("EventOrderTouched",2,resultQueue.size());
 		} finally {
 			topicSubscriber.close();

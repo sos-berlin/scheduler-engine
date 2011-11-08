@@ -79,7 +79,7 @@ public class JmsOrderEventsTest extends SchedulerTest {
     
     @Test public void test() throws Exception {
     	try {
-	        controller().runScheduler(schedulerTimeout, "-e -loglevel=warn");
+	        controller().runSchedulerAndTerminate(schedulerTimeout, "-e -loglevel=warn");
 //	        runScheduler(schedulerTimeout, "-e");
 	        assertEvent("EventOrderTouched",2);
 	        assertEvent("EventOrderStateChanged",4);
