@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.settings.database.DatabaseSettings;
 import com.sos.scheduler.engine.kernel.settings.database.DefaultDatabaseSettings;
+import com.sos.scheduler.engine.kernel.util.Hostware;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
@@ -40,7 +41,7 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
                 return new DefaultDatabaseSettings() {
                     @Override public String getHostwarePathOrNull() {
                         File databaseFile = new File(controller.environment().directory(), "scheduler-database");
-                        return "jdbc -class="+org.h2.Driver.class.getName()+" jdbc:h2:"+databaseFile;
+                        return Hostware.h2DatabasePath(databaseFile);
                     }
                 };
             }
