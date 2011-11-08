@@ -4,6 +4,7 @@ import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 import static com.sos.scheduler.engine.kernel.test.binary.TestCppBinaries.cppBinaries;
+import static java.lang.Thread.sleep;
 
 import java.util.Arrays;
 
@@ -84,11 +85,15 @@ public class TestSchedulerController implements SchedulerController {
         waitForTermination(timeout);
     }
 
-    @Deprecated  // Soll der Scheduler wirklich automatisch beendet werden oder sollte das nicht besser der Test selbst tun? Zschimmer 8.11.2011
+    @Deprecated  // Der Test soll den Scheduler explizit beenden, wenn alles okay ist. Zschimmer 8.11.2011
     public final void runSchedulerAndTerminate(Time timeout, String... args) {
         startScheduler(args);
         waitUntilSchedulerIsRunning();
-        waitForTermination(timeout);
+        try {
+            waitForTermination(timeout);
+        } catch (SchedulerRunningAfterTimeoutException x) {
+            logger.warn("runSchedulerAndTerminate():"+ x.getMessage());
+        }
     }
 
     @Override public final void startScheduler(String... args) {
@@ -155,7 +160,7 @@ public class TestSchedulerController implements SchedulerController {
 
     public final void waitForTermination(Time timeout) {
         boolean ok = tryWaitForTermination(timeout);
-        if (!ok)  throw new RuntimeException("Scheduler has not been terminated within "+timeout);
+        if (!ok) throw new SchedulerRunningAfterTimeoutException(timeout);
     }
 
     @Override public final boolean tryWaitForTermination(Time timeout) {
