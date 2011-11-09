@@ -17,6 +17,7 @@ void register_native_classes(){
     has_proxy< ::sos::scheduler::Prefix_log >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Settings >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Spooler >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::Task >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::com_objects::Com_variable_set >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Job_chain >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Order >::register_cpp_proxy_class_in_java();

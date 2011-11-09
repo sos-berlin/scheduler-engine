@@ -34,7 +34,8 @@ string                          start_cause_name            ( Start_cause );
 //----------------------------------------------------------------------------------------------Task
 
 struct Task : Object, 
-              Scheduler_object
+              Scheduler_object,
+              javabridge::has_proxy<Task>
 {
     enum State
     {

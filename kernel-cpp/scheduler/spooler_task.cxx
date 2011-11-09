@@ -15,8 +15,11 @@
 #include "../kram/sleep.h"
 #include "../zschimmer/z_signals.h"
 
+#include "../javaproxy/com__sos__scheduler__engine__kernel__job__UnmodifiableTask.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__job__events__TaskEndedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepStartedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepEndedEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::kernel::job::events::TaskEndedEvent TaskEndedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepStartedEvent OrderStepStartedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepEndedEvent OrderStepEndedEventJ;
 
@@ -160,19 +163,19 @@ int Task_subsystem::count_tasks_exist( ) const
 {
     int result = 0;
 
-    // TODO ggf. bestimmte Stati nicht zählen
+    // TODO ggf. bestimmte Status nicht zählen
     FOR_EACH_TASK_CONST ( it, task )
         result++;
 
     return result;
 }
 
-
 //---------------------------------------------------------------------------------------Task::Task
 
 Task::Task( Job* job )
 :
     Scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
+    javabridge::has_proxy<Task>(job->_spooler),
     _zero_(this+1),
     _job(job),
     _history(&job->_history,this),
@@ -1888,13 +1891,8 @@ bool Task::do_something()
                                     }                                                               
                                 }                                                               
 
-                                // Gesammelte eMail senden, wenn collected_max erreicht:
-                                //Time log_time = _log->collect_end();
-                                //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
-
+                                report_event(TaskEndedEventJ::new_instance(java_sister()));
                                 set_state_direct( s_deleting_files );
-                                //set_state_direct( s_closed );
-                
                                 loop = true;
                             }
 
