@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
+package com.sos.scheduler.engine.kernelcpptest.excluded.js644.continuous;
 
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
@@ -14,6 +14,7 @@ import org.junit.rules.TestRule;
 
 import com.google.common.base.Function;
 import com.sos.scheduler.engine.kernel.event.EventHandler;
+import com.sos.scheduler.engine.kernel.folder.Path;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
@@ -24,10 +25,10 @@ import com.sos.scheduler.engine.kernel.util.sync.Gate;
 /** Der Test lässt einen Auftrag kontinuierlich durch eine Jobkette laufen.
  * Der Thread {@link FilesModifierRunnable} ändert zu zufälligen Zeitpunkten einen Job
  */
-public final class Js644Test extends SchedulerTest {
+public final class JS644Test extends SchedulerTest {
     @ClassRule public static final TestRule slowTestRule = SlowTestRule.singleton;
 
-    private static final Logger logger = Logger.getLogger(Js644Test.class);
+    private static final Logger logger = Logger.getLogger(JS644Test.class);
     private static final List<String> jobPaths = asList("a", "b", "c");
     private static final Time orderTimeout = Time.of(60);
 
@@ -42,12 +43,15 @@ public final class Js644Test extends SchedulerTest {
         Thread modifierThread = controller().newThread(new FilesModifierRunnable(jobFiles()));
         modifierThread.start();
         try {
-            // Der Test läuft ewig bis ein Job stehen bleibt und ein Auftrag nicht rechtzeitig verarbeitet worden ist oder der Scheduler endet.
-            while (waitForChangedOrder()) {}
+            runUntilJobChainOrSchedulerStops();
         } finally {
             modifierThread.interrupt();
             modifierThread.join();
         }
+    }
+
+    private void runUntilJobChainOrSchedulerStops() throws InterruptedException {
+        while (waitForChangedOrder()) {}
     }
 
     private boolean waitForChangedOrder() throws InterruptedException {
@@ -59,7 +63,7 @@ public final class Js644Test extends SchedulerTest {
 
     private Iterable<File> jobFiles() {
         return transform(jobPaths, new Function<String,File>() {
-            @Override public File apply(String o) { return new File(controller().environment().configDirectory(), o + ".job.xml"); }
+            @Override public File apply(String o) { return controller().environment().fileFromPath(new Path(o), ".job.xml"); }
         });
     }
 

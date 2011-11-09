@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
+package com.sos.scheduler.engine.kernelcpptest.excluded.js644.continuous;
 
 import static java.lang.Math.random;
 
