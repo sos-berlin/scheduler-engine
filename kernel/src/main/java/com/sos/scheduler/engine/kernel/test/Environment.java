@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.kernel.test;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
-import static com.sos.scheduler.engine.kernel.util.Files.removeDirectoryRecursivly;
 import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
@@ -12,6 +11,7 @@ import java.io.File;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.kernel.folder.Path;
 import com.sos.scheduler.engine.kernel.main.CppBinaries;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
@@ -89,6 +89,10 @@ public final class Environment {
         String varName = operatingSystem.getDynamicLibraryEnvironmentVariableName();
         String previous = nullToEmpty(System.getenv(varName));
         return varName + "=" + OperatingSystem.concatFileAndPathChain(directory, previous);
+    }
+
+    public File fileFromPath(Path p, String suffix) {
+        return new File(configDirectory(), p + suffix);
     }
 
     public File directory() {
