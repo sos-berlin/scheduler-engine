@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop;
+package com.sos.scheduler.engine.kernelcpptest.jira.js644.stop;
 
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop.JS644StoppedJobTest.M.orderStateChanged;
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop.JS644StoppedJobTest.M.taskEnded;
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop.JS644StoppedJobTest.M.terminated;
+import static com.sos.scheduler.engine.kernelcpptest.jira.js644.stop.JS644StoppedJobTest.M.orderStateChanged;
+import static com.sos.scheduler.engine.kernelcpptest.jira.js644.stop.JS644StoppedJobTest.M.taskEnded;
+import static com.sos.scheduler.engine.kernelcpptest.jira.js644.stop.JS644StoppedJobTest.M.terminated;
 
 import java.io.File;
 import java.io.IOException;

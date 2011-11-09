@@ -4,7 +4,6 @@
 >
     <script language="shell">@echo off
 echo Hallo
-sleep 1
 exit 0
     </script>
 </job>
