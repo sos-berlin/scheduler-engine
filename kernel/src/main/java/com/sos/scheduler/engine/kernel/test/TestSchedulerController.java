@@ -4,9 +4,10 @@ import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 import static com.sos.scheduler.engine.kernel.test.binary.TestCppBinaries.cppBinaries;
-import static java.lang.Thread.sleep;
 
 import java.util.Arrays;
+
+import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
 
@@ -37,6 +38,17 @@ public class TestSchedulerController implements SchedulerController {
 
     public TestSchedulerController(ResourcePath resourcePath) {
         environment = new Environment(resourcePath);
+    }
+
+    public final void close() {
+        try {
+            delegated.terminateAndWait();
+            environment.close();
+        }
+        catch (Throwable x) {
+            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
+            throw propagate(x);
+        }
     }
 
     @Override public final void setSettings(Settings o) {
@@ -142,6 +154,18 @@ public class TestSchedulerController implements SchedulerController {
         throw new AssertionError(errorLine);
     }
 
+    /** Eine Exception in {@code runnable} beendet den Scheduler. */
+    public final Thread newThread(Runnable runnable) {
+        ThreadTerminationHandler threadTerminationHandler =  new ThreadTerminationHandler() {
+            @Override public void onThreadTermination(@Nullable Throwable t) {
+                if (t != null) terminateAfterException(t);
+            }
+        };
+        Thread result = new Thread(new TestThreadRunnable(runnable, threadTerminationHandler));
+        result.setName(runnable.toString());
+        return result;
+    }
+
     @Override public final void waitUntilSchedulerState(SchedulerState s) {
         delegated.waitUntilSchedulerState(s);
     }
@@ -169,17 +193,6 @@ public class TestSchedulerController implements SchedulerController {
 
     @Override public final int exitCode() {
         return delegated.exitCode();
-    }
-
-    public final void close() {
-        try {
-            delegated.terminateAndWait();
-            environment.close();
-        }
-        catch (Throwable x) {
-            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
-            throw propagate(x);
-        }
     }
 
     public final Environment environment() {

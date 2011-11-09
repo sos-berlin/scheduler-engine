@@ -14,7 +14,7 @@ final class FilesModifierRunnable implements Runnable {
 
     @Override public void run() {
         while(true) {
-            filesModifier.modifyNext();
+            filesModifier.modifyRandom();
             int pause = 1 + (int)(4000*random()) / filesModifier.fileCount();   // Nach 2s Pause sieht der Scheduler eine Dateiänderung als stabil an
             boolean interrupted = sleepUntilInterrupted(pause);
             if (interrupted) break;
