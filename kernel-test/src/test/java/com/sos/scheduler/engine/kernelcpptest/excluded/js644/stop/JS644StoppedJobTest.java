@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.kernelcpptest.excluded.js644stop;
+package com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop;
 
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644stop.JS644Test.M.orderStateChanged;
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644stop.JS644Test.M.taskEnded;
-import static com.sos.scheduler.engine.kernelcpptest.excluded.js644stop.JS644Test.M.terminated;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop.JS644StoppedJobTest.M.orderStateChanged;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop.JS644StoppedJobTest.M.taskEnded;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.stop.JS644StoppedJobTest.M.terminated;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,11 +20,9 @@ import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
 
-/** Der Test lässt einen Auftrag kontinuierlich durch eine Jobkette laufen.
- * Der Thread {@link com.sos.scheduler.engine.kernelcpptest.excluded.js644.FilesModifierRunnable} ändert zu zufälligen Zeitpunkten einen Job
- */
-public final class JS644Test extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(JS644Test.class);
+/** Testet ob ein gestoppter und veränderter Job wieder korrekt in die Jobkette eingehängt wird und erneut anläuft. */
+public final class JS644StoppedJobTest extends SchedulerTest {
+    private static final Logger logger = Logger.getLogger(JS644StoppedJobTest.class);
     private static final Path jobPath = new Path("a");
     enum M { taskEnded, orderStateChanged, terminated }
     private final Gate<M> threadGate = new Gate<M>();
