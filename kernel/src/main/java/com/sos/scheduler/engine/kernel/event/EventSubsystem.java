@@ -16,14 +16,12 @@ import com.sos.scheduler.engine.kernel.Subsystem;
 public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 
-    private final OperationQueue operationQueue;
     private final Set<EventSubscriber> subscribers = new HashSet<EventSubscriber>();
     private final Map<Object,AnnotatedEventSubscriber> annotatedEventSubscriberMap = new HashMap<Object,AnnotatedEventSubscriber>();
     private Event currentEvent = null;
 
-    public EventSubsystem(Platform platform, OperationQueue operationQueue) {
+    public EventSubsystem(Platform platform) {
         super(platform);
-        this.operationQueue = operationQueue;
     }
 
     @ForCpp public final void report(Event e) {

@@ -23,10 +23,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStepEndedEvent extends UnmodifiableOrderEvent {
+public class OrderStepEndedEvent extends ModifiableOrderEvent {
     private final boolean ok;
 
-    @ForCpp public OrderStepEndedEvent(UnmodifiableOrder order, boolean ok) {
+    @ForCpp public OrderStepEndedEvent(Order order, boolean ok) {
         super(order);
         this.ok = ok;
     }

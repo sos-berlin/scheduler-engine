@@ -73,7 +73,7 @@ public final class Scheduler implements HasPlatform, Sister {
         operationExecutor = new OperationExecutor(log);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
-        eventSubsystem = new EventSubsystem(platform, operationExecutor);
+        eventSubsystem = new EventSubsystem(platform);
         databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());
