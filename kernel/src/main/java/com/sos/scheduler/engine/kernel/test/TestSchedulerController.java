@@ -11,52 +11,28 @@ import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
 
-import com.sos.scheduler.engine.eventbus.AnnotatedEventSubscribers;
-import com.sos.scheduler.engine.eventbus.Event;
-import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
-import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
-import com.sos.scheduler.engine.eventbus.GenericEventSubscription;
+import com.sos.scheduler.engine.eventbus.EventSubscription;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
-import com.sos.scheduler.engine.kernel.main.SchedulerController;
-import com.sos.scheduler.engine.kernel.main.SchedulerState;
-import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
-import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
 
-public class TestSchedulerController implements SchedulerController {
+public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
     public static final Time shortTimeout = Time.of(10);
 
-    private final EventBus strictEventBus = new EventBus();
     private final Environment environment;
-    private final SchedulerThreadController delegated = new SchedulerThreadController();
     private boolean terminateOnError = true;
     private Scheduler scheduler = null;
 
     public TestSchedulerController(ResourcePath resourcePath) {
         environment = new Environment(resourcePath);
-        delegated.getEventBus().register(new GenericEventSubscription<Event>(Event.class) {
-            @Override protected void handleTypedEvent(Event e) {
-                strictEventBus.publishImmediately(e);
-            }
-        });
-        strictEventBus.register(new GenericEventSubscription<EventHandlerFailedEvent>(EventHandlerFailedEvent.class) {
-            @Override protected void handleTypedEvent(EventHandlerFailedEvent e) {
-                terminateAfterException(e.getThrowable());
-            }
-        });
-    }
-
-    @Override public final void setSettings(Settings o) {
-        delegated.setSettings(o);
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
@@ -64,32 +40,19 @@ public class TestSchedulerController implements SchedulerController {
         terminateOnError = o;
     }
 
-    public final void subscribeForAnnotatedEventHandlers(EventHandlerAnnotated annotated) {
-        strictSubscribeEvents(AnnotatedEventSubscribers.handlers(annotated));
-    }
-
-//    public final void strictSubscribeEvents() {
-//        strictSubscribeEvents(EventSubscriber.empty);
-//    }
-
-    private void strictSubscribeEvents(Iterable<EventSubscription> subscribers) {
-        for (EventSubscription s: subscribers) subscribeEvents(s);
-    }
-
-    public final void strictSubscribeEvents(EventSubscription s) {
-        subscribeEvents(s);
-    }
-
-    public final void strictSubscribeEvents(EventSubscriber s) {
-        strictSubscribeEvents(new EventSubscriberAdaptingEventSubscription(s));
-    }
-
-    private void subscribeEvents(EventSubscriber s) {
-        subscribeEvents(new EventSubscriberAdaptingEventSubscription(s));
+    @EventHandler @HotEventHandler  // Beide, weil das Event wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.
+    public final void handleEvent(EventHandlerFailedEvent e) {
+        if (terminateOnError)
+            terminateAfterException(e.getThrowable());
     }
 
     public final void subscribeEvents(EventSubscription s) {
-        strictEventBus.register(s);
+        delegate.getEventBus().registerHot(s);
+    }
+
+    @Deprecated
+    public final void subscribeEvents(EventSubscriber s) {
+        delegate.getEventBus().registerHot(new EventSubscriberAdaptingEventSubscription(s));
     }
 
     /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
@@ -99,7 +62,7 @@ public class TestSchedulerController implements SchedulerController {
         waitForTermination(timeout);
     }
 
-    @Deprecated  // Der Test soll den Scheduler explizit beenden, wenn alles okay ist. Zschimmer 8.11.2011
+    @Deprecated  // Statt den Scheduler nach Frist zu beenden, soll der Test das bitte selbst machen, sobald alles okay ist. Zschimmer 8.11.2011
     public final void runSchedulerAndTerminate(Time timeout, String... args) {
         startScheduler(args);
         waitUntilSchedulerIsRunning();
@@ -111,25 +74,27 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     @Override public final void startScheduler(String... args) {
+        delegate.getEventBus().registerAnnotated(this);
         prepare();
-        handleTerminateOnError();
         Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries()), Arrays.asList(args));
-        delegated.startScheduler(toArray(allArgs, String.class));
+        delegate.startScheduler(toArray(allArgs, String.class));
     }
 
-    private void handleTerminateOnError() {
-        if (terminateOnError) {
-            subscribeForAnnotatedEventHandlers(new EventHandlerAnnotated() {
-                @EventHandler public void handleEvent(ErrorLogEvent e) {
-                    throw throwErrorLogException(e.getMessage().toString());
-                }
-            });
+    @Override public final void close() {
+        try {
+            delegate.getEventBus().unregisterAnnotated(this);
+            delegate.close();
+            environment.close();
+        }
+        catch (Throwable x) {
+            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
+            throw propagate(x);
         }
     }
 
     private void prepare() {
         environment.prepare();
-        delegated.loadModule(cppBinaries().file(CppBinary.moduleFilename));
+        delegate.loadModule(cppBinaries().file(CppBinary.moduleFilename));
     }
 
     public final Scheduler scheduler() {
@@ -138,10 +103,15 @@ public class TestSchedulerController implements SchedulerController {
 
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
         if (scheduler == null) {
-            scheduler = delegated.waitUntilSchedulerIsRunning();
+            scheduler = delegate.waitUntilSchedulerIsRunning();
             if (terminateOnError) checkForErrorLogLine();
         }
         return scheduler;
+    }
+
+    public final void waitForTermination(Time timeout) {
+        boolean ok = tryWaitForTermination(timeout);
+        if (!ok) throw new SchedulerRunningAfterTimeoutException(timeout);
     }
 
     private void checkForErrorLogLine() {
@@ -151,64 +121,14 @@ public class TestSchedulerController implements SchedulerController {
 //            throw throwErrorLogException(lastErrorLine);
     }
 
-    private static RuntimeException throwErrorLogException(String errorLine) {
-        throw new AssertionError(errorLine);
-    }
-
     /** Eine Exception in {@code runnable} beendet den Scheduler. */
     public final Thread newThread(Runnable runnable) {
-        ThreadTerminationHandler threadTerminationHandler =  new ThreadTerminationHandler() {
+        ThreadTerminationHandler h = new ThreadTerminationHandler() {
             @Override public void onThreadTermination(@Nullable Throwable t) {
                 if (t != null) terminateAfterException(t);
             }
         };
-        Thread result = new Thread(new TestThreadRunnable(runnable, threadTerminationHandler));
-        result.setName(runnable.toString());
-        return result;
-    }
-
-    @Override public final void waitUntilSchedulerState(SchedulerState s) {
-        delegated.waitUntilSchedulerState(s);
-    }
-
-//    @Override public SchedulerState getSchedulerState() {
-//        return delegated.getSchedulerState();
-//    }
-
-    @Override public final void terminateScheduler() {
-        delegated.terminateScheduler();
-    }
-
-    @Override public final void terminateAfterException(Throwable x) {
-        delegated.terminateAfterException(x);
-    }
-
-    @Override public final void close() {
-        try {
-            delegated.close();
-            environment.close();
-        }
-        catch (Throwable x) {
-            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
-            throw propagate(x);
-        }
-    }
-
-    public final void waitForTermination(Time timeout) {
-        boolean ok = tryWaitForTermination(timeout);
-        if (!ok) throw new SchedulerRunningAfterTimeoutException(timeout);
-    }
-
-    @Override public final boolean tryWaitForTermination(Time timeout) {
-        return delegated.tryWaitForTermination(timeout);
-    }
-
-    @Override public final int exitCode() {
-        return delegated.exitCode();
-    }
-
-    @Override public EventBus getEventBus() {
-        return delegated.getEventBus();
+        return new Thread(new TestThreadRunnable(runnable, h), runnable.toString());
     }
 
     public final Environment environment() {

@@ -1,4 +1,4 @@
 package com.sos.scheduler.engine.eventbus;
 
-/** Marker-Interface, dass Methoden mit @{@link com.sos.scheduler.engine.eventbus.EventHandler} annotiert sind. */
+/** Marker-Interface, dass Methoden mit @{@link EventHandler} oder @{@link HotEventHandler} annotiert sind. */
 public interface EventHandlerAnnotated {}

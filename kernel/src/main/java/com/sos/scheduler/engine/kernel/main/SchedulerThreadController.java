@@ -7,7 +7,7 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 
-import com.sos.scheduler.engine.eventbus.EventBus;
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
@@ -19,14 +19,14 @@ import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 public class SchedulerThreadController implements SchedulerController {
     private static final Logger logger = Logger.getLogger(SchedulerThreadController.class);
 
-    private final EventBus eventBus = new EventBus();
+    private final SchedulerEventBus eventBus = new SchedulerEventBus();
     private Settings settings = DefaultSettings.singleton;
     private boolean isStarted = false;
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThreadControllerBridge controllerBridge = new SchedulerThreadControllerBridge(this, eventBus);
     private final SchedulerThread thread = new SchedulerThread(controllerBridge);
 
-    @Override public void setSettings(Settings o) {
+    @Override public final void setSettings(Settings o) {
         checkState(!isStarted, "Scheduler has already been started");
         settings = o;
     }
@@ -46,6 +46,7 @@ public class SchedulerThreadController implements SchedulerController {
         terminateScheduler();
         tryWaitForTermination(Time.eternal);
         controllerBridge.close();
+        eventBus.dispatchEvents();
     }
 
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
@@ -107,11 +108,11 @@ public class SchedulerThreadController implements SchedulerController {
         return thread.exitCode();
     }
 
-    @Override public EventBus getEventBus() {
+    @Override public final SchedulerEventBus getEventBus() {
         return eventBus;
     }
 
-    public Settings getSettings() {
+    public final Settings getSettings() {
         return settings;
     }
 }

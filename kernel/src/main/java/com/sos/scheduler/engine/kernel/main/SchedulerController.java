@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.main;
 
-import com.sos.scheduler.engine.eventbus.EventBus;
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -33,5 +33,5 @@ public interface SchedulerController {
 
     int exitCode();
 
-    EventBus getEventBus();
+    SchedulerEventBus getEventBus();
 }

@@ -16,10 +16,10 @@ public abstract class AbstractEventPlugin extends AbstractPlugin implements Even
     }
 
     @Override public void activate() {
-        scheduler.getEventSubsystem().subscribe(this);			// register the plugin in the JS
+        scheduler.getEventSubsystem().subscribe(this);
     }
 
     @Override public void close() {
-        scheduler.getEventSubsystem().unsubscribe(this);		// unregister the plugin in the JS
+        scheduler.getEventSubsystem().unsubscribe(this);
     }
 }

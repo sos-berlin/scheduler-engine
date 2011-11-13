@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 import com.google.inject.Injector;
+import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -28,15 +29,15 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
             new PluginCommandCommandXmlParser(this),
             new PluginCommandResultXmlizer(this) };
     private final Scheduler scheduler;
-    private final EventSubsystem eventSubsystem;
     private final Lazy<Injector> lazyInjector;
     private final Map<String,PluginAdapter> plugins = new HashMap<String,PluginAdapter>();
+    private final EventBus eventBus;
 
-    public PluginSubsystem(Scheduler scheduler, EventSubsystem eventSubsystem, Lazy<Injector> injector) {
+    public PluginSubsystem(Scheduler scheduler, Lazy<Injector> injector, EventBus eventBus) {
         super(scheduler.getPlatform());
         this.scheduler = scheduler;
-        this.eventSubsystem = eventSubsystem;
         this.lazyInjector = injector;
+        this.eventBus = eventBus;
     }
 
     public void load(Element root) {
@@ -55,14 +56,14 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
 
     public void activate() {
         for (PluginAdapter p: plugins.values()) {
-            eventSubsystem.subscribeAnnotated(p.getPlugin());
+            eventBus.registerAnnotated(p.getPlugin());
             p.tryActivate();
         }
     }
 
     public void close() {
         for (PluginAdapter p: plugins.values()) {
-            eventSubsystem.unsubscribeAnnotated(p.getPlugin());
+            eventBus.unregisterAnnotated(p.getPlugin());
             p.tryClose();
         }
     }

@@ -3,9 +3,10 @@ package com.sos.scheduler.engine.kernel.event;
 import static com.sos.scheduler.engine.kernel.util.Util.stringOrException;
 
 import com.sos.scheduler.engine.eventbus.AbstractEvent;
+import com.sos.scheduler.engine.eventbus.HotEvent;
 import com.sos.scheduler.engine.kernel.SchedulerObject;
 
-public abstract class ObjectEvent extends AbstractEvent {
+public abstract class ObjectEvent extends AbstractEvent implements HotEvent {
     /** Nur gültig während des Events. 
      * Danach kann das Objekt ungültig geworden sein und es gibt den Fehler Z-JAVA-111. */
     protected abstract SchedulerObject getObject();

@@ -20,6 +20,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.eventbus.EventBus;
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
@@ -36,7 +37,6 @@ import com.sos.scheduler.engine.kernel.log.LogSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.main.SchedulerControllerBridge;
-import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
@@ -52,6 +52,7 @@ public final class Scheduler implements HasPlatform, Sister {
     private final SchedulerControllerBridge controllerBridge;
     private final PrefixLog log;
     private final Platform platform;
+    private final SchedulerEventBus eventBus;
     private final OperationExecutor operationExecutor;
 
     private final LogSubsystem logSubsystem;
@@ -72,16 +73,17 @@ public final class Scheduler implements HasPlatform, Sister {
 
         log = new PrefixLog(cppProxy.log());
         platform = new Platform(log);
+        eventBus = controllerBridge.getEventBus();
         operationExecutor = new OperationExecutor(log);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
-        eventSubsystem = new EventSubsystem(platform, controllerBridge.getEventBus());
+        eventSubsystem = new EventSubsystem(platform, eventBus);
         databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());
         orderSubsystem = new OrderSubsystem(platform, this.cppProxy.order_subsystem());
         Lazy<Injector> injector = new Lazy<Injector>() { @Override protected Injector compute() { return newInjector(); } };
-        pluginSubsystem = new PluginSubsystem(this, eventSubsystem, injector);
+        pluginSubsystem = new PluginSubsystem(this, injector, eventBus);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
         initializeThreadLock();
@@ -95,6 +97,7 @@ public final class Scheduler implements HasPlatform, Sister {
                 bind(JobSubsystem.class).toInstance(jobSubsystem);
                 bind(OrderSubsystem.class).toInstance(orderSubsystem);
                 bind(OperationQueue.class).toInstance(operationExecutor);
+                bind(EventBus.class).toInstance(eventBus);
             }
         });
     }
@@ -120,7 +123,6 @@ public final class Scheduler implements HasPlatform, Sister {
     @ForCpp public void onClose() {
         try {
             eventSubsystem.report(new SchedulerCloseEvent());
-
             try {
                 logSubsystem.close();
             } catch (Exception x) {
@@ -132,6 +134,7 @@ public final class Scheduler implements HasPlatform, Sister {
                 threadInitiallyLocked = false;
             }
         }
+        eventBus.dispatchEvents();
     }
 
     @ForCpp public void onLoad(String configurationXml) {
@@ -152,8 +155,8 @@ public final class Scheduler implements HasPlatform, Sister {
         controllerBridge.onSchedulerActivated();
     }
 
-    @ForCpp public void onEnteringSleepState() {
-        eventSubsystem.dispatchEvents();
+    @ForCpp public void onEnteringSleepState() {    //TODO Name ändern in onSchedulerStep(), wird bei jedem Schleifendurchlauf aufgerufen.
+        eventBus.dispatchEvents();
         operationExecutor.execute();
     }
 

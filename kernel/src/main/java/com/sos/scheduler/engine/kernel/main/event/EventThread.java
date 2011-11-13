@@ -52,8 +52,10 @@ public abstract class EventThread extends Thread implements EventSubscription {
         if (e instanceof TerminatedEvent)
             onSchedulerThreadTerminated((TerminatedEvent)e);
         else
-        if (eventMatchesPredicate(e))
-            rendezvous.unlockAndCall(e);
+        if (eventMatchesPredicate(e)) {
+            if (isAlive())
+                rendezvous.unlockAndCall(e);
+        }
     }
 
     private void onSchedulerThreadReady(SchedulerReadyEvent e) {
@@ -79,7 +81,6 @@ public abstract class EventThread extends Thread implements EventSubscription {
 
     @Override public final void run() {
         rendezvous.beginServing();
-        
         try {
             runEventThreadAndTerminateScheduler();
         }

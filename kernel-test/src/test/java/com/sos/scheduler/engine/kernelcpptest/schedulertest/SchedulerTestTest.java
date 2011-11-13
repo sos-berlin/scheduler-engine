@@ -1,13 +1,11 @@
 package com.sos.scheduler.engine.kernelcpptest.schedulertest;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
-
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
@@ -17,13 +15,13 @@ import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
 /** Testet {@link SchedulerTest} */
 public final class SchedulerTestTest extends SchedulerTest {
-    private final List<Class<? extends Event>> receivedEventClasses = newArrayList();
+    private final ImmutableList.Builder<Class<? extends Event>> receivedEventClasses = ImmutableList.builder();
 
     @Test public void test() {
         controller().startScheduler();
         controller().close();
         Class<?>[] expected = {SchedulerReadyEvent.class, SchedulerCloseEvent.class, TerminatedEvent.class};
-        assertThat(receivedEventClasses, contains(expected));
+        assertThat(receivedEventClasses.build(), contains(expected));
     }
 
     @EventHandler public void handleEvent(SchedulerReadyEvent e) {

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernelcpptest.schedulertest;
 
 import org.junit.Test;
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
@@ -13,7 +13,7 @@ public final class FailingSchedulerReadyEventHandlerTest extends SchedulerTest {
         controller().close();
     }
 
-    @EventHandler public void handleEvent(SchedulerReadyEvent e) {
+    @HotEventHandler public void handleEvent(SchedulerReadyEvent e) {
         throw new MyError();
     }
 }

@@ -2660,10 +2660,10 @@ void Spooler::run()
 
             wait_handles += _wait_handles;
 
+            schedulerJ().onEnteringSleepState();
+
             if( nothing_done_count > 0  ||  !wait_handles.signaled() )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {
-                schedulerJ().onEnteringSleepState();
-
                 if( wait_until == 0 )
                 {
                     wait_handles.wait_until( Time(), wait_until_object, Time(), NULL );   // Signale checken

@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
 public class ExampleWithJavascriptTest extends SchedulerTest {
     @Test public void test() throws Exception {
-        controller().strictSubscribeEvents(new MyEventThread());
+        controller().subscribeEvents(new MyEventThread());
         controller().runScheduler(shortTimeout);
     }
 

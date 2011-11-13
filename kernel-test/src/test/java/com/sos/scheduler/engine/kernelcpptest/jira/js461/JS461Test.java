@@ -77,7 +77,7 @@ public class JS461Test extends SchedulerTest {
      */
     @Ignore 
     public void test() throws Exception {
-        controller().strictSubscribeEvents(new MyEventSubscriber());
+        controller().subscribeEvents(new MyEventSubscriber());
         controller().runScheduler(schedulerTimeout, "-e");
         assertEvent("OrderSuspendedEvent",1);										// one order has to end with 'success'
         assertEvent("OrderResumedEvent",1);										// one order has to end with 'success'

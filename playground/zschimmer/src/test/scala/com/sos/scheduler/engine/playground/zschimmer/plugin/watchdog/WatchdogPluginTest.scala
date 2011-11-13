@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernelcpptest.ScalaSchedulerTest
 import org.junit._
-import com.sos.scheduler.engine.eventbus.EventHandler
+import com.sos.scheduler.engine.eventbus.HotEventHandler
 
 class WatchdogPluginTest extends ScalaSchedulerTest {
     private val schedulerTimeout = Time.of(15)
@@ -17,7 +17,7 @@ class WatchdogPluginTest extends ScalaSchedulerTest {
         controller.terminateScheduler()
     }
 
-    @EventHandler def handleEvent(e: OrderFinishedEvent) {
+    @HotEventHandler def handleEvent(e: OrderFinishedEvent) {
         Thread.sleep(sleepTime.getMillis)   // Wir  blockieren den Scheduler
     }
 }
