@@ -26,8 +26,8 @@ import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
-import com.sos.scheduler.engine.kernel.event.OperationCollector;
 import com.sos.scheduler.engine.kernel.event.OperationExecutor;
+import com.sos.scheduler.engine.kernel.event.OperationQueue;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.log.LogCategory;
@@ -92,6 +92,7 @@ public final class Scheduler implements HasPlatform, Sister {
                 bind(FolderSubsystem.class).toInstance(folderSubsystem);
                 bind(JobSubsystem.class).toInstance(jobSubsystem);
                 bind(OrderSubsystem.class).toInstance(orderSubsystem);
+                bind(OperationQueue.class).toInstance(operationExecutor);
             }
         });
     }
@@ -212,7 +213,7 @@ public final class Scheduler implements HasPlatform, Sister {
         return orderSubsystem;
     }
 
-    public OperationCollector getOperationCollector() {
+    public OperationQueue getOperationQueue() {
         return operationExecutor;
     }
 

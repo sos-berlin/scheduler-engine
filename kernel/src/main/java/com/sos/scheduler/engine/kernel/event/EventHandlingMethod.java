@@ -22,7 +22,7 @@ class EventHandlingMethod {
 
     private static void checkReturnType(Method m) {
         Class<?> c = m.getReturnType();
-        if (!isVoid(c) && !SimpleSchedulerOperation.class.isAssignableFrom(c))
+        if (!isVoid(c))
             throw new IllegalArgumentException("Method " +m.getName() + " has an unexpected return type");
     }
 

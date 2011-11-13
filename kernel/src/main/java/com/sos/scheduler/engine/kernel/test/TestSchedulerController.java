@@ -16,12 +16,10 @@ import com.sos.scheduler.engine.kernel.event.AnnotatedEventSubscriber;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.event.OperationCollector;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
-import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.test.binary.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
@@ -60,22 +58,8 @@ public class TestSchedulerController implements SchedulerController {
         terminateOnError = o;
     }
 
-    public final void subscribeForAnnotatedEventHandlers(final EventHandlerAnnotated annotated) {
-        // TODO Umstellen auf Guava-EventBus und Code vereinfachen
-        strictSubscribeEvents(new EventSubscriber() {
-            private AnnotatedEventSubscriber subscriber = null;
-
-            @Override public void onEvent(Event e) throws Exception {
-                if (subscriber == null && e instanceof SchedulerReadyEvent) {
-                    OperationCollector collector = ((SchedulerReadyEvent)e).getScheduler().getEventSubsystem().getOperationCollector();
-                    subscriber = AnnotatedEventSubscriber.of(annotated, collector);
-                }
-                if (subscriber == null)
-                    logger.error("Early event ignored: "+e);
-                else
-                    subscriber.onEvent(e);
-            }
-        });
+    public final void subscribeForAnnotatedEventHandlers(EventHandlerAnnotated annotated) {
+        strictSubscribeEvents(AnnotatedEventSubscriber.of(annotated));
     }
 
     public final void strictSubscribeEvents() {
@@ -118,7 +102,7 @@ public class TestSchedulerController implements SchedulerController {
     private void handleTerminateOnError() {
         if (terminateOnError) {
             subscribeEvents(new EventSubscriber() {
-                @Override public void onEvent(Event e) throws Exception {
+                @Override public void onEvent(Event e) {
                     if (e instanceof ErrorLogEvent)
                         throw throwErrorLogException(((ErrorLogEvent)e).getMessage().toString());
                 }

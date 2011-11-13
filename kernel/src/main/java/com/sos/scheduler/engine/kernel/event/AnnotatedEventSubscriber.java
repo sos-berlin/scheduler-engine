@@ -9,13 +9,10 @@ import java.lang.reflect.Modifier;
 import com.google.common.collect.ImmutableList;
 
 public class AnnotatedEventSubscriber implements EventSubscriber {
-    private final OperationCollector operationCollector;
     private final EventHandlerAnnotated object;
     private final ImmutableList<EventHandlingMethod> methods;
 
-    public AnnotatedEventSubscriber(OperationCollector operationCollector, EventHandlerAnnotated object,
-            ImmutableList<EventHandlingMethod> methods) {
-        this.operationCollector = operationCollector;
+    public AnnotatedEventSubscriber(EventHandlerAnnotated object, ImmutableList<EventHandlingMethod> methods) {
         this.object = object;
         this.methods = methods;
     }
@@ -29,14 +26,14 @@ public class AnnotatedEventSubscriber implements EventSubscriber {
 
     private void callHandler(Method m, Event e) throws IllegalAccessException {
         try {
-            Object response = m.invoke(object, e);
-            if (response != null)
-                operationCollector.addOperation((SimpleSchedulerOperation)response);
-        } catch (InvocationTargetException x) { throw propagate(x.getCause()); }
+            m.invoke(object, e);
+        } catch (InvocationTargetException x) {
+            throw propagate(x.getCause());
+        }
     }
 
-    public static AnnotatedEventSubscriber of(EventHandlerAnnotated o, OperationCollector operationCollector) {
-        return new AnnotatedEventSubscriber(operationCollector, o, eventHandlerMethods(o));
+    public static AnnotatedEventSubscriber of(EventHandlerAnnotated o) {
+        return new AnnotatedEventSubscriber(o, eventHandlerMethods(o));
     }
 
     public static ImmutableList<EventHandlingMethod> eventHandlerMethods(EventHandlerAnnotated o) {

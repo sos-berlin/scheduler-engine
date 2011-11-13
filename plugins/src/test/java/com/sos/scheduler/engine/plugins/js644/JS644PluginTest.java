@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.js644;
 
-import static com.sos.scheduler.engine.plugins.js644.JS644PluginSchedulerTest.E.jobActivated;
-import static com.sos.scheduler.engine.plugins.js644.JS644PluginSchedulerTest.E.jobchainActivated;
+import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobActivated;
+import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobchainActivated;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
@@ -12,8 +12,7 @@ import java.io.OutputStream;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.event.EventHandler;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.job.Job;
@@ -22,18 +21,18 @@ import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
 
-public class JS644PluginSchedulerTest extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(JS644PluginSchedulerTest.class);
+public class JS644PluginTest extends SchedulerTest {
+    private static final Logger logger = Logger.getLogger(JS644PluginTest.class);
     private static final AbsolutePath jobPath = new AbsolutePath("/A");
     private static final AbsolutePath jobchainPath = new AbsolutePath("/a");
     private static final Time timeout = shortTimeout;
-    enum E { jobActivated, jobchainActivated }
-    private final Gate<E> gate = new Gate<E>();
+
+    enum M { jobActivated, jobchainActivated }
+    private final Gate<M> gate = new Gate<M>();
 
     @Test public void test() throws Exception {
         controller().startScheduler("-e");
         controller().waitUntilSchedulerState(SchedulerState.active);
-        controller().strictSubscribeEvents(new MyEventSubscriber());
         modifyJobFile();
         gate.expect(jobActivated, timeout);
         gate.expect(jobchainActivated, timeout);
@@ -50,17 +49,12 @@ public class JS644PluginSchedulerTest extends SchedulerTest {
         }
     }
 
-    private class MyEventSubscriber implements EventSubscriber {
-        @Override public void onEvent(Event event) throws InterruptedException {
-            if (event instanceof FileBasedActivatedEvent) {
-                FileBasedActivatedEvent e = (FileBasedActivatedEvent)event;
-                if (e.getObject() == scheduler().getJobSubsystem().job(jobPath)) {
-                    gate.put(jobActivated);
-                } else
-                if (e.getObject() == scheduler().getOrderSubsystem().jobChain(jobchainPath)) {
-                    gate.put(jobchainActivated);
-                }
-            }
+    @EventHandler public void handleEvent(FileBasedActivatedEvent e) throws InterruptedException {
+        if (e.getObject() == scheduler().getJobSubsystem().job(jobPath)) {
+            gate.put(jobActivated);
+        } else
+        if (e.getObject() == scheduler().getOrderSubsystem().jobChain(jobchainPath)) {
+            gate.put(jobchainActivated);
         }
     }
 
