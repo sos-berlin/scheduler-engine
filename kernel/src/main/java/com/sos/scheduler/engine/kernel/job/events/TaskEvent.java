@@ -1,16 +1,13 @@
 package com.sos.scheduler.engine.kernel.job.events;
 
+import com.sos.scheduler.engine.kernel.SchedulerObject;
 import com.sos.scheduler.engine.kernel.event.ObjectEvent;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 
-public class TaskEvent extends ObjectEvent {
-    private final UnmodifiableTask task;
-
-    public TaskEvent(UnmodifiableTask task) {
-        this.task = task;
+public abstract class TaskEvent extends ObjectEvent {
+    @Override protected final SchedulerObject getObject() {
+        return getTask();
     }
 
-    @Override protected final UnmodifiableTask getObject() {
-        return task;
-    }
+    protected abstract UnmodifiableTask getTask();
 }
