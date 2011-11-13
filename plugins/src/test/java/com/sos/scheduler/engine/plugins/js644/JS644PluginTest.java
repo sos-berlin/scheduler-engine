@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.event.EventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.job.Job;

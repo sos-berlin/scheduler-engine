@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.sos.scheduler.engine.eventbus.Event;
+import com.sos.scheduler.engine.eventbus.EventPredicate;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.kernel.SchedulerException;
-import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventPredicate;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;

@@ -5,8 +5,7 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_LOG_ERRORLOGEVENT_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_LOG_ERRORLOGEVENT_H_
 
-#include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__Event.h"
+#include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__log__LogEvent.h"
 #include "java__lang__Object.h"
 

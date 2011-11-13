@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.kernel.event.EventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.folder.Path;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;

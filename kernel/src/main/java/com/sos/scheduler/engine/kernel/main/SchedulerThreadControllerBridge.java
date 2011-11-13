@@ -7,9 +7,9 @@ import static com.sos.scheduler.engine.kernel.main.SchedulerState.terminated;
 import javax.annotation.Nullable;
 
 import com.sos.scheduler.engine.eventbus.EventBus;
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.event.EventHandler;
-import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;

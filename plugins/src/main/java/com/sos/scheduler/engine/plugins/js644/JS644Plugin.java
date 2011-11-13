@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.js644;
 
 import javax.inject.Inject;
 
-import com.sos.scheduler.engine.kernel.event.EventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.event.OperationQueue;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent;

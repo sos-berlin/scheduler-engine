@@ -1,5 +1,4 @@
-package com.sos.scheduler.engine.kernel.event;
-
+package com.sos.scheduler.engine.eventbus;
 
 public class EventClassPredicate implements EventPredicate {
     private final Class<? extends Event> eventClass;

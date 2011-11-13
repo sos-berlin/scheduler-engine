@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.event.EventHandler;
-import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.eventbus.Event;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;

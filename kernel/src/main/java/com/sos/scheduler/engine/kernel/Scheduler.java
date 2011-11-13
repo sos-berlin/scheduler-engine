@@ -47,7 +47,6 @@ import com.sos.scheduler.engine.kernel.util.Lazy;
 public final class Scheduler implements HasPlatform, Sister {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
-    private final EventBus eventBus;
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
@@ -68,7 +67,6 @@ public final class Scheduler implements HasPlatform, Sister {
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         this.cppProxy = cppProxy;
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
-        eventBus = controllerBridge.getEventBus();
         cppProxy.setSister(this);
         new CppSettings(cppProxy.modifiable_settings()).setCppSettings(this.controllerBridge.getSettings());
 
@@ -77,7 +75,7 @@ public final class Scheduler implements HasPlatform, Sister {
         operationExecutor = new OperationExecutor(log);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
-        eventSubsystem = new EventSubsystem(platform, eventBus);
+        eventSubsystem = new EventSubsystem(platform, controllerBridge.getEventBus());
         databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());

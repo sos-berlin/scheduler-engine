@@ -1,6 +1,7 @@
 #ifndef __SCHEDULER_JAVAPROXY_H_
 #define __SCHEDULER_JAVAPROXY_H_
 
+#include "../javaproxy/com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__Platform.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__Scheduler.h"
@@ -14,7 +15,6 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__event__Event.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__Job.h"

@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.event;
 
+import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.SchedulerException;
-import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;

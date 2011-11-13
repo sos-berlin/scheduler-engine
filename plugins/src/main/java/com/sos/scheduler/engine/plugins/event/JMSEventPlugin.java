@@ -8,10 +8,10 @@ import javax.jms.TextMessage;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
+import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
-import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.plugin.Plugin;
 import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
 import com.sos.scheduler.model.SchedulerObjectFactory;

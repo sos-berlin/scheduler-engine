@@ -6,8 +6,8 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.UnmodifiableVariableSet;
-import com.sos.scheduler.engine.kernel.event.EventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;

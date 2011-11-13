@@ -5,8 +5,6 @@ import static com.google.common.base.Throwables.propagate;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import com.sos.scheduler.engine.kernel.event.Event;
-
 public class MethodEventSubscription implements EventSubscription {
     private final Class<? extends Event> eventClass;
     private final Object object;

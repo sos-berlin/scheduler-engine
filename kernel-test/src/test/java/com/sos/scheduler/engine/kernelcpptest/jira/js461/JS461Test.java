@@ -8,10 +8,10 @@ import java.util.concurrent.BlockingQueue;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
@@ -98,7 +98,7 @@ public class JS461Test extends SchedulerTest {
     private final class MyEventSubscriber implements EventSubscriber {
 
 		@Override
-		public void onEvent(com.sos.scheduler.engine.kernel.event.Event event)
+		public void onEvent(Event event)
 				throws Exception {
 			
 			String result = "<ignored>";

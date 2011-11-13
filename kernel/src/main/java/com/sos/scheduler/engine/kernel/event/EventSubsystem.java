@@ -6,9 +6,11 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.eventbus.AbstractEvent;
 import com.sos.scheduler.engine.eventbus.EventBus;
-import com.sos.scheduler.engine.eventbus.EventSubscription;
+import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
+import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.Subsystem;
@@ -25,7 +27,8 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
         this.eventBus = eventBus;
     }
 
-    @ForCpp public final void report(Event e) {
+    /** @param e {@link AbstractEvent} stat {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+    @ForCpp public final void report(AbstractEvent e) {
         eventBus.publishImmediately(e);
     }
 

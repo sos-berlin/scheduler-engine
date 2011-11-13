@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.log;
 
 import static com.sos.scheduler.engine.kernel.util.Util.stringOrException;
 
-import com.sos.scheduler.engine.kernel.event.AbstractEvent;
+import com.sos.scheduler.engine.eventbus.AbstractEvent;
 import com.sos.scheduler.engine.kernel.event.Message;
 import com.sos.scheduler.engine.kernel.event.SimpleMessage;
 

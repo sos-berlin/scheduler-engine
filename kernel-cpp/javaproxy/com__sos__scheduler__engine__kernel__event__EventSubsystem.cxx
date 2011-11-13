@@ -3,8 +3,8 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
+#include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
-#include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { 
@@ -14,7 +14,7 @@ struct EventSubsystem__class : ::zschimmer::javabridge::Class
     EventSubsystem__class(const string& class_name);
    ~EventSubsystem__class();
 
-    ::zschimmer::javabridge::Method const _report__Lcom_sos_scheduler_engine_kernel_event_Event_2__method;
+    ::zschimmer::javabridge::Method const _report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2__method;
 
     static const ::zschimmer::javabridge::class_factory< EventSubsystem__class > class_factory;
 };
@@ -23,7 +23,7 @@ const ::zschimmer::javabridge::class_factory< EventSubsystem__class > EventSubsy
 
 EventSubsystem__class::EventSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_report__Lcom_sos_scheduler_engine_kernel_event_Event_2__method(this, "report", "(Lcom/sos/scheduler/engine/kernel/event/Event;)V"){}
+    ,_report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2__method(this, "report", "(Lcom/sos/scheduler/engine/eventbus/AbstractEvent;)V"){}
 
 EventSubsystem__class::~EventSubsystem__class() {}
 
@@ -43,11 +43,11 @@ EventSubsystem::~EventSubsystem() { assign_(NULL); }
 
 
 
-void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::event::Event >& p0) {
+void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent >& p0) {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     EventSubsystem__class* cls = _class.get();
-    cls->_report__Lcom_sos_scheduler_engine_kernel_event_Event_2__method.call(get_jobject(), parameter_list);
+    cls->_report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2__method.call(get_jobject(), parameter_list);
 }
 
 

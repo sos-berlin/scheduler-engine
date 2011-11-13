@@ -3,7 +3,7 @@
 #include "spooler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__event__Event.h"
+#include "../javaproxy/com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "../javaproxy/java__lang__String.h"
 
 using namespace std;
@@ -11,7 +11,7 @@ using namespace std;
 namespace sos {
 namespace scheduler {
 
-typedef javaproxy::com::sos::scheduler::engine::kernel::event::Event EventJ;
+typedef javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent AbstractEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem EventSubsystemJ;
 
 //-------------------------------------------------------------------------------------------static
@@ -31,8 +31,7 @@ struct Event_subsystem_impl : Event_subsystem
     string                      name                        () const                                { return "event_subsystem"; }
 
     // Event_subsystem
-    void                        report                      (const EventJ&);
-    //void                        report                      ( const Scheduler_event2& );
+    void                        report                      (const AbstractEventJ&);
 
 private:
     Fill_zero                  _zero_;
@@ -92,7 +91,7 @@ bool Event_subsystem_impl::subsystem_activate()
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
 
-void Event_subsystem_impl::report(const EventJ& eventJ)
+void Event_subsystem_impl::report(const AbstractEventJ& eventJ)
 {
     if (_spooler->_java_events_allowed && _eventSubsystemJ) 
         _eventSubsystemJ.report(eventJ);

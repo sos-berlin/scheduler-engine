@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.eventbus;
 
 import static com.google.common.base.Throwables.propagate;
 
-import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 
 public class EventSubscriberAdaptingEventSubscription implements EventSubscription {

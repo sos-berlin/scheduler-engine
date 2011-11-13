@@ -3,10 +3,10 @@ package com.sos.scheduler.engine.plugins.event.stepevents;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
+import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
-import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.order.OrderStepEndedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent;
 import com.sos.scheduler.engine.kernel.plugin.Plugin;

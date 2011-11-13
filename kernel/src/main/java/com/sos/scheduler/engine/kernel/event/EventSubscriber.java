@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.event;
 
+import com.sos.scheduler.engine.eventbus.Event;
 
 public interface EventSubscriber {
     /** Wird vom Scheduler bei einem Ereignis aufgerufen.

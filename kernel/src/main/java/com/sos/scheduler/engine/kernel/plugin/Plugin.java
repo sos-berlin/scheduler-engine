@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
-import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
+import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 
 public interface Plugin extends EventHandlerAnnotated {
     void activate();

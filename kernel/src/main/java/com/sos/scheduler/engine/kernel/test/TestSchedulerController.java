@@ -12,15 +12,15 @@ import javax.annotation.Nullable;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.eventbus.AnnotatedEventSubscribers;
+import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventBus;
-import com.sos.scheduler.engine.kernel.event.EventHandler;
-import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
 import com.sos.scheduler.engine.eventbus.GenericEventSubscription;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;

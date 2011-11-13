@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.main.event;
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
-import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Rendezvous;
 

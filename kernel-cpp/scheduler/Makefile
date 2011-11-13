@@ -40,7 +40,6 @@ objects = \
  path.o\
  schedule.o\
  scheduler_client.o\
- Scheduler_event2.o\
  scheduler_messages.o\
  scheduler_object.o\
  scheduler_script.o\

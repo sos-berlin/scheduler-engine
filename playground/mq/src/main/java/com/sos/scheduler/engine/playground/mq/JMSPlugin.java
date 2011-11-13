@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.playground.mq;
 
+import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.plugin.Plugin;
 import com.sos.scheduler.engine.kernel.plugin.PluginFactory;

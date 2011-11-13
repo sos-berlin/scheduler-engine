@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernelcpptest.ScalaSchedulerTest
 import org.junit._
-import com.sos.scheduler.engine.kernel.event.EventHandler
+import com.sos.scheduler.engine.eventbus.EventHandler
 
 class WatchdogPluginTest extends ScalaSchedulerTest {
     private val schedulerTimeout = Time.of(15)

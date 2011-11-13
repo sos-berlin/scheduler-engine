@@ -2,22 +2,22 @@
 
 #include "_precompiled.h"
 
-#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_ABSTRACTEVENT_H_
-#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_ABSTRACTEVENT_H_
+#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_EVENTBUS_ABSTRACTEVENT_H_
+#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_EVENTBUS_ABSTRACTEVENT_H_
 
-#include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct Event; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct Event; }}}}}}
+namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { 
 
 
 struct AbstractEvent__class;
 
-struct AbstractEvent : ::zschimmer::javabridge::proxy_jobject< AbstractEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::event::Event {
+struct AbstractEvent : ::zschimmer::javabridge::proxy_jobject< AbstractEvent >, ::javaproxy::java::lang::Object {
     static AbstractEvent new_instance();
 
     AbstractEvent(jobject = NULL);
@@ -41,7 +41,7 @@ struct AbstractEvent : ::zschimmer::javabridge::proxy_jobject< AbstractEvent >, 
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< AbstractEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::event::Event::set_jobject(jo);
+        ::javaproxy::java::lang::Object::set_jobject(jo);
     }
   public:
 
@@ -61,6 +61,6 @@ struct AbstractEvent : ::zschimmer::javabridge::proxy_jobject< AbstractEvent >, 
 };
 
 
-}}}}}}}
+}}}}}}
 
 #endif

@@ -5,8 +5,7 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERFINISHEDEVENT_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERFINISHEDEVENT_H_
 
-#include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__Event.h"
+#include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrderEvent.h"

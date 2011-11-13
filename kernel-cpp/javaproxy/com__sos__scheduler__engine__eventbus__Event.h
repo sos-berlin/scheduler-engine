@@ -2,8 +2,8 @@
 
 #include "_precompiled.h"
 
-#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_EVENT_H_
-#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_EVENT_H_
+#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_EVENTBUS_EVENT_H_
+#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_EVENTBUS_EVENT_H_
 
 #include "java__lang__Object.h"
 
@@ -11,7 +11,7 @@ namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { 
 
 
 struct Event__class;
@@ -61,6 +61,6 @@ struct Event : ::zschimmer::javabridge::proxy_jobject< Event >, ::javaproxy::jav
 };
 
 
-}}}}}}}
+}}}}}}
 
 #endif

@@ -3,8 +3,6 @@ package com.sos.scheduler.engine.eventbus;
 import java.lang.reflect.Method;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.kernel.event.EventHandler;
-import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 
 public final class AnnotatedEventSubscribers {
     private AnnotatedEventSubscribers() {}

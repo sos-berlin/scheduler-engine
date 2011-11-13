@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.sos.scheduler.engine.kernel.event.EventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderId;
 import com.sos.scheduler.engine.kernel.order.OrderState;

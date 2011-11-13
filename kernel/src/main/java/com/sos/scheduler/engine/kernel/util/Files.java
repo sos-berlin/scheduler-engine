@@ -60,16 +60,16 @@ public final class Files {
 
     public static void removeDirectoryRecursivly(File directory, Function<File,Void> remover) {
         try {
-            checkArgument(directory.isDirectory(), "Not a directory: %s", directory);
+            checkArgument(directory.isDirectory() || !directory.exists(), "Not a directory: %s", directory);
             removeAbsoluteDirectoryRecursivly(directory.getCanonicalFile().getAbsoluteFile(), remover);
-        } catch (IOException x) { throw new RuntimeException(x); }
+        } catch (IOException x) {
+            if (directory.exists()) throw new RuntimeException(x);
+        }
     }
 
     private static void removeAbsoluteDirectoryRecursivly(File dir, Function<File,Void> remover) throws IOException {
         String[] names = dir.list();
-        if (names == null)
-            throw new RuntimeException("Error listing files for "+dir);
-        if (names.length > 0) {
+        if (names != null  &&  names.length > 0) {
             if (directoryCouldBeALink(dir, names[0]))
                 logger.debug("Seems to be a link and will not be deleted: "+dir);
             else {

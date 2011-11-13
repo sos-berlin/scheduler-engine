@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernelcpptest
 
-import com.sos.scheduler.engine.kernel.event.Event
-import com.sos.scheduler.engine.kernel.event.EventPredicate
+import com.sos.scheduler.engine.eventbus.{EventPredicate, Event}
 import com.sos.scheduler.engine.kernel.main.event.EventThread
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernel.main.SchedulerController

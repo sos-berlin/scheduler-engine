@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.eventbus;
 
-import com.sos.scheduler.engine.kernel.event.Event;
-
 /** {@link EventSubscription} für eine Event-Klasse.*/
 public abstract class GenericEventSubscription<E extends Event> implements EventSubscription {
     private final Class<E> eventClass;

@@ -2,11 +2,12 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__Event.h"
+#include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
+#include "com__sos__scheduler__engine__eventbus__Event.h"
+#include "java__lang__Object.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { 
 
 struct AbstractEvent__class : ::zschimmer::javabridge::Class
 {
@@ -19,7 +20,7 @@ struct AbstractEvent__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< AbstractEvent__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< AbstractEvent__class > AbstractEvent__class::class_factory ("com.sos.scheduler.engine.kernel.event.AbstractEvent");
+const ::zschimmer::javabridge::class_factory< AbstractEvent__class > AbstractEvent__class::class_factory ("com.sos.scheduler.engine.eventbus.AbstractEvent");
 
 AbstractEvent__class::AbstractEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
@@ -72,4 +73,4 @@ void AbstractEvent::Lazy_class::initialize() {
 }
 
 
-}}}}}}}
+}}}}}}

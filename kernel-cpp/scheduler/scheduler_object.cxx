@@ -125,7 +125,7 @@ IDispatch* Scheduler_object::idispatch()
 
 //-------------------------------------------------------------------Scheduler_object::report_event
 
-void Scheduler_object::report_event(const EventJ& e)
+void Scheduler_object::report_event(const AbstractEventJ& e)
 {
     if (Spooler* sp = spooler())
         if (Event_subsystem* s = sp->event_subsystem()) 

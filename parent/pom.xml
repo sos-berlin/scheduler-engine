@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.9.1</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
-        <scheduler.javaCppProxyPackage>com.sos.scheduler.engine.kernel</scheduler.javaCppProxyPackage>
+        <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
         <cplusplusVersion>${project.version}</cplusplusVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
     </properties>

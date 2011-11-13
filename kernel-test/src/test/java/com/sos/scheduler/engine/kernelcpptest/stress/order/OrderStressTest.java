@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernelcpptest.stress.order;
 
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.event.EventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;

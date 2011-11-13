@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -223,7 +223,6 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="register.cxx" />
     <ClCompile Include="schedule.cxx" />
     <ClCompile Include="scheduler_client.cxx" />
-    <ClCompile Include="Scheduler_event2.cxx" />
     <ClCompile Include="scheduler_object.cxx" />
     <ClCompile Include="scheduler_script.cxx" />
     <ClCompile Include="spooler.cxx" />
@@ -303,7 +302,9 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="jni__sos__scheduler__Database.cxx" />
     <ClCompile Include="jni__sos__scheduler__Folder_subsystem.cxx" />
     <ClCompile Include="jni__sos__scheduler__order__job_chain__Job_node.cxx" />
-  <ClCompile Include="jni__sos__scheduler__Settings.cxx" /><ClCompile Include="jni__sos__scheduler__Task.cxx" /></ItemGroup>
+    <ClCompile Include="jni__sos__scheduler__Settings.cxx" />
+    <ClCompile Include="jni__sos__scheduler__Task.cxx" />
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />

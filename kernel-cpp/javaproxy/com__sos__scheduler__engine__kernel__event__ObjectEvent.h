@@ -5,11 +5,10 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_OBJECTEVENT_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_OBJECTEVENT_H_
 
-#include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__Event.h"
+#include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct AbstractEvent; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct AbstractEvent; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -18,7 +17,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct ObjectEvent__class;
 
-struct ObjectEvent : ::zschimmer::javabridge::proxy_jobject< ObjectEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::event::AbstractEvent {
+struct ObjectEvent : ::zschimmer::javabridge::proxy_jobject< ObjectEvent >, ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent {
     static ObjectEvent new_instance();
 
     ObjectEvent(jobject = NULL);
@@ -42,7 +41,7 @@ struct ObjectEvent : ::zschimmer::javabridge::proxy_jobject< ObjectEvent >, ::ja
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< ObjectEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::event::AbstractEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent::set_jobject(jo);
     }
   public:
 
