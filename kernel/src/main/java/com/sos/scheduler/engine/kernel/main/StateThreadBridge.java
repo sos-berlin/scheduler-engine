@@ -1,9 +1,14 @@
 package com.sos.scheduler.engine.kernel.main;
 
-import static com.sos.scheduler.engine.kernel.main.SchedulerState.*;
+import static com.sos.scheduler.engine.kernel.main.SchedulerState.active;
+import static com.sos.scheduler.engine.kernel.main.SchedulerState.closed;
+import static com.sos.scheduler.engine.kernel.main.SchedulerState.started;
+import static com.sos.scheduler.engine.kernel.main.SchedulerState.starting;
+import static com.sos.scheduler.engine.kernel.main.SchedulerState.terminated;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
-import java.util.concurrent.atomic.AtomicReference;
 
 /** Die Event-Handler onX() nehmen Status-Änderungen und das {@link Scheduler}-Objekt vom {@link SchedulerThread} entgegen
  * und stellen sie dem aufrufenden Threadn ({@link SchedulerController}) zur Verfügung. */
@@ -56,5 +61,9 @@ final class StateThreadBridge {
             if (scheduler == null) terminateSchedulerWhenPossible = true;
         }
         if (scheduler != null) scheduler.terminate();
+    }
+
+    public final SchedulerState getState() {
+        return state;
     }
 }

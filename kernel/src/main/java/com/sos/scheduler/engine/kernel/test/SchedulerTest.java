@@ -4,8 +4,8 @@ import java.io.File;
 
 import org.junit.After;
 
-import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
+import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.settings.database.DatabaseSettings;

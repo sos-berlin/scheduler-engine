@@ -29,10 +29,12 @@ public class JS644PluginTest extends SchedulerTest {
 
     enum M { jobActivated, jobchainActivated }
     private final Gate<M> gate = new Gate<M>();
+    private volatile boolean schedulerIsActive = false;
 
     @Test public void test() throws Exception {
         controller().startScheduler("-e");
         controller().waitUntilSchedulerState(SchedulerState.active);
+        schedulerIsActive = true;
         modifyJobFile();
         gate.expect(jobActivated, timeout);
         gate.expect(jobchainActivated, timeout);
@@ -50,11 +52,13 @@ public class JS644PluginTest extends SchedulerTest {
     }
 
     @EventHandler public void handleEvent(FileBasedActivatedEvent e) throws InterruptedException {
-        if (e.getObject() == scheduler().getJobSubsystem().job(jobPath)) {
-            gate.put(jobActivated);
-        } else
-        if (e.getObject() == scheduler().getOrderSubsystem().jobChain(jobchainPath)) {
-            gate.put(jobchainActivated);
+        if (schedulerIsActive) {
+            if (e.getObject() == scheduler().getJobSubsystem().job(jobPath)) {
+                gate.put(jobActivated);
+            } else
+            if (e.getObject() == scheduler().getOrderSubsystem().jobChain(jobchainPath)) {
+                gate.put(jobchainActivated);
+            }
         }
     }
 

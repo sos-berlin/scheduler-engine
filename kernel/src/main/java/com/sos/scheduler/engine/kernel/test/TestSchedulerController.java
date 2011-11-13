@@ -11,10 +11,16 @@ import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
 
-import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.event.AnnotatedEventSubscriber;
-import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.eventbus.AnnotatedEventSubscribers;
+import com.sos.scheduler.engine.eventbus.EventBus;
+import com.sos.scheduler.engine.kernel.event.EventHandler;
 import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
+import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
+import com.sos.scheduler.engine.eventbus.EventSubscriber2;
+import com.sos.scheduler.engine.eventbus.EventSubscriber2Adapter;
+import com.sos.scheduler.engine.eventbus.GenericEventSubscriber;
+import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
@@ -29,6 +35,7 @@ public class TestSchedulerController implements SchedulerController {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
     public static final Time shortTimeout = Time.of(10);
 
+    private final EventBus strictEventBus = new EventBus();
     private final Environment environment;
     private final SchedulerThreadController delegated = new SchedulerThreadController();
     private boolean terminateOnError = true;
@@ -36,6 +43,16 @@ public class TestSchedulerController implements SchedulerController {
 
     public TestSchedulerController(ResourcePath resourcePath) {
         environment = new Environment(resourcePath);
+        delegated.getEventBus().register(new GenericEventSubscriber<Event>(Event.class) {
+            @Override protected void handleTypedEvent(Event e) {
+                strictEventBus.publishImmediately(e);
+            }
+        });
+        strictEventBus.register(new GenericEventSubscriber<EventHandlerFailedEvent>(EventHandlerFailedEvent.class) {
+            @Override protected void handleTypedEvent(EventHandlerFailedEvent e) {
+                terminateAfterException(e.getThrowable());
+            }
+        });
     }
 
     public final void close() {
@@ -59,19 +76,31 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public final void subscribeForAnnotatedEventHandlers(EventHandlerAnnotated annotated) {
-        strictSubscribeEvents(AnnotatedEventSubscriber.of(annotated));
+        strictSubscribeEvents(AnnotatedEventSubscribers.handlers(annotated));
     }
 
-    public final void strictSubscribeEvents() {
-        strictSubscribeEvents(EventSubscriber.empty);
+//    public final void strictSubscribeEvents() {
+//        strictSubscribeEvents(EventSubscriber.empty);
+//    }
+
+    private void strictSubscribeEvents(Iterable<EventSubscriber2> subscribers) {
+        for (EventSubscriber2 s: subscribers) subscribeEvents(s);
     }
 
-    public final void strictSubscribeEvents(EventSubscriber s) {
+    public final void strictSubscribeEvents(EventSubscriber2 s) {
         subscribeEvents(s);
     }
 
-    @Override public final void subscribeEvents(EventSubscriber s) {
-        delegated.subscribeEvents(new StrictEventSubscriber(s, delegated));
+    public final void strictSubscribeEvents(EventSubscriber s) {
+        strictSubscribeEvents(new EventSubscriber2Adapter(s));
+    }
+
+    private void subscribeEvents(EventSubscriber s) {
+        subscribeEvents(new EventSubscriber2Adapter(s));
+    }
+
+    public final void subscribeEvents(EventSubscriber2 s) {
+        strictEventBus.register(s);
     }
 
     /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
@@ -101,10 +130,9 @@ public class TestSchedulerController implements SchedulerController {
 
     private void handleTerminateOnError() {
         if (terminateOnError) {
-            subscribeEvents(new EventSubscriber() {
-                @Override public void onEvent(Event e) {
-                    if (e instanceof ErrorLogEvent)
-                        throw throwErrorLogException(((ErrorLogEvent)e).getMessage().toString());
+            subscribeForAnnotatedEventHandlers(new EventHandlerAnnotated() {
+                @EventHandler public void handleEvent(ErrorLogEvent e) {
+                    throw throwErrorLogException(e.getMessage().toString());
                 }
             });
         }
@@ -154,6 +182,10 @@ public class TestSchedulerController implements SchedulerController {
         delegated.waitUntilSchedulerState(s);
     }
 
+//    @Override public SchedulerState getSchedulerState() {
+//        return delegated.getSchedulerState();
+//    }
+
     @Override public final void terminateScheduler() {
         delegated.terminateScheduler();
     }
@@ -177,6 +209,10 @@ public class TestSchedulerController implements SchedulerController {
 
     @Override public final int exitCode() {
         return delegated.exitCode();
+    }
+
+    @Override public EventBus getEventBus() {
+        return delegated.getEventBus();
     }
 
     public final Environment environment() {

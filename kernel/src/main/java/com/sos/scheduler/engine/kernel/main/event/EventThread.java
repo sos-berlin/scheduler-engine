@@ -1,19 +1,23 @@
 package com.sos.scheduler.engine.kernel.main.event;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
+import com.sos.scheduler.engine.eventbus.EventSubscriber2;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventPredicate;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
-import java.util.*;
 
 /** Thread zu Verarbeitung von Scheduler-Ereignissen.
  *
  * @author Zschimmer.sos
  */
-public abstract class EventThread extends Thread implements EventSubscriber {
+public abstract class EventThread extends Thread implements EventSubscriber2 {
     private static final String terminatedEventName = TerminatedEvent.class.getSimpleName();
 
     private final EventRendezvous rendezvous = new EventRendezvous();
@@ -25,6 +29,10 @@ public abstract class EventThread extends Thread implements EventSubscriber {
 
     protected EventThread() {
         setName(getClass().getSimpleName());
+    }
+
+    @Override public Class<? extends Event> getEventClass() {
+        return Event.class;
     }
 
     public final void setEventFilter(EventPredicate... p) {
@@ -75,9 +83,6 @@ public abstract class EventThread extends Thread implements EventSubscriber {
         try {
             runEventThreadAndTerminateScheduler();
         }
-//        catch (UnexpectedTerminatedEventException x) {
-//            throwableMailbox.setIfFirst(x, Level.DEBUG);
-//        }
         catch (Exception x) {
             throwableMailbox.setIfFirst(x);
         }
@@ -131,33 +136,12 @@ public abstract class EventThread extends Thread implements EventSubscriber {
         }
     }
 
-//    /**
-//     * @return Das nicht mehr aktuelle Event, weil der Scheduler schon weiterläuft. Die Objekte am Events sind vielleicht nicht mehr gültig.
-//     */
-//    public <T extends Event> T expectEvent(Time timeout, Class<T> clas) throws InterruptedException {
-//        Event e = enterEventHandling(timeout);
-//        try {
-//            return castEvent(clas, e);
-//        }
-//        finally {
-//            leaveEventHandling();
-//        }
-//    }
-
-//    @SuppressWarnings("unchecked")
-//    private <T> T castEvent(Class<T> clas, Event e) {
-//        if (!clas.isAssignableFrom(e.getClass()))  throw new SchedulerException(clas.getSimpleName() + " expected instead of " + e);
-//        return (T)e;
-//    }
-
     public final void waitForTerminatedEvent(Time timeout) {
         while(!rendezvous.terminatedEventReceived()) {
             Event e = enterEventHandling(timeout);
             if (e == null)  throw new SchedulerException(terminatedEventName + " expected instead of timeout after " + timeout);
             
             try {
-//                if (e instanceof SchedulerCloseEvent)  logger.info(e + " ignored");
-//                else
                 if (!rendezvous.terminatedEventReceived()) {
                     SchedulerException x = new SchedulerException(terminatedEventName + " expected instead of " + e);
                     throwableMailbox.setIfFirst(x);

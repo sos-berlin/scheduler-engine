@@ -31,8 +31,9 @@ class SchedulerThread extends Thread {
         Throwable throwable = null;
         try {
             exitCode = cppScheduler.run(arguments, "", controllerBridge);
-            synchronized (exitCodeAtom) { exitCodeAtom.set(exitCode); }
-            if (exitCode != 0)  throwable = new SchedulerException("Scheduler terminated with exit code " + exitCode);
+            exitCodeAtom.set(exitCode);
+            if (exitCode != 0)
+                throwable = new SchedulerException("Scheduler terminated with exit code " + exitCode);
         }
         catch (Exception x) {
             throwable = x;

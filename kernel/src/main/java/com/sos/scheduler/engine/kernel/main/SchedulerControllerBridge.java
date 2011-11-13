@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.main;
 import javax.annotation.Nullable;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
@@ -15,13 +16,20 @@ public interface SchedulerControllerBridge {
     void onSchedulerStarted(Scheduler scheduler);
     void onSchedulerActivated();
     void onSchedulerTerminated(int exitCode, @Nullable Throwable t);
+    EventBus getEventBus();
 
     SchedulerControllerBridge empty = new SchedulerControllerBridge() {
+        private final EventBus eventBus = new EventBus();
+
         @Override public Settings getSettings() {
             return DefaultSettings.singleton;
         }
         @Override public void onSchedulerStarted(Scheduler scheduler) {}
         @Override public void onSchedulerActivated() {}
         @Override public void onSchedulerTerminated(int exitCode, Throwable t) {}
+
+        @Override public EventBus getEventBus() {
+            return eventBus;
+        }
     };
 }
