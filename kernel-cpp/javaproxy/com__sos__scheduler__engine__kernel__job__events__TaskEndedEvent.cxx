@@ -3,8 +3,8 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__job__events__TaskEndedEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "com__sos__scheduler__engine__kernel__job__UnmodifiableTask.h"
+#include "com__sos__scheduler__engine__kernel__job__events__UnmodifiableTaskEvent.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { namespace events { 

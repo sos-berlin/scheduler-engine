@@ -8,9 +8,11 @@
 #include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
+#include "com__sos__scheduler__engine__kernel__job__events__TaskEvent.h"
+#include "com__sos__scheduler__engine__kernel__job__events__UnmodifiableTaskEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct ObjectEvent; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { namespace events { struct UnmodifiableTaskEvent; }}}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { struct UnmodifiableTask; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -20,7 +22,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct TaskEndedEvent__class;
 
-struct TaskEndedEvent : ::zschimmer::javabridge::proxy_jobject< TaskEndedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent {
+struct TaskEndedEvent : ::zschimmer::javabridge::proxy_jobject< TaskEndedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::job::events::UnmodifiableTaskEvent {
     static TaskEndedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::job::UnmodifiableTask >& p0);
 
     TaskEndedEvent(jobject = NULL);
@@ -44,7 +46,7 @@ struct TaskEndedEvent : ::zschimmer::javabridge::proxy_jobject< TaskEndedEvent >
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< TaskEndedEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::kernel::job::events::UnmodifiableTaskEvent::set_jobject(jo);
     }
   public:
 
