@@ -3,7 +3,8 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__OrderStepEndedEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
+#include "com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 
@@ -13,7 +14,7 @@ struct OrderStepEndedEvent__class : ::zschimmer::javabridge::Class
     OrderStepEndedEvent__class(const string& class_name);
    ~OrderStepEndedEvent__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Z__method;
+    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Z__method;
 
     static const ::zschimmer::javabridge::class_factory< OrderStepEndedEvent__class > class_factory;
 };
@@ -22,20 +23,20 @@ const ::zschimmer::javabridge::class_factory< OrderStepEndedEvent__class > Order
 
 OrderStepEndedEvent__class::OrderStepEndedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Z__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;Z)V"){}
+    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Z__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/Order;Z)V"){}
 
 OrderStepEndedEvent__class::~OrderStepEndedEvent__class() {}
 
 
 
-OrderStepEndedEvent OrderStepEndedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0, jboolean p1) {
+OrderStepEndedEvent OrderStepEndedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, jboolean p1) {
     OrderStepEndedEvent result;
     result.java_object_allocate_();
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].z = p1;
     OrderStepEndedEvent__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Z__method.call(result.get_jobject(), parameter_list);
+    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Z__method.call(result.get_jobject(), parameter_list);
     return result;
 }
 
