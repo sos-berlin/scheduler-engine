@@ -5,10 +5,10 @@ import static com.google.common.base.Throwables.propagate;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 
-public class EventSubscriber2Adapter implements EventSubscriber2 {
+public class EventSubscriberAdaptingEventSubscription implements EventSubscription {
     private final EventSubscriber oldEventSubscriber;
 
-    public EventSubscriber2Adapter(EventSubscriber oldEventSubscriber) {
+    public EventSubscriberAdaptingEventSubscription(EventSubscriber oldEventSubscriber) {
         this.oldEventSubscriber = oldEventSubscriber;
     }
 
@@ -16,7 +16,7 @@ public class EventSubscriber2Adapter implements EventSubscriber2 {
         return Event.class;
     }
 
-    @Override public void onEvent(Event e) {
+    @Override public void handleEvent(Event e) {
         try {
             oldEventSubscriber.onEvent(e);
         } catch (Exception x) {
@@ -29,6 +29,6 @@ public class EventSubscriber2Adapter implements EventSubscriber2 {
     }
 
     @Override public boolean equals(Object o) {
-        return o instanceof EventSubscriber2Adapter && oldEventSubscriber.equals(o);
+        return o instanceof EventSubscriberAdaptingEventSubscription && oldEventSubscriber.equals(o);
     }
 }

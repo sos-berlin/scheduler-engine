@@ -16,9 +16,9 @@ import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.event.EventHandler;
 import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
-import com.sos.scheduler.engine.eventbus.EventSubscriber2;
-import com.sos.scheduler.engine.eventbus.EventSubscriber2Adapter;
-import com.sos.scheduler.engine.eventbus.GenericEventSubscriber;
+import com.sos.scheduler.engine.eventbus.EventSubscription;
+import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
+import com.sos.scheduler.engine.eventbus.GenericEventSubscription;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
@@ -43,12 +43,12 @@ public class TestSchedulerController implements SchedulerController {
 
     public TestSchedulerController(ResourcePath resourcePath) {
         environment = new Environment(resourcePath);
-        delegated.getEventBus().register(new GenericEventSubscriber<Event>(Event.class) {
+        delegated.getEventBus().register(new GenericEventSubscription<Event>(Event.class) {
             @Override protected void handleTypedEvent(Event e) {
                 strictEventBus.publishImmediately(e);
             }
         });
-        strictEventBus.register(new GenericEventSubscriber<EventHandlerFailedEvent>(EventHandlerFailedEvent.class) {
+        strictEventBus.register(new GenericEventSubscription<EventHandlerFailedEvent>(EventHandlerFailedEvent.class) {
             @Override protected void handleTypedEvent(EventHandlerFailedEvent e) {
                 terminateAfterException(e.getThrowable());
             }
@@ -72,23 +72,23 @@ public class TestSchedulerController implements SchedulerController {
 //        strictSubscribeEvents(EventSubscriber.empty);
 //    }
 
-    private void strictSubscribeEvents(Iterable<EventSubscriber2> subscribers) {
-        for (EventSubscriber2 s: subscribers) subscribeEvents(s);
+    private void strictSubscribeEvents(Iterable<EventSubscription> subscribers) {
+        for (EventSubscription s: subscribers) subscribeEvents(s);
     }
 
-    public final void strictSubscribeEvents(EventSubscriber2 s) {
+    public final void strictSubscribeEvents(EventSubscription s) {
         subscribeEvents(s);
     }
 
     public final void strictSubscribeEvents(EventSubscriber s) {
-        strictSubscribeEvents(new EventSubscriber2Adapter(s));
+        strictSubscribeEvents(new EventSubscriberAdaptingEventSubscription(s));
     }
 
     private void subscribeEvents(EventSubscriber s) {
-        subscribeEvents(new EventSubscriber2Adapter(s));
+        subscribeEvents(new EventSubscriberAdaptingEventSubscription(s));
     }
 
-    public final void subscribeEvents(EventSubscriber2 s) {
+    public final void subscribeEvents(EventSubscription s) {
         strictEventBus.register(s);
     }
 

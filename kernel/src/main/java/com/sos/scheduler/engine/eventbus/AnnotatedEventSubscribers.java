@@ -9,11 +9,11 @@ import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 public final class AnnotatedEventSubscribers {
     private AnnotatedEventSubscribers() {}
 
-    public static ImmutableList<EventSubscriber2> handlers(EventHandlerAnnotated o) {
-        ImmutableList.Builder<EventSubscriber2> result = new ImmutableList.Builder<EventSubscriber2>();
+    public static ImmutableList<EventSubscription> handlers(EventHandlerAnnotated o) {
+        ImmutableList.Builder<EventSubscription> result = new ImmutableList.Builder<EventSubscription>();
         for (Method m: o.getClass().getMethods()) {
             if (m.getAnnotation(EventHandler.class) != null)
-                result.add(new MethodEventSubscriber(o, m));
+                result.add(new MethodEventSubscription(o, m));
         }
         return result.build();
     }

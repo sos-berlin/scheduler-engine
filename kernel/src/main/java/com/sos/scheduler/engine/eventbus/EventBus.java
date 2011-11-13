@@ -23,8 +23,8 @@ import com.sos.scheduler.engine.kernel.event.SchedulerIsCallableEvent;
 public class EventBus {
     private static final Logger logger = Logger.getLogger(EventBus.class);
 
-    private final Set<EventSubscriber2> subscribers = newHashSet();
-    private final Multimap<EventHandlerAnnotated,EventSubscriber2> annotatedEventSubscriberMap = HashMultimap.create();
+    private final Set<EventSubscription> subscribers = newHashSet();
+    private final Multimap<EventHandlerAnnotated,EventSubscription> annotatedEventSubscriberMap = HashMultimap.create();
     private final Queue<Call> callQueue = new ArrayDeque<Call>();
     @Nullable private Event currentEvent = null;
 
@@ -72,7 +72,7 @@ public class EventBus {
 
     private Collection<Call> calls(Event e) {
         ImmutableList.Builder<Call> result = null;
-        for (EventSubscriber2 s: subscribers) {
+        for (EventSubscription s: subscribers) {
             if (s.getEventClass().isAssignableFrom(e.getClass())) {
                 if (result == null) result = ImmutableList.builder();
                 result.add(new Call(e, s));
@@ -108,7 +108,7 @@ public class EventBus {
 
     public final void registerAnnotated(EventHandlerAnnotated o) {
         unregisterAnnotated(o);
-        Iterable<EventSubscriber2> subscribers = AnnotatedEventSubscribers.handlers(o);
+        Iterable<EventSubscription> subscribers = AnnotatedEventSubscribers.handlers(o);
         annotatedEventSubscriberMap.putAll(o, subscribers);
         register(subscribers);
     }
@@ -118,21 +118,21 @@ public class EventBus {
         annotatedEventSubscriberMap.removeAll(o);
     }
 
-    private void register(Iterable<EventSubscriber2> subscribers) {
-        for (EventSubscriber2 s: subscribers)
+    private void register(Iterable<EventSubscription> subscribers) {
+        for (EventSubscription s: subscribers)
             register(s);
     }
 
-    private void unregister(Iterable<EventSubscriber2> subscribers) {
-        for (EventSubscriber2 s: subscribers)
+    private void unregister(Iterable<EventSubscription> subscribers) {
+        for (EventSubscription s: subscribers)
             unregister(s);
     }
 
-    public final void register(EventSubscriber2 s) {
+    public final void register(EventSubscription s) {
         subscribers.add(s);
     }
 
-    public final void unregister(EventSubscriber2 s) {
+    public final void unregister(EventSubscription s) {
         subscribers.remove(s);
     }
 }

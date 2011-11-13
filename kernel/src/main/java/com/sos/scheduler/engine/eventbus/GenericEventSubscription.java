@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.eventbus;
 
 import com.sos.scheduler.engine.kernel.event.Event;
 
-/** {@link EventSubscriber2} für eine Event-Klasse.*/
-public abstract class GenericEventSubscriber<E extends Event> implements EventSubscriber2 {
+/** {@link EventSubscription} für eine Event-Klasse.*/
+public abstract class GenericEventSubscription<E extends Event> implements EventSubscription {
     private final Class<E> eventClass;
 
-    protected GenericEventSubscriber(Class<E> eventClass) {
+    protected GenericEventSubscription(Class<E> eventClass) {
         this.eventClass = eventClass;
     }
 
@@ -15,7 +15,7 @@ public abstract class GenericEventSubscriber<E extends Event> implements EventSu
     }
 
     @SuppressWarnings("unchecked")
-    @Override public final void onEvent(Event e) {
+    @Override public final void handleEvent(Event e) {
         handleTypedEvent((E)e);
     }
 

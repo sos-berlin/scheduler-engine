@@ -7,12 +7,12 @@ import java.lang.reflect.Method;
 
 import com.sos.scheduler.engine.kernel.event.Event;
 
-public class MethodEventSubscriber implements EventSubscriber2 {
+public class MethodEventSubscription implements EventSubscription {
     private final Class<? extends Event> eventClass;
     private final Object object;
     private final Method method;
 
-    public MethodEventSubscriber(Object object, Method method) {
+    public MethodEventSubscription(Object object, Method method) {
         eventClass = eventClass(method);
         checkMethod(method);
         this.object = object;
@@ -43,7 +43,7 @@ public class MethodEventSubscriber implements EventSubscriber2 {
     }
 
 
-    @Override public void onEvent(Event event) {
+    @Override public void handleEvent(Event event) {
         try {
             method.invoke(object, event);
         } catch (IllegalArgumentException x) { throw new Error("Method "+method+" rejected argument '"+event+"'", x);

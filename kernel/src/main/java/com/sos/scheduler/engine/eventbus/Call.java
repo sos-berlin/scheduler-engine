@@ -4,26 +4,26 @@ import com.sos.scheduler.engine.kernel.event.Event;
 
 public class Call {
     private final Event event;
-    private final EventSubscriber2 subscriber;
+    private final EventSubscription subscription;
 
-    Call(Event event, EventSubscriber2 subscriber) {
+    Call(Event event, EventSubscription subscription) {
         this.event = event;
-        this.subscriber = subscriber;
+        this.subscription = subscription;
     }
 
     final void apply() {
-        subscriber.onEvent(event);
+        subscription.handleEvent(event);
     }
 
     public final Event getEvent() {
         return event;
     }
 
-    public final EventSubscriber2 getSubscriber() {
-        return subscriber;
+    public final EventSubscription getSubscription() {
+        return subscription;
     }
 
     @Override public String toString() {
-        return Call.class.getSimpleName()+":"+subscriber+"("+event+")";
+        return Call.class.getSimpleName()+":"+ subscription +"("+event+")";
     }
 }

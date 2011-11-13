@@ -9,9 +9,4 @@ public interface EventSubscriber {
      * Nicht alle Aufrufe sind an jeder Stelle möglich.
      */
     void onEvent(Event e) throws Exception;
-
-
-    EventSubscriber empty = new EventSubscriber() {
-        @Override public void onEvent(Event e) {}
-    };
 }

@@ -6,10 +6,9 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.eventbus.Callback;
 import com.sos.scheduler.engine.eventbus.EventBus;
-import com.sos.scheduler.engine.eventbus.EventSubscriber2;
-import com.sos.scheduler.engine.eventbus.EventSubscriber2Adapter;
+import com.sos.scheduler.engine.eventbus.EventSubscription;
+import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.Subsystem;
@@ -19,7 +18,7 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 
     private final EventBus eventBus;
-    private final Map<EventSubscriber,EventSubscriber2> oldSubscribers = new HashMap<EventSubscriber,EventSubscriber2>();
+    private final Map<EventSubscriber,EventSubscription> oldSubscribers = new HashMap<EventSubscriber,EventSubscription>();
 
     public EventSubsystem(Platform platform, EventBus eventBus) {
         super(platform);
@@ -39,11 +38,11 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     }
 
     public final void subscribe(EventSubscriber old) {
-        eventBus.register(new EventSubscriber2Adapter(old));
+        eventBus.register(new EventSubscriberAdaptingEventSubscription(old));
     }
 
     public final void unsubscribe(EventSubscriber old) {
-        EventSubscriber2 s = oldSubscribers.get(old);
+        EventSubscription s = oldSubscribers.get(old);
         if (s != null) {
             oldSubscribers.remove(old);
             eventBus.unregister(s);

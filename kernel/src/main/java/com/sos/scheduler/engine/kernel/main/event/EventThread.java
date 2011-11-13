@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.sos.scheduler.engine.eventbus.EventSubscriber2;
+import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventPredicate;
@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
  *
  * @author Zschimmer.sos
  */
-public abstract class EventThread extends Thread implements EventSubscriber2 {
+public abstract class EventThread extends Thread implements EventSubscription {
     private static final String terminatedEventName = TerminatedEvent.class.getSimpleName();
 
     private final EventRendezvous rendezvous = new EventRendezvous();
@@ -45,7 +45,7 @@ public abstract class EventThread extends Thread implements EventSubscriber2 {
         eventPredicates = new ArrayList<EventPredicate>(c);
     }
 
-    @Override public final void onEvent(Event e) {
+    @Override public final void handleEvent(Event e) {
         if (e instanceof SchedulerReadyEvent)
             onSchedulerThreadReady((SchedulerReadyEvent)e);
         else

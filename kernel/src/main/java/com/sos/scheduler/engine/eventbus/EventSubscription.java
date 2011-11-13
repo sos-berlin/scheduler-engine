@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.eventbus;
 
 import com.sos.scheduler.engine.kernel.event.Event;
 
-public interface EventSubscriber2 {
+public interface EventSubscription {
     Class<? extends Event> getEventClass();
-    void onEvent(Event e);
+    void handleEvent(Event e);
 }
