@@ -21,4 +21,8 @@ public class Task extends FileBased implements UnmodifiableTask {
             return new Task(Platform.of(context), proxy);
         }
     }
+
+    @Override public String toString() {
+        return Task.class.getSimpleName();
+    }
 }
