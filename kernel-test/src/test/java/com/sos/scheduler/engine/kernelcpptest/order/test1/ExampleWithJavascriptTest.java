@@ -6,28 +6,24 @@ import com.sos.scheduler.engine.kernel.main.event.EventThread;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.test.JavascriptEventPredicateEngine;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
-
 
 public class ExampleWithJavascriptTest extends SchedulerTest {
-    private static final Time eventTimeout = Time.of(10);
-
     @Test public void test() throws Exception {
         controller().strictSubscribeEvents(new MyEventThread());
         controller().runScheduler(shortTimeout);
     }
 
-
     private class MyEventThread extends EventThread {
         private final JavascriptEventPredicateEngine j = new JavascriptEventPredicateEngine();
 
-        public MyEventThread() {
+        MyEventThread() {
+            super(controller());
             setEventFilter(j.predicate(OrderStateChangedEvent.class, "event.order.id == 'id.1'"));
         }
         
         @Override protected void runEventThread() throws InterruptedException {
-            expectEvent(eventTimeout, j.predicate(OrderStateChangedEvent.class, "event.order.state == 'state.2'"));
-            expectEvent(eventTimeout, j.predicate(OrderStateChangedEvent.class, "event.order.state == 'state.end'"));
+            expectEvent(shortTimeout, j.predicate(OrderStateChangedEvent.class, "event.order.state == 'state.2'"));
+            expectEvent(shortTimeout, j.predicate(OrderStateChangedEvent.class, "event.order.state == 'state.end'"));
             Thread.sleep(1000);
         }
     }

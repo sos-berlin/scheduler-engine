@@ -21,7 +21,7 @@ public final class SchedulerTestTest extends SchedulerTest {
 
     @Test public void test() {
         controller().startScheduler();
-        controller().terminateAndWait();
+        controller().close();
         Class<?>[] expected = {SchedulerReadyEvent.class, SchedulerCloseEvent.class, TerminatedEvent.class};
         assertThat(receivedEventClasses, contains(expected));
     }

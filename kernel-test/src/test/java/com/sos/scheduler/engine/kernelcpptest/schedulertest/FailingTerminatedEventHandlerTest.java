@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 public final class FailingTerminatedEventHandlerTest extends SchedulerTest {
     @Test(expected=MyError.class) public void quickTest() {
         controller().startScheduler();
-        controller().terminateAndWait();
+        controller().close();
     }
 
     @EventHandler public void handleEvent(TerminatedEvent e) {

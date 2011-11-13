@@ -19,6 +19,7 @@ import com.google.inject.Injector;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
@@ -35,6 +36,7 @@ import com.sos.scheduler.engine.kernel.log.LogSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.main.SchedulerControllerBridge;
+import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
@@ -45,6 +47,7 @@ import com.sos.scheduler.engine.kernel.util.Lazy;
 public final class Scheduler implements HasPlatform, Sister {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
+    private final EventBus eventBus;
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
@@ -62,9 +65,10 @@ public final class Scheduler implements HasPlatform, Sister {
     private final CommandSubsystem commandSubsystem;
     private boolean threadInitiallyLocked = false;
 
-    @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridge) {
+    @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         this.cppProxy = cppProxy;
-        this.controllerBridge = firstNonNull(controllerBridge, SchedulerControllerBridge.empty);
+        controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
+        eventBus = controllerBridge.getEventBus();
         cppProxy.setSister(this);
         new CppSettings(cppProxy.modifiable_settings()).setCppSettings(this.controllerBridge.getSettings());
 
@@ -73,7 +77,7 @@ public final class Scheduler implements HasPlatform, Sister {
         operationExecutor = new OperationExecutor(log);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
-        eventSubsystem = new EventSubsystem(platform, controllerBridge.getEventBus());
+        eventSubsystem = new EventSubsystem(platform, eventBus);
         databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());
@@ -167,7 +171,7 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     private boolean isStartedByJava() {
-        return controllerBridge != SchedulerControllerBridge.empty;
+        return controllerBridge != EmptySchedulerControllerBridge.singleton;
     }
 
     @ForCpp public void threadLock() {

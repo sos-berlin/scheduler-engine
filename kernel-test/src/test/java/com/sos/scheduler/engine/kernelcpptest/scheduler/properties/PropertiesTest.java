@@ -15,7 +15,6 @@ public class PropertiesTest extends SchedulerTest {
             System.out.println("port=" + scheduler().getTcpPort());
             System.out.println("host=" + scheduler().getHostname());
             System.out.println("host_complete=" + scheduler().getHostnameLong());
-            controller().terminateAndWait();
 //            fail("Exception expected");
         }
         catch (Exception x) {

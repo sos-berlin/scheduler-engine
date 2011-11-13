@@ -24,10 +24,11 @@ public abstract class EventThread extends Thread implements EventSubscriber2 {
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private Collection<EventPredicate> eventPredicates = Collections.singleton(EventPredicate.alwaysTrue);
     private boolean threadIsStarted = true;
-    private SchedulerController schedulerController = null;
+    private final SchedulerController schedulerController;
     private int expectEventCount = 0;
 
-    protected EventThread() {
+    protected EventThread(SchedulerController schedulerController) {
+        this.schedulerController = schedulerController;
         setName(getClass().getSimpleName());
     }
 
@@ -56,7 +57,6 @@ public abstract class EventThread extends Thread implements EventSubscriber2 {
     }
 
     private void onSchedulerThreadReady(SchedulerReadyEvent e) {
-        schedulerController = e.getSchedulerController();
         start();  // Thread läuft in run()
         threadIsStarted = true;
     }

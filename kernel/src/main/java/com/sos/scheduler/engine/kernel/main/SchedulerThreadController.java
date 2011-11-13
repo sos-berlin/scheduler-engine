@@ -5,19 +5,11 @@ import static com.google.common.base.Throwables.propagate;
 
 import java.io.File;
 
-import javax.annotation.Nullable;
-
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.eventbus.EventBus;
-import com.sos.scheduler.engine.kernel.event.EventHandler;
-import com.sos.scheduler.engine.kernel.event.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
-import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
-import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -29,17 +21,13 @@ public class SchedulerThreadController implements SchedulerController {
 
     private final EventBus eventBus = new EventBus();
     private Settings settings = DefaultSettings.singleton;
-    private boolean started = false;
+    private boolean isStarted = false;
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
-    private final SchedulerThread thread;
-    private final StateThreadBridge stateThreadBridge = new StateThreadBridge();
-
-    public SchedulerThreadController() {
-        thread = new SchedulerThread(new MyControllerBridge());
-    }
+    private final SchedulerThreadControllerBridge controllerBridge = new SchedulerThreadControllerBridge(this, eventBus);
+    private final SchedulerThread thread = new SchedulerThread(controllerBridge);
 
     @Override public void setSettings(Settings o) {
-        checkState(!started, "Scheduler has already been started");
+        checkState(!isStarted, "Scheduler has already been started");
         settings = o;
     }
 
@@ -48,15 +36,22 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void startScheduler(String... args) {
-        checkState(!started, "Scheduler has already been started");
+        checkState(!isStarted, "Scheduler has already been started");
+        controllerBridge.start();
         thread.startThread(args);
-        started = true;
+        isStarted = true;
+    }
+
+    @Override public final void close() {
+        terminateScheduler();
+        tryWaitForTermination(Time.eternal);
+        controllerBridge.close();
     }
 
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
-        checkState(started, "Scheduler has not been started");
+        checkState(isStarted, "Scheduler has not been started");
         try {
-            Scheduler result = stateThreadBridge.waitWhileSchedulerIsStarting();
+            Scheduler result = controllerBridge.waitWhileSchedulerIsStarting();
             throwableMailbox.throwUncheckedIfSet();
             if (result == null) {
                 throw new SchedulerException("Scheduler aborted before startup");
@@ -68,7 +63,7 @@ public class SchedulerThreadController implements SchedulerController {
 
     @Override public final void waitUntilSchedulerState(SchedulerState s) {
         try {
-            stateThreadBridge.waitUntilSchedulerState(s);
+            controllerBridge.waitUntilSchedulerState(s);
             throwableMailbox.throwUncheckedIfSet();
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
@@ -77,22 +72,6 @@ public class SchedulerThreadController implements SchedulerController {
 //    @Override public final SchedulerState getSchedulerState() {
 //        return stateThreadBridge.getState();
 //    }
-
-    @Override public final void terminateAndWait() {
-        tryTerminateScheduler();
-        tryWaitForTermination(Time.eternal);
-    }
-
-    private void tryTerminateScheduler() {
-        try {
-            terminateScheduler();
-        } catch (Exception x) {
-            if (x.toString().contains("Z-JAVA-111"))    // TODO Z-JAVA-111 als eigene Java-Exception zurückgeben
-                logger.warn(x);
-            else
-                throw propagate(x);
-        }
-    }
 
     @Override public final boolean tryWaitForTermination(Time timeout) {
         try {
@@ -104,13 +83,24 @@ public class SchedulerThreadController implements SchedulerController {
         return !thread.isAlive();
     }
 
-    @Override public final void terminateAfterException(Throwable x) {
-        throwableMailbox.setIfFirst(x);
+    @Override public final void terminateAfterException(Throwable t) {
+        throwableMailbox.setIfFirst(t);
         terminateScheduler();
     }
 
+    final void setThrowable(Throwable t) {
+        throwableMailbox.setIfFirst(t);
+    }
+
     @Override public final void terminateScheduler() {
-        stateThreadBridge.terminate();
+        try {
+            controllerBridge.terminate();
+        } catch (Exception x) {
+            if (x.toString().contains("Z-JAVA-111"))    // TODO Z-JAVA-111 als eigene Java-Exception zurückgeben
+                logger.warn(x);
+            else
+                throw propagate(x);
+        }
     }
 
     @Override public final int exitCode() {
@@ -121,34 +111,7 @@ public class SchedulerThreadController implements SchedulerController {
         return eventBus;
     }
 
-    private final class MyControllerBridge implements SchedulerControllerBridge, EventHandlerAnnotated {
-        @Override public Settings getSettings() {
-            return settings;
-        }
-
-        @Override public void onSchedulerStarted(Scheduler scheduler) {
-            stateThreadBridge.onSchedulerStarted(scheduler);
-            eventBus.publishImmediately(new SchedulerReadyEvent(SchedulerThreadController.this, scheduler));
-        }
-
-        @Override public void onSchedulerActivated() {
-            stateThreadBridge.onSchedulerActivated();
-            eventBus.registerAnnotated(this);
-        }
-
-        @Override public void onSchedulerTerminated(int exitCode, @Nullable Throwable t) {
-            if (t != null) throwableMailbox.setIfFirst(t);
-            stateThreadBridge.onSchedulerTerminated();
-            eventBus.publishImmediately(new TerminatedEvent(exitCode, t));
-        }
-
-        @Override public EventBus getEventBus() {
-            return eventBus;
-        }
-
-        @EventHandler public void handleEvent(Event e) {
-            if (e instanceof SchedulerCloseEvent)
-                stateThreadBridge.onSchedulerClosed();
-        }
+    public Settings getSettings() {
+        return settings;
     }
 }

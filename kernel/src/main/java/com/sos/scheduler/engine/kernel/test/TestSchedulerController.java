@@ -55,17 +55,6 @@ public class TestSchedulerController implements SchedulerController {
         });
     }
 
-    public final void close() {
-        try {
-            delegated.terminateAndWait();
-            environment.close();
-        }
-        catch (Throwable x) {
-            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
-            throw propagate(x);
-        }
-    }
-
     @Override public final void setSettings(Settings o) {
         delegated.setSettings(o);
     }
@@ -194,8 +183,15 @@ public class TestSchedulerController implements SchedulerController {
         delegated.terminateAfterException(x);
     }
 
-    @Override public final void terminateAndWait() {
-        delegated.terminateAndWait();
+    @Override public final void close() {
+        try {
+            delegated.close();
+            environment.close();
+        }
+        catch (Throwable x) {
+            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
+            throw propagate(x);
+        }
     }
 
     public final void waitForTermination(Time timeout) {

@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernelcpptest._
 import org.junit._
 
-
 // Wie die Java-Klasse Example2Text. scheduler.xml siehe Java-Verzeichnis, dasselbe Paket.
 class Example2ScalaTest extends ScalaSchedulerTest {
     private val eventTimeout = Time.of(3)
@@ -16,7 +15,7 @@ class Example2ScalaTest extends ScalaSchedulerTest {
         controller.runScheduler(shortTimeout)
     }
 
-    class MyEventThread extends ScalaEventThread {
+    class MyEventThread extends ScalaEventThread(controller) {
         filter { case e: OrderStateChangedEvent => e.getOrder.getId == "id.1" }
 
         @Override protected def runEventThread() {
