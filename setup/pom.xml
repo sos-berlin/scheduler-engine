@@ -32,6 +32,12 @@ call prepare-setup.sh <version> to use this pom
           <setup.platform>${platform}</setup.platform>
         </properties>
       </profile>
+      <profile>
+        <id>prepare-snapshot</id>
+        <properties>
+          <setup.platform>${platform}</setup.platform>
+        </properties>
+      </profile>
     </profiles>
 
     <build>
@@ -90,7 +96,7 @@ call prepare-setup.sh <version> to use this pom
             <artifactId>maven-antrun-plugin</artifactId>
             <configuration>
                 <tasks>
-                    <ant antfile="download4setup.xml" target="setup.platform">
+                    <ant antfile="prepare-setup.xml" target="setup.platform">
                        <property name="setup.platform" value="${setup.platform}" />
                        <property name="setup.version" value="${setup.version}" />
                        <property name="settings.localRepository" value="${settings.localRepository}" />
