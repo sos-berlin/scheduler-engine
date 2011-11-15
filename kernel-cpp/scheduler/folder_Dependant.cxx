@@ -162,7 +162,7 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
             File_based*   requisite = subsystem->file_based_or_null( path );
 
             // JS-775: default process_class should not displayed
-            if (requisite->is_visible_requisite()) {
+            if (requisite && requisite->is_visible_requisite()) {
                 xml::Element_ptr e = element.append_new_element( "requisite" );
                 e.setAttribute( "type", subsystem->object_type_name() );
                 e.setAttribute( "path", path );
