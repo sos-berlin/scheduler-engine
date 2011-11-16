@@ -135,7 +135,11 @@ to run without maven integration.
 			<fileset refid="files.jar" />
 		</copy>
 		
-		<touch file="${target.dir}/${setup.version}.txt" />
+		<tstamp>
+      <format property="touch.time" pattern="yyyy-MM-dd'T'HH:mm:ss" />
+    </tstamp>
+    <echo message="created.at=${touch.time}" file="${target.dir}/${setup.version}.txt" />
+		<!-- <touch file="${target.dir}/${setup.version}.txt" /> -->
 		
 	</target>
 
