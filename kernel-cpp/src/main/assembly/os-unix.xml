@@ -8,7 +8,7 @@
     <fileSets>
         <fileSet>
             <directory>bin</directory>
-            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin-test</outputDirectory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
             <includes>
                 <include>libscheduler.so</include>
                 <include>scheduler</include>
