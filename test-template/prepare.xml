@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+\brief Prepare the necessary resources from a JS UnitTest
+
+\details
+After export of this Artifakt from the repository you have to run the following command once:
+mvn install -Dbase.version=<versionid>
+
+It will prepare your project for Starting scheduler tests.
+
+\version 1.0
+\date 2011-08-31
+-->
+<project name="com.sos.scheduler.test.prepare" basedir=".">
+	
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${settings.localRepository}/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
+	<property name="base.platform" value="linux-i386" />
+	<property name="source.dir" value="${basedir}/target/dependency" />
+	<property name="target.dir" value="${basedir}/target/lib" />
+	
+	<target name="extract.scheduler" depends="-init, -copy.platform, -remove.dependencies"	description="platform
+		specific project preparation">
+		<echo message="DONE !!" />
+	</target>
+	
+	<target name="-init" description="initialize the platform specific settings">
+		<echo message="${settings.localRepository}" />
+		<if>
+			<equals arg1="${base.platform}" arg2="windows-x86" />
+			<then>
+				<property name="folder.name" value="bind" />
+				<fileset dir="${source.dir}/${folder.name}" id="files.bin.platform">
+					<include name="scheduler.dll"/>
+				</fileset>
+			</then>
+		</if>
+		<if>
+			<equals arg1="${base.platform}" arg2="linux-i386" />
+			<then>
+				<property name="folder.name" value="bin" />
+				<fileset dir="${source.dir}/${folder.name}" id="files.bin.platform">
+					<include name="scheduler"/>
+				</fileset>
+			</then>
+		</if>
+		<if>
+			<equals arg1="${base.platform}" arg2="hpux-itanium" />
+			<then>
+				<echo message="HP-UX" />
+				<!-- <property name="folder.name" value="hpux-ia64-32" /> -->
+			</then>
+		</if>
+		<if>
+			<equals arg1="${base.platform}" arg2="solaris-" />
+			<then>
+				<echo message="SOLARIS" />
+				<!-- <property name="folder.name" value="solarisx86" /> -->
+			</then>
+		</if>
+		<echo message="the folder name is ${folder.name}" />
+	</target>
+	
+	<target name="-copy.platform" description="copy the platform specific files"
+		if="folder.name">
+		<!-- unzip the binary files into a working directory -->
+		<echo message="working for ${base.platform}" />
+		<unzip dest="${source.dir}/${folder.name}">
+			<patternset>
+				<exclude name="*.map"/>
+				<exclude name="*.pdb"/>
+			</patternset>
+			<fileset dir="${source.dir}">
+				<include name="*${base.platform}.zip"/>
+			</fileset>
+		</unzip>
+		<echo message="the folder name is ${folder.name}" />
+		<copy todir="${target.dir}">
+			<fileset refid="files.bin.platform" />
+		</copy>
+		<touch file="${target.dir}/${base.version}.txt" />
+	</target>
+	
+	<target name="-remove.dependencies" description="remove the dependencies folder in target"
+		if="folder.name">
+		<delete dir="${source.dir}" />
+	</target>
+		
+</project>
