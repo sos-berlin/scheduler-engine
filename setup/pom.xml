@@ -63,8 +63,8 @@ call prepare-setup.sh <version> to use this pom
                         <groupId>${project.groupId}</groupId>
                         <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
                         <version>${setup.version}</version>
-                        <type>zip</type>
-                        <classifier>${setup.platform}</classifier>
+                        <classifier>${osArch}</classifier>
+                        <type>jar</type>
                     </artifactItem>
                 </artifactItems>
             </configuration>
@@ -116,16 +116,6 @@ call prepare-setup.sh <version> to use this pom
     </build>
 
     <dependencies>
-        <!-- Artefakte, deren Jars in einem Jar zusammengefasst werden. -->
-
-        <!--
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.sos.scheduler.engine.kernel.cppproxy-generated</artifactId>
-            <version>${setup.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        -->
         
         <dependency>
             <groupId>${project.groupId}</groupId>

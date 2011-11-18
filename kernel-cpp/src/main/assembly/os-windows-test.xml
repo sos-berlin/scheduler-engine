@@ -11,8 +11,21 @@
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin-test</outputDirectory>
             <includes>
                 <include>scheduler.dll</include>
+                <include>scheduler.dll.map</include>
+                <include>scheduler.dll.pdb</include>
                 <include>scheduler.exe</include>
                 <include>spidermonkey.dll</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <!-- hier sind die debug-Informationen für die Produktionsversionen aus dem assembly os-windows.xml enthalten -->
+            <directory>bin</directory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
+            <includes>
+                <include>scheduler.exe.map</include>
+                <include>scheduler.exe.pdb</include>
+                <include>spidermonkey.dll.map</include>
+                <include>spidermonkey.dll.pdb</include>
             </includes>
         </fileSet>
     </fileSets>

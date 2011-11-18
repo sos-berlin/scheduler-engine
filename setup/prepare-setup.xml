@@ -21,8 +21,9 @@ to run without maven integration.
 	<property name="package.name" value="com.sos.scheduler" />
 	<property name="source.dir" value="${basedir}/target/dependency" />
 	<property name="target.dir" value="${basedir}/target/setup" />
+	<property name="archive.root" value="/com/sos/scheduler/engine/kernelcpp" />
 	
-	<target name="setup.platform" depends="-init, -copy, -copy.platform"	description="platform specific setup preparation">
+	<target name="setup.platform" depends="-init, -unzip, -copy, -copy.platform, -versioninfo"	description="platform specific setup preparation">
     <echo message="DONE !!" />
   </target>
 
@@ -34,11 +35,11 @@ to run without maven integration.
      <equals arg1="${setup.platform}" arg2="windows-x86" />
      <then>
         <property name="folder.name" value="windows" />
-      	<fileset dir="${source.dir}/${folder.name}" id="files.bin.platform">
+      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
       		<include name="scheduler.exe"/>
       		<include name="spidermonkey.dll"/>
       	</fileset>
-      	<fileset dir="${source.dir}/${folder.name}" id="files.lib.platform">
+      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
       		<include name="scheduler.dll"/>
       	</fileset>
      </then>
@@ -48,10 +49,10 @@ to run without maven integration.
      <equals arg1="${setup.platform}" arg2="linux-i386" />
      <then>
         <property name="folder.name" value="linux32" />
-      	<fileset dir="${source.dir}/${folder.name}" id="files.bin.platform">
+      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
       		<include name="scheduler"/>
       	</fileset>
-      	<fileset dir="${source.dir}/${folder.name}" id="files.lib.platform">
+      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
       		<include name="libspidermonkey.so"/>
       	</fileset>
      </then>
@@ -78,7 +79,7 @@ to run without maven integration.
     </if>
     <echo message="the folder name is ${folder.name}" />
   	
-  	<fileset dir="${source.dir}/${folder.name}" id="files.config">
+  	<fileset dir="${source.dir}/${folder.name}/${archive.root}" id="files.config">
   		<include name="scheduler.xsd"/>
   	</fileset>
   	
@@ -95,6 +96,36 @@ to run without maven integration.
   	</fileset>
 
   </target>
+	
+	<target name="-unzip" description="unzip the necessary binary files (except the jars)">
+	
+		<unzip dest="${source.dir}/${folder.name}">
+	    <patternset>
+	        <exclude name="**/*.map"/>
+	        <exclude name="**/*.pdb"/>
+	    </patternset>
+	    <fileset dir="${source.dir}">
+	        <include name="*${setup.platform}.jar"/>
+	    </fileset>
+		</unzip>
+		
+	</target>
+	
+	<target name="-copy" description="copy all setup files for the scheduler kernel into a directory">
+
+		<!-- copy the sos specific jar files to the target directory and normalize theirs names -->
+		<copy todir="${target.dir}/scheduler/config">
+			<fileset refid="files.config" />
+		</copy>
+		<copy todir="${target.dir}/scheduler/lib">
+			<fileset refid="files.lib" />
+		  <mapper type="regexp" from="^com.sos.scheduler.engine.jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
+		</copy>
+		<copy todir="${target.dir}/scheduler/lib">
+			<fileset refid="files.jar" />
+		</copy>
+		
+	</target>
 		
 	<target name="-copy.platform" description="copy the platform specific files" if="folder.name">
 
@@ -109,38 +140,10 @@ to run without maven integration.
 
   </target>
 	
-	<target name="-copy" description="copy all setup files for the scheduler kernel into a directory">
-	
-		<!-- unzip the binary files into a working directory -->
- 		<echo message="working for ${setup.platform}" />
-		<unzip dest="${source.dir}/${folder.name}">
-	    <patternset>
-	        <exclude name="*.map"/>
-	        <exclude name="*.pdb"/>
-	    </patternset>
-	    <fileset dir="${source.dir}">
-	        <include name="*${setup.platform}.zip"/>
-	    </fileset>
-		</unzip>
-		
-		<!-- copy the sos specific jar files to the target directory and normalize theirs names -->
-		<copy todir="${target.dir}/scheduler/config">
-			<fileset refid="files.config" />
-		</copy>
-		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="files.lib" />
-		  <mapper type="regexp" from="^com.sos.scheduler.engine.jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
-		</copy>
-		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="files.jar" />
-		</copy>
-		
-		<tstamp>
-      <format property="touch.time" pattern="yyyy-MM-dd'T'HH:mm:ss" />
-    </tstamp>
-    <echo message="created.at=${touch.time}" file="${target.dir}/${setup.version}.txt" />
-		<!-- <touch file="${target.dir}/${setup.version}.txt" /> -->
-		
-	</target>
+	<target name="-versioninfo" description="creates a file with version information">
+    <propertyfile file="${target.dir}/${setup.version}.txt" comment="information about the last build">
+      <entry  key="${setup.platform}.lastbuild" type="date" value="now" pattern="yyyy-MM-dd'T'HH:mm:ss" />
+    </propertyfile>
+  </target>
 
 </project>

@@ -2,25 +2,23 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
     <id>${osArch}</id>
     <formats>
-        <format>zip</format>
+        <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
             <directory>bin</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin-test</outputDirectory>
             <includes>
+                <include>libscheduler.so</include>
                 <include>scheduler</include>
-                <include>scheduler.debug-info</include>
-                <include>javascript</include>
-                <include>javascript.debug-info</include>
                 <include>libspidermonkey.so</include>
-                <include>libspidermonkey.so.debug-info</include>
+                <include>javascript</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>scheduler</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp</outputDirectory>
             <includes>
                 <include>scheduler.xsd</include>
             </includes>

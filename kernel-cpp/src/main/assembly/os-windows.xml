@@ -2,34 +2,30 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
     <id>${osArch}</id>
     <formats>
-        <format>zip</format>
+        <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>bin</directory>
-            <outputDirectory>/</outputDirectory>
+            <!-- das es für die release Version noch keine scheduler.dll gibt, wird diese zunächst aus bind (also der debug Version)
+                 zur Verfügung gestellt -->
+            <directory>bind</directory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
             <includes>
-                <include>scheduler.exe</include>
-                <include>scheduler.exe.map</include>
-                <include>scheduler.exe.pdb</include>
-                <include>spidermonkey.dll</include>
-                <include>spidermonkey.dll.map</include>
-                <include>spidermonkey.dll.pdb</include>
+                <include>scheduler.dll</include>
             </includes>
         </fileSet>
         <fileSet>
-            <directory>bind</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>bin</directory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
             <includes>
-                <include>scheduler.dll</include>
-                <include>scheduler.dll.map</include>
-                <include>scheduler.dll.pdb</include>
+                <include>scheduler.exe</include>
+                <include>spidermonkey.dll</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>scheduler</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/com/sos/scheduler/engine/kernelcpp</outputDirectory>
             <includes>
                 <include>scheduler.xsd</include>
             </includes>
