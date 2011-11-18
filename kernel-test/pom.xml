@@ -85,7 +85,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
             <version>${project.version}</version>
-            <classifier>${osArch}-test</classifier>
+            <classifier>${osArch}</classifier>
         </dependency>
 
         <dependency>
