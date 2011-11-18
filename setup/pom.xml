@@ -63,7 +63,7 @@ call prepare-setup.sh <version> to use this pom
                         <groupId>${project.groupId}</groupId>
                         <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
                         <version>${setup.version}</version>
-                        <classifier>${osArch}</classifier>
+                        <classifier>${setup.platform}</classifier>
                         <type>jar</type>
                     </artifactItem>
                 </artifactItems>
