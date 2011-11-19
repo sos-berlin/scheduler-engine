@@ -23,6 +23,7 @@
     </properties>
 
     <modules>
+        <module>parent</module>
         <module>cplusplus</module>
         <module>opensource</module>
         <module>plugins</module>
