@@ -19,11 +19,12 @@
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
         <cplusplusVersion>${project.version}</cplusplusVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
+        <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
     </properties>
 
     <profiles>
         <profile>
-            <id>windows</id>
+            <id>windows-x86</id>
             <activation>
                 <os>
                     <family>windows</family>
@@ -32,7 +33,21 @@
             </activation>
             <properties>
                 <operatingSystem>windows</operatingSystem>
-                <osArch>windows-${os.arch}</osArch>
+                <osArch>windows-x86</osArch>
+                <osFamily>windows</osFamily>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows-x64</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>windows</operatingSystem>
+                <osArch>windows-x64</osArch>
                 <osFamily>windows</osFamily>
             </properties>
         </profile>
