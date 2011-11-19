@@ -24,7 +24,7 @@
 
     <modules>
         <module>parent</module>
-        <module>cplusplus</module>
+        <module>cppjava</module>
         <module>opensource</module>
         <module>plugins</module>
         <module>playground</module>
