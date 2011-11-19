@@ -23,15 +23,10 @@
     </properties>
 
     <modules>
-        <module>parent</module>
         <module>cplusplus</module>
-        <module>kernel</module>
-        <module>kernel.cppproxy-generated</module>
-        <module>kernel-cpp</module>
+        <module>opensource</module>
         <module>plugins</module>
-        <module>kernel-test</module>
         <module>playground</module>
-        <module>jar</module>
         <module>setup</module>
     </modules>
 
@@ -71,5 +66,4 @@
             </properties>
         </profile>
     </profiles>
-    
 </project>
