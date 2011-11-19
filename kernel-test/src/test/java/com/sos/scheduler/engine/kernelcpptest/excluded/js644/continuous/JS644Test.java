@@ -17,8 +17,8 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.folder.Path;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.test.junit.SlowTestRule;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.junit.SlowTestRule;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
 

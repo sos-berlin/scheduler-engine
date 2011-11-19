@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.test.templates;
 
 import static org.junit.Assert.fail;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

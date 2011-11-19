@@ -4,8 +4,8 @@ import org.junit.Test;
 
 import com.sos.scheduler.engine.kernel.main.event.EventThread;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
-import com.sos.scheduler.engine.kernel.test.JavascriptEventPredicateEngine;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.JavascriptEventPredicateEngine;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class ExampleWithJavascriptTest extends SchedulerTest {
     @Test public void test() throws Exception {

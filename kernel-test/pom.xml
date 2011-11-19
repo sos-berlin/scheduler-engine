@@ -89,19 +89,11 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.sos.scheduler.engine.plugins</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.sos</groupId>
             <artifactId>com.sos.SOSJobSchedulerModel</artifactId>
             <version>${sos.jsobjects.version}</version>
             <scope>compile</scope>
         </dependency>
-
 
         <dependency>
             <groupId>com.sos</groupId>
@@ -138,19 +130,11 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-core</artifactId>
-            <version>5.5.0</version>
         </dependency>
 
         <dependency>
@@ -161,7 +145,6 @@
         <dependency>
         	<groupId>joda-time</groupId>
         	<artifactId>joda-time</artifactId>
-        	<version>2.0</version>
         </dependency>
     </dependencies>
 </project>

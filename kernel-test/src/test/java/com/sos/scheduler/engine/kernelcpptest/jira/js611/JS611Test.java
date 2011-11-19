@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 //TODO Wie prüfen wir das? Erstmal durch Blick ins scheduler.log: {JS-611}.

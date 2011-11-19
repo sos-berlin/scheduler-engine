@@ -19,7 +19,7 @@ import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.sos.scheduler.engine.kernel.test.TestSchedulerController;
+import com.sos.scheduler.engine.test.TestSchedulerController;
 
 public final class JobWhyTest {
     private static final Logger logger = Logger.getLogger(JobWhyTest.class);

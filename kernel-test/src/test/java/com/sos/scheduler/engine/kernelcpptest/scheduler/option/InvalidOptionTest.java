@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 
 public class InvalidOptionTest extends SchedulerTest {

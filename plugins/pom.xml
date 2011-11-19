@@ -32,16 +32,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.VirtualFileSystem</artifactId>
-            <version>${sos.jars.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.JobSchedulerLocalization</artifactId>
-            <version>${sos.jars.version}</version>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.scheduler.engine.kernel</artifactId>
 	        <version>${project.version}</version>
@@ -57,6 +47,21 @@
             <version>${project.version}</version>
             <classifier>${osArch}</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.VirtualFileSystem</artifactId>
+            <version>${sos.jars.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.JobSchedulerLocalization</artifactId>
+            <version>${sos.jars.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>

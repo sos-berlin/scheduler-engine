@@ -4,7 +4,7 @@ import static com.google.common.base.Strings.nullToEmpty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class PropertiesTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(PropertiesTest.class);

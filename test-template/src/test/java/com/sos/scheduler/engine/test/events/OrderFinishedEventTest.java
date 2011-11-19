@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class OrderFinishedEventTest extends SchedulerTest {
 

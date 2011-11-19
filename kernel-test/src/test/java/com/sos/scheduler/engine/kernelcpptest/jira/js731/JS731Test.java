@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-731'>JS-731</a> */
 public class JS731Test extends SchedulerTest {

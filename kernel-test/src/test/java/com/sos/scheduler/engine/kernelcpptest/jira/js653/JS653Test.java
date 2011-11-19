@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderId;
 import com.sos.scheduler.engine.kernel.order.OrderState;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a> */

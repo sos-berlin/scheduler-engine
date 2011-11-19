@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.containsString;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 public final class DatabaseQueryPluginTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(DatabaseQueryPluginTest.class);

@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import com.sos.scheduler.engine.kernel.order.OrderId;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-782'>JS-782</a> */
 public class JS782Test extends SchedulerTest {

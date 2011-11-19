@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernelcpptest.jira.js789;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.kernel.main.SchedulerState;
-import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** @see <a href="http://www.sos-berlin.com/jira/browse/JS-789">JS-789</a> */
 public final class JS789Test extends SchedulerTest {
