@@ -4,11 +4,11 @@
 
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
-        <artifactId>com.sos.scheduler.engine.playground</artifactId>
+        <artifactId>playground</artifactId>
         <version>1.3.13-beta-1a-SNAPSHOT</version>
     </parent>
 
-    <artifactId>com.sos.scheduler.engine.playground.ss</artifactId>
+    <artifactId>playground.ss</artifactId>
 
     <name>${project.artifactId}</name>
     <inceptionYear>2011</inceptionYear>
@@ -37,12 +37,12 @@
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+            <artifactId>kernel</artifactId>
 	        <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
+            <artifactId>test</artifactId>
 	        <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -78,7 +78,7 @@
         </dependency>
         <dependency>
         	<groupId>com.sos.scheduler.engine</groupId>
-        	<artifactId>com.sos.scheduler.engine.plugins</artifactId>
+        	<artifactId>plugins</artifactId>
         	<version>${project.version}</version>
         	<scope>compile</scope>
         </dependency>

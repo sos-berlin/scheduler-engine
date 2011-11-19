@@ -4,11 +4,11 @@
 
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
-        <artifactId>com.sos.scheduler.engine</artifactId>
+        <artifactId>engine</artifactId>
         <version>1.3.13-beta-1a-SNAPSHOT</version>
     </parent>
     
-    <artifactId>com.sos.scheduler.engine.kernel.cppproxy-generated</artifactId>
+    <artifactId>kernel.cppproxy-generated</artifactId>
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
@@ -49,13 +49,13 @@
                 <dependencies>
                     <dependency>
                         <groupId>com.sos.scheduler.engine</groupId>
-                        <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
+                        <artifactId>cppjava.generator</artifactId>
                         <version>${cplusplusVersion}</version>
                         <scope>compile</scope>
                     </dependency>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
-                        <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+                        <artifactId>kernel</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
@@ -74,12 +74,12 @@
     <dependencies>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
+            <artifactId>cppjava.generator</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+            <artifactId>kernel</artifactId>
             <version>${project.version}</version>
         </dependency>
 

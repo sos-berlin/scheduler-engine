@@ -6,9 +6,9 @@ import java.util.Properties
 
 class MavenProperties(clas: Class[_]) {
     private val resourceSimpleName = "maven.properties"
-    def groupId = get("project.groupId")
-    def artifactId = get("project.artifactId")
-    def version = get("project.version")
+    def groupId: String = get("project.groupId")
+    def artifactId: String = get("project.artifactId")
+    def version: String = get("project.version")
 
     def get(name: String) = getOption(name) getOrElse { throw new RuntimeException("Unknown property '" + name + "'") }
 

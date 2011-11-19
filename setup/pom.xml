@@ -7,7 +7,7 @@ call prepare-setup.sh <version> to use this pom
     
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
-        <artifactId>com.sos.scheduler.engine</artifactId>
+        <artifactId>engine</artifactId>
         <version>1.3.13-beta-1a-SNAPSHOT</version>
     </parent>
     
@@ -16,7 +16,7 @@ call prepare-setup.sh <version> to use this pom
       <setup.platform>${osArch}</setup.platform>
     </properties>
     
-    <artifactId>com.sos.scheduler.engine.setup</artifactId>
+    <artifactId>setup</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
@@ -49,19 +49,19 @@ call prepare-setup.sh <version> to use this pom
                 <artifactItems>
                     <artifactItem>
                         <groupId>${project.groupId}</groupId>
-                        <artifactId>com.sos.scheduler.engine.jar</artifactId>
+                        <artifactId>jar</artifactId>
                         <version>${setup.version}</version>
                         <type>jar</type>
                     </artifactItem>
                     <artifactItem>
                         <groupId>${project.groupId}</groupId>
-                        <artifactId>com.sos.scheduler.engine.jar</artifactId>
+                        <artifactId>jar</artifactId>
                         <version>${setup.version}</version>
                         <type>pom</type>
                     </artifactItem>
                     <artifactItem>
                         <groupId>${project.groupId}</groupId>
-                        <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
+                        <artifactId>kernel-cpp</artifactId>
                         <version>${setup.version}</version>
                         <classifier>${setup.platform}</classifier>
                         <type>jar</type>
@@ -119,21 +119,21 @@ call prepare-setup.sh <version> to use this pom
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+            <artifactId>kernel</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
+            <artifactId>cppjava.runtime</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>com.sos.scheduler.engine.plugins</artifactId>
+            <artifactId>plugins</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
