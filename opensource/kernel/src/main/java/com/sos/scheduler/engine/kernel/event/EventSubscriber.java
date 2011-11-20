@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.event;
 
 import com.sos.scheduler.engine.eventbus.Event;
 
+@Deprecated   // @EventHandler, @HotEventHandler (oder EventSubscription) nutzen
 public interface EventSubscriber {
     /** Wird vom Scheduler bei einem Ereignis aufgerufen.
      * Weil wir hier mitten in der Scheduler-Ausführung sind,
