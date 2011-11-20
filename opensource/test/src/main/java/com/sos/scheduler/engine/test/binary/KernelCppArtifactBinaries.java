@@ -20,7 +20,7 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
 
     KernelCppArtifactBinaries() {
         Preconditions.checkArgument(directory.isDirectory(), "%s does not exist or is not a directory", directory);
-        logger.debug("Using scheduler binaries in detected artifact directory "+directory);
+        logger.info("Using JobScheduler binaries in detected artifact directory "+directory);
     }
 
     private static File kernelCppDir() {
