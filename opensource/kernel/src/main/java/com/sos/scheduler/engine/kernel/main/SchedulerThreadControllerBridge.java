@@ -19,6 +19,7 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
     private final SchedulerThreadController schedulerThreadController;
     private final SchedulerEventBus eventBus;
     private final SchedulerStateBridge stateBridge = new SchedulerStateBridge();
+    private volatile boolean terminateSchedulerWhenPossible = false;
 
     SchedulerThreadControllerBridge(SchedulerThreadController c, SchedulerEventBus eventBus) {
         this.schedulerThreadController = c;
@@ -38,9 +39,9 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
     }
 
     @Override public void onSchedulerStarted(Scheduler scheduler) {
-        boolean terminate = stateBridge.setStateStarted(scheduler);
-        if (terminate)  scheduler.terminate();
+        stateBridge.setStateStarted(scheduler);
         eventBus.publish(new SchedulerReadyEvent());
+        if (terminateSchedulerWhenPossible)  scheduler.terminate();
     }
 
     @Override public void onSchedulerActivated() {
@@ -51,6 +52,7 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
         if (t != null) schedulerThreadController.setThrowable(t);
         stateBridge.setState(terminated);
         eventBus.publish(new TerminatedEvent(exitCode, t));
+        eventBus.dispatchEvents();
     }
 
     @Override public SchedulerEventBus getEventBus() {
@@ -71,7 +73,8 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
     }
 
     void terminate() {
-        Scheduler scheduler = stateBridge.tryTerminateAndGetScheduler();
+        Scheduler scheduler = stateBridge.scheduler();
         if (scheduler != null) scheduler.terminate();
+        else terminateSchedulerWhenPossible = true;
     }
 }

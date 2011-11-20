@@ -10,14 +10,12 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 
 final class SchedulerStateBridge {
     private final AtomicReference<Scheduler> schedulerAtom = new AtomicReference<Scheduler>();
-    private volatile boolean terminateSchedulerWhenPossible = false;
     private volatile SchedulerState state = starting;
 
-    synchronized boolean setStateStarted(Scheduler scheduler) {
+    synchronized void setStateStarted(Scheduler scheduler) {
         schedulerAtom.set(scheduler);
         state = started;
         notifyAll();
-        return terminateSchedulerWhenPossible;
     }
 
     synchronized void setState(SchedulerState s) {
@@ -34,12 +32,6 @@ final class SchedulerStateBridge {
     synchronized void waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
         while (state.ordinal() < awaitedState.ordinal())
             wait();
-    }
-
-    synchronized Scheduler tryTerminateAndGetScheduler() {
-        Scheduler scheduler = schedulerAtom.get();
-        if (scheduler == null) terminateSchedulerWhenPossible = true;
-        return scheduler;
     }
 
     Scheduler scheduler() {
