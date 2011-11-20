@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.js644.continuous;
+package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;

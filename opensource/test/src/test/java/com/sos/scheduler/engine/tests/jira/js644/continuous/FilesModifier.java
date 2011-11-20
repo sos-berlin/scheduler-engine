@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.js644.continuous;
+package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
 import static java.lang.Math.random;
 
