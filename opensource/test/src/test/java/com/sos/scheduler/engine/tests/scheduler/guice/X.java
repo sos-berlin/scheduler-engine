@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.guice;
+package com.sos.scheduler.engine.tests.scheduler.guice;
 
 import javax.inject.Inject;
 
