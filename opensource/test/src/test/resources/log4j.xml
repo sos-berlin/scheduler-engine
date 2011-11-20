@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
-
     <appender class="org.apache.log4j.ConsoleAppender" name="console">
         <layout class="org.apache.log4j.PatternLayout">
             <param value="%d{ISO8601} %-5p [%t] (%c) %m%n" name="ConversionPattern"/>
@@ -24,22 +23,9 @@
 		</layout>
 	</appender>
 
-    <logger name="com.sos.scheduler.engine.kernelcpptest">
+    <logger name="com.sos.scheduler">
         <level value="info"/>
     </logger>
-
-    <logger name="com.sos.scheduler.engine.kernel">
-        <!-- Zum Test, 2011-10-10 -->
-        <level value="debug"/>
-    </logger>
-
-	<logger name="org.apache.activemq">
-		<level value="warn"/>
-	</logger>
-
-	<logger name="org.apache.activemq.spring">
-		<level value="warn"/>
-	</logger>
 
 	<logger name="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugin">
 		<level value="info"/>
@@ -51,17 +37,14 @@
 		<appender-ref ref="errorlog"/>
 	</logger>
 	
-	<!--
-	in general the debug level should be 'warn'. if you need 'debug' or
-		'info'
-		level
-	for
-		special
-		cases please use a special logger defined above.
-	-->
+    <logger name="org.apache.activemq">
+        <level value="warn"/>
+    </logger>
+
 	<root>
+        <!-- In general the debug level should be 'warn'. If you need 'debug' or 'info' level for special cases
+        please use a special logger defined above. -->
 		<level value="warn"/>
 		<appender-ref ref="console"/>
 	</root>
-
 </log4j:configuration>
