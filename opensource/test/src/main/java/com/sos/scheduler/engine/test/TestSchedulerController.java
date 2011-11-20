@@ -19,6 +19,7 @@ import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.CppBinary;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -38,6 +39,12 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
     public final void setTerminateOnError(boolean o) {
         terminateOnError = o;
+    }
+
+    @EventHandler
+    public final void handleEvent(ErrorLogEvent e) {
+        if (terminateOnError)
+            terminateAfterException(new RuntimeException("Test terminated after error log line: "+ e.getMessage()));
     }
 
     @EventHandler @HotEventHandler  // Beide, weil das Event wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.
