@@ -3,9 +3,7 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.plugin.Plugin
 import com.sos.scheduler.engine.playground.zschimmer._
-import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
-import java.lang.Math.max
 import org.apache.log4j.Logger
 
 /** Nicht für Produktion. Spielwiese für Scala-Rendezvous.
@@ -20,7 +18,6 @@ class WatchdogPlugin(scheduler: Scheduler, confElemOption: Option[xml.Elem]) ext
     private val thread1 = new Thread1
     private val thread2 = new Thread2
 
-
     def activate() {
         thread1.start()
         thread2.start()
@@ -33,16 +30,16 @@ class WatchdogPlugin(scheduler: Scheduler, confElemOption: Option[xml.Elem]) ext
 
     def getXmlState = "<watchdogPlugIn/>"
 
-
     private class Thread1 extends Thread {
-        override def run() = untilInterruptedEvery(conf.checkEvery) {
-            thread2.callImpatient((), conf.timeout, conf.warnEvery) { 
-                t => logger.warn("Scheduler does not respond after " + t)
+        override def run() {
+            untilInterruptedEvery(conf.checkEvery) {
+                thread2.callImpatient((), conf.timeout, conf.warnEvery) {
+                    t => logger.warn("Scheduler does not respond after " + t)
+                }
             }
         }
     }
 
-    
     private class Thread2 extends Thread with Rendezvous[Unit,Unit] {
         override def run() {
             serveCalls {
@@ -57,7 +54,6 @@ class WatchdogPlugin(scheduler: Scheduler, confElemOption: Option[xml.Elem]) ext
         }
     }
 }
-
 
 object WatchdogPlugin {
     private val logger = Logger.getLogger(classOf[WatchdogPlugin])
