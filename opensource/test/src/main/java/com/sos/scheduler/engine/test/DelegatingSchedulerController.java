@@ -14,10 +14,6 @@ abstract class DelegatingSchedulerController implements SchedulerController {
         delegate.setSettings(o);
     }
 
-    @Override public final void waitUntilSchedulerState(SchedulerState s) {
-        delegate.waitUntilSchedulerState(s);
-    }
-
     @Override public final void terminateScheduler() {
         delegate.terminateScheduler();
     }

@@ -20,9 +20,11 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
-import com.sos.scheduler.engine.main.CppBinary;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.main.CppBinary;
+import com.sos.scheduler.engine.main.SchedulerState;
 
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
@@ -65,14 +67,14 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
     public final void runScheduler(Time timeout, String... args) {
         startScheduler(args);
-        waitUntilSchedulerIsRunning();
+        waitUntilSchedulerIsActive();
         waitForTermination(timeout);
     }
 
     @Deprecated  // Statt den Scheduler nach Frist zu beenden, soll der Test das bitte selbst machen, sobald alles okay ist. Zschimmer 8.11.2011
     public final void runSchedulerAndTerminate(Time timeout, String... args) {
         startScheduler(args);
-        waitUntilSchedulerIsRunning();
+        waitUntilSchedulerIsActive();
         try {
             waitForTermination(timeout);
         } catch (SchedulerRunningAfterTimeoutException x) {
@@ -105,13 +107,16 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final Scheduler scheduler() {
-        return waitUntilSchedulerIsRunning();
+        return waitUntilSchedulerIsActive();
     }
 
-    @Override public final Scheduler waitUntilSchedulerIsRunning() {
+    /** Wartet, bis das Objekt {@link Scheduler} verfügbar ist. */
+    public final Scheduler waitUntilSchedulerIsActive() {
         if (scheduler == null) {
-            scheduler = delegate.waitUntilSchedulerIsRunning();
+            scheduler = delegate.waitUntilSchedulerState(SchedulerState.active);
             if (terminateOnError) checkForErrorLogLine();
+            if (scheduler == null)
+                throw new SchedulerException("Scheduler aborted before startup");
         }
         return scheduler;
     }

@@ -130,7 +130,7 @@ public class SuspendTest extends SchedulerTest {
     @Test 
     public void test() throws Exception {
         controller().startScheduler("-e");
-        controller().waitUntilSchedulerIsRunning();
+        controller().waitUntilSchedulerIsActive();
         assertState("state2",1);										// order has to end in 'state2'
     }
     

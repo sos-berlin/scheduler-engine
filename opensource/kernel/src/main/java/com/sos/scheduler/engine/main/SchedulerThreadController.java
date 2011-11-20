@@ -50,23 +50,12 @@ public class SchedulerThreadController implements SchedulerController {
         eventBus.dispatchEvents();  // Thread-sicher, weil der Scheduler-Thread beendet ist, also selbst kein dispatchEvents() mehr aufrufen kann.
     }
 
-    @Override public final Scheduler waitUntilSchedulerIsRunning() {
-        checkState(isStarted, "Scheduler has not been started");
+    public final Scheduler waitUntilSchedulerState(SchedulerState s) {
         try {
-            Scheduler result = controllerBridge.waitWhileSchedulerIsStarting();
+            checkState(isStarted, "Scheduler has not been started");
+            Scheduler scheduler = controllerBridge.waitUntilSchedulerState(s);
             throwableMailbox.throwUncheckedIfSet();
-            if (result == null) {
-                throw new SchedulerException("Scheduler aborted before startup");
-            }
-            return result;
-        }
-        catch (InterruptedException x) { throw new RuntimeException(x); }
-    }
-
-    @Override public final void waitUntilSchedulerState(SchedulerState s) {
-        try {
-            controllerBridge.waitUntilSchedulerState(s);
-            throwableMailbox.throwUncheckedIfSet();
+            return scheduler;
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }

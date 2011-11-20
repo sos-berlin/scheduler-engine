@@ -16,7 +16,6 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.job.Job;
-import com.sos.scheduler.engine.main.SchedulerState;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
@@ -33,7 +32,7 @@ public class JS644PluginTest extends SchedulerTest {
 
     @Test public void test() throws Exception {
         controller().startScheduler();
-        controller().waitUntilSchedulerState(SchedulerState.active);
+        controller().waitUntilSchedulerIsActive();
         schedulerIsActive = true;
         modifyJobFile();
         gate.expect(jobActivated, timeout);

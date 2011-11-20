@@ -29,9 +29,10 @@ final class SchedulerStateBridge {
         notifyAll();
     }
 
-    synchronized void waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
+    synchronized Scheduler waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
         while (state.ordinal() < awaitedState.ordinal())
             wait();
+        return scheduler();
     }
 
     Scheduler scheduler() {

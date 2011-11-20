@@ -8,7 +8,6 @@ import org.junit.Test;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
-import com.sos.scheduler.engine.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -16,7 +15,6 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 public class OrderSubsystemOfJobTest extends SchedulerTest {
     @Test public void test() throws Exception {
         controller().startScheduler();
-        controller().waitUntilSchedulerState(SchedulerState.active);
         doTest();
         controller().terminateScheduler();
     }

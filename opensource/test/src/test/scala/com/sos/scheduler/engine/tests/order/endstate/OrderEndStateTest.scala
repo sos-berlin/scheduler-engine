@@ -9,7 +9,7 @@ class OrderEndStateTest extends ScalaSchedulerTest {
 
     @Test def test1() {
 //        startScheduler()
-//        val scheduler = waitUntilSchedulerIsRunning()
+//        val scheduler = waitUntilSchedulerIsActive()
 //        val jobChain = scheduler.getOrderSubsystem.jobChain(new AbsolutePath("/myJobChain"))
 //        val order = jobChain.order(new OrderId("id.1"))
 //        order.setEndState(new OrderState(""))

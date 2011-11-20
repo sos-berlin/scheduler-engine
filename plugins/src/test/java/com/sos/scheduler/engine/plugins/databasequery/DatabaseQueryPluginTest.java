@@ -6,28 +6,38 @@ import static org.hamcrest.Matchers.containsString;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
+import com.sos.scheduler.engine.kernel.util.sync.Gate;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 public final class DatabaseQueryPluginTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(DatabaseQueryPluginTest.class);
 
+    private static final Gate<Boolean> gate = new Gate<Boolean>();
+
     public DatabaseQueryPluginTest() throws Exception {
         controller().setSettings(temporaryDatabaseSettings());
         controller().startScheduler();
-        waitForTaskTermination();
-    }
-
-    private void waitForTaskTermination() throws Exception {
-    	controller().waitUntilSchedulerIsRunning();
-        Thread.sleep(10*1000);   // TODO Besser TaskTerminatedEvent abwarten, aber das haben wir noch nicht.
     }
 
     @Test
     public void testShowTaskHistory() throws Exception {
+        waitForTaskTermination();
         String result = execute("<showTaskHistory/>");
         assertThat(result, containsString("</myResult>"));
         assertThat(result, containsString("<row "));
         assertThat(result, containsString(" job="));
+        controller().terminateScheduler();
+    }
+
+    private void waitForTaskTermination() throws Exception {
+    	controller().waitUntilSchedulerIsActive();
+        gate.expect(true, shortTimeout);
+    }
+
+    @EventHandler public void handleEvent(TaskEndedEvent e) throws InterruptedException {
+        gate.put(true);
     }
 
     private String execute(String subcommandXml) throws Exception {

@@ -66,7 +66,7 @@ public class JS746Test extends SchedulerTest {
 	@Test
 	public void test() throws Exception {
         controller().startScheduler("-e", "-log-level=warn");
-        controller().waitUntilSchedulerIsRunning();
+        controller().waitUntilSchedulerIsActive();
 		testStandaloneJobs();
 		testOrders();
         controller().terminateScheduler();

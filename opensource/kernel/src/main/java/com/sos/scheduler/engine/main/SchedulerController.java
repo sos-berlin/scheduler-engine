@@ -15,13 +15,6 @@ public interface SchedulerController {
     /** Veranlasst die Beendigung des Schedulers, wartet aufs Ende und schließt alles. */
     void close();
 
-    /** Wartet, bis das Objekt {@link Scheduler} verfügbar ist. */
-    Scheduler waitUntilSchedulerIsRunning();
-
-    void waitUntilSchedulerState(SchedulerState s);
-
-    //SchedulerState getSchedulerState();
-
     /** Veranlasst die Beendigung des Schedulers. */
     void terminateScheduler();
 

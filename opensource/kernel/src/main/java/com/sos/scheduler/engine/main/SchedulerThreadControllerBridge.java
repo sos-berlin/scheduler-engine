@@ -63,13 +63,8 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
         stateBridge.setStateClosed();
     }
 
-    synchronized Scheduler waitWhileSchedulerIsStarting() throws InterruptedException {
-        waitUntilSchedulerState(started);
-        return stateBridge.scheduler();
-    }
-
-    synchronized void waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
-        stateBridge.waitUntilSchedulerState(awaitedState);
+    Scheduler waitUntilSchedulerState(SchedulerState awaitedState) throws InterruptedException {
+        return stateBridge.waitUntilSchedulerState(awaitedState);
     }
 
     void terminate() {
