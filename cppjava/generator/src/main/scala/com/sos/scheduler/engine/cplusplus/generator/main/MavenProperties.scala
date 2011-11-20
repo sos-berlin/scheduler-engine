@@ -12,7 +12,7 @@ class MavenProperties(clas: Class[_]) {
 
     def get(name: String) = getOption(name) getOrElse { throw new RuntimeException("Unknown property '" + name + "'") }
 
-    def getOption(name: String) = Option(properties.get(name).asInstanceOf[String])
+    def getOption(name: String) = Option(properties.getProperty(name).asInstanceOf[String])
 
     lazy val properties = {
         val resourcePath = clas.getName.split('.').dropRight(1).mkString("/", "/", "/") + resourceSimpleName

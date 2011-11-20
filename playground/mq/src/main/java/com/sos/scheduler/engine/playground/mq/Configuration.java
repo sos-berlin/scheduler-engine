@@ -43,12 +43,12 @@ public class Configuration { //public nur für JmsPluginTest, Klasse ist zu komp
 
     private static Properties jmsProperties(String providerUrl) {
         Properties result = new Properties();
-        result.put(Context.SECURITY_PRINCIPAL, "system");
-        result.put(Context.SECURITY_CREDENTIALS, "manager");
-        result.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactoryName);
-        result.put(Context.PROVIDER_URL, providerUrl);
-        result.put("connectionFactoryNames", topicConnectionFactoryName);
-        result.put("topic." + topicName, topicName);
+        result.setProperty(Context.SECURITY_PRINCIPAL, "system");
+        result.setProperty(Context.SECURITY_CREDENTIALS, "manager");
+        result.setProperty(Context.INITIAL_CONTEXT_FACTORY, initialContextFactoryName);
+        result.setProperty(Context.PROVIDER_URL, providerUrl);
+        result.setProperty("connectionFactoryNames", topicConnectionFactoryName);
+        result.setProperty("topic." + topicName, topicName);
         return result;
     }
 }

@@ -45,7 +45,7 @@ public final class MavenProperties {
 
 
     public String get(String name) {
-        String result = (String)properties.get(name);
+        String result = properties.getProperty(name);
         if (result == null) throw new RuntimeException("Unknown property '" + name + "'");
         return result;
     }

@@ -1,16 +1,14 @@
 package com.sos.scheduler.engine.kernel.util;
 
-//import com.google.common.io.InputSupplier;
-import static com.google.common.collect.Maps.fromProperties;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
-public class ClassResource /*implements InputSupplier<InputStream>*/ {
+public class ClassResource {
     private final Class<?> clas;
     private final String subPath;
 
@@ -41,7 +39,7 @@ public class ClassResource /*implements InputSupplier<InputStream>*/ {
         try {
             Properties properties = new Properties();
             properties.load(getInputStream());
-            return fromProperties(properties);
+            return Maps.fromProperties(properties);
         } catch (IOException e) { throw new RuntimeException(e); }
     }
 
