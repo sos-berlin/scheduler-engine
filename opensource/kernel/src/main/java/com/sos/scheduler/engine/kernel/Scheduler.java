@@ -161,7 +161,10 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     public void terminate() {
-        cppProxy.cmd_terminate();
+        if (!cppProxy.cppReferenceIsValid())
+            log.debug("Scheduler.terminate() ignored because C++ object has already been destructed");
+        else
+            cppProxy.cmd_terminate();
     }
 
     private void initializeThreadLock() {
