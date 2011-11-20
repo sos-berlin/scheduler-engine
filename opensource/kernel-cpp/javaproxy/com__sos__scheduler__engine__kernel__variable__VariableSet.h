@@ -2,8 +2,8 @@
 
 #include "_precompiled.h"
 
-#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_VARIABLESET_H_
-#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_VARIABLESET_H_
+#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_VARIABLE_VARIABLESET_H_
+#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_VARIABLE_VARIABLESET_H_
 
 #include "java__lang__Object.h"
 
@@ -12,7 +12,7 @@ namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace variable { 
 
 
 struct VariableSet__class;
@@ -62,6 +62,6 @@ struct VariableSet : ::zschimmer::javabridge::proxy_jobject< VariableSet >, ::ja
 };
 
 
-}}}}}}
+}}}}}}}
 
 #endif

@@ -5,7 +5,6 @@ javaproxy_objects=\
  com__sos__scheduler__engine__eventbus__AbstractEvent.o\
  com__sos__scheduler__engine__eventbus__Event.o\
  com__sos__scheduler__engine__kernel__Scheduler.o\
- com__sos__scheduler__engine__kernel__VariableSet.o\
  com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.o\
  com__sos__scheduler__engine__kernel__cppproxy__Folder_subsystemC.o\
  com__sos__scheduler__engine__kernel__cppproxy__JobC.o\
@@ -54,6 +53,7 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.o\
  com__sos__scheduler__engine__kernel__scripting__ScriptInstance.o\
  com__sos__scheduler__engine__kernel__util__StringValue.o\
+ com__sos__scheduler__engine__kernel__variable__VariableSet.o\
  com__sos__scheduler__engine__main__SchedulerControllerBridge.o\
  java__lang__Object.o\
  java__lang__String.o\

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.kernel.UnmodifiableVariableSet;
+import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.log.SchedulerLogger;
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;

@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.kernel.VariableSet;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;

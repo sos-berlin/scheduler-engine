@@ -8,7 +8,7 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.VariableSet;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class VariablesTest extends SchedulerTest {

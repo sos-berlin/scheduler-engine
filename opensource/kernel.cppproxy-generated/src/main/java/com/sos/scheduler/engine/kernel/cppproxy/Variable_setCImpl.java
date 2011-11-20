@@ -3,7 +3,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 final class Variable_setCImpl
-   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.VariableSet>
+   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.variable.VariableSet>
    implements com.sos.scheduler.engine.kernel.cppproxy.Variable_setC
 {
     private Variable_setCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich

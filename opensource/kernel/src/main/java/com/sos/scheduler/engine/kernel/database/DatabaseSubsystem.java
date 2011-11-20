@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel.database;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.kernel.UnmodifiableVariableSet;
+import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.DatabaseC;
+
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManager;

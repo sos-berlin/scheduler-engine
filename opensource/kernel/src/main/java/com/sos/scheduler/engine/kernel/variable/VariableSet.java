@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel;
+package com.sos.scheduler.engine.kernel.variable;
 
 import static org.apache.commons.collections.ListUtils.unmodifiableList;
 

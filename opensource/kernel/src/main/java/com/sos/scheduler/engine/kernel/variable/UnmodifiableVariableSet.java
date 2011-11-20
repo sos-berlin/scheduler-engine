@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel;
+package com.sos.scheduler.engine.kernel.variable;
 
 import java.util.Collection;
 
