@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.log;
 
-import com.sos.scheduler.engine.kernel.Subsystem;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 

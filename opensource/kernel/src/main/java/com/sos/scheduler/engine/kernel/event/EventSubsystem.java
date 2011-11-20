@@ -7,14 +7,12 @@ import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.eventbus.AbstractEvent;
-import com.sos.scheduler.engine.eventbus.EventBus;
-import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
-import com.sos.scheduler.engine.kernel.Platform;
-import com.sos.scheduler.engine.kernel.Subsystem;
+import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 
 @ForCpp
 public class EventSubsystem extends AbstractHasPlatform implements Subsystem {

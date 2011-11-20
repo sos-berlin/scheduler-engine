@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.kernel.SchedulerObject;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerObject;
 import com.sos.scheduler.engine.kernel.event.ObjectEvent;
 
 public abstract class OrderEvent extends ObjectEvent {

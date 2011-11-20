@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.command;
 
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.w3c.dom.Element;
 
 

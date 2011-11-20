@@ -5,10 +5,9 @@ import static com.sos.scheduler.engine.kernel.order.jobchain.JobChains.jobChainH
 import com.google.common.collect.Iterables;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
-import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
-import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
-import com.sos.scheduler.engine.kernel.Platform;
-import com.sos.scheduler.engine.kernel.Subsystem;
+import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.*;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import java.util.Collection;

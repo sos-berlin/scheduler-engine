@@ -2,13 +2,13 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
-#include "com__sos__scheduler__engine__kernel__Platform.h"
+#include "com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
 #include "com__sos__scheduler__engine__kernel__log__PrefixLog.h"
+#include "com__sos__scheduler__engine__kernel__scheduler__Platform.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace scheduler { 
 
 struct AbstractHasPlatform__class : ::zschimmer::javabridge::Class
 {
@@ -21,11 +21,11 @@ struct AbstractHasPlatform__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< AbstractHasPlatform__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< AbstractHasPlatform__class > AbstractHasPlatform__class::class_factory ("com.sos.scheduler.engine.kernel.AbstractHasPlatform");
+const ::zschimmer::javabridge::class_factory< AbstractHasPlatform__class > AbstractHasPlatform__class::class_factory ("com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform");
 
 AbstractHasPlatform__class::AbstractHasPlatform__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_getPlatform____method(this, "getPlatform", "()Lcom/sos/scheduler/engine/kernel/Platform;")
+    ,_getPlatform____method(this, "getPlatform", "()Lcom/sos/scheduler/engine/kernel/scheduler/Platform;")
     ,_log____method(this, "log", "()Lcom/sos/scheduler/engine/kernel/log/PrefixLog;"){}
 
 AbstractHasPlatform__class::~AbstractHasPlatform__class() {}
@@ -46,10 +46,10 @@ AbstractHasPlatform::~AbstractHasPlatform() { assign_(NULL); }
 
 
 
-::javaproxy::com::sos::scheduler::engine::kernel::Platform AbstractHasPlatform::getPlatform() {
+::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform AbstractHasPlatform::getPlatform() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractHasPlatform__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::Platform result;
+    ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform result;
     result.steal_local_ref(cls->_getPlatform____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
@@ -73,4 +73,4 @@ void AbstractHasPlatform::Lazy_class::initialize() {
 }
 
 
-}}}}}}
+}}}}}}}

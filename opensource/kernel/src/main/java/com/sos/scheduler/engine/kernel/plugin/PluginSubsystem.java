@@ -2,13 +2,12 @@ package com.sos.scheduler.engine.kernel.plugin;
 
 import com.google.inject.Injector;
 import com.sos.scheduler.engine.eventbus.EventBus;
-import com.sos.scheduler.engine.kernel.command.CommandHandler;
-import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.SchedulerException;
-import com.sos.scheduler.engine.kernel.Subsystem;
+import com.sos.scheduler.engine.kernel.command.CommandHandler;
+import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
-import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
-import com.sos.scheduler.engine.kernel.Platform;
-import com.sos.scheduler.engine.kernel.PlatformMock;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.PlatformMock;
 import org.junit.Test;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 import static org.hamcrest.MatcherAssert.assertThat;

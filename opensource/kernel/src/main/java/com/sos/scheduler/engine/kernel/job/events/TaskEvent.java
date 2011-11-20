@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.job.events;
 
-import com.sos.scheduler.engine.kernel.SchedulerObject;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerObject;
 import com.sos.scheduler.engine.kernel.event.ObjectEvent;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 

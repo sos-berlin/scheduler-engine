@@ -2,11 +2,11 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__Platform.h"
+#include "com__sos__scheduler__engine__kernel__scheduler__Platform.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace scheduler { 
 
 struct Platform__class : ::zschimmer::javabridge::Class
 {
@@ -17,7 +17,7 @@ struct Platform__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< Platform__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< Platform__class > Platform__class::class_factory ("com.sos.scheduler.engine.kernel.Platform");
+const ::zschimmer::javabridge::class_factory< Platform__class > Platform__class::class_factory ("com.sos.scheduler.engine.kernel.scheduler.Platform");
 
 Platform__class::Platform__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
@@ -52,4 +52,4 @@ void Platform::Lazy_class::initialize() {
 }
 
 
-}}}}}}
+}}}}}}}

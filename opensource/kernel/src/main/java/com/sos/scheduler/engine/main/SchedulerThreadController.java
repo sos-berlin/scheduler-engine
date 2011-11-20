@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;

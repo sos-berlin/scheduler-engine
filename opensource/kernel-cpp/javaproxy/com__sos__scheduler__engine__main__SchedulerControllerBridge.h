@@ -2,8 +2,8 @@
 
 #include "_precompiled.h"
 
-#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_MAIN_SCHEDULERCONTROLLERBRIDGE_H_
-#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_MAIN_SCHEDULERCONTROLLERBRIDGE_H_
+#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_MAIN_SCHEDULERCONTROLLERBRIDGE_H_
+#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_MAIN_SCHEDULERCONTROLLERBRIDGE_H_
 
 #include "java__lang__Object.h"
 
@@ -11,7 +11,7 @@ namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace main { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace main { 
 
 
 struct SchedulerControllerBridge__class;
@@ -61,6 +61,6 @@ struct SchedulerControllerBridge : ::zschimmer::javabridge::proxy_jobject< Sched
 };
 
 
-}}}}}}}
+}}}}}}
 
 #endif

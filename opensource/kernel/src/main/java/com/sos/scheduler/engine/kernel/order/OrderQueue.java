@@ -1,15 +1,11 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
-import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_queueC;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 
-/**
- *
- * @author Zschimmer.sos
- */
 public class OrderQueue extends AbstractHasPlatform implements Sister {  // Iterable<Order>
     private final Order_queueC cppProxy;
 

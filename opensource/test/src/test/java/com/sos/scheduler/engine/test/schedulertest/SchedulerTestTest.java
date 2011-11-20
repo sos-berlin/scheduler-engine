@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
+import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** Testet {@link SchedulerTest} */

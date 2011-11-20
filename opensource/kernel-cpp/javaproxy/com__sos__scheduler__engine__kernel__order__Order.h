@@ -5,8 +5,8 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDER_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDER_H_
 
-#include "com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
+#include "com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}

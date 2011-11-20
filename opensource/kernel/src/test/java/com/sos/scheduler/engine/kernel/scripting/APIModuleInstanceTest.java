@@ -1,11 +1,5 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
-import com.sos.scheduler.engine.kernel.LogMock;
-import com.sos.scheduler.engine.kernel.log.PrefixLog;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 public class APIModuleInstanceTest {
 	
 	private final static String script_root = "./src/test/scripts/";

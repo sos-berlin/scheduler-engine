@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain;
 
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
-import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeCI;
 import com.sos.scheduler.engine.kernel.order.OrderQueue;

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
-import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.order.Order;

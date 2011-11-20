@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.schedulerevent;
+package com.sos.scheduler.engine.kernel.scheduler.events;
 
 import com.sos.scheduler.engine.eventbus.AbstractEvent;
 

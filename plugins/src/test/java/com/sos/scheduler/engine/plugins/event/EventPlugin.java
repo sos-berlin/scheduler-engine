@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.plugin.Plugin;
 import com.sos.scheduler.engine.kernel.plugin.PluginFactory;

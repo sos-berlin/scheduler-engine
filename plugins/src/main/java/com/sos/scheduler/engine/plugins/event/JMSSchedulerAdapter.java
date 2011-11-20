@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.plugins.event;
 
+import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.model.events.InfoScheduler;
 
 public class JMSSchedulerAdapter extends InfoScheduler {
 	
-	private JMSSchedulerAdapter(com.sos.scheduler.engine.kernel.Scheduler kernelEvent) {
+	private JMSSchedulerAdapter(Scheduler kernelEvent) {
 		super();
 		setHostname(kernelEvent.getHostname());
 		setPort(kernelEvent.getTcpPort());
@@ -13,7 +14,7 @@ public class JMSSchedulerAdapter extends InfoScheduler {
 		setId(kernelEvent.getSchedulerId());
 	}
 
-	public static JMSSchedulerAdapter createInstance(com.sos.scheduler.engine.kernel.Scheduler kernelEvent) {
+	public static JMSSchedulerAdapter createInstance(Scheduler kernelEvent) {
 		return new JMSSchedulerAdapter(kernelEvent);
 	}
 }

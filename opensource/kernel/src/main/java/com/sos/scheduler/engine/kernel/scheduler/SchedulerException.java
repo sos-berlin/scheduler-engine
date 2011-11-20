@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel;
+package com.sos.scheduler.engine.kernel.scheduler;
 
 import com.sos.scheduler.engine.kernel.event.Message;
 

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.main;
 
+import com.sos.scheduler.engine.kernel.CppScheduler;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 class Main {

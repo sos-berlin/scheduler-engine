@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 
 @ForCpp public final class VariableSet implements Sister, UnmodifiableVariableSet {
     private final Variable_setC cppProxy;

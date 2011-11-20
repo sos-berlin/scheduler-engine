@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.folder;
 
-import com.sos.scheduler.engine.kernel.Subsystem;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC;
 
 public class FolderSubsystem implements Subsystem {

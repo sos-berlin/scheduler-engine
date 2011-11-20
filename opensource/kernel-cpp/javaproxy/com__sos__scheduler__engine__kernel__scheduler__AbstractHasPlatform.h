@@ -2,18 +2,18 @@
 
 #include "_precompiled.h"
 
-#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ABSTRACTHASPLATFORM_H_
-#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ABSTRACTHASPLATFORM_H_
+#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_SCHEDULER_ABSTRACTHASPLATFORM_H_
+#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_SCHEDULER_ABSTRACTHASPLATFORM_H_
 
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace log { struct PrefixLog; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Platform; }}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace scheduler { struct Platform; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace scheduler { 
 
 
 struct AbstractHasPlatform__class;
@@ -48,7 +48,7 @@ struct AbstractHasPlatform : ::zschimmer::javabridge::proxy_jobject< AbstractHas
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::Platform getPlatform();
+    ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform getPlatform();
     ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog log();
 
     ::zschimmer::javabridge::Class* java_object_class_();
@@ -65,6 +65,6 @@ struct AbstractHasPlatform : ::zschimmer::javabridge::proxy_jobject< AbstractHas
 };
 
 
-}}}}}}
+}}}}}}}
 
 #endif

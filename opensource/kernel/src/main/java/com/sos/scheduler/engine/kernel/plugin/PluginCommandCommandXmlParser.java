@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 import com.sos.scheduler.engine.kernel.command.SingleCommandXmlParser;
-import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.command.Command;
 import java.util.Collection;
 import org.w3c.dom.Element;

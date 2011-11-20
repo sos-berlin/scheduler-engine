@@ -2,8 +2,6 @@
 #define __SCHEDULER_JAVAPROXY_H_
 
 #include "../javaproxy/com__sos__scheduler__engine__eventbus__AbstractEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__Platform.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__Scheduler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__JobC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.h"
@@ -18,23 +16,25 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__Job.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__main__SchedulerControllerBridge.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderId.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderState.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__scheduler__Platform.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__util__StringValue.h"
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
+#include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/java__util__ArrayList.h"
 
 namespace sos {
 namespace scheduler {
 
-typedef ::javaproxy::com::sos::scheduler::engine::kernel::Platform PlatformJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler SchedulerJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform PlatformJ;
 typedef ::javaproxy::java::lang::String StringJ;
 
 

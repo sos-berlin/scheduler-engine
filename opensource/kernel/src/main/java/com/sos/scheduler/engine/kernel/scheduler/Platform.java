@@ -1,5 +1,6 @@
-package com.sos.scheduler.engine.kernel;
+package com.sos.scheduler.engine.kernel.scheduler;
 
+import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.command;
 
-import com.sos.scheduler.engine.kernel.Subsystem;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 
 
 public class CommandSubsystem implements Subsystem {

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.folder;
 
-import com.sos.scheduler.engine.kernel.SchedulerObject;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerObject;
 import com.sos.scheduler.engine.kernel.event.ObjectEvent;
 
 public abstract class FolderEvent extends ObjectEvent {

@@ -4,7 +4,7 @@ import static com.sos.scheduler.engine.kernel.util.Util.stringOrException;
 
 import com.sos.scheduler.engine.eventbus.AbstractEvent;
 import com.sos.scheduler.engine.eventbus.HotEvent;
-import com.sos.scheduler.engine.kernel.SchedulerObject;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerObject;
 
 public abstract class ObjectEvent extends AbstractEvent implements HotEvent {
     /** Nur gültig während des Events. 

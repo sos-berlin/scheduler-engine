@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.order.jobchain;
 
-import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
-import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.NodeC;
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC;

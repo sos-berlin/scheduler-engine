@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.main;
+package com.sos.scheduler.engine.kernel;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -7,8 +7,9 @@ import java.io.File;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
+import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 
-/** Schnittstelle zum Start des Schedulers über JNI. */
+/** Schnittstelle zum Start des C++-Teils des JobScheduler über JNI. */
 public class CppScheduler {
     private static final Logger logger = Logger.getLogger(CppScheduler.class);
 

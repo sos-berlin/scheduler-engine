@@ -2,11 +2,11 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__main__SchedulerControllerBridge.h"
+#include "com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace main { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace main { 
 
 struct SchedulerControllerBridge__class : ::zschimmer::javabridge::Class
 {
@@ -17,7 +17,7 @@ struct SchedulerControllerBridge__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< SchedulerControllerBridge__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< SchedulerControllerBridge__class > SchedulerControllerBridge__class::class_factory ("com.sos.scheduler.engine.kernel.main.SchedulerControllerBridge");
+const ::zschimmer::javabridge::class_factory< SchedulerControllerBridge__class > SchedulerControllerBridge__class::class_factory ("com.sos.scheduler.engine.main.SchedulerControllerBridge");
 
 SchedulerControllerBridge__class::SchedulerControllerBridge__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
@@ -52,4 +52,4 @@ void SchedulerControllerBridge::Lazy_class::initialize() {
 }
 
 
-}}}}}}}
+}}}}}}

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.command;
 
-import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.SimpleMessage;
 
 

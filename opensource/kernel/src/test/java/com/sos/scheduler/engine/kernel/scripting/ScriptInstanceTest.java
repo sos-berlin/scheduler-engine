@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.scripting;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import com.sos.scheduler.engine.kernel.LogMock;
+import com.sos.scheduler.engine.kernel.scheduler.LogMock;
 
 /**
 * \class ModuleInstanceTest 
