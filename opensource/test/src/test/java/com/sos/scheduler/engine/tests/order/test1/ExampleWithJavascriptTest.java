@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.order.test1;
 
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.main.event.EventThread;
+import com.sos.scheduler.engine.main.event.EventThread;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.test.JavascriptEventPredicateEngine;
 import com.sos.scheduler.engine.test.SchedulerTest;

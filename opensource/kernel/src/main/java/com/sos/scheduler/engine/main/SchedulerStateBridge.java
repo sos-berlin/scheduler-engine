@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.kernel.main;
+package com.sos.scheduler.engine.main;
 
-import static com.sos.scheduler.engine.kernel.main.SchedulerState.closed;
-import static com.sos.scheduler.engine.kernel.main.SchedulerState.started;
-import static com.sos.scheduler.engine.kernel.main.SchedulerState.starting;
+import static com.sos.scheduler.engine.main.SchedulerState.closed;
+import static com.sos.scheduler.engine.main.SchedulerState.started;
+import static com.sos.scheduler.engine.main.SchedulerState.starting;
 
 import java.util.concurrent.atomic.AtomicReference;
 

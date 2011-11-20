@@ -9,8 +9,8 @@ import org.springframework.core.io.Resource;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.kernel.main.CppBinaries;
-import com.sos.scheduler.engine.kernel.main.CppBinary;
+import com.sos.scheduler.engine.main.CppBinaries;
+import com.sos.scheduler.engine.main.CppBinary;
 
 /** Ablage der Scheduler-Binärdateien, die nötigenfalls aus der kernelcpp.jar entladen werden. */
 public final class ResourceCppBinaries implements CppBinaries {

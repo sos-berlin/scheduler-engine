@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main;
+package com.sos.scheduler.engine.main;
 
 import com.sos.scheduler.engine.kernel.util.Time;
 

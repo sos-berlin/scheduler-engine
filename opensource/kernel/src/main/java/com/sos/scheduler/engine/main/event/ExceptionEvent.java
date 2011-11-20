@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main.event;
+package com.sos.scheduler.engine.main.event;
 
 public class ExceptionEvent extends MainEvent {
     private final Throwable throwable;

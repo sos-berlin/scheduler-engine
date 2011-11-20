@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main.event;
+package com.sos.scheduler.engine.main.event;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventPredicate;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.kernel.SchedulerException;
-import com.sos.scheduler.engine.kernel.main.SchedulerController;
+import com.sos.scheduler.engine.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main.event;
+package com.sos.scheduler.engine.main.event;
 
 import com.sos.scheduler.engine.eventbus.EventPredicate;
 import com.sos.scheduler.engine.kernel.util.Time;

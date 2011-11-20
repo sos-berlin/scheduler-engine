@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main;
+package com.sos.scheduler.engine.main;
 
 /** Die Zustände werden nacheinander, ohne Wiederholung, durchlaufen. */
 public enum SchedulerState {

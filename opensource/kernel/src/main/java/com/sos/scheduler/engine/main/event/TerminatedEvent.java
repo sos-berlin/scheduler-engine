@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main.event;
+package com.sos.scheduler.engine.main.event;
 
 public final class TerminatedEvent extends MainEvent {
     private final int exitCode;

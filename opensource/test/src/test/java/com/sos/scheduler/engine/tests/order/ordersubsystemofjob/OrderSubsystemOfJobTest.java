@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
-import com.sos.scheduler.engine.kernel.main.SchedulerState;
+import com.sos.scheduler.engine.main.SchedulerState;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;

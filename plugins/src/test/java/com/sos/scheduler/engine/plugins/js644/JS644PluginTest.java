@@ -16,7 +16,7 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.job.Job;
-import com.sos.scheduler.engine.kernel.main.SchedulerState;
+import com.sos.scheduler.engine.main.SchedulerState;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;

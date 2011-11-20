@@ -12,8 +12,8 @@ import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.folder.Path;
-import com.sos.scheduler.engine.kernel.main.CppBinaries;
-import com.sos.scheduler.engine.kernel.main.CppBinary;
+import com.sos.scheduler.engine.main.CppBinaries;
+import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 

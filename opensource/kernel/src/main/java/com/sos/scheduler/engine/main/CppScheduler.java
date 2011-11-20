@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main;
+package com.sos.scheduler.engine.main;
 
 import static com.google.common.base.Throwables.propagate;
 

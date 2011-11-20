@@ -7,8 +7,8 @@ import java.io.File;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Preconditions;
-import com.sos.scheduler.engine.kernel.main.CppBinaries;
-import com.sos.scheduler.engine.kernel.main.CppBinary;
+import com.sos.scheduler.engine.main.CppBinaries;
+import com.sos.scheduler.engine.main.CppBinary;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {
@@ -20,7 +20,7 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
 
     KernelCppArtifactBinaries() {
         Preconditions.checkArgument(directory.isDirectory(), "%s does not exist or is not a directory", directory);
-        logger.info("Using JobScheduler binaries in detected artifact directory "+directory);
+        logger.info("Using JobScheduler binaries in detected artifact directory " + directory);
     }
 
     private static File kernelCppDir() {

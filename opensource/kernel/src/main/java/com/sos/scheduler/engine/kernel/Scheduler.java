@@ -36,7 +36,7 @@ import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.kernel.log.LogSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
-import com.sos.scheduler.engine.kernel.main.SchedulerControllerBridge;
+import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;

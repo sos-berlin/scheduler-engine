@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.test.schedulertest;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
+import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** Testet {@link com.sos.scheduler.engine.test.SchedulerTest} */

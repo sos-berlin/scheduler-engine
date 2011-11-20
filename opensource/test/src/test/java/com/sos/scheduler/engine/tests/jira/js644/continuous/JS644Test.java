@@ -15,7 +15,7 @@ import org.junit.rules.TestRule;
 import com.google.common.base.Function;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.folder.Path;
-import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;

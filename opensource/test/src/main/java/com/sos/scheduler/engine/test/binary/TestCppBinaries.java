@@ -14,7 +14,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.kernel.main.CppBinaries;
+import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 
 public final class TestCppBinaries {

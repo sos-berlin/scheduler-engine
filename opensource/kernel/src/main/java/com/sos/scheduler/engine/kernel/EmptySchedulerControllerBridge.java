@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.kernel.main.SchedulerControllerBridge;
+import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 

@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.eventbus.{EventPredicate, Event}
-import com.sos.scheduler.engine.kernel.main.event.EventThread
+import com.sos.scheduler.engine.main.SchedulerController
+import com.sos.scheduler.engine.main.event.EventThread
 import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.kernel.main.SchedulerController
 
 abstract class ScalaEventThread(controller: SchedulerController) extends EventThread(controller) {
     import ScalaEventThread._

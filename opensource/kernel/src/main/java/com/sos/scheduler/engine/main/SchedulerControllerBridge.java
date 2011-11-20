@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.main;
+package com.sos.scheduler.engine.main;
 
 import javax.annotation.Nullable;
 

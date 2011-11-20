@@ -8,8 +8,8 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
-import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
+import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.schedulerevent.SchedulerCloseEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
