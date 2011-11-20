@@ -17,7 +17,11 @@ public class JS782Test extends SchedulerTest {
     @Test public void suspendedOrderMovedToEndStateShouldBeOnBlacklist() throws InterruptedException {
         controller().setTerminateOnError(false);
         controller().startScheduler();
+        doTest();
+        controller().terminateScheduler();
+    }
 
+    private void doTest() {
         scheduler().executeXml("<modify_order job_chain='a' order='testOrder' suspended='true'/>");
         assertTrue("Order should be on blacklist", orderIsOnBlacklist());
 

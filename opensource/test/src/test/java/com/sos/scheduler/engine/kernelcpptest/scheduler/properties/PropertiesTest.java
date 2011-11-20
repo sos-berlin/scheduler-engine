@@ -16,6 +16,7 @@ public class PropertiesTest extends SchedulerTest {
             System.out.println("host=" + scheduler().getHostname());
             System.out.println("host_complete=" + scheduler().getHostnameLong());
 //            fail("Exception expected");
+            controller().terminateScheduler();
         }
         catch (Exception x) {
             if (!nullToEmpty(x.getMessage()).contains("SOS-1300"))

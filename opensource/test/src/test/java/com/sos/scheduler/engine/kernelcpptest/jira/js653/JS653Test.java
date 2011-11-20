@@ -31,10 +31,17 @@ public final class JS653Test extends SchedulerTest {
 
     private final Set<OrderIdAndState> orderStarts = new HashSet<OrderIdAndState>();
 
-    @Test public void test() {
-        controller().runSchedulerAndTerminate(timeout);
+    @Test public void test() throws InterruptedException {
+        controller().startScheduler();
+        waitUntilOrdersAreNotStarted();
+        controller().terminateScheduler();
         if (!orderStarts.equals(expectedOrderStarts))
             fail(differenceMessage());
+    }
+
+    private void waitUntilOrdersAreNotStarted() throws InterruptedException {
+        // Warten bis wir einigermaßen sicher sind, dass Aufträge, die nicht starten sollen, nicht gestartet werden.
+        Thread.sleep(timeout.getMillis());
     }
 
     @EventHandler public void handleEvent(OrderTouchedEvent e) {

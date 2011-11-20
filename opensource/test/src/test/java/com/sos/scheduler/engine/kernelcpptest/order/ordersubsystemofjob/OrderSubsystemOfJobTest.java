@@ -15,8 +15,13 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class OrderSubsystemOfJobTest extends SchedulerTest {
     @Test public void test() throws Exception {
-        controller().startScheduler("-e");
+        controller().startScheduler();
         controller().waitUntilSchedulerState(SchedulerState.active);
+        doTest();
+        controller().terminateScheduler();
+    }
+
+    private void doTest() {
         JobSubsystem jobSubsystem = scheduler().getJobSubsystem();
         OrderSubsystem orderSubsystem = scheduler().getOrderSubsystem();
 

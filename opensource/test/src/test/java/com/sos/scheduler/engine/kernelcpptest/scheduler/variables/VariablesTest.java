@@ -20,5 +20,6 @@ public class VariablesTest extends SchedulerTest {
         assertThat(variables.get("Ä"), equalTo("ä"));
         assertThat(variables.get("Bb"), equalTo("bb"));
         assertThat(variables.get("Ccc"), equalTo("ccc"));
+        controller().terminateScheduler();
     }
 }
