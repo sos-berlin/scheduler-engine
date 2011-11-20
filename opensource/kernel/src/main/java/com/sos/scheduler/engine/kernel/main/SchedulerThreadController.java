@@ -45,8 +45,9 @@ public class SchedulerThreadController implements SchedulerController {
     @Override public final void close() {
         terminateScheduler();
         tryWaitForTermination(Time.eternal);
+        assert !thread.isAlive();
         controllerBridge.close();
-        eventBus.dispatchEvents();
+        eventBus.dispatchEvents();  // Thread-sicher, weil der Scheduler-Thread beendet ist, also selbst kein dispatchEvents() mehr aufrufen kann.
     }
 
     @Override public final Scheduler waitUntilSchedulerIsRunning() {
@@ -98,7 +99,7 @@ public class SchedulerThreadController implements SchedulerController {
             controllerBridge.terminate();
         } catch (Exception x) {
             if (x.toString().contains("Z-JAVA-111"))    // TODO Z-JAVA-111 als eigene Java-Exception zurückgeben
-                logger.warn(x);
+                logger.debug(x);
             else
                 throw propagate(x);
         }
