@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.kernelcpptest.order.endstate
 
 import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.kernelcpptest._
+import com.sos.scheduler.engine.test.ScalaSchedulerTest
 import org.junit._
-
 
 class OrderEndStateTest extends ScalaSchedulerTest {
     private val eventTimeout = Time.of(3)

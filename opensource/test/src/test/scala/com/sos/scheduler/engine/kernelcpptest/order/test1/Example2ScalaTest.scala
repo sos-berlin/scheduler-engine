@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.kernelcpptest.order.test1
 import com.sos.scheduler.engine.kernel.order.OrderState
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent
 import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.kernelcpptest._
 import org.junit._
+import com.sos.scheduler.engine.test.{ScalaEventThread, ScalaSchedulerTest}
 
 // Wie die Java-Klasse Example2Text. scheduler.xml siehe Java-Verzeichnis, dasselbe Paket.
 class Example2ScalaTest extends ScalaSchedulerTest {

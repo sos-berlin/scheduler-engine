@@ -2,18 +2,21 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
 import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.kernelcpptest.ScalaSchedulerTest
-import org.junit._
 import com.sos.scheduler.engine.eventbus.HotEventHandler
+import com.sos.scheduler.engine.test.ScalaSchedulerTest
+import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
+import org.hamcrest.Matchers
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit._
 
 class WatchdogPluginTest extends ScalaSchedulerTest {
     private val schedulerTimeout = Time.of(15)
     private val sleepTime = Time.of(11)
 
     @Test def test() {
-        controller.startScheduler("-e")
+        controller.startScheduler()
         Thread.sleep(schedulerTimeout.getMillis)
-        //TODO SCHEDULER-721 soll gemeldet sein und Plugin soll Warnungen ausgegeben haben.   assertThat(scheduler.log().last(SchedulerLogLevel.warn), Matchers.stringStartsWith("SCHEDULER-721"));
+        assertThat(scheduler.log.lastByLevel(SchedulerLogLevel.warn), Matchers.startsWith("SCHEDULER-721"));
         controller.terminateScheduler()
     }
 

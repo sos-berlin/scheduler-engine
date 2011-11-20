@@ -5,17 +5,17 @@ import java.net._
 import java.nio.charset.Charset
 import org.junit._
 import com.sos.scheduler.engine.cplusplus.scalautil.io.Util._
-import com.sos.scheduler.engine.kernelcpptest.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.ScalaSchedulerTest
 
 final class ShowStateStressTest extends ScalaSchedulerTest {
     import ShowStateStressTest._
     
-    //@Ignore
     @Test def test1() {
         controller.startScheduler("-e", "-log-level=warn")
         closingFinally(new Connection(new InetSocketAddress("localhost", scheduler.getTcpPort))) { connection =>
             1 to 1000 foreach { i => connection.sendAndReceive(emptyCommand) }
         }
+        controller.terminateScheduler()
     }
 }
 

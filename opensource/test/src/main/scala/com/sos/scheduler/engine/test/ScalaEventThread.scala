@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest
+package com.sos.scheduler.engine.test
 
 import com.sos.scheduler.engine.eventbus.{EventPredicate, Event}
 import com.sos.scheduler.engine.kernel.main.event.EventThread

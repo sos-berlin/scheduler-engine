@@ -32,7 +32,7 @@ public class JS644PluginTest extends SchedulerTest {
     private volatile boolean schedulerIsActive = false;
 
     @Test public void test() throws Exception {
-        controller().startScheduler("-e");
+        controller().startScheduler();
         controller().waitUntilSchedulerState(SchedulerState.active);
         schedulerIsActive = true;
         modifyJobFile();
