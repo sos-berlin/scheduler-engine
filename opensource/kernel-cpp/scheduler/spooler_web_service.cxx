@@ -294,7 +294,7 @@ bool Web_services::is_request_authorized( http::Request* http_request )
 
     if( it->second->_password_md5 != password_md5 )
     {
-        Z_LOG2( "scheduler", Z_FUNCTION << "  Kennwort für Benutzer '" << user_name << "' stimmt nicht\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  Kennwort fï¿½r Benutzer '" << user_name << "' stimmt nicht\n" );
         return false;
     }
 
@@ -565,16 +565,8 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 
         _spooler->_executing_command = false;   // Command_processor() hat es true gesetzt. Trotzdem bei Datenbank-Fehler auf DB warten
 
-        command_processor.set_validate( false );            // <content> enthält unbekannte XML-Elemente <task> und <order>
+        command_processor.set_validate( false );            // <content> enthï¿½lt unbekannte XML-Elemente <task> und <order>
         command_processor.execute_2( command_document );
-        
-        /*
-        ptr<Order> order = new Order( _spooler );
-
-        order->set_state( forwarding_job_chain_forward_state );
-        order->set_payload( Variant( transformed_payload_dom.xml() ) );
-        order->place_in_job_chain( _spooler->job_chain( forwarding_job_chain_name ) );
-        */
     }
     catch( exception& x )
     {
@@ -661,7 +653,7 @@ void Web_service_operation::begin()
         ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
 
         order->inhibit_distribution();
-        order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt
+        order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausfï¿½hrt
         order->place_in_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_path ) );
         _http_operation->link_order( order );                // ~Order ruft Http_operation::unlink_order()
         
@@ -670,7 +662,7 @@ void Web_service_operation::begin()
         if( _web_service->_timeout != INT_MAX )
         {
             _http_operation->set_gmtimeout( (double)( ::time(NULL) + 0.999 + _web_service->_timeout ) );
-            // Auftrag ruft vor der Entjungferung http::Operation::on_order_processing() auf, der den Timeout zurücksetzt
+            // Auftrag ruft vor der Entjungferung http::Operation::on_order_processing() auf, der den Timeout zurï¿½cksetzt
         }
     }
 }
@@ -761,8 +753,8 @@ STDMETHODIMP Web_service_operation::Execute_stylesheets()
 
 void Web_service_operation::execute_stylesheets()
 {
-    // Erstmal nicht: Die Operation wird im Task-Prozess ausgeführt.
-    // Erstmal nicht: Scheduler-Methoden, die im Hauptprozess ausgeführt werden sollen, nur über Invoke() aufrufen!
+    // Erstmal nicht: Die Operation wird im Task-Prozess ausgefï¿½hrt.
+    // Erstmal nicht: Scheduler-Methoden, die im Hauptprozess ausgefï¿½hrt werden sollen, nur ï¿½ber Invoke() aufrufen!
 
 
     xml::Document_ptr request_document;
@@ -795,7 +787,7 @@ void Web_service_operation::execute_stylesheets()
 
 
     xml::Element_ptr service_request_element = request_document.createElement( "service_request" );
-    service_request_element.appendChild( _web_service->dom_element( request_document ) );           // <web_service> anhängen
+    service_request_element.appendChild( _web_service->dom_element( request_document ) );           // <web_service> anhï¿½ngen
     service_request_element.setAttribute( "url", http_request()->url() );
 
     xml::Element_ptr content_element = service_request_element.append_new_element( "content" );
@@ -803,11 +795,11 @@ void Web_service_operation::execute_stylesheets()
     //if( is_xml )
     {
         xml::Element_ptr data_element = request_document.replaceChild( service_request_element, request_document.documentElement() );
-        content_element.appendChild( data_element );      // request_data anhängen
+        content_element.appendChild( data_element );      // request_data anhï¿½ngen
     }
     //else
     //{
-    //    content_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhängen (nicht spezifiziert)
+    //    content_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhï¿½ngen (nicht spezifiziert)
     //}
 
 
@@ -834,7 +826,7 @@ void Web_service_operation::execute_stylesheets()
 
 
 
-    // KOMMANDO AUSFÜHREN
+    // KOMMANDO AUSFï¿½HREN
 
     xml::Document_ptr response_document;
 
