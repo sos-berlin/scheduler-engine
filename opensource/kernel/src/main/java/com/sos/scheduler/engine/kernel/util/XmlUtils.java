@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.util;
 
-import com.sos.scheduler.engine.kernel.SchedulerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -82,7 +81,7 @@ public final class XmlUtils {
         String value = xmlElement.getAttribute(attributeName);
         Boolean result = booleanOrNullOf(value, defaultValue);
         if (result == null)
-            throw new SchedulerException("Ungültiger Boolescher Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">");
+            throw new RuntimeException("Ungültiger Boolescher Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">");
         return result;
     }
 
@@ -103,7 +102,7 @@ public final class XmlUtils {
         try {
             return Integer.parseInt( value );
         } catch (NumberFormatException x) {
-            throw new SchedulerException("Ungültiger numerischer Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">", x);
+            throw new RuntimeException("Ungültiger numerischer Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">", x);
         }
     }
 
