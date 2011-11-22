@@ -63,6 +63,7 @@ struct Process_module_instance : Module_instance
     void                        close_handle                ();
     string                      program_path                ();
     std::vector<string>         get_string_args             ();
+    string                      get_parameter_name          (const string suffix);
 
 
     Fill_zero                  _zero_;

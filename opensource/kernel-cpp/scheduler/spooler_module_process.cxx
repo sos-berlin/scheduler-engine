@@ -886,6 +886,11 @@ void Process_module_instance::end__end()
 
 void Process_module_instance::fill_process_environment_with_params()
 {
+    // the default prefix for scheduler environment variables is SCHEDULER_PARAM_, but it can overwrite with the environment variable
+    // ENVIRONMENT_VARIABLE_NAME_PREFIX. Use ENVIRONMENT_VARIABLE_NAME_PREFIX=*NONE to use your scheduler environment variables without prefix.
+    string environment_variable_name_prefix = _spooler->get_env("SCHEDULER_VARIABLE_NAME_PREFIX","SCHEDULER_PARAM_");
+    if (environment_variable_name_prefix == "*NONE") environment_variable_name_prefix = "";
+
     ptr<Com_variable_set> task_params;
     ptr<Com_variable_set> order_params;
 
@@ -915,9 +920,28 @@ void Process_module_instance::fill_process_environment_with_params()
 
     if( order_params )
     {
-        Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )
-            _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
+        Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v ) {
+           string environment_variable_name_suffix = get_parameter_name(v->second->name());
+           if (environment_variable_name_suffix != "")
+              _process_environment->set_var( ucase( environment_variable_name_prefix + environment_variable_name_suffix ), v->second->string_value() );
+        }
     }
+}
+
+//------------------------------------Process_module_instance::fill_process_environment_with_params
+
+string Process_module_instance::get_parameter_name(const string suffix)
+{
+   const string state_parameter_delimiter = "/";
+   string result = suffix;
+   if ( _task ) {
+      if (_task->order()) {
+         string searchFor = _task->order()->string_state() + state_parameter_delimiter;
+         if (result.find(searchFor,0) != string::npos) result.replace(0, searchFor.length(), "");
+         if (result.find(state_parameter_delimiter,0) != string::npos) result = "";
+      }
+   }
+   return result;
 }
 
 //----------------------------------------------Process_module_instance::transfer_exit_code_to_task

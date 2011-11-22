@@ -3436,6 +3436,19 @@ void Spooler::assign_stdout()
     #endif
 }
 
+//------------------------------------------------------------------------------------Spooler::get_env
+
+string Spooler::get_env(const string name, const string default)
+{
+   string result = default;
+   char*  env = getenv(name.c_str());
+    if (env != NULL) {
+       string temp = env;
+       if (temp != "") result = temp;
+    }
+    return result;
+}
+
 //------------------------------------------------------------------------------------start_process
 #ifdef Z_WINDOWS
 
