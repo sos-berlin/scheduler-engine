@@ -83,8 +83,9 @@ to run without maven integration.
   		<include name="scheduler.xsd"/>
   	</fileset>
   	
+  	<!-- it points to the jar built in the artifact jar -->
   	<fileset dir="${source.dir}" id="files.lib">
-  		<include name="com.sos.scheduler.engine.jar*"/>
+  		<include name="jar-${setup.version}.jar"/>
   	</fileset>
   	
   	<fileset dir="${source.dir}" id="files.jar">
@@ -119,7 +120,7 @@ to run without maven integration.
 		</copy>
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="files.lib" />
-		  <mapper type="regexp" from="^com.sos.scheduler.engine.jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
+		  <mapper type="regexp" from="^jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
 		</copy>
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="files.jar" />

@@ -7,5 +7,5 @@
 # in a windows environment you can use 'bash -c "./prepare-snapshot-setup.sh"' if cygwin is installed.
 # ---------------------------------------------------------------------------------------------------------------
 mvn clean
-mvn install -Pprepare-snapshot -Dplatform=windows-x86
-mvn install -Pprepare-snapshot -Dplatform=linux-i386
+mvn install -Pprepare-snapshot -Dengine.platform=windows-x86
+mvn install -Pprepare-snapshot -Dengine.platform=linux-i386

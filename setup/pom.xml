@@ -28,14 +28,14 @@ call prepare-setup.sh <version> to use this pom
       <profile>
         <id>prepare</id>
         <properties>
-          <setup.version>${version}</setup.version>
-          <setup.platform>${platform}</setup.platform>
+          <setup.version>${engine.version}</setup.version>
+          <setup.platform>${engine.platform}</setup.platform>
         </properties>
       </profile>
       <profile>
         <id>prepare-snapshot</id>
         <properties>
-          <setup.platform>${platform}</setup.platform>
+          <setup.platform>${engine.platform}</setup.platform>
         </properties>
       </profile>
     </profiles>
@@ -73,20 +73,6 @@ call prepare-setup.sh <version> to use this pom
                     <phase>install</phase>
                     <goals>
                         <goal>copy</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <configuration>
-                <includeScope>runtime</includeScope>
-            </configuration>
-            <executions>
-                <execution>
-                    <phase>install</phase>
-                    <goals>
                         <goal>copy-dependencies</goal>
                     </goals>
                 </execution>
@@ -125,7 +111,7 @@ call prepare-setup.sh <version> to use this pom
         </dependency>
         
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>cppjava.runtime</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
