@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+This file is for deploying the sos jar files needed for the build of the JS kernel to archiva. The pattern of the files to be deployed has to specify
+in the fileset files.jar.
+
+To specify the version to be deployed the property jar.version has to be set, e.g.
+ant -f deploy-sos-jars.xml -Djar.version=1245 release      ==> to deploy a given Version to sos-release
+ant -f deploy-sos-jars.xml                                 ==> to deploy the last Version (from the actual day) to snapshots
+
+The jar to be deployed expected in J:\E\java\lib_release_jar (see property jar.folder)
+-->
+<project name="com.sos.scheduler.setup.deploy" basedir="." default="snapshot">
+
+	<!-- <property file="build.properties" /> -->
+	
+  <property environment="env"/>
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${env.USERPROFILE}/.m2/repository/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
+	
+	<target name="release" 
+	        depends="-init, -preparejars"
+	        description="deploy the necessary jar files for the JS kernel to the maven release repository">
+
+    <foreach target="-mavenDeploy" param="fullname">
+      <path>
+        <fileset dir="${work.dir}" casesensitive="no" />
+      </path>
+    	<param name="repo.url"     value="${repo.url.release}" />
+  	  <param name="repo.id"      value="${repo.id.release}" />
+  	  <param name="repo.version" value="${repo.version.release}" />
+    </foreach>
+	  <echo message="DONE !" />
+
+	</target>
+
+	<target name="snapshot" 
+	        depends="-setVersion, -init, -preparejars"
+	        description="deploy the necessary jar files for the JS kernel to the maven snapshot repository">
+
+	  <echo message="repo.url.snapshot=${repo.url.snapshot}" />
+	  <echo message="repo.id.snapshot=${repo.id.snapshot}" />
+    <foreach target="-mavenDeploy" param="fullname">
+      <path>
+        <fileset dir="${work.dir}" casesensitive="no" />
+      </path>
+    	<param name="repo.url"     value="${repo.url.snapshot}" />
+  	  <param name="repo.id"      value="${repo.id.snapshot}" />
+  	  <param name="repo.version" value="${repo.version.snapshot}" />
+    </foreach>
+	  <echo message="DONE !" />
+
+	</target>
+	
+	<target name="-init" description="initialize the properties">
+  	<property name="jar.version" value="(unknown)" />         <!-- if not set via -D or -setVersion -->
+  	<property name="jar.folder"  value="J:\E\java\lib_release_jar\${jar.version}" />
+  	<property name="work.dir"    value="./target/lib_release_jar" />
+	  <echo message="jar.folder=${jar.folder}" />
+	  <echo message="jar.version=${jar.version}" />
+
+    <!-- properties for snapshot versions -->
+  	<!-- <property name="repo.version.snapshot" value="${developmentVersion}" />  -->    <!-- got from build.properties -->
+  	<property name="repo.version.snapshot" value="snapshot" /> 
+  	<property name="repo.url.snapshot"     value="http://archiva.sos:8080/archiva/repository/snapshots" />
+  	<property name="repo.id.snapshot"      value="snapshots" />
+	  <echo message="repo.url.snapshot=${repo.url.snapshot}" />
+	  <echo message="repo.id.snapshot=${repo.id.snapshot}" />
+  
+    <!-- properties for snapshot versions -->
+  	<property name="repo.version.release"  value="${jar.version}" />            <!-- got from parameter -Djar.version or default -->
+  	<property name="repo.url.release"      value="http://archiva.sos:8080/archiva/repository/sos-release" />
+  	<property name="repo.id.release"       value="sos-release" />
+	  <echo message="repo.url.release=${repo.url.release}" />
+	  <echo message="repo.id.release=${repo.id.release}" />
+
+    <!-- the jar files to be deployed -->
+  	<fileset dir="${jar.folder}" id="files.jar">
+  		<include name="com.sos.JSHelper*.jar"/>
+  		<include name="com.sos.JobSchedulerLocalization*.jar"/>
+  		<include name="com.sos.SOSJobSchedulerModel*.jar"/>
+  		<include name="com.sos.VirtualFileSystem*.jar"/>
+  		<include name="com.sos.util*.jar"/>
+  		<include name="com.sos.mail*.jar"/>
+  	</fileset>
+	</target>
+	
+	<target name="-preparejars" description="get the jar files from the net drive">
+	  <delete dir="${work.dir}" />
+		<copy todir="${work.dir}">
+			<fileset refid="files.jar" />
+		  <mapper type="regexp" from="^(.*-[0-9]*)-[0-9]*\.jar$" to="\1.jar"/>
+		</copy>
+	</target>
+
+	<target name="-mavenDeploy" description="deploy a jar to maven repository">
+      <propertyregex property="filename"   input="${fullname}" regexp=".*(\\|/)(.*)$" select="\2" casesensitive="false" />	
+      <propertyregex property="packaging"  input="${filename}" regexp="^.*\.(.*)$" select="\1" casesensitive="false" />	
+      <propertyregex property="groupid"    input="${filename}" regexp="^(.*)\.[^\.]*-[0-9\.]*-[0-9]*\..*$" select="\1" casesensitive="false" />	
+      <propertyregex property="artifactid" input="${filename}" regexp="^(.*\.[^\.]*)-[0-9\.]*-[0-9]*\..*$" select="\1" casesensitive="false" />	
+      <echo message="url: ${repo.url}" />
+      <echo message="id: ${repo.id}" />
+      <echo message="filename: ${filename}" />
+      <echo message="groupid: ${groupid}" />
+      <echo message="artifactid: ${artifactid}" />
+      <echo message="packaging: ${packaging}" />
+      <echo message="version: ${repo.version}" />
+      <exec executable="mvn.bat" dir="${basedir}">
+  			<arg value="deploy:deploy-file" />
+  			<arg value="-Durl=${repo.url}" />
+  			<arg value="-DrepositoryId=${repo.id}" />
+  			<arg value="-Dfile=${fullname}" />
+  			<arg value="-DgroupId=${groupid}" />
+  			<arg value="-DartifactId=${artifactid}" />
+  			<arg value="-Dversion=${repo.version}" />
+  			<arg value="-Dpackaging=${packaging}" />
+  			<arg value="-DuniqueVersion=false" />
+  			<arg value="-DupdateReleaseInfo=true" />
+  		</exec>
+	</target>
+	
+	<!-- The release version are tagged with a timestamp consisting of yddd (y=year, ddd=day in year)
+	Here we are getting the Version string from the previous day
+	-->
+	<target name="-setVersion" 
+		description="get the version number"
+	>
+		<tstamp>
+			<format property="timestamp.work" pattern="yD" locale="de,DE" />
+		</tstamp>
+		<propertyregex property="jar.version.1"
+		              input="${timestamp.work}"
+		              regexp=".(.*)"
+		              replace="\1"
+					  global="true"
+		              casesensitive="false" />
+    <var name="op1" value="${jar.version.1}"/>
+    <var name="op2" value="1"/>
+    <var name="op" value="-"/>
+    <math result="jar.version" operand1="${op1}" operation="${op}" operand2="${op2}" datatype="int"/>
+		<!--
+    -->
+  </target>
+
+</project>
