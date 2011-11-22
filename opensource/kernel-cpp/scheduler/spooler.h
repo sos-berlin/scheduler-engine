@@ -443,7 +443,7 @@ struct Spooler : Object,
     void                        log_show_state              ( Prefix_log* log = NULL );
     int                         launch                      ( int argc, char** argv, const string& params );
     void                        assign_stdout               ();
-    static string               get_env                     (const string name, const string default);
+    static string               get_env                     (const string name, const string default_value);
 
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 

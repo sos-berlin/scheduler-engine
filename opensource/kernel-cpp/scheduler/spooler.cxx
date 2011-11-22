@@ -3438,9 +3438,9 @@ void Spooler::assign_stdout()
 
 //------------------------------------------------------------------------------------Spooler::get_env
 
-string Spooler::get_env(const string name, const string default)
+string Spooler::get_env(const string name, const string default_value)
 {
-   string result = default;
+   string result = default_value;
    char*  env = getenv(name.c_str());
     if (env != NULL) {
        string temp = env;
