@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.util.Time;
 
 public class SimpleEventTest extends SchedulerTest {
 
-    private static final Time schedulerTimeout = Time.of(10);
+    private static final Time schedulerTimeout = Time.of(20);
     private static Logger logger;
     
     @BeforeClass
