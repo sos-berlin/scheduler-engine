@@ -89,6 +89,13 @@
         </dependency>
 
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>kernel-cpp</artifactId>
+            <version>${project.version}</version>
+            <classifier>${osArch}-test</classifier>
+        </dependency>
+
+        <dependency>
             <groupId>com.sos</groupId>
             <artifactId>com.sos.SOSJobSchedulerModel</artifactId>
             <version>${sos.jsobjects.version}</version>
