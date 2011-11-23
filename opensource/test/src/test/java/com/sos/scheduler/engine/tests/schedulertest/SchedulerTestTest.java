@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.test.schedulertest;
+package com.sos.scheduler.engine.tests.schedulertest;
 
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
