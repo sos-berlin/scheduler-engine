@@ -54,16 +54,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.VirtualFileSystem</artifactId>
-            <version>${sos.jars.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.JobSchedulerLocalization</artifactId>
-            <version>${sos.jars.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-core</artifactId>
             <version>5.5.0</version>
