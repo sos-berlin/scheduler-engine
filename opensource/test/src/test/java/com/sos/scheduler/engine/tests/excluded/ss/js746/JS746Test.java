@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.js746;
+package com.sos.scheduler.engine.tests.excluded.ss.js746;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
