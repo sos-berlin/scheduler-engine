@@ -168,18 +168,18 @@
 
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <configuration>
-                    <tasks>
-                        <ant antfile="prepare_build.xml" target="all">
-                           <property name="settings.localRepository" value="${settings.localRepository}" />
-                           <property name="platform" value="${osArch}" />
-                        </ant>
-                    </tasks>
-                </configuration>
                 <executions>
                     <execution>
                         <id>prepare</id>
                         <phase>generate-sources</phase>
+		                <configuration>
+		                    <target>
+		                        <ant antfile="prepare_build.xml" target="all">
+		                           <property name="settings.localRepository" value="${settings.localRepository}" />
+		                           <property name="platform" value="${osArch}" />
+		                        </ant>
+		                    </target>
+		                </configuration>
                         <goals>
                             <goal>run</goal>
                         </goals>

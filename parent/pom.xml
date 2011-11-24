@@ -427,7 +427,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.1</version>
+                    <version>1.7</version>
                     <!-- Ant-Contrib for Special Ant Tasks (IF) -->
                     <dependencies>
                         <dependency>
@@ -440,11 +440,6 @@
                                     <artifactId>ant</artifactId>
                                 </exclusion>
                             </exclusions>
-                        </dependency>
-                        <dependency>
-                            <groupId>ant</groupId>
-                            <artifactId>ant-nodeps</artifactId>
-                            <version>1.6.5</version>
                         </dependency>
                     </dependencies>
                 </plugin>
