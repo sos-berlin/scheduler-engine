@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.ss.js606.individual;
+package com.sos.scheduler.engine.tests.jira.js606.individual;
 
 import java.io.IOException;
 
@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.OSValidator;
-import com.sos.scheduler.engine.tests.excluded.ss.js606.JS606Base;
+import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
 
 public class JS606IndividualTest extends JS606Base {
 

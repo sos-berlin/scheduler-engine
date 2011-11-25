@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.ss.js606.empty;
+package com.sos.scheduler.engine.tests.jira.js606.empty;
 
 import java.io.IOException;
 
@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.OSValidator;
-import com.sos.scheduler.engine.tests.excluded.ss.js606.JS606Base;
+import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
 
 public class JS606EmptyTest extends JS606Base {
 

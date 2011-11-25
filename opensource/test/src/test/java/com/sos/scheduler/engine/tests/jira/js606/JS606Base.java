@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.ss.js606;
+package com.sos.scheduler.engine.tests.jira.js606;
 
 import static org.junit.Assert.assertTrue;
 
