@@ -1,5 +1,6 @@
-package com.sos.scheduler.engine.tests.excluded.ss.orderreset;
+package com.sos.scheduler.engine.tests.excluded.ss.scripttest;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.BeforeClass;
@@ -11,20 +12,23 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
-public class OrderResetTest extends SchedulerTest {
+public class JavaXScriptTest extends SchedulerTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(OrderResetTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(JavaXScriptTest.class);
 	
 	private final String jobchain = "chain1";
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        logger.debug("starting test for " + OrderResetTest.class.getName());
+        logger.debug("starting test for " + JavaXScriptTest.class.getName());
 	}
 	
 	@Test
 	public void Test() throws InterruptedException, IOException {
-		controller().startScheduler("-e");
+        logger.debug("starting test for " + JavaXScriptTest.class.getName());
+		String logfilename = "src/test/java/" + JavaXScriptTest.class.getPackage().getName().replace(".", "/") + "/scheduler.log";
+		File f = new File( logfilename );
+		controller().startScheduler("-e","-log=" + f.getAbsolutePath());
 		startOrder(jobchain);
 	}
 	

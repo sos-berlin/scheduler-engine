@@ -1,0 +1,639 @@
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (23819  +23819 bytes) 
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (23819      +0 bytes) ----------------------Fri Nov 25 16:37:32 2011
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (23883     +64 bytes) Aufruf: (unknown)  
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (23851     -32 bytes) host=MOBILE-2, user=schaedi, pid=3400
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (23867     +16 bytes) Microsoft Windows 6.1, Service Pack 1, Build 7601
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (23883     +16 bytes) GetCommandLine(): "C:\Program Files\Java\jdk1.6.0_18\bin\javaw.exe" -Dfile.encoding=UTF-8 -classpath "C:\scheduler\scheduler.src.devel\engine\opensource\test\target\test-classes;C:\scheduler\scheduler.src.devel\engine\opensource\test\target\classes;C:\scheduler\scheduler.src.devel\engine\opensource\kernel\target\classes;C:\Users\schaedi\.m2\repository\com\sos\com.sos.util\1325\com.sos.util-1325.jar;C:\Users\schaedi\.m2\repository\com\sos\com.sos.JSHelper\1325\com.sos.JSHelper-1325.jar;C:\Users\schaedi\.m2\repository\com\sos\scheduler\engine\cppjava.runtime\1.3.13-beta-2a-SNAPSHOT\cppjava.runtime-1.3.13-beta-2a-SNAPSHOT.jar;C:\Users\schaedi\.m2\repository\commons-io\commons-io\1.4\commons-io-1.4.jar;C:\Users\schaedi\.m2\repository\org\hibernate\hibernate-entitymanager\3.5.1-Final\hibernate-entitymanager-3.5.1-Final.jar;C:\Users\schaedi\.m2\repository\org\hibernate\hibernate-core\3.5.1-Final\hibernate-core-3.5.1-Final.jar;C:\Users\schaedi\.m2\repository\antlr\antlr\2.7.6\antlr-2.7.6.jar;C:\Users\schaedi\.m2\repository\commons-collections\commons-collections\3.1\commons-collections-3.1.jar;C:\Users\schaedi\.m2\repository\dom4j\dom4j\1.6.1\dom4j-1.6.1.jar;C:\Users\schaedi\.m2\repository\javax\transaction\jta\1.1\jta-1.1.jar;C:\Users\schaedi\.m2\repository\org\hibernate\hibernate-annotations\3.5.1-Final\hibernate-annotations-3.5.1-Final.jar;C:\Users\schaedi\.m2\repository\org\hibernate\hibernate-commons-annotations\3.2.0.Final\hibernate-commons-annotations-3.2.0.Final.jar;C:\Users\schaedi\.m2\repository\cglib\cglib\2.2\cglib-2.2.jar;C:\Users\schaedi\.m2\repository\asm\asm\3.1\asm-3.1.jar;C:\Users\schaedi\.m2\repository\javassist\javassist\3.9.0.GA\javassist-3.9.0.GA.jar;C:\Users\schaedi\.m2\repository\org\hibernate\javax\persistence\hibernate-jpa-2.0-api\1.0.0.Final\hibernate-jpa-2.0-api-1.0.0.Final.jar;C:\Users\schaedi\.m2\repository\org\eclipse\persistence\javax.persistence\2.0.3\javax.persistence-2.0.3.jar;C:\Users\schaedi\.m2\repository\javax\mail\mail\1.4.3\mail-1.4.3.jar;C:\Users\schaedi\.m2\repository\javax\activation\activation\1.1\activation-1.1.jar;C:\Users\schaedi\.m2\repository\org\jdom\jdom\1.1\jdom-1.1.jar;C:\Users\schaedi\.m2\repository\xerces\xercesImpl\2.9.1\xercesImpl-2.9.1.jar;C:\Users\schaedi\.m2\repository\xml-apis\xml-apis\1.3.04\xml-apis-1.3.04.jar;C:\Users\schaedi\.m2\repository\com\google\inject\guice\3.0\guice-3.0.jar;C:\Users\schaedi\.m2\repository\javax\inject\javax.inject\1\javax.inject-1.jar;C:\Users\schaedi\.m2\repository\aopalliance\aopalliance\1.0\aopalliance-1.0.jar;C:\Users\schaedi\.m2\repository\org\springframework\spring-core\3.0.5.RELEASE\spring-core-3.0.5.RELEASE.jar;C:\Users\schaedi\.m2\repository\org\springframework\spring-asm\3.0.5.RELEASE\spring-asm-3.0.5.RELEASE.jar;C:\Users\schaedi\.m2\repository\commons-logging\commons-logging\1.1.1\commons-logging-1.1.1.jar;C:\Users\schaedi\.m2\repository\com\sos\scheduler\engine\kernel.cppproxy-generated\1.3.13-beta-2a-SNAPSHOT\kernel.cppproxy-generated-1.3.13-beta-2a-SNAPSHOT.jar;C:\Users\schaedi\.m2\repository\com\sos\scheduler\engine\cppjava.generator\1.3.13-beta-2a-SNAPSHOT\cppjava.generator-1.3.13-beta-2a-SNAPSHOT.jar;C:\Users\schaedi\.m2\repository\jaxen\jaxen\1.1\jaxen-1.1.jar;C:\Users\schaedi\.m2\repository\jdom\jdom\1.0\jdom-1.0.jar;C:\Users\schaedi\.m2\repository\xom\xom\1.0\xom-1.0.jar;C:\Users\schaedi\.m2\repository\xerces\xmlParserAPIs\2.6.2\xmlParserAPIs-2.6.2.jar;C:\Users\schaedi\.m2\repository\xalan\xalan\2.6.0\xalan-2.6.0.jar;C:\Users\schaedi\.m2\repository\com\ibm\icu\icu4j\2.6.1\icu4j-2.6.1.jar;C:\scheduler\scheduler.src.devel\engine\opensource\kernel-cpp\target\test-classes;C:\Users\schaedi\.m2\repository\com\sos\com.sos.SOSJobSchedulerModel\1325\com.sos.SOSJobSchedulerModel-1325.jar;C:\Users\schaedi\.m2\repository\com\sos\com.sos.VirtualFileSystem\1325\com.sos.VirtualFileSystem-1325.jar;C:\Users\schaedi\.m2\repository\com\sos\scheduler\engine\cppjava.scalautil.io\1.3.13-beta-2a-SNAPSHOT\cppjava.scalautil.io-1.3.13-beta-2a-SNAPSHOT.jar;C:\Users\schaedi\.m2\repository\org\scala-lang\scala-library\2.9.1\scala-library-2.9.1.jar;C:\Users\schaedi\.m2\repository\com\google\guava\guava\10.0\guava-10.0.jar;C:\Users\schaedi\.m2\repository\com\google\code\findbugs\jsr305\1.3.9\jsr305-1.3.9.jar;C:\Users\schaedi\.m2\repository\com\h2database\h2\1.2.144\h2-1.2.144.jar;C:\Users\schaedi\.m2\repository\log4j\log4j\1.2.16\log4j-1.2.16.jar;C:\Users\schaedi\.m2\repository\junit\junit-dep\4.10\junit-dep-4.10.jar;C:\Users\schaedi\.m2\repository\org\hamcrest\hamcrest-core\1.2.1\hamcrest-core-1.2.1.jar;C:\Users\schaedi\.m2\repository\org\hamcrest\hamcrest-library\1.2.1\hamcrest-library-1.2.1.jar;C:\Users\schaedi\.m2\repository\org\slf4j\slf4j-log4j12\1.6.1\slf4j-log4j12-1.6.1.jar;C:\Users\schaedi\.m2\repository\org\slf4j\slf4j-api\1.6.1\slf4j-api-1.6.1.jar;C:\Users\schaedi\.m2\repository\joda-time\joda-time\2.0\joda-time-2.0.jar;C:\Users\schaedi\.m2\repository\org\eclipse\jetty\jetty-server\8.0.4.v20111024\jetty-server-8.0.4.v20111024.jar;C:\Users\schaedi\.m2\repository\org\mortbay\jetty\servlet-api\3.0.20100224\servlet-api-3.0.20100224.jar;C:\Users\schaedi\.m2\repository\org\eclipse\jetty\jetty-continuation\8.0.4.v20111024\jetty-continuation-8.0.4.v20111024.jar;C:\Users\schaedi\.m2\repository\org\eclipse\jetty\jetty-http\8.0.4.v20111024\jetty-http-8.0.4.v20111024.jar;C:\Users\schaedi\.m2\repository\org\eclipse\jetty\jetty-io\8.0.4.v20111024\jetty-io-8.0.4.v20111024.jar;C:\Users\schaedi\.m2\repository\org\eclipse\jetty\jetty-util\8.0.4.v20111024\jetty-util-8.0.4.v20111024.jar;C:\Users\schaedi\.m2\repository\org\eclipse\jetty\jetty-client\8.0.4.v20111024\jetty-client-8.0.4.v20111024.jar;/C:/Program Files/eclipse_indigo/configuration/org.eclipse.osgi/bundles/169/1/.cp/;/C:/Program Files/eclipse_indigo/configuration/org.eclipse.osgi/bundles/167/1/.cp/;/C:/Program Files/eclipse_indigo/configuration/org.eclipse.osgi/bundles/168/1/.cp/" org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 53278 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -classNames com.sos.scheduler.engine.tests.excluded.ss.scripttest.JavaXScriptTest
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (24202    +319 bytes) Compiler Microsoft Visual C++ 10.0  (1600), Nov 23 2011
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (24218     +16 bytes) get_temp_path() => C:\Users\schaedi\AppData\Local\Temp\
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (24218      +0 bytes) working directory = C:\scheduler\scheduler.src.devel\engine\opensource\test
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (24234     +16 bytes) Modul C:\scheduler\scheduler.src.devel\engine\opensource\kernel-cpp\bind\scheduler.dll  ProductName=Scheduler ProductVersion=1.3.13-beta-2a-SNAPSHOT (Debug) OriginalFilename=scheduler.exe
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (24101    -133 bytes) Programm C:\Program Files\Java\jdk1.6.0_18\bin\javaw.exe  ProductName=Java(TM) Platform SE 6 U18 ProductVersion=6.0.180.7 OriginalFilename=javaw.exe
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (24149     +48 bytes) 
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (23989    -160 bytes) Hostware 1.6.131. (Debug)
+25 16:37:32.352 javaw    0  3400.1EB4 453.145MB (24021     +32 bytes) javaw.exe    HMODULE=  400000 C:\Program Files\Java\jdk1.6.0_18\bin\javaw.exe  ProductName=Java(TM) Platform SE 6 U18 ProductVersion=6.0.180.7 OriginalFilename=javaw.exe
+25 16:37:32.352 javaw    0  3400.1EB4 453.543MB (24146    +125 bytes) ntdll.dll    HMODULE=77780000 C:\Windows\SYSTEM32\ntdll.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=ntdll.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.316MB (24050     -96 bytes) kernel32.dll HMODULE=76720000 C:\Windows\system32\kernel32.dll          ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=kernel32
+25 16:37:32.352 javaw    0  3400.1EB4 455.316MB (24194    +144 bytes) KERNELBASE.dll HMODULE=75B50000 C:\Windows\system32\KERNELBASE.dll        ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=Kernelbase
+25 16:37:32.352 javaw    0  3400.1EB4 455.766MB (24105     -89 bytes) ADVAPI32.dll HMODULE=75D10000 C:\Windows\system32\ADVAPI32.dll          ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=advapi32.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.766MB (24201     +96 bytes) msvcrt.dll   HMODULE=76340000 C:\Windows\system32\msvcrt.dll            ProductName=Microsoft® Windows® Operating System ProductVersion=7.0.7600.16385 OriginalFilename=msvcrt.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.770MB (24169     -32 bytes) sechost.dll  HMODULE=778F0000 C:\Windows\SYSTEM32\sechost.dll           ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=sechost.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.813MB (24018    -151 bytes) RPCRT4.dll   HMODULE=75FA0000 C:\Windows\system32\RPCRT4.dll            ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=rpcrt4.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.813MB (24178    +160 bytes) USER32.dll   HMODULE=76210000 C:\Windows\system32\USER32.dll            ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7601.17514 OriginalFilename=user32
+25 16:37:32.352 javaw    0  3400.1EB4 455.813MB (24105     -73 bytes) GDI32.dll    HMODULE=75DE0000 C:\Windows\system32\GDI32.dll             ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7601.17514 OriginalFilename=gdi32
+25 16:37:32.352 javaw    0  3400.1EB4 455.813MB (24185     +80 bytes) LPK.dll      HMODULE=778C0000 C:\Windows\system32\LPK.dll               ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=LanguagePack
+25 16:37:32.352 javaw    0  3400.1EB4 455.813MB (24154     -31 bytes) USP10.dll    HMODULE=763F0000 C:\Windows\system32\USP10.dll             ProductName=Microsoft(R) Uniscribe Unicode script processor ProductVersion=1.0626.7601.17514 OriginalFilename=Uniscribe
+25 16:37:32.352 javaw    0  3400.1EB4 455.816MB (24018    -136 bytes) IMM32.DLL    HMODULE=75CF0000 C:\Windows\system32\IMM32.DLL             ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7601.17514 OriginalFilename=imm32
+25 16:37:32.352 javaw    0  3400.1EB4 455.816MB (24162    +144 bytes) MSCTF.dll    HMODULE=76490000 C:\Windows\system32\MSCTF.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=MSCTF.DLL.MUI
+25 16:37:32.352 javaw    0  3400.1EB4 455.816MB (24101     -61 bytes) msvcr71.dll  HMODULE=7C340000 C:\Program Files\Java\jdk1.6.0_18\jre\bin\msvcr71.dll  ProductName=Microsoft® Visual Studio .NET ProductVersion=7.10.3052.4 OriginalFilename=MSVCR71.DLL
+25 16:37:32.352 javaw    0  3400.1EB4 455.816MB (24197     +96 bytes) jvm.dll      HMODULE=6D8B0000 C:\Program Files\Java\jdk1.6.0_18\jre\bin\client\jvm.dll  ProductName=Java(TM) Platform SE 6u18 ProductVersion=6.0.180.7 OriginalFilename=jvm.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.844MB (24130     -67 bytes) WINMM.dll    HMODULE=74920000 C:\Windows\system32\WINMM.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=WINMM.DLL.MUI
+25 16:37:32.352 javaw    0  3400.1EB4 455.848MB (24037     -93 bytes) apphelp.dll  HMODULE=75850000 C:\Windows\system32\apphelp.dll           ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7601.17514 OriginalFilename=Apphelp
+25 16:37:32.352 javaw    0  3400.1EB4 455.848MB (24181    +144 bytes) verify.dll   HMODULE=6D860000 C:\Program Files\Java\jdk1.6.0_18\jre\bin\verify.dll  ProductName=Java(TM) Platform SE 6 U18 ProductVersion=6.0.180.7 OriginalFilename=verify.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.848MB (24085     -96 bytes) java.dll     HMODULE=6D3E0000 C:\Program Files\Java\jdk1.6.0_18\jre\bin\java.dll  ProductName=Java(TM) Platform SE 6 U18 ProductVersion=6.0.180.7 OriginalFilename=java.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.848MB (24181     +96 bytes) hpi.dll      HMODULE=6D340000 C:\Program Files\Java\jdk1.6.0_18\jre\bin\hpi.dll  ProductName=Java(TM) Platform SE 6 U18 ProductVersion=6.0.180.7 OriginalFilename=hpi.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.848MB (24117     -64 bytes) PSAPI.DLL    HMODULE=779A0000 C:\Windows\system32\PSAPI.DLL             ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=PSAPI
+25 16:37:32.352 javaw    0  3400.1EB4 455.848MB (24181     +64 bytes) zip.dll      HMODULE=6D8A0000 C:\Program Files\Java\jdk1.6.0_18\jre\bin\zip.dll  ProductName=Java(TM) Platform SE 6 U18 ProductVersion=6.0.180.7 OriginalFilename=zip.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.848MB (24165     -16 bytes) net.dll      HMODULE=6D6C0000 C:\Program Files\Java\jdk1.6.0_18\jre\bin\net.dll  ProductName=Java(TM) Platform SE 6 U18 ProductVersion=6.0.180.7 OriginalFilename=net.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.867MB (24041    -124 bytes) WS2_32.dll   HMODULE=75CB0000 C:\Windows\system32\WS2_32.dll            ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=ws2_32.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.867MB (24201    +160 bytes) NSI.dll      HMODULE=778D0000 C:\Windows\system32\NSI.dll               ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=nsi.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.887MB (24066    -135 bytes) mswsock.dll  HMODULE=75390000 C:\Windows\system32\mswsock.dll           ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=mswsock.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.887MB (24178    +112 bytes) wship6.dll   HMODULE=75380000 C:\Windows\System32\wship6.dll            ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=wship6.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.891MB (24146     -32 bytes) wshtcpip.dll HMODULE=74DA0000 C:\Windows\System32\wshtcpip.dll          ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=wshtcpip.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.906MB (24018    -128 bytes) scheduler.dll HMODULE=10000000 C:\scheduler\scheduler.src.devel\engine\opensource\kernel-cpp\bind\scheduler.dll  ProductName=Scheduler ProductVersion=1.3.13-beta-2a-SNAPSHOT (Debug) OriginalFilename=scheduler.exe
+25 16:37:32.352 javaw    0  3400.1EB4 455.906MB (24210    +192 bytes) WSOCK32.dll  HMODULE=72EA0000 C:\Windows\system32\WSOCK32.dll           ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=wsock32.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.906MB (24043    -167 bytes) VERSION.dll  HMODULE=74D10000 C:\Windows\system32\VERSION.dll           ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=VERSION.DLL
+25 16:37:32.352 javaw    0  3400.1EB4 455.906MB (24107     +64 bytes) OLEAUT32.dll HMODULE=75C20000 C:\Windows\system32\OLEAUT32.dll           ProductVersion=6.1.7601.17676 
+25 16:37:32.352 javaw    0  3400.1EB4 455.910MB (24137     +30 bytes) ole32.dll    HMODULE=760B0000 C:\Windows\system32\ole32.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=OLE32.DLL.MUI
+25 16:37:32.352 javaw    0  3400.1EB4 455.910MB (24217     +80 bytes) CRYPTBASE.dll HMODULE=758A0000 C:\Windows\system32\CRYPTBASE.dll         ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=cryptbase.dll
+25 16:37:32.352 javaw    0  3400.1EB4 455.918MB (24146     -71 bytes) uxtheme.dll  HMODULE=74350000 C:\Windows\system32\uxtheme.dll           ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=UxTheme.dll.mui
+25 16:37:32.352 javaw    0  3400.1EB4 455.918MB (23923    -223 bytes) SspiCli.dll  HMODULE=75830000 C:\Windows\system32\SspiCli.dll           ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7601.17514 OriginalFilename=sspicli.dll
+25 16:37:32.384 javaw   31  3400.1EB4 455.918MB (23915      -8 bytes) {scheduler} Scheduler 1.3.13-beta-2a-SNAPSHOT (Debug)
+25 16:37:32.384 javaw    0  3400.1EB4 456.230MB (28843   +4928 bytes) sos.ini=C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\sos.ini
+25 16:37:32.408 javaw   32  3400.1EB4 457.918MB (440972 +412129 bytes) {scheduler} [debug3] --------------------------------------------
+25 16:37:32.408 javaw    0  3400.1EB4 457.918MB (440852    -120 bytes) {scheduler} [debug3] SCHEDULER-902  state=loading
+25 16:37:32.433 javaw   15  3400.1EB4 457.918MB (443316   +2464 bytes) {scheduler} [debug3] the home-directory is C:\scheduler\scheduler.src.devel\engine\opensource\test\.\..\..\opensource\kernel-cpp
+25 16:37:32.443 javaw   16  3400.1EB4 460.496MB (442979    -337 bytes) GetComputerNameEx()
+25 16:37:32.444 javaw    0  3400.1EB4 460.496MB (443983   +1004 bytes) open("C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml")  => 4
+25 16:37:32.444 javaw    0  3400.1EB4 460.496MB (444335    +352 bytes) close(4) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444287     -48 bytes) {scheduler} sos::scheduler::Command_processor::execute_config_file
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444271     -16 bytes) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml:
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444271      +0 bytes) <?xml version="1.0"?>
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444223     -48 bytes) <spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:/c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444279     +56 bytes) >
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444247     -32 bytes)     <config/>
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444247      +0 bytes) </spooler>
+25 16:37:32.445 javaw    0  3400.1EB4 460.496MB (444247      +0 bytes) 
+25 16:37:32.452 javaw    0  3400.1EB4 460.496MB (453487   +9240 bytes) {scheduler} Java_subsystem: switch_subsystem_state initialized
+25 16:37:32.493 javaw   47  3400.1EB4 460.496MB (459951   +6464 bytes) .{scheduler} Java_subsystem: state=initialized
+25 16:37:32.566 javaw   78  3400.1EB4 460.496MB (556112  +96161 bytes) {scheduler} Event_subsystem: switch_subsystem_state initialized
+25 16:37:32.566 javaw    0  3400.1EB4 460.496MB (556144     +32 bytes) .{scheduler} Event_subsystem: state=initialized
+25 16:37:32.566 javaw    0  3400.1EB4 460.496MB (556128     -16 bytes) {scheduler} Folder_subsystem: switch_subsystem_state initialized
+25 16:37:32.568 javaw    0  3400.1EB4 460.496MB (582348  +26220 bytes) .{scheduler} Folder_subsystem: state=initialized
+25 16:37:32.568 javaw    0  3400.1EB4 460.496MB (582332     -16 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state initialized
+25 16:37:32.568 javaw    0  3400.1EB4 460.496MB (582348     +16 bytes) .{scheduler} Schedule_subsystem: state=initialized
+25 16:37:32.568 javaw    0  3400.1EB4 460.496MB (582332     -16 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state initialized
+25 16:37:32.570 javaw    0  3400.1EB4 460.496MB (590548   +8216 bytes) .{scheduler} Process_class_subsystem: state=initialized
+25 16:37:32.570 javaw    0  3400.1EB4 460.496MB (590532     -16 bytes) {scheduler} Lock_subsystem: switch_subsystem_state initialized
+25 16:37:32.570 javaw    0  3400.1EB4 460.496MB (590548     +16 bytes) .{scheduler} Lock_subsystem: state=initialized
+25 16:37:32.570 javaw    0  3400.1EB4 460.496MB (590516     -32 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state initialized
+25 16:37:32.579 javaw   15  3400.1EB4 460.496MB (604371  +13855 bytes) .{scheduler} Job_chain_subsystem: state=initialized
+25 16:37:32.580 javaw    0  3400.1EB4 460.496MB (604355     -16 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state initialized
+25 16:37:32.580 javaw    0  3400.1EB4 460.496MB (604371     +16 bytes) .{scheduler} Standing_order_subsystem: state=initialized
+25 16:37:32.580 javaw    0  3400.1EB4 460.496MB (604355     -16 bytes) {scheduler} Http_server: switch_subsystem_state initialized
+25 16:37:32.581 javaw    0  3400.1EB4 460.496MB (604467    +112 bytes) .{scheduler} Http_server: state=initialized
+25 16:37:32.581 javaw    0  3400.1EB4 460.496MB (604451     -16 bytes) {scheduler} Web_services: switch_subsystem_state initialized
+25 16:37:32.582 javaw    0  3400.1EB4 460.496MB (609462   +5011 bytes) .{scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><job visible="no" name="scheduler_service_forwarder" order="yes" title="Web-service forwarder"><script language="java" java_class="sos.spooler.jobs.Web_service_forwarder"/></job>
+25 16:37:32.589 javaw    0  3400.1EB4 460.496MB (623726  +14264 bytes) .{scheduler} [debug9] (Job  ) SCHEDULER-893  Job is 'undefined' now
+25 16:37:32.590 javaw    0  3400.1EB4 460.496MB (623710     -16 bytes) .{scheduler} [debug9] (Job scheduler_service_forwarder*) SCHEDULER-893  Job is 'not_initialized' now
+25 16:37:32.591 javaw    0  3400.1EB4 460.496MB (623245    -465 bytes) .{scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><job_chain visible="no" name="scheduler_service_forwarding"><job_chain_node state="forward" job="scheduler_service_forwarder"/><job_chain_node state="finished"/></job_chain>
+25 16:37:32.592 javaw    0  3400.1EB4 460.496MB (629061   +5816 bytes) .{scheduler} [debug9] (Job_chain) SCHEDULER-893  Job_chain is 'undefined' now
+25 16:37:32.593 javaw    0  3400.1EB4 460.496MB (633052   +3991 bytes) .{scheduler} [debug9] (Job_chain /scheduler_service_forwarding*) SCHEDULER-893  Job_chain is 'not_initialized' now
+25 16:37:32.593 javaw    0  3400.1EB4 460.496MB (632700    -352 bytes) .{JS-644} job_chain::Node scheduler_service_forwarding:1::sos::scheduler::folder::Dependant::add_requisite 'Job /scheduler_service_forwarder'
+25 16:37:32.594 javaw   16  3400.1EB4 460.496MB (633240    +540 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::add_requisite job_chain::Node scheduler_service_forwarding:1 '/scheduler_service_forwarder'
+25 16:37:32.594 javaw    0  3400.1EB4 460.496MB (633600    +360 bytes) .{scheduler} sos::scheduler::order::Order_sources::initialize
+25 16:37:32.595 javaw    0  3400.1EB4 460.496MB (633832    +232 bytes) .{scheduler} [debug9] (Job_chain /scheduler_service_forwarding*) SCHEDULER-893  Job_chain is 'initialized' now
+25 16:37:32.596 javaw    0  3400.1EB4 460.496MB (628286   -5546 bytes) .{scheduler} Web_services: state=initialized
+25 16:37:32.596 javaw    0  3400.1EB4 460.496MB (628334     +48 bytes) {scheduler} Supervisor: switch_subsystem_state initialized
+25 16:37:32.597 javaw    0  3400.1EB4 460.496MB (636098   +7764 bytes) .{scheduler} Supervisor: state=initialized
+25 16:37:32.597 javaw    0  3400.1EB4 460.496MB (636082     -16 bytes) {scheduler} Job_subsystem: switch_subsystem_state initialized
+25 16:37:32.597 javaw    0  3400.1EB4 460.496MB (636114     +32 bytes) .{scheduler} Job scheduler_file_order_sink.initialize()
+25 16:37:32.597 javaw    0  3400.1EB4 460.496MB (636122      +8 bytes) ..{JS-644} Job scheduler_file_order_sink::sos::scheduler::folder::Dependant::add_requisite 'Process_class '
+25 16:37:32.598 javaw    0  3400.1EB4 460.496MB (636534    +412 bytes) ..{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::add_requisite Job scheduler_file_order_sink ''
+25 16:37:32.598 javaw    0  3400.1EB4 460.496MB (640426   +3892 bytes) ..{JS-644} Schedule_use Job scheduler_file_order_sink-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:32.599 javaw    0  3400.1EB4 460.496MB (640742    +316 bytes) ..{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:32.599 javaw    0  3400.1EB4 460.496MB (644407   +3665 bytes) .{scheduler} [debug9] (Job scheduler_file_order_sink) SCHEDULER-893  Job is 'initialized' now
+25 16:37:32.600 javaw    0  3400.1EB4 460.496MB (643967    -440 bytes) .{scheduler} Job scheduler_service_forwarder.initialize()
+25 16:37:32.600 javaw    0  3400.1EB4 460.496MB (644039     +72 bytes) ..{JS-644} Job scheduler_service_forwarder::sos::scheduler::folder::Dependant::add_requisite 'Process_class '
+25 16:37:32.601 javaw    0  3400.1EB4 460.496MB (644451    +412 bytes) ..{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::add_requisite Job scheduler_service_forwarder ''
+25 16:37:32.601 javaw    0  3400.1EB4 460.496MB (648019   +3568 bytes) ..{JS-644} Schedule_use Job scheduler_service_forwarder-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:32.601 javaw    0  3400.1EB4 460.496MB (648335    +316 bytes) ..{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:32.602 javaw    0  3400.1EB4 460.496MB (651852   +3517 bytes) .{scheduler} [debug9] (Job scheduler_service_forwarder) SCHEDULER-893  Job is 'initialized' now
+25 16:37:32.602 javaw    0  3400.1EB4 460.496MB (651396    -456 bytes) .{scheduler} Job_subsystem: state=initialized
+25 16:37:32.602 javaw    0  3400.1EB4 460.496MB (651444     +48 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state initialized
+25 16:37:32.603 javaw    0  3400.1EB4 460.496MB (651476     +32 bytes) .{scheduler} Scheduler_script_subsystem: state=initialized
+25 16:37:32.603 javaw    0  3400.1EB4 460.496MB (657068   +5592 bytes) {scheduler} [debug3] --------------------------------------------
+25 16:37:32.604 javaw    0  3400.1EB4 460.496MB (656964    -104 bytes) {scheduler} [debug3] SCHEDULER-902  state=starting
+25 16:37:32.605 javaw    0  3400.1EB4 460.496MB (658128   +1164 bytes) {scheduler} [info]   SCHEDULER-900  Scheduler 1.3.13-beta-2a-SNAPSHOT (Debug) is starting with C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml, pid=3400
+25 16:37:32.605 javaw    0  3400.1EB4 460.496MB (657544    -584 bytes) {scheduler} sos::scheduler::time::Time::set_current_difference_to_utc -3600 tz=-3600 is_dst=0 dstbias=-3600 (old=0)
+25 16:37:32.606 javaw    0  3400.1EB4 460.496MB (660108   +2564 bytes) {scheduler} Web_services: switch_subsystem_state loaded
+25 16:37:32.606 javaw    0  3400.1EB4 460.496MB (660044     -64 bytes) .{scheduler} Web_services: state=loaded
+25 16:37:32.606 javaw    0  3400.1EB4 460.496MB (660028     -16 bytes) {scheduler} _getmaxstdio()=512
+25 16:37:32.606 javaw    0  3400.1EB4 460.496MB (660028      +0 bytes) {scheduler} _setmaxstdio(2048), _getmaxstdio()=2048
+25 16:37:32.607 javaw    0  3400.1EB4 460.496MB (660084     +56 bytes) {scheduler} Java_subsystem: switch_subsystem_state loaded
+25 16:37:32.607 javaw    0  3400.1EB4 460.496MB (660180     +96 bytes) .open("C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml")  => 5
+25 16:37:32.607 javaw    0  3400.1EB4 460.496MB (660340    +160 bytes) .close(5) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml
+25 16:37:32.655 javaw   47  3400.1EB4 460.496MB (660116    -224 bytes) .{scheduler} Java_subsystem: state=loaded
+25 16:37:32.656 javaw    0  3400.1EB4 460.496MB (660068     -48 bytes) {scheduler} Event_subsystem: switch_subsystem_state loaded
+25 16:37:32.656 javaw    0  3400.1EB4 460.496MB (660356    +288 bytes) .{scheduler} Event_subsystem: state=loaded
+25 16:37:32.656 javaw    0  3400.1EB4 460.496MB (660340     -16 bytes) {scheduler} Folder_subsystem: switch_subsystem_state loaded
+25 16:37:32.657 javaw   15  3400.1EB4 460.496MB (666000   +5660 bytes) .{scheduler} [debug9] (Folder /) SCHEDULER-893  Folder is 'initialized' now
+25 16:37:32.657 javaw    0  3400.1EB4 460.496MB (665936     -64 bytes) .{scheduler} [debug9] (Folder /) SCHEDULER-893  Folder is 'loaded' now
+25 16:37:32.657 javaw    0  3400.1EB4 460.496MB (665640    -296 bytes) .{JS-644} Dependencies(Folder_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Folder /
+25 16:37:32.659 javaw    0  3400.1EB4 460.496MB (667792   +2152 bytes) .open("C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\job1.job.xml")  => 5
+25 16:37:32.660 javaw    0  3400.1EB4 460.496MB (667952    +160 bytes) .close(5) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\job1.job.xml
+25 16:37:32.667 javaw    0  3400.1EB4 460.496MB (681852  +13900 bytes) .{scheduler} [debug9] (Job  ) SCHEDULER-893  Job is 'undefined' now
+25 16:37:32.668 javaw    0  3400.1EB4 460.496MB (682952   +1100 bytes) .{scheduler} [info]   (Job job1*) SCHEDULER-891  Configuration file 'C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\job1.job.xml' (2011-11-25 15:37:29.000 UTC) is going to be be loaded into this new Job
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686420   +3468 bytes) .{scheduler} C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\job1.job.xml:
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686516     +96 bytes) .<?xml version="1.0" encoding="ISO-8859-1"?>
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686468     -48 bytes) .
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686420     -48 bytes) .<job order="yes"
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686452     +32 bytes) .     stop_on_error="no">
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686452      +0 bytes) .    <script language="javax.script:javascript">
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686484     +32 bytes) .        <![CDATA[
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686452     -32 bytes) .function spooler_process() {
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686452      +0 bytes) .	logger.info( "hello world" );
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686468     +16 bytes) .	return true;
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686476      +8 bytes) .}        ]]>
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686476      +0 bytes) .    </script>
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686476      +0 bytes) .    <run_time/>
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686508     +32 bytes) .</job>
+25 16:37:32.669 javaw    0  3400.1EB4 460.496MB (686476     -32 bytes) .
+25 16:37:32.672 javaw   16  3400.1EB4 460.496MB (686863    +387 bytes) .{JS-644} Schedule_use Job job1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:32.673 javaw    0  3400.1EB4 460.496MB (687307    +444 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:32.674 javaw    0  3400.1EB4 460.496MB (694716   +7409 bytes) .{scheduler} [debug9] (Job job1) SCHEDULER-893  Job is 'not_initialized' now
+25 16:37:32.674 javaw    0  3400.1EB4 460.496MB (694308    -408 bytes) .{scheduler} Job job1.initialize()
+25 16:37:32.675 javaw    0  3400.1EB4 460.496MB (694364     +56 bytes) ..{JS-644} Job job1::sos::scheduler::folder::Dependant::add_requisite 'Process_class '
+25 16:37:32.675 javaw    0  3400.1EB4 460.496MB (694776    +412 bytes) ..{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::add_requisite Job job1 ''
+25 16:37:32.675 javaw    0  3400.1EB4 460.496MB (694812     +36 bytes) ..{scheduler} use java-interface for scripting of language javax.script:javascript
+25 16:37:32.676 javaw    0  3400.1EB4 460.496MB (695076    +264 bytes) .{scheduler} [debug9] (Job job1) SCHEDULER-893  Job is 'initialized' now
+25 16:37:32.676 javaw    0  3400.1EB4 460.496MB (690264   -4812 bytes) .open("C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\chain1.job_chain.xml")  => 5
+25 16:37:32.677 javaw    0  3400.1EB4 460.496MB (690632    +368 bytes) .close(5) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\chain1.job_chain.xml
+25 16:37:32.677 javaw    0  3400.1EB4 460.496MB (696036   +5404 bytes) .{scheduler} [debug9] (Job_chain) SCHEDULER-893  Job_chain is 'undefined' now
+25 16:37:32.678 javaw    0  3400.1EB4 460.496MB (697328   +1292 bytes) .{scheduler} [info]   (Job_chain /chain1*) SCHEDULER-891  Configuration file 'C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\chain1.job_chain.xml' (2011-11-25 15:37:29.000 UTC) is going to be be loaded into this new Job_chain
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701304   +3976 bytes) .{scheduler} C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\chain1.job_chain.xml:
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701400     +96 bytes) .<?xml version="1.0" encoding="ISO-8859-1"?>
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701352     -48 bytes) .
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701304     -48 bytes) .<job_chain orders_recoverable="yes"
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701352     +48 bytes) .           visible="yes"
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701336     -16 bytes) .           max_orders="1">
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701336      +0 bytes) .    <job_chain_node state="100"
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701352     +16 bytes) .                    job="job1"
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701352      +0 bytes) .                    next_state="success"
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701392     +40 bytes) .                    error_state="error"/>
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701408     +16 bytes) .    <job_chain_node state="success"/>
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701408      +0 bytes) .    <job_chain_node state="error"/>
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701408      +0 bytes) .</job_chain>
+25 16:37:32.679 javaw    0  3400.1EB4 460.496MB (701360     -48 bytes) .
+25 16:37:32.682 javaw    0  3400.1EB4 460.496MB (701360      +0 bytes) .{scheduler} At most 1 orders can run simultaneously.
+25 16:37:32.684 javaw    0  3400.1EB4 460.496MB (706603   +5243 bytes) .{scheduler} [debug9] (Job_chain /chain1) SCHEDULER-893  Job_chain is 'not_initialized' now
+25 16:37:32.684 javaw    0  3400.1EB4 460.496MB (706171    -432 bytes) .{JS-644} job_chain::Node chain1:1::sos::scheduler::folder::Dependant::add_requisite 'Job /job1'
+25 16:37:32.684 javaw    0  3400.1EB4 460.496MB (706647    +476 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::add_requisite job_chain::Node chain1:1 '/job1'
+25 16:37:32.685 javaw    0  3400.1EB4 460.496MB (706991    +344 bytes) .{scheduler} sos::scheduler::order::Order_sources::initialize
+25 16:37:32.685 javaw    0  3400.1EB4 460.496MB (707255    +264 bytes) .{scheduler} [debug9] (Job_chain /chain1) SCHEDULER-893  Job_chain is 'initialized' now
+25 16:37:32.686 javaw    0  3400.1EB4 460.496MB (701027   -6228 bytes) .{scheduler} Folder_subsystem: state=loaded
+25 16:37:32.686 javaw    0  3400.1EB4 460.496MB (701075     +48 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state loaded
+25 16:37:32.686 javaw    0  3400.1EB4 460.496MB (701647    +572 bytes) .{scheduler} [debug9] (Process_class ) SCHEDULER-893  Process_class is 'initialized' now
+25 16:37:32.686 javaw    0  3400.1EB4 460.496MB (701519    -128 bytes) .{scheduler} [debug9] (Process_class ) SCHEDULER-893  Process_class is 'loaded' now
+25 16:37:32.687 javaw    0  3400.1EB4 460.496MB (701223    -296 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Process_class 
+25 16:37:32.687 javaw    0  3400.1EB4 460.496MB (701367    +144 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_file_order_sink->on_requisite_loaded()
+25 16:37:32.687 javaw    0  3400.1EB4 460.496MB (701351     -16 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_service_forwarder->on_requisite_loaded()
+25 16:37:32.688 javaw   15  3400.1EB4 460.496MB (701367     +16 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded Job job1->on_requisite_loaded()
+25 16:37:32.688 javaw    0  3400.1EB4 460.496MB (701891    +524 bytes) .{scheduler} [debug9] (Process_class (temporaries)) SCHEDULER-893  Process_class is 'initialized' now
+25 16:37:32.689 javaw    0  3400.1EB4 460.496MB (701731    -160 bytes) .{scheduler} [debug9] (Process_class (temporaries)) SCHEDULER-893  Process_class is 'loaded' now
+25 16:37:32.689 javaw    0  3400.1EB4 460.496MB (701403    -328 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Process_class (temporaries)
+25 16:37:32.690 javaw    0  3400.1EB4 460.496MB (701531    +128 bytes) .{scheduler} Process_class_subsystem: state=loaded
+25 16:37:32.690 javaw    0  3400.1EB4 460.496MB (701451     -80 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state loaded
+25 16:37:32.690 javaw    0  3400.1EB4 460.496MB (701451      +0 bytes) .{scheduler} Schedule_subsystem: state=loaded
+25 16:37:32.691 javaw    0  3400.1EB4 460.496MB (701435     -16 bytes) {scheduler} Lock_subsystem: switch_subsystem_state loaded
+25 16:37:32.691 javaw    0  3400.1EB4 460.496MB (701451     +16 bytes) .{scheduler} Lock_subsystem: state=loaded
+25 16:37:32.691 javaw    0  3400.1EB4 460.496MB (701435     -16 bytes) {scheduler} Job_subsystem: switch_subsystem_state loaded
+25 16:37:32.691 javaw    0  3400.1EB4 460.496MB (701471     +36 bytes) .{scheduler} Job scheduler_file_order_sink.load()
+25 16:37:32.701 javaw    0  3400.1EB4 460.496MB (702559   +1088 bytes) ..open("C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.scheduler_file_order_sink.txt")  => 6
+25 16:37:32.702 javaw    0  3400.1EB4 460.496MB (703387    +828 bytes) ..{scheduler} [debug3] (Job  scheduler_file_order_sink) SCHEDULER-910  New history file opened: C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.scheduler_file_order_sink.txt
+25 16:37:32.703 javaw   16  3400.1EB4 460.496MB (703003    -384 bytes) ..{scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-931  state=loaded
+25 16:37:32.703 javaw    0  3400.1EB4 460.496MB (703059     +56 bytes) .{scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-893  Job is 'loaded' now
+25 16:37:32.704 javaw    0  3400.1EB4 460.496MB (702731    -328 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_file_order_sink
+25 16:37:32.704 javaw    0  3400.1EB4 460.496MB (702875    +144 bytes) .{scheduler} Job job1.load()
+25 16:37:32.711 javaw    0  3400.1EB4 460.496MB (703379    +504 bytes) ..{scheduler} [info]   (Job  job1) 
+25 16:37:32.712 javaw    0  3400.1EB4 460.496MB (703395     +16 bytes) ..{scheduler} [info]   (Job  job1) Job job1 - Protocol starts in C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/job.job1.log
+25 16:37:32.713 javaw    0  3400.1EB4 460.496MB (703595    +200 bytes) ..open("C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.job1.txt")  => 8
+25 16:37:32.715 javaw    0  3400.1EB4 460.496MB (704295    +700 bytes) ..{scheduler} [debug3] (Job  job1) SCHEDULER-910  New history file opened: C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.job1.txt
+25 16:37:32.715 javaw    0  3400.1EB4 460.496MB (703991    -304 bytes) ..{scheduler} [debug9] (Job  job1) SCHEDULER-931  state=loaded
+25 16:37:32.716 javaw    0  3400.1EB4 460.496MB (704047     +56 bytes) .{scheduler} [debug9] (Job  job1) SCHEDULER-893  Job is 'loaded' now
+25 16:37:32.716 javaw    0  3400.1EB4 460.496MB (703751    -296 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job job1
+25 16:37:32.716 javaw    0  3400.1EB4 460.496MB (703879    +128 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded job_chain::Node chain1:1->on_requisite_loaded()
+25 16:37:32.717 javaw    0  3400.1EB4 460.496MB (703879      +0 bytes) .{JS-644} sos::scheduler::order::job_chain::Job_node::on_requisite_loaded job_chain::Node chain1:1::on_requisite_loaded()
+25 16:37:32.718 javaw    0  3400.1EB4 460.496MB (703879      +0 bytes) .{JS-644} Job job1::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node chain1:1)
+25 16:37:32.718 javaw    0  3400.1EB4 460.496MB (703875      -4 bytes) .{JS-644} Job job1::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=never state=loaded
+25 16:37:32.719 javaw   16  3400.1EB4 460.496MB (703875      +0 bytes) .{scheduler} Job scheduler_service_forwarder.load()
+25 16:37:32.726 javaw    0  3400.1EB4 460.496MB (704931   +1056 bytes) ..open("C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.scheduler_service_forwarder.txt")  => 10
+25 16:37:32.727 javaw    0  3400.1EB4 460.496MB (705775    +844 bytes) ..{scheduler} [debug3] (Job  scheduler_service_forwarder) SCHEDULER-910  New history file opened: C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.scheduler_service_forwarder.txt
+25 16:37:32.727 javaw    0  3400.1EB4 460.496MB (705391    -384 bytes) ..{scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-931  state=loaded
+25 16:37:32.728 javaw    0  3400.1EB4 460.496MB (705447     +56 bytes) .{scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-893  Job is 'loaded' now
+25 16:37:32.728 javaw    0  3400.1EB4 460.496MB (705103    -344 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_service_forwarder
+25 16:37:32.729 javaw    0  3400.1EB4 460.496MB (705247    +144 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded job_chain::Node scheduler_service_forwarding:1->on_requisite_loaded()
+25 16:37:32.729 javaw    0  3400.1EB4 460.496MB (705263     +16 bytes) .{JS-644} sos::scheduler::order::job_chain::Job_node::on_requisite_loaded job_chain::Node scheduler_service_forwarding:1::on_requisite_loaded()
+25 16:37:32.730 javaw    0  3400.1EB4 460.496MB (705263      +0 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node scheduler_service_forwarding:1)
+25 16:37:32.731 javaw    0  3400.1EB4 460.496MB (705275     +12 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=never state=loaded
+25 16:37:32.731 javaw    0  3400.1EB4 460.496MB (705239     -36 bytes) .{scheduler} Job_subsystem: state=loaded
+25 16:37:32.731 javaw    0  3400.1EB4 460.496MB (705143     -96 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state loaded
+25 16:37:32.731 javaw    0  3400.1EB4 460.496MB (705535    +392 bytes) .{scheduler} [debug9] (Job_chain /scheduler_service_forwarding) SCHEDULER-893  Job_chain is 'loaded' now
+25 16:37:32.732 javaw    0  3400.1EB4 460.496MB (705111    -424 bytes) .{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job_chain /scheduler_service_forwarding
+25 16:37:32.732 javaw    0  3400.1EB4 460.496MB (705599    +488 bytes) .{scheduler} [debug9] (Job_chain /chain1) SCHEDULER-893  Job_chain is 'loaded' now
+25 16:37:32.733 javaw    0  3400.1EB4 460.496MB (705111    -488 bytes) .{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job_chain /chain1
+25 16:37:32.733 javaw    0  3400.1EB4 460.496MB (705223    +112 bytes) .{scheduler} Job_chain_subsystem: state=loaded
+25 16:37:32.734 javaw    0  3400.1EB4 460.496MB (705143     -80 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state loaded
+25 16:37:32.734 javaw    0  3400.1EB4 460.496MB (705175     +32 bytes) .{scheduler} Standing_order_subsystem: state=loaded
+25 16:37:32.734 javaw    0  3400.1EB4 460.496MB (705159     -16 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state loaded
+25 16:37:32.734 javaw    0  3400.1EB4 460.496MB (705175     +16 bytes) .{scheduler} Scheduler_script_subsystem: state=loaded
+25 16:37:32.734 javaw    0  3400.1EB4 460.496MB (705159     -16 bytes) {scheduler} Java_subsystem: switch_subsystem_state active
+25 16:37:32.735 javaw   15  3400.1EB4 460.496MB (705159      +0 bytes) .{scheduler} Java_subsystem: state=active
+25 16:37:32.735 javaw    0  3400.1EB4 460.496MB (705143     -16 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state active
+25 16:37:32.735 javaw    0  3400.1EB4 460.496MB (705175     +32 bytes) .{scheduler} Scheduler_script_subsystem: state=active
+25 16:37:32.735 javaw    0  3400.1EB4 460.496MB (705159     -16 bytes) {scheduler} Event_subsystem: switch_subsystem_state active
+25 16:37:32.736 javaw    0  3400.1EB4 460.496MB (705159      +0 bytes) .{scheduler} Event_subsystem: state=active
+25 16:37:32.736 javaw    0  3400.1EB4 460.496MB (705143     -16 bytes) {scheduler} Folder_subsystem: switch_subsystem_state active
+25 16:37:32.736 javaw    0  3400.1EB4 460.496MB (706251   +1108 bytes) .{scheduler} [info]   (Folder_subsystem) SCHEDULER-718  Using 'local' configuration directory 'C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\'
+25 16:37:32.737 javaw    0  3400.1EB4 460.496MB (705659    -592 bytes) .{scheduler} FindFirstChangeNotification( "C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+25 16:37:32.737 javaw    0  3400.1EB4 460.496MB (706347    +688 bytes) .{scheduler} [info]   (Folder /) SCHEDULER-893  Folder is 'active' now
+25 16:37:32.739 javaw    0  3400.1EB4 460.496MB (705863    -484 bytes) .{scheduler} Folder_subsystem: state=active
+25 16:37:32.739 javaw    0  3400.1EB4 460.496MB (705911     +48 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state active
+25 16:37:32.740 javaw    0  3400.1EB4 460.496MB (706435    +524 bytes) .{scheduler} [info]   (Process_class ) SCHEDULER-893  Process_class is 'active' now
+25 16:37:32.740 javaw    0  3400.1EB4 460.496MB (706567    +132 bytes) .{scheduler} [info]   (Process_class (temporaries)) SCHEDULER-893  Process_class is 'active' now
+25 16:37:32.740 javaw    0  3400.1EB4 460.496MB (706223    -344 bytes) .{scheduler} Process_class_subsystem: state=active
+25 16:37:32.741 javaw    0  3400.1EB4 460.496MB (706287     +64 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state active
+25 16:37:32.741 javaw    0  3400.1EB4 460.496MB (706287      +0 bytes) .{scheduler} Schedule_subsystem: state=active
+25 16:37:32.741 javaw    0  3400.1EB4 460.496MB (706271     -16 bytes) {scheduler} Lock_subsystem: switch_subsystem_state active
+25 16:37:32.741 javaw    0  3400.1EB4 460.496MB (706287     +16 bytes) .{scheduler} Lock_subsystem: state=active
+25 16:37:32.741 javaw    0  3400.1EB4 460.496MB (706271     -16 bytes) {scheduler} Job_subsystem: switch_subsystem_state active
+25 16:37:32.742 javaw    0  3400.1EB4 460.496MB (706579    +308 bytes) .{scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-931  state=pending
+25 16:37:32.742 javaw    0  3400.1EB4 460.496MB (706243    -336 bytes) .{JS-644} Job scheduler_file_order_sink::sos::scheduler::Job::on_activate next_time=never next_start_time=never
+25 16:37:32.743 javaw    0  3400.1EB4 460.496MB (707187    +944 bytes) .{scheduler} [debug3] (Job  scheduler_file_order_sink) SCHEDULER-921  Next period is <period begin="2011-11-25 00:00:00.000" end="2011-11-26 00:00:00.000"/>, Schedule ''
+25 16:37:32.744 javaw    0  3400.1EB4 460.496MB (706799    -388 bytes) .{scheduler} [info]   (Job  scheduler_file_order_sink) SCHEDULER-893  Job is 'active' now
+25 16:37:32.750 javaw   16  3400.1EB4 460.496MB (707279    +480 bytes) .{scheduler} [debug9] (Job  job1) SCHEDULER-931  state=pending
+25 16:37:32.751 javaw    0  3400.1EB4 460.496MB (707039    -240 bytes) .{JS-644} Job job1::sos::scheduler::Job::on_activate next_time=never next_start_time=never
+25 16:37:32.751 javaw    0  3400.1EB4 460.496MB (707919    +880 bytes) .{scheduler} [debug3] (Job  job1) SCHEDULER-921  Next period is <period begin="2011-11-25 00:00:00.000" end="2011-11-26 00:00:00.000"/>, Schedule ''
+25 16:37:32.752 javaw    0  3400.1EB4 460.496MB (707463    -456 bytes) .{scheduler} [info]   (Job  job1) SCHEDULER-893  Job is 'active' now
+25 16:37:32.753 javaw    0  3400.1EB4 460.496MB (707455      -8 bytes) .{scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-931  state=pending
+25 16:37:32.753 javaw    0  3400.1EB4 460.496MB (707167    -288 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Job::on_activate next_time=never next_start_time=never
+25 16:37:32.754 javaw    0  3400.1EB4 460.496MB (708127    +960 bytes) .{scheduler} [debug3] (Job  scheduler_service_forwarder) SCHEDULER-921  Next period is <period begin="2011-11-25 00:00:00.000" end="2011-11-26 00:00:00.000"/>, Schedule ''
+25 16:37:32.754 javaw    0  3400.1EB4 460.496MB (707739    -388 bytes) .{scheduler} [info]   (Job  scheduler_service_forwarder) SCHEDULER-893  Job is 'active' now
+25 16:37:32.755 javaw    0  3400.1EB4 460.496MB (707375    -364 bytes) .{scheduler} Job_subsystem: state=active
+25 16:37:32.755 javaw    0  3400.1EB4 460.496MB (707423     +48 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state active
+25 16:37:32.756 javaw    0  3400.1EB4 460.496MB (707471     +48 bytes) .{JS-644} job_chain::Node scheduler_service_forwarding:1::sos::scheduler::order::job_chain::Order_queue_node::wake_orders (no processable order)
+25 16:37:32.757 javaw    0  3400.1EB4 460.496MB (707551     +80 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node scheduler_service_forwarding:1)
+25 16:37:32.757 javaw    0  3400.1EB4 460.496MB (707551      +0 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=2011-11-26 00:00:00.000 state=pending
+25 16:37:32.758 javaw    0  3400.1EB4 460.496MB (707551      +0 bytes) .{scheduler} sos::scheduler::order::Order_sources::activate
+25 16:37:32.758 javaw    0  3400.1EB4 460.496MB (707979    +428 bytes) .{scheduler} [info]   (Job_chain /scheduler_service_forwarding) SCHEDULER-893  Job_chain is 'active' now
+25 16:37:32.764 javaw    0  3400.1EB4 460.496MB (707571    -408 bytes) .{JS-644} job_chain::Node chain1:1::sos::scheduler::order::job_chain::Order_queue_node::wake_orders (no processable order)
+25 16:37:32.765 javaw    0  3400.1EB4 460.496MB (707699    +128 bytes) .{JS-644} Job job1::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node chain1:1)
+25 16:37:32.765 javaw    0  3400.1EB4 460.496MB (707683     -16 bytes) .{JS-644} Job job1::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=2011-11-26 00:00:00.000 state=pending
+25 16:37:32.765 javaw    0  3400.1EB4 460.496MB (707715     +32 bytes) .{scheduler} sos::scheduler::order::Order_sources::activate
+25 16:37:32.766 javaw   15  3400.1EB4 460.496MB (708082    +367 bytes) .{scheduler} [info]   (Job_chain /chain1) SCHEDULER-893  Job_chain is 'active' now
+25 16:37:32.766 javaw    0  3400.1EB4 460.496MB (707674    -408 bytes) .{scheduler} Job_chain_subsystem: state=active
+25 16:37:32.766 javaw    0  3400.1EB4 460.496MB (707722     +48 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state active
+25 16:37:32.767 javaw    0  3400.1EB4 460.496MB (707754     +32 bytes) .{scheduler} Standing_order_subsystem: state=active
+25 16:37:32.767 javaw    0  3400.1EB4 460.496MB (707738     -16 bytes) {scheduler} Web_services: switch_subsystem_state active
+25 16:37:32.767 javaw    0  3400.1EB4 460.496MB (707738      +0 bytes) .{scheduler} Web_services: state=active
+25 16:37:32.767 javaw    0  3400.1EB4 460.496MB (708097    +359 bytes) {scheduler} [info]   --------------------------------------------
+25 16:37:32.768 javaw    0  3400.1EB4 460.496MB (708152     +55 bytes) {scheduler} [info]   SCHEDULER-902  state=running
+25 16:37:32.768 javaw    0  3400.1EB4 460.496MB (712594   +4442 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><show_state what="folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724149  +11555 bytes) {scheduler} 
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723957    -192 bytes) 
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723957      +0 bytes) <?xml version="1.0" encoding="ISO-8859-1"?>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005     +48 bytes) <spooler>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723957     -48 bytes)   <answer time="2011-11-25 16:37:32.768">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005     +48 bytes)     <state time="2011-11-25 16:37:32" id="" spooler_id="" spooler_running_since="2011-11-25 16:37:32" state="running" log_file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/scheduler-2011-11-25-163732.log" version="1.3.13-beta-2a-SNAPSHOT (Debug)" pid="3400" config_file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml" host="mobile-2" db="" cpu_time="1.232" loop="1" waits="0">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724197    +192 bytes)       <folder path="/">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989    -208 bytes)         <file_based state="active">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005     +16 bytes)           <requisites/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723957     -48 bytes)         </file_based>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989     +32 bytes)         <process_classes>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)           <process_class path="" max_processes="30" processes="0">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724037     +48 bytes)             <file_based state="active">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005     -32 bytes)               <requisites/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989     -16 bytes)             </file_based>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)           </process_class>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)           <process_class path="/(temporaries)" name="(temporaries)" max_processes="30" processes="0">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724021     +32 bytes)             <file_based state="active">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005     -16 bytes)               <requisites/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989     -16 bytes)             </file_based>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)           </process_class>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)         </process_classes>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)         <jobs>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)           <job path="/job1" name="job1" job="job1" state="pending" all_steps="0" all_tasks="0" log_file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/job.job1.log" order="yes" tasks="1" cmd="enable" in_period="yes" job_chain_priority="1" enabled="yes">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724165    +176 bytes)             <file_based state="active" file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\job1.job.xml" last_write_time="2011-11-25T15:37:29.000Z">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724021    -144 bytes)               <requisites/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989     -32 bytes)             </file_based>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)             <params count="0" estimated_byte_count="0"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724021     +32 bytes)             <tasks count="0"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005     -16 bytes)             <queued_tasks length="0"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005      +0 bytes)             <order_queue length="0"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005      +0 bytes)             <log level="info" highest_level="info" last_info="SCHEDULER-893  Job is 'active' now" smtp="-"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724053     +48 bytes)           </job>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989     -64 bytes)         </jobs>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)         <job_chains>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)           <job_chain path="/chain1" name="chain1" orders="0" running_orders="0" max_orders="1" state="running" orders_recoverable="yes">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724101    +112 bytes)             <file_based state="active" file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\chain1.job_chain.xml" last_write_time="2011-11-25T15:37:29.000Z">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724117     +16 bytes)               <requisites/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989    -128 bytes)             </file_based>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)             <job_chain_node state="100" next_state="success" error_state="error" job="/job1">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723957     -32 bytes)               <order_queue length="0" next_start_time="never"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724037     +80 bytes)             </job_chain_node>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989     -48 bytes)             <job_chain_node state="success"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005     +16 bytes)             <job_chain_node state="error"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724005      +0 bytes)           </job_chain>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989     -16 bytes)         </job_chains>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)       </folder>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)       <subprocesses/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)       <remote_schedulers count="0" connected="0"/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)       <http_server/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)       <connections/>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes)       <operations>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (723989      +0 bytes) Directory_observer(C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\), at 2011-11-25 15:38:32 UTC
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724069     +80 bytes) Daylight_saving_time_transition_detector, possible begin of daylight saving time, at 2011-11-26 00:59:59 UTC
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724013     -56 bytes) </operations>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724013      +0 bytes)       <java_subsystem GlobalRef="41" NewGlobalRef="47" DeleteGlobalRef="6">
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724093     +80 bytes) <!--For debugging only-->
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724045     -48 bytes)       </java_subsystem>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724045      +0 bytes)     </state>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724013     -32 bytes)   </answer>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724013      +0 bytes) </spooler>
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724013      +0 bytes) 
+25 16:37:32.773 javaw    0  3400.1EB4 460.496MB (724013      +0 bytes) 
+25 16:37:32.787 javaw   16  3400.1EAC 460.496MB (713985  -10028 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><add_order id="test_chain1" job_chain="chain1"><params><param name="100/NODE_PARAM" value="param_state_100"/></params></add_order>
+25 16:37:32.789 javaw    0  3400.1EAC 460.496MB (722045   +8060 bytes) {scheduler} [debug3] (Order_queue chain1:100) SCHEDULER-990  Adding Order chain1:test_chain1
+25 16:37:32.804 javaw   16  3400.1EB4 460.496MB (724039   +1994 bytes) {scheduler} [info]   (Task job1:1) SCHEDULER-842  Task is going to process Order chain1:test_chain1, state=100, on Scheduler 
+25 16:37:32.805 javaw    0  3400.1EB4 460.496MB (723783    -256 bytes) {scheduler} [debug3] (Job  job1) Task starts for Order chain1:test_chain1
+25 16:37:32.806 javaw    0  3400.1EB4 460.496MB (723715     -68 bytes) {scheduler} [debug9] (Job  job1) SCHEDULER-931  state=running
+25 16:37:32.806 javaw    0  3400.1EB4 460.496MB (724171    +456 bytes) {scheduler} [info]   (Job  job1) SCHEDULER-930  Task 1 started - cause: Order chain1:test_chain1
+25 16:37:32.808 javaw    0  3400.1EB4 460.496MB (724728    +557 bytes) {scheduler} [info]   (Task job1:1) 
+25 16:37:32.808 javaw    0  3400.1EB4 460.496MB (725043    +315 bytes) {scheduler} [info]   (Task job1:1) Task job1:1 - Protocol starts in C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/task.job1.log
+25 16:37:32.811 javaw    0  3400.1EB4 460.496MB (731352   +6309 bytes) sopen("C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp")
+25 16:37:32.812 javaw   15  3400.1EB4 460.496MB (731464    +112 bytes) sopen("C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp")
+25 16:37:32.815 javaw    0  3400.1EB4 460.496MB (733308   +1844 bytes) sopen("C:\Users\schaedi\AppData\Local\Temp\sos5645.tmp")
+25 16:37:32.815 javaw    0  3400.1EB4 460.496MB (733896    +588 bytes) CreateProcess("C:\scheduler\scheduler.src.devel\engine\opensource\test\.\..\..\opensource\kernel-cpp\bind\scheduler.exe",""C:\scheduler\scheduler.src.devel\engine\opensource\test\.\..\..\opensource\kernel-cpp\bind\scheduler.exe" "-sos.ini=C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\sos.ini" "-ini=C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\factory.ini" "-O" "-job=job1" "-task-id=1" "-log=exception.* log4j.* >+C:\scheduler\scheduler.src.devel\engine\opensource\test\src\test\java\com\sos\scheduler\engine\tests\excluded\ss\scripttest\scheduler.log" "-controller=127.0.0.1:59999"")
+25 16:37:32.855 javaw   31  3400.1EB4 460.496MB (733888      -8 bytes) pid=7712
+25 16:37:32.856 javaw    0  3400.1EB4 460.496MB (733888      +0 bytes) close(14) C:\Users\schaedi\AppData\Local\Temp\sos5645.tmp
+25 16:37:32.856 javaw    0  3400.1EB4 460.496MB (733952     +64 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp
+25 16:37:32.856 javaw    0  3400.1EB4 460.496MB (733952      +0 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp
+25 16:37:32.857 javaw    0  3400.1EB4 460.496MB (732848   -1104 bytes) {scheduler} [debug9] SCHEDULER-948  Process pid=7712 started
+25 16:37:32.857 javaw    0  3400.1EB4 460.496MB (731888    -960 bytes) {scheduler} [info]   (Task job1:1) SCHEDULER-918  state=starting (at=never)
+25 16:37:33.050 scheduler    0  7712.1864 54.336MB (22400  +22400 bytes) 
+25 16:37:33.050 scheduler    0  7712.1864 54.336MB (22400      +0 bytes) ----------------------Fri Nov 25 16:37:33 2011
+25 16:37:33.050 scheduler    0  7712.1864 54.336MB (22464     +64 bytes) Aufruf: C:\scheduler\scheduler.src.devel\engine\opensource\test\.\..\..\opensource\kernel-cpp\bind\scheduler.exe  -sos.ini=C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\sos.ini  -ini=C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\factory.ini  -O  -job=job1  -task-id=1  -log=exception.* log4j.* >+C:\scheduler\scheduler.src.devel\engine\opensource\test\src\test\java\com\sos\scheduler\engine\tests\excluded\ss\scripttest\scheduler.log  -controller=127.0.0.1:59999  
+25 16:37:33.050 scheduler    0  7712.1864 54.336MB (22544     +80 bytes) {scheduler} Scheduler 1.3.13-beta-2a-SNAPSHOT (Debug)
+25 16:37:33.057 scheduler    0  7712.1864 54.852MB (73544  +51000 bytes) .{socket.connect} pid=0 connect(156,127.0.0.1:59999) ...
+25 16:37:33.058 scheduler    0  7712.1864 54.852MB (73544      +0 bytes) .{socket.connect} pid=0 connect(156,127.0.0.1:59999) OK
+25 16:37:33.059 javaw  203  3400.1EB4 460.496MB (731980     +92 bytes) .pid=7712 accept()  errno=0
+25 16:37:33.060 scheduler    0  7712.1864 54.852MB (75844   +2300 bytes) .pid=0 Session::execute_create_instance({FEEE47A3-6C1B-11D8-8103-000476EE8AFB})
+25 16:37:33.060 scheduler    0  7712.1864 54.852MB (76048    +204 bytes) ..sos.ini=C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\sos.ini
+25 16:37:33.073 scheduler   16  7712.1864 55.301MB (83510   +7462 bytes) .
+25 16:37:33.075 scheduler    0  7712.1864 55.301MB (90581   +7071 bytes) .{scheduler} use java-interface for scripting of language javax.script:javascript
+25 16:37:33.124 scheduler   62  7712.1864 450.770MB (92565   +1984 bytes) .Java Native Interface (JNI) 1.6, loaded from C:\Program Files\Java\jre6\bin\client\jvm.dll
+25 16:37:33.145 scheduler   16  7712.1864 450.770MB (94817   +2252 bytes) .[xc.insert 1, "java.lang.NoClassDefFoundError"]
+25 16:37:33.145 scheduler    0  7712.1864 450.770MB (94832     +15 bytes) .[xc.insert 2, "org/apache/log4j/Logger
+25 16:37:33.145 scheduler    0  7712.1864 450.770MB (94816     -16 bytes) .org.apache.log4j.Logger"]
+25 16:37:33.145 scheduler    0  7712.1864 450.770MB (94872     +56 bytes) .[xc.insert 3, "CallVoidMethodA"]
+25 16:37:33.145 scheduler    0  7712.1864 450.770MB (93277   -1595 bytes) .Com_set_error("Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger
+25 16:37:33.145 scheduler    0  7712.1864 450.770MB (93341     +64 bytes) .org.apache.log4j.Logger"), method=CallVoidMethodA []","Remote_module_instance_server::construct)
+25 16:37:33.146 scheduler    0  7712.1864 451.656MB (93213    -128 bytes) .[xc.insert 1, "construct"]
+25 16:37:33.146 scheduler    0  7712.1864 451.656MB (93140     -73 bytes) .[xc.insert 3, "Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger
+25 16:37:33.146 scheduler    0  7712.1864 451.656MB (93220     +80 bytes) .org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct"]
+25 16:37:33.147 javaw   94  3400.1EB4 460.496MB (736091   +4111 bytes) .[ERROR COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger
+25 16:37:33.147 javaw    0  3400.1EB4 460.496MB (736219    +128 bytes) .org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call]
+25 16:37:33.147 javaw    0  3400.1EB4 460.496MB (732924   -3295 bytes) .zschimmer::Async_operation::async_continue ERROR COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger
+25 16:37:33.147 javaw    0  3400.1EB4 460.496MB (732988     +64 bytes) .org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call, Remote_module_instance_proxy(state=construct)
+25 16:37:33.148 javaw    0  3400.1EB4 460.496MB (733124    +136 bytes) .{scheduler} Version of Remote Scheduler must be 1.3.9 or higher COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger
+25 16:37:33.148 javaw    0  3400.1EB4 460.496MB (733268    +144 bytes) .org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call
+25 16:37:33.148 javaw    0  3400.1EB4 460.496MB (733196     -72 bytes) [ERROR COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger
+25 16:37:33.148 javaw    0  3400.1EB4 460.496MB (733324    +128 bytes) org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call]
+25 16:37:33.149 javaw    0  3400.1EB4 460.496MB (736680   +3356 bytes) [ERROR COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger
+25 16:37:33.149 javaw    0  3400.1EB4 460.496MB (736712     +32 bytes) org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call]
+25 16:37:33.149 javaw    0  3400.1EB4 460.496MB (736680     -32 bytes) {scheduler} [ERROR]  (Task job1:1) COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger 
+25 16:37:33.150 javaw    0  3400.1EB4 460.496MB (737112    +432 bytes) {scheduler} [ERROR]  (Task job1:1) org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call
+25 16:37:33.155 javaw    0  3400.1EB4 460.496MB (738884   +1772 bytes) {scheduler} [info]   --------------------------------------------
+25 16:37:33.156 javaw   15  3400.1EB4 460.496MB (739058    +174 bytes) {scheduler} [info]   SCHEDULER-902  state=stopping
+25 16:37:33.157 javaw    0  3400.1EB4 460.496MB (743500   +4442 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><show_state what="folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767063  +23563 bytes) {scheduler} 
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766871    -192 bytes) 
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766871      +0 bytes) <?xml version="1.0" encoding="ISO-8859-1"?>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     +48 bytes) <spooler>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766871     -48 bytes)   <answer time="2011-11-25 16:37:33.156">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     +48 bytes)     <state time="2011-11-25 16:37:33" id="" spooler_id="" spooler_running_since="2011-11-25 16:37:32" state="stopping" log_file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/scheduler-2011-11-25-163732.log" version="1.3.13-beta-2a-SNAPSHOT (Debug)" pid="3400" config_file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\scheduler.xml" host="mobile-2" db="" cpu_time="1.310" loop="9" waits="4">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767111    +192 bytes)       <folder path="/">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903    -208 bytes)         <file_based state="active">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     +16 bytes)           <requisites/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -16 bytes)         </file_based>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)         <process_classes>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)           <process_class path="" max_processes="30" processes="1">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766951     +48 bytes)             <file_based state="active">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     -32 bytes)               <requisites/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -16 bytes)             </file_based>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)             <processes>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)               <process pid="7712" job="job1" task="1" task_id="1" operations="3" callbacks="0" running_since="2011-11-25 16:37:32.857" operation="Simple_operation(state=waiting,method=call(end(0,)))"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767031    +128 bytes)             </processes>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903    -128 bytes)           </process_class>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)           <process_class path="/(temporaries)" name="(temporaries)" max_processes="30" processes="0">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766871     -32 bytes)             <file_based state="active">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     +48 bytes)               <requisites/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -16 bytes)             </file_based>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)           </process_class>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)         </process_classes>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)         <jobs>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)           <job path="/job1" name="job1" job="job1" state="running" all_steps="0" all_tasks="1" log_file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/job.job1.log" order="yes" tasks="1" in_period="yes" job_chain_priority="1" enabled="yes">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767015    +112 bytes)             <file_based state="active" file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\job1.job.xml" last_write_time="2011-11-25T15:37:29.000Z">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767047     +32 bytes)               <requisites/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903    -144 bytes)             </file_based>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)             <params count="0" estimated_byte_count="0"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766935     +32 bytes)             <tasks count="1">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -32 bytes)               <task job="/job1" id="1" task="1" state="ending" name="" running_since="2011-11-25 16:37:32.809" start_at="never" cause="order" steps="0" log_file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/task.job1.log" pid="7712" priority="normal" operation="Simple_operation(state=waiting,method=call(end(0,)))" force_start="no">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767063    +160 bytes)                 <order path="/" order="test_chain1" id="test_chain1" state="100" initial_state="100" job_chain="/chain1" job="/job1" task="1" in_process_since="now" priority="0" created="2011-11-25 16:37:32.788" touched="yes" start_time="2011-11-25 16:37:32.791">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767031     -32 bytes)                   <file_based state="not_initialized">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766935     -96 bytes)                     <requisites/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     -16 bytes)                   </file_based>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919      +0 bytes)                 </order>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -16 bytes)                 <ERROR time="2011-11-25 16:37:33" code="COM-80020009" text="COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError(&quot;org/apache/log4j/Logger&#13;&#10;org.apache.log4j.Logger&quot;), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766935     +32 bytes)                 <log level="info" highest_level="error" last_error="COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError(&quot;org/apache/log4j/Logger&#13;&#10;org.apache.log4j.Logger&quot;), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call" last_info="SCHEDULER-918  state=starting (at=never)" smtp="-"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767031     +96 bytes)               </task>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903    -128 bytes)             </tasks>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)             <queued_tasks length="0"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     +16 bytes)             <order_queue length="1"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919      +0 bytes)             <ERROR time="2011-11-25 16:37:33" code="COM-80020009" text="COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError(&quot;org/apache/log4j/Logger&#13;&#10;org.apache.log4j.Logger&quot;), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -16 bytes)             <log level="info" highest_level="info" last_info="SCHEDULER-930  Task 1 started - cause: Order chain1:test_chain1" smtp="-"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767015    +112 bytes)           </job>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903    -112 bytes)         </jobs>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)         <job_chains>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)           <job_chain path="/chain1" name="chain1" orders="1" running_orders="1" max_orders="1" state="running" orders_recoverable="yes">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766935     +32 bytes)             <file_based state="active" file="C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\chain1.job_chain.xml" last_write_time="2011-11-25T15:37:29.000Z">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767047    +112 bytes)               <requisites/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903    -144 bytes)             </file_based>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)             <job_chain_node state="100" next_state="success" error_state="error" job="/job1">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766951     +48 bytes)               <order_queue length="1" next_start_time="never">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766951      +0 bytes)                 <order path="/" order="test_chain1" id="test_chain1" state="100" initial_state="100" job_chain="/chain1" job="/job1" task="1" in_process_since="now" priority="0" created="2011-11-25 16:37:32.788" touched="yes" start_time="2011-11-25 16:37:32.791">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766983     +32 bytes)                   <file_based state="not_initialized">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766935     -48 bytes)                     <requisites/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     -16 bytes)                   </file_based>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919      +0 bytes)                 </order>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -16 bytes)               </order_queue>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)             </job_chain_node>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)             <job_chain_node state="success"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919     +16 bytes)             <job_chain_node state="error"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766919      +0 bytes)           </job_chain>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -16 bytes)         </job_chains>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)       </folder>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)       <subprocesses/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)       <remote_schedulers count="0" connected="0"/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766935     +32 bytes)       <http_server/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903     -32 bytes)       <connections/>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766903      +0 bytes)       <operations>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766871     -32 bytes) File_logger(Task job1:1, stdout: 0 bytes, stderr: 0 bytes), at 2011-11-25 15:37:34 UTC
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766967     +96 bytes) Directory_observer(C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\), at 2011-11-25 15:38:32 UTC
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766983     +16 bytes) Daylight_saving_time_transition_detector, possible begin of daylight saving time, at 2011-11-26 00:59:59 UTC
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766959     -24 bytes) </operations>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766927     -32 bytes)       <java_subsystem GlobalRef="46" NewGlobalRef="54" DeleteGlobalRef="8">
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (767007     +80 bytes) <!--For debugging only-->
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766959     -48 bytes)       </java_subsystem>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766959      +0 bytes)     </state>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766927     -32 bytes)   </answer>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766927      +0 bytes) </spooler>
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766927      +0 bytes) 
+25 16:37:33.163 javaw    0  3400.1EB4 460.496MB (766927      +0 bytes) 
+25 16:37:33.182 javaw   16  3400.1EB4 460.496MB (739090  -27837 bytes) {scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-931  state=stopped
+25 16:37:33.182 javaw    0  3400.1EB4 460.496MB (739058     -32 bytes) {scheduler} [info]   (Job  job1) SCHEDULER-931  state=stopping
+25 16:37:33.183 javaw    0  3400.1EB4 460.496MB (739106     +48 bytes) {scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-931  state=stopped
+25 16:37:33.195 javaw   16  3400.1EB4 460.496MB (736394   -2712 bytes) .pid=7712 GetExitCodeProcess() => 0, Prozess hat geendet
+25 16:37:33.195 javaw    0  3400.1EB4 460.496MB (736442     +48 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp")  => 12
+25 16:37:33.196 javaw    0  3400.1EB4 460.496MB (736362     -80 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp
+25 16:37:33.196 javaw    0  3400.1EB4 460.496MB (736442     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp")  => 12
+25 16:37:33.204 javaw   15  3400.1EB4 460.496MB (737050    +608 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp
+25 16:37:33.204 javaw    0  3400.1EB4 460.496MB (739051   +2001 bytes) {scheduler} [info]   (Task job1:1) java.lang.NoClassDefFoundError: org/apache/log4j/Logger 
+25 16:37:33.205 javaw    0  3400.1EB4 460.496MB (739083     +32 bytes) {scheduler} [info]   (Task job1:1) 	at com.sos.scheduler.engine.kernel.scripting.ScriptInstance.<init>(ScriptInstance.java:43) 
+25 16:37:33.205 javaw    0  3400.1EB4 460.496MB (739671    +588 bytes) {scheduler} [info]   (Task job1:1) 	at com.sos.scheduler.engine.kernel.scripting.APIModuleInstance.<init>(APIModuleInstance.java:61) 
+25 16:37:33.205 javaw    0  3400.1EB4 460.496MB (739671      +0 bytes) {scheduler} [info]   (Task job1:1) Caused by: java.lang.ClassNotFoundException: org.apache.log4j.Logger 
+25 16:37:33.206 javaw    0  3400.1EB4 460.496MB (739639     -32 bytes) {scheduler} [info]   (Task job1:1) 	at java.net.URLClassLoader$1.run(Unknown Source) 
+25 16:37:33.206 javaw    0  3400.1EB4 460.496MB (739623     -16 bytes) {scheduler} [info]   (Task job1:1) 	at java.security.AccessController.doPrivileged(Native Method) 
+25 16:37:33.206 javaw    0  3400.1EB4 460.496MB (739639     +16 bytes) {scheduler} [info]   (Task job1:1) 	at java.net.URLClassLoader.findClass(Unknown Source) 
+25 16:37:33.207 javaw    0  3400.1EB4 460.496MB (740433    +794 bytes) {scheduler} [info]   (Task job1:1) 	at java.lang.ClassLoader.loadClass(Unknown Source) 
+25 16:37:33.207 javaw    0  3400.1EB4 460.496MB (740433      +0 bytes) {scheduler} [info]   (Task job1:1) 	at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source) 
+25 16:37:33.207 javaw    0  3400.1EB4 460.496MB (740449     +16 bytes) {scheduler} [info]   (Task job1:1) 	at java.lang.ClassLoader.loadClass(Unknown Source) 
+25 16:37:33.208 javaw    0  3400.1EB4 460.496MB (740433     -16 bytes) {scheduler} [info]   (Task job1:1) 	... 2 more
+25 16:37:33.208 javaw    0  3400.1EB4 460.496MB (738945   -1488 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp")  => 12
+25 16:37:33.209 javaw    0  3400.1EB4 460.496MB (738929     -16 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp
+25 16:37:33.210 javaw    0  3400.1EB4 460.496MB (738321    -608 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp")  => 12
+25 16:37:33.211 javaw    0  3400.1EB4 460.496MB (738249     -72 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp
+25 16:37:33.211 javaw    0  3400.1EB4 460.496MB (738321     +72 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp")  => 12
+25 16:37:33.212 javaw    0  3400.1EB4 460.496MB (738249     -72 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp
+25 16:37:33.213 javaw    0  3400.1EB4 460.496MB (738409    +160 bytes) [ERROR SCHEDULER-280  Process terminated with exit code 1 (0x1)]
+25 16:37:33.213 javaw    0  3400.1EB4 460.496MB (738781    +372 bytes) {scheduler} [WARN]   (Task job1:1) SCHEDULER-280  Process terminated with exit code 1 (0x1)
+25 16:37:33.213 javaw    0  3400.1EB4 460.496MB (738373    -408 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp")  => 12
+25 16:37:33.214 javaw    0  3400.1EB4 460.496MB (738357     -16 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp
+25 16:37:33.214 javaw    0  3400.1EB4 460.496MB (738437     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp")  => 12
+25 16:37:33.215 javaw    0  3400.1EB4 460.496MB (738357     -80 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp
+25 16:37:33.216 javaw    0  3400.1EB4 460.496MB (738437     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp")  => 12
+25 16:37:33.216 javaw    0  3400.1EB4 460.496MB (738365     -72 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp
+25 16:37:33.217 javaw    0  3400.1EB4 460.496MB (738437     +72 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp")  => 12
+25 16:37:33.218 javaw   16  3400.1EB4 460.496MB (738365     -72 bytes) close(12) C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp
+25 16:37:33.227 javaw    0  3400.1EB4 460.496MB (738937    +572 bytes) unlink("C:\Users\schaedi\AppData\Local\Temp\sos5645.tmp")
+25 16:37:33.228 javaw    0  3400.1EB4 460.496MB (738937      +0 bytes) unlink("C:\Users\schaedi\AppData\Local\Temp\sos5634.tmp")
+25 16:37:33.228 javaw    0  3400.1EB4 460.496MB (738937      +0 bytes) unlink("C:\Users\schaedi\AppData\Local\Temp\sos5635.tmp")
+25 16:37:33.229 javaw    0  3400.1EB4 460.496MB (732401   -6536 bytes) {scheduler} [info]   (Task job1:1) SCHEDULER-843  Task has ended processing of Order chain1:test_chain1, state=100, on Scheduler 
+25 16:37:33.230 javaw    0  3400.1EB4 460.496MB (732285    -116 bytes) {scheduler} [debug9] (Order_queue chain1:100) remove_order Order chain1:test_chain1
+25 16:37:33.230 javaw    0  3400.1EB4 460.496MB (732173    -112 bytes) {scheduler} [info]   (Order chain1:test_chain1) set_state error
+25 16:37:33.239 javaw   15  3400.1EB4 460.496MB (733341   +1168 bytes) {scheduler} [info]   (Order chain1:test_chain1) SCHEDULER-945  No further job in job chain - order has been carried out
+25 16:37:33.240 javaw    0  3400.1EB4 460.496MB (734460   +1119 bytes) {scheduler} [info]   (Order chain1:test_chain1) SCHEDULER-940  Removing order from job chain
+25 16:37:33.242 javaw    0  3400.1EB4 460.496MB (735604   +1144 bytes) {log4j.com.sos.scheduler.engine.tests.excluded.ss.scripttest.JavaXScriptTest} order finished
+25 16:37:33.243 javaw    0  3400.1EB4 460.496MB (735560     -44 bytes) {JS-644} Schedule_use Order test_chain1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.244 javaw    0  3400.1EB4 460.496MB (735908    +348 bytes) {JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.244 javaw    0  3400.1EB4 460.496MB (735892     -16 bytes) {JS-644} Order test_chain1::sos::scheduler::folder::Dependant::remove_requisite 'Job_chain '
+25 16:37:33.244 javaw    0  3400.1EB4 460.496MB (736192    +300 bytes) {JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.245 javaw    0  3400.1EB4 460.496MB (736208     +16 bytes) {JS-644} Schedule_use Order test_chain1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.245 javaw    0  3400.1EB4 460.496MB (736224     +16 bytes) {JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.245 javaw    0  3400.1EB4 460.496MB (736208     -16 bytes) {JS-644} Order test_chain1::sos::scheduler::folder::Dependant::remove_requisite 'Job_chain '
+25 16:37:33.246 javaw    0  3400.1EB4 460.496MB (736192     -16 bytes) {JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.246 javaw    0  3400.1EB4 460.496MB (736784    +592 bytes) {scheduler} [WARN]   (Task job1:1) SCHEDULER-846  After task exception and due to stop_on_error='no', the order has been moved to error_state='error'
+25 16:37:33.246 javaw    0  3400.1EB4 460.496MB (737824   +1040 bytes) {scheduler} [debug3] (Job  job1) SCHEDULER-977  Job is not stopping because of <job stop_on_error="no">. Task error was: COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [Z-JAVA-105  Java exception java.lang.NoClassDefFoundError("org/apache/log4j/Logger 
+25 16:37:33.247 javaw    0  3400.1EB4 460.496MB (738096    +272 bytes) {scheduler} [debug3] (Job  job1) org.apache.log4j.Logger"), method=CallVoidMethodA [], in Remote_module_instance_server::construct], method=call
+25 16:37:33.247 javaw    0  3400.1EB4 460.496MB (737128    -968 bytes) {JS-644} Schedule_use Order test_chain1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.247 javaw    0  3400.1EB4 460.496MB (737256    +128 bytes) {JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.248 javaw    0  3400.1EB4 460.496MB (725452  -11804 bytes) {scheduler} [info]   (Task job1:1) SCHEDULER-918  state=closed
+25 16:37:33.249 javaw   16  3400.1EB4 460.496MB (725280    -172 bytes) {scheduler} [info]   (Job  job1) SCHEDULER-931  state=stopped
+25 16:37:33.250 javaw    0  3400.1EB4 460.496MB (725576    +296 bytes) {scheduler} [info]   (Task job1:1) SCHEDULER-962  Protocol ends in C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/task.job1.log
+25 16:37:33.251 javaw    0  3400.1EB4 460.496MB (714781  -10795 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state stopped
+25 16:37:33.251 javaw    0  3400.1EB4 460.496MB (714861     +80 bytes) .{scheduler} Scheduler_script_subsystem: state=stopped
+25 16:37:33.251 javaw    0  3400.1EB4 460.496MB (714845     -16 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state stopped
+25 16:37:33.252 javaw    0  3400.1EB4 460.496MB (714861     +16 bytes) .{scheduler} Standing_order_subsystem: state=stopped
+25 16:37:33.252 javaw    0  3400.1EB4 460.496MB (714845     -16 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state stopped
+25 16:37:33.252 javaw    0  3400.1EB4 460.496MB (714861     +16 bytes) .{scheduler} sos::scheduler::order::Order_subsystem_impl::close
+25 16:37:33.253 javaw    0  3400.1EB4 460.496MB (714877     +16 bytes) ..{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job_chain /chain1
+25 16:37:33.254 javaw    0  3400.1EB4 460.496MB (714929     +52 bytes) ..{scheduler} Job_chain /chain1.close()
+25 16:37:33.254 javaw    0  3400.1EB4 460.496MB (714833     -96 bytes) ...{scheduler} sos::scheduler::order::Order_sources::close
+25 16:37:33.255 javaw    0  3400.1EB4 460.496MB (714857     +24 bytes) ...{JS-644} job_chain::Node chain1:2::sos::scheduler::folder::Dependant::remove_requisite 'Job /job1'
+25 16:37:33.255 javaw    0  3400.1EB4 460.496MB (714857      +0 bytes) ...{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/job1'
+25 16:37:33.256 javaw    0  3400.1EB4 460.496MB (714513    -344 bytes) ...{JS-644} Job job1::sos::scheduler::Combined_job_nodes::disconnect_job_node (job_chain::Node chain1:2)
+25 16:37:33.256 javaw    0  3400.1EB4 460.496MB (712125   -2388 bytes) ..{scheduler} [debug9] (Job_chain_folder /) SCHEDULER-861  'Job_chain /chain1' has been removed
+25 16:37:33.257 javaw    0  3400.1EB4 460.496MB (711613    -512 bytes) ...{scheduler} Job_chain /chain1.close()
+25 16:37:33.257 javaw    0  3400.1EB4 460.496MB (711661     +48 bytes) ....{scheduler} sos::scheduler::order::Order_sources::close
+25 16:37:33.258 javaw    0  3400.1EB4 460.496MB (711685     +24 bytes) ....{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /job1'
+25 16:37:33.258 javaw    0  3400.1EB4 460.496MB (711717     +32 bytes) ....{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/job1'
+25 16:37:33.259 javaw    0  3400.1EB4 460.496MB (711461    -256 bytes) ..{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /job1'
+25 16:37:33.259 javaw    0  3400.1EB4 460.496MB (711445     -16 bytes) ..{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/job1'
+25 16:37:33.260 javaw    0  3400.1EB4 460.496MB (703191   -8254 bytes) ..{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job_chain /scheduler_service_forwarding
+25 16:37:33.261 javaw    0  3400.1EB4 460.496MB (703211     +20 bytes) ..{scheduler} Job_chain /scheduler_service_forwarding.close()
+25 16:37:33.261 javaw    0  3400.1EB4 460.496MB (703115     -96 bytes) ...{scheduler} sos::scheduler::order::Order_sources::close
+25 16:37:33.262 javaw    0  3400.1EB4 460.496MB (703155     +40 bytes) ...{JS-644} job_chain::Node scheduler_service_forwarding:2::sos::scheduler::folder::Dependant::remove_requisite 'Job /scheduler_service_forwarder'
+25 16:37:33.262 javaw    0  3400.1EB4 460.496MB (703171     +16 bytes) ...{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/scheduler_service_forwarder'
+25 16:37:33.263 javaw    0  3400.1EB4 460.496MB (702731    -440 bytes) ...{JS-644} Job scheduler_service_forwarder::sos::scheduler::Combined_job_nodes::disconnect_job_node (job_chain::Node scheduler_service_forwarding:2)
+25 16:37:33.263 javaw    0  3400.1EB4 460.496MB (700586   -2145 bytes) ..{scheduler} [debug9] (Job_chain_folder /) SCHEDULER-861  'Job_chain /scheduler_service_forwarding' has been removed
+25 16:37:33.264 javaw    0  3400.1EB4 460.496MB (699962    -624 bytes) ...{scheduler} Job_chain /scheduler_service_forwarding.close()
+25 16:37:33.264 javaw    0  3400.1EB4 460.496MB (700026     +64 bytes) ....{scheduler} sos::scheduler::order::Order_sources::close
+25 16:37:33.264 javaw    0  3400.1EB4 460.496MB (700066     +40 bytes) ....{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /scheduler_service_forwarder'
+25 16:37:33.265 javaw   16  3400.1EB4 460.496MB (700130     +64 bytes) ....{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/scheduler_service_forwarder'
+25 16:37:33.265 javaw    0  3400.1EB4 460.496MB (699858    -272 bytes) ..{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /scheduler_service_forwarder'
+25 16:37:33.265 javaw    0  3400.1EB4 460.496MB (699858      +0 bytes) ..{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/scheduler_service_forwarder'
+25 16:37:33.266 javaw    0  3400.1EB4 460.496MB (692983   -6875 bytes) .{scheduler} Job_chain_subsystem: state=stopped
+25 16:37:33.266 javaw    0  3400.1EB4 460.496MB (692919     -64 bytes) {scheduler} Job_subsystem: switch_subsystem_state stopped
+25 16:37:33.267 javaw    0  3400.1EB4 460.496MB (692939     +20 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job scheduler_service_forwarder
+25 16:37:33.268 javaw    0  3400.1EB4 460.496MB (693623    +684 bytes) .{scheduler} [info]   (Job  scheduler_service_forwarder) SCHEDULER-962  Protocol ends in C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/job.scheduler_service_forwarder.log
+25 16:37:33.269 javaw    0  3400.1EB4 460.496MB (692911    -712 bytes) .close(10) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.scheduler_service_forwarder.txt
+25 16:37:33.270 javaw    0  3400.1EB4 460.496MB (692811    -100 bytes) .{JS-644} Schedule_use Job scheduler_service_forwarder-->Schedule ::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.270 javaw    0  3400.1EB4 460.496MB (692843     +32 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.271 javaw    0  3400.1EB4 460.496MB (686046   -6797 bytes) .{JS-644} Schedule_use Job scheduler_service_forwarder-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.271 javaw    0  3400.1EB4 460.496MB (686078     +32 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.271 javaw    0  3400.1EB4 460.496MB (685422    -656 bytes) .{scheduler} [debug9] (Job_folder /) SCHEDULER-861  'Job scheduler_service_forwarder' has been removed
+25 16:37:33.272 javaw    0  3400.1EB4 460.496MB (676450   -8972 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.272 javaw    0  3400.1EB4 460.496MB (670350   -6100 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job job1
+25 16:37:33.274 javaw    0  3400.1EB4 460.496MB (670794    +444 bytes) .{scheduler} [info]   (Job  job1) SCHEDULER-962  Protocol ends in C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/job.job1.log
+25 16:37:33.275 javaw    0  3400.1EB4 460.496MB (670194    -600 bytes) .close(8) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.job1.txt
+25 16:37:33.276 javaw    0  3400.1EB4 460.496MB (670078    -116 bytes) .{JS-644} Schedule_use Job job1-->Schedule ::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.276 javaw    0  3400.1EB4 460.496MB (670094     +16 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.276 javaw    0  3400.1EB4 460.496MB (663201   -6893 bytes) .{JS-644} Schedule_use Job job1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.277 javaw    0  3400.1EB4 460.496MB (663217     +16 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.277 javaw    0  3400.1EB4 460.496MB (662301    -916 bytes) .{scheduler} [debug9] (Job_folder /) SCHEDULER-861  'Job job1' has been removed
+25 16:37:33.278 javaw    0  3400.1EB4 460.496MB (652406   -9895 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.278 javaw    0  3400.1EB4 460.496MB (645794   -6612 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job scheduler_file_order_sink
+25 16:37:33.280 javaw   15  3400.1EB4 460.496MB (646414    +620 bytes) .{scheduler} [info]   (Job  scheduler_file_order_sink) SCHEDULER-962  Protocol ends in C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log/job.scheduler_file_order_sink.log
+25 16:37:33.280 javaw    0  3400.1EB4 460.496MB (645718    -696 bytes) .close(6) C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\log\history.job.scheduler_file_order_sink.txt
+25 16:37:33.281 javaw    0  3400.1EB4 460.496MB (645618    -100 bytes) .{JS-644} Schedule_use Job scheduler_file_order_sink-->Schedule ::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.281 javaw    0  3400.1EB4 460.496MB (645650     +32 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.282 javaw    0  3400.1EB4 460.496MB (638853   -6797 bytes) .{JS-644} Schedule_use Job scheduler_file_order_sink-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+25 16:37:33.282 javaw    0  3400.1EB4 460.496MB (638885     +32 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.283 javaw    0  3400.1EB4 460.496MB (637969    -916 bytes) .{scheduler} [debug9] (Job_folder /) SCHEDULER-861  'Job scheduler_file_order_sink' has been removed
+25 16:37:33.283 javaw    0  3400.1EB4 460.496MB (629061   -8908 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+25 16:37:33.284 javaw    0  3400.1EB4 460.496MB (622562   -6499 bytes) .{scheduler} Job_subsystem: state=stopped
+25 16:37:33.284 javaw    0  3400.1EB4 460.496MB (622498     -64 bytes) {scheduler} Task_subsystem: switch_subsystem_state stopped
+25 16:37:33.284 javaw    0  3400.1EB4 460.496MB (622514     +16 bytes) .{scheduler} Task_subsystem: state=not_initialized
+25 16:37:33.284 javaw    0  3400.1EB4 460.496MB (622514      +0 bytes) {scheduler} Lock_subsystem: switch_subsystem_state stopped
+25 16:37:33.284 javaw    0  3400.1EB4 460.496MB (622514      +0 bytes) .{scheduler} Lock_subsystem: state=stopped
+25 16:37:33.285 javaw    0  3400.1EB4 460.496MB (622498     -16 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state stopped
+25 16:37:33.285 javaw    0  3400.1EB4 460.496MB (622546     +48 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Process_class (temporaries)
+25 16:37:33.286 javaw    0  3400.1EB4 460.496MB (623102    +556 bytes) .{scheduler} [debug9] (Process_class_folder /) SCHEDULER-861  'Process_class (temporaries)' has been removed
+25 16:37:33.287 javaw    0  3400.1EB4 460.496MB (618162   -4940 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Process_class 
+25 16:37:33.287 javaw    0  3400.1EB4 460.496MB (618522    +360 bytes) .{scheduler} [debug9] (Process_class_folder /) SCHEDULER-861  'Process_class' has been removed
+25 16:37:33.288 javaw    0  3400.1EB4 460.496MB (613710   -4812 bytes) .{scheduler} Process_class_subsystem: state=stopped
+25 16:37:33.288 javaw    0  3400.1EB4 460.496MB (613774     +64 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state stopped
+25 16:37:33.288 javaw    0  3400.1EB4 460.496MB (613790     +16 bytes) .{scheduler} Schedule_subsystem: state=stopped
+25 16:37:33.288 javaw    0  3400.1EB4 460.496MB (613758     -32 bytes) {scheduler} Folder_subsystem: switch_subsystem_state stopped
+25 16:37:33.288 javaw    0  3400.1EB4 460.496MB (613750      -8 bytes) .{scheduler} FindCloseChangeNotification(Event Remote_configurations C:\Users\schaedi\AppData\Local\Temp\1322235452125-0\config\)
+25 16:37:33.289 javaw    0  3400.1EB4 460.496MB (610162   -3588 bytes) .{scheduler} Folder_subsystem: state=stopped
+25 16:37:33.289 javaw    0  3400.1EB4 460.496MB (610066     -96 bytes) {scheduler} Event_subsystem: switch_subsystem_state stopped
+25 16:37:33.289 javaw    0  3400.1EB4 460.496MB (610082     +16 bytes) .{scheduler} Event_subsystem: state=active
+25 16:37:33.289 javaw    0  3400.1EB4 460.496MB (610066     -16 bytes) {scheduler} Supervisor: switch_subsystem_state stopped
+25 16:37:33.290 javaw    0  3400.1EB4 460.496MB (602334   -7732 bytes) .{scheduler} Supervisor: state=stopped
+25 16:37:33.290 javaw    0  3400.1EB4 460.496MB (601950    -384 bytes) {scheduler} Java_subsystem: switch_subsystem_state stopped
+25 16:37:33.290 javaw    0  3400.1EB4 460.496MB (601966     +16 bytes) .{scheduler} Java_subsystem: state=stopped
+25 16:37:33.291 javaw    0  3400.1EB4 460.496MB (602230    +264 bytes) {scheduler} [info]   --------------------------------------------
+25 16:37:33.291 javaw    0  3400.1EB4 460.496MB (602142     -88 bytes) {scheduler} [info]   SCHEDULER-902  state=stopped
+25 16:37:33.293 javaw    0  3400.1EB4 460.496MB (536759  -65383 bytes) {scheduler} [info]   SCHEDULER-999  Scheduler has been terminated properly
+25 16:37:33.296 javaw   16  3400.1EB4 460.496MB (47122 -489637 bytes) {scheduler} Executable will be terminated.
