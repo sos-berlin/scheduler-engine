@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job_chain orders_recoverable="yes"
+           visible="yes"
+           max_orders="1">
+    <job_chain_node state="100"
+                    job="job1"
+                    next_state="success"
+                    error_state="error"/>
+    <job_chain_node state="success"/>
+    <job_chain_node state="error"/>
+</job_chain>
