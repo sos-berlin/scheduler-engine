@@ -4,9 +4,7 @@
      stop_on_error="no">
     <script language="shell">
         <![CDATA[
-echo JOB2_RESULT=%NODE_PARAM%
-echo SCHEDULER_VARIABLE_NAME_PREFIX=%SCHEDULER_VARIABLE_NAME_PREFIX%
-echo JOB2_RESULT=%NODE_PARAM% >> %SCHEDULER_PARAM_RESULT_FILE%
+echo SCHEDULER_VARIABLE_NAME_PREFIX=$SCHEDULER_VARIABLE_NAME_PREFIX >> $MYPREFIX_RESULT_FILE
         ]]>
     </script>
     <run_time/>

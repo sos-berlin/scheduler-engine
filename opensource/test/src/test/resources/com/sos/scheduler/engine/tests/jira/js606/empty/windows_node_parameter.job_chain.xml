@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job_chain orders_recoverable="yes"
+           visible="yes"
+           max_orders="1">
+    <job_chain_node state="100"
+                    job="windows_job"
+                    next_state="200"
+                    error_state="error"/>
+    <job_chain_node state="200"
+                    job="windows_job"
+                    next_state="300"
+                    error_state="error"/>
+    <job_chain_node state="300"
+                    job="windows_prefix"
+                    next_state="success"
+                    error_state="error"/>
+    <job_chain_node state="success"/>
+    <job_chain_node state="error"/>
+</job_chain>

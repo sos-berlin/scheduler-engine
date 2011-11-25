@@ -4,7 +4,7 @@
      stop_on_error="no">
     <script language="shell">
         <![CDATA[
-echo JOB2_RESULT=%SCHEDULER_PARAM_NODE_PARAM% >> %SCHEDULER_PARAM_RESULT_FILE%
+echo JOB_RESULT=%NODE_PARAM% >> %RESULT_FILE%
         ]]>
     </script>
     <run_time/>
