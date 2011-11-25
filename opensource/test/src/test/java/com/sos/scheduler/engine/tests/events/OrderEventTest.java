@@ -8,12 +8,14 @@ import org.slf4j.LoggerFactory;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class OrderEventTest extends SchedulerTest {
 
 	private static Logger logger;
 	private int count = 0;
+	private Time timeout = Time.of(20);
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -24,7 +26,7 @@ public class OrderEventTest extends SchedulerTest {
 	@Test
 	public void test() throws InterruptedException {
 		controller().startScheduler();
-		controller().waitForTermination(shortTimeout);
+		controller().waitForTermination(timeout);
 	}
 
 	@HotEventHandler

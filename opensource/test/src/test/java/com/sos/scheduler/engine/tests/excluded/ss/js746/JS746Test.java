@@ -52,6 +52,7 @@ import com.sos.scheduler.engine.test.SchedulerTest;
  */
 @SuppressWarnings("deprecation")
 public class JS746Test extends SchedulerTest {
+	
 	private static final Logger logger = LoggerFactory.getLogger(JS746Test.class);
 
 	private static DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;

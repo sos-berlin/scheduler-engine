@@ -40,7 +40,36 @@
 	                </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>attach-javadocs</id>
+                  <goals>
+                    <goal>jar</goal>
+                    <goal>test-jar</goal>
+                  </goals>
+                </execution>
+              </executions>
+           </plugin>
+        <!-- es ist nicht klar, wie dieses plugin genutzt werden kann
+        <plugin>
+          <groupId>com.soebes.maven.plugins.dmg</groupId>
+          <artifactId>doxygen-maven-plugin</artifactId>
+          <version>1.0.1</version>
+          <executions>
+            <execution>
+              <id>doxygen</id>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+         --> 
         </plugins>
+        
         <resources>
             <resource>
                 <!-- Standard Wiederholen -->
@@ -68,7 +97,7 @@
             </testResource>
         </testResources>
     </build>
-
+    
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
