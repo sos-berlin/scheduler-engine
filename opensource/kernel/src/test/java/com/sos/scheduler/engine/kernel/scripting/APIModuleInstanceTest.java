@@ -1,50 +1,61 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sos.scheduler.engine.kernel.scheduler.LogMock;
+
 public class APIModuleInstanceTest {
 	
 	private final static String script_root = "./src/test/scripts/";
 
-//	@Test
-//	public void javascriptApi() throws NoSuchMethodException {
-//		String script = "var cnt;\n"
-//			+ "function scheduler_init() {\n"
-//			+ "   cnt = 0;\n"
-//			+ "   return true;\n"
-//			+ "}"
-//			+ " "
-//			+ "function scheduler_process() {\n"
-//			+ "  if (cnt < 5) {;\n"
-//			+ "    cnt++;\n"
-//			+ "    print('iteration no ' + cnt + '\\n');\n"
-//			+ "    return true;\n"
-//			+ "  }"
-//			+ "  return false;\n"
-//			+ "}";
-//		System.out.println("START javascriptApi ---------------------------------------------------------------------");
-//		APIModuleInstance module = new APIModuleInstance(new PrefixLog(), "javascript",script);
-//		module.call("scheduler_init");
-//		while (module.callBoolean("scheduler_process")) {
-//			;
-//		}
-//		System.out.println("END javascriptApi -----------------------------------------------------------------------");
-//	}
+	private static final Logger logger = LoggerFactory.getLogger(APIModuleInstanceTest.class);
 
-//	@Test
-//	public void javascriptWithoutFunctions() {
-//		System.out.println("START javascriptWithoutFunctions ---------------------------------------------------------------------");
-//		String script =	"print('script ran successfully\\n');\n";
-//		APIModuleInstance module = new APIModuleInstance("javascript",script);
-//		module.call("scheduler_init");
-//		module.call("scheduler_process");
-//		module.call("scheduler_exit");
-//		System.out.println("END javascriptWithoutFunctions -----------------------------------------------------------------------");
-//	}
+	@Test
+	public void javascriptApi() throws NoSuchMethodException {
+		String script = "var cnt;\n"
+			+ "function spooler_init() {\n"
+			+ "   cnt = 0;\n"
+			+ "   return true;\n"
+			+ "}"
+			+ " "
+			+ "function scheduler_process() {\n"
+			+ "  if (cnt < 5) {;\n"
+			+ "    cnt++;\n"
+			+ "    print('iteration no ' + cnt + '\\n');\n"
+			+ "    return true;\n"
+			+ "  }"
+			+ "  return false;\n"
+			+ "}";
+		logger.debug("START javascriptApi ---------------------------------------------------------------------");
+		APIModuleInstance module = new APIModuleInstance("javascript",script);
+		module.call("scheduler_init");
+		while (module.callBoolean("scheduler_process")) {;}
+		logger.debug("END javascriptApi -----------------------------------------------------------------------");
+	}
 
-	/*
+	/**
+	 * Spooler_process is the implicitly given function if no function body exists. This behavior is similiar to
+	 * the current behavior for using the scripting API  
+	 */
+	@Test
+	public void javascriptWithoutFunctions() {
+		logger.debug("START javascriptWithoutFunctions ---------------------------------------------------------------------");
+		String script =	"print('script ran successfully\\n');\n";
+		APIModuleInstance module = new APIModuleInstance("javascript",script);
+		module.call("spooler_init");
+		module.call("spooler_process");
+		module.call("spooler_exit");
+		logger.debug("END javascriptWithoutFunctions -----------------------------------------------------------------------");
+	}
+
+	/**
 	 * \brief Executes a simple javascript
 	 * \detail
-	 * Calls a javascript snippet and gives them some objects
-	 * via the addObject method.
+	 * Calls a javascript snippet and gives them some objects via the addObject method.
+	 * 
 	 * The script does not contain any function, but calls the scheduler_process
 	 * method to cause the executing of the script. This is a special behavior 
 	 * of the JobScheduler api: The execution of call("scheduler_process") is just the 
@@ -52,17 +63,17 @@ public class APIModuleInstanceTest {
 	 * http://www.mozilla.org/rhino/
 	 * jar-file: inherited in java
 	 */
-//	@Test
-//	public void javascriptWithObjects() {
-//		System.out.println("START javascriptWithObjects ---------------------------------------------------------------------");
-//		String script =	"print('hello, my name ist ' + name + '\\n');\n" +
-//				"log.debug('hello my name ist ' + name + '\\n')\n";
-//		APIModuleInstance module = new APIModuleInstance("javascript",script);
-//		module.addObject("walter", "name");
-//		module.addObject(new LogMock(), "log");
-//		module.call("scheduler_process");
-//		System.out.println("END javascriptWithObjects -----------------------------------------------------------------------");
-//	}
+	@Test
+	public void javascriptWithObjects() {
+		logger.debug("START javascriptWithObjects ---------------------------------------------------------------------");
+		String script =	"print('hello, my name ist ' + name + '\\n');\n" +
+				"log.debug('hello my name ist ' + name + '\\n')\n";
+		APIModuleInstance module = new APIModuleInstance("javascript",script);
+		module.addObject("walter", "name");
+		module.addObject(new LogMock(), "log");
+		module.call("scheduler_process");
+		logger.debug("END javascriptWithObjects -----------------------------------------------------------------------");
+	}
 
 	/*
 	 * \brief Executes a simple jython script
@@ -78,7 +89,7 @@ public class APIModuleInstanceTest {
 //	 @Test
 	//	maven dependencies not found for bean
 //	public void jythonScriptFromFile() {
-//		System.out.println("START jythonScriptFromFile ---------------------------------------------------------------------");
+//		logger.debug("START jythonScriptFromFile ---------------------------------------------------------------------");
 //		APIModuleInstance module = new APIModuleInstance("jython","");
 //		module.setSourceFile(script_root + "test.py");
 //		module.addObject("jythonScriptFromFile", "name");
@@ -92,7 +103,7 @@ public class APIModuleInstanceTest {
 //			e.printStackTrace();
 //		}
 //		module.call("scheduler_exit");
-//		System.out.println("END jythonScriptFromFile -----------------------------------------------------------------------");
+//		logger.debug("END jythonScriptFromFile -----------------------------------------------------------------------");
 //	}
 
 	/*
@@ -106,8 +117,9 @@ public class APIModuleInstanceTest {
 	 */
 //	 @Test
 	//	maven dependencies not found for groovy
+	@Ignore
 	public void groovyScriptFromFile() throws NoSuchMethodException {
-		System.out.println("START groovyScriptFromFile --------------------------------------------------------------------");
+		logger.debug("START groovyScriptFromFile --------------------------------------------------------------------");
 		ScriptInstance module = new ScriptInstance("groovy");
 		module.setSourceFile(script_root + "test.groovy");
 		module.addObject("groovyScriptFromFile", "name");
@@ -116,7 +128,7 @@ public class APIModuleInstanceTest {
 			;
 		}
 		module.call("scheduler_exit");
-		System.out.println("END groovyScriptFromFile -----------------------------------------------------------------------");
+		logger.debug("END groovyScriptFromFile -----------------------------------------------------------------------");
 	}
 
 }
