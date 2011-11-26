@@ -506,7 +506,7 @@ ptr<Module_instance> Module::create_instance_impl()
                 Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
             }
             
-                ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
+            ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
             result = +p;
             break;
         }
