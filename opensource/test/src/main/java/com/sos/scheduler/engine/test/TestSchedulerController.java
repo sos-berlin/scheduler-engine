@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.test;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
@@ -20,7 +21,6 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.main.CppBinary;
@@ -30,6 +30,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
     public static final Time shortTimeout = Time.of(10);
 
+    private final Thread thread = Thread.currentThread();
     private final Environment environment;
     private boolean terminateOnError = true;
     private Scheduler scheduler = null;
@@ -66,8 +67,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
     public final void runScheduler(Time timeout, String... args) {
-        startScheduler(args);
-        waitUntilSchedulerIsActive();
+        activateScheduler(args);
         waitForTermination(timeout);
     }
 
@@ -80,6 +80,11 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         } catch (SchedulerRunningAfterTimeoutException x) {
             logger.warn("runSchedulerAndTerminate():"+ x.getMessage());
         }
+    }
+
+    public final void activateScheduler(String... args) {
+        startScheduler(args);
+        waitUntilSchedulerIsActive();
     }
 
     @Override public final void startScheduler(String... args) {
@@ -107,18 +112,21 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final Scheduler scheduler() {
-        return waitUntilSchedulerIsActive();
+        if (scheduler == null) {
+            checkState(Thread.currentThread() == thread, "TestSchedulerController.waitUntilSchedulerIsActive() must be called in constructing thread");
+            if (!delegate.isStarted())
+                startScheduler();
+            waitUntilSchedulerIsActive();
+        }
+        return scheduler;
     }
 
     /** Wartet, bis das Objekt {@link Scheduler} verfügbar ist. */
-    public final Scheduler waitUntilSchedulerIsActive() {
-        if (scheduler == null) {
-            scheduler = delegate.waitUntilSchedulerState(SchedulerState.active);
-            if (terminateOnError) checkForErrorLogLine();
-            if (scheduler == null)
-                throw new SchedulerException("Scheduler aborted before startup");
-        }
-        return scheduler;
+    public final void waitUntilSchedulerIsActive() {
+        Scheduler previous = scheduler;
+        scheduler = delegate.waitUntilSchedulerState(SchedulerState.active);
+        if (scheduler == null) throw new RuntimeException("Scheduler aborted before startup");
+        if (previous == null && terminateOnError) checkForErrorLogLine();
     }
 
     public final void waitForTermination(Time timeout) {

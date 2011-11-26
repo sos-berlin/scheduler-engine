@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -18,6 +17,7 @@ import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 /** Steuert den {@link SchedulerThread}. */
 public class SchedulerThreadController implements SchedulerController {
     private static final Logger logger = Logger.getLogger(SchedulerThreadController.class);
+    private static final Time terminationTimeout = Time.of(5);
 
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
     private Settings settings = DefaultSettings.singleton;
@@ -44,6 +44,8 @@ public class SchedulerThreadController implements SchedulerController {
 
     @Override public final void close() {
         terminateScheduler();
+        if (!tryWaitForTermination(terminationTimeout))
+            logger.warn("Still waiting for JobScheduler termination ("+terminationTimeout+") ...");
         tryWaitForTermination(Time.eternal);
         assert !thread.isAlive();
         controllerBridge.close();
@@ -59,10 +61,6 @@ public class SchedulerThreadController implements SchedulerController {
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
-
-//    @Override public final SchedulerState getSchedulerState() {
-//        return stateThreadBridge.getState();
-//    }
 
     @Override public final boolean tryWaitForTermination(Time timeout) {
         try {
@@ -92,6 +90,10 @@ public class SchedulerThreadController implements SchedulerController {
             else
                 throw propagate(x);
         }
+    }
+
+    public final boolean isStarted() {
+        return isStarted;
     }
 
     @Override public final int exitCode() {
