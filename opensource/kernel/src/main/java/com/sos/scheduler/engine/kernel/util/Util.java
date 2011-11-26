@@ -2,10 +2,6 @@ package com.sos.scheduler.engine.kernel.util;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collections;
-
 import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
@@ -17,22 +13,10 @@ public final class Util {
 
     private Util() {}
 
-    public static void throwUnchecked(Throwable x) {
-        if (x instanceof Error)  throw (Error)x;
-        if (x instanceof RuntimeException)  throw (RuntimeException)x;
-        throw new WrappedThrowable(x);
-    }
-
     public static String stringOrException(Object o) {
         try {
             return o == null? "null" : o.toString();
         } catch (Throwable x) { return x.toString(); }
-    }
-
-    private static final class WrappedThrowable extends RuntimeException {
-        private WrappedThrowable(Throwable t) {
-            super(t);
-        }
     }
 
     public static boolean booleanOf(String s, boolean nullDefault, boolean emptyDefault) {
