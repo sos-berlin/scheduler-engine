@@ -8,7 +8,7 @@
             //String request_string = new String( request.binary_content(), request.charset_name() );
             var response = op.response
             response.content_type = "text/plain"
-            response.charset_name = "UTF-8"
+            response.charset_name = "ISO-8859-1"
             response.string_content = "Bye!"
             response.send()
         }

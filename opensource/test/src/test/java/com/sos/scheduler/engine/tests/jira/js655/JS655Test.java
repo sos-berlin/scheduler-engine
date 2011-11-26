@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js655;
 
-import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.sos.scheduler.engine.tests.jira.js655.JS655Test.M.jobChainActivated;
 import static com.sos.scheduler.engine.tests.jira.js655.JS655Test.M.jobChainRemoved;
 import static com.sos.scheduler.engine.tests.jira.js655.JS655Test.M.terminated;
-import static java.lang.Thread.sleep;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -108,7 +107,7 @@ public class JS655Test extends SchedulerTest {
     }
 
     private class WebClient {
-        private final Charset encoding = UTF_8;
+        private final Charset encoding = ISO_8859_1;
         private final ContentExchange contentExchange = new ContentExchange();
 
         WebClient(String url) throws Exception {
