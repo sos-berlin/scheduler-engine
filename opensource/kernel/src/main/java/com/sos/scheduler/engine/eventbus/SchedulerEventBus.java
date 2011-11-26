@@ -12,8 +12,8 @@ public class SchedulerEventBus implements EventBus {
     }
 
     @Override public final void unregisterAnnotated(EventHandlerAnnotated o) {
-        hotEventBus.registerAnnotated(o);
-        coldEventBus.registerAnnotated(o);
+        hotEventBus.unregisterAnnotated(o);
+        coldEventBus.unregisterAnnotated(o);
     }
 
     public final void registerHot(EventSubscription s) {
