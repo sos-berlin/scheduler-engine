@@ -8,7 +8,12 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** Testet {@link com.sos.scheduler.engine.test.SchedulerTest} */
 public final class FailingSchedulerReadyEventHandlerTest extends SchedulerTest {
-    @Test(expected=MyError.class) public void quickTest() {
+    @Test(expected=MyError.class) public void activateTest() {
+        controller().activateScheduler();
+        controller().close();
+    }
+
+    @Test(expected=MyError.class) public void startTest() {
         controller().startScheduler();
         controller().close();
     }
