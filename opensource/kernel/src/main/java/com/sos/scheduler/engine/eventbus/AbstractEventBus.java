@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.eventbus;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.HashMultimap;
@@ -29,24 +29,24 @@ public abstract class AbstractEventBus implements EventBus {
         this(new ImmutableList.Builder<Class<? extends Annotation>>().add(annotation).build());
     }
 
-    public final void registerAnnotated(EventHandlerAnnotated o) {
+    @Override public final void registerAnnotated(EventHandlerAnnotated o) {
         unregisterAnnotated(o);
         Iterable<EventSubscription> subscribers = handlerFinder.handlers(o);
         annotatedEventSubscriberMap.putAll(o, subscribers);
-        register(subscribers);
+        registerAll(subscribers);
     }
 
-    public final void unregisterAnnotated(EventHandlerAnnotated o) {
-        unregister(annotatedEventSubscriberMap.get(o));
+    @Override public final void unregisterAnnotated(EventHandlerAnnotated o) {
+        unregisterAll(annotatedEventSubscriberMap.get(o));
         annotatedEventSubscriberMap.removeAll(o);
     }
 
-    private void register(Iterable<EventSubscription> subscribers) {
+    private void registerAll(Iterable<EventSubscription> subscribers) {
         for (EventSubscription s: subscribers)
             register(s);
     }
 
-    private void unregister(Iterable<EventSubscription> subscribers) {
+    private void unregisterAll(Iterable<EventSubscription> subscribers) {
         for (EventSubscription s: subscribers)
             unregister(s);
     }
@@ -71,27 +71,26 @@ public abstract class AbstractEventBus implements EventBus {
         else return result.build();
     }
 
-    public final void publishNow(Event e) {
-        for (Call call: calls(e))
+    public final boolean publishNow(Event e) {
+        boolean published = false;
+        for (Call call: calls(e)) {
             dispatchCall(call);
+            published = true;
+        }
+        return published;
     }
 
-    protected final void dispatchCall(Call call) {
+    protected final boolean dispatchCall(Call call) {
         try {
             call.apply();
-        } catch (Throwable x) {   // TODO Der C++-Code soll wirklich keine Exception bekommen.
-            logger.error(call+": "+x, x);
+            return true;
+        } catch (Throwable t) {   // Der C++-Code soll wirklich keine Exception bekommen.
+            logger.log(t instanceof Error? Level.FATAL : Level.ERROR, call+": "+t, t);
             //Löst ein rekursives Event aus: log().error(s+": "+x);
-            if (call.getEvent().getClass() != EventHandlerFailedEvent.class)
-                publishFailedEvent(new EventHandlerFailedEvent(call, x));
-        }
-    }
-
-    private void publishFailedEvent(EventHandlerFailedEvent e) {
-        try {
-            publishNow(e);
-        } catch (Throwable x) {   // TODO Der C++-Code soll wirklich keine Exception bekommen.
-            logger.error(e +": "+ x, x);
+            if (call.getEvent().getClass() == EventHandlerFailedEvent.class)
+                return false;
+            else
+                return publishNow(new EventHandlerFailedEvent(call, t));
         }
     }
 }

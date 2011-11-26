@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.test;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.main.SchedulerController;
-import com.sos.scheduler.engine.main.SchedulerState;
-import com.sos.scheduler.engine.main.SchedulerThreadController;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.main.SchedulerController;
+import com.sos.scheduler.engine.main.SchedulerThreadController;
 
 abstract class DelegatingSchedulerController implements SchedulerController {
-    protected final SchedulerThreadController delegate = new SchedulerThreadController();
+    private final SchedulerThreadController delegate = new SchedulerThreadController();
 
     @Override public final void setSettings(Settings o) {
         delegate.setSettings(o);
@@ -30,7 +29,11 @@ abstract class DelegatingSchedulerController implements SchedulerController {
         return delegate.exitCode();
     }
 
-    @Override public SchedulerEventBus getEventBus() {
+    @Override public final SchedulerEventBus getEventBus() {
         return delegate.getEventBus();
+    }
+
+    protected final SchedulerThreadController getDelegate() {
+        return delegate;
     }
 }

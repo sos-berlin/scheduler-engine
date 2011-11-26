@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.main;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;
 
@@ -10,6 +9,7 @@ public interface SchedulerController {
     /** @throws IllegalStateException, wenn nach {@link #startScheduler(String...)} aufgerufen. */
     void setSettings(Settings o);
 
+    /** Startet den Scheduler ohne zu warten. */
     void startScheduler(String... arguments);
 
     /** Veranlasst die Beendigung des Schedulers, wartet aufs Ende und schließt alles. */

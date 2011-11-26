@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.test;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 import static com.sos.scheduler.engine.test.binary.TestCppBinaries.cppBinaries;
@@ -44,25 +43,13 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         terminateOnError = o;
     }
 
-    @EventHandler
-    public final void handleEvent(ErrorLogEvent e) {
-        if (terminateOnError)
-            terminateAfterException(new RuntimeException("Test terminated after error log line: "+ e.getMessage()));
-    }
-
-    @EventHandler @HotEventHandler  // Beide, weil das Event wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.
-    public final void handleEvent(EventHandlerFailedEvent e) {
-        if (terminateOnError)
-            terminateAfterException(e.getThrowable());
-    }
-
     public final void subscribeEvents(EventSubscription s) {
-        delegate.getEventBus().registerHot(s);
+        getEventBus().registerHot(s);
     }
 
     @Deprecated
     public final void subscribeEvents(EventSubscriber s) {
-        delegate.getEventBus().registerHot(new EventSubscriberAdaptingEventSubscription(s));
+        getEventBus().registerHot(new EventSubscriberAdaptingEventSubscription(s));
     }
 
     /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
@@ -82,54 +69,63 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         }
     }
 
+    /** Startet den Scheduler und wartet, bis er aktiv ist. */
     public final void activateScheduler(String... args) {
         startScheduler(args);
         waitUntilSchedulerIsActive();
     }
 
     @Override public final void startScheduler(String... args) {
-        delegate.getEventBus().registerAnnotated(this);
+        getEventBus().registerAnnotated(this);
         prepare();
         Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries()), Arrays.asList(args));
-        delegate.startScheduler(toArray(allArgs, String.class));
+        getDelegate().startScheduler(toArray(allArgs, String.class));
     }
 
     @Override public final void close() {
         try {
-            delegate.getEventBus().unregisterAnnotated(this);
-            delegate.close();
-            environment.close();
+            getDelegate().close();
         }
-        catch (Throwable x) {
-            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
-            throw propagate(x);
+//        catch (Throwable x) {
+//            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
+//            throw propagate(x);
+//        }
+        finally {
+            environment.close();
+            getEventBus().unregisterAnnotated(this);
         }
     }
 
     private void prepare() {
         environment.prepare();
-        delegate.loadModule(cppBinaries().file(CppBinary.moduleFilename));
+        getDelegate().loadModule(cppBinaries().file(CppBinary.moduleFilename));
     }
 
     public final Scheduler scheduler() {
         if (scheduler == null) {
-            checkState(Thread.currentThread() == thread, "TestSchedulerController.waitUntilSchedulerIsActive() must be called in constructing thread");
-            if (!delegate.isStarted())
-                startScheduler();
+            automaticStart();
             waitUntilSchedulerIsActive();
         }
         return scheduler;
     }
 
+    private void automaticStart() {
+        if (!getDelegate().isStarted()) {
+            checkState(Thread.currentThread() == thread, "TestSchedulerController.automaticStart() must be called in constructing thread");
+            startScheduler();
+        }
+    }
+
     /** Wartet, bis das Objekt {@link Scheduler} verfügbar ist. */
     public final void waitUntilSchedulerIsActive() {
         Scheduler previous = scheduler;
-        scheduler = delegate.waitUntilSchedulerState(SchedulerState.active);
+        scheduler = getDelegate().waitUntilSchedulerState(SchedulerState.active);
         if (scheduler == null) throw new RuntimeException("Scheduler aborted before startup");
         if (previous == null && terminateOnError) checkForErrorLogLine();
     }
 
     public final void waitForTermination(Time timeout) {
+        automaticStart();
         boolean ok = tryWaitForTermination(timeout);
         if (!ok) throw new SchedulerRunningAfterTimeoutException(timeout);
     }
@@ -139,6 +135,17 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 //        String lastErrorLine = scheduler.log().lastByLevel(SchedulerLogLevel.error);
 //        if (!lastErrorLine.isEmpty())
 //            throw throwErrorLogException(lastErrorLine);
+    }
+
+    @EventHandler public final void handleEvent(ErrorLogEvent e) {
+        if (terminateOnError)
+            terminateAfterException(new RuntimeException("Test terminated after error log line: "+ e.getMessage()));
+    }
+
+    @EventHandler @HotEventHandler  // Beide, weil das Event wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.
+    public final void handleEvent(EventHandlerFailedEvent e) {
+        if (terminateOnError)
+            terminateAfterException(e.getThrowable());
     }
 
     /** Eine Exception in {@code runnable} beendet den Scheduler. */

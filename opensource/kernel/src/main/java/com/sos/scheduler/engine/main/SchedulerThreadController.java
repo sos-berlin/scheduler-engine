@@ -27,7 +27,7 @@ public class SchedulerThreadController implements SchedulerController {
     private final SchedulerThread thread = new SchedulerThread(controllerBridge);
 
     @Override public final void setSettings(Settings o) {
-        checkState(!isStarted, "Scheduler has already been started");
+        checkIsNotStarted();
         settings = o;
     }
 
@@ -36,7 +36,7 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void startScheduler(String... args) {
-        checkState(!isStarted, "Scheduler has already been started");
+        checkIsNotStarted();
         controllerBridge.start();
         thread.startThread(args);
         isStarted = true;
@@ -44,32 +44,22 @@ public class SchedulerThreadController implements SchedulerController {
 
     @Override public final void close() {
         terminateScheduler();
-        if (!tryWaitForTermination(terminationTimeout))
+        if (!tryJoinThread(terminationTimeout))
             logger.warn("Still waiting for JobScheduler termination ("+terminationTimeout+") ...");
-        tryWaitForTermination(Time.eternal);
-        assert !thread.isAlive();
+        tryJoinThread(Time.eternal);
         controllerBridge.close();
         eventBus.dispatchEvents();  // Thread-sicher, weil der Scheduler-Thread beendet ist, also selbst kein dispatchEvents() mehr aufrufen kann.
+        throwableMailbox.throwUncheckedIfSet();
     }
 
     public final Scheduler waitUntilSchedulerState(SchedulerState s) {
         try {
-            checkState(isStarted, "Scheduler has not been started");
+            checkIsStarted();
             Scheduler scheduler = controllerBridge.waitUntilSchedulerState(s);
             throwableMailbox.throwUncheckedIfSet();
             return scheduler;
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
-    }
-
-    @Override public final boolean tryWaitForTermination(Time timeout) {
-        try {
-            if (timeout == Time.eternal)  thread.join();
-            else timeout.unit.timedJoin(thread, timeout.value);
-            throwableMailbox.throwUncheckedIfSet();
-        }
-        catch (InterruptedException x) { throw new RuntimeException(x); }
-        return !thread.isAlive();
     }
 
     @Override public final void terminateAfterException(Throwable t) {
@@ -90,6 +80,30 @@ public class SchedulerThreadController implements SchedulerController {
             else
                 throw propagate(x);
         }
+    }
+
+    @Override public final boolean tryWaitForTermination(Time timeout) {
+        checkIsStarted();
+        boolean result = tryJoinThread(timeout);
+        throwableMailbox.throwUncheckedIfSet();
+        return result;
+    }
+
+    private boolean tryJoinThread(Time timeout) {
+        try {
+            if (timeout == Time.eternal)  thread.join();
+            else timeout.unit.timedJoin(thread, timeout.value);
+        }
+        catch (InterruptedException x) { throw new RuntimeException(x); }
+        return !thread.isAlive();
+    }
+
+    private void checkIsNotStarted() {
+        checkState(!isStarted, "Scheduler has already been started");
+    }
+
+    private void checkIsStarted() {
+        checkState(isStarted, "Scheduler has not been started");
     }
 
     public final boolean isStarted() {
