@@ -1,7 +1,9 @@
 #include "spooler.h"
 
 #include "../javaproxy/com__sos__scheduler__engine__kernel__folder__events__FileBasedActivatedEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__folder__events__FileBasedRemovedEvent.h"
 typedef javaproxy::com::sos::scheduler::engine::kernel::folder::events::FileBasedActivatedEvent FileBasedActivatedEventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::folder::events::FileBasedRemovedEvent FileBasedRemovedEventJ;
 
 namespace sos {
 namespace scheduler {
@@ -264,7 +266,8 @@ void File_based::remove_now()
     on_remove_now();
     typed_folder()->remove_file_based( this );
     subsystem()->dependencies()->announce_requisite_removed( this ); 
-    //SS: report_event( new folder_removed_event ... ()
+    if (jobject sister = java_sister())
+        report_event(FileBasedRemovedEventJ::new_instance(sister));
 }
 
 //-------------------------------------------------------------------------------File_based::remove
