@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js795;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,7 +25,8 @@ import com.google.common.io.CharStreams;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
-public class JS795Test extends SchedulerTest {
+/** JS-795: Einbau von Jetty in den JobScheduler. */
+public final class JS795Test extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(JS795Test.class);
     private static final int cppPortNumber = 44441;  // TODO Ports sind willkürlich gewählt und nicht sicher verfügbar
     private static final int jettyPortNumber = 44440;
@@ -46,15 +48,16 @@ public class JS795Test extends SchedulerTest {
         controller().terminateScheduler();
     }
 
-    private String executeXml(String commandXml) throws Exception {
+    private static String executeXml(String commandXml) throws Exception {
         HttpClient httpClient = new HttpClient();
         httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         httpClient.start();
         ContentExchange c = new ContentExchange();
         c.setMethod("POST");
         c.setURL("http://localhost:" + jettyPortNumber + "/");
-        c.setRequestContentType("text/xml;charset=utf-8");
-        c.setRequestContent(new ByteArrayBuffer(commandXml));
+        Charset encoding = UTF_8;
+        c.setRequestContentType("text/xml;charset="+encoding.name());
+        c.setRequestContent(new ByteArrayBuffer(commandXml, encoding.name()));
         httpClient.send(c);
         int sendStatus = c.waitForDone();
         assertThat(sendStatus, equalTo(HttpExchange.STATUS_COMPLETED));
@@ -62,15 +65,15 @@ public class JS795Test extends SchedulerTest {
         return c.getResponseContent();
     }
 
-    private static class MyHandler extends AbstractHandler {
+    private static final class MyHandler extends AbstractHandler {
         private final Scheduler scheduler;
 
         MyHandler(Scheduler scheduler) {
             this.scheduler = scheduler;
         }
 
-        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                throws IOException, ServletException {
+        @Override public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                throws IOException {
             String commandXml = CharStreams.toString(request.getReader());
             String responseXml = scheduler.executeXml(commandXml);
             response.setContentType("text/xml;charset=utf-8");
