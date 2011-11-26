@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.schedulertest;
+package com.sos.scheduler.engine.test.schedulertest;
 
 import org.junit.Test;
 
