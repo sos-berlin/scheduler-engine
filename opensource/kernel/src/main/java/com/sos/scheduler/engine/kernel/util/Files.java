@@ -110,6 +110,15 @@ public final class Files {
         if (!ok  &&  f.exists())  throw new RuntimeException("File cannot be deleted: " + f);
     }
 
+//    public static void renameFile(File f, String newName) {
+//        renameFile(f, new File(f.getParentFile(), newName));
+//    }
+
+    public static void renameFile(File f, File newFile) {
+        boolean ok = f.renameTo(newFile);
+        if (!ok)  throw new RuntimeException("File cannot be renamed: "+f+"-->"+newFile);
+    }
+
     public static void copyURLToFile(URL source, File destination) {
         try {
             InputStream in = source.openStream();
