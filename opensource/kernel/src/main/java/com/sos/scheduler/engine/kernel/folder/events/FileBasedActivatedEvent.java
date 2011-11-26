@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.folder.event;
+package com.sos.scheduler.engine.kernel.folder.events;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.event.ObjectEvent;

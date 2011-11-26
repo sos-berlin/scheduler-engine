@@ -2,12 +2,12 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__folder__event__FileBasedActivatedEvent.h"
+#include "com__sos__scheduler__engine__kernel__folder__events__FileBasedActivatedEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { namespace event { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { namespace events { 
 
 struct FileBasedActivatedEvent__class : ::zschimmer::javabridge::Class
 {
@@ -19,7 +19,7 @@ struct FileBasedActivatedEvent__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< FileBasedActivatedEvent__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< FileBasedActivatedEvent__class > FileBasedActivatedEvent__class::class_factory ("com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent");
+const ::zschimmer::javabridge::class_factory< FileBasedActivatedEvent__class > FileBasedActivatedEvent__class::class_factory ("com.sos.scheduler.engine.kernel.folder.events.FileBasedActivatedEvent");
 
 FileBasedActivatedEvent__class::FileBasedActivatedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)

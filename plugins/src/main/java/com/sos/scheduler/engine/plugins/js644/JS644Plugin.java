@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
-import com.sos.scheduler.engine.kernel.folder.event.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.kernel.folder.events.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;

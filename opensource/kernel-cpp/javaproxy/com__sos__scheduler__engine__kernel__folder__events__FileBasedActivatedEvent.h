@@ -2,8 +2,8 @@
 
 #include "_precompiled.h"
 
-#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_FOLDER_EVENT_FILEBASEDACTIVATEDEVENT_H_
-#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_FOLDER_EVENT_FILEBASEDACTIVATEDEVENT_H_
+#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_FOLDER_EVENTS_FILEBASEDACTIVATEDEVENT_H_
+#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_FOLDER_EVENTS_FILEBASEDACTIVATEDEVENT_H_
 
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
@@ -14,7 +14,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { namespace event { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { namespace events { 
 
 
 struct FileBasedActivatedEvent__class;

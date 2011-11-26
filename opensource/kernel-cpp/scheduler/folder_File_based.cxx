@@ -1,7 +1,7 @@
 #include "spooler.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__kernel__folder__event__FileBasedActivatedEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::kernel::folder::event::FileBasedActivatedEvent FileBasedActivatedEventJ;
+#include "../javaproxy/com__sos__scheduler__engine__kernel__folder__events__FileBasedActivatedEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::kernel::folder::events::FileBasedActivatedEvent FileBasedActivatedEventJ;
 
 namespace sos {
 namespace scheduler {
