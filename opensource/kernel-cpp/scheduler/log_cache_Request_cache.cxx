@@ -17,7 +17,8 @@ struct Request_cache_impl : Request_cache {
     public: Request_cache_impl() : _zero_(this+1) {}
 
     public: ~Request_cache_impl() {
-        Z_DEBUG_ONLY(assert(_map.empty()));
+        Z_FOR_EACH_CONST(Map, _map, it)  Z_LOG2("scheduler", Z_FUNCTION << "() " << it->second->obj_name());
+        //Z_DEBUG_ONLY(assert(_map.empty()));
     }
 
     public: void remove(Prefix_log* log) {

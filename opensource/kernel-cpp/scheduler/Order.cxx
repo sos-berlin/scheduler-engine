@@ -1595,10 +1595,12 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     if( _web_service )
     result.setAttribute( "web_service", _web_service->name() );
 
-    if( _http_operation  &&  _http_operation->web_service_operation_or_null() )
-    {
-        result.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
-        result.setAttribute( "web_service_client"   , _http_operation->web_service_operation_or_null()->http_operation()->connection()->peer().as_string() );
+    if( _http_operation ) {
+        if (Web_service_operation* op = _http_operation->web_service_operation_or_null()) {
+            result.setAttribute( "web_service_operation", op->id() );
+            if (Communication::Connection* c = op->http_operation()->connection())
+                result.setAttribute( "web_service_client", c->peer().as_string() );
+        }
     }
 
     if( _is_on_blacklist )  result.setAttribute( "on_blacklist", "yes" );

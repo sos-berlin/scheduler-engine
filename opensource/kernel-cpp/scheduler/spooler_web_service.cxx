@@ -73,7 +73,7 @@ struct Web_services : Web_services_interface
 {
                                 Web_services                ( Spooler* sp )                         : Web_services_interface( sp, type_web_services ), _zero_(this+1) {}
 
-    void                        close                       ()                                      {}
+    void                        close                       ();
     string                      name                        () const                                { return "web_service"; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
@@ -134,6 +134,12 @@ Http_user::Http_user( const string& name, const string& password_md5_hex )
     {
         z::throw_xc( "SCHEDULER-427", name, x );
     }
+}
+
+//------------------------------------------------------------------------------Web_services::close
+
+void Web_services::close() {
+    Z_FOR_EACH(Name_web_service_map, _name_web_service_map, it) it->second->close();
 }
 
 //----------------------------------------------------------------------------Web_services::set_dom
@@ -236,11 +242,6 @@ bool Web_services::subsystem_initialize()
 
 bool Web_services::subsystem_load()
 {
-    Z_FOR_EACH( Url_web_service_map, _url_web_service_map, ws )
-    {
-        ws->second->check();
-    }
-
     _subsystem_state = subsys_loaded;
     return true;
 }
@@ -407,13 +408,6 @@ void Web_service::load_xslt_stylesheet( Xslt_stylesheet* stylesheet, const strin
     {
         stylesheet->load_file( path );
     }
-}
-
-//-------------------------------------------------------------------------------Web_service::check
-
-void Web_service::check()
-{
-    if( _job_chain_path != "" )  _spooler->order_subsystem()->job_chain( _job_chain_path );  // Jobkette ist bekannt?
 }
 
 //-----------------------------------------------------------------------------Web_service::set_dom

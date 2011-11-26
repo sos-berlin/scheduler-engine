@@ -42,7 +42,7 @@
     </logger>
 
     <logger name="org.eclipse.jetty">
-        <level value="debug"/>
+        <level value="info"/>
     </logger>
 
     <logger name="com.sos.scheduler.engine.tests.excluded.ss">

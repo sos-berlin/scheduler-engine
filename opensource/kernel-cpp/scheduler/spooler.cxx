@@ -1923,6 +1923,7 @@ void Spooler::activate_subsystems()
 void Spooler::stop_subsystems()
 {
     _scheduler_script_subsystem->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
+    _web_services              ->switch_subsystem_state( subsys_stopped );
     _standing_order_subsystem  ->switch_subsystem_state( subsys_stopped );
     _order_subsystem           ->switch_subsystem_state( subsys_stopped );
     _job_subsystem             ->switch_subsystem_state( subsys_stopped );

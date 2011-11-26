@@ -70,7 +70,6 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     string                      obj_name                    () const                                { return "Web_service " + _name; }
 
     void                        activate                    ();
-    void                        check                       ();
     void                    set_url_path                    ( const string& url_path )              { _url_path = url_path; }
     string                      url_path                    () const                                { return _url_path; }
     void                    set_dom                         ( const xml::Element_ptr& );

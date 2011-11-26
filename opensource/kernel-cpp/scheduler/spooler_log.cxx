@@ -1059,6 +1059,12 @@ bool Prefix_log::is_enabled_log_level( Log_level level )
     return log_level() <= level;
 }
 
+//-----------------------------------------------------------------------------Prefix_log::obj_name
+
+string Prefix_log::obj_name() const { 
+    return S() << "Prefix_log(" << _prefix << ")"; 
+}
+
 //---------------------------------------------------------------------------------Prefix_log::log2
 
 struct Prefix_log_deny_recursion

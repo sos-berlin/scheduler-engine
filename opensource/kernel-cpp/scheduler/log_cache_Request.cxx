@@ -27,6 +27,7 @@ struct Request_impl : Request {
 
     public: Prefix_log* log() const {  return _log; }
     public: int64 number() const { return _number; }
+    public: string obj_name() const { return S() << "log::cache::Request(" << _log->obj_name() << ")"; }
 };
 
 ptr<Request> Request::of(Request_cache* cache, Prefix_log* log, int64 number) {

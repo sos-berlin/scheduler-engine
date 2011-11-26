@@ -177,6 +177,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 
     void                        send                        ( Scheduler_event* );
     void                        send_really                 ( Scheduler_event* );
+    string                      obj_name                    () const;
 
 
 
@@ -223,7 +224,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     bool                       _started;                    // open() gerufen
     bool                       _closed;
     bool                       _is_finished;
-   bool                       _open_and_close_every_line;
+    bool                       _open_and_close_every_line;
     bool                       _mail_defaults_set;
     bool                       _mail_on_warning;
     bool                       _mail_on_error;
