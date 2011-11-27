@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.test;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
-import static com.sos.scheduler.engine.test.binary.TestCppBinaries.cppBinaries;
 
 import java.util.Arrays;
 
@@ -22,8 +21,10 @@ import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.main.SchedulerState;
+import com.sos.scheduler.engine.test.binary.TestCppBinaries;
 
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
@@ -160,6 +161,10 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     public final Environment environment() {
         return environment;
+    }
+
+    public final CppBinaries cppBinaries() {
+        return TestCppBinaries.cppBinaries();
     }
 
     public static TestSchedulerController of(Package p) {
