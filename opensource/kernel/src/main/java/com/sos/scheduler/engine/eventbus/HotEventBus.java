@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
 
+import com.sos.scheduler.engine.eventbus.annotated.HotMethodEventSubscriptionFactory;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 
 public class HotEventBus extends AbstractEventBus {
@@ -14,7 +15,7 @@ public class HotEventBus extends AbstractEventBus {
     @Nullable private Event currentEvent = null;
 
     public HotEventBus() {
-        super(HotEventHandler.class);
+        super(HotMethodEventSubscriptionFactory.singleton);
     }
 
     @Override public final void publish(Event e) {

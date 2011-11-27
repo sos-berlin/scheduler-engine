@@ -4,13 +4,13 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Queue;
 
-import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory;
 
 public class ColdEventBus extends AbstractEventBus {
     private final Queue<Call> callQueue = new ArrayDeque<Call>();
 
     public ColdEventBus() {
-        super(EventHandler.class);
+        super(ColdMethodEventSubscriptionFactory.singleton);
     }
 
     @Override public final void publish(Event e) {

@@ -1,30 +1,27 @@
 package com.sos.scheduler.engine.eventbus;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collection;
 
 import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactory;
 
-public final class AnnotatedHandlerFinder {
-    private final Collection<Class<? extends Annotation>> annotations;
+final class AnnotatedHandlerFinder {
+    private final MethodEventSubscriptionFactory factory;
 
-    AnnotatedHandlerFinder(Collection<Class<? extends Annotation>> annotations) {
-        this.annotations = annotations;
+    AnnotatedHandlerFinder(MethodEventSubscriptionFactory factory) {
+        this.factory = factory;
     }
 
-    public ImmutableList<EventSubscription> handlers(EventHandlerAnnotated o) {
+    ImmutableList<EventSubscription> handlers(EventHandlerAnnotated o) {
         ImmutableList.Builder<EventSubscription> result = new ImmutableList.Builder<EventSubscription>();
         for (Method m: o.getClass().getMethods()) {
             if (methodIsAnnotated(m))
-                result.add(new MethodEventSubscription(o, m));
+                result.add(factory.newSubscription(o, m));
         }
         return result.build();
     }
 
     private boolean methodIsAnnotated(Method m) {
-        for (Class<? extends Annotation> a: annotations)
-            if (m.getAnnotation(a) != null) return true;
-        return false;
+        return m.getAnnotation(factory.getAnnotation()) != null;
     }
 }

@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.eventbus;
 
-import java.util.Collection;
-
 public class SchedulerEventBus implements EventBus {
     private final HotEventBus hotEventBus = new HotEventBus();
     private final ColdEventBus coldEventBus = new ColdEventBus();
@@ -24,21 +22,25 @@ public class SchedulerEventBus implements EventBus {
         hotEventBus.unregister(s);
     }
 
+    public final void publish(Event e, EventSource source) {
+        publish(new EventSourceEvent(e, source));
+    }
+
     public final void publish(Event e) {
         checkDuplicateCalls(e);
         //coldCalls.removeAll(hotCalls);
         //if (e instanceof HotEvent)
             hotEventBus.publish(e);
-        coldEventBus.publish(e);
+        coldEventBus.publish(e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e);
     }
 
     private void checkDuplicateCalls(Event e) {
-        Collection<Call> hotCalls = hotEventBus.calls(e);
-        Collection<Call> coldCalls = coldEventBus.calls(e);
-        if (!hotCalls.isEmpty() && !coldCalls.isEmpty()) {
-            int a = 1;
-            a++;
-        }
+//        Collection<Call> hotCalls = hotEventBus.calls(e);
+//        Collection<Call> coldCalls = coldEventBus.calls(e);
+//        if (!hotCalls.isEmpty() && !coldCalls.isEmpty()) {
+//            int a = 1;
+//            a++; // Für Breakpoint
+//        }
     }
 
     public final void dispatchEvents() {
