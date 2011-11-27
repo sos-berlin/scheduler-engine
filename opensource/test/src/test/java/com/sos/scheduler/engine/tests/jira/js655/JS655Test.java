@@ -22,6 +22,7 @@ import org.junit.Test;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
+import com.sos.scheduler.engine.kernel.folder.Path;
 import com.sos.scheduler.engine.kernel.folder.events.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.folder.events.FileBasedRemovedEvent;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
@@ -33,8 +34,8 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 /** JS-655  "JobScheduler does not start when a webservice entry is assigned to a job chain coming from hot folder" */
 public class JS655Test extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(JS655Test.class);
-    private static final String initialJobChainName = "myJobChain";
-    private static final String rightJobChainName = "myLazyJobChain";
+    private static final Path initialJobChainPath = new AbsolutePath("/myJobChain");
+    private static final Path rightJobChainPath = new AbsolutePath("/myLazyJobChain");
 
     private final HttpClient httpClient = new HttpClient();
     private final URI uri;
@@ -56,23 +57,23 @@ public class JS655Test extends SchedulerTest {
     }
 
     private void testAddJobChain() throws Exception {
-        renameJobChain(initialJobChainName, rightJobChainName);
+        renameJobChain(initialJobChainPath, rightJobChainPath);
         gate.expect(jobChainActivated, shortTimeout);
         assertThat(webClient().post("Hello!"), equalTo("Bye!"));
     }
 
     private void testRemoveJobChain() throws Exception {
-        renameJobChain(rightJobChainName, initialJobChainName);
+        renameJobChain(rightJobChainPath, initialJobChainPath);
         gate.expect(jobChainRemoved, shortTimeout);
         checkWebServiceIsNotReady();
     }
 
-    private void renameJobChain(String oldName, String newName) {
-        Files.renameFile(jobChainFile(oldName), jobChainFile(newName));
+    private void renameJobChain(Path a, Path b) {
+        Files.renameFile(jobChainFile(a), jobChainFile(b));
     }
 
-    private File jobChainFile(String name) {
-        return controller().environment().fileFromPath(new AbsolutePath("/" + name), ".job_chain.xml");
+    private File jobChainFile(Path p) {
+        return controller().environment().fileFromPath(p, ".job_chain.xml");
     }
 
     private void checkWebServiceIsNotReady() throws Exception {
@@ -88,17 +89,14 @@ public class JS655Test extends SchedulerTest {
     @HotEventHandler public void handleEvent(FileBasedActivatedEvent e) throws InterruptedException {
         if (e.getObject() instanceof JobChain) {
             JobChain jobChain = (JobChain)e.getObject();
-            if (jobChain.getName().equals(rightJobChainName))
+            if (jobChain.getPath().equals(rightJobChainPath))
                 gate.put(jobChainActivated);
         }
     }
 
-    @HotEventHandler public void handleEvent(FileBasedRemovedEvent e) throws InterruptedException {
-        if (e.getObject() instanceof JobChain) {
-            JobChain jobChain = (JobChain)e.getObject();
-            if (jobChain.getName().equals(rightJobChainName))
-                gate.put(jobChainRemoved);
-        }
+    @HotEventHandler public void handleEvent(FileBasedRemovedEvent e, JobChain jobChain) throws InterruptedException {
+        if (jobChain.getPath().equals(rightJobChainPath))
+            gate.put(jobChainRemoved);
     }
 
     @EventHandler public void handleEvent(TerminatedEvent e) throws InterruptedException {

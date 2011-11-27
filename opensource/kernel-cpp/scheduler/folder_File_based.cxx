@@ -267,7 +267,7 @@ void File_based::remove_now()
     typed_folder()->remove_file_based( this );
     subsystem()->dependencies()->announce_requisite_removed( this ); 
     if (jobject sister = java_sister())
-        report_event(FileBasedRemovedEventJ::new_instance(sister));
+        report_event(FileBasedRemovedEventJ::new_instance(), sister);
 }
 
 //-------------------------------------------------------------------------------File_based::remove

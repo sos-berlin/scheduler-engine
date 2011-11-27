@@ -3,8 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__folder__events__FileBasedRemovedEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
-#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
+#include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { namespace events { 
@@ -14,7 +13,7 @@ struct FileBasedRemovedEvent__class : ::zschimmer::javabridge::Class
     FileBasedRemovedEvent__class(const string& class_name);
    ~FileBasedRemovedEvent__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_folder_FileBased_2__method;
+    ::zschimmer::javabridge::Method const __constructor____method;
 
     static const ::zschimmer::javabridge::class_factory< FileBasedRemovedEvent__class > class_factory;
 };
@@ -23,19 +22,18 @@ const ::zschimmer::javabridge::class_factory< FileBasedRemovedEvent__class > Fil
 
 FileBasedRemovedEvent__class::FileBasedRemovedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_folder_FileBased_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/folder/FileBased;)V"){}
+    ,__constructor____method(this, "<init>", "()V"){}
 
 FileBasedRemovedEvent__class::~FileBasedRemovedEvent__class() {}
 
 
 
-FileBasedRemovedEvent FileBasedRemovedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased >& p0) {
+FileBasedRemovedEvent FileBasedRemovedEvent::new_instance() {
     FileBasedRemovedEvent result;
     result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     FileBasedRemovedEvent__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_folder_FileBased_2__method.call(result.get_jobject(), parameter_list);
+    cls->__constructor____method.call(result.get_jobject(), parameter_list);
     return result;
 }
 
