@@ -32,6 +32,7 @@ struct Event_subsystem_impl : Event_subsystem
 
     // Event_subsystem
     void                        report                      (const AbstractEventJ&);
+    void                        report                      (const AbstractEventJ&, const ObjectJ&);
 
 private:
     Fill_zero                  _zero_;
@@ -95,6 +96,13 @@ void Event_subsystem_impl::report(const AbstractEventJ& eventJ)
 {
     if (_spooler->_java_events_allowed && _eventSubsystemJ) 
         _eventSubsystemJ.report(eventJ);
+}
+
+//---------------------------------------------------------------------Event_subsystem_impl::report
+
+void Event_subsystem_impl::report(const AbstractEventJ& eventJ, const ObjectJ& eventSourceJ) {
+    if (_spooler->_java_events_allowed && _eventSubsystemJ) 
+        _eventSubsystemJ.report(eventJ, eventSourceJ);
 }
 
 //---------------------------------------------------------------------Event_subsystem_impl::report

@@ -5,6 +5,7 @@
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
+#include "java__lang__Object.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { 
@@ -15,6 +16,7 @@ struct EventSubsystem__class : ::zschimmer::javabridge::Class
    ~EventSubsystem__class();
 
     ::zschimmer::javabridge::Method const _report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2__method;
+    ::zschimmer::javabridge::Method const _report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2Ljava_lang_Object_2__method;
 
     static const ::zschimmer::javabridge::class_factory< EventSubsystem__class > class_factory;
 };
@@ -23,7 +25,8 @@ const ::zschimmer::javabridge::class_factory< EventSubsystem__class > EventSubsy
 
 EventSubsystem__class::EventSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2__method(this, "report", "(Lcom/sos/scheduler/engine/eventbus/AbstractEvent;)V"){}
+    ,_report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2__method(this, "report", "(Lcom/sos/scheduler/engine/eventbus/AbstractEvent;)V")
+    ,_report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2Ljava_lang_Object_2__method(this, "report", "(Lcom/sos/scheduler/engine/eventbus/AbstractEvent;Ljava/lang/Object;)V"){}
 
 EventSubsystem__class::~EventSubsystem__class() {}
 
@@ -48,6 +51,14 @@ void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::java
     parameter_list._jvalues[0].l = p0.get_jobject();
     EventSubsystem__class* cls = _class.get();
     cls->_report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2__method.call(get_jobject(), parameter_list);
+}
+
+void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) {
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    parameter_list._jvalues[1].l = p1.get_jobject();
+    EventSubsystem__class* cls = _class.get();
+    cls->_report__Lcom_sos_scheduler_engine_eventbus_AbstractEvent_2Ljava_lang_Object_2__method.call(get_jobject(), parameter_list);
 }
 
 

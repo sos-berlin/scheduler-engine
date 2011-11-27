@@ -27,6 +27,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__util__StringValue.h"
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
+#include "../javaproxy/java__lang__Object.h"
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/java__util__ArrayList.h"
 
@@ -35,8 +36,8 @@ namespace scheduler {
 
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler SchedulerJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform PlatformJ;
+typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
-
 
 }} //namespaces
 

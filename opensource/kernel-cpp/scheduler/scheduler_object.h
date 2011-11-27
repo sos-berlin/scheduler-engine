@@ -82,7 +82,6 @@ struct Scheduler_object
         type_xml_client_connection,
         type_scheduler_event2,
         type_event_subsystem,
-      //type_subprocess_register
     };
 
 
@@ -99,7 +98,7 @@ struct Scheduler_object
 
     virtual void                close                       ()                                      {}
     void                        report_event                (const AbstractEventJ&);
-    //void                        report_event                ( const string& code );
+    void                        report_event                (const AbstractEventJ&, const ObjectJ& eventSource);
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
     virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }
@@ -125,14 +124,6 @@ struct Scheduler_object
     string                     _mail_xslt_stylesheet_path;
     ptr<Prefix_log>            _log;
 };
-
-//-------------------------------------------------------------------------------scheduler_object<>
-
-//template<class T>
-//struct scheduler_object : Scheduler_object, javabridge::has_proxy<T>
-//{
-//                                scheduler_object            (Spooler* s, IUnknown* me, Type_code tc) : Scheduler_object(s, me, tc) {}
-//};
 
 //-------------------------------------------------------------------------------------------------
 

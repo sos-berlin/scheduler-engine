@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.eventbus.AbstractEvent;
+import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
@@ -26,9 +27,16 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
         this.eventBus = eventBus;
     }
 
-    /** @param e {@link AbstractEvent} stat {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+    /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
     @ForCpp public final void report(AbstractEvent e) {
         eventBus.publish(e);
+    }
+
+    /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig.
+     * @param eventSource {@link Object} statt {@liink EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+    @ForCpp public final void report(AbstractEvent e, Object eventSource) {
+        EventSource o = (EventSource)eventSource;
+        eventBus.publish(e, o);
     }
 
     @Deprecated
