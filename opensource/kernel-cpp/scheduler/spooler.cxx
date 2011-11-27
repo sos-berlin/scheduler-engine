@@ -887,15 +887,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "config_file"          , _configuration_file_path );
     state_element.setAttribute( "host"                 , _short_hostname );
 
-  //if( _need_db )
-  //state_element.setAttribute( "need_db"              , _need_db == need_db_yes? "yes" 
-  //                            : "strict" 
-  //                                                             : "no" );
     if( _need_db )
     state_element.setAttribute( "need_db"              , string_need_db() );
-
-  //if( _wait_endless_for_db_open )
-  //state_element.setAttribute( "wait_endless_for_db"  , _wait_endless_for_db_open? "yes" : "no" );
 
     if( _tcp_port )
     state_element.setAttribute( "tcp_port"             , _tcp_port );
@@ -1626,6 +1619,8 @@ void Spooler::read_command_line_arguments()
             if( opt.with_value( "use-xml-schema"        ) )  ;   // wird in sos::spooler_main vearbeitet
             else
             if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
+            else
+            if (opt.with_value("db"))  _modifiable_settings->_db_name = opt.value();
             else
             if( opt.flag( "java-events"       ) )  _java_events_allowed = opt.set();
             else
@@ -3720,7 +3715,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             my_spooler._log->error( x.what() );
             my_spooler._log->error( message_string( "SCHEDULER-331" ) );
             string line = S() << "Error " << x.what();
-            if (java_main_context)  cerr << line << "\n" << flush;
+            if (java_main_context || !isatty(fileno(stderr)))  cerr << line << "\n" << flush;
             else show_msg( line );     // Fehlermeldung vor ~Spooler ausgeben
 
             if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
