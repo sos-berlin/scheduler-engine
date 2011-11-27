@@ -131,7 +131,7 @@ public final class Files {
                 closeQuietly(in);
             }
         } catch (IOException x) {
-            throw new RuntimeException("copyURLToFile(): "+x, x);
+            throw new RuntimeException("copyURLToFile(): "+x+", from="+source+" to="+destination, x);
         }
     }
 }
