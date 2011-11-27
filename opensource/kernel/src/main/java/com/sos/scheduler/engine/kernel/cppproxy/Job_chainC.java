@@ -11,6 +11,7 @@ public interface Job_chainC extends CppProxyWithSister<JobChain> {
     JobChain.Type sisterType = new JobChain.Type();
 
     String name();
+    String path();
     void set_force_file_reread();
     List<Node> java_nodes();
     OrderC order(String orderId);
