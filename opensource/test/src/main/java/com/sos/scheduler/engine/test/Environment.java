@@ -73,8 +73,8 @@ public final class Environment {
     ImmutableList<String> standardArgs(CppBinaries cppBinaries) {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
         result.add(cppBinaries.file(CppBinary.exeFilename).getPath());
-        result.add("-sos.ini=" + new File(configDirectory, "sos.ini").getAbsolutePath());  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
-        result.add("-ini=" + new File(configDirectory, "factory.ini").getAbsolutePath());  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
+        result.add("-sos.ini=" + sosIniFile());
+        result.add("-ini=" + iniFile());
         result.add("-log-dir=" + logDirectory.getPath());
         result.add("-log=" + new File(logDirectory, "scheduler.log").getPath());
         result.add("-java-events");
@@ -82,6 +82,16 @@ public final class Environment {
             result.add("-env=" + libraryPathEnv(cppBinaries.directory()));
         result.add(configDirectory.getPath());
         return result.build();
+    }
+
+    public File sosIniFile() {
+        return new File(configDirectory, "sos.ini").getAbsoluteFile();
+        // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
+    }
+
+    public File iniFile() {
+        return new File(configDirectory, "factory.ini").getAbsoluteFile();
+        // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
     }
 
     /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
