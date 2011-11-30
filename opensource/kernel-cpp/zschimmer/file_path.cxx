@@ -397,8 +397,13 @@ bool File_path::try_unlink( Has_log* log ) const
 
         if( errn != ENOENT )
         {
-            if( log )  log->warn( msg );
-            err = 0;
+         if ( log ) {
+            if( errn == EACCES )        // permission denied
+               log->info( msg );
+            else
+               log->warn( msg );
+         }
+         err = 0;
         }
 
         if( Log_ptr log = "" )
