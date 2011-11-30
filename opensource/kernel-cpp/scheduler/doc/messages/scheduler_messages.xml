@@ -2911,11 +2911,17 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-478">
-            <text xml:lang="en">
-                <title>Could not re-open '<p1/>' log file. Following lines are lost. <p2/></title>
-            </text>
-        </message>
+       <message code="SCHEDULER-478">
+          <text xml:lang="en">
+             <title>Could not re-open '<p1/>' log file. Following lines are lost. <p2/></title>
+          </text>
+       </message>
+
+       <message code="SCHEDULER-479">
+          <text xml:lang="en">
+             <title>Unknown scheduler id: Neither attribute config/@spooler_id nor commandline option -id is specified.</title>
+          </text>
+       </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -4108,6 +4114,15 @@
         <message code="SCHEDULER-878" weight="info" object="Task">
             <text xml:lang="en">
                 <title>Temporary files cannot be deleted: <p1>paths</p1></title>
+                <description>
+                    <p>
+                      In a windows environment it is possible that files can not be deleted, because another process (e.g. a virus scanner) blocked them. 
+                      JobScheduler try to delete files for a while and if it's failed you'll get the message SCHEDULER-878.
+                    </p>
+                    <p>
+                      This behaviour should not be the normal case, but it is not excluded.
+                    </p>
+                </description>
             </text>
         </message>
 

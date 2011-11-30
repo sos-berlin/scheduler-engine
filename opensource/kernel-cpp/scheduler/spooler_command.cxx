@@ -467,12 +467,18 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
 
     if( !config_element.nodeName_is( "config" ) )  z::throw_xc( "SCHEDULER-113", config_element.nodeName() );
 
-    string spooler_id = config_element.getAttribute( "spooler_id" );
-    if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
+    string spooler_id = "";
+    if (_spooler->id().empty()) {
+       spooler_id = config_element.getAttribute( "spooler_id" );
+       _spooler->set_id(spooler_id);
+    }
+
+    if( !_spooler->id().empty()  ||  _spooler->_manual )
     {
         if( _load_base_config_immediately )  _spooler->load_config( config_element, _source_filename, true );
                                        else  _spooler->cmd_load_config( config_element, _source_filename );
-    }
+    } else 
+       z::throw_xc( "SCHEDULER-479" );
 
     return _answer.createElement( "ok" );
 }

@@ -319,6 +319,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-475", "java_options and java_class_path can only be set in primary XML configuration" },
     { "SCHEDULER-477", "Could not re-open log file. Following lines are not written to this file. $2" },
     { "SCHEDULER-478", "Could not re-open '$1' log file. Following lines are lost. $2" },
+    { "SCHEDULER-479", "Unknown scheduler id: Neither attribute config/@spooler_id nor commandline option -id is specified." },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },
