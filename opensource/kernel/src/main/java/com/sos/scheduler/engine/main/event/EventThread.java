@@ -13,10 +13,8 @@ import com.sos.scheduler.engine.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 
-/** Thread zu Verarbeitung von Scheduler-Ereignissen.
- *
- * @author Zschimmer.sos
- */
+/** Thread zu Verarbeitung von Scheduler-Ereignissen. */
+@Deprecated  //EventThread kann objektlose Events nicht und ist ohnehin zu kompliziert
 public abstract class EventThread extends Thread implements EventSubscription {
     private static final String terminatedEventName = TerminatedEvent.class.getSimpleName();
 
