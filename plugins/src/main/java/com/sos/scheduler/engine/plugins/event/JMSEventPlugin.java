@@ -9,11 +9,13 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import com.sos.scheduler.engine.eventbus.Event;
+import com.sos.scheduler.engine.eventbus.EventSource;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
+import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.plugin.Plugin;
 import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.JSEvent;
 
@@ -31,18 +33,19 @@ import com.sos.scheduler.model.events.JSEvent;
  * </p>
  * </div>
  */
-public class JMSEventPlugin extends AbstractEventPlugin {
+public class JMSEventPlugin extends AbstractPlugin {
 	
 	private static Logger logger = Logger.getLogger(JMSEventPlugin.class);
 
+    private final Scheduler scheduler;
 	private final Connector connector;
 
 	private SchedulerObjectFactory objFactory;
 
-	JMSEventPlugin(Scheduler scheduler, Element plugInElement) {
-		super(scheduler, plugInElement);
-		String providerUrl = stringXPath(plugInElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
-		String persistenceDir = stringXPath(plugInElement, "jms/connection/@persistenceDirectory", Configuration.persistenceDirectory);
+	JMSEventPlugin(Scheduler scheduler, Element pluginElement) {
+		this.scheduler = scheduler;
+		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
+		String persistenceDir = stringXPath(pluginElement, "jms/connection/@persistenceDirectory", Configuration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
 		scheduler.log().info( getClass().getName() + ": providerUrl=" + providerUrl);
 		// TODO PlugIns sollen eigenes PrefixLog bekommen
@@ -80,12 +83,11 @@ public class JMSEventPlugin extends AbstractEventPlugin {
 	 * called. The JobScheduler internal event will be converted in a
 	 * represantation for the JMS and provided as TextMessage (in XML format).
 	 */
-	@Override
-	public void onEvent(Event e) throws Exception {
+	@HotEventHandler public void handleEvent(Event e, EventSource eventSource) throws Exception {
 
 		TextMessage m = connector.newTextMessage();
 		try {
-			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
+			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e, eventSource);
 			logger.info("publish event " + ev.getName());
 			logger.debug(ev.marshal());
 			m.setText(ev.marshal());
