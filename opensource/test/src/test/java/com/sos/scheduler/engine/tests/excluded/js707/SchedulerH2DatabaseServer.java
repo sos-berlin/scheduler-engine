@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js707;
+package com.sos.scheduler.engine.tests.excluded.js707;
 
 import static com.google.common.base.Throwables.propagate;
 

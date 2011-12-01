@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js707;
+package com.sos.scheduler.engine.tests.excluded.js707;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.Thread.sleep;
@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
+/** JS-707 "If JS terminates caused by an exception a potentially existent backup scheduler should do the scheduling". */
 public class JS707Test extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(JS707Test.class);
     private static final String schedulerId = "testScheduler";
@@ -26,7 +27,7 @@ public class JS707Test extends SchedulerTest {
     private static final int databasePortNumber = portNumber + 2;
     private final SchedulerH2DatabaseServer database = SchedulerH2DatabaseServer.newTcpServer(databasePortNumber);
 
-    @Ignore     // Test funktioniert noch nicht.
+    @Ignore     // Test ist nur ein Entwurf
     @Test public void test() throws Exception {
         database.start();
         controller().activateScheduler("-e", "-id="+schedulerId, "-exclusive", "-tcp-port="+portNumber, "-db="+database.hostwarePath());
@@ -37,7 +38,7 @@ public class JS707Test extends SchedulerTest {
         stderrThread.start();
         try {
             sleep(10*1000);
-            scheduler().executeXml("<terminate timeout='0'/>");
+            scheduler().executeXml("<terminate all_schedulers='true'/>");
             int exitCode = backupScheduler.waitFor();
             assertThat(exitCode, equalTo(0));
         }
