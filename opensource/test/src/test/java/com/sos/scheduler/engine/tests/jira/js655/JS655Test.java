@@ -86,12 +86,9 @@ public class JS655Test extends SchedulerTest {
         return new WebClient(uri.toString());
     }
 
-    @HotEventHandler public void handleEvent(FileBasedActivatedEvent e) throws InterruptedException {
-        if (e.getObject() instanceof JobChain) {
-            JobChain jobChain = (JobChain)e.getObject();
-            if (jobChain.getPath().equals(rightJobChainPath))
-                gate.put(jobChainActivated);
-        }
+    @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, JobChain jobChain) throws InterruptedException {
+        if (jobChain.getPath().equals(rightJobChainPath))
+            gate.put(jobChainActivated);
     }
 
     @HotEventHandler public void handleEvent(FileBasedRemovedEvent e, JobChain jobChain) throws InterruptedException {
