@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 
 /** Erleichtert die Implementierung eines EventPlugin. */
+@Deprecated  // Seit @EventHandler und @HotEventHandler überflüssig
 public abstract class AbstractEventPlugin extends AbstractPlugin implements EventSubscriber {
     protected final Scheduler scheduler;
     protected final Element pluginElement;
