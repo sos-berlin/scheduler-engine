@@ -12,13 +12,13 @@ import org.junit.Test;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderId;
 import com.sos.scheduler.engine.kernel.order.OrderState;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a> */
 public final class JS653Test extends SchedulerTest {
@@ -44,8 +44,7 @@ public final class JS653Test extends SchedulerTest {
         Thread.sleep(timeout.getMillis());
     }
 
-    @EventHandler public void handleEvent(OrderTouchedEvent e) {
-        Order o = e.getOrder();
+    @HotEventHandler public void handleEvent(OrderTouchedEvent e, Order o) {
         orderStarts.add(new OrderIdAndState(o.getId(), o.getState()));
     }
 
