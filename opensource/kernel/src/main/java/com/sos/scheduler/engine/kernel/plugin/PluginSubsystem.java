@@ -41,9 +41,9 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
 
     public void load(Element root) {
         PluginReader pluginReader = new PluginReader(log(), lazyInjector, scheduler);
-        Element plugInsElement = elementXPathOrNull(root, "config/plugins");
-        if (plugInsElement != null) {
-            for (Element e: elementsXPath(plugInsElement, "plugin")) {
+        Element pluginsElement = elementXPathOrNull(root, "config/plugins");
+        if (pluginsElement != null) {
+            for (Element e: elementsXPath(pluginsElement, "plugin")) {
                 PluginAdapter a = pluginReader.tryReadPlugin(e);
                 if (a != null) {
                     plugins.put(a.getPluginClassName(), a);
