@@ -29,10 +29,10 @@ public class OrderEventTest extends SchedulerTest {
 		controller().waitForTermination(timeout);
 	}
 
-	@HotEventHandler
-	/* 
-	 * Es wird erwartet, dass 8 Order beendet werden (vgl. scheduler.xml), erst dann darf der Scheduler beendet werden
-	 */
+    /*
+      * Es wird erwartet, dass 8 Order beendet werden (vgl. scheduler.xml), erst dann darf der Scheduler beendet werden
+      */
+    @HotEventHandler
 	public void handleEvent(OrderFinishedEvent e) {
 		count++;
 		if (count == 8)
@@ -41,7 +41,7 @@ public class OrderEventTest extends SchedulerTest {
 
 	@HotEventHandler
 	public void handleEvent2(OrderEvent e) {
-		logger.info(e.getClass().getSimpleName() + " for order " + e.getOrder().getId() );
+		logger.info(e.getClass().getSimpleName() + " for order " + e.getKey().getId() );
 	}
 
 }
