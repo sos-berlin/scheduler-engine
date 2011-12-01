@@ -73,6 +73,7 @@ public final class Environment {
     ImmutableList<String> standardArgs(CppBinaries cppBinaries) {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
         result.add(cppBinaries.file(CppBinary.exeFilename).getPath());
+        result.add("-id=test");
         result.add("-sos.ini=" + sosIniFile());
         result.add("-ini=" + iniFile());
         result.add("-log-dir=" + logDirectory.getPath());
