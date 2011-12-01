@@ -16,14 +16,15 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.events.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.kernel.job.Job;
+import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
 
 public class JS644PluginTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(JS644PluginTest.class);
-    private static final AbsolutePath jobPath = new AbsolutePath("/A");
-    private static final AbsolutePath jobchainPath = new AbsolutePath("/a");
+    private static final AbsolutePath jobPath = new AbsolutePath("/a");
+    private static final AbsolutePath jobChainPath = new AbsolutePath("/A");
     private static final Time timeout = shortTimeout;
 
     enum M { jobActivated, jobchainActivated }
@@ -50,14 +51,14 @@ public class JS644PluginTest extends SchedulerTest {
         }
     }
 
-    @HotEventHandler public void handleEvent(FileBasedActivatedEvent e) throws InterruptedException {
-        if (schedulerIsActive) {
-            if (e.getObject() == scheduler().getJobSubsystem().job(jobPath))
-                gate.put(jobActivated);
-            else
-            if (e.getObject() == scheduler().getOrderSubsystem().jobChain(jobchainPath))
-                gate.put(jobchainActivated);
-        }
+    @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, Job job) throws InterruptedException {
+        if (schedulerIsActive && job.getPath().equals(jobPath))
+            gate.put(jobActivated);
+    }
+
+    @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, JobChain jobChain) throws InterruptedException {
+        if (schedulerIsActive && jobChain.getPath().equals(jobChainPath))
+            gate.put(jobchainActivated);
     }
 
     private File fileBasedFile(Job o) {
