@@ -103,6 +103,7 @@ public final class Scheduler implements HasPlatform, Sister {
                 bind(OrderSubsystem.class).toInstance(orderSubsystem);
                 bind(OperationQueue.class).toInstance(operationExecutor);
                 bind(EventBus.class).toInstance(eventBus);
+                bind(PrefixLog.class).toInstance(log);
             }
         });
     }
