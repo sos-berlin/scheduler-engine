@@ -7,8 +7,9 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-731'>JS-731</a> */
@@ -20,8 +21,8 @@ public class JS731Test extends SchedulerTest {
         controller().waitForTermination(shortTimeout);
     }
 
-    @HotEventHandler public void handleEvent(OrderFinishedEvent e) {
-        UnmodifiableVariableSet v = e.getOrder().getParameters();
+    @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) {
+        UnmodifiableVariableSet v = order.getParameters();
         assertThat(v.get("a"), equalTo("ä"));
         assertThat(v.get("A"), equalTo("ä"));
         assertThat(v.get("b"), equalTo("B"));
