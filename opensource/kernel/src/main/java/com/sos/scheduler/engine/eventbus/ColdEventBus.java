@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.eventbus;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory;
 
 public class ColdEventBus extends AbstractEventBus {
-    private final Queue<Call> callQueue = new ArrayDeque<Call>();
+    private final Queue<Call> callQueue = new ConcurrentLinkedQueue<Call>();
 
     public ColdEventBus() {
         super(ColdMethodEventSubscriptionFactory.singleton);

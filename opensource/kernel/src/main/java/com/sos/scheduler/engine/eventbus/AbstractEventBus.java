@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.eventbus;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.synchronizedSet;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.log4j.Level;
@@ -18,7 +19,7 @@ import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactor
 public abstract class AbstractEventBus implements EventBus {
     private static final Logger logger = Logger.getLogger(AbstractEventBus.class);
 
-    private final Set<EventSubscription> subscribers = newHashSet();
+    private final Set<EventSubscription> subscribers = synchronizedSet(new HashSet<EventSubscription>());
     private final AnnotatedHandlerFinder handlerFinder;
     private final Multimap<EventHandlerAnnotated,EventSubscription> annotatedEventSubscriberMap = HashMultimap.create();
 
