@@ -1783,7 +1783,12 @@ void Spooler::read_xml_configuration()
     else
         cp.execute_config_file( _configuration_file_path );
 
-    assert(_config_element_to_load);
+    if (!_config_element_to_load)
+       if (this->id().empty() )
+          z::throw_xc( "SCHEDULER-480" );
+       else
+         z::throw_xc( "SCHEDULER-479", this->id() );
+
 }
 
 //---------------------------------------------------------------Spooler::initialize_java_subsystem

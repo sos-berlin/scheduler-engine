@@ -2919,9 +2919,18 @@
 
        <message code="SCHEDULER-479">
           <text xml:lang="en">
-             <title>Unknown scheduler id: Neither attribute config/@spooler_id nor commandline option -id is specified.</title>
+             <title>
+                No entry config/@spooler_id='<p1/>' found in configuration file 'scheduler.xml'.
+             </title>
           </text>
        </message>
+
+       <message code="SCHEDULER-480">
+          <text xml:lang="en">
+             <title>No appropriate config element found in scheduler.xml - please remove attribute @spooler_id of the config-element or start JS with the appropriate -id option.</title>
+          </text>
+       </message>
+       
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
