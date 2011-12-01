@@ -1,61 +1,38 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import com.sos.scheduler.engine.eventbus.Event;
-import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.plugin.Plugin;
-import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
+
+import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.TextMessage;
+
 import org.w3c.dom.Element;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
+import com.sos.scheduler.engine.eventbus.Event;
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 
-public class JMSPlugin implements Plugin, EventSubscriber {
-    private final Scheduler scheduler;
+public class JMSPlugin extends AbstractPlugin {
     private final Connector connector;
 
-    
-    JMSPlugin(Scheduler scheduler, Element plugInElement) {
-        this.scheduler = scheduler;
+    @Inject public JMSPlugin(PrefixLog log, Element plugInElement) {
         String providerUrl = stringXPath(plugInElement, "jms/connection/@providerUrl", Configuration.vmProviderUrl);
         connector = Connector.newInstance(providerUrl);
-        scheduler.log().info(getClass().getName() + ": providerUrl=" + providerUrl);
-        //TODO Plugins sollen eigenes PrefixLog bekommen
+        log.info(JMSPlugin.class.getName() + ": providerUrl=" + providerUrl);
     }
 
-
-    @Override public void activate() {
-        scheduler.getEventSubsystem().subscribe(this);
+    @Override public final void activate() {
         connector.start();
     }
 
-
-    @Override public void close() {
-        try {
-            connector.close();
-        } finally {
-            scheduler.getEventSubsystem().unsubscribe(this);
-        }
+    @Override public final void close() {
+        connector.close();
     }
 
-
-    @Override public String getXmlState() {
-        return "";
-    }
-
-
-    @Override public void onEvent(Event e) throws Exception {
+    @EventHandler public final void handleEvent(Event e) throws JMSException {
         TextMessage m = connector.newTextMessage();
         m.setText(e.toString());    //TODO Provisorisch, besser toXml()
         connector.publish(m);
-    }
-
-
-    public static PluginFactory factory() {
-        return new PluginFactory() {
-            @Override public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
-                return new JMSPlugin(scheduler, plugInElement);
-            }
-        };
     }
 }

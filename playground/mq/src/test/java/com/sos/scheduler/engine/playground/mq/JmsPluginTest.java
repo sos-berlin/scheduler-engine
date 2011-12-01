@@ -33,12 +33,10 @@ public class JmsPluginTest extends SchedulerTest {
     private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
     private final Gate<Boolean> resultGate = new Gate<Boolean>();
 
-    
     public JmsPluginTest() throws Exception {
         newTopicSubscriber().setMessageListener(new MyListener());
         topicConnection.start();
     }
-
 
     private TopicSubscriber newTopicSubscriber() throws JMSException {
         String messageSelector = null;
@@ -46,12 +44,10 @@ public class JmsPluginTest extends SchedulerTest {
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
     }
 
-    
     @Test public void test() throws Exception {
         controller().startScheduler();
         assertThat(resultGate.poll(schedulerTimeout), equalTo(true));
     }
-
 
     private class MyListener implements javax.jms.MessageListener {
         @Override public void onMessage(Message message) {
