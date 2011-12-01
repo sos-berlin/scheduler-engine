@@ -5,8 +5,8 @@ public class SchedulerEventBus implements EventBus {
     private final ColdEventBus coldEventBus = new ColdEventBus();
 
     @Override public final void registerAnnotated(EventHandlerAnnotated o) {
-        coldEventBus.registerAnnotated(o);
         hotEventBus.registerAnnotated(o);
+        coldEventBus.registerAnnotated(o);
     }
 
     @Override public final void unregisterAnnotated(EventHandlerAnnotated o) {
@@ -27,32 +27,12 @@ public class SchedulerEventBus implements EventBus {
     }
 
     public final void publish(Event e) {
-        checkDuplicateCalls(e);
-        //coldCalls.removeAll(hotCalls);
-        //if (e instanceof HotEvent)
-            hotEventBus.publish(e);
+        hotEventBus.publish(e);
         coldEventBus.publish(e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e);
-    }
-
-    private void checkDuplicateCalls(Event e) {
-//        Collection<Call> hotCalls = hotEventBus.calls(e);
-//        Collection<Call> coldCalls = coldEventBus.calls(e);
-//        if (!hotCalls.isEmpty() && !coldCalls.isEmpty()) {
-//            int a = 1;
-//            a++; // Für Breakpoint
-//        }
     }
 
     public final void dispatchEvents() {
         //hotEventBus.dispatchEvents();
         coldEventBus.dispatchEvents();
-    }
-
-    public final HotEventBus getHotEventBus() {
-        return hotEventBus;
-    }
-
-    public final ColdEventBus getColdEventBus() {
-        return coldEventBus;
     }
 }
