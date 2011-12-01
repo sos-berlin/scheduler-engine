@@ -9,7 +9,8 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerObject;
 public abstract class ObjectEvent extends AbstractEvent implements HotEvent {
     /** Nur gültig während des Events. 
      * Danach kann das Objekt ungültig geworden sein und es gibt den Fehler Z-JAVA-111. */
-    protected abstract SchedulerObject getObject();
+    @Deprecated
+    public abstract SchedulerObject getObject();
 
     @Override public String toString() {
         StringBuilder result = new StringBuilder(200);

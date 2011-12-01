@@ -1,4 +1,4 @@
 package com.sos.scheduler.engine.eventbus;
 
-/** Markiert zur Typsicherheit eine Objekt als Quelle von {@Event}. */
+/** Markiert zur Typsicherheit ein Objekt als Quelle von {@link Event}. */
 public interface EventSource {}

@@ -12,6 +12,7 @@ public class FileBasedActivatedEvent extends ObjectEvent {
         this.fileBased = fileBased;
     }
 
+    @Deprecated
     @Override public FileBased getObject() {
         return fileBased;
     }

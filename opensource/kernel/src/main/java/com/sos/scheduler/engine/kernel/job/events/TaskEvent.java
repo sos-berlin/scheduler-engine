@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.kernel.event.ObjectEvent;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 
 public abstract class TaskEvent extends ObjectEvent {
-    @Override protected final SchedulerObject getObject() {
+    @Override public final SchedulerObject getObject() {
         return getTask();
     }
 

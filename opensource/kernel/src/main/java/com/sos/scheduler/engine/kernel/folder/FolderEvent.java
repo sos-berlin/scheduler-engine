@@ -14,7 +14,7 @@ public abstract class FolderEvent extends ObjectEvent {
         return fileBased;
     }
 
-	@Override protected final SchedulerObject getObject() {
+	@Override public final SchedulerObject getObject() {
 		return fileBased;
 	}
 }

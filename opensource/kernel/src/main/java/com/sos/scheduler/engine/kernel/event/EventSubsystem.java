@@ -29,7 +29,10 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
 
     /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
     @ForCpp public final void report(AbstractEvent e) {
-        eventBus.publish(e);
+        if (e instanceof ObjectEvent)
+            report(e, ((ObjectEvent)e).getObject());
+        else
+            eventBus.publish(e);
     }
 
     /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig.

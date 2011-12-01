@@ -7,6 +7,7 @@ public abstract class ModifiableOrderEvent extends OrderEvent {
         this.order = o;
     }
 
+    @Deprecated
     @Override public final Order getOrder() {
         return order;
     }
