@@ -26,16 +26,6 @@
     <logger name="com.sos.scheduler">
         <level value="info"/>
     </logger>
-
-	<logger name="com.sos.scheduler.engine.plugins.event.stepevents.OrderStepEventsPlugin">
-		<level value="info"/>
-	</logger>
-
-	<logger name="com.sos.scheduler.engine.plugins.errorlogger" additivity="false">
-		<level value="warn"/>
-		<appender-ref ref="console_simple"/>
-		<appender-ref ref="errorlog"/>
-	</logger>
 	
     <logger name="org.apache.activemq">
         <level value="warn"/>
@@ -43,6 +33,11 @@
 
     <logger name="org.eclipse.jetty">
         <level value="info"/>
+    </logger>
+
+    <logger name="com.sos.scheduler.engine.tests.jira.js793">
+        <level value="debug"/>
+		<appender-ref ref="console_simple"/>
     </logger>
 
     <logger name="com.sos.scheduler.engine.tests.excluded.ss">
