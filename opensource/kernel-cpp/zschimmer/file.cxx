@@ -115,12 +115,7 @@ bool File_base::try_unlink( Has_log* log )
         if( _last_errno != ENOENT )
         {
             msg = message_string( errno_code( _last_errno ), "unlink", _path );
-            if ( log ) { 
-               if( _last_errno == EACCES )       // permission denied
-                  log->info( msg );
-               else
-                  log->warn( msg );
-            }
+            if ( log ) log->info( msg );
             result = false;
         }
     }
