@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.kernel.util.Lazy;
 
 public final class TestCppBinaries {
     private static final Logger logger = Logger.getLogger(TestCppBinaries.class);
-    private static final String binariesTmpdirPropertyName = "scheduler.binaries.tmpdir";
+    private static final String binariesTmpdirPropertyName = "com.sos.scheduler.engine.test.binary.tmpdir";
     private static final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
     private static final String kernelCppPackageDirectory = "com/sos/scheduler/engine/kernelcpp/bin-test";
     private static final String resourcePattern = "classpath*:" + kernelCppPackageDirectory + "/*";

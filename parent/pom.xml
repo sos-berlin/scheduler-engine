@@ -323,8 +323,8 @@
                             <value>${basedir}/target</value>
                         </property-->
                         <property>
-                            <name>scheduler.binaries.tmpdir</name>
-                            <value>${basedir}/target/test-scheduler-binaries</value>
+                            <name>com.sos.scheduler.engine.test.binary.tmpdir</name>
+                            <value>${basedir}/target/scheduler-test-binaries</value>
                         </property>
                         <property>
                             <name>com.sos.scheduler.engine.test.directory</name>
