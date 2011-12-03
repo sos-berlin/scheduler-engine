@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.folder.FileBasedState;
 
 @ForCpp
-public final class Job extends FileBased implements Sister {
+public final class Job extends FileBased implements Sister, UnmodifiableJob {
     private final JobC cppProxy;
 
     private Job(Platform platform, JobC jobC) {
