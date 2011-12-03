@@ -8,6 +8,7 @@ abstract class UnmodifiableOrderEvent extends OrderEvent {
         assert !(order instanceof Order);
     }
 
+    @Deprecated
     @Override public final UnmodifiableOrder getOrder() {
         return order;
     }
