@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.test;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
-import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
 import java.io.File;
@@ -12,10 +11,10 @@ import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.folder.Path;
-import com.sos.scheduler.engine.main.CppBinaries;
-import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
+import com.sos.scheduler.engine.main.CppBinaries;
+import com.sos.scheduler.engine.main.CppBinary;
 
 /** Stellt eine Konfigurationsumgebung für den Scheduler bereit.
  * \file Environment.java
@@ -44,11 +43,7 @@ public final class Environment {
     private final File configDirectory;
     private final File logDirectory;
 
-    Environment(ResourcePath resourcePath) {
-        this(resourcePath, makeTemporaryDirectory());
-    }
-
-    private Environment(ResourcePath resourcePath, File directory) {
+    Environment(ResourcePath resourcePath, File directory) {
         this.resourcePath = resourcePath;
         this.directory = directory;
         configDirectory = new File(directory, configSubdir);
@@ -59,9 +54,7 @@ public final class Environment {
         prepareTemporaryConfigurationDirectory();
     }
 
-    void close() {
-        tryRemoveDirectoryRecursivly(directory);
-    }
+    void close() {}
 
     private void prepareTemporaryConfigurationDirectory() {
         makeDirectories(directory);

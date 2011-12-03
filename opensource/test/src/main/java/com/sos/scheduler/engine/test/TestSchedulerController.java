@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.test;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
+import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
+import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
 
 import java.io.File;
 import java.util.Arrays;
@@ -15,13 +17,13 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
 import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
-import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.settings.SettingName;
 import com.sos.scheduler.engine.kernel.settings.Settings;
+import com.sos.scheduler.engine.kernel.util.Files;
 import com.sos.scheduler.engine.kernel.util.Hostware;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -34,15 +36,32 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
     public static final Time shortTimeout = Time.of(10);
 
+    private final File directory;
+    private final boolean directoryIsTemporary;
     private final Thread thread = Thread.currentThread();
     private final Environment environment;
     private boolean terminateOnError = true;
     private Scheduler scheduler = null;
     private String logCategories = "";
 
-    public TestSchedulerController(ResourcePath resourcePath) {
-        environment = new Environment(resourcePath);
+    public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath) {
+        String p = System.getProperty("com.sos.scheduler.engine.test.directory");
+        if (p != null) {
+            directory = new File(p, testClass.getName());
+            makeCleanDirectory(directory);
+            directoryIsTemporary = false;
+        } else {
+            directory = makeTemporaryDirectory();
+            directoryIsTemporary = true;
+        }
+        environment = new Environment(configurationResourcePath, directory);
         setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
+    }
+
+    private static void makeCleanDirectory(File directory) {
+        Files.makeDirectory(directory.getParentFile());
+        Files.makeDirectory(directory);
+        Files.removeDirectoryContentRecursivly(directory);
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
@@ -54,10 +73,6 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     public final void setLogCategories(String o) {
         getDelegate().checkIsNotStarted();
         logCategories = o;
-    }
-
-    public final void subscribeEvents(EventSubscription s) {
-        getEventBus().registerHot(s);
     }
 
     @Deprecated
@@ -105,6 +120,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 //        }
         finally {
             environment.close();
+            if (directoryIsTemporary)
+                tryRemoveDirectoryRecursivly(directory);
             getEventBus().unregisterAnnotated(this);
         }
     }
@@ -185,7 +202,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         return TestCppBinaries.cppBinaries();
     }
 
-    public static TestSchedulerController of(Package p) {
-        return new TestSchedulerController(new ResourcePath(p));
+    /** @param testClass Test-Klasse, für Benennung des Scheduler-Arbeitsverzeichnisses und Ort der Konfigurationsresourcen. */
+    public static TestSchedulerController of(Class<?> testClass) {
+        return new TestSchedulerController(testClass, new ResourcePath(testClass.getPackage()));
     }
 }

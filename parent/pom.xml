@@ -326,6 +326,10 @@
                             <name>scheduler.binaries.tmpdir</name>
                             <value>${basedir}/target/test-scheduler-binaries</value>
                         </property>
+                        <property>
+                            <name>com.sos.scheduler.engine.test.directory</name>
+                            <value>${project.build.testOutputDirectory}/../scheduler-test</value>
+                        </property>
                     </systemProperties>
                 </configuration>
             </plugin>

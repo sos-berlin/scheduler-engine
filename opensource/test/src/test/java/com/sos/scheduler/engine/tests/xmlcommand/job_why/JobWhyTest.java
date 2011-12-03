@@ -24,7 +24,7 @@ import com.sos.scheduler.engine.test.TestSchedulerController;
 public final class JobWhyTest {
     private static final Logger logger = Logger.getLogger(JobWhyTest.class);
 
-    private static final TestSchedulerController controller = TestSchedulerController.of(JobWhyTest.class.getPackage());
+    private static final TestSchedulerController controller = TestSchedulerController.of(JobWhyTest.class);
     private static Map<String,Element> results = null;
 
     @BeforeClass public static void beforeClass() {

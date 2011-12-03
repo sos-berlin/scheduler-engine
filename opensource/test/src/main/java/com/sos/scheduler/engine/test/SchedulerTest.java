@@ -11,7 +11,7 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     private static final Logger logger = Logger.getLogger(SchedulerTest.class);
     public static final Time shortTimeout = TestSchedulerController.shortTimeout;
 
-    private final TestSchedulerController controller = TestSchedulerController.of(getClass().getPackage());
+    private final TestSchedulerController controller = TestSchedulerController.of(getClass());
 
     protected SchedulerTest() {
         controller.getEventBus().registerAnnotated(this);
