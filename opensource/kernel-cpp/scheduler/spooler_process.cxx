@@ -495,7 +495,8 @@ void Process::fill_connection( object_server::Connection* connection )
     {
         stdin_xml_writer.set_attribute_optional( "include_path"          , _spooler->include_path() );
         stdin_xml_writer.set_attribute_optional( "java_options"          , _spooler->java_subsystem()->java_vm()->options() );
-        stdin_xml_writer.set_attribute_optional( "java_class_path"       , _spooler->java_subsystem()->java_vm()->class_path() );
+        stdin_xml_writer.set_attribute_optional( "java_class_path"       , spooler()->settings()->_job_java_class_path + Z_PATH_SEPARATOR +
+            _spooler->java_subsystem()->java_vm()->class_path());
         stdin_xml_writer.set_attribute_optional( "javac"                 , _spooler->java_subsystem()->java_vm()->javac_filename() );
         stdin_xml_writer.set_attribute_optional( "java_work_dir"         , _spooler->java_work_dir() );
         stdin_xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
