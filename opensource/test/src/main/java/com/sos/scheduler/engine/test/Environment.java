@@ -70,14 +70,14 @@ public final class Environment {
         EnvironmentFiles.copy(resourcePath, configDirectory);
     }
 
-    ImmutableList<String> standardArgs(CppBinaries cppBinaries) {
+    ImmutableList<String> standardArgs(CppBinaries cppBinaries, String logCategories) {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
         result.add(cppBinaries.file(CppBinary.exeFilename).getPath());
         result.add("-id=test");
         result.add("-sos.ini=" + sosIniFile());
         result.add("-ini=" + iniFile());
         result.add("-log-dir=" + logDirectory.getPath());
-        result.add("-log=" + new File(logDirectory, "scheduler.log").getPath());
+        result.add("-log="+logCategories+">" + new File(logDirectory, "scheduler.log").getPath());
         result.add("-java-events");
         if (OperatingSystem.isUnix)
             result.add("-env=" + libraryPathEnv(cppBinaries.directory()));

@@ -38,6 +38,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private final Environment environment;
     private boolean terminateOnError = true;
     private Scheduler scheduler = null;
+    private String logCategories = "";
 
     public TestSchedulerController(ResourcePath resourcePath) {
         environment = new Environment(resourcePath);
@@ -48,6 +49,11 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     public final void setTerminateOnError(boolean o) {
         getDelegate().checkIsNotStarted();
         terminateOnError = o;
+    }
+
+    public final void setLogCategories(String o) {
+        getDelegate().checkIsNotStarted();
+        logCategories = o;
     }
 
     public final void subscribeEvents(EventSubscription s) {
@@ -85,7 +91,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     @Override public final void startScheduler(String... args) {
         getEventBus().registerAnnotated(this);
         prepare();
-        Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries()), Arrays.asList(args));
+        Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries(), logCategories), Arrays.asList(args));
         getDelegate().startScheduler(toArray(allArgs, String.class));
     }
 
@@ -167,7 +173,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     public final void useDatabase() {
         File databaseFile = new File(environment.directory(), "scheduler-database");
-        String dbName = Hostware.h2DatabasePath(databaseFile).toString();
+        String dbName = Hostware.h2DatabasePath(databaseFile);
         setSettings(Settings.of(SettingName.dbName, dbName));
     }
 
