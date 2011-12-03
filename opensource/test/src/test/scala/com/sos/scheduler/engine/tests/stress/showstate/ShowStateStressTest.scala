@@ -5,7 +5,7 @@ import java.net._
 import java.nio.charset.Charset
 import org.junit._
 import com.sos.scheduler.engine.cplusplus.scalautil.io.Util._
-import com.sos.scheduler.engine.test.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 
 final class ShowStateStressTest extends ScalaSchedulerTest {
     import ShowStateStressTest._

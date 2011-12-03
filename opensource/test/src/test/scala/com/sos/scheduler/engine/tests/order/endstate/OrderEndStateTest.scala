@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.order.endstate
 
 import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.test.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import org.junit._
 
 class OrderEndStateTest extends ScalaSchedulerTest {

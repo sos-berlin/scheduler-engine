@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.test
+package com.sos.scheduler.engine.test.scala
 
 import com.sos.scheduler.engine.eventbus.{EventPredicate, Event}
 import com.sos.scheduler.engine.main.SchedulerController

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.eventbus.HotEventHandler
-import com.sos.scheduler.engine.test.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
 import org.hamcrest.Matchers
 import org.hamcrest.MatcherAssert.assertThat
