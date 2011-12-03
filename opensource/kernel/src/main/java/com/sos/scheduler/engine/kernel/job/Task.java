@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 
-public class Task extends FileBased implements UnmodifiableTask {
+public final class Task extends FileBased implements UnmodifiableTask {
     private final TaskC cppProxy;
 
     protected Task(Platform p, TaskC cppProxy) {
@@ -20,6 +20,10 @@ public class Task extends FileBased implements UnmodifiableTask {
         @Override public final Task sister(TaskC proxy, Sister context) {
             return new Task(Platform.of(context), proxy);
         }
+    }
+
+    public Job getJob() {
+        return cppProxy.job().getSister();
     }
 
     @Override public String toString() {
