@@ -750,7 +750,7 @@ Spooler::~Spooler()
 //-----------------------------------------------------------------------Spooler::writable_settings
 
 Settings* Spooler::modifiable_settings() const {
-    if (_settings)  z::throw_xc("SCHEDULER-479");
+    if (_settings)  z::throw_xc("modifiable_settings");
     return _modifiable_settings;
 }
 
@@ -1458,7 +1458,7 @@ void Spooler::read_ini_file()
     _job_history_with_log       =            read_profile_with_log  ( _factory_ini, "spooler", "history_with_log"   , arc_no );
     _order_history_yes          =            read_profile_bool      ( _factory_ini, "spooler", "order_history"      , true );
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
-    _modifiable_settings->_db_name =           read_profile_string    ( _factory_ini, "spooler", "db"                 );
+    modifiable_settings()->_db_name =        read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _db_check_integrity         =            read_profile_bool      ( _factory_ini, "spooler", "db_check_integrity" , _db_check_integrity );
     _db_log_level               = make_log_level(read_profile_string( _factory_ini ,"spooler", "db_log_level"       , as_string( _db_log_level ) ) );
 
@@ -1620,7 +1620,7 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
             else
-            if (opt.with_value("db"))  _modifiable_settings->_db_name = opt.value();
+            if (opt.with_value("db"))  modifiable_settings()->_db_name = opt.value();
             else
             if( opt.flag( "java-events"       ) )  _java_events_allowed = opt.set();
             else
@@ -1742,6 +1742,8 @@ void Spooler::load()
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
+
+    _settings = _modifiable_settings;
 }
 
 //---------------------------------------------------------------------------Spooler::open_pid_file
@@ -2027,7 +2029,6 @@ string Spooler::configuration_for_single_job_script()
 
 void Spooler::start()
 {
-    _settings = _modifiable_settings;
     static_log_categories.save_to( &_original_log_categories );
     _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.as_time_t());
 

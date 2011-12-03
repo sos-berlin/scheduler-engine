@@ -17,12 +17,12 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static void JNICALL set_1db_1name__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+static void JNICALL set__ILjava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jint p0, jstring p1)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::set_db_name()");
-        (o_->set_db_name(env.string_from_jstring(p0)));
+        ::sos::scheduler::Settings* o_ = has_proxy< ::sos::scheduler::Settings >::of_cpp_reference(cppReference,"::sos::scheduler::Settings::set()");
+        (o_->set(p0, env.string_from_jstring(p1)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -32,7 +32,7 @@ static void JNICALL set_1db_1name__Ljava_lang_String_2(JNIEnv* jenv, jobject, jl
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-    { (char*)"set_db_name__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1db_1name__Ljava_lang_String_2 }
+    { (char*)"set__native", (char*)"(JILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set__ILjava_lang_String_2 }
 };
 
 namespace zschimmer { namespace javabridge { 

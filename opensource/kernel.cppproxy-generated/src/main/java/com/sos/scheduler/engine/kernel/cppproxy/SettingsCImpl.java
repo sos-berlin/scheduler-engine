@@ -10,17 +10,17 @@ final class SettingsCImpl
         requireContextIsNull(context);
     }
 
-    @Override public void set_db_name(java.lang.String p0) {
+    @Override public void set(int p0, java.lang.String p1) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            set_db_name__native(cppReference(), p0);
+            set__native(cppReference(), p0, p1);
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
-    private static native void set_db_name__native(long cppReference, java.lang.String p0);
+    private static native void set__native(long cppReference, int p0, java.lang.String p1);
 
 
 }

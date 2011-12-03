@@ -42,7 +42,6 @@ import com.sos.scheduler.engine.kernel.scheduler.EmptySchedulerControllerBridge;
 import com.sos.scheduler.engine.kernel.scheduler.HasPlatform;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
-import com.sos.scheduler.engine.kernel.settings.CppSettings;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.util.MavenProperties;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
@@ -74,7 +73,7 @@ public final class Scheduler implements HasPlatform, Sister {
         this.cppProxy = cppProxy;
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
         cppProxy.setSister(this);
-        new CppSettings(cppProxy.modifiable_settings()).setCppSettings(this.controllerBridge.getSettings());
+        controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
 
         log = new PrefixLog(cppProxy.log());
         platform = new Platform(log);

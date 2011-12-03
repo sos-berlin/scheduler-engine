@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 
+import java.io.File;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
@@ -19,6 +20,9 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
+import com.sos.scheduler.engine.kernel.settings.SettingName;
+import com.sos.scheduler.engine.kernel.settings.Settings;
+import com.sos.scheduler.engine.kernel.util.Hostware;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.main.CppBinaries;
@@ -37,10 +41,12 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     public TestSchedulerController(ResourcePath resourcePath) {
         environment = new Environment(resourcePath);
+        setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
     public final void setTerminateOnError(boolean o) {
+        getDelegate().checkIsNotStarted();
         terminateOnError = o;
     }
 
@@ -157,6 +163,12 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             }
         };
         return new Thread(new TestThreadRunnable(runnable, h), runnable.toString());
+    }
+
+    public final void useDatabase() {
+        File databaseFile = new File(environment.directory(), "scheduler-database");
+        String dbName = Hostware.h2DatabasePath(databaseFile).toString();
+        setSettings(Settings.of(SettingName.dbName, dbName));
     }
 
     public final Environment environment() {

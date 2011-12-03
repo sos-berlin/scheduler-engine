@@ -5,7 +5,5 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 
 @CppClass(clas="sos::scheduler::Settings", directory="scheduler", include="spooler.h")
 public interface SettingsC extends CppProxy {
-    //ModifiableSettings.Type sisterType = new ModifiableSettings.Type();
-
-    void set_db_name(String o);
+    void set(int number, String value);
 }

@@ -6,9 +6,10 @@ namespace scheduler {
 
 struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     virtual                    ~Settings                    ();
-    void                        set_db_name                 (const string& o)                       { _db_name = o; }
+    void                        set                         (int number, const string& value);
 
     string                     _db_name;
+    string                     _job_java_class_path;
 };
 
 }} //namespace sos::scheduler

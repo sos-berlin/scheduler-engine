@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.settings.DefaultSettings;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
@@ -20,7 +19,7 @@ public class SchedulerThreadController implements SchedulerController {
     private static final Time terminationTimeout = Time.of(5);
 
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
-    private Settings settings = DefaultSettings.singleton;
+    private final Settings settings = new Settings();
     private boolean isStarted = false;
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThreadControllerBridge controllerBridge = new SchedulerThreadControllerBridge(this, eventBus);
@@ -28,7 +27,7 @@ public class SchedulerThreadController implements SchedulerController {
 
     @Override public final void setSettings(Settings o) {
         checkIsNotStarted();
-        settings = o;
+        settings.setAll(o);
     }
 
     public final void loadModule(File cppModuleFile) {
@@ -98,7 +97,7 @@ public class SchedulerThreadController implements SchedulerController {
         return !thread.isAlive();
     }
 
-    private void checkIsNotStarted() {
+    public void checkIsNotStarted() {
         checkState(!isStarted, "Scheduler has already been started");
     }
 

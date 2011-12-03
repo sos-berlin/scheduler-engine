@@ -17,7 +17,7 @@ public final class DatabaseQueryPluginTest extends SchedulerTest {
     private static final Gate<Boolean> gate = new Gate<Boolean>();
 
     public DatabaseQueryPluginTest() throws Exception {
-        controller().setSettings(temporaryDatabaseSettings());
+        controller().useDatabase();
         controller().startScheduler();
     }
 
