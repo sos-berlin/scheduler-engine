@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.kernel.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.io.Files.createParentDirs;
 import static com.google.common.io.Files.createTempDir;
+import static com.sos.scheduler.engine.kernel.util.Files.DirectoryHandling.dontRemoveDirectory;
+import static com.sos.scheduler.engine.kernel.util.Files.DirectoryHandling.removeDirectory;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.File;
@@ -20,6 +22,7 @@ import org.apache.log4j.Logger;
 import com.google.common.base.Function;
 
 public final class Files {
+    public enum DirectoryHandling {removeDirectory, dontRemoveDirectory}
     private static final Logger logger = Logger.getLogger(Files.class);
 
     private Files() {}
@@ -51,23 +54,27 @@ public final class Files {
     }
 
     public static void tryRemoveDirectoryRecursivly(File directory) {
-        removeDirectoryRecursivly(directory, tryRemoveFile);
+        removeDirectoryRecursivly(directory, tryRemoveFileFunction, removeDirectory);
     }
 
     public static void removeDirectoryRecursivly(File directory) {
-        removeDirectoryRecursivly(directory, removeFile);
+        removeDirectoryRecursivly(directory, removeFileFunction, removeDirectory);
     }
 
-    public static void removeDirectoryRecursivly(File directory, Function<File,Void> remover) {
+    public static void removeDirectoryContentRecursivly(File directory) {
+        removeDirectoryRecursivly(directory, removeFileFunction, dontRemoveDirectory);
+    }
+
+    public static void removeDirectoryRecursivly(File directory, Function<File,Void> remover, DirectoryHandling dirHandling) {
         try {
             checkArgument(directory.isDirectory() || !directory.exists(), "Not a directory: %s", directory);
-            removeAbsoluteDirectoryRecursivly(directory.getCanonicalFile().getAbsoluteFile(), remover);
+            removeAbsoluteDirectoryRecursivly(directory.getCanonicalFile().getAbsoluteFile(), remover, dirHandling);
         } catch (IOException x) {
             if (directory.exists()) throw new RuntimeException(x);
         }
     }
 
-    private static void removeAbsoluteDirectoryRecursivly(File dir, Function<File,Void> remover) throws IOException {
+    private static void removeAbsoluteDirectoryRecursivly(File dir, Function<File,Void> remover, DirectoryHandling dirHandling) throws IOException {
         String[] names = dir.list();
         if (names != null  &&  names.length > 0) {
             if (directoryCouldBeALink(dir, names[0]))
@@ -75,22 +82,23 @@ public final class Files {
             else {
                 for (String name: names) {
                     File f = new File(dir, name);
-                    if (f.isDirectory()) removeAbsoluteDirectoryRecursivly(f, remover);
+                    if (f.isDirectory()) removeAbsoluteDirectoryRecursivly(f, remover, removeDirectory);
                     else remover.apply(f);
                 }
             }
         }
-        remover.apply(dir);
+        if (dirHandling == removeDirectory)
+            remover.apply(dir);
     }
 
-    private static final Function<File,Void> removeFile = new Function<File,Void>() {
+    private static final Function<File,Void> removeFileFunction = new Function<File,Void>() {
         @Override @Nullable public Void apply(@Nullable File f) {
             removeFile(f);
             return null;
         }
     };
 
-    private static final Function<File,Void> tryRemoveFile = new Function<File,Void>() {
+    private static final Function<File,Void> tryRemoveFileFunction = new Function<File,Void>() {
         @Override @Nullable public Void apply(@Nullable File f) {
             try {
                 removeFile(f);
