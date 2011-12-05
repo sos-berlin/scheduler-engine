@@ -97,7 +97,7 @@ Characteristics of Job Scheduler Agents:
 			</p>
 			<p>
 					In the opposite direction, task(s) must be able to communicate with the initiating Job Scheduler 
-					using the port(s) &lt; 5999 counting downwards pro task being processed.
+					using the port(s) &lt;= 59999 counting downwards pro task being processed.
 					The number of firewall ports which are opened must correspond with the maximum number of tasks expected.
 			<!--In der entgegengesetzten Richtung verbindet sich die Task mit dem aufrufenden Job Scheduler über 
 					einen Port &lt;5999 abwärts zählend pro laufende Task.
