@@ -82,7 +82,7 @@
           Alle Sicherheitseinstellungen in den Firewalls müssen das berücksichtigen. 
           Für die Kommunikation in Richtung Agent muss der Port des Agenten in der Firewall freigeschaltet sein. 
           In der entgegengesetzten Richtung verbindet sich die Task mit dem aufrufenden Job Scheduler über 
-          einen Port &lt;5999 abwärts zählend pro laufende Task.
+          einen Port &lt;=59999 abwärts zählend pro laufende Task.
           Entsprechend der erwarteten Anzahl Tasks müssen diese Ports in der Firewall freigeschaltet sein.
           <br/><br/>
         </p>
