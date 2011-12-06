@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!-- $Id: Log.xml 3944 2005-09-25 22:28:46Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "javax-Log"
+    object_name = "logger"
+    base_dir    = "../"
+    author      = "$Author: ss $"
+    date        = "$Date: 2011-11-30 10:02:35 +0200 (Di, 30 Nov 2011) $"
+>
+
+<title>
+    Logger
+<!--Prookollierung-->
+</title>
+
+<description>
+    <p>
+      Das java plugin für die Ausführung von script-jobs erzeugt einige Protokolleinträge für Analysezwecke.
+      Dazu wird <a href="http://logging.apache.org/log4j/">log4j</a> verwendet, welches die Möglichkeit bietet,
+      das logging über property Dateien zu konfigurieren.
+    </p>
+    
+    <p>
+      Testausgaben des Jobs selbst können ebenfalls über diese Logger Instanz ausgegeben werden. In jedem 
+      Job steht dafür das Objekt <i>logger</i> zur Verfügung. Es ist eine Instanz von <i>org.apache.log4j.Logger</i>,
+      das bedeutet, das dieses Objekt mit allen Möglichkeiten, die log4j appender bieten, konfiguriert werden kann.
+    </p>
+    
+    <p>
+      Es ist weiterhin möglich das <a href="Log.xml">spooler_log</a> Objekt (das interne logging Objekt des JobSchedulers) zu nutzen.
+      Das wird jedoch <b>nicht empfohlen</b>, da nicht sicher ist, das diese Objekt in zukünfitgen Versionen des JobSchedulers
+      weiterhin unterstützt wird.
+    </p>
+    
+    <p>
+      Um <a href="http://logging.apache.org/log4j/">log4j</a> für den JobScheduler konfigurieren zu können, muß sich 
+      die properties Datei im Klassenpfad der JVM befinden. Der Klassenpfad kann in der Datei <i>factory.ini</i> eingestellt 
+      werden.
+    </p>
+    
+    <p>
+      Sollen die Testnachrichten des Jobs in seinem Taskprotokoll ausgegeben werden, ist der
+      appender <i>com.sos.JSHelper.Logging.BufferedJobSchedulerLog4JAppender</i> zu verwenden.
+    </p>
+    
+    <p>
+      Das folgende Beispiel zeigt eine entsprechende log4j Konfiguration des appenders:
+      <pre>
+# assign the appender for the scripting-api
+# please notice: if appender scheduler is used the log-entries of the class
+# will be placed in the task-log of the scheduler job
+log4j.logger.com.sos.scheduler.engine.kernel.scripting=debug, scheduler
+log4j.appender.scheduler=com.sos.JSHelper.Logging.BufferedJobSchedulerLog4JAppender
+log4j.appender.scheduler.layout=org.apache.log4j.PatternLayout
+log4j.appender.scheduler.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n
+      </pre>
+    </p>
+
+</description>
+
+<example programming_language="javax.script">
+    <pre>logger.info( "Something for the Log" );</pre>
+</example>
+
+</api.class>

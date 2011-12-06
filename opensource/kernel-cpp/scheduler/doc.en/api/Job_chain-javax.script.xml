@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- $Id: Job_chain-javascript.xml 3920 2005-09-20 13:57:40Z jz $ -->
+
+<?xml-stylesheet href="api-javax.script.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "Job_chain"
+    base_dir             = "../"
+/>

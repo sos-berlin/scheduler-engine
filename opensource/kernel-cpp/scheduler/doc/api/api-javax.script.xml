@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- $Id: api-javascript.xml 4070 2006-01-31 11:42:37Z jz $ -->
+
+<?xml-stylesheet href="api-javax.script.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "api"
+    base_dir             = "../"
+    title                = "Application Programming Interface (API) for scripting with javax.script"
+>
+
+Sorry, you need a browser which can process XML files with XSLT style sheets.
+
+</api.class>

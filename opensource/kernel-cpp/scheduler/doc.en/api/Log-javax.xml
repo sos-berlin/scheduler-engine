@@ -1,0 +1,66 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Log.xml 3944 2005-09-25 22:28:46Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "javax-Log"
+    object_name = "logger"
+    base_dir    = "../"
+    author      = "$Author: ss $"
+    date        = "$Date: 2011-11-30 10:02:35 +0200 (Di, 30 Nov 2011) $"
+>
+
+<title>
+    Logger
+<!--Prookollierung-->
+</title>
+
+<description>
+    <p>
+      The java plugin for running script-jobs produce some log messages for analyzing purposes.
+      Thus we use <a href="http://logging.apache.org/log4j/">log4j</a> for logging, it is possible to configure it via a properties file.
+    </p>
+    
+    <p>
+      The messages of the script itself will be forwarded to this logger instance, too. To point up
+      this fact we provide a special object named <i>logger</i> to each script. It is an instance of
+      <i>org.apache.log4j.Logger</i>, that means that you can configure your log with all capabilities
+      of log4j appenders.
+    </p>
+    
+    <p>
+      It is still possible to use the <a href="Log.xml">spooler_log</a> object (the internal logging service of JS), but it is
+      <b>not recommended</b>, because it will not supported in future versions of the JS.
+    </p>
+    
+    <p>
+      The assumption for using a log4j properties file for the job scheduler is that it is placed in the
+      classpath of the JVM. You can configure the classpath in the scheduler configuration file
+      factory.ini.
+    </p>
+    
+    <p>
+      If you want to redirect the log messages into the task log of the running job you have to use
+      the special appender <i>com.sos.JSHelper.Logging.BufferedJobSchedulerLog4JAppender</i>
+      build for JobScheduler. The following sample will show a log4j configuration for this
+      purpose:
+      <pre>
+# assign the appender for the scripting-api
+# please notice: if appender scheduler is used the log-entries of the class
+# will be placed in the task-log of the scheduler job
+log4j.logger.com.sos.scheduler.engine.kernel.scripting=debug, scheduler
+log4j.appender.scheduler=com.sos.JSHelper.Logging.BufferedJobSchedulerLog4JAppender
+log4j.appender.scheduler.layout=org.apache.log4j.PatternLayout
+log4j.appender.scheduler.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n
+      </pre>
+    </p>
+
+</description>
+
+<example programming_language="javax.script">
+    <pre>logger.info( "Something for the Log" );</pre>
+</example>
+
+</api.class>
