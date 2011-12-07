@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.OSValidator;
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
 
 public class JS606IndividualTest extends JS606Base {
@@ -15,7 +16,7 @@ public class JS606IndividualTest extends JS606Base {
 	private static final Logger logger = LoggerFactory.getLogger(JS606IndividualTest.class);
 	
 	private final String prefix = "MYPREFIX_";
-	private final String jobchain = OSValidator.isWindows() ? "windows_node_parameter" : "unix_node_parameter";
+	private final String jobchain = OperatingSystem.isWindows ? "windows_node_parameter" : "unix_node_parameter";
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {

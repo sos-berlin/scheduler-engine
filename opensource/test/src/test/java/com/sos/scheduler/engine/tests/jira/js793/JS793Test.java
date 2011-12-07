@@ -15,6 +15,7 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.OSValidator;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 /**
@@ -53,7 +54,7 @@ public class JS793Test extends SchedulerTest {
 	@Test
 	public void myTest() throws InterruptedException, IOException {
 		controller().startScheduler();
-		if (OSValidator.isWindows()) {
+		if (OperatingSystem.isWindows) {
 			doJobchain("windows_node_parameter");
 		} else {
 			doJobchain("unix_node_parameter");
