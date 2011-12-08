@@ -8,11 +8,14 @@ import org.junit.Test;
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
+import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 public final class DatabaseQueryPluginTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(DatabaseQueryPluginTest.class);
+    
+    private Time timeout = Time.of(20);
 
     private static final Gate<Boolean> gate = new Gate<Boolean>();
 
@@ -33,7 +36,7 @@ public final class DatabaseQueryPluginTest extends SchedulerTest {
 
     private void waitForTaskTermination() throws Exception {
     	controller().waitUntilSchedulerIsActive();
-        gate.expect(true, shortTimeout);
+        gate.expect(true, timeout);
     }
 
     @EventHandler public void handleEvent(TaskEndedEvent e) throws InterruptedException {
