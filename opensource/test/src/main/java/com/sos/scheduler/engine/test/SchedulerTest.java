@@ -9,7 +9,10 @@ import com.sos.scheduler.engine.kernel.util.Time;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
     private static final Logger logger = Logger.getLogger(SchedulerTest.class);
-    public static final Time shortTimeout = TestSchedulerController.shortTimeout;
+    
+//    public static final Time shortTimeout = TestSchedulerController.shortTimeout;
+//  shortTimeout aus TestSchedulerController (10 sec) reicht für einige Test nicht
+    public static final Time shortTimeout = Time.of(15);
 
     private final TestSchedulerController controller = TestSchedulerController.of(getClass());
 
