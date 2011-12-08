@@ -54,7 +54,7 @@ public class JS721Test extends SchedulerTest {
 	@Test
 	public void test() throws InterruptedException {
         controller().activateScheduler();
-        String params = "<params><param name='DELAY' value='1' /></params>";
+        String params = "<params><param name='DELAY' value='" + JOB_RUNTIME_IN_SECONDS + "' /></params>";
         for (int i = 0; i < ESTIMATED_TASKS; i++) {
             startJob(jobName,params);
         }
