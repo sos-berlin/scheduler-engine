@@ -16,9 +16,11 @@
 #include "../zschimmer/z_signals.h"
 
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__UnmodifiableTask.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__job__events__TaskStartedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__events__TaskEndedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepStartedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepEndedEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::kernel::job::events::TaskStartedEvent TaskStartedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::job::events::TaskEndedEvent TaskEndedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepStartedEvent OrderStepStartedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepEndedEvent OrderStepEndedEventJ;
@@ -1503,7 +1505,7 @@ bool Task::do_something()
                                                 _module_instance->kind() == Module::kind_remote? s_running_remote_process 
                                                                                                : s_running_process
                                            : s_opening );
-
+                                report_event(TaskStartedEventJ::new_instance(java_sister()));
                                 loop = true;
                             }
 

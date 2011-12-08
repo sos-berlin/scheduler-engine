@@ -585,7 +585,9 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         _class_data->_remote_instance_pid = _server->_module_instance->pid();
 
         // if( _server->_module->needs_java() )  // Besser needs_java_compiler?                        // JS-540 ...
-        bool needs_java_vm = _server->_module->kind() == sos::scheduler::Module::kind_java || _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine;
+        bool needs_java_vm = _server->_module->kind() == sos::scheduler::Module::kind_java || 
+                             _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine ||
+                             _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine_java;
         if(needs_java_vm)
         {
             _server->_log.debug1("java classpath: " + _server->_module->_java_vm->class_path()); 

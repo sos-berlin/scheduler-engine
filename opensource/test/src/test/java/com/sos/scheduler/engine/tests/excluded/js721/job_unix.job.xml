@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+	name="job_unix" tasks="99999">
+	<params>
+		<param name="DELAY" value="1"/>
+	</params>
+    <script language="shell">
+        <![CDATA[
+sleep $SCHEDULER_PARAM_DELAY
+        ]]>
+    </script>
+    <run_time/>
+</job>
