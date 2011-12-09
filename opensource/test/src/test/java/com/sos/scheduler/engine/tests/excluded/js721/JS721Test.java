@@ -13,8 +13,8 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
+import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.tests.excluded.ss.scripttest.JavaXScriptTest;
 
 /**
  * This test is for running a lot of simultaniously processes in one instance of the JObScheduler.
@@ -41,6 +41,7 @@ public class JS721Test extends SchedulerTest implements TaskInfo {
 	private int runningTasks = 0;
 	private int maxParallelTasks = 0;
 	private TaskObserver loggerTask = null;
+	private static final Time MAX_RUNTIME = Time.of(3600);  // max 1h
 	
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -64,7 +65,7 @@ public class JS721Test extends SchedulerTest implements TaskInfo {
 	            startJob(jobName,params);
 	        }
 		} finally {
-	        controller().tryWaitForTermination(shortTimeout);
+	        controller().tryWaitForTermination(MAX_RUNTIME);
 	        if (endedTasks != ESTIMATED_TASKS)
 	        	fail(endedTasks + " are finished yet - " + ESTIMATED_TASKS + " are estimated");
 	        logger.info("max. " + maxParallelTasks + " tasks ran parallel.");
