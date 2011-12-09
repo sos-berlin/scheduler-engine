@@ -2,15 +2,9 @@ package com.sos.scheduler.engine.tests.excluded.js721;
 
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.util.Timer;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -20,6 +14,7 @@ import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.tests.excluded.ss.scripttest.JavaXScriptTest;
 
 /**
  * This test is for running a lot of simultaniously processes in one instance of the JObScheduler.
@@ -34,17 +29,18 @@ import com.sos.scheduler.engine.test.SchedulerTest;
  * @version 1.0 - 08.12.2011 13:57:27
  *
  */
-public class JS721Test extends SchedulerTest {
+public class JS721Test extends SchedulerTest implements TaskInfo {
 
 	private static final Logger logger = LoggerFactory.getLogger(JS721Test.class);
 	
 	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
-	private static final int ESTIMATED_TASKS = 100;
+	private static final int ESTIMATED_TASKS = 10;
 	private static final int JOB_RUNTIME_IN_SECONDS = 1;
 	
 	private int endedTasks = 0;
 	private int runningTasks = 0;
 	private int maxParallelTasks = 0;
+	private TaskObserver loggerTask = null;
 	
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -52,16 +48,31 @@ public class JS721Test extends SchedulerTest {
 	}
 
 	@Test
-	public void test() throws InterruptedException {
+	public void test() throws Exception {
+		
         controller().activateScheduler();
-        String params = "<params><param name='DELAY' value='" + JOB_RUNTIME_IN_SECONDS + "' /></params>";
-        for (int i = 0; i < ESTIMATED_TASKS; i++) {
-            startJob(jobName,params);
-        }
-        controller().tryWaitForTermination(shortTimeout);
         
-        if (endedTasks != ESTIMATED_TASKS)
-        	fail(endedTasks + " are finished yet - " + ESTIMATED_TASKS + " are estimated");
+		String logfilename = "src/test/java/" + JS721Test.class.getPackage().getName().replace(".", "/") + "/JS721.log";
+		File f = new File( logfilename );
+		Timer timer = new Timer();
+		loggerTask = new TaskObserver(f.getAbsolutePath(), this);
+
+        String params = "<params><param name='DELAY' value='" + JOB_RUNTIME_IN_SECONDS + "' /></params>";
+		try {
+			timer.schedule(loggerTask, 1000, 1000);
+	        for (int i = 0; i < ESTIMATED_TASKS; i++) {
+	            startJob(jobName,params);
+	        }
+		} finally {
+	        controller().tryWaitForTermination(shortTimeout);
+	        if (endedTasks != ESTIMATED_TASKS)
+	        	fail(endedTasks + " are finished yet - " + ESTIMATED_TASKS + " are estimated");
+	        logger.info("max. " + maxParallelTasks + " tasks ran parallel.");
+			loggerTask.close();
+			timer.cancel();
+			timer.purge();
+		}
+        
 	}
 
 	protected void startJob(String jobName, String params) {
@@ -73,22 +84,36 @@ public class JS721Test extends SchedulerTest {
 	public void handleTaskStart(TaskStartedEvent e) throws IOException {
 		runningTasks++;
 		if (runningTasks > maxParallelTasks) maxParallelTasks = runningTasks;
-		logger.debug(e.getJobPath().getString() + " TASKSTART: " + e.getClass().getSimpleName());
-		logStatus();
+		logger.debug("TASKSTART: " + e.getClass().getSimpleName());
 	}
 
 	@HotEventHandler
 	public void handleTaskEnd(TaskEndedEvent e) throws IOException {
-		logger.debug(e.getJobPath().getString() + " TASKEND: " + e.getClass().getSimpleName());
+		logger.debug("TASKEND: " + e.getClass().getSimpleName());
 		runningTasks--;
 		endedTasks++;
-		logStatus();
 		if (endedTasks == ESTIMATED_TASKS)
 			controller().terminateScheduler();
 	}
-	
-	private void logStatus() {
-		logger.info(runningTasks + " are currently running (" + endedTasks + " of " + ESTIMATED_TASKS + " are finished)");
+
+	@Override
+	public int currentlyRunningTasks() {
+		return runningTasks;
 	}
 
+	@Override
+	public int endedTasks() {
+		return endedTasks;
+	}
+
+	@Override
+	public int highwaterTasks() {
+		return maxParallelTasks;
+	}
+
+	@Override
+	public int estimatedTasks() {
+		return ESTIMATED_TASKS;
+	}
+	
 }
