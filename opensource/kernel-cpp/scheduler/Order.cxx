@@ -2343,7 +2343,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( node->is_suspending_order() )  {
             _suspended = true;   
-            fire_event_suspended();
+            report_event(OrderSuspendedEventJ::new_instance(java_sister()));
         }
 
         if( !_is_distribution_inhibited  &&  job_chain->is_distributed() )  set_distributed();
@@ -2567,25 +2567,6 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
     }
 
     postprocessing2( last_job );
-}
-
-//--------------------------------------------------------------------------Order::fire_event_suspended
-
-void Order::fire_event_suspended()
-{
-    if( _suspended ) {
-        report_event( OrderSuspendedEventJ::new_instance(java_sister()) );
-    }
-}
-
-//--------------------------------------------------------------------------Order::fire_event_resumed
-
-void Order::fire_event_resumed()
-{
-    // Endzustand erreicht. 
-    if( !_suspended ) {
-        report_event( OrderResumedEventJ::new_instance(java_sister()) );
-    }
 }
 
 //--------------------------------------------------------------------------Order::handle_end_state
@@ -2847,10 +2828,10 @@ void Order::set_suspended( bool suspended )
 
             if( _suspended )  {
                _log->info( message_string( "SCHEDULER-991" ) );
-               fire_event_suspended();
+                report_event(OrderSuspendedEventJ::new_instance(java_sister()));
             } else {
                _log->info( message_string( "SCHEDULER-992", _setback ) );
-               fire_event_resumed();
+                report_event(OrderResumedEventJ::new_instance(java_sister()));
             }
         }
 
