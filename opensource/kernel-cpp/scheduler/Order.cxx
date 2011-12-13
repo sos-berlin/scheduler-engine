@@ -25,7 +25,7 @@ using namespace job_chain;
 
 //---------------------------------------------------------------------------------------------const
 
-const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
+const int    max_insert_race_retry_count                = 5;                            // Race condition beim EinfÃ¼gen eines Datensatzes
 
 //-------------------------------------------------------------------------------Order_schedule_use
 
@@ -43,8 +43,8 @@ struct Order_schedule_use : Schedule_use
 };
 
 //--------------------------------------------------------------------db_text_distributed_next_time
-// Für SqlServer: distributed_next_time kann zwischen Sommer- und Winterzeit liegen.
-// Bei einem Vergleich konvertiert SqlServer in einen echten Zeitstempel und stößt auf einen Fehler,
+// FÃ¼r SqlServer: distributed_next_time kann zwischen Sommer- und Winterzeit liegen.
+// Bei einem Vergleich konvertiert SqlServer in einen echten Zeitstempel und stÃ¶ÃŸt auf einen Fehler,
 // weil es die Stunde zwischen 2 und 3 nicht gibt.
 // Das Problem umgehen wir, wenn wir nach Text (ISO-Format) konvertierem.
 
@@ -57,7 +57,7 @@ string db_text_distributed_next_time()
 
 void split_standing_order_name( const string& name, string* job_chain_name, string* order_id )
 {
-    // Könnte bei Bedarf nach File_based_subsystem verallgemeinert werden
+    // KÃ¶nnte bei Bedarf nach File_based_subsystem verallgemeinert werden
 
     size_t pos = name.find( folder_name_separator );
     if( pos == string::npos )  pos = 0;
@@ -85,7 +85,7 @@ Order::Order( Standing_order_subsystem* subsystem )
     //_signaled_next_time = Time::never;
 
     _schedule_use = Z_NEW( Order_schedule_use( this ) );
-    _schedule_use->set_scheduler_holidays_usage( schedule::without_scheduler_holidays );  // <config><holidays> nicht übernehmen, eMail von Andreas Liebert 2008-04-21
+    _schedule_use->set_scheduler_holidays_usage( schedule::without_scheduler_holidays );  // <config><holidays> nicht Ã¼bernehmen, eMail von Andreas Liebert 2008-04-21
 }
 
 //------------------------------------------------------------------------------------Order::~Order
@@ -183,7 +183,7 @@ void Order::load_payload_blob( Read_transaction* ta )
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
         ptr<Com_variable_set> v = new Com_variable_set;
-        v->put_Xml( Bstr( payload_string ) );               // 2008-05-23  SCHLECHT: Löst keine Exception, sollte aber! 
+        v->put_Xml( Bstr( payload_string ) );               // 2008-05-23  SCHLECHT: LÃ¶st keine Exception, sollte aber! 
         _payload = v;
     }
     else
@@ -256,14 +256,14 @@ xml::Element_ptr Order::why_dom_element(const xml::Document_ptr& doc, const Time
 }
 
 //----------------------------------------------------------Order::handle_changed_processable_state
-// Nach Änderung von next_time(), also _setback und is_processable() zu rufen!
+// Nach Ã„nderung von next_time(), also _setback und is_processable() zu rufen!
 
 void Order::handle_changed_processable_state()
 {
-    // Eine schönere Implementierung wäre vielleicht, nur für den ersten Auftrag der Warteschlange 
+    // Eine schÃ¶nere Implementierung wÃ¤re vielleicht, nur fÃ¼r den ersten Auftrag der Warteschlange 
     // Order_queue_node::handle_changed_processable_state() aufzurufen,
-    // denn die weiter hinten stehenden Aufträge laufen nie vor dem ersten an.
-    // Dann hätten wir weniger Aufruf an Job::signal_earlier_order().
+    // denn die weiter hinten stehenden AuftrÃ¤ge laufen nie vor dem ersten an.
+    // Dann hÃ¤tten wir weniger Aufruf an Job::signal_earlier_order().
 
     Time new_next_time = next_time();
 
@@ -341,7 +341,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
     if( was_virgin )
     {
         if ( _job_chain )   // JS-682
-            _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
+            _job_chain->check_max_orders();  // Keine Exception auslÃ¶sen oder occupy_for_task() zurÃ¼cknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
         order_subsystem()->count_started_orders();
         report_event( OrderTouchedEventJ::new_instance(java_sister()) );
@@ -425,7 +425,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_order_history_tablename, x ), Z_FUNCTION ); }
     }
 
-    _history_id = 0;        // Beim nächsten Start neue history_id ziehen
+    _history_id = 0;        // Beim nÃ¤chsten Start neue history_id ziehen
 }
 
 //-------------------------------------------------------Order::db_insert_order_step_history_record
@@ -484,7 +484,7 @@ void Order::db_update_order_step_history_record( Transaction* ta )
         if( _task_error )
         {
             if( !_task_error.code().empty() )  update[ "error_code" ] = _task_error->code();
-            if( !_task_error.what().empty() )  update[ "error_text" ] = string( _task_error->what() ).substr( 0, max_column_length );    // Für MySQL 249 statt 250. jz 7.1.04
+            if( !_task_error.what().empty() )  update[ "error_text" ] = string( _task_error->what() ).substr( 0, max_column_length );    // FÃ¼r MySQL 249 statt 250. jz 7.1.04
         }
 
         ta->execute_single( update, Z_FUNCTION );
@@ -522,7 +522,7 @@ bool Order::db_occupy_for_processing()
     if( update_ok )
     {
         _is_db_occupied = true, _occupied_state = _state;
-        //if( order_subsystem()->_database_order_detector )  order_subsystem()->_database_order_detector->on_new_order();     // Verkürzt die Überwachungsperiode
+        //if( order_subsystem()->_database_order_detector )  order_subsystem()->_database_order_detector->on_new_order();     // VerkÃ¼rzt die Ãœberwachungsperiode
     }
     else
     {
@@ -756,7 +756,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 {
     bool update_ok = false;
 
-    // outer_transaction nur für db_handle_modified_order() oder vor sicherem Commit. Bei Rollback würde Order nicht mit Datenbanksatz übereinstimmen.
+    // outer_transaction nur fÃ¼r db_handle_modified_order() oder vor sicherem Commit. Bei Rollback wÃ¼rde Order nicht mit Datenbanksatz Ã¼bereinstimmen.
 
     if( update_option == update_and_release_occupation  &&  _spooler->_are_all_tasks_killed )
     {
@@ -769,7 +769,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         if( update_option == update_not_occupied  &&  _is_db_occupied )  z::throw_xc( Z_FUNCTION, "is_db_occupied" );
 
 
-        string           state_string = state().as_string();    // Kann Exception auslösen;
+        string           state_string = state().as_string();    // Kann Exception auslÃ¶sen;
         sql::Update_stmt update       = db_update_stmt();
 
         if( _is_db_occupied )
@@ -817,7 +817,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         }
         else
         {
-            string payload_string = string_payload();   // Kann Exception auslösen
+            string payload_string = string_payload();   // Kann Exception auslÃ¶sen
 
             if( _is_db_occupied  &&  update_option == update_and_release_occupation )  update[ "occupying_cluster_member_id" ] = sql::null_value;
 
@@ -847,8 +847,8 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 else
                 //if( !finished() )
                 {
-                    // _schedule_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
-                    // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
+                    // _schedule_modified gilt nicht fÃ¼r den Datenbanksatz, sondern fÃ¼r den Auftragsneustart
+                    // Vorschlag: xxx_modified auflÃ¶sen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
                     if( _schedule_use->is_defined() ) 
                     {
                         xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
@@ -858,7 +858,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     else
                         update[ "run_time" ].set_direct( "null" );
 
-                    //if( _order_xml_modified )  // Das wird nicht überall gesetzt und sowieso ändert sich das Element fast immer
+                    //if( _order_xml_modified )  // Das wird nicht Ã¼berall gesetzt und sowieso Ã¤ndert sich das Element fast immer
                     {
                         xml::Document_ptr order_document = dom( show_for_database_only );
                         xml::Element_ptr  order_element  = order_document.documentElement();
@@ -921,7 +921,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 
 bool Order::db_handle_modified_order( Transaction* outer_transaction )
 {
-    // db_update() oder db_delete() konnte den Auftrag nicht ändern, weil die Where-Klausel nicht passte.
+    // db_update() oder db_delete() konnte den Auftrag nicht Ã¤ndern, weil die Where-Klausel nicht passte.
     // Wir sehen hier nach der Ursache.
 
     bool result = false;
@@ -932,9 +932,9 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
         {
             if( modified_order->_is_replacement )
             {
-                // Der Auftrag in der Datenbank ersetzt unseren, gerade ausgeführten Auftrag.
-                // Unser Auftrag bleibt gelöscht, wir speichern ihn nicht.
-                // Der neue Auftrag in der Datenbank wird jetzt ausführbar gemacht:
+                // Der Auftrag in der Datenbank ersetzt unseren, gerade ausgefÃ¼hrten Auftrag.
+                // Unser Auftrag bleibt gelÃ¶scht, wir speichern ihn nicht.
+                // Der neue Auftrag in der Datenbank wird jetzt ausfÃ¼hrbar gemacht:
 
                 _log->info( message_string( "SCHEDULER-839" ) );
 
@@ -1092,7 +1092,7 @@ void Order::open_log()
     {
         string name = _id.as_string();
         
-        for( int i = 0; i < name.length(); i++ )        // Ungültige Zeichen in '_' ändern. DAS KANN MEHRDEUTIG WERDEN!
+        for( int i = 0; i < name.length(); i++ )        // UngÃ¼ltige Zeichen in '_' Ã¤ndern. DAS KANN MEHRDEUTIG WERDEN!
         {
             char& c = name[i];
             switch( c )
@@ -1269,7 +1269,7 @@ void Order::on_remove_now()
     //{
     //    ptr<Order> order = _order;
     //    
-    //    _order->connect_with_standing_order( NULL );    // Verbindung zwischen Order und Standing_order lösen,
+    //    _order->connect_with_standing_order( NULL );    // Verbindung zwischen Order und Standing_order lÃ¶sen,
     //    _order = NULL;                                  // dass remove_job_chain() nicht check_for_replacing_or_removing() rufe!
     //                                        
     //    order->remove_from_job_chain();
@@ -1330,7 +1330,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( priority         != "" )  set_priority( as_int(priority) );
     if( id               != "" )  set_id( id.c_str() );
 
-    if( has_base_file() )   // Sicherstellen, das job_chain= und id=, falls vorhanden, mit Angaben im Dateinamen übereinstimmen
+    if( has_base_file() )   // Sicherstellen, das job_chain= und id=, falls vorhanden, mit Angaben im Dateinamen Ã¼bereinstimmen
     {
         Absolute_path job_chain_path ( folder_path(), element.getAttribute( "job_chain" ) );  // Bei <add_order> vom Schema erlaubt
         if( !job_chain_path.empty()  &&  subsystem()->normalized_path( job_chain_path ) != subsystem()->normalized_path( _file_based_job_chain_path ) )  z::throw_xc( "SCHEDULER-437", job_chain_path, _file_based_job_chain_path );
@@ -1397,7 +1397,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             }
         }
         else
-        if( e.nodeName_is( "run_time" ) )       // Attribut at="..." setzt nächste Startzeit
+        if( e.nodeName_is( "run_time" ) )       // Attribut at="..." setzt nÃ¤chste Startzeit
         { 
             set_schedule( this, e );
         }
@@ -1420,8 +1420,8 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             _outer_job_chain_path = Absolute_path( root_path, e2.getAttribute( "job_chain", _outer_job_chain_path ) );
             _outer_job_chain_state = e2.getAttribute( "state" );
 
-            // Nicht prüfen, weil Äußere Jobkette später definiert werden kann
-            //order_subsystem()->job_chain( _outer_job_chain_path )->node_from_state( _outer_job_chain_state );   // Prüfen
+            // Nicht prÃ¼fen, weil Ã¤uÃŸere Jobkette spÃ¤ter definiert werden kann
+            //order_subsystem()->job_chain( _outer_job_chain_path )->node_from_state( _outer_job_chain_state );   // PrÃ¼fen
         }
     }
 
@@ -1503,7 +1503,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
         if( _task )
         {
-            result.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
+            result.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die VorgÃ¤nger-Task sein (bis spooler_process endet)
             result.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
         }
 
@@ -1550,7 +1550,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     //{
     //    // Nach <run_time> setzen!
     //    if( _period.repeat() < Time::never ||
-    //        _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <schedule>
+    //        _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, fÃ¼r <schedule>
     //}
 
     if( show_what.is_set( show_log )  ||  show_what.is_set( show_for_database_only ) )
@@ -1584,7 +1584,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     }
 
 
-    // Wenn die folgenden Werte sich ändern, _order_xml_modified = true setzen!
+    // Wenn die folgenden Werte sich Ã¤ndern, _order_xml_modified = true setzen!
 
     if( _setback  )
     result.setAttribute( _setback_count == 0? "at" : "setback", _setback.as_string() );
@@ -1973,7 +1973,7 @@ void Order::set_xml_payload( const string& xml_string )
 
 void Order::set_xml_payload( const xml::Element_ptr& element )
 { 
-    _xml_payload = element? element.xml() : "";     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
+    _xml_payload = element? element.xml() : "";     // _xml_payload kann in order_xml <order> eingefÃ¼gt werden, unabhÃ¤ngig von der Codierung (ist nur 7bit-Ascii)
     _order_xml_modified = true; 
 }
 
@@ -2106,7 +2106,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
 void Order::reset()
 {
-    // Für http://www.sos-berlin.com/jira/browse/JS-305 
+    // FÃ¼r http://www.sos-berlin.com/jira/browse/JS-305 
 
     assert_no_task( Z_FUNCTION );
 
@@ -2122,7 +2122,7 @@ void Order::set_end_state( const State& end_state )
 { 
     if( !end_state.is_null_or_empty_string() )
     {
-        if( Job_chain* job_chain = this->job_chain() )  job_chain->referenced_node_from_state( end_state );       // Prüfen
+        if( Job_chain* job_chain = this->job_chain() )  job_chain->referenced_node_from_state( end_state );       // PrÃ¼fen
     }
 
     _end_state = end_state;
@@ -2204,7 +2204,7 @@ void Order::remove( File_based::Remove_flag remove_flag )
     ptr<Order> hold_me = this;
 
     if( is_in_folder() )  My_file_based::remove( remove_flag );
-    // Löscht erst im Endzustand, deshalb noch remove_from_job_chain() rufen
+    // LÃ¶scht erst im Endzustand, deshalb noch remove_from_job_chain() rufen
 
     remove_from_job_chain(); 
 }
@@ -2226,9 +2226,6 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
         }
 
         db_delete( update_and_release_occupation, outer_transaction );     // Schreibt auch die Historie (auch bei orders_recoverable="no")
-
-        // wird beim order remove aufgerufen und sollte evtl. ein eigenes event sein
-        fire_event_if_finished();
     }
 
     assert( !_is_db_occupied );
@@ -2276,12 +2273,12 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 {
     job_chain->assert_is_loaded();
 
-    // Sollte mit assert_is_loaded() überflüssig geworden sein:
+    // Sollte mit assert_is_loaded() Ã¼berflÃ¼ssig geworden sein:
     if( job_chain->state() != Job_chain::s_loaded  &&  
         job_chain->state() != Job_chain::s_active  )  z::throw_xc( "SCHEDULER-151" );
       //job_chain->state() != Job_chain::s_stopped 
 
-    if( _outer_job_chain_path == ""  &&  !_end_state.is_null_or_empty_string() )  job_chain->referenced_node_from_state( _end_state );       // Prüfen
+    if( _outer_job_chain_path == ""  &&  !_end_state.is_null_or_empty_string() )  job_chain->referenced_node_from_state( _end_state );       // PrÃ¼fen
 
     bool is_new = true;
 
@@ -2314,7 +2311,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
     if( is_new )
     {
-        ptr<Order> hold_me = this;   // Halten für remove_from_job_chain()
+        ptr<Order> hold_me = this;   // Halten fÃ¼r remove_from_job_chain()
         
         if( _job_chain_path != "" )  remove_from_job_chain( job_chain_stack_option );
         assert( !_job_chain );
@@ -2323,7 +2320,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         {
             // Auftrag bekommt Zustand des ersten Jobs der Jobkette. 
             set_state2( job_chain->first_node()->order_state() );     
-            //2007-07-30 Besser so?: set_job_chain_node( job_chain->first_node() );     // Node._action, ._is_suspending_order und ._delay berücksichtigen
+            //2007-07-30 Besser so?: set_job_chain_node( job_chain->first_node() );     // Node._action, ._is_suspending_order und ._delay berÃ¼cksichtigen
         }
 
         Node* node = job_chain->node_from_state( _state );
@@ -2333,7 +2330,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
         {
-            if( _outer_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich (sollte nicht passieren, wird schon vorher geprüft)
+            if( _outer_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht mÃ¶glich (sollte nicht passieren, wird schon vorher geprÃ¼ft)
 
             _outer_job_chain_path = Absolute_path( root_path, job_chain->path() );
             _outer_job_chain_state = _state;
@@ -2345,8 +2342,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  z::throw_xc( "SCHEDULER-438", _state );
 
         if( node->is_suspending_order() )  {
-           _suspended = true;   
-           fire_event_suspended();
+            _suspended = true;   
+            fire_event_suspended();
         }
 
         if( !_is_distribution_inhibited  &&  job_chain->is_distributed() )  set_distributed();
@@ -2354,11 +2351,11 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         _job_chain_path = job_chain->path();
         _removed_from_job_chain_path.clear();
 
-        activate_schedule();     // Errechnet die nächste Startzeit
+        activate_schedule();     // Errechnet die nÃ¤chste Startzeit
 
         if( _delay_storing_until_processing ) 
         {
-            if( _is_distributed )  assert(0), z::throw_xc( Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
+            if( _is_distributed )  assert(0), z::throw_xc( Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prÃ¼fen kÃ¶nnen
         }
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
@@ -2398,14 +2395,14 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
                 other_order->remove_from_job_chain();
                 place_in_job_chain( job_chain );
             } else {
-                activate_schedule();  // Wird sonst von place_in_job_chain ausgeführt // SOS-1219
+                activate_schedule();  // Wird sonst von place_in_job_chain ausgefÃ¼hrt // SOS-1219
             }
 
             if( other_order->_task )
             {
                 set_replacement( other_order );
                 _replaced_order_occupator = other_order->_task->obj_name();
-                _log->info( message_string( "SCHEDULER-942", _replaced_order_occupator, other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat
+                _log->info( message_string( "SCHEDULER-942", _replaced_order_occupator, other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzÃ¶gert bis <p1/> <p2/> ausgefÃ¼hrt hat
             }
             //else
             //    other_order->close();       // 2007-09-16
@@ -2436,7 +2433,7 @@ void Order::set_next_start_time()
     if (is_in_initial_state()) {
         if( _schedule_use->is_defined() )
         {
-            set_setback( next_start_time( true ) );     // Braucht für <schedule start_time_function=""> das Scheduler-Skript
+            set_setback( next_start_time( true ) );     // Braucht fÃ¼r <schedule start_time_function=""> das Scheduler-Skript
         }
         else
             set_setback( Time::never );
@@ -2513,7 +2510,7 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
 
     if( !_suspended  &&  _setback == Time::never  &&  _setback_count > _task->job()->max_order_setbacks() )
     {
-        _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
+        _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurÃ¼ckgestellt. Der Auftrag wechselt in den Fehlerzustand"
         _is_success_state = false;
         force_error_state = true;
         _setback = Time(0);
@@ -2566,20 +2563,10 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
         if( _job_chain_node  &&  _job_chain_node->action() == Node::act_next_state )
             clear_setback();
 
-        set_state1( _state );       // Node._action, ._is_suspending_order und ._delay berücksichtigen
+        set_state1( _state );       // Node._action, ._is_suspending_order und ._delay berÃ¼cksichtigen
     }
 
     postprocessing2( last_job );
-}
-
-//--------------------------------------------------------------------------Order::fire_event_if_finished
-
-void Order::fire_event_if_finished()
-{
-    // Endzustand erreicht. 
-    if( finished() ) {
-        report_event( OrderFinishedEventJ::new_instance(java_sister()) );
-    }
 }
 
 //--------------------------------------------------------------------------Order::fire_event_suspended
@@ -2606,7 +2593,7 @@ void Order::fire_event_resumed()
 void Order::handle_end_state()
 {
     // Endzustand erreicht. 
-    // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
+    // MÃ¶glicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die Ã¼bergeordnete Jobkette.
     bool is_real_end_state = false;
 
 
@@ -2629,6 +2616,8 @@ void Order::handle_end_state()
         Time  next_start    = next_start_time( is_first_call );
         State s             = _outer_job_chain_path != ""? _outer_job_chain_state : _state;
 
+        report_event(OrderFinishedEventJ::new_instance(java_sister()));
+
         if( ( has_base_file()  ||  next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
            (s != _initial_state || _initial_state == _end_state) )   // JS-730  
         {
@@ -2641,7 +2630,7 @@ void Order::handle_end_state()
             {
                 if( is_file_order()  &&  file_path().file_exists() )
                 {
-                    _log->error( message_string( "SCHEDULER-340" ) );  // Auslösende Datei darf nach Auftragsende nicht mehr da sein.
+                    _log->error( message_string( "SCHEDULER-340" ) );  // AuslÃ¶sende Datei darf nach Auftragsende nicht mehr da sein.
                     set_on_blacklist();
                 }
                 
@@ -2701,9 +2690,9 @@ bool Order::handle_end_state_of_nested_job_chain()
                 _end_time = 0;
                 open_log();
 
-                _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
+                _state.clear();     // LÃ¤sst place_in_job_chain() den ersten Zustand der Jobkette nehmen
                 place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
-                _outer_job_chain_path = Absolute_path( root_path, outer_job_chain->path() );  // place_in_job_chain() hat's gelöscht
+                _outer_job_chain_path = Absolute_path( root_path, outer_job_chain->path() );  // place_in_job_chain() hat's gelÃ¶scht
 
                 _log->info( message_string( "SCHEDULER-863", previous_job_chain->obj_name() ) );
             }
@@ -2773,7 +2762,6 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 void Order::on_carried_out()
 {
     order_subsystem()->count_finished_orders();
-
     check_for_replacing_or_removing( act_now );     // Kann Auftrag aus der Jobkette nehmen
 }
 
@@ -2819,9 +2807,6 @@ void Order::postprocessing2( Job* last_job )
         catch( exception& x )  { _log->error( x.what() ); }
     }
     
-    fire_event_if_finished();
-
-
     if( _job_chain )  // 2008-03-07  &&  _is_in_database )
     {
         try
@@ -2899,13 +2884,13 @@ bool Order::setback()
     {
         Time delay = _task->job()->get_delay_order_after_setback( _setback_count );
         _setback = delay? Time::now() + delay : Time(0);
-        _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurückgestellt, bis $2"
+        _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurÃ¼ckgestellt, bis $2"
         result = true;
     }
     else
     {
-        _setback = Time::never;  // Das heißt: Der Auftrag kommt in den Fehlerzustand
-        _log->info( message_string( "SCHEDULER-947", _setback_count, maximum ) );   // "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, ""das ist über dem Maximum " + as_string(maximum) + " des Jobs" );
+        _setback = Time::never;  // Das heiÃŸt: Der Auftrag kommt in den Fehlerzustand
+        _log->info( message_string( "SCHEDULER-947", _setback_count, maximum ) );   // "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurÃ¼ckgestellt, ""das ist Ã¼ber dem Maximum " + as_string(maximum) + " des Jobs" );
         result = false;
     }
 
@@ -2976,7 +2961,7 @@ Time Order::next_time()
 
 //---------------------------------------------------------------------------Order::next_start_time
 // first_call: false, wenn Order endet oder nicht gestartet wurde
-// first_call: true, bevor Order gestartet wird oder sich die Konfigurationsdatei der Order ändert
+// first_call: true, bevor Order gestartet wird oder sich die Konfigurationsdatei der Order Ã¤ndert
 
 Time Order::next_start_time( bool first_call )
 {
@@ -3018,7 +3003,7 @@ Time Order::next_start_time( bool first_call )
                 if (result.is_never()) 
                         result = next_period.begin();  // SOS1219 next_period.begin() kann never sein!??
                 else
-                if (result >= next_period.end()) { // Nächste Periode ist auch abgelaufen?
+                if (result >= next_period.end()) { // NÃ¤chste Periode ist auch abgelaufen?
                     next_period = _schedule_use->next_period(next_period.end(), schedule::wss_next_any_start);
                     result = next_period.begin();
                 }
@@ -3026,7 +3011,7 @@ Time Order::next_start_time( bool first_call )
                 if( !next_period.is_seamless_repeat_of(_period))
                     result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
                 else {
-                    // Perioden gehen nahtlos ineinander über und in result berechneter repeat-Abstand bleibt erhalten.
+                    // Perioden gehen nahtlos ineinander Ã¼ber und in result berechneter repeat-Abstand bleibt erhalten.
                 }
 
                 _period = next_period;
@@ -3085,8 +3070,8 @@ void Order::handle_changed_schedule()
     
         if( is_virgin() )
         {
-            //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
-            set_next_start_time();      // Änderung von <run_time> überschreibt Order.at
+            //_setback = 0;           // Ã„nderung von <run_time> Ã¼berschreibt Order.at
+            set_next_start_time();      // Ã„nderung von <run_time> Ãœberschreibt Order.at
         }
     }
 }
@@ -3110,8 +3095,8 @@ Schedule_use* Order::schedule_use()
 
 void Order::set_replacement( Order* replaced_order )
 {
-    // Bei verschachtelten Jobketten (in einer Order_id_space verbunden) können die 
-    // zwei Aufträge in verschiedenen Jobketten sein.
+    // Bei verschachtelten Jobketten (in einer Order_id_space verbunden) kÃ¶nnen die 
+    // zwei AuftrÃ¤ge in verschiedenen Jobketten sein.
 
     assert( !replaced_order->_replaced_by );
     assert( !replaced_order->_is_replacement );
