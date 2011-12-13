@@ -14,6 +14,14 @@ public class SchedulerEventBus implements EventBus {
         coldEventBus.unregisterAnnotated(o);
     }
 
+    public final void register(EventSubscription s) {
+        coldEventBus.register(s);
+    }
+
+    public final void unregister(EventSubscription s) {
+        coldEventBus.unregister(s);
+    }
+
     public final void registerHot(EventSubscription s) {
         hotEventBus.register(s);
     }
