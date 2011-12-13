@@ -6,4 +6,8 @@ public class AbsolutePath extends Path {
         super(p);
         assertIsEmptyOrAbsolute();
     }
+
+    public final String getName() {
+        return getString().substring(getString().lastIndexOf('/') + 1);
+    }
 }
