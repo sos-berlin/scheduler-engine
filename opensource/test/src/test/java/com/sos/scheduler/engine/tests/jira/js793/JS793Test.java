@@ -16,6 +16,7 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.tests.Goodies;
 
 /**
  * This test show how to set specific parameter for jobchain nodes. To do this, you have to sepcify order parameters
@@ -44,6 +45,7 @@ public class JS793Test extends SchedulerTest {
 	private static final Logger logger = LoggerFactory.getLogger(JS793Test.class);
 
 	private File resultfile;
+	private static final Goodies helper = Goodies.getInstance();
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -58,14 +60,15 @@ public class JS793Test extends SchedulerTest {
 		} else {
 			doJobchain("unix_node_parameter");
 		}
+        controller().tryWaitForTermination(shortTimeout);
 	}
 	
-	private void doJobchain(String jobchainName) {
+	private void doJobchain(String jobchainName) throws IOException {
 		resultfile = prepareResultfile(jobchainName);
 		startOrder(jobchainName);
 	}
 	
-	private void startOrder(String jobchainName) {
+	private void startOrder(String jobchainName) throws IOException {
 
 		/*
 		 * hier sollte eine Order im code erzeugt werden, leider ist nicht klar, wie man die Order dazu bringt,
@@ -79,7 +82,7 @@ public class JS793Test extends SchedulerTest {
 		String command = 
 		"<add_order id='test_" + jobchainName + "' job_chain='" + jobchainName + "'>" +
 		"<params>" + 
-		"<param name='RESULT_FILE'    value='" + getResultfile(jobchainName) + "' />" + 
+		"<param name='RESULT_FILE'    value='" + getResultfile(jobchainName).getAbsolutePath() + "' />" + 
 		"<param name='100/NODE_PARAM' value='param_state_100' />" + 
 		"<param name='200/NODE_PARAM' value='param_state_200' />" + 
 		"</params>" + 
@@ -88,14 +91,14 @@ public class JS793Test extends SchedulerTest {
 	}
 	
 	private final File prepareResultfile(String jobchainName) {
-		File f = new File( getResultfile(jobchainName) );
+		File f = getResultfile(jobchainName);
 		if (f.exists()) f.delete();
 		logger.debug("results of the jobs will be written in file " + f.getAbsolutePath());
 		return f;
 	}
 	
-	private String getResultfile(String jobchainName) {
-		return "src/test/resources/" + JS793Test.class.getPackage().getName().replace(".", "/") + "/result_" + jobchainName + ".txt";
+	private File getResultfile(String jobchainName) {
+		return helper.getTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
 	}
 		
 	@HotEventHandler

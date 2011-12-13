@@ -13,10 +13,12 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.tests.Goodies;
 
 public class JS606Base extends SchedulerTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(JS606Base.class);
+	private static final Goodies helper = Goodies.getInstance();
 	
 	private String variablePrefixEnv;
 	private File resultfile;
@@ -28,7 +30,7 @@ public class JS606Base extends SchedulerTest {
 		this.variablePrefixEnv = prefix;
 		this.jobchainName = jobchain;
 
-		File f = new File( getResultfile(this.jobchainName) );
+		File f = getResultfile(this.jobchainName);
 		if (f.exists()) f.delete();
 		this.resultfile = f;
 
@@ -57,8 +59,8 @@ public class JS606Base extends SchedulerTest {
 		controller().scheduler().executeXml(command);
 	}
 	
-	private String getResultfile(String jobchainName) {
-		return "src/test/resources/" + JS606Base.class.getPackage().getName().replace(".", "/") + "/result_" + jobchainName + ".txt";
+	private File getResultfile(String jobchainName) {
+		return helper.getTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
 	}
 	
 	@HotEventHandler

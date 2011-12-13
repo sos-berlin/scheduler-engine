@@ -24,9 +24,10 @@ public class JS606StandardTest extends JS606Base {
 	
 	@Test
 	public void Test() throws InterruptedException, IOException {
-		controller().startScheduler("-env=SCHEDULER_VARIABLE_NAME_PREFIX=" + prefix);
+		controller().activateScheduler("-env=SCHEDULER_VARIABLE_NAME_PREFIX=" + prefix);
 		prepareTest(jobchain, prefix);
 		startOrder();
+		controller().tryWaitForTermination(shortTimeout);
 	}
 	
 
