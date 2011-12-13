@@ -69,7 +69,6 @@ public final class Environment {
         result.add("-ini=" + iniFile());
         result.add("-log-dir=" + logDirectory.getPath());
         result.add("-log="+logCategories+">" + new File(logDirectory, "scheduler.log").getPath());
-        result.add("-java-events");
         if (OperatingSystem.isUnix)
             result.add("-env=" + libraryPathEnv(cppBinaries.directory()));
         result.add(configDirectory.getPath());

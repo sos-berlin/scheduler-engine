@@ -94,14 +94,14 @@ bool Event_subsystem_impl::subsystem_activate()
 
 void Event_subsystem_impl::report(const AbstractEventJ& eventJ)
 {
-    if (_spooler->_java_events_allowed && _eventSubsystemJ) 
+    if (_eventSubsystemJ) 
         _eventSubsystemJ.report(eventJ);
 }
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
 
 void Event_subsystem_impl::report(const AbstractEventJ& eventJ, const ObjectJ& eventSourceJ) {
-    if (_spooler->_java_events_allowed && _eventSubsystemJ) 
+    if (_eventSubsystemJ) 
         _eventSubsystemJ.report(eventJ, eventSourceJ);
 }
 
