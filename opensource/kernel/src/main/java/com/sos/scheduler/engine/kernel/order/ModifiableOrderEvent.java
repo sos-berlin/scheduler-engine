@@ -4,6 +4,7 @@ public abstract class ModifiableOrderEvent extends OrderEvent {
     private final Order order;
 
     protected ModifiableOrderEvent(Order o) {
+        super(o.getKey());
         this.order = o;
     }
 

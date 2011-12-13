@@ -4,6 +4,12 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerObject;
 import com.sos.scheduler.engine.kernel.event.ObjectEvent;
 
 public abstract class OrderEvent extends ObjectEvent {
+    private final OrderKey key;
+
+    public OrderEvent(OrderKey key) {
+        this.key = key;
+    }
+
     @Deprecated
     @Override public final SchedulerObject getObject() {
         return getOrder();
@@ -13,6 +19,6 @@ public abstract class OrderEvent extends ObjectEvent {
     public abstract UnmodifiableOrder getOrder();
 
     public OrderKey getKey() {
-        return new OrderKey(getOrder().getJobChain().getPath(), getOrder().getId());
+        return key;
     }
 }
