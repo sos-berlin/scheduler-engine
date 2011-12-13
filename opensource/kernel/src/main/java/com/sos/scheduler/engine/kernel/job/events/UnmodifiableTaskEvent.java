@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.kernel.job.events;
 
-import com.sos.scheduler.engine.kernel.folder.Path;
+import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerObject;
 
 public class UnmodifiableTaskEvent extends TaskEvent {
     private final UnmodifiableTask task;
-    private final Path jobPath;
+    private final AbsolutePath jobPath;
 
 
     protected UnmodifiableTaskEvent(UnmodifiableTask task) {
@@ -18,7 +18,7 @@ public class UnmodifiableTaskEvent extends TaskEvent {
         return task;
     }
 
-    public Path getJobPath() {
+    public AbsolutePath getJobPath() {
         return jobPath;
     }
 }
