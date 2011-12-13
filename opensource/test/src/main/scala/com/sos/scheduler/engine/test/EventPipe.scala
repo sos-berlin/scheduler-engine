@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test
 
-import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import com.sos.scheduler.engine.main.event.TerminatedEvent
@@ -9,7 +8,7 @@ import com.sos.scheduler.engine.kernel.util.Time
 
 class EventPipe extends EventHandlerAnnotated {
     import EventPipe._
-    private final val queue: BlockingQueue[Event] = new LinkedBlockingQueue[Event]
+    private final val queue = new LinkedBlockingQueue[Event]
     @volatile private var lastEventAdded = false
 
     @EventHandler def add(e: Event) {
