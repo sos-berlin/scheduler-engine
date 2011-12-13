@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.kernel.scheduler.HasPlatform;
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 
 @ForCpp public interface UnmodifiableOrder extends EventSource, HasPlatform {
+    OrderKey getKey();
 	OrderId getId();
 	OrderState getState();
 	OrderState getEndState();

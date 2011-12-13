@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
@@ -31,6 +32,10 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
     @Override public void onCppProxyInvalidated() {
     }
 
+    @Override public OrderKey getKey() {
+        return new OrderKey(getJobChainPath(), getId());
+    }
+
     @Override public OrderId getId() {
         return new OrderId(cppProxy.string_id());
     }
@@ -53,6 +58,10 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
 
     @Override public String getTitle() {
         return cppProxy.title();
+    }
+
+    public AbsolutePath getJobChainPath() {
+        return new AbsolutePath(cppProxy.job_chain_path_string());
     }
 
     public JobChain getJobChain() {

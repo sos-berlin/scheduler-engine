@@ -12,6 +12,10 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
         this.order = order;
     }
 
+    @Override public OrderKey getKey() {
+        return order.getKey();
+    }
+
     @Override public OrderId getId() {
         return order.getId();
     }

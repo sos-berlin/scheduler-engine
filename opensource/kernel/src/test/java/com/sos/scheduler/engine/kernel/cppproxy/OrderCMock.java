@@ -3,9 +3,7 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl;
 
-
-public class OrderCMock extends CppProxyImpl<Order> implements OrderC
-{
+public class OrderCMock extends CppProxyImpl<Order> implements OrderC {
     private String id = "TESTORDER-ID";
     private String state = "TESTORDER-STATE";
     private String title =" TESTORDER-TITLE";
@@ -17,6 +15,10 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC
     @Override public String string_id() { return id; }
 
     @Override public void set_id(String id) { this.id = id; }
+
+    @Override public String job_chain_path_string() {
+        throw new UnsupportedOperationException("com.sos.scheduler.engine.kernel.cppproxy.OrderCMock.job_chain_path_string()");
+    }
 
     @Override public Job_chainC job_chain() {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -30,8 +32,7 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC
 
     @Override public String title() { return title; }
 
-	@Override
-	public String file_path() {	return filePath; };
+	@Override public String file_path() {	return filePath; }
 
     @Override public Variable_setC params() {
         throw new UnsupportedOperationException("Not supported yet.");
