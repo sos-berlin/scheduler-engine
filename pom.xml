@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>parent</artifactId>
-        <version>1.3.12.1337-SNAPSHOT</version>
+        <version>1.3.12.1346-BT</version>
         <relativePath>parent</relativePath>
     </parent>
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>engine</artifactId>
-    <version>1.3.12.1337-SNAPSHOT</version>
+    <version>1.3.12.1346-BT</version>
     
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
@@ -51,9 +51,9 @@
         <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
         <url>http://subversion.sos/svn/sos/scheduler/engine</url>
         -->
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
+        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine/engine-1.3.12.1346-BT</connection>
+        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine-releases/engine-1.3.12.1346-BT</developerConnection>
+        <url>http://subversion.sos/svn/sos/scheduler/engine/engine-1.3.12.1346-BT</url>
     </scm>
 
     <profiles>

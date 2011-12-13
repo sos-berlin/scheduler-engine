@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>parent</artifactId>
-    <version>1.3.12.1337-SNAPSHOT</version>
+    <version>1.3.12.1346-BT</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
 
@@ -123,17 +123,17 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.generator</artifactId>
-                <version>1.3.12.1337-SNAPSHOT</version>
+                <version>1.3.12.1346-BT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.scalautil.io</artifactId>
-                <version>1.3.12.1337-SNAPSHOT</version>
+                <version>1.3.12.1346-BT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.runtime</artifactId>
-                <version>1.3.12.1337-SNAPSHOT</version>
+                <version>1.3.12.1346-BT</version>
             </dependency>
 
             <dependency>
