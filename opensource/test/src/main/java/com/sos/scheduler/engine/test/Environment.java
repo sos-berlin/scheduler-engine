@@ -54,8 +54,6 @@ public final class Environment {
         prepareTemporaryConfigurationDirectory();
     }
 
-    void close() {}
-
     private void prepareTemporaryConfigurationDirectory() {
         makeDirectories(directory);
         makeDirectories(configDirectory);
