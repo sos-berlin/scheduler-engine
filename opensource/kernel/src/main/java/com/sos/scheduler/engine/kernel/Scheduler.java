@@ -127,7 +127,7 @@ public final class Scheduler implements HasPlatform, Sister {
 
     @ForCpp public void onClose() {
         try {
-            eventSubsystem.report(new SchedulerCloseEvent());
+            eventBus.publish(new SchedulerCloseEvent());
             try {
                 logSubsystem.close();
             } catch (Exception x) {
