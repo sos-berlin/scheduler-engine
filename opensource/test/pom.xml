@@ -185,6 +185,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.joda</groupId>
+            <artifactId>joda-convert</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
             <scope>test</scope>
