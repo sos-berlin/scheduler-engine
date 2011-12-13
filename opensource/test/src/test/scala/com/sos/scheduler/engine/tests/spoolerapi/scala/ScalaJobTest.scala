@@ -1,40 +1,37 @@
 package com.sos.scheduler.engine.tests.spoolerapi.scala
 
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.kernel.folder.Path
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent
-import com.sos.scheduler.engine.eventbus.EventHandler
 import org.junit.Test
+import com.sos.scheduler.engine.kernel.folder.AbsolutePath
+import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent
+import com.sos.scheduler.engine.test.scala._
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
 
 final class ScalaJobTest extends ScalaSchedulerTest {
     import ScalaJobTest._
+    private val eventPipe = controller.newEventPipe()
 
-    private var countdown = numberOfStarts
+    controller.setTerminateOnError(false)
+    controller.activateScheduler("-e")
 
     @Test def testScalaJob() {
-        controller.setTerminateOnError(false)
-        controller.activateScheduler("-e")
-        for (i <- 1 to numberOfStarts)  scheduler.executeXml(startJobXml(i).toString())
-        controller.waitForTermination(shortTimeout)
+        runJob(SchedulerLogLevel.info)
+        runJob(SchedulerLogLevel.error)
     }
 
-    private def startJobXml(index: Int) =
+    private def runJob(logLevel: SchedulerLogLevel) {
+        scheduler.executeXml(startJobElem(logLevel))
+        eventPipe.expectEvent(shortTimeout){e: TaskEndedEvent => e.getJobPath == jobPath}
+    }
+
+    private def startJobElem(logLevel: SchedulerLogLevel) =
         <start_job job={jobPath.toString}>
             <params>
-                <param name="index" value={index.toString}/>
+                <param name="logLevel" value={logLevel.getNumber.toString}/>
             </params>
         </start_job>
-
-    @EventHandler def handleEvent(e: TaskEndedEvent) {
-        if (e.getJobPath == jobPath) {
-            countdown -= 1
-            if (countdown == 0)
-                controller.terminateScheduler()
-        }
-    }
 }
 
 object ScalaJobTest {
-    private def jobPath = new Path("/scala")
-    private def numberOfStarts = 2
+    private def jobPath = new AbsolutePath("/scala")
 }

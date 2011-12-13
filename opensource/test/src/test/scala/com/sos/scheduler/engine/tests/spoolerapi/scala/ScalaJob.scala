@@ -20,9 +20,7 @@ final class ScalaJob extends Job_impl {
     }
 
     override def spooler_close() {
-        spooler_log.info("spooler_close")
-        if (Integer.parseInt(spooler_task.params().value("index")) % 2 == 0)
-            spooler_log.error("ERROR")
+        spooler_log.log(spooler_task.params.value("logLevel").toInt, "spooler_close")
     }
 
     override def spooler_process() = {
