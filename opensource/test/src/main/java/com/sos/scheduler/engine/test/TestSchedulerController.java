@@ -7,7 +7,9 @@ import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -18,6 +20,7 @@ import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
 import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
@@ -34,34 +37,50 @@ import com.sos.scheduler.engine.test.binary.TestCppBinaries;
 
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
+    private static final String workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory";
     public static final Time shortTimeout = Time.of(10);
 
-    private final File directory;
-    private final boolean directoryIsTemporary;
+    private final List<Runnable> closingRunnables = new ArrayList<Runnable>();
+    private final SchedulerEventBus eventBus = getEventBus();
     private final Thread thread = Thread.currentThread();
     private final Environment environment;
     private boolean terminateOnError = true;
-    private Scheduler scheduler = null;
     private String logCategories = "";
+    private Scheduler scheduler = null;
 
     public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath) {
-        String p = System.getProperty("com.sos.scheduler.engine.test.directory");
-        if (p != null) {
-            directory = new File(p, testClass.getName());
-            makeCleanDirectory(directory);
-            directoryIsTemporary = false;
-        } else {
-            directory = makeTemporaryDirectory();
-            directoryIsTemporary = true;
-        }
+        File directory = workDirectory(testClass);
         environment = new Environment(configurationResourcePath, directory);
         setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
+    }
+
+    private File workDirectory(Class<?> testClass) {
+        String p = System.getProperty(workDirectoryPropertyName);
+        if (p != null) {
+            File result = new File(p, testClass.getName());
+            makeCleanDirectory(result);
+            return result;
+        } else {
+            final File result = makeTemporaryDirectory();
+            closingRunnables.add(new Runnable() {
+                @Override public void run() { tryRemoveDirectoryRecursivly(result); }
+            });
+            return result;
+        }
     }
 
     private static void makeCleanDirectory(File directory) {
         Files.makeDirectory(directory.getParentFile());
         Files.makeDirectory(directory);
         Files.removeDirectoryContentRecursivly(directory);
+    }
+
+    @Override public final void close() {
+        try {
+            getDelegate().close();
+        } finally {
+            for (Runnable r: closingRunnables) r.run();
+        }
     }
 
     /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
@@ -77,7 +96,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     @Deprecated
     public final void subscribeEvents(EventSubscriber s) {
-        getEventBus().registerHot(new EventSubscriberAdaptingEventSubscription(s));
+        eventBus.registerHot(new EventSubscriberAdaptingEventSubscription(s));
     }
 
     /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
@@ -104,26 +123,10 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     @Override public final void startScheduler(String... args) {
-        getEventBus().registerAnnotated(this);
+        registerEventHandler(this);
         prepare();
         Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries(), logCategories), Arrays.asList(args));
         getDelegate().startScheduler(toArray(allArgs, String.class));
-    }
-
-    @Override public final void close() {
-        try {
-            getDelegate().close();
-        }
-//        catch (Throwable x) {
-//            logger.error(TestSchedulerController.class.getName() + ".close(): " + x);
-//            throw propagate(x);
-//        }
-        finally {
-            environment.close();
-            if (directoryIsTemporary)
-                tryRemoveDirectoryRecursivly(directory);
-            getEventBus().unregisterAnnotated(this);
-        }
     }
 
     private void prepare() {
@@ -172,7 +175,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             terminateAfterException(new RuntimeException("Test terminated after error log line: "+ e.getMessage()));
     }
 
-    @EventHandler @HotEventHandler  // Beide, weil das Event wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.
+    @EventHandler @HotEventHandler  // Beide, weil das EventHandlerFailedEvent wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.
     public final void handleEvent(EventHandlerFailedEvent e) {
         if (terminateOnError)
             terminateAfterException(e.getThrowable());
@@ -186,6 +189,21 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             }
         };
         return new Thread(new TestThreadRunnable(runnable, h), runnable.toString());
+    }
+
+    /** @throws IllegalStateException, wenn nach {#startScheduler} aufgerufen. Das wird vorsichthalber erzwungen, weil sonst Events verlorengehen können. */
+    public final EventPipe newEventPipe() {
+        getDelegate().checkIsNotStarted();
+        final EventPipe result = new EventPipe();
+        registerEventHandler(result);
+        return result;
+    }
+
+    private void registerEventHandler(final EventHandlerAnnotated o) {
+        eventBus.registerAnnotated(o);
+        closingRunnables.add(new Runnable() {
+            @Override public void run() { eventBus.unregisterAnnotated(o); }
+        });
     }
 
     public final void useDatabase() {
