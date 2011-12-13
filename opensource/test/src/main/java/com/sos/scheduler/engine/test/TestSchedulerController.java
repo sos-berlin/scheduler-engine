@@ -46,7 +46,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private final Environment environment;
     private boolean terminateOnError = true;
     private String logCategories = "";
-    private Scheduler scheduler = null;
+    private Scheduler scheduler_ = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
     public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath) {
         File directory = workDirectory(testClass);
@@ -135,11 +135,11 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final Scheduler scheduler() {
-        if (scheduler == null) {
+        if (scheduler_ == null) {
             automaticStart();
             waitUntilSchedulerIsActive();
         }
-        return scheduler;
+        return scheduler_;
     }
 
     private void automaticStart() {
@@ -151,9 +151,9 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** Wartet, bis das Objekt {@link Scheduler} verfügbar ist. */
     public final void waitUntilSchedulerIsActive() {
-        Scheduler previous = scheduler;
-        scheduler = getDelegate().waitUntilSchedulerState(SchedulerState.active);
-        if (scheduler == null) throw new RuntimeException("Scheduler aborted before startup");
+        Scheduler previous = scheduler_;
+        scheduler_ = getDelegate().waitUntilSchedulerState(SchedulerState.active);
+        if (scheduler_ == null) throw new RuntimeException("Scheduler aborted before startup");
         if (previous == null && terminateOnError) checkForErrorLogLine();
     }
 
@@ -165,7 +165,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     private void checkForErrorLogLine() {
         // TODO Prefix_log.last() liefert nur für info die Start-Meldung SCHEDULER-900. Wo sind die anderen Meldungen?
-//        String lastErrorLine = scheduler.log().lastByLevel(SchedulerLogLevel.error);
+//        String lastErrorLine = scheduler_.log().lastByLevel(SchedulerLogLevel.error);
 //        if (!lastErrorLine.isEmpty())
 //            throw throwErrorLogException(lastErrorLine);
     }
@@ -191,9 +191,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         return new Thread(new TestThreadRunnable(runnable, h), runnable.toString());
     }
 
-    /** @throws IllegalStateException, wenn nach {#startScheduler} aufgerufen. Das wird vorsichthalber erzwungen, weil sonst Events verlorengehen können. */
+    /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
     public final EventPipe newEventPipe() {
-        getDelegate().checkIsNotStarted();
         final EventPipe result = new EventPipe();
         registerEventHandler(result);
         return result;
@@ -207,7 +206,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final void useDatabase() {
-        File databaseFile = new File(environment.directory(), "scheduler-database");
+        File databaseFile = new File(environment.directory(), "scheduler_-database");
         String dbName = Hostware.h2DatabasePath(databaseFile);
         setSettings(Settings.of(SettingName.dbName, dbName));
     }
