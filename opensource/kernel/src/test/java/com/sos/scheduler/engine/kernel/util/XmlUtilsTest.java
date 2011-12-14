@@ -3,13 +3,13 @@ package com.sos.scheduler.engine.kernel.util;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
-/**
- *
- * @author Joacim Zschimmer
- */
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+
 public class XmlUtilsTest {
     @Test public void testLoadXml_String() {
         String xml = "<a>A</a>";
@@ -65,5 +65,18 @@ public class XmlUtilsTest {
         Element e = XmlUtils.loadXml("<a b='4711'/>").getDocumentElement();
         assertThat(XmlUtils.intXmlAttribute(e, "b", -99), equalTo(4711));
         assertThat(XmlUtils.intXmlAttribute(e, "x", -99), equalTo(-99));
+    }
+
+    @Test public void testChildElements() {
+        testChildElements("<root><a/>x<b><bb/></b>x<c/></root>", "a", "b", "c");
+        testChildElements("<root>xx<a/>x<b><bb/></b>x<c/>xx</root>", "a", "b", "c");
+    }
+
+    private void testChildElements(String xml, String... expected) {
+        Element e = XmlUtils.loadXml(xml).getDocumentElement();
+        List<Element> list = XmlUtils.childElements(e);
+        assertThat(list, hasSize(expected.length));
+        for (int i = 0; i < list.size(); i++)
+            assertThat(list.get(i).getTagName(), equalTo(expected[i]));
     }
 }
