@@ -2279,7 +2279,7 @@ Period At_set::next_period_of_same_day( const Time& tim, With_single_start singl
 {
     Period result;
     
-    if( single_start & wss_next_single_start )
+    if( single_start & (wss_next_any_start|wss_next_single_start))
     {
         FOR_EACH( set<Time>, _at_set, it )
         {
@@ -2290,7 +2290,7 @@ Period At_set::next_period_of_same_day( const Time& tim, With_single_start singl
                 if( time.day_nr() == tim.day_nr() )
                 {
                     result._begin           = time;
-                    result._end             = time;
+                    result._end             = time + Time::epsilon;     // JS-802, damit ein Auftrag nicht wegen _period.end() == at in eine Schleife geht
                     result._single_start    = true;
                     result._let_run         = true;
                     result._repeat          = Time::never;

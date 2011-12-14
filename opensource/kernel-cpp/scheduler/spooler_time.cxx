@@ -66,6 +66,7 @@ int                             Time::static_current_difference_to_utc  = 0;
 extern const int                       never_int                   = INT_MAX;
 extern const Time                      latter_day                  = never_int;
        const Time                      Time::never                 = never_int;
+       const Time                      Time::epsilon               = 0.001;
 static const char                      never_name[]                = "never";
 static const char                      immediately_name[]          = "now";
 static const int64                     base_filetime               = 116444736000000000LL;

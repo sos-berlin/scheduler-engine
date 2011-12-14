@@ -153,6 +153,7 @@ struct Time
   public:
     static int                  static_current_difference_to_utc;
     static const Time           never;
+    static const Time           epsilon;
 };      
 
 void                            insert_into_message         ( Message_string*, int index, const Time& ) throw();
