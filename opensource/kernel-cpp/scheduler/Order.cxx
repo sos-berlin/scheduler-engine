@@ -2924,8 +2924,8 @@ void Order::set_at( const Time& time )
 
 void Order::set_at_after_delay( const Time& time )
 {
-    assert_no_task( Z_FUNCTION );
-    if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
+    //JS-801  assert_no_task( Z_FUNCTION );
+    //JS-801  if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
 
     set_setback( time, true );
 }
