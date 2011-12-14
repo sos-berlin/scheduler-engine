@@ -8,17 +8,17 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** Testet {@link com.sos.scheduler.engine.test.SchedulerTest} */
 public final class FailingTerminatedEventHandlerTest extends SchedulerTest {
-    @Test(expected=MyError.class) public void activateTest() {
+    @Test(expected=TestError.class) public void activateTest() {
         controller().activateScheduler();
         controller().close();
     }
 
-    @Test(expected=MyError.class) public void startTest() {
+    @Test(expected=TestError.class) public void startTest() {
         controller().startScheduler();
         controller().close();
     }
 
     @HotEventHandler public void handleEvent(TerminatedEvent e) {
-        throw new MyError();
+        throw new TestError();
     }
 }

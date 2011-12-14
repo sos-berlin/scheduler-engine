@@ -2,6 +2,9 @@ package com.sos.scheduler.engine.eventbus;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.synchronizedSet;
+import static org.apache.log4j.Level.DEBUG;
+import static org.apache.log4j.Level.ERROR;
+import static org.apache.log4j.Level.FATAL;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -90,11 +93,12 @@ public abstract class AbstractEventBus implements EventBus {
             call.apply();
             return true;
         } catch (Throwable t) {   // Der C++-Code soll wirklich keine Exception bekommen.
-            logger.log(t instanceof Error? Level.FATAL : Level.ERROR, call+": "+t, t);
+            Level level = t instanceof Error? t.getClass().getSimpleName().equals("TestError")? DEBUG : FATAL : ERROR;
+                logger.log(level, call+": "+t, t);
             //Löst ein rekursives Event aus: log().error(s+": "+x);
-            if (call.getEvent().getClass() == EventHandlerFailedEvent.class)
+            if (call.getEvent().getClass() == EventHandlerFailedEvent.class) {
                 return false;
-            else
+            } else
                 return publishNow(new EventHandlerFailedEvent(call, t));
         }
     }
