@@ -28,4 +28,8 @@ class OrderIdAndState {
     @Override public String toString() {
         return orderId + "(" + orderState + ")";
     }
+
+    static OrderIdAndState of(String orderId, String orderState) {
+        return new OrderIdAndState(new OrderId(orderId), new OrderState(orderState));
+    }
 }

@@ -2,44 +2,46 @@ package com.sos.scheduler.engine.tests.jira.js653;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
-import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderId;
-import com.sos.scheduler.engine.kernel.order.OrderState;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
-/** @see <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a> */
+/** Ticket JS-653.
+ * @see <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a>
+ * @see com.sos.scheduler.engine.tests.jira.js803.JS803Test */
 public final class JS653Test extends SchedulerTest {
+    private static final Logger logger = Logger.getLogger(JS653Test.class);
     private static final long idleTimeoutMs = 5*1000;
-    private static final Joiner commaJoiner = Joiner.on(", ");
     private static final ImmutableSet<OrderIdAndState> expectedOrderStarts = ImmutableSet.of(
-            new OrderIdAndState(new OrderId("simpleShouldRun"), new OrderState("state.job1")),
-            new OrderIdAndState(new OrderId("superShouldRun"), new OrderState("state.nestedA.job1")),
-            new OrderIdAndState(new OrderId("superWithStateBShouldRun"), new OrderState("state.nestedB.job1")));
+            OrderIdAndState.of("simpleShouldRun", "state.job1"),
+            OrderIdAndState.of("simpleWithStateShouldRun", "state.job1"),
+            OrderIdAndState.of("superShouldRun", "state.nestedA.job1"),
+            OrderIdAndState.of("superWithStateBShouldRun", "state.nestedB.job1"));
+    private static final ImmutableSet<OrderKeyAndState> expectedOrderEnds = ImmutableSet.of(
+            OrderKeyAndState.of("/simple", "simpleShouldRun", "end"),
+            OrderKeyAndState.of("/simple", "simpleWithStateShouldRun", "end"),
+            OrderKeyAndState.of("/b", "superShouldRun", "end"),
+            OrderKeyAndState.of("/b", "superWithStateBShouldRun", "end"));
 
     private final Set<OrderIdAndState> orderStarts = new HashSet<OrderIdAndState>();
+    private final Set<OrderKeyAndState> orderEnds = new HashSet<OrderKeyAndState>();
     private volatile long lastActivity;
 
     @Test public void test() throws InterruptedException {
-        controller().activateScheduler("-e");
+        controller().activateScheduler();
         waitUntilOrdersAreNotStarted();
-        controller().terminateScheduler();
-        if (!orderStarts.equals(expectedOrderStarts))
-            fail(differenceMessage());
+        DifferenceChecker.assertNoDifference(expectedOrderStarts, orderStarts, "started");
+        DifferenceChecker.assertNoDifference(expectedOrderEnds, orderEnds, "finished");
     }
 
     /* Warten bis wir einigermaßen sicher sind, dass Aufträge, die nicht starten sollen, nicht gestartet werden. **/
@@ -52,25 +54,14 @@ public final class JS653Test extends SchedulerTest {
         }
     }
 
-    @HotEventHandler public void handleEvent(OrderTouchedEvent e, Order o) {
-        orderStarts.add(new OrderIdAndState(o.getId(), o.getState()));
+    @HotEventHandler public void handleEvent(OrderTouchedEvent e, UnmodifiableOrder o) {
+        orderStarts.add(new OrderIdAndState(e.getKey().getId(), o.getState()));
     }
 
-    @HotEventHandler public void handleEvent(OrderFinishedEvent e) {
+    @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder o) {
+        OrderKeyAndState a = new OrderKeyAndState(e.getKey(), o.getState());
+        orderEnds.add(a);
+        //logger.info("FINISHED: "+a);
         lastActivity = currentTimeMillis();
-    }
-
-    private String differenceMessage() {
-        return Joiner.on("; ").skipNulls().join(wrongStartedString(), wrongNotStartedString());
-    }
-
-    @Nullable private String wrongStartedString() {
-        Set<OrderIdAndState> wrongStarted = Sets.difference(orderStarts, expectedOrderStarts);
-        return wrongStarted.isEmpty()? null : "Unexpectedly started orders: "+ commaJoiner.join(wrongStarted);
-    }
-
-    @Nullable private String wrongNotStartedString() {
-        Set<OrderIdAndState> wrongNotStarted = Sets.difference(expectedOrderStarts, orderStarts);
-        return wrongNotStarted.isEmpty()? null : "Missing order starts: "+ commaJoiner.join(wrongNotStarted);
     }
 }

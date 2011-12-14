@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd">
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
     <job_chain_node.job_chain state="state.nestedA" job_chain="/a"/>
     <job_chain_node.job_chain state="state.nestedB" job_chain="/b"/>
-    <job_chain_node.end state="end"/>
+    <job_chain_node.end state="superEnd"/>
 </job_chain>

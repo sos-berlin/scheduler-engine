@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/opensource/kernel-cpp/scheduler/scheduler.xsd"
     order="yes"
 >
-    <script language="shell">echo "******************************************************************" $SCHEDULER_ORDER_ID %SCHEDULER_ORDER_ID%</script>
+    <script java_class="com.sos.scheduler.engine.test.jobs.EmptyOrderJob"/>
 </job>
