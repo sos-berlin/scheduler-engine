@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
+import scala.xml.Elem
+import scala.xml.Utility.trim
 import org.apache.log4j.Logger
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
@@ -22,18 +24,23 @@ final class JS803Test extends SchedulerTest {
     @volatile private var startTime = new DateTime(0)
     private var count = 0
 
+    //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht helfen uns die Logzeilen weiter.
     @Test def test() {
-        controller.activateScheduler()
+        controller.activateScheduler("-e")
         startTime = secondNow() plusSeconds orderDelay
-        logger.info(startTime)  //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht hilft uns diese Logzeile weiter.
-        controller.scheduler.executeXml(addDailyOrderElem(new OrderKey(jobChainPath, new OrderId("dailyOrder")), startTime))
-        controller.scheduler.executeXml(addSingleOrderElem(new OrderKey(jobChainPath, new OrderId("singleOrder")), startTime))
-        controller.scheduler.executeXml(addSingleRuntimeOrderElem(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), startTime))
+        logger.info(startTime)
+        execute(addDailyOrderElem(new OrderKey(jobChainPath, new OrderId("dailyOrder")), startTime))
+        execute(addSingleOrderElem(new OrderKey(jobChainPath, new OrderId("singleOrder")), startTime))
+        execute(addSingleRuntimeOrderElem(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), startTime))
         controller.waitForTermination(shortTimeout)
     }
 
+    private def execute(command: Elem) {
+        logger.info(trim(command))
+        controller.scheduler.executeXml(command)
+    }
+
     @EventHandler def handleEvent(e: OrderTouchedEvent) {
-        //logger.info(startTime)
         assertTrue("Order "+e.getKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
     }
 
