@@ -23,7 +23,7 @@
 		</layout>
 	</appender>
 
-    <logger name="com.sos.scheduler.engine.tests.excluded">
+    <logger name="com.sos.scheduler.engine">
         <level value="info"/>
     </logger>
 	
