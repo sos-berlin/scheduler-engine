@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.tests.order.events
 
 import org.junit.Test
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.order._
+import com.sos.scheduler.engine.test.SchedulerTest
 
 //TODO Testet nicht, ob zu viele Events eintreffen
 /** Testet, ob die erwarteten Events eintreffen. */
-class OrderEventsTest extends ScalaSchedulerTest {
+class OrderEventsTest extends SchedulerTest {
     import OrderEventsTest._
 
     private val eventPipe = controller.newEventPipe()
@@ -51,6 +51,7 @@ class OrderEventsTest extends ScalaSchedulerTest {
 }
 
 object OrderEventsTest {
+    private val shortTimeout = SchedulerTest.shortTimeout
     private val jobChainPath = new AbsolutePath("/a")
     private val persistentOrderKey = new OrderKey(jobChainPath, new OrderId("persistentOrder"))
     private val temporaryOrderKey = new OrderKey(jobChainPath, new OrderId("1"))

@@ -3,13 +3,13 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.eventbus.HotEventHandler
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
 import org.hamcrest.Matchers
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit._
+import com.sos.scheduler.engine.test.SchedulerTest
 
-class WatchdogPluginTest extends ScalaSchedulerTest {
+class WatchdogPluginTest extends SchedulerTest {
     private val schedulerTimeout = Time.of(15)
     private val sleepTime = Time.of(11)
 

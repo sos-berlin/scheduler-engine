@@ -41,33 +41,36 @@
                 </configuration>
             </plugin>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <quiet/>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- es ist nicht klar, wie dieses plugin genutzt werden kann
+            <plugin>
+              <groupId>com.soebes.maven.plugins.dmg</groupId>
+              <artifactId>doxygen-maven-plugin</artifactId>
+              <version>1.0.1</version>
               <executions>
                 <execution>
-                  <id>attach-javadocs</id>
+                  <id>doxygen</id>
                   <goals>
-                    <goal>jar</goal>
-                    <goal>test-jar</goal>
+                    <goal>report</goal>
                   </goals>
                 </execution>
               </executions>
-           </plugin>
-        <!-- es ist nicht klar, wie dieses plugin genutzt werden kann
-        <plugin>
-          <groupId>com.soebes.maven.plugins.dmg</groupId>
-          <artifactId>doxygen-maven-plugin</artifactId>
-          <version>1.0.1</version>
-          <executions>
-            <execution>
-              <id>doxygen</id>
-              <goals>
-                <goal>report</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-         --> 
+            </plugin>
+            -->
         </plugins>
         
         <resources>
@@ -172,6 +175,11 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.9.0</artifactId>
         </dependency>
 
         <dependency>

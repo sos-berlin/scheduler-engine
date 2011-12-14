@@ -6,15 +6,15 @@ import org.junit.Assert._
 import org.junit.Test
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.order._
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent
 import scala.collection.mutable
 import com.sos.scheduler.engine.eventbus.EventHandler
+import com.sos.scheduler.engine.test.SchedulerTest
 
 /** JS-802 "http://www.sos-berlin.com/jira/browse/JS-802": Testet einen Auftrag und einen Job.
  * @see <a href="http://www.sos-berlin.com/jira/browse/JS-802">JS-802</a>*/
-class JS802Test extends ScalaSchedulerTest {
+class JS802Test extends SchedulerTest {
     import JS802Test._
     @volatile private var startTime = new DateTime(0)
 
@@ -52,6 +52,7 @@ class JS802Test extends ScalaSchedulerTest {
 }
 
 object JS802Test {
+    private val shortTimeout = SchedulerTest.shortTimeout
     private val orderDelay = 3+1
     private val orderKey = new OrderKey(new AbsolutePath("/a"), new OrderId("atOrder"))
     private val jobName = "job"
