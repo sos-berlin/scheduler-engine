@@ -10,14 +10,14 @@ import org.junit.Test
 import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
+import com.sos.scheduler.engine.test.SchedulerTest
 
 /** Ticket JS-803.
  * @see <a href='http://www.sos-berlin.com/jira/browse/JS-803'>JS-803</a>
  * @see com.sos.scheduler.engine.tests.jira.js653.JS653Test */
-final class JS803Test extends ScalaSchedulerTest {
+final class JS803Test extends SchedulerTest {
     import JS803Test._
     @volatile private var startTime = new DateTime(0)
     private var count = 0
@@ -25,6 +25,7 @@ final class JS803Test extends ScalaSchedulerTest {
     @Test def test() {
         controller.activateScheduler()
         startTime = secondNow() plusSeconds orderDelay
+        logger.info(startTime)  //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht hilft uns diese Logzeile weiter.
         controller.scheduler.executeXml(addDailyOrderElem(new OrderKey(jobChainPath, new OrderId("dailyOrder")), startTime))
         controller.scheduler.executeXml(addSingleOrderElem(new OrderKey(jobChainPath, new OrderId("singleOrder")), startTime))
         controller.scheduler.executeXml(addSingleRuntimeOrderElem(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), startTime))
@@ -45,6 +46,7 @@ final class JS803Test extends ScalaSchedulerTest {
 
 object JS803Test {
     private val logger: Logger = Logger.getLogger(classOf[JS803Test])
+    private val shortTimeout = SchedulerTest.shortTimeout
     private val orderDelay = 3+1
     private val jobChainPath = new AbsolutePath("/super")
     private val expectedEndState = new OrderState("state.nestedC.end")
