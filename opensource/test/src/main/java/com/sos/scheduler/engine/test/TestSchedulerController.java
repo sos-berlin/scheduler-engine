@@ -206,7 +206,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final void useDatabase() {
-        File databaseFile = new File(environment.directory(), "scheduler_-database");
+        File databaseFile = new File(environment.directory(), "scheduler-database");
         String dbName = Hostware.h2DatabasePath(databaseFile);
         setSettings(Settings.of(SettingName.dbName, dbName));
     }
