@@ -33,7 +33,7 @@ public final class JS795Test extends SchedulerTest {
     private static final String jettyTestString = "**test**";
 
     @Test public void testJetty() throws Exception {
-        controller().startScheduler("-port=" + cppPortNumber, "-e", "-log-level=debug9");
+        controller().startScheduler("-port="+cppPortNumber);
 
         Server server = new Server(jettyPortNumber);    // Server meldet nicht, wenn die Portnummer belegt ist. //
         server.setHandler(new MyHandler(scheduler()));
