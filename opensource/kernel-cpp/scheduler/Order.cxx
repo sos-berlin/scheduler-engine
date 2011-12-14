@@ -2447,16 +2447,14 @@ void Order::set_next_start_time()
 //-----------------------------------------------------------------------Order::is_in_initial_state
 
 bool Order::is_in_initial_state() {
-    if (_state == _initial_state)  return true;
-    if (!_outer_job_chain_path.empty()) {
-        if (Job_chain* outer_job_chain = order_subsystem()->job_chain_or_null(_outer_job_chain_path)) {
-            if (Node* outer_node = outer_job_chain->node_from_state_or_null(_outer_job_chain_state)) {
-                if (Nested_job_chain_node* n = Nested_job_chain_node::try_cast(outer_node)) {
+    if (_outer_job_chain_path.empty()) {
+        return _state == _initial_state;
+    } else {
+        if (Job_chain* outer_job_chain = order_subsystem()->job_chain_or_null(_outer_job_chain_path))
+            if (Node* outer_node = outer_job_chain->node_from_state_or_null(_outer_job_chain_state))
+                if (Nested_job_chain_node* n = Nested_job_chain_node::try_cast(outer_node))
                     if (_state == n->nested_job_chain()->first_node()->order_state())
                         return true;
-                }
-            }
-        }
     }
     return false;
 }
