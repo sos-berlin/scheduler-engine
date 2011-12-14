@@ -3,9 +3,11 @@ package com.sos.scheduler.engine.kernel.variable;
 import static org.apache.commons.collections.ListUtils.unmodifiableList;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -42,6 +44,12 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 
     public void put(String name, String value) {
         cppProxy.set_var(name, value);
+    }
+
+    public ImmutableMap<String,String> toMap() {
+        ImmutableMap.Builder<String,String> result = ImmutableMap.builder();
+        for (String name: getNames()) result.put(name, get(name));
+        return result.build();
     }
 
 //    public final Map<String,String> asMap() {
