@@ -54,7 +54,7 @@ public final class Scheduler implements HasPlatform, Sister {
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
-    private final PrefixLog log;
+    private final PrefixLog log_;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
     private final Platform platform;
     private final SchedulerEventBus eventBus;
     private final OperationExecutor operationExecutor;
@@ -75,10 +75,10 @@ public final class Scheduler implements HasPlatform, Sister {
         cppProxy.setSister(this);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
 
-        log = new PrefixLog(cppProxy.log());
-        platform = new Platform(log);
+        log_ = new PrefixLog(cppProxy.log());
+        platform = new Platform(log_);
         eventBus = controllerBridge.getEventBus();
-        operationExecutor = new OperationExecutor(log);
+        operationExecutor = new OperationExecutor(log_);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
         eventSubsystem = new EventSubsystem(platform, eventBus);
@@ -102,7 +102,7 @@ public final class Scheduler implements HasPlatform, Sister {
                 bind(OrderSubsystem.class).toInstance(orderSubsystem);
                 bind(OperationQueue.class).toInstance(operationExecutor);
                 bind(EventBus.class).toInstance(eventBus);
-                bind(PrefixLog.class).toInstance(log);
+                bind(PrefixLog.class).toInstance(log_);
             }
         });
     }
@@ -120,7 +120,7 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     @Override public PrefixLog log() {
-        return log;
+        return log_;
     }
 
     @Override public void onCppProxyInvalidated() {}
@@ -167,7 +167,7 @@ public final class Scheduler implements HasPlatform, Sister {
 
     public void terminate() {
         if (!cppProxy.cppReferenceIsValid())
-            log.debug("Scheduler.terminate() ignored because C++ object has already been destructed");
+            log_.debug("Scheduler.terminate() ignored because C++ object has already been destructed");
         else
             cppProxy.cmd_terminate();
     }
@@ -202,7 +202,7 @@ public final class Scheduler implements HasPlatform, Sister {
         try {
             return commandSubsystem.executeXml(xml);
         } catch (UnknownCommandException x) {
-            log.warn(x.toString());
+            log_.warn(x.toString());
             return "UNKNOWN_COMMAND";   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
         }
     }
