@@ -13,7 +13,7 @@
 #include "../zschimmer/embedded_files.h"
 #include "../zschimmer/z_gzip.h"
 
-// Für temporäre Datei:
+// Fï¿½r temporï¿½re Datei:
 #include <sys/stat.h>               // S_IREAD, stat()
 #include <fcntl.h>                  // O_RDONLY
 
@@ -149,7 +149,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
             bool ok = _process->try_delete_files( _process->log() );
             if( !ok )
             {
-                // Das könnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
+                // Das kï¿½nnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
                 // Ebenso (aber synchron) mit Remote_module_instance_server::try_delete_files()
 
                 double now = double_from_gmtime();
@@ -246,8 +246,8 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 {
     xml::Element_ptr e = document.createElement( "ERROR" );
 
-    //timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
-    //ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
+    //timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berï¿½cksichtigt wird, hï¿½ngt von der _aktuellen_ Zeit ab.
+    //ftime( &tm );  // Nicht schï¿½n, aber es funktioniert, weil der Spooler sowieso nicht wï¿½hrend der Zeitumstellung laufen soll.
     //e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
     if( gm_time )  e.setAttribute( "time", Sos_optional_date_time( localtime_from_gmtime( gm_time ) ).as_string() );
 
@@ -340,7 +340,7 @@ void Show_what::set_what(const string& what) {
     {
         while( *p == ' ' )  p++;
 
-        if( string_equals_prefix_then_skip( &p, "none"             ) )  _what = show_standard;       // Setzt Flags zurück! (Provisorisch, solange jobs,tasks default ist)
+        if( string_equals_prefix_then_skip( &p, "none"             ) )  _what = show_standard;       // Setzt Flags zurï¿½ck! (Provisorisch, solange jobs,tasks default ist)
         else
         if( string_equals_prefix_then_skip( &p, "all!"             ) )  _what = _what | show_all;
         else
@@ -405,7 +405,7 @@ void Show_what::set_what(const string& what) {
 /*
         if( string_equals_prefix_then_skip( &p, "check_folders"    ) )  
         {
-#           ifdef Z_UNIX    // Weil wir unter Unix nur periodisch die Verzeichnisse prüfen
+#           ifdef Z_UNIX    // Weil wir unter Unix nur periodisch die Verzeichnisse prï¿½fen
                 if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )
                 {
                     _spooler->folder_subsystem()->handle_folders( 1 );  
@@ -549,7 +549,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         Z_DEBUG_ONLY( result.setAttribute( "debug", static_log_categories.debug_string() ) );
 
 
-        // Einstellungen aus static_log_categories übernehmen
+        // Einstellungen aus static_log_categories ï¿½bernehmen
 
         Log_categories::Map map = static_log_categories.map_copy();
 
@@ -584,7 +584,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         }
 
 
-        // Einstellung der Dokumentation übernehmen
+        // Einstellung der Dokumentation ï¿½bernehmen
 
         xml::Document_ptr doc                        ( embedded_files.get_embedded_file( "doc.en/log_categories.xml" )->_content );
         xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
@@ -657,7 +657,7 @@ xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& ele
 * \version 2.1.1 - 2010-05-28
 *
 * \param element - XML-Kommando (<show_subsystem .../>)
-* \param show_what - Attribut @what in Datenstruktur aufgelöst.
+* \param show_what - Attribut @what in Datenstruktur aufgelï¿½st.
 * \return XML-Element mit den Informationen zu den Subsystemen
 */
 xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& element, const Show_what& show_what )
@@ -955,7 +955,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_check_folders( const xml::Element_ptr& )
 {
-    // Für die HTML-Oberfläche und Wecksignal vom Supervisor
+    // Fï¿½r die HTML-Oberflï¿½che und Wecksignal vom Supervisor
 
 
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
@@ -1001,8 +1001,8 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     Time start_at;
 
     if( at_str == ""       )  at_str = "now";
-    if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zulässt)
-                        else  start_at = Time::time_with_now( at_str );         // "now+..." möglich
+    if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zulï¿½sst)
+                        else  start_at = Time::time_with_now( at_str );         // "now+..." mï¿½glich
 
     if( !after_str.empty() )  start_at = Time::now() + Time( as_int( after_str ) );     // Entweder at= oder after=
 
@@ -1050,7 +1050,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
     process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
     process->set_run_in_thread( kind == "process" );
-    process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
+    process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst ï¿½ber COM/TCP protokollieren
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();
 
@@ -1437,10 +1437,10 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             
             //if( ta.record_count() == 0 )
             //{
-            //    // Sollte Exception auslösen: nicht da oder belegt
+            //    // Sollte Exception auslï¿½sen: nicht da oder belegt
             //    _spooler->order_subsystem()->load_order_from_database( job_chain_path, id );
             //    
-            //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
+            //    // Der Auftrag ist gerade freigegeben oder hinzugefï¿½gt worden
             //    delete_stmt.remove_where_condition( "occupying_cluster_member_id" );
             //    ta.execute_single( delete_stmt, Z_FUNCTION ); 
             //}
@@ -1507,7 +1507,7 @@ xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& 
 
     _response->write( "<events>\n" );
 
-    return NULL;    // Antwort wird asynchron übergeben
+    return NULL;    // Antwort wird asynchron ï¿½bergeben
 }
 
 //-----------------------------------------et_events_command_response::~Get_events_command_response
@@ -1536,7 +1536,7 @@ void Get_events_command_response::write_event( const Scheduler_event& event )
 {
     write( event.xml() );
 
-    if( _append_0_byte )  write( io::Char_sequence( "\0", 1 ) );       // 0-Byte anhängen
+    if( _append_0_byte )  write( io::Char_sequence( "\0", 1 ) );       // 0-Byte anhï¿½ngen
                     else  write( "\n" );
 }
 
@@ -1554,7 +1554,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         _log->info( m );
     }
 
-    Show_what show = show_jobs | show_tasks;        // Zur Kompatibilität. Besser: <show_state what="jobs,tasks"/>
+    Show_what show = show_jobs | show_tasks;        // Zur Kompatibilitï¿½t. Besser: <show_state what="jobs,tasks"/>
     show.set_dom(*_spooler, element);
 
     string element_name = element.nodeName();
@@ -1705,7 +1705,7 @@ string xml_as_string( const xml::Document_ptr& document, const string& indent_st
     try 
     {
         result = document.xml( "ASCII", indent_string );
-        if( indent_string != "" )  result = replace_regex( result, "\n", "\r\n" );      // Für Windows-telnet
+        if( indent_string != "" )  result = replace_regex( result, "\n", "\r\n" );      // Fï¿½r Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
@@ -1714,7 +1714,7 @@ string xml_as_string( const xml::Document_ptr& document, const string& indent_st
 }
 
 //-------------------------------------------------------------------Command_processor::execute_http
-// Könnte als Unterklasse von Web_service_operation implementiert werden
+// Kï¿½nnte als Unterklasse von Web_service_operation implementiert werden
 
 void Command_processor::execute_http( http::Operation* http_operation, Http_file_directory* http_file_directory )
 {
@@ -1727,7 +1727,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
     try
     {
-         if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine Prüfung mehr
+         if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine Prï¿½fung mehr
 
         if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
 //        if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );    // JS-748: timestamps in the command use the colon
@@ -1883,18 +1883,18 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                     response_content_type = "text/xml";
                 }
                 else
-                    throw http::Http_exception( http::status_404_bad_request, "Ungültiger URL-Pfad: " + path );
+                    throw http::Http_exception( http::status_404_bad_request, "Ungï¿½ltiger URL-Pfad: " + path );
             }
             else
             {
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
-                    if( !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende führt zum erneuten GET mit demselben Pfad
+                    if( !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende fï¿½hrt zum erneuten GET mit demselben Pfad
                     {
-                        // (Man könnte hier noch prüfen, ob's wirklich ein Verzeichnis ist.)
-                        // Der Browser soll dem Verzeichnisnamen einen Schräger anhängen und das als Basisadresse für weitere Anfragen verwenden.
+                        // (Man kï¿½nnte hier noch prï¿½fen, ob's wirklich ein Verzeichnis ist.)
+                        // Der Browser soll dem Verzeichnisnamen einen Schrï¿½ger anhï¿½ngen und das als Basisadresse fï¿½r weitere Anfragen verwenden.
                         // http://localhost:6310/jz ==> http://localhost:6310/jz/, http://localhost:6310/jz/details.html
-                        // Ohne diesen Mechanismus würde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
+                        // Ohne diesen Mechanismus wï¿½rde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
 
                         path += "/";
                         http_response->set_status( http::status_301_moved_permanently );
@@ -2012,7 +2012,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
     http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
 }
 
-//------------------------------------------------------------------------Command_processor::execute
+//--------------------------------------------------------------Command_processor::response_execute
 
 ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, const string& indent_string )
 {
@@ -2033,7 +2033,7 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
     ptr<Command_response> result = _response;
     if( !result )
     {
-        _spooler->signal("execute_xml");    // Sonst schläft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
+        _spooler->signal("execute_xml");    // Sonst schlï¿½ft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
         ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( xml_as_string( _answer, indent_string ) ) );
         result = +r;
     }
@@ -2103,7 +2103,7 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
     if( !ok )
     {
         string text = command_doc.error_text();
-        _spooler->log()->error( text );       // Log ist möglicherweise noch nicht geöffnet
+        _spooler->log()->error( text );       // Log ist mï¿½glicherweise noch nicht geï¿½ffnet
         z::throw_xc( "XML-ERROR", text );
     }
 
@@ -2141,7 +2141,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
-    // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
+    // Eigentlich nur fï¿½r einige mï¿½glicherweise langlaufende <show_xxx>-Kommandos nï¿½tig, z.B. <show_state>, <show_history> (mit Datenbank)
     if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml( scheduler_character_encoding ) );
 }
 
@@ -2360,7 +2360,7 @@ string File_buffered_command_response::get_part()
         {
             if( _buffer == "" ) 
             {
-                // Leeren String zurückgeben bedeutet, dass noch keine neuen Daten da sind
+                // Leeren String zurï¿½ckgeben bedeutet, dass noch keine neuen Daten da sind
             }
             else
             {
