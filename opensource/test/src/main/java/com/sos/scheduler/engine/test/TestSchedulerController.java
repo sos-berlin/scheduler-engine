@@ -38,7 +38,7 @@ import com.sos.scheduler.engine.test.binary.TestCppBinaries;
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
     private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
     private static final String workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory";
-    public static final Time shortTimeout = Time.of(10);
+    public static final Time shortTimeout = Time.of(15);
 
     private final List<Runnable> closingRunnables = new ArrayList<Runnable>();
     private final SchedulerEventBus eventBus = getEventBus();

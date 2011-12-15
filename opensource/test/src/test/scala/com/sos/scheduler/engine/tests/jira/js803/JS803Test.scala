@@ -21,13 +21,14 @@ import com.sos.scheduler.engine.test.SchedulerTest
  * @see com.sos.scheduler.engine.tests.jira.js653.JS653Test */
 final class JS803Test extends SchedulerTest {
     import JS803Test._
+    @volatile private var startTime = new DateTime(0)
     private var count = 0
-
-    controller.activateScheduler()
-    private val startTime = secondNow() plusSeconds orderDelay
 
     //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht helfen uns die Logzeilen weiter.
     @Test def test() {
+        controller.activateScheduler("-e")
+        startTime = secondNow() plusSeconds orderDelay
+        logger.info(startTime)
         execute(addDailyOrderElem(new OrderKey(jobChainPath, new OrderId("dailyOrder")), startTime))
         execute(addSingleOrderElem(new OrderKey(jobChainPath, new OrderId("singleOrder")), startTime))
         execute(addSingleRuntimeOrderElem(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), startTime))
@@ -35,7 +36,7 @@ final class JS803Test extends SchedulerTest {
     }
 
     private def execute(command: Elem) {
-        logger.debug(trim(command))
+        logger.info(trim(command))
         controller.scheduler.executeXml(command)
     }
 
@@ -51,7 +52,7 @@ final class JS803Test extends SchedulerTest {
 }
 
 object JS803Test {
-    private val logger = Logger.getLogger(classOf[JS803Test])
+    private val logger: Logger = Logger.getLogger(classOf[JS803Test])
     private val shortTimeout = SchedulerTest.shortTimeout
     private val orderDelay = 3+1
     private val jobChainPath = new AbsolutePath("/super")
