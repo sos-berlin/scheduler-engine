@@ -1,22 +1,22 @@
-package com.sos.scheduler.engine.tests;
+package com.sos.scheduler.engine.test.util;
 
 import java.io.File;
 import java.io.FileInputStream;
 
-public class Goodies {
+public class JSTestUtils {
 	
-	private static Goodies instance = null;
+	private static JSTestUtils instance = null;
 	private static final File testresultBaseDir = new File("target/test-results");
 	
-	protected Goodies() {}
+	protected JSTestUtils() {}
 	
-	public static Goodies getInstance() {
+	public static JSTestUtils getInstance() {
 		if (instance == null) 
-			instance = new Goodies();
+			instance = new JSTestUtils();
 		return instance;
 	}
 	
-	public void lockFile(String filename, int durationInSeconds) throws Exception {
+	public static void lockFile(String filename, int durationInSeconds) throws Exception {
 		FileInputStream in = new FileInputStream(filename);
 		try {
 		    java.nio.channels.FileLock lock = in.getChannel().tryLock(0L, Long.MAX_VALUE, true);
@@ -30,25 +30,25 @@ public class Goodies {
 		}
 	}
 	
-	public File getLocalPath(Class<?> ClassInstance) {
+	public static File getLocalPath(Class<?> ClassInstance) {
 		String path = "src/test/java/" + ClassInstance.getPackage().getName().replace(".", "/");
 		return createFolderIfNecessary(path);
 	}
 	
-	public File getLocalFile(Class<?> ClassInstance, String fileWithoutPath) {
+	public static File getLocalFile(Class<?> ClassInstance, String fileWithoutPath) {
 		return new File( getLocalPath(ClassInstance).getAbsolutePath() + "/" + fileWithoutPath );
 	}
 	
-	public File getTestresultPath(Class<?> ClassInstance) {
+	public static File getTestresultPath(Class<?> ClassInstance) {
 		String path = testresultBaseDir + "/" + ClassInstance.getPackage().getName().replace(".", "/");
 		return createFolderIfNecessary(path);
 	}
 	
-	public File getTestresultFile(Class<?> ClassInstance, String fileWithoutPath) {
+	public static File getTestresultFile(Class<?> ClassInstance, String fileWithoutPath) {
 		return new File( getTestresultPath(ClassInstance).getAbsolutePath() + "/" + fileWithoutPath );
 	}
 	
-	private File createFolderIfNecessary(String folderName) {
+	private static File createFolderIfNecessary(String folderName) {
 		File f = new File(folderName);
 		boolean result = true;
 		if (!f.exists()) result = f.mkdirs();
