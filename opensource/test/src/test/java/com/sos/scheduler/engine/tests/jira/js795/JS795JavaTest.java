@@ -26,8 +26,8 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
-public final class JS795Test extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(JS795Test.class);
+public final class JS795JavaTest extends SchedulerTest {
+    private static final Logger logger = Logger.getLogger(JS795JavaTest.class);
     private static final int cppPortNumber = 44441;  // TODO Ports sind willkürlich gewählt und nicht sicher verfügbar
     private static final int jettyPortNumber = 44440;
     private static final String jettyTestString = "**test**";
