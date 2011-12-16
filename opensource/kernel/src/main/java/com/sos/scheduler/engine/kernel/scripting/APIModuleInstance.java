@@ -2,10 +2,10 @@ package com.sos.scheduler.engine.kernel.scripting;
 
 /**
  * \file APIModuleInstance.java
- * \brief implementation of the script api from the job scheduler
+ * \brief implementation of the script api from the job scheduler.
  *  
  * \class ModuleInstance 
- * \brief implementation of the script api from the job scheduler
+ * \brief implementation of the script api from the job scheduler.
  * 
  * \details
  * This class is a general implementation of the scheduler script api for using with
