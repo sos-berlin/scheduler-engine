@@ -20,6 +20,7 @@ package com.sos.scheduler.engine.kernel.scripting;
 public interface Script {
     public Object call(String name) throws NoSuchMethodException;
     public Object call(String rawfunctionname, Object[] params) throws NoSuchMethodException;
+    public Object call(String rawfunctionname, boolean param) throws NoSuchMethodException;
     public Object call();
     public boolean callBoolean(String name) throws NoSuchMethodException;
     public boolean callBoolean(String name, Object[] params) throws NoSuchMethodException;

@@ -106,8 +106,12 @@ public class ScriptInstance implements Script {
 	@Override
 	public void addObject(Object object, String name) {
 		String object_name = name;
-		logger.debug("addObject " + name + " to script");
-		scriptbindings.put(object_name, object);
+		if (object == null) {
+			logger.error("the object '" + name + "' is not set");
+		} else {
+			logger.debug("add object " + name + " to script");
+			scriptbindings.put(object_name, object);
+		}
 	}
 	
 	public Object call() {
@@ -152,6 +156,11 @@ public class ScriptInstance implements Script {
 	@Override
 	public Object call(String rawfunctionname) throws NoSuchMethodException {
 		return call(rawfunctionname, new Object[] {});
+	}
+
+	@Override
+	public Object call(String rawfunctionname, boolean param) throws NoSuchMethodException {
+		return call(rawfunctionname, new Object[] {Boolean.valueOf(param)});
 	}
 
 	@Override

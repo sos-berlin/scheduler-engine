@@ -24,9 +24,6 @@ package com.sos.scheduler.engine.kernel.scripting;
 //import com.sos.JSHelper.Logging.JobSchedulerLog4JAppender;
 //import org.apache.log4j.Appender;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.log4j.Appender;
 import sos.spooler.Log;
 import sos.util.SOSSchedulerLogger;
@@ -39,23 +36,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 public class APIModuleInstance extends ScriptInstance implements APIModule {
 
 	private final static String LANGUAGE_PREFIX = "javax.script:";
-
-	private final static String SCHEDULER_INIT = "spooler_init";
-	private final static String SCHEDULER_OPEN = "spooler_open";
-	private final static String SCHEDULER_CLOSE = "spooler_close";
-	private final static String SCHEDULER_ON_SUCCESS = "spooler_on_success";
-	private final static String SCHEDULER_EXIT = "spooler_exit";
-	private final static String SCHEDULER_ON_ERROR = "spooler_on_error";
 	private final static String SCHEDULER_PROCESS = "spooler_process";
 
 	private final String schedulerLanguageId;
 	private final JobSchedulerLog4JAppender jsAppender;
-
-	/**
-	 * These are the optional methods of the scheduler script api.
-	 */
-	List<String> optionalMethods = Arrays.asList(SCHEDULER_INIT, SCHEDULER_OPEN,
-			SCHEDULER_CLOSE, SCHEDULER_ON_SUCCESS, SCHEDULER_EXIT, SCHEDULER_ON_ERROR);
 
 	@ForCpp public APIModuleInstance(String scriptlanguage, String sourcecode) {
 		super(getScriptLanguage(scriptlanguage));
@@ -127,7 +111,6 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 		Object result = null;
 		ScriptFunction fobj = new ScriptFunction(rawfunctionname);
 		String function = fobj.getNativeFunctionName();
-		logger.info("call for function " + function);
 		if ( fobj.isFunction(getSourcecode())) {
 			try {
 				result = super.call(function, params);
@@ -147,6 +130,12 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
     @ForCpp
 	public Object call(String rawfunctionname) {
 		return call(rawfunctionname, new Object[] {});
+	}
+
+	@Override
+    @ForCpp
+	public Object call(String rawfunctionname, boolean param) {
+		return call(rawfunctionname, new Object[] {Boolean.valueOf(param)});
 	}
 
 	/**
