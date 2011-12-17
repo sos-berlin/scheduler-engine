@@ -10,6 +10,7 @@ abstract class ScalaSchedulerTest extends SchedulerTest with FunSuite with Befor
     def shortTimeout = SchedulerTest.shortTimeout       // Zur komfortableren Benutzung
 
     override def afterAll(configMap: Map[String, Any]) {
-        controller.close()
+        try controller.close()
+        finally super.afterAll(configMap)
     }
 }
