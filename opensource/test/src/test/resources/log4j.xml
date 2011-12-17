@@ -31,10 +31,6 @@
         <level value="warn"/>
     </logger>
 
-    <logger name="org.eclipse.jetty">
-        <level value="info"/>
-    </logger>
-
     <logger name="com.sos.scheduler.engine.tests.jira.js793">
         <level value="debug"/>
 		<appender-ref ref="console_simple"/>
