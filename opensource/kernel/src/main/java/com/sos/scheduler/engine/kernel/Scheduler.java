@@ -4,13 +4,13 @@ import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.namedChildElements;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.google.inject.Module;
 import com.sos.scheduler.engine.util.xml.NamedChildElements;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -75,6 +75,23 @@ public final class Scheduler implements HasPlatform, Sister {
     private final CommandSubsystem commandSubsystem;
     private boolean threadInitiallyLocked = false;
 
+    private final Lazy<Module> guiceModule = new Lazy<Module>() {
+        @Override protected Module compute() {
+            return new AbstractModule() {
+                @Override protected void configure() {
+                    bind(Scheduler.class).toInstance(Scheduler.this);
+                    bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
+                    bind(FolderSubsystem.class).toInstance(folderSubsystem);
+                    bind(JobSubsystem.class).toInstance(jobSubsystem);
+                    bind(OrderSubsystem.class).toInstance(orderSubsystem);
+                    bind(OperationQueue.class).toInstance(operationExecutor);
+                    bind(EventBus.class).toInstance(eventBus);
+                    bind(PrefixLog.class).toInstance(log_);
+                }
+            };
+        }
+    };
+
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         this.cppProxy = cppProxy;
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
@@ -100,17 +117,11 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     private Injector newInjector() {
-        return Guice.createInjector(new AbstractModule() {
-            @Override protected void configure() {
-                bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
-                bind(FolderSubsystem.class).toInstance(folderSubsystem);
-                bind(JobSubsystem.class).toInstance(jobSubsystem);
-                bind(OrderSubsystem.class).toInstance(orderSubsystem);
-                bind(OperationQueue.class).toInstance(operationExecutor);
-                bind(EventBus.class).toInstance(eventBus);
-                bind(PrefixLog.class).toInstance(log_);
-            }
-        });
+        return Guice.createInjector(guiceModule.get());
+    }
+
+    public final Module getGuiceModule() {
+        return guiceModule.get();
     }
 
     private static Iterable<CommandHandler> getCommandHandlers(Iterable<?> objects) {
@@ -197,10 +208,11 @@ public final class Scheduler implements HasPlatform, Sister {
         CppProxy.threadLock.unlock();
     }
 
+    /** Stellt XML-Prolog voran und löst bei einem ERROR-Element eine Exception aus. */
     public String executeXml(String xml) {
         checkArgument(!xml.startsWith("<?"), "executeXml() does not accept XML with a prolog");  // Blanks und Kommentare vereiteln diese Prüfung.
         String prolog = "<?xml version='1.0' encoding='iso-8859-1'?>";   // Für libxml2, damit Umlaute korrekt erkant werden.
-        String result = cppProxy.execute_xml(prolog + xml);
+        String result = uncheckedExecuteXml(prolog + xml);
         if (result.contains("<ERROR")) {
             Document doc = XmlUtils.loadXml(result);
             for (Element e: childElements(doc.getDocumentElement()))
@@ -208,6 +220,11 @@ public final class Scheduler implements HasPlatform, Sister {
                     throw new SchedulerException(error.getAttribute("code") +" "+ error.getAttribute("text"));
         }
         return result;
+    }
+
+    /** execute_xml() der C++-Klasse Spooler */
+    public String uncheckedExecuteXml(String xml) {
+        return cppProxy.execute_xml(xml);
     }
 
     /** Nur für C++, zur Ausführung eines Kommandos in Java */
