@@ -2927,7 +2927,7 @@
 
        <message code="SCHEDULER-480">
           <text xml:lang="en">
-             <title>No appropriate config element found in scheduler.xml - please remove attribute @spooler_id of the config-element or start JS with the appropriate -id option.</title>
+             <title>No appropriate config element found in file scheduler.xml - please remove attribute @spooler_id of the config-element or start JS with the appropriate -id option.</title>
           </text>
        </message>
        
