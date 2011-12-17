@@ -321,6 +321,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-478", "Could not re-open '$1' log file. Following lines are lost. $2" },
     { "SCHEDULER-479", "                 No entry config/@spooler_id='$1' found in configuration file 'scheduler.xml'.              " },
     { "SCHEDULER-480", "No appropriate config element found in scheduler.xml - please remove attribute @spooler_id of the config-element or start JS with the appropriate -id option." },
+    { "SCHEDULER-481", "Method '$1' with signature '$2' is not implemented." },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

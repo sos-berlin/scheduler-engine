@@ -49,6 +49,7 @@ void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
     ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(idispatch, name);
     _added_jobjects.push_back( java_idispatch );
     _java_module_instance.addObject( java_idispatch->get_jobject(), name );            // registriert das Object in ScriptInterface
+    Module_instance::add_obj( idispatch, name );
 }
 
 //-----------------------------------------------------------Script_module_instance::call
@@ -63,10 +64,15 @@ Variant Script_module_instance::call( const string& name )
 
 //-------------------------------------------------------------------Script_module_instance::call
 
-Variant Script_module_instance::call( const string&, const Variant&, const Variant& )
+Variant Script_module_instance::call( const string& name, const Variant& p1, const Variant& p2 )
 {
+    if (p2 != missing_variant ) 
+       assert(0), z::throw_xc( "SCHEDULER-481", name, "(p1,p2)" );
+
     Z_LOG2("scheduler","Script_module_instance::call\n");
-    assert(0), z::throw_xc( Z_FUNCTION );
+    Com_env env = _module->_java_vm->jni_env();
+    javaproxy::java::lang::Object result = _java_module_instance.call(name,p1.as_bool());
+    return (result == NULL) ? empty_variant : env.jobject_to_variant( result ); 
 }
 
 //------------------------------------------------------------Script_module_instance::name_exists

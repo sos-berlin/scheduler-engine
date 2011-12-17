@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
+	order="yes" stop_on_error="no">
+    <script language="javax.script:javascript">
+        <![CDATA[
+importPackage(com.google.common.io);
+importPackage(java.io);
+importPackage(java.nio.charset);
+
+var resultfile;
+ 
+function spooler_init()	{
+	resultfile = new File(spooler_task.order().params().value("resultfile"));
+	log_function("spooler_init");
+	return true;
+}
+ 
+function spooler_open()	{
+	log_function("spooler_open");
+	return true;
+}
+ 
+function spooler_process() {
+	log_function("spooler_process");
+	return true;
+}
+
+function spooler_close() {
+	log_function("spooler_close");
+}
+ 
+function spooler_exit()	{
+	log_function("spooler_exit");
+}
+ 
+function spooler_on_error()	{
+	log_function("spooler_on_error");
+}
+ 
+function spooler_on_success() {
+	log_function("spooler_on_success");
+}
+
+function log_function( functionname ) {
+	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null)
+		Files.append(functionname + " was called\n",resultfile,Charset.defaultCharset());
+}
+        ]]>
+    </script>
+    <monitor name="process0" ordering="0">
+        <script language="javax.script:javascript">
+            <![CDATA[
+importPackage(com.google.common.io);
+importPackage(java.io);
+importPackage(java.nio.charset);
+
+var resultfile;
+
+function spooler_task_before() {
+	resultfile = new File(spooler_task.order().params().value("resultfile"));
+	log_function("spooler_task_before");
+	return true;
+}
+
+function spooler_process_before() {
+	log_function("spooler_process_before");
+	return true;
+}
+
+function spooler_process_after(spooler_process_result) {
+	log_function("spooler_process_after");
+	return spooler_process_result;
+}
+
+function spooler_task_after() {
+	log_function("spooler_task_after");
+}
+
+function log_function( functionname ) {
+	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null)
+		Files.append(functionname + " was called\n",resultfile,Charset.defaultCharset());
+}
+            ]]>
+        </script>
+    </monitor>
+    <run_time/>
+</job>

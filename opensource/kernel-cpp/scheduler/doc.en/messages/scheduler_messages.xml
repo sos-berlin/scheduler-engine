@@ -2930,7 +2930,13 @@
              <title>No appropriate config element found in scheduler.xml - please remove attribute @spooler_id of the config-element or start JS with the appropriate -id option.</title>
           </text>
        </message>
-       
+
+       <message code="SCHEDULER-481">
+          <text xml:lang="en">
+             <title>Method '<p1/>' with signature '<p2/>' is not implemented.</title>
+          </text>
+       </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
