@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.test.scala.Utils.ignoreException
 trait CheckedBeforeAll {
   this: BeforeAndAfterAll =>
 
-  override protected def beforeAll(configMap: Map[String, Any]) {
+  override protected final def beforeAll(configMap: Map[String, Any]) {
     try checkedBeforeAll(configMap)
     catch {
       case x =>

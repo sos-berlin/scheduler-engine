@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import com.sos.scheduler.engine.test.{TestSchedulerController, SchedulerTest}
 
 @RunWith(classOf[JUnitRunner])
-trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll {
+trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with CheckedBeforeAll {
   val controller = TestSchedulerController.of(getClass)
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
