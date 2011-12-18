@@ -26,7 +26,7 @@ class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
             "    }\n" +
             "    catch(const exception& x) {\n" +
             "        env.set_java_exception(x);\n" +
-            ("        return " + jniReturnTypeName + "();\n" when m.hasReturnType) +
+           ("        return " + jniReturnTypeName + "();\n" when m.hasReturnType) +
             "    }\n"
             
         jniName.namespace.nestedCode(declaration + "\n{\n" + code + "}\n")
@@ -51,6 +51,9 @@ class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
     }
 
     private def jniExpressionStringOfCpp(typ: Class[_], expr: String) =
+        if (typ.isArray)
+            "java_array_from_c("+ expr +")"
+        else
         if (isStringClass(typ))
             "env.jstring_from_string(" + expr + ")"
         else
@@ -60,7 +63,7 @@ class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
         if (isClass(typ))  // Method returns a real Java object, that means the method is used only for Java calls.
             "(" + expr + ").local_ref()"  // Global reference is lost after call, therefore we make a local reference
         else
-            "(" + expr + ")"
+          "(" + expr + ")"
 
     def registerNativeArrayEntry =
         List("(char*)" + quoted(m.nativeJavaName), "(char*)" + quoted(signatureString), "(void*)" + jniName)

@@ -179,7 +179,7 @@ string expand_class_path( const string& class_path_with_wildcards )
             else
                 new_class_path << Z_PATH_SEPARATOR << path;
         }
-        else; // Leere Einträge ignorieren
+        else; // Leere Eintrï¿½ge ignorieren
     }
 
     string result = new_class_path;
@@ -297,7 +297,7 @@ static jint JNICALL java_vfprintf( FILE*, const char *format, va_list args )
 
     if( Vm::static_vm ) 
     {
-        if( strcmp( buf, "\n" ) == 0 )  return ret;     // log macht sowieso einen Zeilenwechsel, das hier gäbe also nur eine Leerzeile
+        if( strcmp( buf, "\n" ) == 0 )  return ret;     // log macht sowieso einen Zeilenwechsel, das hier gï¿½be also nur eine Leerzeile
 
         if( Vm::static_vm->_log.log_level() <= log_debug3 )  Vm::static_vm->_log.debug3( buf );
                                                        else  Z_LOG2( Vm::java_log_category, buf );
@@ -351,7 +351,7 @@ Vm::~Vm()
 
     try
     {
-        //Java bleibt bei Prozessende hängen  close(); 
+        //Java bleibt bei Prozessende hï¿½ngen  close(); 
     }
     catch( const exception& x ) { Z_LOG( Z_FUNCTION << ": " << x << "\n" ); }
 
@@ -445,7 +445,7 @@ void Vm::start()
             }
 /*
             else
-            if( static_foreign_jvm )        // veraltet (noch für hostjava -> hostole)
+            if( static_foreign_jvm )        // veraltet (noch fï¿½r hostjava -> hostole)
             {
                 _vm = static_foreign_jvm;
                 _foreign = true;
@@ -628,7 +628,7 @@ void Vm::start()
 
     new_instances( _new_instances );
 
-    load_standard_classes();           // Wirkt natürlich nur für dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
+    load_standard_classes();           // Wirkt natï¿½rlich nur fï¿½r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
 }
 
 //----------------------------------------------------------------------------------------Vm::close
@@ -649,7 +649,7 @@ void Vm::close()
         {
             if( _dont_destroy  ||  unloading_module )
             {
-                Z_LOG2( Vm::java_log_category, "DestroyJavaVM() unterdrückt\n" );
+                Z_LOG2( Vm::java_log_category, "DestroyJavaVM() unterdrï¿½ckt\n" );
                 //_vm = NULL;
             }
             else
@@ -666,7 +666,7 @@ void Vm::close()
 
                 Z_LOG2( Vm::java_log_category, "DestroyJavaVM()  OK\n" );            
 
-                if( ret < 0 )  _log.error( "DestroyJavaVM() liefert " + as_string(ret) + ". Java lässt sich nicht entladen" );
+                if( ret < 0 )  _log.error( "DestroyJavaVM() liefert " + as_string(ret) + ". Java lï¿½sst sich nicht entladen" );
                          else  _vm = NULL;
             }
 
@@ -679,7 +679,7 @@ void Vm::close()
 
 void Vm::set_destroy_vm( bool destroy )
 { 
-    if( !destroy  &&  !_dont_destroy )  AddRef();       // Nie freigeben, static_vm bleibt erhalten für erneute Verwendung
+    if( !destroy  &&  !_dont_destroy )  AddRef();       // Nie freigeben, static_vm bleibt erhalten fï¿½r erneute Verwendung
     if( destroy   &&   _dont_destroy )  Release();      // AddRef() wieder aufheben
 
     _dont_destroy = !destroy; 
@@ -752,6 +752,7 @@ void Vm::new_instances( const string& class_names_str )
 void Vm::Standard_classes::load( JNIEnv* jenv )
 {
     Env env ( jenv );
+    _java_lang_object_class     = env.find_class( "java/lang/Object"  );
     _java_lang_string_class     = env.find_class( "java/lang/String"  );
     _java_lang_short_class      = env.find_class( "java/lang/Short"   );
     _java_lang_integer_class    = env.find_class( "java/lang/Integer" );
@@ -1047,7 +1048,7 @@ void Env::delete_global_ref(jobject jo)
 }
 
 //--------------------------------------------------------------------------Env::is_byte_array_class
-// Das könnte man optimieren.
+// Das kï¿½nnte man optimieren.
 
 bool Env::is_byte_array_class( jobject jo )
 {
@@ -1067,7 +1068,7 @@ bool Env::is_byte_array_class( jobject jo )
 }
 
 //-----------------------------------------------------------------------Env::is_string_array_class
-// Das könnte man optimieren.
+// Das kï¿½nnte man optimieren.
 
 bool Env::is_string_array_class( jobject jo )
 {
@@ -1163,7 +1164,7 @@ void Env::throw_java( const string& text1, const string& text2 )
 #endif
 
             Z_LOG2( Vm::java_log_category, "Vm::static_vm=" << (void*)Vm::static_vm << "  _debug=" << ( Vm::static_vm? Vm::static_vm->_debug : false ) << "\n" );
-            if( Vm::static_vm && Vm::static_vm->_debug )  { Z_LOG2( Vm::java_log_category, "jenv->ExceptionDescribe()\n" ); jenv->ExceptionDescribe(); }     // Ausgabe über java_vfprintf()
+            if( Vm::static_vm && Vm::static_vm->_debug )  { Z_LOG2( Vm::java_log_category, "jenv->ExceptionDescribe()\n" ); jenv->ExceptionDescribe(); }     // Ausgabe ï¿½ber java_vfprintf()
             jenv->ExceptionClear();
 
             jclass c = jenv->GetObjectClass(x);
@@ -1772,7 +1773,7 @@ void Global_jobject::assign_add_ref( jobject jo )
         if( jo )
         {
             new_jobject = env.new_global_ref(jo);
-            env->DeleteLocalRef(jo);  // jo wird ungültig!
+            env->DeleteLocalRef(jo);  // jo wird ungï¿½ltig!
         }
 
         if( _jvalue.l )

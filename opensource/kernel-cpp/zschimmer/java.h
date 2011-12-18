@@ -98,7 +98,7 @@ struct Env
     jclass                      get_spooler_idispatch_class_if_is_instance_of( jobject );
 
 
-    // Einige Java-Methoden mit Fehlerprüfung:
+    // Einige Java-Methoden mit Fehlerprï¿½fung:
     jclass                      find_class                  ( const string& name );
     jfieldID                    get_field_id                ( jclass cls, const string& name, const string& signature );
     jmethodID                   get_method_id               ( jclass cls, const string& name, const string& signature ) { return get_method_id( cls, name.c_str(), signature.c_str() ); }
@@ -166,8 +166,8 @@ struct Jobject : Jvalue
 
     jobject                     take                        ()                                      { jobject result = _jvalue.l;  _jvalue.l = NULL;  return result; }
 
-    virtual void                assign                      ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ungültig!
-    virtual void                assign_add_ref              ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ungültig!
+    virtual void                assign                      ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ungï¿½ltig!
+    virtual void                assign_add_ref              ( jobject )                             = 0;    // jobject muss eine LocalRef sein, und wird danach ungï¿½ltig!
     virtual jclass              get_jclass                  ()                                      = 0;
 
     jobject                     j                           () const                                { return get_jobject(); }
@@ -460,7 +460,7 @@ struct Statistics {
 };
 
 //-----------------------------------------------------------------------------------------------Vm
-// Für dieselbe JavaVM können mehrere VM vorhanden sein, für jede DLL eine.
+// Fï¿½r dieselbe JavaVM kï¿½nnen mehrere VM vorhanden sein, fï¿½r jede DLL eine.
 // Neben dem Hauptprogram zurzeit hostole.dll, spidermonkey.dll, hostjava.dll.
 
 struct Vm : Object              // Java virtual machine
@@ -491,6 +491,7 @@ struct Vm : Object              // Java virtual machine
         void                    load                        ( JNIEnv* );
 
         Fill_zero              _zero_;
+        global_jobject<jclass> _java_lang_object_class;
         global_jobject<jclass> _java_lang_string_class;
         global_jobject<jclass> _java_lang_short_class;
         global_jobject<jclass> _java_lang_integer_class;
@@ -514,7 +515,7 @@ struct Vm : Object              // Java virtual machine
     };
 
                                 Vm                          ( bool do_start = true );
-                                Vm                          ( JavaVM* );                            // Vorhandene JVM verwenden (für natives Module)
+                                Vm                          ( JavaVM* );                            // Vorhandene JVM verwenden (fï¿½r natives Module)
                                ~Vm                          ();
 
 
@@ -545,7 +546,7 @@ struct Vm : Object              // Java virtual machine
 
     void                    set_destroy_vm                  ( bool );
 
-    void                    set_sos_initialized             ( bool b = true )                       { _sos_initialized = b; }       // Für kram/sos_java.h
+    void                    set_sos_initialized             ( bool b = true )                       { _sos_initialized = b; }       // Fï¿½r kram/sos_java.h
     bool                        sos_initialized             () const                                { return _sos_initialized; }
 
     void                        init                        ();
@@ -575,10 +576,10 @@ struct Vm : Object              // Java virtual machine
 
     Fill_zero                  _zero_;
     //Mutex                      _jni_switch_mutex;
-    //Mutex_guard                _jni_switch_mutex_guard;     // Synchronisiert den nebenläufigen Aufruf aus Java
-    bool                       _foreign;                    // JVM ist von außen (für Hostjava)
+    //Mutex_guard                _jni_switch_mutex_guard;     // Synchronisiert den nebenlï¿½ufigen Aufruf aus Java
+    bool                       _foreign;                    // JVM ist von auï¿½en (fï¿½r Hostjava)
     bool                       _vm_requested;
-    bool                       _dont_destroy;               // DestroyJavaVM() nicht rufen (hängt manchmal)
+    bool                       _dont_destroy;               // DestroyJavaVM() nicht rufen (hï¿½ngt manchmal)
     bool                       _debug;
     bool                       _debug_options_set;
     bool                       _sos_initialized;
@@ -591,7 +592,7 @@ struct Vm : Object              // Java virtual machine
 
     string                     _filename;                   // Dateiname der Java-VM
     string                     _class_path;
-    string                     _last_expanded_class_path;   // Für expand_class_path()
+    string                     _last_expanded_class_path;   // Fï¿½r expand_class_path()
     string                     _complete_class_path;
     string                     _javac_filename;
     string                     _work_dir;

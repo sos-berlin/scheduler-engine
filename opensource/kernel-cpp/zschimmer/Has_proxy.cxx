@@ -83,6 +83,19 @@ Has_proxy* Has_proxy::of_cpp_reference_(jlong cpp_reference, const char* debug_s
     return (Has_proxy*)cpp_reference;
 }
 
+//--------------------------------------------------------------------------------java_array_from_c
+
+jobjectArray java_array_from_c(const std::vector<string>& v) {
+    Env jenv;
+    Local_frame java_frame (10);
+    jobjectArray result = jenv->NewObjectArray(v.size(), Vm::static_vm->standard_classes()->_java_lang_string_class, NULL);
+    if (result != NULL) {  // Keine Exception
+        for (int i = 0; i < v.size(); i++)
+            jenv->SetObjectArrayElement(result, i, jenv.jstring_from_string(v[i]));
+    }
+    return result;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace javabridge

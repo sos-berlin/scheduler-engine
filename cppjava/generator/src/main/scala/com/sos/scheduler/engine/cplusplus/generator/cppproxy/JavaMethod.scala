@@ -6,14 +6,19 @@ import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.generator.util.Util._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
 
-
 class JavaMethod(m: ProcedureSignature) {
     private val javaParameterDeclarations = m.parameters map { p => p.typ.getName + " " + p.name }
+
+    private val returnTypeName = m.returnType match {
+      case c if c.isArray && c.getComponentType == classOf[java.lang.String] => "String[]"
+      case c if c.isArray => "Object[]"
+      case c => c.getName
+    }
 
     def javaImplementation = {
         val declaration =
             "    @Override public " +
-            m.returnType.getName + " " +
+            returnTypeName +" "+
             m.name +
             inParentheses(javaParameterDeclarations)
 
@@ -21,8 +26,8 @@ class JavaMethod(m: ProcedureSignature) {
 
         val code = m.returnType match {
             case t if isClass(t) =>
-                "            " + t.getName + " result = " + call + ";\n" +
-                "            " + "checkIsNotReleased(" + t.getName + ".class, result);\n" +
+                "            " + returnTypeName + " result = " + call + ";\n" +
+                "            " + "checkIsNotReleased("+ returnTypeName +".class, result);\n"+
                 "            " + "return result;\n"
             case t if isVoid(t) =>
                 "            " + call + ";\n"
@@ -57,7 +62,7 @@ class JavaMethod(m: ProcedureSignature) {
 
     def javaNativeDeclaration =
         "    private static native " +
-        m.returnType.getName + " " +
+        returnTypeName + " " +
         m.nativeJavaName +
         inParentheses("long cppReference" :: javaParameterDeclarations) +
         ";\n"
