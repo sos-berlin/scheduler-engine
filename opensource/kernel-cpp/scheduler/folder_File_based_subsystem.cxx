@@ -78,6 +78,24 @@ void File_based_subsystem::assert_xml_elements_name( const xml::Element_ptr& e )
     if( !e.nodeName_is( xml_elements_name() ) )  z::throw_xc( "SCHEDULER-409", xml_elements_name(), e.nodeName() );
 }
 
+//---------------------------------------------------File_based_subsystem::name_from_xml_attributes
+
+string File_based_subsystem::name_from_xml_attributes( const xml::Element_ptr& element, Handle_attributes handle_attributes ) const
+{
+    string         name;
+    vector<string> name_attributes = vector_split( " ", this->name_attributes() );
+
+    for( int i = 0; i < name_attributes.size(); i++ )  
+    {
+        if( i > 0 )  name += folder_name_separator;
+        name += element.getAttribute_mandatory( name_attributes[ i ] );     // name=  oder, f�r Order, job_chain= und id= durch Komma getrennt
+
+        if( handle_attributes == remove_attributes )  element.removeAttribute( name_attributes[ i ] );
+    }
+
+    return name;
+}
+
 //----------------------------------------------------------------File_based_subsystem::execute_xml
 
 xml::Element_ptr File_based_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
