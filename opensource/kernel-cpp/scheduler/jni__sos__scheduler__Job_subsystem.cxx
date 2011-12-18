@@ -17,6 +17,23 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL file_1based_1names__Z(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job_subsystem* o_ = has_proxy< ::sos::scheduler::Job_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Job_subsystem::file_based_names()");
+        return java_array_from_c(o_->file_based_names(p0 != 0));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL job_1by_1string__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
     Env env = jenv;
@@ -50,6 +67,7 @@ static jobject JNICALL job_1by_1string_1or_1null__Ljava_lang_String_2(JNIEnv* je
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"file_based_names__native", (char*)"(JZ)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1names__Z },
     { (char*)"job_by_string__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1by_1string__Ljava_lang_String_2 },
     { (char*)"job_by_string_or_null__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1by_1string_1or_1null__Ljava_lang_String_2 }
 };
@@ -59,7 +77,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Job_subsystem >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Job_subsystem >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 2);
+        int ret = env->RegisterNatives(*cls, native_methods, 3);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

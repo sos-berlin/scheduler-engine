@@ -10,6 +10,21 @@ final class Job_subsystemCImpl
         requireContextIsNull(context);
     }
 
+    @Override public String[] file_based_names(boolean p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            String[] result = file_based_names__native(cppReference(), p0);
+            checkIsNotReleased(String[].class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native String[] file_based_names__native(long cppReference, boolean p0);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

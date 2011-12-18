@@ -15,7 +15,6 @@ namespace folder {
 File_based::File_based( File_based_subsystem* subsystem, IUnknown* iunknown, Type_code type_code )
 : 
     Scheduler_object( subsystem->spooler(), iunknown, type_code ),
-    //javabridge::has_proxy<File_based>(),
     _zero_(this+1),
     _visible(visible_yes),
     _file_based_subsystem(subsystem),
@@ -139,7 +138,7 @@ bool File_based::on_requisite_loaded( File_based* )
 {
     bool result = false;
 
-    if( is_in_folder() )  check_for_replacing_or_removing();    // Für Standing_order: Wenn Jobkette gelöscht, Auftragsdatei geändert und Jobkette wieder geladen wird, 2008-02-01
+    if( is_in_folder() )  check_for_replacing_or_removing();    // Fï¿½r Standing_order: Wenn Jobkette gelï¿½scht, Auftragsdatei geï¿½ndert und Jobkette wieder geladen wird, 2008-02-01
     if( is_in_folder() )  result = activate();                  // (Besser: nur wenn s_incomplete?)
     
     return result;
@@ -225,7 +224,7 @@ void File_based::set_replacement( File_based* replacement )
     if( replacement  &&  
         _configuration_origin == confdir_cache &&  
         replacement->_configuration_origin != confdir_cache &&
-        _base_file_info._path.exists() )    // Außer, die zentrale Datei ist gelöscht
+        _base_file_info._path.exists() )    // Auï¿½er, die zentrale Datei ist gelï¿½scht
     {
         z::throw_xc( "SCHEDULER-460", subsystem()->object_type_name() );  // Original ist zentral konfiguriert, aber Ersatz nicht
     }
@@ -298,7 +297,7 @@ bool File_based::remove( Remove_flag remove_flag )
     else  
     {
         _remove_xc = remove_error();
-        log()->info( _remove_xc.what() );   // Kein Fehler, Löschen ist nur verzögert
+        log()->info( _remove_xc.what() );   // Kein Fehler, Lï¿½schen ist nur verzï¿½gert
     }
 
 
@@ -423,7 +422,7 @@ File_based* File_based::on_replace_now()
     assert( can_be_replaced_now() );
 
     typed_folder->remove_file_based( this );
-    // this ist ungültig
+    // this ist ungï¿½ltig
 
     typed_folder->add_file_based( replacement );
 
@@ -441,9 +440,9 @@ File_based* File_based::replace_now()
 
     File_based* new_file_based = on_replace_now();
 
-    if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
+    if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte ï¿½bernommen
     {                                       
-        set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
+        set_base_file_info( file_info );        // Alte Werte geï¿½nderten Objekts ï¿½berschreiben
         _source_xml        = replacement->_source_xml;
         _base_file_xc      = zschimmer::Xc();
         _base_file_xc_time = 0;
@@ -451,10 +450,10 @@ File_based* File_based::replace_now()
     }
     else
     {
-        // this ist ungültig
+        // this ist ungï¿½ltig
     }
 
-    //SS: replacement->report_event_replace ... (weil "this" ungültig)
+    //SS: replacement->report_event_replace ... (weil "this" ungï¿½ltig)
     new_file_based->activate();
     return new_file_based;
 }
@@ -534,7 +533,7 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, co
         try
         {
             xml::Document_ptr source_dom ( _source_xml );
-            source_element.appendChild( source_element.ownerDocument().clone( source_dom.documentElement() ) );      // Ein "prune()" wäre effizienter als clone()
+            source_element.appendChild( source_element.ownerDocument().clone( source_dom.documentElement() ) );      // Ein "prune()" wï¿½re effizienter als clone()
         }
         catch( exception& x )
         {
@@ -666,7 +665,7 @@ void File_based::set_name( const string& name )
 
     if( normalized_name != _file_based_subsystem->normalized_name( name ) )
     {
-        if( _name_is_fixed )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geändert werden, außer Großschreibung
+        if( _name_is_fixed )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geï¿½ndert werden, auï¿½er Groï¿½schreibung
         _name = name;
         log()->set_prefix(obj_name() + "*");    // Provisorisch, noch ohne Pfad
 
@@ -683,7 +682,7 @@ void File_based::set_name( const string& name )
 Folder* File_based::folder() const
 { 
     return _typed_folder? _typed_folder->folder()
-                        : spooler()->folder_subsystem()->folder( folder_path() );   // _state < s_initialized, noch nicht im Typed_folder eingehängt, replacement()
+                        : spooler()->folder_subsystem()->folder( folder_path() );   // _state < s_initialized, noch nicht im Typed_folder eingehï¿½ngt, replacement()
 }
 
 //-------------------------------------------------------------------------File_based::handle_event

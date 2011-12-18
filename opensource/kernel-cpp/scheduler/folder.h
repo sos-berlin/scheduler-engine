@@ -38,7 +38,7 @@ struct Requisite_path
 
 //----------------------------------------------------------------------------------------Dependant
 
-struct Dependant                // Abhängig von anderen File_based (Requisite)
+struct Dependant                // Abhï¿½ngig von anderen File_based (Requisite)
 {
                                 Dependant                   ();
     virtual                    ~Dependant                   ();
@@ -66,7 +66,7 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     typedef stdext::hash_map< File_based_subsystem*, Requisite_set >  Requisite_sets;
 
     Requisite_sets             _requisite_sets;
-    stdext::hash_set<Dependant*> _accompanying_dependants;    // missing_requistes() liefert auch die Vermissten dieser Dependants, z.B. Schedule_use für Job
+    stdext::hash_set<Dependant*> _accompanying_dependants;    // missing_requistes() liefert auch die Vermissten dieser Dependants, z.B. Schedule_use fï¿½r Job
 };
 
 //-------------------------------------------------------------------------------------Dependencies
@@ -128,16 +128,16 @@ struct File_based : Scheduler_object,
         s_undefined,            // Fehler in XML-Definition
         s_not_initialized,      // on_initialized() gescheitert, Objekt ist nicht im Folder
         s_initialized,          // on_initialized() ok, Objekt sieht gut aus
-        s_loaded,               // Mit Daten gefüllt: bei Jobs die Task-Warteschlange, bei Jobketten die Auftragswarteschlangen
+        s_loaded,               // Mit Daten gefï¿½llt: bei Jobs die Task-Warteschlange, bei Jobketten die Auftragswarteschlangen
         s_incomplete,           // Requisite fehlt (beim Versuch zu aktivieren)
         s_active,
         s_closed
     };
 
-    // Zutun: Genauer klären, was die Zustände bedeuten, für jede Klasse, besonders Fehlerfälle (einschließlich fehlender Requisiten)
+    // Zutun: Genauer klï¿½ren, was die Zustï¿½nde bedeuten, fï¿½r jede Klasse, besonders Fehlerfï¿½lle (einschlieï¿½lich fehlender Requisiten)
     // s_incomplete vielleicht automatisch setzen, nach on_requisite_loaded() wieder versuchen zu aktivieren
     
-    // Diese generischen Zustände mit den Zuständen der Objekte (Job, Order) unter einem Hut bringen. 
+    // Diese generischen Zustï¿½nde mit den Zustï¿½nden der Objekte (Job, Order) unter einem Hut bringen. 
     // Vielleicht klassen-spezifische Sub_states.
     // s_halted?
 
@@ -148,7 +148,7 @@ struct File_based : Scheduler_object,
     { 
         rm_standard, 
         rm_base_file_too,
-        rm_temporary,           // Objekt wird nur vorrübergehend gelöscht, weil es ersetzt oder weil der Scheduler beendet wird.
+        rm_temporary,           // Objekt wird nur vorrï¿½bergehend gelï¿½scht, weil es ersetzt oder weil der Scheduler beendet wird.
     };
 
 
@@ -208,8 +208,9 @@ struct File_based : Scheduler_object,
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     void                        fix_name                    ()                                      { _name_is_fixed = true; }
-    Absolute_path               path                        () const;                               //2008-07-09 Könnte path_or_slash() heißen?
-    Absolute_path               path_or_empty               () const;                               //2008-07-09 Könnte path() heißen?
+    Absolute_path               path                        () const;                               //2008-07-09 Kï¿½nnte path_or_slash() heiï¿½en?
+    Absolute_path               path_or_empty               () const;                               //2008-07-09 Kï¿½nnte path() heiï¿½en?
+    string                      string_path                 () const                                { return path().with_slash(); }
     string                      normalized_name             () const;
     string                      normalized_path             () const;
     File_path                   configuration_root_directory() const;
@@ -220,7 +221,7 @@ struct File_based : Scheduler_object,
     static string               file_based_state_name       ( State );
     bool                        is_file_based_reread        () const                                { return _reread; }
     bool                        is_loaded                   () const                                { return _state >= s_loaded  &&  _state < s_closed; }
-  //void                    set_defined                     ();                                     // Für Objekte, die kein XML brauchen
+  //void                    set_defined                     ();                                     // Fï¿½r Objekte, die kein XML brauchen
 
     void                    set_to_be_removed               ( bool, Remove_flag = rm_standard );
     bool                     is_to_be_removed               () const                                { return _is_to_be_removed; }
@@ -231,7 +232,7 @@ struct File_based : Scheduler_object,
     void                    set_replacement                 ( File_based* );
     File_based*                 replacement                 () const                                { return _replacement; }
 
-    void                    set_typed_folder                ( Typed_folder* );                      // Nur für Typed_folder!
+    void                    set_typed_folder                ( Typed_folder* );                      // Nur fï¿½r Typed_folder!
     void                    set_folder_path                 ( const Absolute_path& );
     Absolute_path               folder_path                 () const;
 
@@ -397,7 +398,7 @@ struct typed_folder : Typed_folder
 
 //-------------------------------------------------------------------------------------------Folder
 //
-// Ein Ordner (Folder) enthält alle Objekte. 
+// Ein Ordner (Folder) enthï¿½lt alle Objekte. 
 // Bislang gibt es nur einen Ordner im Scheduler.
 
 struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >, 
@@ -434,7 +435,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
 
     file::File_path             directory                   () const;
-    Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
+    Absolute_path               make_path                   ( const string& name );                 // Hï¿½ngt den Ordernamen voran
     bool                        is_valid_extension          ( const string& extension );
 
     bool                        adjust_with_directory       ( directory_observer::Directory* );
@@ -488,7 +489,7 @@ struct Subfolder_folder : typed_folder< Folder >
 };
 
 //-----------------------------------------------------------------------------File_based_subsystem
-// Für jeden dateibasierten Typ (File_based) gibt es genau ein File_based_subsystem
+// Fï¿½r jeden dateibasierten Typ (File_based) gibt es genau ein File_based_subsystem
 
 struct File_based_subsystem : Subsystem
 {
@@ -650,11 +651,20 @@ struct file_based_subsystem : File_based_subsystem
         result.reserve( _file_based_map.size() );
         Z_FOR_EACH( typename File_based_map, _file_based_map, fb )  result.push_back( fb->second );
 
-        //Wir müssen nicht ordnen und ordering_is_less() betrachtet nicht den Pfad: sort( result, result.begin(), result.end(), File_based::ordering_is_less );
+        //Wir mï¿½ssen nicht ordnen und ordering_is_less() betrachtet nicht den Pfad: sort( result, result.begin(), result.end(), File_based::ordering_is_less );
 
         return result;
     }
 
+    virtual vector<string> file_based_names(bool visibleOnly) const {
+        vector<string> result;
+        result.reserve(_file_based_map.size());
+        Z_FOR_EACH_CONST(typename File_based_map, _file_based_map, i) {
+            const File_based* f = i->second;
+            if (!visibleOnly || f->is_visible()) result.push_back(f->name());
+        }
+        return result;
+    }
 
     FILE_BASED* file_based_or_null( const Absolute_path& path ) const
     {
@@ -726,7 +736,7 @@ struct file_based_subsystem : File_based_subsystem
     friend struct               Folder_subsystem;
 
 
-    void add_file_based( File_based* file_based )                   // Nur für Typed_folder::add_file_based()
+    void add_file_based( File_based* file_based )                   // Nur fï¿½r Typed_folder::add_file_based()
     {
         assert( !file_based_or_null( file_based->path() ) );
 
@@ -738,7 +748,7 @@ struct file_based_subsystem : File_based_subsystem
     }
 
 
-    void remove_file_based( File_based* file_based )                // Nur für Typed_folder::remove_file_based()
+    void remove_file_based( File_based* file_based )                // Nur fï¿½r Typed_folder::remove_file_based()
     {
         assert( file_based_or_null( file_based->path() ) );
 
@@ -752,7 +762,7 @@ struct file_based_subsystem : File_based_subsystem
     }
 
 
-    void replace_file_based( File_based* old_file_based, File_based* new_file_based )       // Nur für Typed_folder::replace_file_based()
+    void replace_file_based( File_based* old_file_based, File_based* new_file_based )       // Nur fï¿½r Typed_folder::replace_file_based()
     {
         assert( file_based_or_null( old_file_based->path() ) );
 

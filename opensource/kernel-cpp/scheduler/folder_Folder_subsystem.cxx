@@ -301,4 +301,9 @@ void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder
     handle_folders();
 }
 
+//----------------------------------------------------------------------Folder_subsystem::java_list
+
+//javaproxy::java::util::ArrayList Folder_subsystem::java_list(const string& absolute_path, const string& type_name) {
+//}
+
 }}} //namespace sos::scheduler::folder
