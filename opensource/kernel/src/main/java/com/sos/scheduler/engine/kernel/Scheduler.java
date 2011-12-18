@@ -1,25 +1,10 @@
 package com.sos.scheduler.engine.kernel;
 
-import static com.google.common.base.Objects.firstNonNull;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import com.google.inject.Module;
-import com.sos.scheduler.engine.util.xml.NamedChildElements;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -42,19 +27,29 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
-import com.sos.scheduler.engine.kernel.scheduler.EmptySchedulerControllerBridge;
-import com.sos.scheduler.engine.kernel.scheduler.HasPlatform;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.*;
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.util.MavenProperties;
 import com.sos.scheduler.engine.kernel.util.XmlUtils;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
+import com.sos.scheduler.engine.util.xml.NamedChildElements;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.google.common.base.Objects.firstNonNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 
 @ForCpp
-public final class Scheduler implements HasPlatform, Sister {
+public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommandExecutor {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
@@ -79,7 +74,7 @@ public final class Scheduler implements HasPlatform, Sister {
         @Override protected Module compute() {
             return new AbstractModule() {
                 @Override protected void configure() {
-                    bind(Scheduler.class).toInstance(Scheduler.this);
+                    bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
                     bind(JobSubsystem.class).toInstance(jobSubsystem);
@@ -209,7 +204,7 @@ public final class Scheduler implements HasPlatform, Sister {
     }
 
     /** Stellt XML-Prolog voran und löst bei einem ERROR-Element eine Exception aus. */
-    public String executeXml(String xml) {
+    @Override public String executeXml(String xml) {
         checkArgument(!xml.startsWith("<?"), "executeXml() does not accept XML with a prolog");  // Blanks und Kommentare vereiteln diese Prüfung.
         String prolog = "<?xml version='1.0' encoding='iso-8859-1'?>";   // Für libxml2, damit Umlaute korrekt erkant werden.
         String result = uncheckedExecuteXml(prolog + xml);
