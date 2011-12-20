@@ -29,11 +29,8 @@ public class JS606Base extends SchedulerTest {
 		this.variablePrefixEnv = prefix;
 		this.jobchainName = jobchain;
 
-		File f = getResultfile(this.jobchainName);
-		if (f.exists()) f.delete();
-		this.resultfile = f;
-
-		logger.debug("results of the jobs will be written in file " + f.getAbsolutePath());
+		resultfile = JSTestUtils.getEmptyTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
+		logger.debug("results of the jobs will be written in file " + resultfile.getAbsolutePath());
 	}
 	
 	protected void startOrder() {
@@ -50,16 +47,12 @@ public class JS606Base extends SchedulerTest {
 		String command = 
 		"<add_order id='test_" + jobchainName + "' job_chain='" + this.jobchainName + "'>" +
 		"<params>" + 
-		"<param name='RESULT_FILE'    value='" + getResultfile(this.jobchainName) + "' />" + 
+		"<param name='RESULT_FILE'    value='" + resultfile.getAbsolutePath() + "' />" + 
 		"<param name='100/NODE_PARAM' value='param_state_100' />" + 
 		"<param name='200/NODE_PARAM' value='param_state_200' />" + 
 		"</params>" + 
 		"</add_order>";
 		controller().scheduler().executeXml(command);
-	}
-	
-	private File getResultfile(String jobchainName) {
-		return JSTestUtils.getTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
 	}
 	
 	@HotEventHandler
@@ -71,7 +64,6 @@ public class JS606Base extends SchedulerTest {
 		assertParameter(lines, "JOB_RESULT", "param_state_200" );
 		
 		controller().terminateScheduler();
-		if (resultfile.exists()) resultfile.delete();
 		
 	}
 	
