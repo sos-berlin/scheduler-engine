@@ -6,14 +6,13 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -36,8 +35,6 @@ import com.sos.scheduler.engine.test.util.JSTestUtils;
  */
 public class JavaXScriptTest extends SchedulerTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(JavaXScriptTest.class);
-	
 	private final List<String> jobchains = Arrays.asList("chain_rhino");
 	
 	private JSTestUtils util = JSTestUtils.getInstance();
@@ -47,7 +44,7 @@ public class JavaXScriptTest extends SchedulerTest {
 
 	@Test
 	public void Test() throws InterruptedException, IOException {
-		controller().startScheduler();
+		controller().startScheduler("-e","-log-level=debug");
 		for (String jobchain : jobchains) {
 			File resultfile = JSTestUtils.getEmptyTestresultFile(this.getClass(), jobchain + ".log");
 			resultfiles.put(jobchain, resultfile);

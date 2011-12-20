@@ -21,6 +21,7 @@ function spooler_open()	{
 }
  
 function spooler_process() {
+	logger.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
 	log_function("spooler_process");
 	return true;
 }
@@ -68,6 +69,7 @@ function spooler_process_before() {
 }
 
 function spooler_process_after(spooler_process_result) {
+	logger.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
 	log_function("spooler_process_after");
 	return spooler_process_result;
 }
