@@ -1646,6 +1646,7 @@ xml::Element_ptr Order::append_calendar_dom_element_for_setback(  const xml::Ele
     {
        if (_setback >= options->_from && _setback < options->_before) {
          setback_element = new_calendar_dom_element( element.ownerDocument(), _setback );
+         setback_element.setAttribute( "setback", "true" );
          element.appendChild( setback_element );
        }
     }

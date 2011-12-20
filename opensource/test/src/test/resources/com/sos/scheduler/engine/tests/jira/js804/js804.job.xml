@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job order="yes"
+     stop_on_error="no">
+    <script language="shell">
+        <![CDATA[
+exit 5
+        ]]>
+    </script>
+    <delay_order_after_setback setback_count="5"
+                               is_maximum="yes"/>
+    <delay_order_after_setback setback_count="1"
+                               is_maximum="no"
+                               delay="00:02"/>
+    <run_time/>
+</job>
