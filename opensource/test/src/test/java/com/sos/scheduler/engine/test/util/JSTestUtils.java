@@ -5,14 +5,20 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.google.common.io.Files;
+
 public class JSTestUtils {
 	
+	private static final Logger logger = Logger.getLogger(JSTestUtils.class);
 	private static JSTestUtils instance = null;
 	private static final File testresultBaseDir = new File("target/test-results");
+	
+	private String command;
 	
 	private HashMap<String,String> params;
 	
@@ -58,11 +64,15 @@ public class JSTestUtils {
 		return new File( getTestresultPath(ClassInstance).getAbsolutePath() + "/" + fileWithoutPath );
 	}
 	
-	public static File getEmptyTestresultFile(Class<?> ClassInstance, String fileWithoutPath) throws IOException {
+	public static File getEmptyTestresultFile(Class<?> ClassInstance, String fileWithoutPath) {
 		File f = getTestresultFile(ClassInstance, fileWithoutPath);
-		if (f.exists()) {
+		if (f.exists()) 
 			f.delete();
-			f.createNewFile();
+		try {
+			Files.touch(f);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return f;
 	}
@@ -76,16 +86,18 @@ public class JSTestUtils {
 	}
 	
 	public String buildCommandAddOrder(String jobchainName) {
-		String command = "<add_order id='test_" + jobchainName + "' job_chain='" + jobchainName + "'>";
-		addParams(command);
+		command = "<add_order id='test_" + jobchainName + "' job_chain='" + jobchainName + "'>";
+		addParams();
 		command += "</add_order>";
+		logger.debug("COMMAND: " + command);
 		return command;
 	}
 	
 	public String buildCommandModifyOrder(String order) {
-		String command = "<modify_order at='now' job_chain='" + order + "_chain' order='" + order + "'>";
-		addParams(command);
+		command = "<modify_order at='now' job_chain='" + order + "_chain' order='" + order + "'>";
+		addParams();
 		command += "</modify_order>";
+		logger.debug("COMMAND: " + command);
 		return command;
 	}
 	
@@ -93,11 +105,12 @@ public class JSTestUtils {
     	DateTime begin = new DateTime();
     	DateTime end = new DateTime(begin.plusSeconds(DurationInSeconds));
     	DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinuteSecond();
-    	String command = "<show_calendar before='" + fmt.print(end) + "' from='" + fmt.print(begin) + "' limit='10' what='" + what + "' />";
+    	command = "<show_calendar before='" + fmt.print(end) + "' from='" + fmt.print(begin) + "' limit='10' what='" + what + "' />";
+		logger.debug("COMMAND: " + command);
 		return command;
 	}
 	
-	private void addParams(String command) {
+	private void addParams() {
 		if (params.size() > 0 ) {
 			command += "<params>";
 			for (String key : params.keySet()) {

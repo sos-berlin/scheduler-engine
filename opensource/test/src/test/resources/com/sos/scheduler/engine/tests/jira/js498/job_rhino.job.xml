@@ -11,6 +11,7 @@ var resultfile;
  
 function spooler_init()	{
 	resultfile = new File(spooler_task.order().params().value("resultfile"));
+	logger.debug("resultfile=" + resultfile.getAbsolutePath());
 	log_function("spooler_init");
 	return true;
 }
@@ -44,7 +45,7 @@ function spooler_on_success() {
 
 function log_function( functionname ) {
 	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null)
-		Files.append(functionname + " was called\n",resultfile,Charset.defaultCharset());
+		Files.append(functionname + " was called\n",resultfile,Charset.forName("UTF-8"));
 }
         ]]>
     </script>
@@ -59,6 +60,7 @@ var resultfile;
 
 function spooler_task_before() {
 	resultfile = new File(spooler_task.order().params().value("resultfile"));
+	logger.debug("resultfile=" + resultfile.getAbsolutePath());
 	log_function("spooler_task_before");
 	return true;
 }
@@ -80,7 +82,7 @@ function spooler_task_after() {
 
 function log_function( functionname ) {
 	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null)
-		Files.append(functionname + " was called\n",resultfile,Charset.defaultCharset());
+		Files.append(functionname + " was called\n",resultfile,Charset.forName("UTF-8"));
 }
             ]]>
         </script>
