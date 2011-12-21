@@ -16,7 +16,7 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSTestUtils;
+import com.sos.scheduler.engine.test.util.JSFileUtils;
 
 /**
  * This test show how to set specific parameter for jobchain nodes. To do this, you have to sepcify order parameters
@@ -97,7 +97,7 @@ public class JS793Test extends SchedulerTest {
 	}
 	
 	private File getResultfile(String jobchainName) {
-		return JSTestUtils.getTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
+		return JSFileUtils.getTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
 	}
 		
 	@HotEventHandler

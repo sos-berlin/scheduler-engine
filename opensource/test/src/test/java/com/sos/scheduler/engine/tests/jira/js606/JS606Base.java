@@ -13,7 +13,7 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSTestUtils;
+import com.sos.scheduler.engine.test.util.JSFileUtils;
 
 public class JS606Base extends SchedulerTest {
 
@@ -29,7 +29,7 @@ public class JS606Base extends SchedulerTest {
 		this.variablePrefixEnv = prefix;
 		this.jobchainName = jobchain;
 
-		resultfile = JSTestUtils.getEmptyTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
+		resultfile = JSFileUtils.getEmptyTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
 		logger.debug("results of the jobs will be written in file " + resultfile.getAbsolutePath());
 	}
 	

@@ -11,14 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Ignore;
-import org.junit.Test;
 
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSTestUtils;
+import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.JSFileUtils;
 
 /**
  * This is a test for scripting with the Rhino engine. The jobchain chain_scripting executes a job with all knwowing API
@@ -36,7 +36,7 @@ public class JavaXScriptTest extends SchedulerTest {
 
 	private final List<String> jobchains = Arrays.asList("chain_rhino");
 	
-	private JSTestUtils util = JSTestUtils.getInstance();
+	private JSCommandUtils util = JSCommandUtils.getInstance();
 	private HashMap<String,File> resultfiles = new HashMap<String,File>();
 	
 	private int finishedOrders = 0;
@@ -51,10 +51,10 @@ public class JavaXScriptTest extends SchedulerTest {
 	public void Test() throws InterruptedException, IOException {
 		controller().startScheduler("-e","-log-level=info");
 		for (String jobchain : jobchains) {
-			File resultfile = JSTestUtils.getEmptyTestresultFile(this.getClass(), jobchain + ".log");
+			File resultfile = JSFileUtils.getEmptyTestresultFile(this.getClass(), jobchain + ".log");
 			resultfiles.put(jobchain, resultfile);
 			util.addParam("resultfile", resultfile.getAbsolutePath());
-			controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain) );
+			controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain).getCommand() );
 		}
 		controller().tryWaitForTermination(shortTimeout);
 	}
