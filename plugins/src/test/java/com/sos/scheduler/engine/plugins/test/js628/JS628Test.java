@@ -16,10 +16,9 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -80,7 +79,7 @@ public class JS628Test extends SchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		logger = LoggerFactory.getLogger(JS628Test.class);
+		logger = Logger.getLogger(JS628Test.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
     

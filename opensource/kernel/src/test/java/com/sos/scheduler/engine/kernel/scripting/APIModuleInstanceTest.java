@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
+import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.kernel.scheduler.LogMock;
 
@@ -11,7 +10,7 @@ public class APIModuleInstanceTest {
 	
 	private final static String script_root = "./src/test/scripts/";
 
-	private static final Logger logger = LoggerFactory.getLogger(APIModuleInstanceTest.class);
+	private static final Logger logger = Logger.getLogger(APIModuleInstanceTest.class);
 
 	@Test
 	public void javascriptApi() throws NoSuchMethodException {

@@ -7,12 +7,10 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.io.Files;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.engine.plugins.event.Connector;
 
@@ -31,7 +29,7 @@ public class ConnectorTest {
     
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		logger = LoggerFactory.getLogger(Connector.class);
+		logger = Logger.getLogger(Connector.class);
 		connector = Connector.newInstance(Configuration.vmProviderUrl, "c:/temp/amq");
 		connector.start();
 	}

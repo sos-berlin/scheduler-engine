@@ -6,8 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -17,7 +16,7 @@ import com.sos.scheduler.engine.test.util.JSFileUtils;
 
 public class JS606Base extends SchedulerTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(JS606Base.class);
+	private static final Logger logger = Logger.getLogger(JS606Base.class);
 	
 	private String variablePrefixEnv;
 	private File resultfile;

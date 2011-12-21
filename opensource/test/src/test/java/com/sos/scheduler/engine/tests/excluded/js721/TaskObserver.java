@@ -5,12 +5,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.TimerTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 public class TaskObserver extends TimerTask {
 
-	private static final Logger logger = LoggerFactory.getLogger(TaskObserver.class);
+	private static final Logger logger = Logger.getLogger(TaskObserver.class);
 	
 	private final Long start;
 	private final String filename;

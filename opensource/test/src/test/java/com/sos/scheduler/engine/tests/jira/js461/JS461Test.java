@@ -6,10 +6,9 @@ import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
@@ -58,7 +57,7 @@ public class JS461Test extends SchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		logger = LoggerFactory.getLogger(JS461Test.class);
+		logger = Logger.getLogger(JS461Test.class);
 	}
     
     public JS461Test() throws Exception {

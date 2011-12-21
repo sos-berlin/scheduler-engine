@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.jms.Message;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.log4j.Logger;
 
 /**
  * \file JMSPlugIn.java
@@ -29,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JMSMessageHelper {
 
-	private static Logger logger = LoggerFactory.getLogger(JMSMessageHelper.class);
+	private static Logger logger = Logger.getLogger(JMSMessageHelper.class);
 	private final Message message;
 
     

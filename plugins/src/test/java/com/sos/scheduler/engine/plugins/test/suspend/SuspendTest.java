@@ -16,11 +16,10 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -76,7 +75,7 @@ public class SuspendTest extends SchedulerTest {
     private static final Time schedulerTimeout = Time.of(5);
     private static Configuration conf;
 
-	private static final Logger logger = LoggerFactory.getLogger(SuspendTest.class);
+	private static final Logger logger = Logger.getLogger(SuspendTest.class);
     private final Topic topic = conf.topic;
     private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
     private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);

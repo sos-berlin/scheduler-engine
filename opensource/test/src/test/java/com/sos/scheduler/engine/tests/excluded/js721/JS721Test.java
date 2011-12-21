@@ -5,10 +5,10 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.Timer;
+
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
@@ -31,7 +31,7 @@ import com.sos.scheduler.engine.test.SchedulerTest;
  */
 public class JS721Test extends SchedulerTest implements TaskInfo {
 
-	private static final Logger logger = LoggerFactory.getLogger(JS721Test.class);
+	private static final Logger logger = Logger.getLogger(JS721Test.class);
 	
 	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
 	private static final int ESTIMATED_TASKS = 10;

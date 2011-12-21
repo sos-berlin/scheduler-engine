@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.plugins.event.stepevents;
 
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
@@ -17,7 +16,7 @@ public class OrderStepEventsTest extends SchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		logger = LoggerFactory.getLogger(Connector.class);
+		logger = Logger.getLogger(Connector.class);
 		logger.info("Starting test of EventPlugin");
 	}
     

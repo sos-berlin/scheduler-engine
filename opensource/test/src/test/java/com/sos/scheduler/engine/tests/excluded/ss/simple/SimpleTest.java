@@ -2,10 +2,9 @@ package com.sos.scheduler.engine.tests.excluded.ss.simple;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -14,7 +13,7 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class SimpleTest extends SchedulerTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(SimpleTest.class);
+	private static final Logger logger = Logger.getLogger(SimpleTest.class);
 	
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {

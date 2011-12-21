@@ -13,10 +13,6 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
-
 public class Connector implements Closeable {
 	
 	//TODO
