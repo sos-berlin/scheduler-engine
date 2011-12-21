@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.io.Files;
@@ -54,7 +55,10 @@ public class JSCommandUtilsTest {
 		compareFiles(file,estimated);
 	}
 
-	@Test
+  /*
+   * Es ist nicht sicher, das der Zeitstempel f�r before und from mit dem �bereinstimmt, wie er in buildCommandShowCalendar gesetzt wird.
+   */
+	@Ignore
 	public void testBuildCommandShowCalendar() throws IOException {
 		int duration = 60;
 		String command = util.buildCommandShowCalendar(duration, What.orders).getCommand();
