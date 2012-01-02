@@ -6,17 +6,20 @@ import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent
 import com.sos.scheduler.engine.test.scala._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 /** Prüft, ob alle Methoden eines Scala-Jobs aufgerufen werden.
  * Der Scala-Job wird mit den Log-Levels info und error gerufen, um den Aufruf von spooler_on_success() und spooler_on_error()
  * zu prüfen.
  * Der Job schreibt in Spooler.variables für jeden Log-Level und jeden Aufruf eine Variable mit der Anzahl der Aufrufe.*/
+@RunWith(classOf[JUnitRunner])
 final class ScalaJobTest extends ScalaSchedulerTest {
     import ScalaJobTest._
     private val eventPipe = controller.newEventPipe()
 
     controller.setTerminateOnError(false)
-    controller.activateScheduler("-e")
+    controller.activateScheduler()
 
     test("xx") {
         runJob(SchedulerLogLevel.info)
