@@ -43,7 +43,7 @@ public class PluginReader {
         try {
             return pluginAdapter(className, elementOrNull);
         } catch (Exception x) {
-            PluginSubsystem.logError(log, "Plug-in " + className, x);
+            PluginSubsystem.logError(log, "Plugin "+ className, x);
             return null;
         }
     }
