@@ -16,8 +16,8 @@ import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 public class JMSPlugin extends AbstractPlugin {
     private final Connector connector;
 
-    @Inject public JMSPlugin(PrefixLog log, Element plugInElement) {
-        String providerUrl = stringXPath(plugInElement, "jms/connection/@providerUrl", Configuration.vmProviderUrl);
+    @Inject public JMSPlugin(PrefixLog log, Element pluginElement) {
+        String providerUrl = stringXPath(pluginElement, "jms/connection/@providerUrl", Configuration.vmProviderUrl);
         connector = Connector.newInstance(providerUrl);
         log.info(JMSPlugin.class.getName() + ": providerUrl=" + providerUrl);
     }
