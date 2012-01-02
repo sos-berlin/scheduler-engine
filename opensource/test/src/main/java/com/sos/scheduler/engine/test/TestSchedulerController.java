@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
@@ -164,10 +165,9 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     private void checkForErrorLogLine() {
-        // TODO Prefix_log.last() liefert nur für info die Start-Meldung SCHEDULER-900. Wo sind die anderen Meldungen?
-//        String lastErrorLine = scheduler_.log().lastByLevel(SchedulerLogLevel.error);
-//        if (!lastErrorLine.isEmpty())
-//            throw throwErrorLogException(lastErrorLine);
+        String lastErrorLine = scheduler_.log().lastByLevel(SchedulerLogLevel.error);
+        if (!lastErrorLine.isEmpty())
+            throw new RuntimeException("Test terminated after error log line: "+ lastErrorLine);
     }
 
     @EventHandler public final void handleEvent(ErrorLogEvent e) {
