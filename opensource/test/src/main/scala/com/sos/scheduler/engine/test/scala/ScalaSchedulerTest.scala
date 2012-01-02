@@ -1,11 +1,8 @@
 package com.sos.scheduler.engine.test.scala
 
 import org.scalatest.{FunSuite, BeforeAndAfterAll}
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import com.sos.scheduler.engine.test.{TestSchedulerController, SchedulerTest}
 
-@RunWith(classOf[JUnitRunner])
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with CheckedBeforeAll {
   val controller = TestSchedulerController.of(getClass)
 
@@ -16,6 +13,7 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with CheckedBef
     finally super.afterAll(configMap)
   }
 
-  /** Zur Bequemlichkeit; dasselbe wie {@link com.sos.scheduler.engine.test.TestSchedulerController#scheduler()}. */
+  /** Zur Bequemlichkeit
+   * @see com.sos.scheduler.engine.test.TestSchedulerController#scheduler(). */
   protected final def scheduler = controller.scheduler
 }
