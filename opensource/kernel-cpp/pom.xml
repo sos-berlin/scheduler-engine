@@ -14,6 +14,10 @@
     <inceptionYear>2010</inceptionYear>
     <description>C++-Code der Scheduler-Engine</description>
 
+    <properties>
+        <cppConf>Debug Release</cppConf>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -64,7 +68,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase clean</arguments>
+                                <arguments>make/make-scheduler-phase clean ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>
@@ -78,7 +82,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase compile</arguments>
+                                <arguments>make/make-scheduler-phase compile ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>

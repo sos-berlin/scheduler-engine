@@ -14,6 +14,8 @@ if [ -z "$cmd" ]; then
     exit 1
 fi
 
+targets="$2 $3"
+
 inWindows=$(if [ `uname -o` == "Cygwin" ]; then echo 1; else echo ""; fi)
 vcbuild=""
 msbuild=""
@@ -84,8 +86,9 @@ function cmd_windows_clean() {
 
 function cmd_windows_cleanWithRm() {
     # Weil "vcbuild.exe /clean" nicht immer löschen kann (Fehlermeldung PRJ0008), siehe http://msdn.microsoft.com/en-us/library/hk8k8k4h%28v=vs.80%29.aspx
-    searchAndDestroySubDirectory Release  || exit
-    searchAndDestroySubDirectory Debug  || exit
+    for target in $targets; do :
+        searchAndDestroySubDirectory $target  || exit
+    done
     rm -rf {bin,bind,ipch}/*  || exit
 }
 
@@ -112,16 +115,14 @@ function visualStudio_compile() {
 }
 
 function msbuild() {
-    # Zuerst Release bauen, weil Debug auf release/spooler.tlb zurückgreift. Sonst: spooler.rc(6): error RC2135: file not found: release\spooler.tlb [C:\sos\scheduler\engine\kernel-cpp\scheduler\scheduler_main.vcxproj]
-    for c in Release Debug; do :
+    for c in $targets; do :
         "$msbuild" /m:$NUMBER_OF_PROCESSORS /property:Configuration=$c $* || exit
     done
 }
 
 function vcbuild() {
-    # Zuerst Release bauen, weil Debug auf release/spooler.tlb zurückgreift. Sonst: spooler.rc(6): error RC2135: file not found: release\spooler.tlb [C:\sos\scheduler\engine\kernel-cpp\scheduler\scheduler_main.vcxproj]
-    for c in "Release|Win32" "Debug|Win32"; do :
-        "$vcbuild" /M$NUMBER_OF_PROCESSORS $* "$c" || exit
+    for c in $targets; do :
+        "$vcbuild" /M$NUMBER_OF_PROCESSORS $* "$c|Win32" || exit
     done
 }
 
