@@ -67,6 +67,16 @@ public class XmlUtilsTest {
         assertThat(XmlUtils.intXmlAttribute(e, "x", -99), equalTo(-99));
     }
 
+    @Test(expected=Exception.class) public void testMissingIntXmlAttribute() {
+        Element e = XmlUtils.loadXml("<a/>").getDocumentElement();
+        XmlUtils.intXmlAttribute(e, "b");
+    }
+
+    @Test(expected=Exception.class) public void testEmptyIntXmlAttribute() {
+        Element e = XmlUtils.loadXml("<a b=''/>").getDocumentElement();
+        XmlUtils.intXmlAttribute(e, "b");
+    }
+
     @Test public void testChildElements() {
         testChildElements("<root><a/>x<b><bb/></b>x<c/></root>", "a", "b", "c");
         testChildElements("<root>xx<a/>x<b><bb/></b>x<c/>xx</root>", "a", "b", "c");

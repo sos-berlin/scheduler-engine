@@ -91,12 +91,20 @@ public final class XmlUtils {
                s.isEmpty()? deflt : null;
     }
 
-    public static int intXmlAttribute(Element xmlElement, String attributeName, int defaultValue) {
+    public static int intXmlAttribute(Element xmlElement, String attributeName) {
+        return intXmlAttribute(xmlElement, attributeName, (Integer)null);
+    }
+
+    public static int intXmlAttribute(Element xmlElement, String attributeName, @Nullable Integer defaultValue) {
         String value = xmlElement.getAttribute(attributeName);
-        if (value.isEmpty())  return defaultValue;
+        if (value.isEmpty()) {
+            if (defaultValue == null)
+                throw new RuntimeException("Fehlender Angabe in <"+ xmlElement.getNodeName() +" "+ attributeName +"=''");
+            return defaultValue;
+        }
 
         try {
-            return Integer.parseInt( value );
+            return Integer.parseInt(value);
         } catch (NumberFormatException x) {
             throw new RuntimeException("Ungültiger numerischer Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">", x);
         }
