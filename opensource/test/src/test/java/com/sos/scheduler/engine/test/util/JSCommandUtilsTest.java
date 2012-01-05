@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Ignore;
@@ -55,15 +56,12 @@ public class JSCommandUtilsTest {
 		compareFiles(file,estimated);
 	}
 
-  /*
-   * Es ist nicht sicher, das der Zeitstempel f�r before und from mit dem �bereinstimmt, wie er in buildCommandShowCalendar gesetzt wird.
-   */
-	@Ignore
+	@Test
 	public void testBuildCommandShowCalendar() throws IOException {
 		int duration = 60;
 		String command = util.buildCommandShowCalendar(duration, What.orders).getCommand();
-    	DateTime begin = new DateTime();
-    	DateTime end = new DateTime(begin.plusSeconds(duration));
+    	DateTime begin = util.getLastBegin();
+    	DateTime end = util.getLastEnd();
     	DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinuteSecond();
     	String estimated = "<show_calendar before='" + fmt.print(end) + "' from='" + fmt.print(begin) + "' limit='10' what='orders'></show_calendar>";
 		assertTrue("estimated value is '" + estimated + "'",estimated.equals(command));
