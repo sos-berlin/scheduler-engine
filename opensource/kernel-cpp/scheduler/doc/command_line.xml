@@ -193,6 +193,13 @@
             </description>
         </command_option>
 
+        <command_option name="use-xml-schema" type="dateiname" title="Schema für die Validierung der JobScheduler Konfiguration">
+            <description>
+                <p>
+                  Mit dieser Option kann das durch den JobScheduler verwendete Schema überschrieben werden.
+                </p>
+            </description>
+        </command_option>
 
         <command_option name="env" multiple="yes" type="name=value" title="Umgebungsvariable setzen">
             <description>

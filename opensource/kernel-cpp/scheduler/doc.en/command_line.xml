@@ -309,6 +309,14 @@
             </description>
         </command_option>
 
+        <command_option name="use-xml-schema" type="dateiname" title="Schema for validating the JobScheduler configuration">
+            <description>
+                <p>
+                  JobScheduler use a build-in schema for validating the configuration files. With this option you can overwrite it.
+                </p>
+            </description>
+        </command_option>
+
 
         <command_option name="env" multiple="yes" type="name=value" title="Set Environment Variables">
     <!--<command_option name="env" multiple="yes" type="name=value" title="Umgebungsvariable setzen">-->
