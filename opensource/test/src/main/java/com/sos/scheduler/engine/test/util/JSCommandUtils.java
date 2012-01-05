@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -14,6 +15,8 @@ public class JSCommandUtils {
 	
 	private String commandPrefix;
 	private String commandSuffix;
+	private DateTime begin = null;
+	private DateTime end = null;
 	
 	private HashMap<String,String> params;
 	
@@ -54,13 +57,21 @@ public class JSCommandUtils {
 	}
 	
 	public JSCommandUtils buildCommandShowCalendar(int DurationInSeconds, What what) {
-    	DateTime begin = new DateTime();
-    	DateTime end = new DateTime(begin.plusSeconds(DurationInSeconds));
+    	begin = new DateTime();
+    	end = new DateTime(begin.plusSeconds(DurationInSeconds));
     	DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinuteSecond();
     	commandPrefix = "<show_calendar before='" + fmt.print(end) + "' from='" + fmt.print(begin) + "' limit='10' what='" + what + "'>";
     	commandSuffix = "</show_calendar>";
     	initParams();
     	return this;
+	}
+	
+	public DateTime getLastBegin() {
+		return begin;
+	}
+	
+	public DateTime getLastEnd() {
+		return end;
 	}
 	
 	public void initParams() {
