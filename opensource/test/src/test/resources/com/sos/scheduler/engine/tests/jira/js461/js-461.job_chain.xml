@@ -1,0 +1,10 @@
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+	<job_chain_node state="state1" job="js-461-1"
+		next_state="state2" error_state="error" />
+	<job_chain_node state="state2" job="js-461-2"
+		next_state="state3" error_state="error" on_error="suspend" />
+	<job_chain_node state="state3" job="js-461-3"
+		next_state="success" error_state="error" />
+	<job_chain_node state="error" />
+	<job_chain_node state="success" />
+</job_chain>
