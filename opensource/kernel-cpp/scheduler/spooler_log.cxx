@@ -733,6 +733,7 @@ void Prefix_log::open()
             _spooler->_log_file_cache->cache(this);
         }
 
+        _java_sister.onStarted();
         _started = true;
     }
 }
@@ -747,7 +748,8 @@ void Prefix_log::close()
     if (_spooler->_log_file_cache)  // Bei Programmende kann der Cache weg sein.
         _spooler->_log_file_cache->remove(this);
     close_file();
-
+    if (!_closed)
+        _java_sister.onClosed();
     _log = NULL;
 
     if( _remove_after_close )
@@ -758,6 +760,7 @@ void Prefix_log::close()
 
     //signal_events();
     _events.clear();
+    _closed = true;
 }
 
 //---------------------------------------------------------------------------Prefix_log::finish_log

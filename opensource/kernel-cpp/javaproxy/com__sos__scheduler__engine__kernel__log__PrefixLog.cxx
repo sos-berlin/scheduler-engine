@@ -14,7 +14,9 @@ struct PrefixLog__class : ::zschimmer::javabridge::Class
     PrefixLog__class(const string& class_name);
    ~PrefixLog__class();
 
+    ::zschimmer::javabridge::Method const _onClosed____method;
     ::zschimmer::javabridge::Method const _onLogged____method;
+    ::zschimmer::javabridge::Method const _onStarted____method;
 
     static const ::zschimmer::javabridge::class_factory< PrefixLog__class > class_factory;
 };
@@ -23,7 +25,9 @@ const ::zschimmer::javabridge::class_factory< PrefixLog__class > PrefixLog__clas
 
 PrefixLog__class::PrefixLog__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_onLogged____method(this, "onLogged", "()V"){}
+    ,_onClosed____method(this, "onClosed", "()V")
+    ,_onLogged____method(this, "onLogged", "()V")
+    ,_onStarted____method(this, "onStarted", "()V"){}
 
 PrefixLog__class::~PrefixLog__class() {}
 
@@ -43,10 +47,22 @@ PrefixLog::~PrefixLog() { assign_(NULL); }
 
 
 
+void PrefixLog::onClosed() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    PrefixLog__class* cls = _class.get();
+    cls->_onClosed____method.call(get_jobject(), parameter_list);
+}
+
 void PrefixLog::onLogged() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     PrefixLog__class* cls = _class.get();
     cls->_onLogged____method.call(get_jobject(), parameter_list);
+}
+
+void PrefixLog::onStarted() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    PrefixLog__class* cls = _class.get();
+    cls->_onStarted____method.call(get_jobject(), parameter_list);
 }
 
 

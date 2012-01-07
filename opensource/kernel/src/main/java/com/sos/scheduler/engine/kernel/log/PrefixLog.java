@@ -16,13 +16,27 @@ public final class PrefixLog implements Sister, SchedulerLogger {
 
     private final Prefix_logC cppProxy;
     private final List<LogSubscription> subscriptions = new ArrayList<LogSubscription>();
-    
+    private final LogSubscription[] emptyLogSubscriptions = new LogSubscription[0];
+    private LogSubscription[] subscriptionsSnapshot = emptyLogSubscriptions;
+    private boolean subscriptionsModified = false;
+//    private File fileToBeRemoved = null;
+
     public PrefixLog(Prefix_logC cppProxy) {
         this.cppProxy = cppProxy;
     }
 
-    @Override public void onCppProxyInvalidated() {
-        for (LogSubscription o: subscriptions) {
+    @Override public void onCppProxyInvalidated() {}
+
+    @ForCpp public void onStarted() {
+        for (LogSubscription o: subscriptionsSnapshot()) {
+            try {
+                o.onStarted();
+            } catch (Throwable t) { logger.error(o+": "+t, t); }
+        }
+    }
+
+    @ForCpp public void onClosed() {
+        for (LogSubscription o: subscriptionsSnapshot()) {
             try {
                 o.onClosed();
             } catch (Throwable t) { logger.error(o+": "+t, t); }
@@ -30,11 +44,50 @@ public final class PrefixLog implements Sister, SchedulerLogger {
         subscriptions.clear();
     }
 
-    @ForCpp public final void onLogged() {
-        for (LogSubscription o: subscriptions) {
+    @ForCpp public void onLogged() {
+        for (LogSubscription o: subscriptionsSnapshot()) {
             try {
                 o.onLogged();
             } catch (Throwable t) { logger.error(o+": "+t, t); }
+        }
+    }
+
+//    @ForCpp public void removeFile(String file) {
+//        fileToBeRemoved = new File(file);
+//    }
+
+//    private void removeFileNow() {
+//        if (fileToBeRemoved != null) {
+//            boolean ok = fileToBeRemoved.delete();
+//            if (!ok)
+//                logger.error("SCHEDULER-291 "+fileToBeRemoved);
+//        }
+//    }
+
+    private LogSubscription[] subscriptionsSnapshot() {
+        synchronized (subscriptions) {
+            if (subscriptionsModified) {
+                subscriptionsModified = false;
+                subscriptionsSnapshot = subscriptions.isEmpty()?
+                        emptyLogSubscriptions : subscriptions.toArray(new LogSubscription[subscriptions.size()]);
+            }
+        }
+        return subscriptionsSnapshot;
+    }
+
+    public void subscribe(LogSubscription o) {
+        synchronized (subscriptions) {
+            subscriptions.add(o);
+            subscriptionsModified = true;
+        }
+    }
+
+    public void unsubscribe(LogSubscription o) {
+        synchronized (subscriptions) {
+            subscriptions.remove(o);
+            subscriptionsModified = true;
+//            if (subscriptions.isEmpty())
+//                removeFileNow();
         }
     }
 
@@ -58,21 +111,17 @@ public final class PrefixLog implements Sister, SchedulerLogger {
         debug3(s);
     }
 
-    public void subscribe(LogSubscription o) {
-        subscriptions.add(o);
-    }
-
-    public void unsubscribe(LogSubscription o) {
-        subscriptions.remove(o);
-    }
-
     /** @return "", wenn für den Level keine Meldung vorliegt. */
     public String lastByLevel(SchedulerLogLevel level) {
         return cppProxy.java_last(level.getCppName());
     }
 
+    public boolean isStarted() {
+        return cppProxy.started();
+    }
+
     public File getFile() {
-        return new File(cppProxy.filename());
+        return new File(cppProxy.this_filename());
     }
 
     public static class Type implements SisterType<PrefixLog, Prefix_logC> {

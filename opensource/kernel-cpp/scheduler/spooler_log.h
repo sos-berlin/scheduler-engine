@@ -75,9 +75,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        remove_file                 ();
     bool                        started                     () const                            { return _started; }        // open() gerufen
     bool                        is_active                   () const                            { return _started && !_is_finished; }
-   //bool                        opened                      () const                            { return _file != -1; }
-   bool                        file_is_opened              () const                            { return _file != -1; }
-    //bool                        closed                      () const                            { return _closed; }
+    bool                        file_is_opened              () const                            { return _file != -1; }
     bool                        is_finished                 () const                            { return _is_finished; }
     bool                        is_stderr                   () const                            { return _file == fileno(stderr); }
 
@@ -86,13 +84,13 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                    set_append                      ( bool b )                          { _append = b; }
     void                    set_filename                    ( const File_path& );
     File_path                   filename                    () const                            { return _filename == "" && _log? _log->filename() : _filename; }
+    const File_path&            this_filename               () const                            { return _filename; }
     void                    set_title                       ( const string& title )             { _title = title; }
     string                      title                       ()                                  { return _title; }
     void                    set_remove_after_close          ( bool b )                          { _remove_after_close = b; }
     void                    set_new_filename                ( const string& );
     string                      new_filename                ()                                  { return _new_filename; }
     void                        start_new_file              ();
-  //void                    set_log_level                   ( Log_level level )                 { _log_level = level; }
     int                         log_level                   ();
     bool                        is_enabled_log_level        ( Log_level );
     void                        reset_highest_level         ()                                  { _highest_level = (Log_level)-999; }
@@ -118,21 +116,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        remove_event                ( Event_base* );
     void                        signal_events               ();
 
-  //void                        operator()                  ( const string& line )              { info( line ); }
-  //void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
-  //void                        debug8                      ( const string& line )              { log( log_debug8, line ); }
-  //void                        debug7                      ( const string& line )              { log( log_debug7, line ); }
-  //void                        debug6                      ( const string& line )              { log( log_debug6, line ); }
-  //void                        debug5                      ( const string& line )              { log( log_debug5, line ); }
-  //void                        debug4                      ( const string& line )              { log( log_debug4, line ); }
-  //void                        debug3                      ( const string& line )              { log( log_debug3, line ); }
-  //void                        debug2                      ( const string& line )              { log( log_debug2, line ); }
-  //void                        debug1                      ( const string& line )              { log( log_debug1, line ); }
     void                        debug                       ( const string& line )              { log( log_debug_spooler, line ); }
-  //void                        info                        ( const string& line )              { log( log_info  , line ); }
-  //void                        warn                        ( const string& line )              { log( log_warn  , line ); }
-  //void                        error                       ( const string& line )              { log( log_error , line ); }
-  //void                        log                         ( Log_level level, const string& line )  { Has_log::log( level, line ); }
     void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     string                      last_error_line             ()                                  { return last( log_error ); }
@@ -141,9 +125,6 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     string                      last_line                   () const                            { return last( _last_level ); }
     bool                        has_line_for_level          ( Log_level level ) const           { return _last.find( level ) != _last.end(); }
     string                      java_last                   (const string& level) const         { return last(make_log_level(level)); }
-
-    //int                         counter                     ( Log_level level ) const           { return level >= log_debug9  &&  level <= log_fatal? _counter[ level - log_debug9 ]
-    //                                                                                                                                                : 0; }
 
     void                        continue_with_text          ( const string& );
     
@@ -166,13 +147,6 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 
     Com_mail*                   imail                       ();
 
-    // Defaults setzen, ohne eMail-Objekt anzulegen:
-  //void                    set_mail_from_name              ( const string&, bool overwrite = false );
-  //void                    set_mail_subject                ( const string&, bool overwrite = false );
-  //void                    set_mail_body                   ( const string&, bool overwrite = false );
-  //string                      mail_to                     () const                            { return _to; }
-  //string                      mail_from                   () const                            { return _from; }
-
     void                    set_mail_defaults               ();
     void                    set_mail_default                ( const string& field_name, const string& value, bool overwrite = true );
 
@@ -190,7 +164,6 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        open_file                   ();
     void                        check_open_errno            ();
     void                        write                       ( const char*, int );
-  //void                        set_mail_header             ();
 
     friend struct               Log;
     friend struct               Task;                       // Für _mail_on_error etc.
@@ -205,15 +178,12 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     Prefix_log*                _order_log;
     string                     _prefix;
     string                     _section;
-  //Log_level                  _log_level;                  // Ab diesem Level protokollieren, sonst nicht
     Log_level                  _highest_level;
     Log_level                  _last_level;
     string                     _highest_msg;
     
     typedef stdext::hash_map< Log_level, string >   Last;
     Last                       _last;
-
-  //int                        _counter [ log_fatal - log_debug9 + 1 ];
 
     string                     _title;
     File_path                  _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)

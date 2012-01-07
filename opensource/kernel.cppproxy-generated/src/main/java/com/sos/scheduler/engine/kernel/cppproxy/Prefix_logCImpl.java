@@ -36,21 +36,6 @@ final class Prefix_logCImpl
     private static native void error__native(long cppReference, java.lang.String p0);
 
 
-    @Override public java.lang.String filename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            java.lang.String result = filename__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
-        }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native java.lang.String filename__native(long cppReference);
-
-
     @Override public void info(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -77,6 +62,34 @@ final class Prefix_logCImpl
     }
 
     private static native java.lang.String java_last__native(long cppReference, java.lang.String p0);
+
+
+    @Override public boolean started() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return started__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean started__native(long cppReference);
+
+
+    @Override public java.lang.String this_filename() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = this_filename__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String this_filename__native(long cppReference);
 
 
     @Override public void warn(java.lang.String p0) {

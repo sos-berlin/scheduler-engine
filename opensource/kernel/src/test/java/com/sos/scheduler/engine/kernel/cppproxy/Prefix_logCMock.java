@@ -42,7 +42,11 @@ public class Prefix_logCMock extends CppProxyImpl<PrefixLog> implements Prefix_l
         return "";
     }
 
-    @Override public String filename() {
+    @Override public boolean started() {
+        return true;
+    }
+
+    @Override public String this_filename() {
         return "";
     }
 

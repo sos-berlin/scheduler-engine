@@ -13,5 +13,6 @@ public interface Prefix_logC extends CppProxyWithSister<PrefixLog> {
     void error(String line);
     void debug3(String line);
     String java_last(String log_level);
-    String filename();
+    boolean started();
+    String this_filename();
 }

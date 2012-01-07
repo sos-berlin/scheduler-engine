@@ -47,7 +47,9 @@ struct PrefixLog : ::zschimmer::javabridge::proxy_jobject< PrefixLog >, ::javapr
     }
   public:
 
+    void onClosed();
     void onLogged();
+    void onStarted();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 
