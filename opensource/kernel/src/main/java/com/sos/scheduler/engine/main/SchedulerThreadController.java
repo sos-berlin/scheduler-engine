@@ -5,6 +5,7 @@ import static com.google.common.base.Throwables.propagate;
 
 import java.io.File;
 
+import com.sos.scheduler.engine.kernel.util.Stopwatch;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
@@ -42,10 +43,13 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void close() {
+        Stopwatch stopwatch = new Stopwatch();
         terminateScheduler();
-        if (!tryJoinThread(terminationTimeout))
+        if (!tryJoinThread(terminationTimeout)) {
             logger.warn("Still waiting for JobScheduler termination ("+terminationTimeout+") ...");
-        tryJoinThread(Time.eternal);
+            tryJoinThread(Time.eternal);
+            logger.info("JobScheduler has been terminated after "+stopwatch);
+        }
         controllerBridge.close();
         eventBus.dispatchEvents();  // Thread-sicher, weil der Scheduler-Thread beendet ist, also selbst kein dispatchEvents() mehr aufrufen kann.
         throwableMailbox.throwUncheckedIfSet();
