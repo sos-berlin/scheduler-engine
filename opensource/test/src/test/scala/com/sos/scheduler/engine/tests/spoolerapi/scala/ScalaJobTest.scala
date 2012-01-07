@@ -15,59 +15,54 @@ import org.scalatest.junit.JUnitRunner
  * Der Job schreibt in Spooler.variables für jeden Log-Level und jeden Aufruf eine Variable mit der Anzahl der Aufrufe.*/
 @RunWith(classOf[JUnitRunner])
 final class ScalaJobTest extends ScalaSchedulerTest {
-    import ScalaJobTest._
-    private val eventPipe = controller.newEventPipe()
+  import ScalaJobTest._
+  private val eventPipe = controller.newEventPipe()
 
-    controller.setTerminateOnError(false)
-    controller.activateScheduler()
+  controller.setTerminateOnError(false)
+  controller.activateScheduler()
 
-    test("xx") {
-        runJob(SchedulerLogLevel.info)
-        runJob(SchedulerLogLevel.error)
+  List(SchedulerLogLevel.info, SchedulerLogLevel.error) foreach { logLevel =>
+    test("Job with "+logLevel+" should call some methods") {
+      scheduler.executeXml(startJobElem(logLevel))
+      eventPipe.expectEvent(shortTimeout) { e: TaskEndedEvent => e.getJobPath == jobPath}
+      checkMethodCallCounters(logLevel)
     }
+  }
 
-    private def runJob(logLevel: SchedulerLogLevel) {
-        scheduler.executeXml(startJobElem(logLevel))
-        eventPipe.expectEvent(shortTimeout){e: TaskEndedEvent => e.getJobPath == jobPath}
-        checkSchedulerVariables(logLevel)
+  private def checkMethodCallCounters(logLevel: SchedulerLogLevel) {
+    // Der Job schreibt in scheduler.variables, wie oft der Scheduler jede Methode aufgerufen hat.
+    val LevelString = logLevel.getNumber.toString
+    val result = scheduler.getVariables.toMap collect {
+        case (VariableNamePattern(LevelString, call), value) => call -> value.toInt
     }
-
-    private def startJobElem(logLevel: SchedulerLogLevel) =
-        <start_job job={jobPath.toString}>
-            <params>
-                <param name="logLevel" value={logLevel.getNumber.toString}/>
-            </params>
-        </start_job>
-
-    private def checkSchedulerVariables(logLevel: SchedulerLogLevel) {
-        val LevelString = logLevel.getNumber.toString
-        val result = scheduler.getVariables.toMap flatMap {_ match {
-            case (VariableNamePattern(LevelString, call), value) => Some(call -> value.toInt)
-            case _ => None
-        }}
-        assert(result === expectedCallFrequencies(logLevel))
-    }
+    assert(result === expectedCallFrequencies(logLevel))
+  }
 }
 
 object ScalaJobTest {
-    private def jobPath = new AbsolutePath("/scala")
-    private val VariableNamePattern = """test[.](\d+)[.]([a-z_]+)""".r      // "test.0.spooler_process"
+  private val jobPath = new AbsolutePath("/scala")
+  private val VariableNamePattern = """test[.](\d+)[.]([a-z_]+)""".r  // "test.0.spooler_process"
 
-    private val expectedCallFrequencies = Map(
-        SchedulerLogLevel.info -> Map(
-            "spooler_init" -> 1,
-            "spooler_exit" -> 1,
-            "spooler_open" -> 1,
-            "spooler_close" -> 1,
-            "spooler_process" -> 2,
-            "spooler_on_success" -> 1),
-        SchedulerLogLevel.error -> Map(
-            "spooler_init" -> 1,
-            "spooler_exit" -> 1,
-            "spooler_open" -> 1,
-            "spooler_close" -> 1,
-            "spooler_process" -> 2,
-            "spooler_on_error" -> 1))
+  private val expectedCallFrequencies = Map(
+    SchedulerLogLevel.info -> Map(
+      "spooler_init" -> 1,
+      "spooler_exit" -> 1,
+      "spooler_open" -> 1,
+      "spooler_close" -> 1,
+      "spooler_process" -> 2,
+      "spooler_on_success" -> 1),
+    SchedulerLogLevel.error -> Map(
+      "spooler_init" -> 1,
+      "spooler_exit" -> 1,
+      "spooler_open" -> 1,
+      "spooler_close" -> 1,
+      "spooler_process" -> 2,
+      "spooler_on_error" -> 1))
 
-    private def v(l: SchedulerLogLevel, call: String) = "test."+ l.getNumber +"."+call
+  private def startJobElem(logLevel: SchedulerLogLevel) =
+    <start_job job={jobPath.toString}>
+      <params>
+          <param name="logLevel" value={logLevel.getNumber.toString}/>
+      </params>
+    </start_job>
 }
