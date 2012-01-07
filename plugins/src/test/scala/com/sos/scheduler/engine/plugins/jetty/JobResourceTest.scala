@@ -10,10 +10,10 @@ import org.apache.log4j.Logger
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
-/** JS-795: Einbau von Jetty in den JobScheduler. */
+@deprecated("","")
 @RunWith(classOf[JUnitRunner])
-final class ObjectsResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
-  import ObjectsResourceTest._
+final class JobResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
+  import JobResourceTest._
 
   private val client = Client.create()
 
@@ -25,24 +25,28 @@ final class ObjectsResourceTest extends ScalaSchedulerTest with CheckedBeforeAll
   private val objectsResource = client.resource(contextUri+"/objects")
 
   test("Read a task log") {
-    new Thread("LogReader") {
-      start()
-      override def run() {
-        logReader(objectsResource.path("a.job/log").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
-        logger.info("---------------------");
+    controller.newThread(new Runnable {
+        override def run() {
+          logReader(objectsResource.path("a.job/log").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
+          logger.info("---------------------")
+        }
+        override def toString = "LogReader"
       }
+    ).start()
+    for (i <- 1 to 3) {
+      Thread.sleep(1000)
+      scheduler.executeXml(<start_job job='/a'/>)
     }
-    Thread.sleep(2000)
-    scheduler.executeXml(<start_job job='/a'/>)
+    Thread.sleep(100)
   }
 
-//  test("Read a job log") {
-//    logReader(objectsResource.path("a.job/log").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
-//  }
+  test("Read a job snapshot log") {
+    logReader(objectsResource.path("a.job/log.snapshot").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
+  }
 }
 
-object ObjectsResourceTest {
-  private val logger = Logger.getLogger(classOf[ObjectsResourceTest])
+object JobResourceTest {
+  private val logger = Logger.getLogger(classOf[JobResourceTest])
   private val jettyPortNumber = 44440
   private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.contextPath)
 

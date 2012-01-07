@@ -53,8 +53,9 @@ object JettyPlugin {
   private def newServletModule() = new JerseyServletModule {
     override def configureServlets() {
       bind(classOf[CommandResource])
-      bind(classOf[ObjectsResource])
-      serveRegex("/objects/(.+)[.]job/log").`with`(classOf[LogServlet])
+      bind(classOf[JobResource])
+      serveRegex("/objects/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
+      serveRegex("/objects/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
       serve("/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
     }
   }
@@ -80,7 +81,8 @@ object JettyPlugin {
   // "/JobScheduler/engine/objects//PATH/?deep=true" wie vorher, aber verschachtelt
   // "/JobScheduler/engine/objects//PATH/*.job" liefert Jobs
   // "/JobScheduler/engine/objects//PATH/*.job?deep=true" wie vorher, aber verschachtelt
-  // "/JobScheduler/engine/objects//PATH.job/log&snapshot=true"  snapshot liefert nur den aktuellen Stand, sonst fortlaufend bis Log beendet ist.
+  // "/JobScheduler/engine/objects//PATH.job/log"  Liefert fortlaufend bis Log beendet ist
+  // "/JobScheduler/engine/objects//PATH.job/log.snapshot"  liefert nur den aktuellen Stand
   // "/JobScheduler/engine/objects//PATH.job/description"
   // "/JobScheduler/engine/objects//PATH.task/TASKID/log"
   // "/JobScheduler/engine/objects//PATH.job_chain/orders/ORDERID/log"
