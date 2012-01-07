@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js795
+package com.sos.scheduler.engine.plugins.jetty
 
 import javax.ws.rs.core.CacheControl
 

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js795
+package com.sos.scheduler.engine.plugins.jetty.unused
 
 import java.net.URL
 import com.google.common.base.Charsets.UTF_8

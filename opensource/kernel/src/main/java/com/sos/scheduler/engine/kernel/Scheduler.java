@@ -1,10 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.google.inject.*;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -49,7 +46,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 
 @ForCpp
-public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommandExecutor {
+public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommandExecutor, GetGuiceModule {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
@@ -74,6 +71,8 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
         @Override protected Module compute() {
             return new AbstractModule() {
                 @Override protected void configure() {
+                    bind(Scheduler.class).toInstance(Scheduler.this);
+                    bind(GetGuiceModule.class).toInstance(Scheduler.this);  //TODO Provisorisch für MyJettyServer
                     bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
@@ -115,7 +114,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
         return Guice.createInjector(guiceModule.get());
     }
 
-    public final Module getGuiceModule() {
+    @Override public final Module getGuiceModule() {
         return guiceModule.get();
     }
 
@@ -218,7 +217,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
     }
 
     /** execute_xml() der C++-Klasse Spooler */
-    public String uncheckedExecuteXml(String xml) {
+    @Override public String uncheckedExecuteXml(String xml) {
         return cppProxy.execute_xml(xml);
     }
 

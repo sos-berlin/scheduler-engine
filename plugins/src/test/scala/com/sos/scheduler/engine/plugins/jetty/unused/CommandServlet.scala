@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js795
+package com.sos.scheduler.engine.plugins.jetty.unused
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import com.google.inject.Singleton

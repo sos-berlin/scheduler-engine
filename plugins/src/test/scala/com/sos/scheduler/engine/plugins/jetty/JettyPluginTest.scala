@@ -1,28 +1,28 @@
-package com.sos.scheduler.engine.tests.jira.js795
+package com.sos.scheduler.engine.plugins.jetty
 
-import java.net.URI
-import org.apache.log4j.Logger
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.StringContains.containsString
 import com.sun.jersey.api.client.Client
 import javax.ws.rs.core.MediaType._
 import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
+import org.apache.log4j.Logger
+import java.net.URI
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 /**JS-795: Einbau von Jetty in den JobScheduler. */
-final class JS795aTest extends ScalaSchedulerTest with CheckedBeforeAll {
-  import JS795aTest._
+@RunWith(classOf[JUnitRunner])
+final class JettyPluginTest extends ScalaSchedulerTest with CheckedBeforeAll {
+  import JettyPluginTest._
 
-  private lazy val server = new MyJettyServer(jettyPortNumber, contextPath, scheduler.getGuiceModule)
   private val client = Client.create()
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
-    controller.activateScheduler("-port=" + cppPortNumber)
-    server.start()
+    controller.activateScheduler("-e")
     super.checkedBeforeAll(configMap)
   }
 
-  val commandResource = client.resource(contextUri +"/command")
-
+  val commandResource = client.resource(contextUri+"/command")
 
   test("Execute a command via POST ") {
     val result = commandResource.accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], "<show_state/>");
@@ -36,20 +36,16 @@ final class JS795aTest extends ScalaSchedulerTest with CheckedBeforeAll {
 
   private def checkCommandResult(result: String) {
     assertThat(result, containsString("<state"))
-    assertThat(result, containsString(CommandServlet.testString))
   }
 
   override def afterAll() {
-    try server.stop()
-    finally try controller.terminateScheduler()
-    finally try server.close()
-    finally try super.afterAll()
+    try controller.terminateScheduler()
+    finally super.afterAll()
   }
 }
 
-object JS795aTest {
-  private val logger: Logger = Logger.getLogger(classOf[JS795aTest])
-  private val cppPortNumber = 44441
+object JettyPluginTest {
+  private val logger: Logger = Logger.getLogger(classOf[JettyPlugin])
   private val jettyPortNumber = 44440
   private val contextPath = "/JobScheduler"
   private val contextUri = new URI("http://localhost:"+ jettyPortNumber + contextPath)

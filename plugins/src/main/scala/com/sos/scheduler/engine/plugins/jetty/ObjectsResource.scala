@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js795
+package com.sos.scheduler.engine.plugins.jetty
 
 import javax.ws.rs.core.MediaType
 import javax.ws.rs._
@@ -11,10 +11,10 @@ class ObjectsResource @Inject()(scheduler: Scheduler) {
   @GET
   @Path("jobs/{path:.+}/")
   @Produces(Array(MediaType.TEXT_XML))
-  def get() =
-    <scheduler>
-      {scheduler.getJobSubsystem.getVisibleNames map { name => <job name={name}/> }}
-    </scheduler>
+  def get() = {
+    val jobs = scheduler.getJobSubsystem.getVisibleNames map { name => <job name={name}/> }
+    <scheduler>{jobs}</scheduler>
+  }
 
 //  @GET
 //  @Path("{path:.+}.{type:[a-z_]+}/log")
