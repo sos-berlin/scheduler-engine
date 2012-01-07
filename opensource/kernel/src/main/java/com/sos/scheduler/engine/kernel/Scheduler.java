@@ -1,7 +1,10 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -27,7 +30,6 @@ import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.util.Lazy;
-import com.sos.scheduler.engine.kernel.util.MavenProperties;
 import com.sos.scheduler.engine.kernel.util.XmlUtils;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
@@ -43,6 +45,7 @@ import java.util.UUID;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.version;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 
@@ -50,7 +53,6 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommandExecutor, HasGuiceModule {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
-    private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
@@ -95,7 +97,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
         cppProxy.setSister(this);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
 
-        _log = new PrefixLog(cppProxy.log());
+        _log = cppProxy.log().getSister();
         platform = new Platform(_log);
         eventBus = controllerBridge.getEventBus();
         operationExecutor = new OperationExecutor(_log);
@@ -292,7 +294,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
     }
 
     public String getVersion() {
-        return mavenProperties.getVersion();
+        return version;
     }
 
     public VariableSet getVariables() {
