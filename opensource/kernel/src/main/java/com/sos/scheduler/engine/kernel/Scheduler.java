@@ -1,7 +1,10 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -46,13 +49,13 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 
 @ForCpp
-public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommandExecutor, GetGuiceModule {
+public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommandExecutor, HasGuiceModule {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
-    private final PrefixLog log_;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
+    private final PrefixLog _log;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
     private final Platform platform;
     private final SchedulerEventBus eventBus;
     private final OperationExecutor operationExecutor;
@@ -72,7 +75,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
             return new AbstractModule() {
                 @Override protected void configure() {
                     bind(Scheduler.class).toInstance(Scheduler.this);
-                    bind(GetGuiceModule.class).toInstance(Scheduler.this);  //TODO Provisorisch für MyJettyServer
+                    bind(HasGuiceModule.class).toInstance(Scheduler.this);  //TODO Provisorisch für MyJettyServer
                     bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
@@ -80,7 +83,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
                     bind(OrderSubsystem.class).toInstance(orderSubsystem);
                     bind(OperationQueue.class).toInstance(operationExecutor);
                     bind(EventBus.class).toInstance(eventBus);
-                    bind(PrefixLog.class).toInstance(log_);
+                    bind(PrefixLog.class).toInstance(_log);
                 }
             };
         }
@@ -92,10 +95,10 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
         cppProxy.setSister(this);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
 
-        log_ = new PrefixLog(cppProxy.log());
-        platform = new Platform(log_);
+        _log = new PrefixLog(cppProxy.log());
+        platform = new Platform(_log);
         eventBus = controllerBridge.getEventBus();
-        operationExecutor = new OperationExecutor(log_);
+        operationExecutor = new OperationExecutor(_log);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
         eventSubsystem = new EventSubsystem(platform, eventBus);
@@ -131,7 +134,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
     }
 
     @Override public PrefixLog log() {
-        return log_;
+        return _log;
     }
 
     @Override public void onCppProxyInvalidated() {}
@@ -178,7 +181,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
 
     public void terminate() {
         if (!cppProxy.cppReferenceIsValid())
-            log_.debug("Scheduler.terminate() ignored because C++ object has already been destructed");
+            _log.debug("Scheduler.terminate() ignored because C++ object has already been destructed");
         else
             cppProxy.cmd_terminate();
     }
@@ -226,7 +229,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
         try {
             return commandSubsystem.executeXml(xml);
         } catch (UnknownCommandException x) {
-            log_.warn(x.toString());
+            _log.warn(x.toString());
             return "UNKNOWN_COMMAND";   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
         }
     }
