@@ -17,16 +17,13 @@ class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServ
     val attributeName = classOf[OrderLogServlet].getName
     Option(request.getAttribute(attributeName).asInstanceOf[FileServletAsyncOperation]) match {
       case None =>
-        request.getPathInfo match {
-          case PathInfoRegex(jobChainPathString, orderIdString) =>
-            val jobChain = orderSubsystem.jobChain(AbsolutePath.of(jobChainPathString))
-            val order = jobChain.order(new OrderId(orderIdString))
-            val result = LogServletAsyncOperation(request, response, order.getLog)
-            request.setAttribute(attributeName, result)
-            result
-          case _ =>
-            throw new WebApplicationException(BAD_REQUEST)
-        }
+        val jobChainPathString = Option(request.getParameter("job_chain")).get
+        val orderIdString = Option(request.getParameter("order")).get
+        val jobChain = orderSubsystem.jobChain(AbsolutePath.of(jobChainPathString))
+        val order = jobChain.order(new OrderId(orderIdString))
+        val result = LogServletAsyncOperation(request, response, order.getLog)
+        request.setAttribute(attributeName, result)
+        result
       case Some(operation) =>
         operation.continue()
     }
@@ -45,5 +42,5 @@ class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServ
 }
 
 object OrderLogServlet {
-  val PathInfoRegex = """(.+)[.]job_chain/orders/([^/]+)/log$""".r
+  val PathInfoRegex = """order[.]log""".r
 }

@@ -27,7 +27,7 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   private val objectsResource = client.resource(contextUri+"/objects")
 
   test("Read a task log") {
-    startLogThread(objectsResource.path("a.job/log"))
+    startLogThread(objectsResource.path("job.log").queryParam("job", "a"))
     for (i <- 1 to 3) {
       Thread.sleep(1000)
       scheduler.executeXml(<start_job job='/a'/>)
@@ -36,12 +36,12 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   }
 
   test("Read a job snapshot log") {
-    logReader(objectsResource.path("a.job/log.snapshot").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
+    logReader(objectsResource.path("job/log.snapshot").queryParam("job", "a").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
   }
 
   test("Read an order log") {
     scheduler.executeXml(<order job_chain='/a' id='1'/>)
-    startLogThread(objectsResource.path("a.job_chain/orders/1/log"))
+    startLogThread(objectsResource.path("order.log").queryParam("job_chain", "a").queryParam("order", "1"))
     Thread.sleep(1000)
   }
 

@@ -14,19 +14,15 @@ class JobLogServlet @Inject()(jobSubsystem: JobSubsystem) extends HttpServlet {
   import JobLogServlet._
 
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
-    request.getPathInfo match {
-      case PathInfoRegex(jobPathString) =>
-        val operation = getOrSetAttribute(request, classOf[JobLogServlet].getName) {
-          val job = jobSubsystem.job(AbsolutePath.of(stripFromEnd(request.getPathInfo, ".job/log")))
-          LogServletAsyncOperation(request, response, job.getLog)
-        }
-        operation.continue()
-      case _ =>
-        throw new WebApplicationException(BAD_REQUEST)
+    val operation = getOrSetAttribute(request, classOf[JobLogServlet].getName) {
+      val jobPathString = Option(request.getParameter("job")).get
+      val job = jobSubsystem.job(AbsolutePath.of(jobPathString))
+      LogServletAsyncOperation(request, response, job.getLog)
     }
+    operation.continue()
   }
 }
 
 object JobLogServlet {
-  val PathInfoRegex = """(.+)[.]job/log$""".r
+  val PathInfoRegex = """job[.]log""".r
 }
