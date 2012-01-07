@@ -19,10 +19,6 @@ class PluginAdapter {
         plugin.activate();
     }
 
-    final void close() {
-        plugin.close();
-    }
-
     final String getXmlState() {
         try {
             return plugin.getXmlState();

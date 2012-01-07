@@ -149,6 +149,7 @@ public final class Scheduler implements HasPlatform, Sister,
     @ForCpp public void onClose() {
         try {
             eventBus.publish(new SchedulerCloseEvent());
+            eventBus.dispatchEvents();
             try {
                 pluginSubsystem.close();
             } catch (Exception x) {
