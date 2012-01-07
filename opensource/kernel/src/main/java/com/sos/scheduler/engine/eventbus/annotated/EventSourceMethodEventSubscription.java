@@ -22,9 +22,8 @@ public class EventSourceMethodEventSubscription extends MethodEventSubscription 
         checkMethodParameterCount(method, 1, 2);
     }
 
-    public boolean matches(EventSourceEvent e) {
-        return getEventClass().isAssignableFrom(e.getEvent().getClass()) &&
-            getEventSourceClass().isAssignableFrom(e.getEventSource().getClass());
+    public boolean eventSourceMatches(EventSourceEvent e) {
+        return getEventSourceClass().isAssignableFrom(e.getEventSource().getClass());
     }
 
     @Override protected void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException {

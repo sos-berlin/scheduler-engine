@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 
 public final class SchedulerEventBusTest {
@@ -59,6 +60,7 @@ public final class SchedulerEventBusTest {
 
     private void assertCounters(int aHot, int a, int aaHot, int aa, int bHot, int b, int aSHot, int aTHot) {
         assertThat(annotated.throwable, nullValue());
+        assertThat(annotated.asList(), equalTo(ImmutableList.of(aHot, a, aaHot, aa, bHot, b, aSHot, aTHot)));
         assertThat(annotated.aHot, equalTo(aHot));
         assertThat(annotated.a, equalTo(a));
         assertThat(annotated.aaHot, equalTo(aaHot));
@@ -79,6 +81,10 @@ public final class SchedulerEventBusTest {
         private int aSHot = 0;
         private int aTHot = 0;
         private Throwable throwable = null;
+
+        ImmutableList<Integer> asList() {
+            return ImmutableList.of(aHot, a, aaHot, aa, bHot, b, aSHot, aTHot);
+        }
 
         @HotEventHandler public void handleHot(A event) {
             aHot += 1;
