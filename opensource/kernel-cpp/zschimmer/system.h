@@ -56,7 +56,7 @@
 #   pragma warning( disable:4675 )   // warning C4675: 'size_t zschimmer::com::hash_value(const zschimmer::com::Bstr &)': aufgelöste Überladung wurde mit argumentbezogener Suche gefunden
 #   pragma warning( error  :4717 )   // warning C4717: Rekursiv für alle Steuerelementpfade. Die Funktion verursacht einen Stapelüberlauf zur Laufzeit.
 #   pragma warning( error  :4800 )   // warning C4800: Variable wird auf booleschen Wert ('True' oder 'False') gesetzt (Auswirkungen auf Leistungsverhalten moeglich)
-
+#   pragma warning( error  :4927 )   // warning C4927: Unzulässige Konvertierung. Mehrere benutzerdefinierte Konvertierungen wurden implizit übernommen.
 #endif
 
 //-------------------------------------------------------------------------------------------------
