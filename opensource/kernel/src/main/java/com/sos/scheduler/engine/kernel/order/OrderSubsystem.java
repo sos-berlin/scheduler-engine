@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.*;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
@@ -32,6 +33,9 @@ public class OrderSubsystem extends AbstractHasPlatform implements Subsystem
     }
 
     public final JobChain jobChain(AbsolutePath path) {
-        return cppProxy.java_file_based_or_null(path.toString());
+        JobChain result = cppProxy.java_file_based_or_null(path.toString());
+        if (result == null)
+            throw new SchedulerException("Unknown job chain '"+path+"'");
+        return result;
     }
 }
