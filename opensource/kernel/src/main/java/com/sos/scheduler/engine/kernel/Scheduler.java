@@ -1,10 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.google.inject.*;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -42,6 +39,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -53,6 +51,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final MavenProperties mavenProperties = new MavenProperties(Scheduler.class);
+    private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
     private final PrefixLog _log;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
@@ -75,6 +74,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
             return new AbstractModule() {
                 @Override protected void configure() {
                     bind(Scheduler.class).toInstance(Scheduler.this);
+                    bind(SchedulerInstanceId.class).toInstance(instanceId);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  //TODO Provisorisch für MyJettyServer
                     bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
