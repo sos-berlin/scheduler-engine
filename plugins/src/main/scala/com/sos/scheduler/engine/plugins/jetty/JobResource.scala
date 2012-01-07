@@ -11,17 +11,10 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.{noCache, wrapXmlResponse}
 
 @Path("/objects/job")
-class JobResource @Inject()(@QueryParam("job") pathString: String,
-    jobSubsystem: JobSubsystem, schedulerInstanceId: SchedulerInstanceId) {
+class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: SchedulerInstanceId,
+    @QueryParam("job") pathString: String) {
 
   private lazy val job = jobSubsystem.job(AbsolutePath.of(pathString))
-
-//  @GET
-//  @Produces(Array(MediaType.TEXT_XML))
-//  def get() = {
-//    val contents = wrapXmlResponse(jobSubsystem.getVisibleNames map { name => <job name={name}/> })
-//    Response.ok(contents).cacheControl(noCache).build()
-//  }
 
   @Path("log.snapshot")
   @GET

@@ -11,8 +11,8 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
-final class JobResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
-  import JobResourceTest._
+final class JobsResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
+  import JobsResourceTest._
 
   private val client = Client.create()
 
@@ -21,16 +21,17 @@ final class JobResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
     super.checkedBeforeAll(configMap)
   }
 
-  private val jobResource = client.resource(contextUri+"/objects/job").queryParam("job", "a")
+  private val jobsResource = client.resource(contextUri+"/objects/jobs")
 
-  test("Read a job snapshot log") {
-    val log = jobResource.path("log.snapshot").accept(TEXT_PLAIN_TYPE).get(classOf[String])
-    log should include ("SCHEDULER-893")
+  test("Read job list") {
+    val xml = jobsResource.accept(TEXT_XML_TYPE).get(classOf[String])
+    logger.info(xml)
+    xml should include ("<job name=\"a\"")
   }
 }
 
-object JobResourceTest {
-  private val logger = Logger.getLogger(classOf[JobResourceTest])
+object JobsResourceTest {
+  private val logger = Logger.getLogger(classOf[JobsResourceTest])
   private val jettyPortNumber = 44440
   private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.contextPath)
 }
