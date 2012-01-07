@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__cppproxy__JobC.h"
+#include "com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 

@@ -3,11 +3,11 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 final class Prefix_logCImpl
-   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
+   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.log.PrefixLog>
    implements com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC
 {
     private Prefix_logCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        requireContextIsNull(context);
+        setSister(sisterType.sister(this, context));
     }
 
     @Override public void debug3(java.lang.String p0) {
@@ -34,6 +34,21 @@ final class Prefix_logCImpl
     }
 
     private static native void error__native(long cppReference, java.lang.String p0);
+
+
+    @Override public java.lang.String filename() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = filename__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String filename__native(long cppReference);
 
 
     @Override public void info(java.lang.String p0) {

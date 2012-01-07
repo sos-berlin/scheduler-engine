@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl;
-import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -10,7 +11,7 @@ import java.io.Writer;
  *
  * @author Zschimmer.sos
  */
-public class Prefix_logCMock extends CppProxyImpl<Sister> implements Prefix_logC {
+public class Prefix_logCMock extends CppProxyImpl<PrefixLog> implements Prefix_logC {
     private final Writer writer;
 
     public Prefix_logCMock(Writer w) { 
@@ -38,6 +39,10 @@ public class Prefix_logCMock extends CppProxyImpl<Sister> implements Prefix_logC
     }
 
     @Override public String java_last(String log_level) {
+        return "";
+    }
+
+    @Override public String filename() {
         return "";
     }
 

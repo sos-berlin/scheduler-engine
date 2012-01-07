@@ -3,11 +3,12 @@ package com.sos.scheduler.engine.kernel.job;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.JobC;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.folder.FileBasedState;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import com.sos.scheduler.engine.kernel.scheduler.Platform;
 
 @ForCpp
 public final class Job extends FileBased implements Sister, UnmodifiableJob {
@@ -20,21 +21,25 @@ public final class Job extends FileBased implements Sister, UnmodifiableJob {
 
     @Override public void onCppProxyInvalidated() {}
 
-    public FileBasedState getFileBasedState() {
+    @Override public FileBasedState getFileBasedState() {
         return FileBasedState.ofCppName(cppProxy.file_based_state_name());
     }
 
-    public String getName() {
+    @Override public String getName() {
         return cppProxy.name();
     }
 
-    public AbsolutePath getPath() {
+    @Override public AbsolutePath getPath() {
         return new AbsolutePath(cppProxy.path());
     }
 
     /** @return true, wenn das {@link FileBased} nach einer Änderung erneut geladen worden ist. */
-    public boolean isFileBasedReread() {
+    @Override public boolean isFileBasedReread() {
         return cppProxy.is_file_based_reread();
+    }
+
+    @Override public PrefixLog getLog() {
+        return cppProxy.log().getSister();
     }
 
     @Override public String toString() {

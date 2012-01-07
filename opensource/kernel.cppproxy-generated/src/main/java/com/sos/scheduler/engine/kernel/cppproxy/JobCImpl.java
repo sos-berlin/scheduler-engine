@@ -38,6 +38,21 @@ final class JobCImpl
     private static native boolean is_file_based_reread__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC result = log__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log__native(long cppReference);
+
+
     @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

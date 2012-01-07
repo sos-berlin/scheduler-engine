@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__log__PrefixLog.h"
+#include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
