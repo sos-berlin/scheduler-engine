@@ -7,24 +7,24 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-
 public class ThreadLock {
-    private static final int logTimeoutMillis = 1000;     // Wenn's länger dauert, Meldung loggen
-    private static final Level logLevel = Level.TRACE;
+    private static final int logTimeoutMillis = 30*1000;     // Wenn's länger dauert, Meldung loggen
+    private static final Level logLevel = Level.WARN;
     private static final Logger logger = Logger.getLogger(ThreadLock.class);
 
     private final SimpleLock myLock = logger.isEnabledFor(logLevel)? new LoggingLock() : new SimpleLock();
 
-    
     public void lock() {
         myLock.lock();
     }
-
 
     public void unlock() {
         myLock.unlock();
     }
 
+    @Override public String toString() {
+        return myLock.toString();
+    }
 
     private static class SimpleLock {
         private final ReentrantLock lock = new ReentrantLock();
@@ -42,6 +42,10 @@ public class ThreadLock {
 
         void unlock() {
             lock.unlock();
+        }
+
+        @Override public String toString() {
+            return SimpleLock.class.getName()+"("+lock+")";
         }
     }
 
