@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
@@ -64,19 +65,23 @@ public final class Order extends FileBased implements UnmodifiableOrder, Sister 
         return new AbsolutePath(cppProxy.job_chain_path_string());
     }
 
-    public JobChain getJobChain() {
+    @Override public JobChain getJobChain() {
         JobChain result = getJobChainOrNull();
         if (result == null)  throw new SchedulerException("Order is not in a job chain: "+this);
         return result;
     }
 
-    @Nullable public JobChain getJobChainOrNull() {
+    @Override @Nullable public JobChain getJobChainOrNull() {
         Job_chainC jobChainC = cppProxy.job_chain();
         return jobChainC == null? null : jobChainC.getSister();
     }
 
-    public VariableSet getParameters() {
+    @Override public VariableSet getParameters() {
         return cppProxy.params().getSister();
+    }
+
+    @Override public PrefixLog getLog() {
+        return cppProxy.log().getSister();
     }
 
     public UnmodifiableOrder unmodifiableDelegate() {

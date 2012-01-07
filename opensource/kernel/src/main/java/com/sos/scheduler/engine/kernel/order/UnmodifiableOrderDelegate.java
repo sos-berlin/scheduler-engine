@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.order;
 
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.log.SchedulerLogger;
@@ -42,6 +43,10 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
 
     @Override public UnmodifiableVariableSet getParameters() {
         return order.getParameters();   // TODO Delegate erzeugen
+    }
+
+    @Override public PrefixLog getLog() {
+        return order.getLog();
     }
 
     @Override public Platform getPlatform() {

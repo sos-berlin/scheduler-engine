@@ -19,4 +19,5 @@ public interface OrderC extends CppProxyWithSister<Order> {
     String string_state();
     void set_end_state(String order_state);
     String string_end_state();
+    Prefix_logC log();
 }

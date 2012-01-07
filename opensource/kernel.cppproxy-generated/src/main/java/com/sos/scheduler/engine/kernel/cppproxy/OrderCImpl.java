@@ -55,6 +55,21 @@ final class OrderCImpl
     private static native java.lang.String job_chain_path_string__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC result = log__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
