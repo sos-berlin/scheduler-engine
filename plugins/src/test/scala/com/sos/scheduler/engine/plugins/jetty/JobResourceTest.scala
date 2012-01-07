@@ -32,5 +32,5 @@ final class JobResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
 object JobResourceTest {
   private val logger = Logger.getLogger(classOf[JobResourceTest])
   private val jettyPortNumber = 44440
-  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.contextPath)
+  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.prefixPath)
 }

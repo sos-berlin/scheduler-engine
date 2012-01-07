@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import javax.inject.Inject
-import com.google.inject.Guice
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
 import com.sos.scheduler.engine.kernel.scheduler.HasGuiceModule
@@ -13,27 +12,23 @@ import org.apache.log4j.Logger
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler}
 import org.w3c.dom.Element
+import com.google.inject.{Injector, Guice}
 
 /**JS-795: Einbau von Jetty in den JobScheduler. */
 final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule) extends AbstractPlugin {
   import JettyPlugin._
 
   private lazy val server = {
+    val schedulerModule = hasGuiceModule.getGuiceModule
     val port = XmlUtils.intXmlAttribute(pluginElement, "port")
-    val contextHandler = {
-      val o = new ServletContextHandler(ServletContextHandler.SESSIONS)
-      o.setContextPath(contextPath)
-      o.addEventListener(new GuiceServletContextListener {
-        val schedulerModule = hasGuiceModule.getGuiceModule
-        def getInjector = Guice.createInjector(schedulerModule, newServletModule())
-        //Funktioniert nicht: def getInjector = injector.createChildInjector(newServletModule())
-      })
-      o.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
-      o.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
-      o
-    }
+//    val contexts = new ContextHandlerCollection()
+//    contexts.setHandlers(Array(
+//      newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule())),
+//      newContextHandler(cppContextPath, Guice.createInjector(schedulerModule, newCppServletModule()))
+//      //Funktioniert nicht: injector.createChildInjector(newServletModule())
+//    ))
     val server = new Server(port)
-    server.setHandler(contextHandler)
+    server.setHandler(newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule())))
     server
   }
 
@@ -48,20 +43,38 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 }
 
 object JettyPlugin {
-  private val logger: Logger = Logger.getLogger(classOf[JettyPlugin])
-  val contextPath = "/JobScheduler/engine"
+  private val logger = Logger.getLogger(classOf[JettyPlugin])
+  private val contextPath = ""  // Mehrere Kontexte funktionieren nicht und GuiceFilter meldet einen Konflikt. Deshalb simulieren wir mit prefixPath.
+  val prefixPath = "/JobScheduler/engine"
+  val cppPrefixPath = ""
+
+  private def newContextHandler(contextPath: String, injector: Injector) = {
+    val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
+    result.setContextPath(contextPath)
+    result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
+    result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
+    result.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
+    result
+  }
+
+//  private def newCppServletModule() = new JerseyServletModule {
+//    override def configureServlets() {
+//      serve("/*").`with`(classOf[CppServlet])
+//    }
+//  }
 
   private def newServletModule() = new JerseyServletModule {
     override def configureServlets() {
-      serve("/cpp/*").`with`(classOf[CppServlet])
-      serveRegex("/objects/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
-      serveRegex("/objects/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
-      serveRegex("/log").`with`(classOf[MainLogServlet])
-      serve("/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
+      serveRegex(prefixPath+"/objects/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
+      serveRegex(prefixPath+"/objects/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
+      serveRegex(prefixPath+"/log").`with`(classOf[MainLogServlet])
+      serve(prefixPath+"/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
       bind(classOf[CommandResource])
       bind(classOf[JobResource])
       bind(classOf[JobsResource])
       bind(classOf[XmlElemWriter])
+      serve(cppPrefixPath).`with`(classOf[CppServlet])
+      serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])
     }
   }
 

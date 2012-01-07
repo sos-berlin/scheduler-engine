@@ -21,7 +21,7 @@ final class CppServletTest extends ScalaSchedulerTest {
     super.checkedBeforeAll(configMap)
   }
 
-  private val cppResource = client.resource(contextUri+"/cpp/")
+  private val cppResource = client.resource(contextUri)
 
   test("Kommando über POST") {
     val result = cppResource.`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
@@ -49,7 +49,7 @@ final class CppServletTest extends ScalaSchedulerTest {
 object CppServletTest {
   private val logger = Logger.getLogger(classOf[CppServletTest])
   private val jettyPortNumber = 44440
-  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.contextPath)
+  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.cppPrefixPath)
   private val jobChainPath = "a"
   private val orderId = "1"
 }

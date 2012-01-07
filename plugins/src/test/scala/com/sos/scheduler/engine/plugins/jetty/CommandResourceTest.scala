@@ -17,7 +17,7 @@ final class CommandResourceTest extends ScalaSchedulerTest with CheckedBeforeAll
   private val client = Client.create()
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
-    controller.activateScheduler("-e")
+    controller.activateScheduler()
     super.checkedBeforeAll(configMap)
   }
 
@@ -39,7 +39,7 @@ final class CommandResourceTest extends ScalaSchedulerTest with CheckedBeforeAll
 }
 
 object CommandResourceTest {
-  private val logger: Logger = Logger.getLogger(classOf[CommandResourceTest])
+  private val logger = Logger.getLogger(classOf[CommandResourceTest])
   private val jettyPortNumber = 44440
-  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.contextPath)
+  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.prefixPath)
 }

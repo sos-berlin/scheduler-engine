@@ -106,7 +106,7 @@ object CppServlet {
     def parameter(name: String) = firstNonNull(request.getParameter(name), "")
     def header(name: String) = firstNonNull(request.getHeader(name), "")
     def protocol() = request.getProtocol
-    def urlPath = URLDecoder.decode(request.getPathInfo, UTF_8.name) + (if (request.getQueryString != null) "?" else "")
+    def urlPath = URLDecoder.decode(firstNonNull(request.getPathInfo, ""), UTF_8.name) + (if (request.getQueryString != null) "?" else "")
     def charsetName = request.getCharacterEncoding
     def httpMethod = request.getMethod
     def body = _body
