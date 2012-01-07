@@ -553,6 +553,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
+    _java_sister(java_sister()),
     _file(-1),
     _mail_defaults(NULL)
 {
@@ -563,6 +564,7 @@ Prefix_log::Prefix_log( int )
 Prefix_log::Prefix_log( Scheduler_object* o )
 :
     _zero_(this+1),
+    _java_sister(java_sister()),
     _object(o),
     _spooler(o->_spooler),
     _log(&o->_spooler->_base_log),
@@ -911,6 +913,8 @@ void Prefix_log::write( const char* text, int len )
             throw_errno( errno, "write", _filename.c_str() );
         }
     }
+
+    _java_sister.onLogged();
 }
 
 //--------------------------------------------------------------------Prefix_log::set_mail_defaults

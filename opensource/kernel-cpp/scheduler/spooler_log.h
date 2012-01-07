@@ -5,6 +5,7 @@
 
 #include "log_cache_Request.h"
 #include "log_cache_Request_cache.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 
 namespace sos {
 namespace scheduler {
@@ -195,6 +196,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     friend struct               Task;                       // Für _mail_on_error etc.
 
 
+    javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog _java_sister;
     Scheduler_object*          _object;
     Spooler*                   _spooler;
     string                     _job_name;
@@ -214,7 +216,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
   //int                        _counter [ log_fatal - log_debug9 + 1 ];
 
     string                     _title;
-    File_path                  _filename;                   // Name einer zus?tzlichen Log-Datei (für die Tasks)
+    File_path                  _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
     File_path                  _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben ?ffnen
     int                        _file;                       // File handle
