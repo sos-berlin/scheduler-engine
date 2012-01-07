@@ -4,8 +4,9 @@ import javax.inject.Inject
 import com.google.inject.Guice
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
-import com.sos.scheduler.engine.kernel.util.XmlUtils
 import com.sos.scheduler.engine.kernel.scheduler.HasGuiceModule
+import com.sos.scheduler.engine.kernel.util.XmlUtils
+import com.sos.scheduler.engine.plugins.jetty.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import org.apache.log4j.Logger
@@ -52,11 +53,15 @@ object JettyPlugin {
 
   private def newServletModule() = new JerseyServletModule {
     override def configureServlets() {
+      serve("/cpp/*").`with`(classOf[CppServlet])
       serveRegex("/objects/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
       serveRegex("/objects/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
+      serveRegex("/log").`with`(classOf[MainLogServlet])
       serve("/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
       bind(classOf[CommandResource])
       bind(classOf[JobResource])
+      bind(classOf[JobsResource])
+      bind(classOf[XmlElemWriter])
     }
   }
 
