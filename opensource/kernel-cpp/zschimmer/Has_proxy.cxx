@@ -90,7 +90,7 @@ jobjectArray java_array_from_c(const std::vector<string>& v) {
     Local_frame java_frame (10);
     jobjectArray result = jenv->NewObjectArray(v.size(), Vm::static_vm->standard_classes()->_java_lang_string_class, NULL);
     if (result != NULL) {  // Keine Exception
-        for (int i = 0; i < v.size(); i++)
+        for (size_t i = 0; i < v.size(); i++)
             jenv->SetObjectArrayElement(result, i, jenv.jstring_from_string(v[i]));
     }
     return result;
