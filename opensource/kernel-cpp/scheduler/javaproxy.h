@@ -18,6 +18,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__Job.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderId.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderState.h"
@@ -40,6 +41,7 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler SchedulerJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest SchedulerHttpRequestJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform PlatformJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixLogJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 

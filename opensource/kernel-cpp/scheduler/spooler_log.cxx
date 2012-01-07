@@ -553,7 +553,6 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
-    _java_sister(java_sister()),
     _file(-1),
     _mail_defaults(NULL)
 {
@@ -564,7 +563,6 @@ Prefix_log::Prefix_log( int )
 Prefix_log::Prefix_log( Scheduler_object* o )
 :
     _zero_(this+1),
-    _java_sister(java_sister()),
     _object(o),
     _spooler(o->_spooler),
     _log(&o->_spooler->_base_log),
@@ -733,7 +731,7 @@ void Prefix_log::open()
             _spooler->_log_file_cache->cache(this);
         }
 
-        _java_sister.onStarted();
+        if (typed_java_sister()) typed_java_sister().onStarted();
         _started = true;
     }
 }
@@ -748,8 +746,7 @@ void Prefix_log::close()
     if (_spooler->_log_file_cache)  // Bei Programmende kann der Cache weg sein.
         _spooler->_log_file_cache->remove(this);
     close_file();
-    if (!_closed)
-        _java_sister.onClosed();
+    if (!_closed && typed_java_sister()) typed_java_sister().onClosed();
     _log = NULL;
 
     if( _remove_after_close )
@@ -916,7 +913,7 @@ void Prefix_log::write( const char* text, int len )
         }
     }
 
-    _java_sister.onLogged();
+    if (typed_java_sister()) typed_java_sister().onLogged();
 }
 
 //--------------------------------------------------------------------Prefix_log::set_mail_defaults
@@ -1250,6 +1247,14 @@ void Prefix_log::continue_with_text( const string& text )
     }
 
     if( _log_buffer != "" )  _is_logging_continuing = true;
+}
+
+//--------------------------------------------------------------------Prefix_log::typed_java_sister
+
+PrefixLogJ& Prefix_log::typed_java_sister() {
+    if (!_typed_java_sister && javabridge::Vm::is_active())
+        _typed_java_sister = java_sister();
+    return _typed_java_sister;
 }
 
 //---------------------------------------------------------------Prefix_log::as_string_ignore_error

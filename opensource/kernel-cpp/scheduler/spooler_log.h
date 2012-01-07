@@ -5,7 +5,6 @@
 
 #include "log_cache_Request.h"
 #include "log_cache_Request_cache.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 
 namespace sos {
 namespace scheduler {
@@ -152,6 +151,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 
     void                        send                        ( Scheduler_event* );
     void                        send_really                 ( Scheduler_event* );
+    PrefixLogJ&                 typed_java_sister           ();
     string                      obj_name                    () const;
 
 
@@ -169,7 +169,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     friend struct               Task;                       // Für _mail_on_error etc.
 
 
-    javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog _java_sister;
+    PrefixLogJ                 _typed_java_sister;
     Scheduler_object*          _object;
     Spooler*                   _spooler;
     string                     _job_name;
