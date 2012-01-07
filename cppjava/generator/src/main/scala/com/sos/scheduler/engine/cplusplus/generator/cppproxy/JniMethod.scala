@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.generator.util.Util._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
-
+import com.sos.scheduler.engine.cplusplus.generator.Configuration
 
 class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
     val jniName = CppName(Jni.simpleMethodName(m.name, m.parameterTypes), CppName(jniModule.interface).namespace)
@@ -37,7 +37,10 @@ class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
             "env.string_from_jstring(" + p.name + ")"
         else
         if (isClass(p.typ))
-            cppObjectByReference(CppName(p.typ), p.name)
+            if (classOf[CppProxy] isAssignableFrom p.typ)
+                cppObjectByReference(CppName(p.typ), p.name)
+            else
+                cppJavaClassName(p.typ) +"("+ p.name +")"
         else
         if (p.typ.getName == "boolean")
             p.name + " != 0"
@@ -70,4 +73,7 @@ class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
         .mkString("{ ", ", ", " }")
 
     private def signatureString = Jni.methodTypeSignatureString(classOf[Long] :: m.parameterTypes, m.returnType)
+
+    private def cppJavaClassName(c: Class[_]) =
+      Configuration.generatedJavaProxyNamespace.fullName +"::"+ c.getName.replace(".", "::")
 }

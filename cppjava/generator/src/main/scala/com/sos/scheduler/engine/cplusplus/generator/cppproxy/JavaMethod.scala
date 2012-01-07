@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
-import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.generator.util.Util._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
 
@@ -22,7 +21,7 @@ class JavaMethod(m: ProcedureSignature) {
             m.name +
             inParentheses(javaParameterDeclarations)
 
-        val call = m.nativeJavaName + inParentheses("cppReference()" :: (m.parameters map javaCallArgument))
+        val call = m.nativeJavaName + inParentheses("cppReference()" :: (m.parameters map { _.name }))
 
         val code = m.returnType match {
             case t if isClass(t) =>
@@ -50,15 +49,6 @@ class JavaMethod(m: ProcedureSignature) {
         (if (m.isThreadSafe) code else threadSafeCode) +
         "    }\n"
     }
-
-    def javaCallArgument(p: Parameter) =
-        if (isStringClass(p.typ))
-            p.name
-        else
-        if (isClass(p.typ))
-            p.name + ".cppReference()"
-        else
-            p.name
 
     def javaNativeDeclaration =
         "    private static native " +
