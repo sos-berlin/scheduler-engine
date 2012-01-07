@@ -146,6 +146,24 @@ struct Simple_event : Event_base
     Mutex                      _mutex;
 };
 
+//---------------------------------------------------------------------------------------Signalable
+
+struct Signalable {
+    virtual void on_event_signaled() = 0;
+};
+
+//-----------------------------------------------------------------------------------Callback_event
+
+struct Callback_event : Simple_event {
+    private: Signalable* const _signalable;
+
+    public: Callback_event(Signalable* s) : _signalable(s) {}
+
+    public: Callback_event(Signalable* s, const string& name) : Simple_event(name), _signalable(s) {}
+
+    public: void signal(const string& name);
+};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace zschimmer

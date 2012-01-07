@@ -64,6 +64,13 @@ bool Simple_event::wait( double )
     throw_xc( "Simple_event::wait" );
 }
 
+//----------------------------------------------------------------------------Callback_event::signal
+
+void Callback_event::signal(const string& name) {
+    _signalable->on_event_signaled();
+    Simple_event::signal(name);
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace zschimmer
