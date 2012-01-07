@@ -18,13 +18,13 @@ class ObjectsResource @Inject()(scheduler: Scheduler) {
   def get(@PathParam("type") typeString: String, @PathParam("folderPath") folderPathString: String) =
     wrapXmlResponse(scheduler.getJobSubsystem.getVisibleNames map { name => <job name={name}/> })
 
-  @GET
-  @Path("{path:.+}.job/log")
-  @Produces(Array(MediaType.TEXT_PLAIN))
-  def getJobLog(@PathParam("type") typeString: String, @PathParam("path") pathString: String) = {
-    val jobPath = new AbsolutePath("/"+pathString)
-    scheduler.getJobSubsystem.job(jobPath).getLog.getFile
-  }
+//  @GET
+//  @Path("{path:.+}.job/log")
+//  @Produces(Array(MediaType.TEXT_PLAIN))
+//  def getJobLog(@PathParam("type") typeString: String, @PathParam("path") pathString: String) = {
+//    val jobPath = new AbsolutePath("/"+pathString)
+//    scheduler.getJobSubsystem.job(jobPath).getLog.getFile
+//  }
 }
 
 object ObjectsResource {

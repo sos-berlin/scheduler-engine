@@ -49,11 +49,12 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 object JettyPlugin {
   private val logger: Logger = Logger.getLogger(classOf[JettyPlugin])
   val contextPath = "/JobScheduler/engine"
+
   private def newServletModule() = new JerseyServletModule {
     override def configureServlets() {
       bind(classOf[CommandResource])
       bind(classOf[ObjectsResource])
-      //serve("/objects/*.job/log").`with`(classOf[LogServlet])
+      serveRegex("/objects/(.+)[.]job/log").`with`(classOf[LogServlet])
       serve("/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
     }
   }
