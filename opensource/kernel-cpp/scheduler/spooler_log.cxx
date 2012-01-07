@@ -758,7 +758,6 @@ void Prefix_log::close()
         remove_file();
     }
 
-    //signal_events();
     _events.clear();
     _closed = true;
 }

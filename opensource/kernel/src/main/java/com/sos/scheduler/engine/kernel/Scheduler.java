@@ -14,12 +14,15 @@ import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
+import com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.event.OperationExecutor;
 import com.sos.scheduler.engine.kernel.event.OperationQueue;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
+import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest;
+import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.kernel.log.LogSubsystem;
@@ -50,7 +53,8 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 
 @ForCpp
-public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommandExecutor, HasGuiceModule {
+public final class Scheduler implements HasPlatform, Sister,
+        SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
@@ -79,6 +83,7 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
                     bind(SchedulerInstanceId.class).toInstance(instanceId);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  //TODO Provisorisch für MyJettyServer
                     bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
+                    bind(SchedulerHttpService.class).toInstance(Scheduler.this);
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
                     bind(JobSubsystem.class).toInstance(jobSubsystem);
@@ -145,6 +150,11 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
         try {
             eventBus.publish(new SchedulerCloseEvent());
             try {
+                pluginSubsystem.close();
+            } catch (Exception x) {
+                log().error("pluginSubsystem.close(): " + x);
+            }
+            try {
                 logSubsystem.close();
             } catch (Exception x) {
                 log().error("logSubsystem.close(): " + x);
@@ -205,6 +215,11 @@ public final class Scheduler implements HasPlatform, Sister, SchedulerXmlCommand
 
     @ForCpp public void threadUnlock() {
         CppProxy.threadLock.unlock();
+    }
+
+    /** @return {@link HttpResponseC#close()} MUSS aufgerufen werden! */
+    @Override public HttpResponseC executeHttpRequest(SchedulerHttpRequest request, SchedulerHttpResponse response) {
+        return cppProxy.java_execute_http(request, response);
     }
 
     /** Stellt XML-Prolog voran und löst bei einem ERROR-Element eine Exception aus. */

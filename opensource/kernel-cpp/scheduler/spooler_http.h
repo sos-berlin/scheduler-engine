@@ -17,6 +17,7 @@ const int                       recommended_chunk_size = 32768;
 struct Operation_connection;
 struct Operation;
 struct Request;
+struct C_request;
 struct Response;
 
 //-------------------------------------------------------------------------------------------------
@@ -38,7 +39,7 @@ string                          date_string                 ( time_t );
     }
 */
 
-struct Chunk_reader : Object
+struct Chunk_reader : Object, javabridge::has_proxy<Chunk_reader>
 {
                                 Chunk_reader                ( const string& content_type )          : _zero_(this+1), _recommended_block_size( recommended_chunk_size ), _content_type(content_type) {}
 
@@ -273,7 +274,7 @@ struct Headers
 
 struct Parser : Object
 {
-                                Parser                      ( Request* );
+                                Parser                      ( C_request* );
 
     void                        close                       ();
     void                        add_text                    ( const char*, int len );
@@ -296,26 +297,40 @@ struct Parser : Object
     int                        _body_start;
     int                        _content_length;
     const char*                _next_char;
-    Request*                   _request;
+    C_request*                 _request;
 };
 
 //------------------------------------------------------------------------------------------Request
 
-struct Request : Object
+struct Request : Object {
+    virtual bool                has_parameter               ( const string& name ) = 0;
+    virtual string              parameter                   ( const string& name ) = 0;
+    virtual string              header                      ( const string& name ) = 0;
+    virtual string              protocol                    () = 0;
+    virtual bool                is_http_1_1                 () { return protocol() == "HTTP/1.1"; }
+    virtual string              url_path                    () = 0;
+    virtual string              charset_name                () = 0;
+    virtual string              http_method                 () = 0;
+    virtual string              body                        () = 0;
+};
+
+//----------------------------------------------------------------------------------------C_request
+
+struct C_request : Request
 {
-                                Request                     ()                                      : _zero_(this+1){}
+                                C_request                   ()                                      : _zero_(this+1){}
 
   //void                        close                       ();
     void                        check                       ();
-    bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
-    string                      parameter                   ( const string& name ) const;
-    bool                        is_http_1_1                 () const;
-    string                      header                      ( const string& name ) const            { return _headers[ name ]; }
-    string                      url                         () const;
-    string                      url_path                    () const                                { return _path; }
-    string                      charset_name                () const;
-    string                      content_type                () const;
-    const string&               body                        () const                                { return _body; }
+    bool                        has_parameter               ( const string& name )                  { return _parameters.find( name ) != _parameters.end(); }
+    string                      parameter                   ( const string& name );      
+    string                      protocol                    ()                                      { return _protocol; }
+    string                      header                      ( const string& name )                  { return _headers[ name ]; }
+    string                      url                         ();        
+    string                      url_path                    ()                                      { return _path; }
+    string                      charset_name                ();        
+    virtual string              http_method                 ()                                      { return _http_method; }
+    string                      body                        ()                                      { return _body; }
 
     STDMETHODIMP            get_Url                         ( BSTR* result )                        { return String_to_bstr( url(), result ); }
     STDMETHODIMP            get_Header                      ( BSTR name, BSTR* result )             { return String_to_bstr( header( string_from_bstr( name ) ), result ); }
@@ -331,7 +346,7 @@ struct Request : Object
     friend struct               Response;
 
     Fill_zero                  _zero_;
-    string                     _http_cmd;
+    string                     _http_method;
     string                     _protocol;                                                      
     string                     _path;
 
@@ -341,33 +356,33 @@ struct Request : Object
     string                     _body;
 };
 
+
 //-----------------------------------------------------------------------------------------Response
 
 struct Response : Object
 {
-                                Response                    ( Operation* );
+                                Response                    (Request*);
+                               ~Response                    ();
 
-
-  //void                        close                       ();
-    bool                        closed                      () const                                { return _operation == NULL; }
     void                        recommend_block_size        ( int size )                            { if( _chunk_reader )  _chunk_reader->recommend_block_size( size ); }
     int                         recommended_block_size      () const                                { return _chunk_reader? _chunk_reader->_recommended_block_size : recommended_chunk_size; }
+    Chunk_reader*               chunk_reader                () const                                { return _chunk_reader; }
 
     bool                        close_connection_at_eof     ()                                      { return _close_connection_at_eof; }
-
+    virtual bool                closed                      () = 0;
     void                    set_event                       ( Event_base* event )                   { if( _chunk_reader )  _chunk_reader->set_event( event ); }
 
-  //string                      content_type                ()                                      { return _content_type; }
-  //void                    set_content_type                ( const string& value )                 { set_header( "Content-Type", value ); }
-  //void                    set_character_encoding          ( const string& value );
+    int                         status                      () const                                { return (int)_status_code; }
     void                    set_header                      ( const string& name, const string& value );
     string                      header                      ( const string& name )                  { return _headers[ name ]; }
+    string                      header_string               () const                                { S s; _headers.print(&s); return s; }
     void                    set_status                      ( Status_code, const string& text = "" );
     void                    set_chunk_reader                ( Chunk_reader* );
     void                        finish                      ();
     void                        send                        ();
     bool                     is_ready                       () const                                { return _ready; }
-    void                    set_ready                       ();
+    virtual void            set_ready                       ();
+    virtual void                on_ready                    () = 0;
 
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
@@ -385,15 +400,12 @@ struct Response : Object
     STDMETHODIMP                Send                        ();
 
   protected:
-    friend struct               Operation;
-
     string                      start_new_chunk             ();
 
-
     Fill_zero                  _zero_;
-    Operation*                 _operation;
+    string const               _protocol;
     Headers                    _headers;
-    bool                       _chunked;
+    bool const                 _chunked;
     bool                       _close_connection_at_eof;
     Status_code                _status_code;
     ptr<Chunk_reader>          _chunk_reader;
@@ -407,6 +419,36 @@ struct Response : Object
     bool                       _eof;
 };
 
+//---------------------------------------------------------------------------------------C_response
+
+struct C_response : Response {
+    private: Fill_zero _zero_;
+    private: Operation* const _operation;
+
+    public:                 C_response                      (Operation*);
+    bool                    closed                          () { return _operation == NULL; }
+    void                    on_ready                        ();
+};
+
+//---------------------------------------------------------------------------------new_java_request
+
+ptr<Request> new_java_request(const SchedulerHttpRequestJ&);
+
+//------------------------------------------------------------------------------------Java_response
+
+struct Java_response : Response, Signalable, javabridge::has_proxy<Java_response> {
+    private: SchedulerHttpResponseJ _responseJ;
+    private: Callback_event _event;
+    private: bool _closed;
+
+    public: Java_response(Request*, const SchedulerHttpResponseJ&);
+    public: ~Java_response();
+    public: void close();
+    public: bool closed();
+    public: void on_ready();
+    public: void on_event_signaled();
+};
+
 //-----------------------------------------------------------------------------------Operation
 
 struct Operation : Communication::Operation
@@ -414,7 +456,7 @@ struct Operation : Communication::Operation
                                 Operation                   ( Operation_connection* );
 
     void                        close                       ();
-    bool                        closed                      () const                                { return _response == NULL; }
+    bool                        closed                      ()                                      { return _response == NULL; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
     void                        put_request_part            ( const char* data, int length )        { _parser->add_text( data, length ); }
@@ -435,19 +477,19 @@ struct Operation : Communication::Operation
     bool                        should_close_connection     ();
     Web_service_operation*      web_service_operation_or_null()                                     { return _web_service_operation; }
 
-    Request*                    request                     () const                                { return _request; }
+    C_request*                  request                     () const                                { return _request; }
     Response*                   response                    () const                                { return _response; }
 
     string                      obj_name                    () const                                { return "http::Operation"; }
 
   private:
-    friend struct               Request;
+    friend struct               C_request;
     friend struct               Response;
 
     Fill_zero                  _zero_;
-    ptr<Request>               _request;
+    ptr<C_request>             _request;
     ptr<Parser>                _parser;
-    ptr<Response>              _response;
+    ptr<Response>            _response;
     ptr<Web_service_operation> _web_service_operation;
     Order*                     _order;
 };

@@ -636,6 +636,21 @@ final class SpoolerCImpl
     private static native boolean is_termination_state_cmd__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC java_execute_http(com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest p0, com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse p1) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC result = java_execute_http__native(cppReference(), p0, p1);
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC java_execute_http__native(long cppReference, com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest p0, com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse p1);
+
+
     @Override public java.lang.String java_work_dir() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

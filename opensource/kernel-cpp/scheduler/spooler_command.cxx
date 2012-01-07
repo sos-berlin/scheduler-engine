@@ -1714,25 +1714,22 @@ string xml_as_string( const xml::Document_ptr& document, const string& indent_st
 }
 
 //-------------------------------------------------------------------Command_processor::execute_http
-// Kï¿½nnte als Unterklasse von Web_service_operation implementiert werden
 
-void Command_processor::execute_http( http::Operation* http_operation, Http_file_directory* http_file_directory )
+void Command_processor::execute_http( http::Request* http_request, http::Response* http_response, Http_file_directory* http_file_directory )
 {
-    http::Request*  http_request            = http_operation->request();
-    http::Response* http_response           = http_operation->response();
-    string          path                    = http_request->_path;
+    string          path                    = http_request->url_path();
     string          response_body;
     string          response_content_type;
     string const    show_log_request        = "/show_log?";
 
     try
     {
-         if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine Prï¿½fung mehr
+        if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine Prüfung mehr
 
         if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
 //        if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );    // JS-748: timestamps in the command use the colon
 
-        if( http_request->_http_cmd == "GET" )
+        if( http_request->http_method() == "GET" )
         {
             if( string_begins_with( path, "/<" ) )   // direct XML command, e.g. <show_state/>
             {
@@ -1883,18 +1880,18 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                     response_content_type = "text/xml";
                 }
                 else
-                    throw http::Http_exception( http::status_404_bad_request, "Ungï¿½ltiger URL-Pfad: " + path );
+                    throw http::Http_exception( http::status_404_bad_request, "Ungueltiger URL-Pfad: " + path );
             }
             else
             {
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
-                    if( !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende fï¿½hrt zum erneuten GET mit demselben Pfad
+                    if( !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende führt zum erneuten GET mit demselben Pfad
                     {
-                        // (Man kï¿½nnte hier noch prï¿½fen, ob's wirklich ein Verzeichnis ist.)
-                        // Der Browser soll dem Verzeichnisnamen einen Schrï¿½ger anhï¿½ngen und das als Basisadresse fï¿½r weitere Anfragen verwenden.
+                        // (Man könnte hier noch prüfen, ob's wirklich ein Verzeichnis ist.)
+                        // Der Browser soll dem Verzeichnisnamen einen Schräger anhängen und das als Basisadresse für weitere Anfragen verwenden.
                         // http://localhost:6310/jz ==> http://localhost:6310/jz/, http://localhost:6310/jz/details.html
-                        // Ohne diesen Mechanismus wï¿½rde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
+                        // Ohne diesen Mechanismus würde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
 
                         path += "/";
                         http_response->set_status( http::status_301_moved_permanently );
@@ -1987,9 +1984,9 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
             }
         }
         else
-        if( http_request->_http_cmd == "POST" )
+        if( http_request->http_method() == "POST" )
         {
-            response_body = execute( http_request->_body, "  " );
+            response_body = execute( http_request->body(), "  " );
             response_content_type = "text/xml";
         }
         else
@@ -2001,15 +1998,20 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
             response_body = execute( "<show_state what=\"all,orders\"/>", "  " );
             response_content_type = "text/xml";
         }
-    }
-    catch( const exception& x )
-    {
-        _spooler->log()->debug( message_string( "SCHEDULER-311", http_request->_http_cmd + " " + path, x ) );
 
-        throw http::Http_exception( http::status_404_bad_request, x.what() );  
+        http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
     }
-
-    http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
+    catch (http::Http_exception& x) {
+        _spooler->log()->debug( message_string( "SCHEDULER-311", http_request->http_method() + " " + path, x ) );
+        http_response->set_status( x._status_code, x.what() );
+        http_response->set_ready();
+    }
+    catch( const exception& x ) {
+        _spooler->log()->debug( message_string( "SCHEDULER-311", http_request->http_method() + " " + path, x ) );
+        http_response->set_status( http::status_404_bad_request, x.what() );
+        http_response->set_ready();
+        //throw http::Http_exception( http::status_404_bad_request, x.what() );  
+    }
 }
 
 //--------------------------------------------------------------Command_processor::response_execute
@@ -2033,7 +2035,7 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
     ptr<Command_response> result = _response;
     if( !result )
     {
-        _spooler->signal("execute_xml");    // Sonst schlï¿½ft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
+        _spooler->signal("execute_xml");    // Sonst schläft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
         ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( xml_as_string( _answer, indent_string ) ) );
         result = +r;
     }
@@ -2103,7 +2105,7 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
     if( !ok )
     {
         string text = command_doc.error_text();
-        _spooler->log()->error( text );       // Log ist mï¿½glicherweise noch nicht geï¿½ffnet
+        _spooler->log()->error( text );       // Log ist möglicherweise noch nicht geöffnet
         z::throw_xc( "XML-ERROR", text );
     }
 
@@ -2141,7 +2143,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
-    // Eigentlich nur fï¿½r einige mï¿½glicherweise langlaufende <show_xxx>-Kommandos nï¿½tig, z.B. <show_state>, <show_history> (mit Datenbank)
+    // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
     if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml( scheduler_character_encoding ) );
 }
 
@@ -2360,7 +2362,7 @@ string File_buffered_command_response::get_part()
         {
             if( _buffer == "" ) 
             {
-                // Leeren String zurï¿½ckgeben bedeutet, dass noch keine neuen Daten da sind
+                // Leeren String zurückgeben bedeutet, dass noch keine neuen Daten da sind
             }
             else
             {

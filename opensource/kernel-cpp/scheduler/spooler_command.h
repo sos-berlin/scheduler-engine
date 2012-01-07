@@ -30,7 +30,7 @@ enum Show_what_enum
     show_description        = 0x10,
     show_log                = 0x20,
     show_task_history       = 0x40,
-    show_no_subfolders_flag = 0x80,             // JS-506: internees Flag für das weitere Auflössen von Unterordnern 
+    show_no_subfolders_flag = 0x80,             // JS-506: internees Flag für das weitere Auflössen von Unterordnern
     show_remote_schedulers  = 0x100,
     show_schedule           = 0x200,
     show_job_chains         = 0x400,
@@ -260,7 +260,7 @@ struct Command_processor
     Communication::Operation*   communication_operation     () const                                { return _communication_operation; }
 
     void                        execute_config_file         ( const string& xml_filename );
-    void                        execute_http                ( http::Operation*, Http_file_directory* );
+    void                        execute_http                ( http::Request*, http::Response*, Http_file_directory* );
     ptr<Command_response>       response_execute            ( const string& xml_text, const string& indent_string = "" );
     string                      execute                     ( const string& xml_text, const string& indent_string = "" );
     xml::Document_ptr           execute                     ( const xml::Document_ptr& );

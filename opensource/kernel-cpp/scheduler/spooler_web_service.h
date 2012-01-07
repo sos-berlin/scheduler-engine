@@ -171,7 +171,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
 
     Web_service*                web_service                 () const                                { return _web_service; }
     http::Operation*            http_operation              () const                                { return _http_operation; }
-    http::Request*              http_request                () const                                { return _http_operation->request(); }
+    http::C_request*            http_request                () const                                { return _http_operation->request(); }
     http::Response*             http_response               () const                                { return _http_operation->response(); }
 
   private:
@@ -230,7 +230,7 @@ struct Web_service_request : idispatch_implementation< Web_service_request, spoo
 
     STDMETHODIMP                Assert_is_usable            ();
 
-    http::Request*              http_request                () const                                { return _web_service_operation->http_request(); }
+    http::C_request*            http_request                () const                                { return _web_service_operation->http_request(); }
 
 
   private:

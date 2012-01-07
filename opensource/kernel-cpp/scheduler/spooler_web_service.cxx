@@ -1195,14 +1195,6 @@ File_path Http_file_directory::file_path_from_url_path( const string& url_path )
     return result;
 }
 
-//-------------------------------------------------------------Http_file_directory::execute_request
-
-//void Http_file_directory::execute_request( const string& url )
-//{
-//    Command_processor command_processor ( _spooler, _connection->_security_level, this );
-//    command_processor.execute_http( this );
-//}
-
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

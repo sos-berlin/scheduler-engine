@@ -268,7 +268,7 @@ void Headers::set_default( const string& name, const string& value )
         string        lname = lcase( name );
         Map::iterator it    = _map.find( lname );
 
-        if( it == _map.end() )  set( lname, value );
+        if( it == _map.end() )  set( name, value );
     }
 }
 
@@ -470,7 +470,7 @@ STDMETHODIMP Headers::get_Charset_name( BSTR* result )
 
 //-----------------------------------------------------------------------------------Parser::Parser
     
-Parser::Parser( Request* request )
+Parser::Parser( C_request* request )
 :
     _zero_(this+1),
     _request( request )
@@ -548,7 +548,7 @@ void Parser::parse_header()
 
     _next_char = _text.c_str();
 
-    _request->_http_cmd = eat_word();
+    _request->_http_method = eat_word();
     _request->_path     = eat_path();
     _request->_protocol = eat_word();
     eat_line_end();
@@ -681,7 +681,7 @@ Operation::Operation( Operation_connection* pc )
     Communication::Operation( pc ), 
     _zero_(this+1)
 {
-    _request  = Z_NEW( Request() );
+    _request  = Z_NEW( C_request() );
     _parser   = Z_NEW( Parser( _request ) );
 }
 
@@ -746,7 +746,7 @@ void Operation::begin()
         if( !string_ends_with( text, "\n" ) )  log << '\n';
     }
 
-    _response = Z_NEW( Response( this ) );
+    _response = Z_NEW( C_response( this ) );
 
     try
     {
@@ -800,7 +800,7 @@ void Operation::begin()
             }
 
             Command_processor command_processor ( _spooler, _connection->_security_level, this );
-            command_processor.execute_http( this, http_file_directory );
+            command_processor.execute_http( request(), response(), http_file_directory );
             _response->set_ready();
         }
     }
@@ -925,46 +925,39 @@ string Operation::async_state_text_() const
     return result;
 }
 
-//-----------------------------------------------------------------------------------Request::close
+//---------------------------------------------------------------------------------C_request::close
 /*
-void Request::close()
+void C_request::close()
 {
 }
 */
-//-------------------------------------------------------------------------------Request::parameter
+//-----------------------------------------------------------------------------C_request::parameter
     
-string Request::parameter( const string& name ) const
+string C_request::parameter( const string& name )
 { 
     String_map::const_iterator it = _parameters.find( name );
     return it == _parameters.end()? "" : it->second;
 }
 
-//-------------------------------------------------------------------------Request::keep_connection
+//-----------------------------------------------------------------------------------C_request::url
 
-bool Request::is_http_1_1() const
-{
-    return _protocol == "HTTP/1.1";
-}
-
-//-------------------------------------------------------------------------------------Request::url
-
-string Request::url() const
+string C_request::url()
 {
     S result;
     result << "http://" << _headers[ "host" ] << url_path();        // Zum Beispiel "Host: hostname:80"
     return result;
 }
 
-//----------------------------------------------------------------------------Request::charset_name
+//--------------------------------------------------------------------------C_request::charset_name
 
-string Request::charset_name() const
+string C_request::charset_name()
 {
     return _headers.charset_name();
 }
 
-//-----------------------------------------------------------------------------------Request::check
+//---------------------------------------------------------------------------------C_request::check
 
-void Request::check()
+void C_request::check()
 {
     if( _protocol != ""  
      && _protocol != "HTTP/1.0"  
@@ -973,9 +966,9 @@ void Request::check()
     if( !string_begins_with( _path, "/" ) )  throw Http_exception( status_404_bad_request );
 }
 
-//----------------------------------------------------------------------Request::get_String_content
+//--------------------------------------------------------------------C_request::get_String_content
 
-STDMETHODIMP Request::get_String_content( BSTR* result )
+STDMETHODIMP C_request::get_String_content( BSTR* result )
 {
     HRESULT hr = S_OK;
     
@@ -993,9 +986,9 @@ STDMETHODIMP Request::get_String_content( BSTR* result )
     return hr;
 }
 
-//----------------------------------------------------------------------Request::get_Binary_content
+//--------------------------------------------------------------------C_request::get_Binary_content
 
-STDMETHODIMP Request::get_Binary_content( SAFEARRAY** result )
+STDMETHODIMP C_request::get_Binary_content( SAFEARRAY** result )
 {
     HRESULT hr = S_OK;
     
@@ -1008,6 +1001,28 @@ STDMETHODIMP Request::get_Binary_content( SAFEARRAY** result )
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
+}
+
+//-------------------------------------------------------------------------------------Java_request
+
+struct Java_request : Request {
+    private: SchedulerHttpRequestJ _requestJ;
+
+    public: Java_request(const SchedulerHttpRequestJ& requestJ) : _requestJ(requestJ) {}
+
+    public: bool has_parameter(const string& name) { return _requestJ.hasParameter(name);  }
+    public: string parameter( const string& name ) { return _requestJ.parameter(name); }
+    public: string header(const string& name) { return _requestJ.header(name); }
+    public: string protocol() { return _requestJ.protocol(); }
+    public: string url_path() { return _requestJ.urlPath(); }
+    public: string charset_name() { return _requestJ.charsetName(); }
+    public: string http_method() { return _requestJ.httpMethod(); }
+    public: string body() { return _requestJ.body(); }
+};
+
+ptr<Request> new_java_request(const SchedulerHttpRequestJ& requestJ) {
+    ptr<Java_request> result = Z_NEW(Java_request(requestJ));
+    return +result;
 }
 
 //-------------------------------------------------------------------Http_exception::Http_exception
@@ -1033,20 +1048,24 @@ Http_exception::~Http_exception()  throw()
 
 //-------------------------------------------------------------------------------Response::Response
 
-Response::Response( Operation* operation )
+Response::Response(Request* request)
 : 
     _zero_(this+1), 
-    _chunked( operation->request()->is_http_1_1() ),
-    _close_connection_at_eof( !operation->request()->is_http_1_1() ),
-    _operation(operation)
+    _chunked( request->is_http_1_1() ),
+    _protocol(request->protocol()),
+    _close_connection_at_eof( !request->is_http_1_1() )
 { 
     if( _close_connection_at_eof )  _headers.set_default( "Connection", "close" );
 
-    if( _operation->_request->_headers[ "cache-control" ] == "no-cache" )
+    if( request->header("cache-control") == "no-cache" )
         _headers.set( "Cache-Control", "no-cache" );   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
                                                        // Gut wäre eine Frist, z.B. 10s
 }
 
+//------------------------------------------------------------------------------Response::~Response
+
+Response::~Response() {}
+ 
 //----------------------------------------------------------------------------------Response::close
 /*    
 void Response::close()
@@ -1105,18 +1124,6 @@ void Response::set_chunk_reader( Chunk_reader* c )
     _chunk_reader = c; 
 }
 
-//------------------------------------------------------------------------------Response::set_ready
-
-void Response::set_ready()
-{ 
-    finish();
-
-    _ready = true; 
-    if( _operation  &&  _operation->_connection )  _operation->_connection->signal( "http response is ready" );
-
-    // Nicht sofort senden
-}
-
 //-----------------------------------------------------------------------------------Response::send
 
 void Response::send()
@@ -1144,8 +1151,6 @@ void Response::finish()
         }
     }
 
-    _chunked = _operation->request()->is_http_1_1();
-
 
     // _headers füllen
 
@@ -1157,15 +1162,12 @@ void Response::finish()
 
     //TODO: _operation->request()->_protocol == ""  ==> Simple request, simple respone, HTTP-Header nicht senden! (laut RFC 1945)
 
-    _headers_stream << _operation->request()->_protocol << ' ' << _status_code << ' ' << http_status_messages[ _status_code ] << "\r\n";
+    _headers_stream << _protocol << ' ' << _status_code << ' ' << http_status_messages[ _status_code ] << "\r\n";
     _headers.print( &_headers_stream );
 
     if( _chunked )  _headers_stream << "Transfer-Encoding: chunked\r\n";
-          //  else  _headers_stream << "Content-Length: ???\r\n";
 
     _headers_stream << "Server: Scheduler " << version_string;
-    //if( Web_service_operation* wso = _operation->_web_service_operation )
-    //    _headers_stream << wso->_web_service->obj_name();
 
     _headers_stream << "\r\n\r\n";
 
@@ -1412,6 +1414,60 @@ STDMETHODIMP Response::Send() // VARIANT* content, BSTR content_type_bstr )
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
+}
+
+//------------------------------------------------------------------------------Response::set_ready
+
+void Response::set_ready()
+{ 
+    finish();
+    _ready = true; 
+    on_ready();
+}
+
+//---------------------------------------------------------------------------C_response::C_response
+
+C_response::C_response(Operation* operation)
+: 
+    Response(operation->request()),
+    _zero_(this+1), 
+    _operation(operation)
+{ 
+}
+
+//-----------------------------------------------------------------------------C_response::on_ready
+
+void C_response::on_ready()
+{ 
+    if( _operation  &&  _operation->_connection )  _operation->_connection->signal( "http response is ready" );
+    // Nicht sofort senden
+}
+
+//------------------------------------------------------------------------------------Java_response
+
+Java_response::Java_response(Request* request, const SchedulerHttpResponseJ& responseJ) : 
+    Response(request), _event(this, "Java_response"), _responseJ(responseJ) 
+{}
+
+Java_response::~Java_response() {
+    Z_LOG2("scheduler", "~Java_response()\n");
+}
+
+void Java_response::close() {
+    _closed = true;
+    _responseJ = NULL;
+}
+
+bool Java_response::closed() { 
+    return _closed;
+}
+    
+void Java_response::on_ready() {
+    set_event(&_event);
+}
+
+void Java_response::on_event_signaled() {
+    _responseJ.onNextChunkIsReady();
 }
 
 //---------------------------------------------------------String_chunk_reader::get_next_chunk_size

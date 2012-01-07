@@ -60,7 +60,7 @@ const int                       show_message_after_seconds          = 15*60;    
 const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
 
 const int                       nothing_done_max                    = 10;  //2+1;        // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
-                                                                                        // +1 für Job::start_when_directory_changed() unter Windows    
+                                                                                        // +1 für Job::start_when_directory_changed() unter Windows
 const double                    nichts_getan_bremse                 = 1.0;              // Wartezeit in nichts_getan(), Meldung SCHEDULER-261
 #ifdef Z_DEBUG
     const int                   scheduler_261_second                = 5;                // Nach sovielen leeren Schleifendurchläufen SCHEDULER-261 wiederholen
@@ -73,7 +73,7 @@ const double                    nichts_getan_bremse                 = 1.0;      
 const int                       kill_timeout_1                      = 10;               // < kill_timeout_total
 const int                       kill_timeout_total                  = 30;               // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 
-const int                       tcp_restart_close_delay             = 3;                // Wartezeit, damit der Browser nicht hängenbleibt. 
+const int                       tcp_restart_close_delay             = 3;                // Wartezeit, damit der Browser nicht hängenbleibt.
                                                                                         // Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloß?
                                                                                         // Client (Internet Explorer) bekommt so Gelegenheit, selbst die Verbindung zu schließen.
                                                                                         // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
@@ -617,7 +617,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
             int count = _spooler->_task_subsystem->_task_list.size();
             _spooler->_log->warn( message_string( "SCHEDULER-254", count, kill_timeout_1, kill_timeout_total ) );    // $1 Tasks haben sich nicht beendet trotz kill vor $2. Die $3s lange Nachfrist läuft weiter</title>
             //_spooler->_log->warn( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_1 << "s."
-            //                     " Die " << kill_timeout_total << "s lange Nachfrist läuft weiter" ); 
+            //                     " Die " << kill_timeout_total << "s lange Nachfrist läuft weiter" );
 
             Z_FOR_EACH( Task_list, _spooler->_task_subsystem->_task_list, t )
             {
@@ -942,7 +942,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
 //#   ifdef Z_UNIX
 //    {
-//        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben. 
+//        // Offene file descriptors ermitteln. Zum Debuggen, weil das Gerücht geht, Dateien würden offen bleiben.
 //        // Das war nur ein Gerücht.
 //        S s;
 //        int n = sysconf( _SC_OPEN_MAX );
@@ -1774,7 +1774,7 @@ void Spooler::read_xml_configuration()
     assert(!_config_element_to_load);
 
     Command_processor cp ( this, Security::seclev_all );
-    _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
+    _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht.
                                             // database.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
@@ -1864,7 +1864,7 @@ void Spooler::initialize_subsystems()
 }
 
 //---------------------------------------------Spooler::initialize_subsystems_after_base_processing
-// Nachdem load_config() die <base> ausgeführt hat. 
+// Nachdem load_config() die <base> ausgeführt hat.
 // <base> erlaubt mehrere mischende set_dom() aufs selbe File_based und muss vor der Initialisierung gelaufen sein.
 // Andererseits müssen einige andere Subsysteme bereits vorher initialisiert sein.
 
@@ -2206,7 +2206,7 @@ string Spooler::db_cluster_member_id()
 }
 
 //-------------------------------------------------------------------Spooler::distributed_member_id
-// Liefert Member-ID nur für verteilten Scheduler, 
+// Liefert Member-ID nur für verteilten Scheduler,
 // nicht aber im Backup-Betrieb.
 
 string Spooler::distributed_member_id()
@@ -2892,7 +2892,7 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
 // Kann nach jeder vermutlich längeren Operation aufgerufen werden, vor allem bei externer Software: Datenbank, eMail, xslt etc.
 
 {
-    // Wir sind mitten in irgendeiner Verarbeitung. Also nur bestimmte Sachen verändern! 
+    // Wir sind mitten in irgendeiner Verarbeitung. Also nur bestimmte Sachen verändern!
 
     bool result = true;
 
@@ -3102,6 +3102,18 @@ void Spooler::suspend_machine()
 string Spooler::execute_xml(const string& xml_command) {
     Command_processor cp ( _spooler, Security::seclev_all );
     return cp.execute(xml_command);
+}
+
+//-----------------------------------------------------------------------Spooler::java_execute_http
+
+http::Java_response* Spooler::java_execute_http(const SchedulerHttpRequestJ& requestJ, const SchedulerHttpResponseJ& responseJ) {
+    Command_processor command_processor ( this, Security::seclev_all);
+    ptr<http::Request> request = http::new_java_request(requestJ);
+    ptr<http::Java_response> response = Z_NEW(http::Java_response(request, responseJ));
+    command_processor.execute_http(request, response, (Http_file_directory*)NULL);
+    response->set_ready();
+    response->finish();
+    return response.copy();  // Java muss Java_response::Release aufrufen, um Speicherleck zu vermeiden!
 }
 
 //-------------------------------------------------------------------------Spooler::cmd_load_config
@@ -3926,7 +3938,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 {
                     use_external_schema = opt.value();
                     /*\\< Dynamisches XSD sofort einlesen und statisches "ersetzen". Wenn das erst nach verarbeiten aller
-                    Optionen gemacht wird, dann steht das dynamische XSD noch nicht für die Option -show-xml-schema zur Verfügung 
+                    Optionen gemacht wird, dann steht das dynamische XSD noch nicht für die Option -show-xml-schema zur Verfügung
                     */
                     sos::scheduler::embedded_and_dynamic_files.set_dynamic_file(use_external_schema, sos::scheduler::xml_schema_path);
                 }                

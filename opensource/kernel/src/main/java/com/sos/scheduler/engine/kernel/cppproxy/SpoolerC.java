@@ -4,6 +4,8 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppThreadSafe;
+import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest;
+import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse;
 
 @CppClass(clas="sos::scheduler::Spooler", directory="scheduler", include="spooler.h")
 public interface SpoolerC extends CppProxyWithSister<Scheduler> {
@@ -37,6 +39,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     void assign_stdout ();
 //    void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
     String execute_xml(String xml);
+    HttpResponseC java_execute_http(SchedulerHttpRequest request, SchedulerHttpResponse response);
     void cmd_pause();
     void cmd_continue();
     void cmd_terminate_after_error(String function_name, String message_text);

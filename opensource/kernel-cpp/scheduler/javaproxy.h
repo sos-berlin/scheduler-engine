@@ -15,6 +15,8 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__folder__FileBased.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__Job.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderId.h"
@@ -35,6 +37,8 @@ namespace sos {
 namespace scheduler {
 
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler SchedulerJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest SchedulerHttpRequestJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform PlatformJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
