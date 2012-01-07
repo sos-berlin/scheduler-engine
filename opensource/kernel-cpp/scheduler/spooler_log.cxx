@@ -209,7 +209,7 @@ static void io_error( Spooler* spooler, const string& filename )
         string error_code = "ERRNO-" + as_string( spooler->_waiting_errno );
         zschimmer::Xc x ( error_code.c_str(), filename.c_str() );
 
-        Z_LOGI2( "scheduler", "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << x.what() << ", Datei " << filename << "\n\n" );
+        Z_LOGI2( "scheduler", "\n*** SCHEDULER HAELT WEGEN PLATTENPLATZMANGEL AN. " << x.what() << ", Datei " << filename << "\n\n" );
 
         Scheduler_event scheduler_event ( evt_disk_full, log_warn, spooler );
         scheduler_event.set_error( x );
@@ -365,7 +365,7 @@ void Log::open_new()
 
         if( old_file != -1  &&  old_file != fileno(stderr) )
         {
-            string line = "\nDas Protokoll wird fortgeführt in " + _filename + "\n";
+            string line = "\nDas Protokoll wird fortgefuehrt in " + _filename + "\n";
             ::write( old_file, line.c_str(), line.length() );
             ::close( old_file );
         }
@@ -504,51 +504,42 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
 
         int begin = 0;
-        while(1)
-        {
-            z::Log_ptr log ( "scheduler" );
-
-            int next = line.find( '\n', begin );  
-            if( next == string::npos )  next = line.length(); 
-                                  else  next++;
-
-            if( log_to_files )
-            {
-                int buffer1_len = strlen( time_buffer );
-                write( level, extra_log, order_log, time_buffer, buffer1_len );                        // Zeit
+        while(1) {
+            int level_len = strlen(level_buffer);   // " [info]"
+            string prefix_string;
+            if (!prefix.empty()) {
+                prefix_string.reserve(prefix.length() + 3); 
+                prefix_string = "(";
+                prefix_string += prefix;
+                prefix_string += ") ";
             }
-
-            int buffer2_len = strlen( level_buffer );
-            if( log          )  log->write( level_buffer + 1, buffer2_len - 1 );
-            if( log_to_files )  write( level, extra_log, order_log, level_buffer, buffer2_len );       // [info]
-
-            if( !prefix.empty() )
-            {
-                string s; s.reserve( prefix.length() + 3 ); s = "(",  s += prefix, s += ") ";   // (prefix)
-                if( log          )  log << s;
-                if( log_to_files )  write( level, NULL, order_log, s );     // (Job ...)
-            }
-
+            int next = line.find('\n', begin);  
+            string line_end;
+            if (next == string::npos)  next = line.length(), line_end = "\n"; 
+                                 else  next++;
             int len = next - begin;
-            while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
-            if( log          )  log->write( line.c_str() + begin, len );
-            if( log_to_files )  write( level, extra_log, order_log, line.c_str() + begin, len );       // Text
+            while (len > 1  &&  line.c_str()[begin+len-1] == '\r')  len--;
+            
+            if (z::Log_ptr log = "scheduler") {
+                log->write(level_buffer + 1, level_len - 1);
+                log << prefix_string;
+                log->write(line.data() + begin, len);
+                log << line_end;
+            }
+
+            if (log_to_files) {
+                write(level, extra_log, order_log, time_buffer, strlen(time_buffer));   // Zeit
+                write(level, extra_log, order_log, level_buffer, level_len);            // [info]
+                write(level, NULL, order_log, prefix_string);                           // (Job ...)
+                write(level, extra_log, order_log, line.c_str() + begin, len );         // Text
+                write(level, extra_log, order_log, line_end.data(), line_end.length()); // "\n"
+            }
 
             begin = next;
             if( begin >= line.length() )  break;
         }
 
-        if( line.length() == 0 || line[line.length()-1] != '\n' )  
-        {
-            Z_LOG( "\n" );
-            if( log_to_files )  write( level, extra_log, order_log, "\n", 1 );
-        }
-
-        //Z_LOG2( "scheduler", _log_line );  _log_line = "";
-
-        
-        if( log_to_files )  
-        {
+        if (log_to_files) {
             if( extra_log )  extra_log->signal_events();
             if( order_log )  order_log->signal_events();
 
