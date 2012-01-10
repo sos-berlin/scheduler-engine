@@ -18,14 +18,12 @@ public class JS606Base extends SchedulerTest {
 
 	private static final Logger logger = Logger.getLogger(JS606Base.class);
 	
-	private String variablePrefixEnv;
 	private File resultfile;
 	private String jobchainName;
 	
 	
-	protected void prepareTest(String jobchain, String prefix) {
+	protected void prepareTest(String jobchain) {
 		
-		this.variablePrefixEnv = prefix;
 		this.jobchainName = jobchain;
 
 		resultfile = JSFileUtils.getEmptyTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
@@ -47,8 +45,7 @@ public class JS606Base extends SchedulerTest {
 		"<add_order id='test_" + jobchainName + "' job_chain='" + this.jobchainName + "'>" +
 		"<params>" + 
 		"<param name='RESULT_FILE'    value='" + resultfile.getAbsolutePath() + "' />" + 
-		"<param name='100/NODE_PARAM' value='param_state_100' />" + 
-		"<param name='200/NODE_PARAM' value='param_state_200' />" + 
+		"<param name='NODE_PARAM' value='param_state_100' />" + 
 		"</params>" + 
 		"</add_order>";
 		controller().scheduler().executeXml(command);
@@ -58,9 +55,8 @@ public class JS606Base extends SchedulerTest {
 	public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
 		String lines = Files.toString(resultfile, Charset.defaultCharset());
 		logger.debug("resultfile is " + resultfile.getName() + "\n"+ lines);
-		assertParameter(lines, "SCHEDULER_VARIABLE_NAME_PREFIX", variablePrefixEnv );
+		assertParameter(lines, "RESULT_FILE", resultfile.getAbsolutePath() );
 		assertParameter(lines, "JOB_RESULT", "param_state_100" );
-		assertParameter(lines, "JOB_RESULT", "param_state_200" );
 		
 		controller().terminateScheduler();
 		

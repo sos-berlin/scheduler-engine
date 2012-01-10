@@ -4,6 +4,7 @@
      stop_on_error="no">
     <script language="shell">
         <![CDATA[
+echo RESULT_FILE=$SCHEDULER_PARAM_RESULT_FILE >> $SCHEDULER_PARAM_RESULT_FILE
 echo JOB_RESULT=$SCHEDULER_PARAM_NODE_PARAM >> $SCHEDULER_PARAM_RESULT_FILE
         ]]>
     </script>

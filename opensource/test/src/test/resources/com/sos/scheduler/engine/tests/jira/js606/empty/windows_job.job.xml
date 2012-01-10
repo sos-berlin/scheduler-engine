@@ -4,6 +4,7 @@
      stop_on_error="no">
     <script language="shell">
         <![CDATA[
+echo RESULT_FILE=%RESULT_FILE% >> %RESULT_FILE%
 echo JOB_RESULT=%NODE_PARAM% >> %RESULT_FILE%
         ]]>
     </script>

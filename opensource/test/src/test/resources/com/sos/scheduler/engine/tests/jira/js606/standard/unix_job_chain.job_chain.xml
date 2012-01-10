@@ -5,14 +5,6 @@
            max_orders="1">
     <job_chain_node state="100"
                     job="unix_job"
-                    next_state="200"
-                    error_state="error"/>
-    <job_chain_node state="200"
-                    job="unix_job"
-                    next_state="300"
-                    error_state="error"/>
-    <job_chain_node state="300"
-                    job="unix_prefix"
                     next_state="success"
                     error_state="error"/>
     <job_chain_node state="success"/>
