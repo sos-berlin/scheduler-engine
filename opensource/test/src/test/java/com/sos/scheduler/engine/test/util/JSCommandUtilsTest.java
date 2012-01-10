@@ -28,7 +28,7 @@ public class JSCommandUtilsTest {
 	@Test
 	public void testBuildCommandAddOrder() throws IOException {
 		String command = util.buildCommandAddOrder("myJobchain").getCommand();
-		File file = JSFileUtils.getEmptyTestresultFile(JSCommandUtilsTest.class,"testBuildCommandAddOrder.txt");
+		File file = JSFileUtils.createEmptyTestresultFile(JSCommandUtilsTest.class,"testBuildCommandAddOrder.txt");
 		Files.append(command, file, Charset.defaultCharset());
 		File estimated = JSFileUtils.getLocalResourceFile(JSCommandUtilsTest.class, estimatedBuildCommandAddOrder);
 		compareFiles(file,estimated);
@@ -37,7 +37,7 @@ public class JSCommandUtilsTest {
 	@Test
 	public void testBuildCommandAddOrderWithParams() throws IOException {
 		String command = util.buildCommandAddOrder("myJobchain").addParam("myParam1", "value1").getCommand();
-		File file = JSFileUtils.getEmptyTestresultFile(JSCommandUtilsTest.class,"testBuildCommandAddOrderWithParam.txt");
+		File file = JSFileUtils.createEmptyTestresultFile(JSCommandUtilsTest.class,"testBuildCommandAddOrderWithParam.txt");
 		Files.append(command, file, Charset.defaultCharset());
 		File estimated = JSFileUtils.getLocalResourceFile(JSCommandUtilsTest.class, estimatedBuildCommandAddOrderWithParams);
 		compareFiles(file,estimated);
@@ -48,7 +48,7 @@ public class JSCommandUtilsTest {
 		util.addParam("myParam1", "value1");
 		util.addParam("myParam2", "value2");
 		String command = util.buildCommandAddOrder("myJobchain").getCommand();
-		File file = JSFileUtils.getEmptyTestresultFile(JSCommandUtilsTest.class,"testBuildCommandAddOrderWithParam2.txt");
+		File file = JSFileUtils.createEmptyTestresultFile(JSCommandUtilsTest.class,"testBuildCommandAddOrderWithParam2.txt");
 		Files.append(command, file, Charset.defaultCharset());
 		File estimated = JSFileUtils.getLocalResourceFile(JSCommandUtilsTest.class, estimatedBuildCommandAddOrderWithParams2);
 		compareFiles(file,estimated);

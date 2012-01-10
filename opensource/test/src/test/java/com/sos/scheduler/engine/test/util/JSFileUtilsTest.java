@@ -1,26 +1,13 @@
 package com.sos.scheduler.engine.test.util;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertTrue;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import com.google.common.io.Files;
 
 public class JSFileUtilsTest {
 	
 	private static final Logger logger = Logger.getLogger(JSFileUtilsTest.class);
-	
-	private final static String lockfile = "fileToLock.txt";
 	
 	@Test
 	public void testGetLocalPath() {
@@ -110,7 +97,7 @@ public class JSFileUtilsTest {
 	@Test
 	public void testGetEmptyTestresultFile() {
 		
-		File file = JSFileUtils.getEmptyTestresultFile(JSFileUtilsTest.class,"myFile.txt");
+		File file = JSFileUtils.createEmptyTestresultFile(JSFileUtilsTest.class,"myFile.txt");
 		String givenFile = file.getAbsolutePath().replace("\\", "/");
 
 		File estimated = new File("target/test-results/" + this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
@@ -122,16 +109,5 @@ public class JSFileUtilsTest {
 		assertTrue("file '" + givenFile + "' does not exist",file.isFile());
 		assertTrue("file '" + givenFile + "' is not empty",file.length() == 0);
 	}
-	
-	/*
-	 * TODO Das Sperren des files muß in einem separetem Thread erfolgen, unklar ist, wie der
-	 * Hauptprozess mitbekommt, wenn im Thread eine Exception ausgelöst wird (also z.B. die Datei
-	 * bereits gesperrt ist). 
-	 */
-	@Ignore
-	public void testLockFile() throws Exception {
-		File lock = JSFileUtils.getLocalResourceFile(JSCommandUtilsTest.class, lockfile);
-		JSFileUtils.lockFile(lock, 5);
-		JSFileUtils.lockFile(lock, 5);
-	}
+
 }

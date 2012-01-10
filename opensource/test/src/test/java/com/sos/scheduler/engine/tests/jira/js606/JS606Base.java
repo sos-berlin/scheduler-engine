@@ -26,7 +26,7 @@ public class JS606Base extends SchedulerTest {
 		
 		this.jobchainName = jobchain;
 
-		resultfile = JSFileUtils.getEmptyTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
+		resultfile = JSFileUtils.createEmptyTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
 		logger.debug("results of the jobs will be written in file " + resultfile.getAbsolutePath());
 	}
 	
