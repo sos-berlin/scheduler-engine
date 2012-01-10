@@ -22,7 +22,7 @@ public class JS606StandardTest extends JS606Base {
 
 	private static final Logger logger = Logger.getLogger(JS606StandardTest.class);
 	
-	private final String jobchain = OperatingSystem.isWindows ? "windows_job_chain" : "unix__job_chain";
+	private final String jobchain = OperatingSystem.isWindows ? "windows_job_chain" : "unix_job_chain";
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
