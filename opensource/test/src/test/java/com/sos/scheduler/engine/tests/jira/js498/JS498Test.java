@@ -10,12 +10,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.junit.Test;
+
+import sos.spooler.Variable_set;
 
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.JSCommandUtils;
 import com.sos.scheduler.engine.test.util.JSFileUtils;
@@ -34,14 +38,10 @@ import com.sos.scheduler.engine.test.util.JSFileUtils;
  */
 public class JS498Test extends SchedulerTest {
 
-	private final List<String> jobchains = Arrays.asList("chain_rhino");
+	private final String jobchain = "chain_rhino";
 	
 	private final JSCommandUtils util = JSCommandUtils.getInstance();
-	private final HashMap<String,File> resultfiles = new HashMap<String,File>();
-	
-	private int finishedOrders = 0;
-	private String currentChain;
-	private String currentContent;
+	private VariableSet resultSet;
 
 	/*
 	 * Unter linux gibt es Probleme beim Zugriff auf den Scheduler-Objekten untegeordneten Objekte, so führt
@@ -51,47 +51,36 @@ public class JS498Test extends SchedulerTest {
 	 */
 	@Test
 	public void test() throws InterruptedException, IOException {
-		controller().startScheduler();
-		for (String jobchain : jobchains) {
-			File resultfile = JSFileUtils.createEmptyTestresultFile(this.getClass(), jobchain + ".log");
-			resultfiles.put(jobchain, resultfile);
-			util.addParam("resultfile", resultfile.getAbsolutePath());
-			controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain).getCommand() );
-		}
+		controller().activateScheduler();
+		controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain).getCommand() );
 		controller().waitForTermination(shortTimeout);
 		testAssertions();
 	}
 	
 	@HotEventHandler
 	public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
-		finishedOrders++;
-		if (finishedOrders == jobchains.size())
-			controller().terminateScheduler();
-		
+		resultSet = scheduler().getVariables();
+		controller().terminateScheduler();
 	}
 	
 	public void testAssertions() throws IOException {
-		for (String chain : resultfiles.keySet()) {
-			currentChain = chain;
-			currentContent = Files.toString(resultfiles.get(currentChain), Charset.forName("UTF-8"));
-			assertFunction("spooler_init");
-			assertFunction("spooler_open");
-			assertFunction("spooler_process");
-			assertFunction("spooler_close");
-			assertFunction("spooler_on_success");
-			assertFunction("spooler_exit");
-			assertFunction("spooler_task_before");
-			assertFunction("spooler_task_after");
-			assertFunction("spooler_process_before");
-			assertFunction("spooler_process_after");
-			assertObject("spooler","sos.spooler.Process_classes");
-			assertObject("spooler","sos.spooler.Variable_set");
-			assertObject("spooler_task","sos.spooler.Order");
-			assertObject("spooler_task","sos.spooler.Variable_set");
-			assertObject("spooler_task","sos.spooler.Subprocess");
-			assertObject("spooler_job","sos.spooler.Order_queue");
-			assertObject("spooler_job","sos.spooler.Process_class");
-		}
+		assertFunction("spooler_init");
+		assertFunction("spooler_open");
+		assertFunction("spooler_process");
+		assertFunction("spooler_close");
+		assertFunction("spooler_on_success");
+		assertFunction("spooler_exit");
+		assertFunction("spooler_task_before");
+		assertFunction("spooler_task_after");
+		assertFunction("spooler_process_before");
+		assertFunction("spooler_process_after");
+		assertObject("spooler","sos.spooler.Process_classes");
+		assertObject("spooler","sos.spooler.Variable_set");
+		assertObject("spooler_task","sos.spooler.Order");
+		assertObject("spooler_task","sos.spooler.Variable_set");
+		assertObject("spooler_task","sos.spooler.Subprocess");
+		assertObject("spooler_job","sos.spooler.Order_queue");
+		assertObject("spooler_job","sos.spooler.Process_class");
 	}
 
 	
@@ -102,7 +91,9 @@ public class JS498Test extends SchedulerTest {
 	 * @param function
 	 */
 	private void assertFunction(String function) {
-		assertTrue(currentChain + ": " + function + " not executed.",currentContent.contains(function));
+		String value = resultSet.get(function);
+		assertTrue(function + " is not set in scheduler variables", value != null);
+		assertTrue(function + " has to be called exact one time", value.equals("1"));
 	}
 	
 	/**
@@ -112,8 +103,10 @@ public class JS498Test extends SchedulerTest {
 	 * @param function
 	 */
 	private void assertObject(String type, String object) {
-		String searchFor = type + ":" + object + "=" + object;		// see function log_object in job
-		assertTrue(currentChain + ": object " + type + ":" + object + " not present.",currentContent.contains(searchFor));
+		String varname = type + "_" + object;
+		String value = resultSet.get(varname);
+		assertTrue(varname + " is not set in scheduler variables", value != null);
+		assertTrue(value + " is not valid - " + object + " expected", value.startsWith(object + "@"));
 	}
 
 }

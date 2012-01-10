@@ -3,15 +3,7 @@
 	order="yes" stop_on_error="no">
     <script language="javax.script:javascript">
         <![CDATA[
-importPackage(com.google.common.io);
-importPackage(java.io);
-importPackage(java.nio.charset);
-
-var resultfile;
- 
 function spooler_init()	{
-	resultfile = new File(spooler_task.order().params().value("resultfile"));
-	logger.debug("resultfile=" + resultfile.getAbsolutePath());
 	log_function("spooler_init");
 	return true;
 }
@@ -51,30 +43,22 @@ function spooler_on_success() {
 }
 
 function log_function( functionname ) {
-	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null)
-		Files.append(functionname + " was called\n",resultfile,Charset.forName("UTF-8"));
+	count = (spooler.variables().value(functionname)) ? (spooler.variables().value(functionname)) : 0;
+	spooler.variables().set_var(functionname,++count);
+	logger.info(functionname + " called " + count + " times.");
 }
 
 function log_object( objecttype, objectname, objectvalue ) {
-	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null) {
-		out = 
-		Files.append(objecttype + ":" + objectname + "=" + objectvalue + "\n",resultfile,Charset.forName("UTF-8"));
-	}
+	varname = objecttype + "_" + objectname;
+	spooler.variables().set_var(varname,objectvalue);
+	logger.info(varname + "=" + objectvalue);
 }
         ]]>
     </script>
     <monitor name="process0" ordering="0">
         <script language="javax.script:javascript">
             <![CDATA[
-importPackage(com.google.common.io);
-importPackage(java.io);
-importPackage(java.nio.charset);
-
-var resultfile;
-
 function spooler_task_before() {
-	resultfile = new File(spooler_task.order().params().value("resultfile"));
-	logger.debug("resultfile=" + resultfile.getAbsolutePath());
 	log_function("spooler_task_before");
 	return true;
 }
@@ -95,8 +79,9 @@ function spooler_task_after() {
 }
 
 function log_function( functionname ) {
-	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null)
-		Files.append(functionname + " was called\n",resultfile,Charset.forName("UTF-8"));
+	count = (spooler.variables().value(functionname)) ? (spooler.variables().value(functionname)) : 0;
+	spooler.variables().set_var(functionname,++count);
+	logger.info(functionname + " called " + count + " times.");
 }
             ]]>
         </script>
