@@ -24,6 +24,13 @@ function spooler_open()	{
 function spooler_process() {
 	logger.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
 	log_function("spooler_process");
+	log_object("spooler","sos.spooler.Process_classes",spooler.process_classes());
+	log_object("spooler","sos.spooler.Variable_set",spooler.variables());
+	log_object("spooler_task","sos.spooler.Order",spooler_task.order());
+	log_object("spooler_task","sos.spooler.Variable_set",spooler_task.params());
+	log_object("spooler_task","sos.spooler.Subprocess",spooler_task.create_subprocess());
+	log_object("spooler_job","sos.spooler.Order_queue",spooler_job.order_queue());
+	log_object("spooler_job","sos.spooler.Process_class",spooler_job.process_class());
 	return true;
 }
 
@@ -46,6 +53,13 @@ function spooler_on_success() {
 function log_function( functionname ) {
 	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null)
 		Files.append(functionname + " was called\n",resultfile,Charset.forName("UTF-8"));
+}
+
+function log_object( objecttype, objectname, objectvalue ) {
+	if (spooler_log != null && logger != null && spooler_task != null && spooler != null && spooler_job != null) {
+		out = 
+		Files.append(objecttype + ":" + objectname + "=" + objectvalue + "\n",resultfile,Charset.forName("UTF-8"));
+	}
 }
         ]]>
     </script>
