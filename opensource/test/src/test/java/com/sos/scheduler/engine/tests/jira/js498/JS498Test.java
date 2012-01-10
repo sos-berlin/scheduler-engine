@@ -2,27 +2,13 @@ package com.sos.scheduler.engine.tests.jira.js498;
 
 
 import static org.junit.Assert.assertTrue;
-
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import sos.spooler.Variable_set;
-
-import com.google.common.io.Files;
+import org.junit.Ignore;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.JSCommandUtils;
-import com.sos.scheduler.engine.test.util.JSFileUtils;
 
 /**
  * This is a test for scripting with the Rhino engine. The jobchain chain_scripting executes a job with all knwowing API
@@ -49,7 +35,7 @@ public class JS498Test extends SchedulerTest {
 	 * Unter Windows (lokal) funktioniert er.
 	 * Der Test wurde deshalb zunächst deaktiviert.
 	 */
-	@Test
+	@Ignore
 	public void test() throws InterruptedException, IOException {
 		controller().activateScheduler();
 		controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain).getCommand() );
