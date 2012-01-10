@@ -6,11 +6,12 @@ import com.google.common.io.Files;
 
 public class JSFileUtils {
 	
-	private static final String mavenTargetDir = "target";
-	private static final String defaultTestresultBaseDir = "test-results";
+	private final static File testresultBasedir = Files.createTempDir();
 	
-	private static File testresultBaseDir;
-	
+	public static File getTestresultBasedir() {
+		return testresultBasedir;
+	}
+
 	private JSFileUtils() {
 	}
 	
@@ -33,7 +34,7 @@ public class JSFileUtils {
 	}
 	
 	public static File getTestresultPath(Class<?> ClassInstance) {
-		String path = getTargetDir() + "/" + ClassInstance.getPackage().getName().replace(".", "/");
+		String path = testresultBasedir + "/" + ClassInstance.getPackage().getName().replace(".", "/");
 		return createFolderIfNecessary(path);
 	}
 	
@@ -60,11 +61,6 @@ public class JSFileUtils {
 		if (!f.exists()) result = f.mkdirs();
 		if (!result) throw new RuntimeException("error creating folder " + folderName);
 		return f;
-	}
-	
-	private static String getTargetDir() {
-		File result = new File(mavenTargetDir);
-		return (result.exists()) ? result + "/" + defaultTestresultBaseDir : defaultTestresultBaseDir;
 	}
 
 }

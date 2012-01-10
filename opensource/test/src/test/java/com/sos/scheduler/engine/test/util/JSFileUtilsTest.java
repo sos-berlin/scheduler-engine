@@ -5,6 +5,8 @@ import java.io.File;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import com.google.common.io.Files;
+
 public class JSFileUtilsTest {
 	
 	private static final Logger logger = Logger.getLogger(JSFileUtilsTest.class);
@@ -71,7 +73,7 @@ public class JSFileUtilsTest {
 		File path = JSFileUtils.getTestresultPath(JSFileUtilsTest.class);
 		String givenPath = path.getAbsolutePath().replace("\\", "/");
 
-		File estimated = new File("target/test-results/" + this.getClass().getPackage().getName().replace(".", "/"));
+		File estimated = new File(JSFileUtils.getTestresultBasedir() + "/" + this.getClass().getPackage().getName().replace(".", "/"));
 		String estimatedPath = estimated.getAbsolutePath().replace("\\", "/");
 		
 		logger.debug("result ....: " + givenPath);
@@ -86,7 +88,7 @@ public class JSFileUtilsTest {
 		File path = JSFileUtils.getTestresultFile(JSFileUtilsTest.class,"myFile.txt");
 		String givenFile = path.getAbsolutePath().replace("\\", "/");
 
-		File estimated = new File("target/test-results/" + this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
+		File estimated = new File(JSFileUtils.getTestresultBasedir() + "/"+ this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
 		String estimatedFile = estimated.getAbsolutePath().replace("\\", "/");
 		
 		logger.debug("result ....: " + givenFile);
@@ -100,7 +102,7 @@ public class JSFileUtilsTest {
 		File file = JSFileUtils.createEmptyTestresultFile(JSFileUtilsTest.class,"myFile.txt");
 		String givenFile = file.getAbsolutePath().replace("\\", "/");
 
-		File estimated = new File("target/test-results/" + this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
+		File estimated = new File(JSFileUtils.getTestresultBasedir() + "/" + this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
 		String estimatedFile = estimated.getAbsolutePath().replace("\\", "/");
 		
 		logger.debug("result ....: " + givenFile);
