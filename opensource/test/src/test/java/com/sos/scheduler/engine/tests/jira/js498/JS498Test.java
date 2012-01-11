@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.*;
 
 /**
  * This is a test for scripting with the Rhino engine. The jobchain chain_scripting executes a job with all knwowing API
@@ -40,12 +40,12 @@ public class JS498Test extends SchedulerTest {
 	 * Unter Windows (lokal) funktioniert er.
 	 * Der Test wurde deshalb zunächst deaktiviert.
 	 */
-	@Test
+	@Ignore
 	public void testFunctions() throws InterruptedException, IOException {
-		controller().activateScheduler("-e","-log-level=info");
+		controller().activateScheduler("-e","-log-level=info","-log=" + JSFileUtils.getLocalPath(this.getClass()) + "/scheduler.log");
 		controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain).getCommand() );
 		controller().waitForTermination(shortTimeout);
-		testFunctionAssertions();
+		testAssertions();
 	}
 	
 	@HotEventHandler
@@ -54,7 +54,7 @@ public class JS498Test extends SchedulerTest {
 		controller().terminateScheduler();
 	}
 	
-	public void testFunctionAssertions() throws IOException {
+	public void testAssertions() throws IOException {
 		assertObject("spooler.variables.count","2");
 		assertObject("spooler_task.order.job_chain.name","chain_rhino");
 		assertObject("spooler_task.params.names","taskparam1;taskparam2");
