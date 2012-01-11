@@ -3,7 +3,13 @@ package com.sos.scheduler.engine.tests.jira.js498;
 
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Ignore;
+import org.junit.Test;
+
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
@@ -25,7 +31,6 @@ import com.sos.scheduler.engine.test.util.JSCommandUtils;
 public class JS498Test extends SchedulerTest {
 
 	private final String jobchain = "chain_rhino";
-	
 	private final JSCommandUtils util = JSCommandUtils.getInstance();
 	private VariableSet resultSet;
 
@@ -35,12 +40,12 @@ public class JS498Test extends SchedulerTest {
 	 * Unter Windows (lokal) funktioniert er.
 	 * Der Test wurde deshalb zunächst deaktiviert.
 	 */
-	@Ignore
-	public void test() throws InterruptedException, IOException {
-		controller().activateScheduler();
+	@Test
+	public void testFunctions() throws InterruptedException, IOException {
+		controller().activateScheduler("-e","-log-level=info");
 		controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain).getCommand() );
 		controller().waitForTermination(shortTimeout);
-		testAssertions();
+		testFunctionAssertions();
 	}
 	
 	@HotEventHandler
@@ -49,7 +54,12 @@ public class JS498Test extends SchedulerTest {
 		controller().terminateScheduler();
 	}
 	
-	public void testAssertions() throws IOException {
+	public void testFunctionAssertions() throws IOException {
+		assertObject("spooler.variables.count","2");
+		assertObject("spooler_task.order.job_chain.name","chain_rhino");
+		assertObject("spooler_task.params.names","taskparam1;taskparam2");
+		assertObject("spooler_job.order_queue.length","1");
+		assertObject("spooler_task.order.id","test_chain_rhino");
 		assertFunction("spooler_init");
 		assertFunction("spooler_open");
 		assertFunction("spooler_process");
@@ -60,16 +70,8 @@ public class JS498Test extends SchedulerTest {
 		assertFunction("spooler_task_after");
 		assertFunction("spooler_process_before");
 		assertFunction("spooler_process_after");
-		assertObject("spooler","sos.spooler.Process_classes");
-		assertObject("spooler","sos.spooler.Variable_set");
-		assertObject("spooler_task","sos.spooler.Order");
-		assertObject("spooler_task","sos.spooler.Variable_set");
-		assertObject("spooler_task","sos.spooler.Subprocess");
-		assertObject("spooler_job","sos.spooler.Order_queue");
-		assertObject("spooler_job","sos.spooler.Process_class");
 	}
 
-	
 	/**
 	 * checks if an estimated funtion was called.
 	 * @param chain
@@ -77,22 +79,19 @@ public class JS498Test extends SchedulerTest {
 	 * @param function
 	 */
 	private void assertFunction(String function) {
-		String value = resultSet.get(function);
-		assertTrue(function + " is not set in scheduler variables", value != null);
-		assertTrue(function + " has to be called exact one time", value.equals("1"));
+		assertObject(function,"1");		// any funtion should be called exactly one time
 	}
 	
 	/**
-	 * checks if an estimated (sub-)object was given
+	 * checks if an estimated object was given
 	 * @param chain
 	 * @param content
 	 * @param function
 	 */
-	private void assertObject(String type, String object) {
-		String varname = type + "_" + object;
+	private void assertObject(String varname, String expected) {
 		String value = resultSet.get(varname);
 		assertTrue(varname + " is not set in scheduler variables", value != null);
-		assertTrue(value + " is not valid - " + object + " expected", value.startsWith(object + "@"));
+		assertTrue(value + " is not valid - " + expected + " expected", value.equals(expected));
 	}
 
 }
