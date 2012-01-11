@@ -93,7 +93,10 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	}
 
 	/**
-	 * \brief call a script function \details It's just the same like the call
+	 * \brief
+	 * call a script function
+	 * 
+	 * \details It's just the same like the call
 	 * method of the superclass, but the error handling is different. The JS
 	 * calls the script for any function of the api (scheduler_init, scheduler_open
 	 * etc.), but it is not necessary the functions are present in the script.
@@ -120,7 +123,7 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 		} else {
 			if (function.equals(SCHEDULER_PROCESS)) {
 				result = super.call();
-				result = (result == null) ? false : result;
+				result = (result == null) ? Boolean.FALSE : result;
 			}
 		}
 		return result;
@@ -147,8 +150,9 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	 */
 	@Override
 	@ForCpp
-    public boolean nameExists(String name) {
-		return true;
+    public boolean nameExists(String rawfunctionname) {
+		ScriptFunction fobj = new ScriptFunction(rawfunctionname);
+		return fobj.isFunction(getSourcecode());
 	}
 
 }
