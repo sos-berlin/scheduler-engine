@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
 
 /**
- * This class tests an empty prefix "MYPARAM_" (see scheduler.xml)
+ * This class tests an empty prefix (see scheduler.xml)
  * 
  * <div class="sos_branding">
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>

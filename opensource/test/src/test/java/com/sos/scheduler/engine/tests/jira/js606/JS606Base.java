@@ -12,7 +12,7 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSFileUtils;
+import com.sos.scheduler.engine.test.util.*;
 
 public class JS606Base extends SchedulerTest {
 
@@ -20,6 +20,7 @@ public class JS606Base extends SchedulerTest {
 	
 	private File resultfile;
 	private String jobchainName;
+	private JSCommandUtils util = JSCommandUtils.getInstance();
 	
 	
 	protected void prepareTest(String jobchain) {
@@ -31,24 +32,11 @@ public class JS606Base extends SchedulerTest {
 	}
 	
 	protected void startOrder() {
-
-		/*
-		 * hier sollte eine Order im code erzeugt werden, leider ist nicht klar, wie man die Order dazu bringt,
-		 * das sie gestartet wird.
-		JobChain jobchain = controller().scheduler().getOrderSubsystem().jobChain(new AbsolutePath("/node_parameter"));
-		Order o = jobchain.order( new OrderId("test_node_parameter") );
-		o.getParameters().put("", "");
-		 */
-		
-		
-		String command = 
-		"<add_order id='test_" + jobchainName + "' job_chain='" + this.jobchainName + "'>" +
-		"<params>" + 
-		"<param name='RESULT_FILE'    value='" + resultfile.getAbsolutePath() + "' />" + 
-		"<param name='NODE_PARAM' value='param_state_100' />" + 
-		"</params>" + 
-		"</add_order>";
-		controller().scheduler().executeXml(command);
+		util.buildCommandAddOrder(jobchainName)
+			.addParam("RESULT_FILE", resultfile.getAbsolutePath())
+			.addParam("ORDER_PARAM", "ORDER_PARAM")
+		;
+		controller().scheduler().executeXml(util.getCommand());
 	}
 	
 	@HotEventHandler
@@ -56,10 +44,9 @@ public class JS606Base extends SchedulerTest {
 		String lines = Files.toString(resultfile, Charset.defaultCharset());
 		logger.debug("resultfile is " + resultfile.getName() + "\n"+ lines);
 		assertParameter(lines, "RESULT_FILE", resultfile.getAbsolutePath() );
-		assertParameter(lines, "JOB_RESULT", "param_state_100" );
-		
+		assertParameter(lines, "ORDER_PARAM", "ORDER_PARAM" );
+		assertParameter(lines, "JOB_PARAM", "JOB_PARAM" );
 		controller().terminateScheduler();
-		
 	}
 	
 	private void assertParameter(String content, String paramName, String expectedValue) {

@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<job order="yes"
-     stop_on_error="no">
-    <script language="shell">
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+	order="yes" stop_on_error="no">
+	<params>
+		<param name="JOB_PARAM" value="JOB_PARAM" />
+	</params>
+	<script language="shell">
         <![CDATA[
 echo RESULT_FILE=$RESULT_FILE >> $RESULT_FILE
-echo JOB_RESULT=$NODE_PARAM >> $RESULT_FILE
+echo ORDER_PARAM=$ORDER_PARAM >> $RESULT_FILE
+echo JOB_PARAM=$JOB_PARAM >> $RESULT_FILE
         ]]>
-    </script>
-    <run_time/>
+	</script>
+	<run_time />
 </job>
