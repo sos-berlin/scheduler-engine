@@ -1,65 +1,49 @@
 package com.sos.scheduler.engine.test.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.*;
+import java.nio.channels.OverlappingFileLockException;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.apache.log4j.Logger;
 
-public class LockFile extends  Observable implements Runnable  {
-
+public class LockFile extends Observable implements Observer {
+	
 	private final static Logger logger = Logger.getLogger(LockFile.class);
-	
-	private final File file;
-	private final int duration;
-	
-	public LockFile(File fileToLock, int durationInSeconds) {
-		file = fileToLock;
-		duration = durationInSeconds;
+	private final LockFileThread lock;
+	private Thread t;
+
+	public LockFile(String filename, int durationInSeconds) {
+		lock = prepare(new File(filename), durationInSeconds);
 	}
 	
-	@Override
-	public void run() {
-		FileInputStream in = null;
-		try {
-			in = new FileInputStream(file);
-		    java.nio.channels.FileLock lock = in.getChannel().tryLock(0L, Long.MAX_VALUE, true);
-		    try {
-		    	Thread.sleep(duration*1000);
-		    } catch (InterruptedException e) {
-		    	logger.error("sleep interrupted - " + e.getMessage());
-		    	logger.trace("error in sleep", e);
-		    	tellObserver(e);
-			} finally {
-		        lock.release();
-		    }
-		} catch (FileNotFoundException e) {
-			String message = "file '" + file.getAbsolutePath() + "' does not exist";
-	    	logger.error(message);
-	    	logger.trace(message, e);
-	    	tellObserver(e);
-		} catch (IOException e) {
-	    	logger.error(e.getMessage());
-	    	logger.trace(e.getMessage(), e);
-	    	tellObserver(e);
-		} finally {
-		    if (in != null)
-				try {
-					in.close();
-				} catch (IOException e) {
-					String message = "file '" + file.getAbsolutePath() + "' could not be closed";
-			    	logger.error(message);
-			    	logger.trace(message, e);
-			    	tellObserver(e);
-				}
-		}
-	}
-	
-	private void tellObserver(Exception e) {
-		setChanged();
-		notifyObservers(e);
+	public LockFile(File file, int durationInSeconds) {
+		lock = prepare(file, durationInSeconds);
 	}
 
+	private LockFileThread prepare(File file, int durationInSeconds) {
+		LockFileThread result = new LockFileThread(file, durationInSeconds);
+		result.addObserver(this);
+		return result;
+	}
+	
+	public void lock() {
+		t = new Thread(lock);
+		t.start();
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		setChanged();
+		notifyObservers( arg );
+	}
+
+	public boolean isAlreadyLocked() {
+		return lock.isAlreadyLocked();
+	}
+
+	public boolean isAlive() {
+		return t.isAlive();
+	}
+	
 }
