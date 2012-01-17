@@ -90,6 +90,7 @@ to run without maven integration.
   	
   	<fileset dir="${source.dir}" id="files.jar">
   		<include name="guava*.jar"/>
+  		<include name="guice*.jar"/>
   		<include name="log4j-*.jar"/>
   		<include name="geronimo*.jar"/>
   		<include name="activemq*.jar"/>
