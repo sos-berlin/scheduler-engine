@@ -9,8 +9,10 @@ import org.apache.log4j.Logger
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
+import org.junit.Ignore
 
-@RunWith(classOf[JUnitRunner])
+// @RunWith(classOf[JUnitRunner])
+@Ignore
 final class CppServletTest extends ScalaSchedulerTest {
   import CppServletTest._
 
