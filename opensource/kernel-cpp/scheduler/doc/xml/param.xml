@@ -15,21 +15,106 @@
             Siehe <scheduler_element name="params" />.
         </p>
         <p>
-            Bestimmt einen einzelnen Parameter für den Scheduler, einen Job oder einen Auftrag.
+            Bestimmt einen einzelnen Parameter für den <a href="#param_scheduler">Scheduler</a>, einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.
+        </p>
+        <p>
+            Es wird empfohlen keine eigenen Parameter einzustellen, die mit der Zeichenfolge <b>SCHEDULER_</b> beginnen, da dieser Namensraum
+            für Konfigurationseinstellungen des JobScheduler reserviert ist.
+        </p>
+        <p>
             Die Parameter können zur Laufzeit überschrieben und erweitert werden.
         </p>
-        <p>
-            Scheduler-Parameter können mit der Methode <scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.
-        </p>
-        <p>
-            Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
-        </p>
-        <p>
-            Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="params" /> abgerufen werden.
-        </p>
+
         <p>
             Siehe auch die Klasse <scheduler_method class="Variable_set" />.
         </p>
+        
+        <a name="param_scheduler" />
+        <h3>Scheduler-Parameter</h3>
+        <p> 
+           Folgende Scheduler-Parameter könnnen für die Konfiguration des JobScheduler verwendet werden:
+        </p>
+          
+        <ul>
+          <li><b>SCHEDULER_VARIABLE_NAME_PREFIX</b></li>
+          <p>
+            Mit diesem Parameter kann bestimmt werden, unter welchen Namen Parameter aus Aufträgen und Jobs in in einem Shell job bekannt gemacht
+            werden. Der Prefix wird den Umgebungsvariablen aus Aufträgen und Jobs vorangestellt.
+          </p>
+          <p>
+            Fehlt diese Angabe, verwendet der JobScheduler <i>SCHEDULER_PARAM_</i>.
+          </p>
+          <p>
+            Wird <i>SCHEDULER_VARIABLE_NAME_PREFIX</i> auf <i>*NONE</i> gesetzt, werden Umgebungsvariablen ohne Prefix verwendet.
+          </p>
+          <p>
+            Der Parameter ist inbesondere dann nützlich, wenn bestehende shell Scripte mit dem JobScheduler gesteuert werden sollen. Durch Angabe von 
+<pre>&lt;params>
+   &lt;param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="*NONE" />
+&lt;/params>
+</pre>
+            in der zentralen Konfigurationsdatei <i>scheduler.xml</i> kann der JobScheduler so konfiguriert werden, das die shell Scripte direkt mit Parametern
+            aus einem Auftrag oder Job versorgt werden können. 
+          </p>
+
+          <p>
+            <b style="color:red">ACHTUNG!</b><br/>
+            Durch Setzen dieses Parameters, insbesondere durch die Verwendung von <i>*NONE</i>, kann es zu Überschneidungen mit bestehenden Environmentvariablen wie 
+            beispielsweise <i>PATH</i> kommen. Er sollte deshalb vorsichtig eingesetzt werden.
+          </p>
+
+          <p>
+              Scheduler-Parameter können mit der Methode <scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.
+          </p>
+          <br/><br/>
+          <b>Beispiel (Windows):</b>
+          <p>In der <i>scheduler.xml</i> ist der Prefix <i>MYPREFIX_</i> definiert:</p>
+<pre>&lt;params>
+   &lt;param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="MYPREFIX_" />
+&lt;/params>
+</pre>
+          <p>Folgender Auftrag startet den job <i>sample</i> (über eine Jobkette) und übergibt den Parameter <i>ORDER_PARAM</i>:</p>
+<pre>&lt;order job_chain="job_chain_windows" id="1">
+    &lt;params>
+        &lt;param name="ORDER_PARAM" value="ORDER_PARAM"/>
+    &lt;/params>
+    &lt;run_time let_run="yes"/>
+&lt;/order>
+</pre>
+          
+          <p>
+          Der Job <i>sample</i> ist ein shell job, der auf die Parameter der Order zurück greift und zusätzlich dem shell script einen eigenen Parameter (JOB_PARAM) zur Verfügung stellt.
+          <b>Entscheidend ist, das die Parameter, die aus dem Auftrag und dem Job übergeben werden, im shell script mit dem Prefix <i>MYPREFIX_</i> angepsrochen werden müssen.</b>
+          </p>
+<pre>&lt;job order="yes" stop_on_error="no">
+	&lt;params>
+		&lt;param name="JOB_PARAM" value="JOB_PARAM" />
+	&lt;/params>
+	&lt;script language="shell">
+        <![CDATA[
+echo ORDER_PARAM=%MYPREFIX_ORDER_PARAM%
+echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
+        ]]>
+	&lt;/script>
+&lt;/job>
+</pre>
+        <p>
+          <i>Für Unix gelten $MYPREFIX_ORDER_PARAM und $MYPREFIX_JOB_PARAM.</i>
+        </p>
+        </ul>
+                
+        <a name="param_job" />
+        <h3>Job-Parameter</h3>
+        <p>
+            Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
+        </p>
+
+        <a name="param_auftrag" />
+        <h3>Auftrags-Parameter</h3>
+        <p>
+            Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="params" /> abgerufen werden.
+        </p>
+
     </description>
 
     <xml_parent_elements>
