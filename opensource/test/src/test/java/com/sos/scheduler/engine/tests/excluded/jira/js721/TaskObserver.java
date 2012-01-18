@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.js721;
+package com.sos.scheduler.engine.tests.excluded.jira.js721;
 
 import java.io.FileWriter;
 import java.io.IOException;

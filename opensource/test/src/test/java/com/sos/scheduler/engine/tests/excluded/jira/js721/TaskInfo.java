@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.js721;
+package com.sos.scheduler.engine.tests.excluded.jira.js721;
 
 public interface TaskInfo {
 	public int currentlyRunningTasks();

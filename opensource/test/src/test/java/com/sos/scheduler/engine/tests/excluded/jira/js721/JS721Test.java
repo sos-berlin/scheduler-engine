@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.excluded.js721;
+package com.sos.scheduler.engine.tests.excluded.jira.js721;
 
 import static org.junit.Assert.fail;
 
@@ -15,12 +15,15 @@ import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.JSFileUtils;
 
 /**
  * This test is for running a lot of simultaniously processes in one instance of the JObScheduler.
- * A simple job is started ESTIMATED_TASKS times. The job only waits 
+ * A simple job is started ESTIMATED_TASKS times. The job only waits JOB_RUNTIME_IN_SECONDS.
  * 
- * This behaviour to run more than simulataniously processes is only available and tested for shell jobs.
+ * This behaviour is only available and tested for shell jobs.
+ * 
  * <div class="sos_branding">
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
@@ -34,6 +37,9 @@ public class JS721Test extends SchedulerTest implements TaskInfo {
 	private static final Logger logger = Logger.getLogger(JS721Test.class);
 	
 	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
+	private static final String resultfileName = "JS721.csv";
+	private static final JSCommandUtils util = JSCommandUtils.getInstance();
+	
 	private static final int ESTIMATED_TASKS = 10;
 	private static final int JOB_RUNTIME_IN_SECONDS = 1;
 	
@@ -52,17 +58,17 @@ public class JS721Test extends SchedulerTest implements TaskInfo {
 	public void test() throws Exception {
 		
         controller().activateScheduler();
-        
-		String logfilename = "src/test/java/" + JS721Test.class.getPackage().getName().replace(".", "/") + "/JS721.log";
-		File f = new File( logfilename );
+   
+        File logfile = JSFileUtils.getLocalFile(getClass(), resultfileName); 
 		Timer timer = new Timer();
-		loggerTask = new TaskObserver(f.getAbsolutePath(), this);
+		loggerTask = new TaskObserver(logfile.getAbsolutePath(), this);
 
-        String params = "<params><param name='DELAY' value='" + JOB_RUNTIME_IN_SECONDS + "' /></params>";
 		try {
-			timer.schedule(loggerTask, 1000, 1000);
+			timer.schedule(loggerTask, 1000, 1000);		// schedule the timer task
 	        for (int i = 0; i < ESTIMATED_TASKS; i++) {
-	            startJob(jobName,params);
+	    		controller().scheduler().executeXml(util.buildCommandStartJobImmediately(jobName)
+	    				.addParam("DELAY", String.valueOf(JOB_RUNTIME_IN_SECONDS))
+	    				.getCommand());
 	        }
 		} finally {
 	        controller().tryWaitForTermination(MAX_RUNTIME);
@@ -76,11 +82,6 @@ public class JS721Test extends SchedulerTest implements TaskInfo {
         
 	}
 
-	protected void startJob(String jobName, String params) {
-		String command = "<start_job job='" + jobName + "' at='now'>" + params + "</start_job>";
-		controller().scheduler().executeXml(command);
-	}
-	
 	@HotEventHandler
 	public void handleTaskStart(TaskStartedEvent e) throws IOException {
 		runningTasks++;
