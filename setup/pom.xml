@@ -81,13 +81,13 @@ call prepare-setup.sh <version> to use this pom
         <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
             <configuration>
-                <tasks>
+                <target>
                     <ant antfile="prepare-setup.xml" target="setup.platform">
                        <property name="setup.platform" value="${setup.platform}" />
                        <property name="setup.version" value="${setup.version}" />
                        <property name="settings.localRepository" value="${settings.localRepository}" />
                     </ant>
-                </tasks>
+                </target>
             </configuration>
             <executions>
                 <execution>
