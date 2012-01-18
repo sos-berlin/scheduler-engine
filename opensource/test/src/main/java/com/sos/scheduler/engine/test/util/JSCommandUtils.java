@@ -4,21 +4,23 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 public class JSCommandUtils {
 	
 	private static final Logger logger = Logger.getLogger(JSCommandUtils.class);
+	
+	private static final String idPrefix = "test_";
+
 	private static JSCommandUtils instance = null;
-	
-	private String commandPrefix;
-	private String commandSuffix;
-	private DateTime begin = null;
-	private DateTime end = null;
-	
-	private HashMap<String,String> params;
+
+	private static DateTime lastBegin = null;
+	private static DateTime lastEnd = null;
+	private static String lastId = null;
+	private static String commandPrefix;
+	private static String commandSuffix;
+	private static HashMap<String,String> params;
 	
 	protected JSCommandUtils() {
 		params = new HashMap<String,String>();
@@ -45,7 +47,8 @@ public class JSCommandUtils {
 	}
 	
 	public JSCommandUtils buildCommandAddOrder(String jobchainName) {
-		commandPrefix = "<add_order id='test_" + jobchainName + "' job_chain='" + jobchainName + "'>";
+		setId(jobchainName);
+		commandPrefix = "<add_order id='" + getId() + "' job_chain='" + jobchainName + "'>";
 		commandSuffix = "</add_order>";
 		return this;
 	}
@@ -57,21 +60,31 @@ public class JSCommandUtils {
 	}
 	
 	public JSCommandUtils buildCommandShowCalendar(int DurationInSeconds, What what) {
-    	begin = new DateTime();
-    	end = new DateTime(begin.plusSeconds(DurationInSeconds));
+    	lastBegin = new DateTime();
+    	lastEnd = new DateTime(lastBegin.plusSeconds(DurationInSeconds));
     	DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinuteSecond();
-    	commandPrefix = "<show_calendar before='" + fmt.print(end) + "' from='" + fmt.print(begin) + "' limit='10' what='" + what + "'>";
+    	commandPrefix = "<show_calendar before='" + fmt.print(lastEnd) + "' from='" + fmt.print(lastBegin) + "' limit='10' what='" + what + "'>";
     	commandSuffix = "</show_calendar>";
     	initParams();
     	return this;
 	}
 	
+	public JSCommandUtils buildCommandStartJobImmediately(String jobName) {
+		commandPrefix = "<start_job job='" + jobName + "' at='now'>";
+    	commandSuffix = "</start_job>";
+    	return this;
+	}
+	
 	public DateTime getLastBegin() {
-		return begin;
+		return lastBegin;
 	}
 	
 	public DateTime getLastEnd() {
-		return end;
+		return lastEnd;
+	}
+	
+	public String getLastId() {
+		return lastId;
 	}
 	
 	public void initParams() {
@@ -81,5 +94,13 @@ public class JSCommandUtils {
 	public JSCommandUtils addParam(String paramName, String paramValue) {
 		params.put(paramName, paramValue);
 		return this;
+	}
+	
+	private void setId(String jobchainName) {
+		lastId = idPrefix + jobchainName;
+	}
+	
+	private String getId() {
+		return lastId;
 	}
 }

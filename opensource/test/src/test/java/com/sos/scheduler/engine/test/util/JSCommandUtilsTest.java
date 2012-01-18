@@ -23,6 +23,7 @@ public class JSCommandUtilsTest {
 	private static final String estimatedBuildCommandAddOrder = "estimatedBuildCommandAddOrder.txt";
 	private static final String estimatedBuildCommandAddOrderWithParams = "estimatedBuildCommandAddOrderWithParams.txt";
 	private static final String estimatedBuildCommandAddOrderWithParams2 = "estimatedBuildCommandAddOrderWithParams2.txt";
+	private static final String estimatedBuildCommandStartJobImmidiately = "estimatedBuildCommandStartJobImmidiately.txt";
 	
 	
 	@Test
@@ -71,4 +72,16 @@ public class JSCommandUtilsTest {
 		logger.debug("estimated content: " + estimatedContent);
 		assertTrue("content of file '" + file.getAbsolutePath() + "' is not estimated",Files.equal(file, estimated));
 	}
+
+	@Test
+	public void testBuildCommandStartJobImmidiately() throws IOException {
+		util.addParam("myParam1", "value1");
+		util.addParam("myParam2", "value2");
+		String command = util.buildCommandStartJobImmediately("myJob").getCommand();
+		File file = JSFileUtils.createEmptyTestresultFile(JSCommandUtilsTest.class,"testBuildCommandStartJobImmidiately.txt");
+		Files.append(command, file, Charset.defaultCharset());
+		File estimated = JSFileUtils.getLocalResourceFile(JSCommandUtilsTest.class, estimatedBuildCommandStartJobImmidiately);
+		compareFiles(file,estimated);
+	}
+	
 }
