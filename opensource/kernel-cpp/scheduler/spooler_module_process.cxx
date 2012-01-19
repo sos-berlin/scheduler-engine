@@ -889,7 +889,7 @@ void Process_module_instance::fill_process_environment_with_params()
     // the default prefix for scheduler environment variables is SCHEDULER_PARAM_, but it can overwrite with the scheduler variable
     // SCHEDULER_VARIABLE_NAME_PREFIX. Use SCHEDULER_VARIABLE_NAME_PREFIX=*NONE to use your scheduler environment variables without prefix.
     string prefix;
-    if( _spooler->variables() )
+    if( _spooler && _spooler->variables() )
        prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
 
     string environment_variable_name_prefix = "SCHEDULER_PARAM_";
