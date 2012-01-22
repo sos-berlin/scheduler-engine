@@ -1,10 +1,6 @@
 package com.sos.scheduler.engine.kernel.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -42,6 +38,10 @@ public final class XmlUtils {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         }
         catch (ParserConfigurationException x) { throw new XmlException(x); }
+    }
+
+    public static Document loadXml(byte[] xml) {
+        return loadXml(new ByteArrayInputStream(xml));
     }
 
     public static Document loadXml(InputStream in) {

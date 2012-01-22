@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import javax.inject.Inject
+import javax.ws.rs.core.{EntityTag, MediaType, Response}
 import javax.ws.rs._
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
+import com.sos.scheduler.engine.plugins.jetty.Constants._
 import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.noCache
-import javax.ws.rs.core.{EntityTag, MediaType, Response, Variant}
 
 @Path("/objects/job")
 class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: SchedulerInstanceId,
@@ -18,17 +18,13 @@ class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: Sch
 
   @GET @Path("configuration")
   @Produces(Array(MediaType.TEXT_XML))
-  def getJobConfiguration = Response.ok(job.getConfigurationXml).tag(jobTag).build()
+  def getConfiguration = Response.ok(job.getConfigurationXmlBytes).tag(jobTag).build()
 
   @GET @Path("description")
   @Produces(Array(MediaType.TEXT_PLAIN))
-  def getJobLog = Response.ok(job.getDescription).tag(jobTag).build()
+  def getDescription = Response.ok(job.getDescription, textPlainVariant).tag(jobTag).build()
 
   @GET @Path("log.snapshot")
   @Produces(Array(MediaType.TEXT_PLAIN))
-  def getJobLogSnapshot = {
-    val file = job.getLog.getFile
-    val variant = new Variant(MediaType.TEXT_PLAIN_TYPE, null, schedulerEncoding.name())
-    Response.ok(file, variant).cacheControl(noCache).build()
-  }
+  def getLogSnapshot = Response.ok(job.getLog.getFile, schedulerTextPlainVariant).cacheControl(noCache).build()
 }

@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.kernel.folder.FileBasedState;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 
-import static com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.xmlFromCppByteString;
+import static com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString;
 
 @ForCpp
 public final class Job extends FileBased implements Sister, UnmodifiableJob {
@@ -35,8 +35,8 @@ public final class Job extends FileBased implements Sister, UnmodifiableJob {
         return new AbsolutePath(cppProxy.path());
     }
 
-    public String getConfigurationXml() {
-        return xmlFromCppByteString(cppProxy.source_xml());
+    public byte[] getConfigurationXmlBytes() {
+        return byteArrayFromCppByteString(cppProxy.source_xml());
     }
 
     public String getDescription() {

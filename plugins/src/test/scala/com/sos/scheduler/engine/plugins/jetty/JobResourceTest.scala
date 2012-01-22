@@ -28,7 +28,7 @@ final class JobResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
 
   test("Read a job description") {
     val result = jobResource.path("description").accept(TEXT_PLAIN_TYPE).get(classOf[String])
-    result should equal("TEST-DESCRIPTION")
+    result should equal("TEST-DESCRIPTION mit Ümläüten")
   }
 
   test("Read a job snapshot log") {
