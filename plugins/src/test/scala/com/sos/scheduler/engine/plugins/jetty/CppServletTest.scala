@@ -12,10 +12,9 @@ import org.scalatest.matchers.ShouldMatchers._
 
 import JettyPluginTest._
 import com.sun.jersey.api.client.Client
-import org.junit.Ignore
+import org.joda.time.Duration
 
-//@RunWith(classOf[JUnitRunner])
-@Ignore
+@RunWith(classOf[JUnitRunner])
 final class CppServletTest extends ScalaSchedulerTest {
   import CppServletTest._
 
@@ -24,7 +23,7 @@ final class CppServletTest extends ScalaSchedulerTest {
     super.checkedBeforeAll(configMap)
   }
 
-  private val authResource = newAuthentifyingResource(contextUri)
+  private val authResource = newAuthentifyingResource(contextUri, timeout=new Duration(30*1000))
   private val nonAuthResource = Client.create().resource(contextUri)
 
   test("Kommando über POST") {

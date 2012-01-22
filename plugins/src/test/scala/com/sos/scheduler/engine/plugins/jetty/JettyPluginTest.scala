@@ -3,10 +3,14 @@ package com.sos.scheduler.engine.plugins.jetty
 import java.net.URI
 import com.sun.jersey.api.client.{Client, WebResource}
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter
+import org.joda.time.Duration
 
 object JettyPluginTest {
-  def newAuthentifyingResource(uri: URI) = {
+  val defaultTimeout = new Duration(60*1000)
+
+  def newAuthentifyingResource(uri: URI, timeout: Duration = defaultTimeout) = {
     val result = Client.create()
+    result.setReadTimeout(timeout.getMillis.toInt)
     result.addFilter(new HTTPBasicAuthFilter("testName", "testPassword"))
     result.resource(uri)
   }
