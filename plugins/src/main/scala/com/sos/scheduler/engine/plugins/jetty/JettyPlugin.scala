@@ -1,18 +1,21 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import javax.inject.Inject
+import com.google.common.base.Strings.emptyToNull
+import com.google.inject.{Injector, Guice}
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
 import com.sos.scheduler.engine.kernel.scheduler.HasGuiceModule
-import com.sos.scheduler.engine.kernel.util.XmlUtils
+import com.sos.scheduler.engine.kernel.util.XmlUtils.{childElementOrNull, intXmlAttribute}
 import com.sos.scheduler.engine.plugins.jetty.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import org.apache.log4j.Logger
-import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.{Handler, Server}
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler}
+import org.eclipse.jetty.security._
+import org.eclipse.jetty.util.security.Constraint
 import org.w3c.dom.Element
-import com.google.inject.{Injector, Guice}
 
 /**JS-795: Einbau von Jetty in den JobScheduler. */
 final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule) extends AbstractPlugin {
@@ -20,16 +23,26 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 
   private lazy val server = {
     val schedulerModule = hasGuiceModule.getGuiceModule
-    val port = XmlUtils.intXmlAttribute(pluginElement, "port")
 //    val contexts = new ContextHandlerCollection()
 //    contexts.setHandlers(Array(
 //      newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule())),
 //      newContextHandler(cppContextPath, Guice.createInjector(schedulerModule, newCppServletModule()))
 //      //Funktioniert nicht: injector.createChildInjector(newServletModule())
 //    ))
-    val server = new Server(port)
-    server.setHandler(newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule())))
-    server
+    newServer(
+      port = intXmlAttribute(pluginElement, "port"),
+      handler = newContextHandler(
+        contextPath,
+        injector = Guice.createInjector(schedulerModule, newServletModule()),
+        loginService = childElementOption(pluginElement, "loginService") map PluginLoginService.apply)
+    )
+  }
+
+  private def newServer(port: Int, handler: Handler, beans: Iterable[AnyRef] = List()) = {
+    val result = new Server(port)
+    result.setHandler(handler)
+    beans foreach { bean => result.addBean(bean) }
+    result
   }
 
   override def activate() {
@@ -47,13 +60,40 @@ object JettyPlugin {
   private val contextPath = ""  // Mehrere Kontexte funktionieren nicht und GuiceFilter meldet einen Konflikt. Deshalb simulieren wir mit prefixPath.
   val prefixPath = "/JobScheduler/engine"
   val cppPrefixPath = ""
+  val realmName = "JobScheduler realm"    //TODO Was macht der Realm-Name?
+  val adminstratorRoleName = "administrator"
 
-  private def newContextHandler(contextPath: String, injector: Injector) = {
+  private def newContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
     val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
     result.setContextPath(contextPath)
     result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
     result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
     result.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
+    loginService foreach { s =>
+      result.setSecurityHandler(newConstraintSecurityHandler(s))
+    }
+    result
+  }
+
+  private def newConstraintSecurityHandler(loginService: LoginService) = {
+    val constraint = {
+      val o = new Constraint()
+      o.setName(Constraint.__BASIC_AUTH)
+      o.setRoles(Array(adminstratorRoleName))
+      o.setAuthenticate(true)
+      o
+    }
+    val constraintMapping = {
+      val o = new ConstraintMapping()
+      o.setConstraint(constraint)
+      o.setPathSpec("/*")
+      o
+    }
+    val result = new ConstraintSecurityHandler()
+    result.setRealmName(realmName)
+    result.setLoginService(loginService)
+    //sh.setUserRealm(new HashUserRealm("MyRealm",System.getProperty("jetty.home")+"/etc/realm.properties"));
+    result.setConstraintMappings(Array(constraintMapping))
     result
   }
 
@@ -77,6 +117,10 @@ object JettyPlugin {
       serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])
     }
   }
+
+  private def noneIfEmpty(s: String) = Option(emptyToNull(s))
+
+  private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
 
 
   // TODO URIs und REST

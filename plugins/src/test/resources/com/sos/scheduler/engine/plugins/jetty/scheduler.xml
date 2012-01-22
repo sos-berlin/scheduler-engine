@@ -3,7 +3,13 @@
     <config>
         <plugins>
             <plugin java_class="com.sos.scheduler.engine.plugins.jetty.JettyPlugin">
-                <plugin.config port="44440"/>
+                <plugin.config port="44440">
+                    <loginService>
+                        <logins>
+                            <login name="testName" password="testPassword" roles="administrator"/>
+                        </logins>
+                    </loginService>
+                </plugin.config>
             </plugin>
         </plugins>
     </config>

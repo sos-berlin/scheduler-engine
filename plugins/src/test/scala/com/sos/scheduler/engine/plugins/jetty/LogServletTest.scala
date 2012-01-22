@@ -10,6 +10,8 @@ import org.apache.log4j.Logger
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
+import JettyPluginTest._
+
 //TODO Wechsel der Datei bei Log.start_new_file() und instance_number berücksichtigen
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
 
@@ -17,14 +19,12 @@ import org.scalatest.junit.JUnitRunner
 final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   import LogServletTest._
 
-  private val client = Client.create()
-
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
     controller.activateScheduler()
     super.checkedBeforeAll(configMap)
   }
 
-  private val objectsResource = client.resource(contextUri+"/objects")
+  private val objectsResource = newAuthResource(contextUri+"/objects")
 
   test("Read a task log") {
     startLogThread(objectsResource.path("job.log").queryParam("job", "a"))
