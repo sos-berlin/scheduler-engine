@@ -2,5 +2,6 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
     stop_on_error="no"
 >
+    <description>TEST-DESCRIPTION</description>
     <script java_class="com.sos.scheduler.engine.plugins.jetty.TestJob"/>
 </job>

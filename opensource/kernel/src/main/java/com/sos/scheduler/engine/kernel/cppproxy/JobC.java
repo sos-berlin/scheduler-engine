@@ -12,5 +12,7 @@ public interface JobC extends CppProxyWithSister<Job> {
     boolean is_file_based_reread();
     String name();
     String path();
+    String source_xml();
+    String description();
     Prefix_logC log();
 }

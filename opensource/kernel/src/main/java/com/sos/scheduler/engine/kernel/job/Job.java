@@ -10,6 +10,8 @@ import com.sos.scheduler.engine.kernel.folder.FileBasedState;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 
+import static com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.xmlFromCppByteString;
+
 @ForCpp
 public final class Job extends FileBased implements Sister, UnmodifiableJob {
     private final JobC cppProxy;
@@ -31,6 +33,14 @@ public final class Job extends FileBased implements Sister, UnmodifiableJob {
 
     @Override public AbsolutePath getPath() {
         return new AbsolutePath(cppProxy.path());
+    }
+
+    public String getConfigurationXml() {
+        return xmlFromCppByteString(cppProxy.source_xml());
+    }
+
+    public String getDescription() {
+        return cppProxy.description();
     }
 
     /** @return true, wenn das {@link FileBased} nach einer Änderung erneut geladen worden ist. */

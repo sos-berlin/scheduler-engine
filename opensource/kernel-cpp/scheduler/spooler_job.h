@@ -179,6 +179,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*  );
     xml::Element_ptr            why_dom_element             ( const xml::Document_ptr& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
+    const string&               description                 () const                                { return _description; }
 
 
     void                        init_start_when_directory_changed( Task* = NULL );
@@ -197,9 +198,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
     string                      profile_section             ();
-//    void                    set_visible                     ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
-//    void                    set_visible                     ( Visibility v )                        { _visible = v; }
-//    bool                     is_visible                     () const                                { return _visible == visible_yes; }
     bool                        temporary                   () const                                { return _temporary; }
 
     void                        on_prepare_to_remove        ();
@@ -308,7 +306,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     ptr<Com_job>&               com_job                     ()                                      { return _com_job; }
 
-  //Order_queue*                order_queue                 () const                                { return _order_queue; }
     Order_queue*                any_order_queue             () const;
     Combined_job_nodes*         combined_job_nodes          () const                                { return _combined_job_nodes; }
     bool                        connect_job_node            ( job_chain::Job_node* );
@@ -364,7 +361,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     Time                       _task_timeout;               // Frist für einen Schritt einer Task
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
     bool                       _force_idle_timeout;         // _idle_timeout wirkt beendet auch Tasks, wenn _min_tasks unterschritten wird
-//    Visibility                 _visible;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _start_once_for_directory;
     bool                       _machine_resumable;          // Test
@@ -416,7 +412,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     Job_history                _history;
 
-  //ptr<Order_queue>           _order_queue;
     bool                       _is_order_controlled;
 
     ptr<Combined_job_nodes> _combined_job_nodes;
@@ -457,13 +452,9 @@ struct Job_folder : typed_folder< Job >
                                 Job_folder                  ( Folder* );
 
 
-  //void                        set_dom                     ( const xml::Element_ptr& );
-  //void                        load_job_from_xml           ( const xml::Element_ptr&  );
-  //void                        add_or_replace_job_from_xml ( const string& name, const xml::Element_ptr&, bool activate = false );
     void                        add_job                     ( const ptr<Job>& job )                 { add_file_based( +job ); }
     Job*                        job                         ( const string& name )                  { return file_based( name ); }
     Job*                        job_or_null                 ( const string& name )                  { return file_based_or_null( name ); }
-  //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "jobs" ); }
 };
 
