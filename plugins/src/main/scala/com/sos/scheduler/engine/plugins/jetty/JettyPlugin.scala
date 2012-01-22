@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import javax.inject.Inject
-import com.google.common.base.Strings.emptyToNull
 import com.google.inject.{Injector, Guice}
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
@@ -60,7 +59,6 @@ object JettyPlugin {
   private val contextPath = ""  // Mehrere Kontexte funktionieren nicht und GuiceFilter meldet einen Konflikt. Deshalb simulieren wir mit prefixPath.
   val prefixPath = "/JobScheduler/engine"
   val cppPrefixPath = ""
-  val realmName = "JobScheduler realm"    //TODO Was macht der Realm-Name?
   val adminstratorRoleName = "administrator"
 
   private def newContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
@@ -89,10 +87,9 @@ object JettyPlugin {
       o.setPathSpec("/*")
       o
     }
-    val result = new ConstraintSecurityHandler()
-    result.setRealmName(realmName)
+    val result = new ConstraintSecurityHandler
+    result.setRealmName(loginService.getName)
     result.setLoginService(loginService)
-    //sh.setUserRealm(new HashUserRealm("MyRealm",System.getProperty("jetty.home")+"/etc/realm.properties"));
     result.setConstraintMappings(Array(constraintMapping))
     result
   }
@@ -117,8 +114,6 @@ object JettyPlugin {
       serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])
     }
   }
-
-  private def noneIfEmpty(s: String) = Option(emptyToNull(s))
 
   private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
 

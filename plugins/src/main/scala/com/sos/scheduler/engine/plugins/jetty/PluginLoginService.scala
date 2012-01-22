@@ -12,7 +12,7 @@ import java.util.regex.Pattern
 
 class PluginLoginService(logins: Iterable[Login]) extends MappedLoginService {
   logins foreach { o => putUser(o.name, o.credential, o.roles) }
-  setName("JobScheduler realm")
+  setName(realmName)
 
   def loadUser(username: String) = null
 
@@ -20,6 +20,8 @@ class PluginLoginService(logins: Iterable[Login]) extends MappedLoginService {
 }
 
 object PluginLoginService {
+  val realmName = "JobScheduler realm"
+
   def apply(element: Element) = new PluginLoginService(logins(element))
 
   private val spaceSplitter = Splitter.on(Pattern.compile(" +")).omitEmptyStrings();
