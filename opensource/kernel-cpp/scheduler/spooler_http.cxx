@@ -1467,7 +1467,7 @@ void Java_response::on_ready() {
 }
 
 void Java_response::on_event_signaled() {
-    _responseJ.onNextChunkIsReady();
+    if (_responseJ)  _responseJ.onNextChunkIsReady();
 }
 
 //---------------------------------------------------------String_chunk_reader::get_next_chunk_size
