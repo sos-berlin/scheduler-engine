@@ -1,20 +1,23 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.sos.scheduler.engine.kernel.scheduler.{Configuration, HasGuiceModule}
 import com.google.inject.{Injector, Guice}
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
+import com.sos.scheduler.engine.kernel.scheduler.{Configuration, HasGuiceModule}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
 import com.sos.scheduler.engine.kernel.util.XmlUtils.{childElementOrNull, intXmlAttribute}
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginConfiguration._
 import com.sos.scheduler.engine.plugins.jetty.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.io.File
 import javax.inject.Inject
+import javax.servlet.Filter
 import org.apache.log4j.Logger
 import org.eclipse.jetty.security._
+import org.eclipse.jetty.servlet.{Holder, FilterHolder, DefaultServlet, ServletContextHandler}
+import org.eclipse.jetty.servlets.GzipFilter
 import org.eclipse.jetty.server.handler.{RequestLogHandler, HandlerCollection}
 import org.eclipse.jetty.server._
-import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler}
 import org.eclipse.jetty.util.security.Constraint
 import org.w3c.dom.Element
 
@@ -65,9 +68,6 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 object JettyPlugin {
   private val logger = Logger.getLogger(classOf[JettyPlugin])
   private val contextPath = ""  // Mehrere Kontexte funktionieren nicht und GuiceFilter meldet einen Konflikt. Deshalb simulieren wir mit prefixPath.
-  val prefixPath = "/JobScheduler/engine"
-  val cppPrefixPath = ""
-  val adminstratorRoleName = "administrator"
 
   private def newHandlerCollection(handlers: Handler*) = {
     val result = new HandlerCollection
@@ -83,13 +83,27 @@ object JettyPlugin {
 
   private def newContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
     val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
+
+    def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
+      result.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
+    }
+
     result.setContextPath(contextPath)
     result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
+    //addFilter(classOf[GzipFilter], "/*", "mimeTypes" -> gzipContentTypes.mkString(","))
+    //result.addFilter(classOf[GzipFilter], "/*", null);
     result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
     result.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
     loginService foreach { s =>
       result.setSecurityHandler(newConstraintSecurityHandler(s))
     }
+    result
+  }
+
+  private def newFilterHolder[F <: Filter](c: Class[F], initParameters: Iterable[(String, String)]) = {
+    val result = new FilterHolder(Holder.Source.EMBEDDED)
+    result.setHeldClass(classOf[GzipFilter])
+    for (p <- initParameters) result.setInitParameter(p._1, p._2)
     result
   }
 

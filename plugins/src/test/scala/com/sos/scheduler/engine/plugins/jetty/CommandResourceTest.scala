@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginConfiguration.prefixPath
 import java.net.URI
 import javax.ws.rs.core.MediaType._
-import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
 import org.apache.log4j.Logger
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -40,5 +41,5 @@ final class CommandResourceTest extends ScalaSchedulerTest with CheckedBeforeAll
 object CommandResourceTest {
   private val logger = Logger.getLogger(classOf[CommandResourceTest])
   private val jettyPortNumber = 44440
-  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.prefixPath)
+  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + prefixPath)
 }

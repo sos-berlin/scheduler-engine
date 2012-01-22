@@ -42,8 +42,8 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
         def continue() {
           if (chunkReaderC != null) {
             serveChunks()
-            if (!isClosed)
-              startAsync()
+            if (!isClosed) startAsync()
+            else writer.flush()
           }
         }
 

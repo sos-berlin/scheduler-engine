@@ -59,7 +59,7 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
 object LogServletTest {
   private val logger = Logger.getLogger(classOf[LogServletTest])
   private val jettyPortNumber = 44440
-  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPlugin.prefixPath)
+  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPluginConfiguration.prefixPath)
 
   private def logReader(reader: Reader) {
     val r = new BufferedReader(reader)
