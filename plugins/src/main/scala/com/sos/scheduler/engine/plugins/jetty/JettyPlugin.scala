@@ -1,24 +1,30 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import javax.inject.Inject
+import com.sos.scheduler.engine.kernel.scheduler.{Configuration, HasGuiceModule}
 import com.google.inject.{Injector, Guice}
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
-import com.sos.scheduler.engine.kernel.scheduler.HasGuiceModule
 import com.sos.scheduler.engine.kernel.util.XmlUtils.{childElementOrNull, intXmlAttribute}
 import com.sos.scheduler.engine.plugins.jetty.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
+import java.io.File
+import javax.inject.Inject
 import org.apache.log4j.Logger
-import org.eclipse.jetty.server.{Handler, Server}
-import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler}
 import org.eclipse.jetty.security._
+import org.eclipse.jetty.server.handler.{RequestLogHandler, HandlerCollection}
+import org.eclipse.jetty.server._
+import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler}
 import org.eclipse.jetty.util.security.Constraint
 import org.w3c.dom.Element
 
 /**JS-795: Einbau von Jetty in den JobScheduler. */
-final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule) extends AbstractPlugin {
+final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, configuration: Configuration)
+  extends AbstractPlugin {
+
   import JettyPlugin._
+
+  val accessLogFile = new File(configuration.getLogDirectory, "http.log");
 
   private lazy val server = {
     val schedulerModule = hasGuiceModule.getGuiceModule
@@ -30,10 +36,12 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 //    ))
     newServer(
       port = intXmlAttribute(pluginElement, "port"),
-      handler = newContextHandler(
-        contextPath,
-        injector = Guice.createInjector(schedulerModule, newServletModule()),
-        loginService = childElementOption(pluginElement, "loginService") map PluginLoginService.apply)
+      handler = newHandlerCollection(
+        newRequestLogHandler(new NCSARequestLog(accessLogFile.toString)),
+        newContextHandler(
+          contextPath,
+          injector = Guice.createInjector(schedulerModule, newServletModule()),
+          loginService = childElementOption(pluginElement, "loginService") map PluginLoginService.apply))
     )
   }
 
@@ -60,6 +68,18 @@ object JettyPlugin {
   val prefixPath = "/JobScheduler/engine"
   val cppPrefixPath = ""
   val adminstratorRoleName = "administrator"
+
+  private def newHandlerCollection(handlers: Handler*) = {
+    val result = new HandlerCollection
+    result.setHandlers(handlers.toArray)
+    result
+  }
+
+  private def newRequestLogHandler(r: RequestLog) = {
+    val result = new RequestLogHandler
+    result.setRequestLog(r)
+    result
+  }
 
   private def newContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
     val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
