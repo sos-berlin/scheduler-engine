@@ -59,6 +59,7 @@ public final class Scheduler implements HasPlatform, Sister,
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
     private final SpoolerC cppProxy;
+    private final Configuration configuration;
     private final SchedulerControllerBridge controllerBridge;
     private final PrefixLog _log;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
     private final Platform platform;
@@ -80,6 +81,7 @@ public final class Scheduler implements HasPlatform, Sister,
             return new AbstractModule() {
                 @Override protected void configure() {
                     bind(Scheduler.class).toInstance(Scheduler.this);
+                    bind(Configuration.class).toInstance(configuration);
                     bind(SchedulerInstanceId.class).toInstance(instanceId);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  //TODO Provisorisch für MyJettyServer
                     bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
@@ -98,6 +100,7 @@ public final class Scheduler implements HasPlatform, Sister,
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         this.cppProxy = cppProxy;
+        configuration = new Configuration(this, cppProxy);
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
         cppProxy.setSister(this);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
