@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -176,8 +177,9 @@ public final class XmlUtils {
 //        return result;
     }
 
-    public static List<Element> namedChildElements(String name, Element element) {
-        return ImmutableList.copyOf(new NamedChildElements(name, element));
+    public static Element childElementOrNull(Element e, String name) {
+        Iterator<Element> i = new NamedChildElements(name, e).iterator();
+        return i.hasNext()? i.next() : null;
     }
 
     public static NodeList nodeListXpath(Node baseNode, String xpathExpression) {
