@@ -1,18 +1,18 @@
 package com.sos.scheduler.engine.main;
 
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
-
-import java.io.File;
-
-import com.sos.scheduler.engine.kernel.util.Stopwatch;
-import org.apache.log4j.Logger;
-
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.Settings;
+import com.sos.scheduler.engine.kernel.util.Stopwatch;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.propagate;
+import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 
 /** Steuert den {@link SchedulerThread}. */
 public class SchedulerThreadController implements SchedulerController {
@@ -25,6 +25,10 @@ public class SchedulerThreadController implements SchedulerController {
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThreadControllerBridge controllerBridge = new SchedulerThreadControllerBridge(this, eventBus);
     private final SchedulerThread thread = new SchedulerThread(controllerBridge);
+
+    public SchedulerThreadController() {
+        enableJavaUtilLoggingOverSLF4J();
+    }
 
     @Override public final void setSettings(Settings o) {
         checkIsNotStarted();
