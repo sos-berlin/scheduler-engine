@@ -47,14 +47,22 @@ public class JSCommandUtils {
 	}
 	
 	public JSCommandUtils buildCommandAddOrder(String jobchainName) {
-		setId(jobchainName);
+		return buildCommandAddOrder(jobchainName,jobchainName);
+	}
+	
+	public JSCommandUtils buildCommandAddOrder(String jobchainName, String id) {
+		setId(id);
 		commandPrefix = "<add_order id='" + getId() + "' job_chain='" + jobchainName + "'>";
 		commandSuffix = "</add_order>";
 		return this;
 	}
 	
 	public JSCommandUtils buildCommandModifyOrder(String order) {
-		commandPrefix = "<modify_order at='now' job_chain='" + order + "_chain' order='" + order + "'>";
+		return buildCommandModifyOrder(order, order);
+	}
+	
+	public JSCommandUtils buildCommandModifyOrder(String order, String id) {
+		commandPrefix = "<modify_order at='now' job_chain='" + order + "_chain' order='" + id + "'>";
 		commandSuffix = "</modify_order>";
 		return this;
 	}
@@ -83,9 +91,9 @@ public class JSCommandUtils {
 		return lastEnd;
 	}
 	
-	public String getLastId() {
-		return lastId;
-	}
+//	public String getLastId() {
+//		return lastId;
+//	}
 	
 	public void initParams() {
 		params.clear();
@@ -97,10 +105,10 @@ public class JSCommandUtils {
 	}
 	
 	private void setId(String jobchainName) {
-		lastId = idPrefix + jobchainName;
+		lastId = jobchainName;
 	}
 	
-	private String getId() {
+	public String getId() {
 		return lastId;
 	}
 }
