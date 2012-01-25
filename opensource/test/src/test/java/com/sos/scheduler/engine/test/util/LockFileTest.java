@@ -33,7 +33,7 @@ public class LockFileTest implements Observer {
 		postprocessing();
 	}
 
-	// Probleme auf w2k3
+	//TODO Probleme auf w2k3
 	@Ignore
 	public void testLockFileSingle() throws Exception {
 		preprocessing();
