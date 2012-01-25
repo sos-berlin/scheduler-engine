@@ -1,16 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: param.xml,v 1.3 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: param.xml 13605 2008-07-08 08:14:29Z jz $-->
 
 <!--         title    = "Ein Parameter"-->
 
 <xml_element name     = "param" 
-             title    = "Single Parameters"
+             title    = "Individual Parameters"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2008-07-08 10:14:29 +0200 (Di, 08 Jul 2008) $">
+             date     = "$Date: 2008-07-08 10:14:29 +0200 (Tue, 08 Jul 2008) $">
 
     <description>
         <p>
@@ -18,28 +18,151 @@
         <!--Siehe <scheduler_element name="params" />.-->
         </p>
         <p>
-            Defines the individual parameters for the Job Scheduler, a job or an order.
-            Parameters can be overwritten and extended whilst a job or order is being executed.
-        <!--Bestimmt einen einzelnen Parameter für den Scheduler, einen Job oder für einen Auftrag.
-            Die Parameter können zur Laufzeit überschrieben und erweitert werden.-->
+            Defines the individual parameters for the <a href="#param_scheduler">Job Scheduler</a>, 
+						a <a href="#param_job">Job</a> or an <a href="#param_auftrag">Order</a>.
+        <!--Bestimmt einen einzelnen Parameter für den <a href="#param_scheduler">Scheduler</a>, 
+						einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.-->
         </p>
         <p>
-            Job Scheduler parameters can be called using the 
-            <scheduler_method class="Spooler" object="spooler" method="variables"/> method.
-        <!--Scheduler-Parameter können mit der Methode <scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.-->
+            The use of individual parameters beginning with <b>SCHEDULER_</b> is not recommended 
+						as this name space is reserved for the JobScheduler configuration settings.
+        <!--Es wird empfohlen keine eigenen Parameter einzustellen, 
+						die mit der Zeichenfolge <b>SCHEDULER_</b> beginnen, 
+						da dieser Namensraum für Konfigurationseinstellungen des JobScheduler reserviert ist.-->
         </p>
+        <p>
+            The parameters can be overwritten and extended during run time.
+        <!--Die Parameter können zur Laufzeit überschrieben und erweitert werden.-->
+        </p>
+
+        <p>
+            See also <scheduler_method class="Variable_set" /> class.
+        <!--Siehe auch die Klasse <scheduler_method class="Variable_set" />.-->
+        </p>
+        
+        <a name="param_scheduler" />
+        <h3>JobScheduler Parameters</h3>
+    <!--<h3>Scheduler-Parameter</h3>-->
+        <p> 
+           The following parameters can be used to configure the JobScheduler:
+       <!--Folgende Scheduler-Parameter könnnen für die Konfiguration des JobScheduler verwendet werden:-->
+        </p>
+          
+        <ul>
+          <li><b>SCHEDULER_VARIABLE_NAME_PREFIX</b></li>
+      <!--<li><b>SCHEDULER_VARIABLE_NAME_PREFIX</b></li>-->
+          <p>
+            This prefix can be used to specify the names used to declare job and order parameters in shell jobs. 
+						These names are made up from this prefix and the relevant job and order environment variables.
+				<!--Mit diesem Parameter kann bestimmt werden, 
+						unter welchen Namen Parameter aus Aufträgen und Jobs in in einem Shell job bekannt gemacht werden. 
+						Der Prefix wird den Umgebungsvariablen aus Aufträgen und Jobs vorangestellt.-->
+          </p>
+          <p>
+            The JobScheduler will use <i>SCHEDULER_PARAM_</i> if the 
+						<i>SCHEDULER_VARIABLE_NAME_PREFIX</i>  parameter is not specified.
+        <!--Fehlt diese Angabe, verwendet der JobScheduler <i>SCHEDULER_PARAM_</i>.-->
+          </p>
+          <p>
+            If the <i>SCHEDULER_VARIABLE_NAME_PREFIX</i> is set to <i>*NONE</i>, 
+						the environment variable(s) will be used without a prefix.
+        <!--Wird <i>SCHEDULER_VARIABLE_NAME_PREFIX</i> auf <i>*NONE</i> gesetzt, 
+						werden Umgebungsvariablen ohne Prefix verwendet.-->
+          </p>
+          <p>
+            This parameter is particularly useful, 
+						when already existing shell scripts are to be controlled by the JobScheduler. 
+						When
+        <!--Der Parameter ist inbesondere dann nützlich, 
+						wenn bestehende shell Scripte mit dem JobScheduler gesteuert werden sollen. 
+						Durch Angabe von -->
+<pre>&lt;params>
+   &lt;param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="*NONE" />
+&lt;/params>
+</pre>
+            is specified in the <i>scheduler.xml</i> central configuration file, it is possible to configure the JobScheduler so that job or order parameters can be directly used in shell scripts. 
+        <!--in der zentralen Konfigurationsdatei <i>scheduler.xml</i> kann der JobScheduler so konfiguriert werden, 		das die shell Scripte direkt mit Parametern aus einem Auftrag oder Job versorgt werden können. -->
+          </p>
+
+          <p>
+            <b style="color:red">CAREFUL!</b><br/>
+        <!--<b style="color:red">ACHTUNG!</b><br/>-->
+            Setting this parameter - in particular setting it to <i>*NONE</i> - 
+						can lead to conflicts with existing environment variables such as <i>PATH</i>. 
+						It should therefore be used carefully.
+				<!--Durch Setzen dieses Parameters, insbesondere durch die Verwendung von <i>*NONE</i>, 
+						kann es zu Überschneidungen mit bestehenden Environmentvariablen wie beispielsweise <i>PATH</i> kommen. Er sollte deshalb vorsichtig eingesetzt werden.-->
+          </p>
+
+          <p>
+              Scheduler parameters can be called using the  
+							<scheduler_method class="Spooler" object="spooler" method="variables"/> method.
+          <!--Scheduler-Parameter können mit der Methode 
+							<scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.-->
+          </p>
+          <br/><br/>
+          <b>Example (Windows):</b>
+      <!--<b>Beispiel (Windows):</b>-->
+          <p>In this example the <i>MYPREFIX_</i> prefix is specified in the <i>scheduler.xml</i>file:</p>
+      <!--<p>In der <i>scheduler.xml</i> ist der Prefix <i>MYPREFIX_</i> definiert:</p>-->
+<pre>&lt;params>
+   &lt;param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="MYPREFIX_" />
+&lt;/params>
+</pre>
+          <p>and the following order is used to start the <i>sample</i> job (via a job chain) and 
+					hand over the <i>ORDER_PARAM</i> parameter:</p>
+      <!--<p>Folgender Auftrag startet den job <i>sample</i> (über eine Jobkette) und übergibt den Parameter 		  <i>ORDER_PARAM</i>:</p>-->
+<pre>&lt;order job_chain="job_chain_windows" id="1">
+    &lt;params>
+        &lt;param name="ORDER_PARAM" value="ORDER_PARAM"/>
+    &lt;/params>
+    &lt;run_time let_run="yes"/>
+&lt;/order>
+</pre>
+          
+          <p>
+          The <i>sample</i> job is a shell job, 
+					that uses the order parameter as well as providing an additional parameter (JOB_PARAM) for the shell script.
+          <b>It is important that the parameters forwarded by the order and the job are addressed using the prefix <i>MYPREFIX_</i>.</b>
+      <!--Der Job <i>sample</i> ist ein shell job, 
+					der auf die Parameter der Order zurück greift und zusätzlich dem shell script einen eigenen Parameter (JOB_PARAM) zur Verfügung stellt.
+          <b>Entscheidend ist, das die Parameter, die aus dem Auftrag und dem Job übergeben werden, 
+					im shell script mit dem Prefix <i>MYPREFIX_</i> angepsrochen werden müssen.</b>-->
+          </p>
+<pre>&lt;job order="yes" stop_on_error="no">
+	&lt;params>
+		&lt;param name="JOB_PARAM" value="JOB_PARAM" />
+	&lt;/params>
+	&lt;script language="shell">
+        <![CDATA[
+echo ORDER_PARAM=%MYPREFIX_ORDER_PARAM%
+echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
+        ]]>
+	&lt;/script>
+&lt;/job>
+</pre>
+        <p>
+          <i>$MYPREFIX_ORDER_PARAM and $MYPREFIX_JOB_PARAM are used on Unix systems.</i>
+      <!--<i>Für Unix gelten $MYPREFIX_ORDER_PARAM und $MYPREFIX_JOB_PARAM.</i>-->
+        </p>
+        </ul>
+                
+        <a name="param_job" />
+        <h3>Job Parameters</h3>
+    <!--<h3>Job-Parameter</h3>-->
         <p>
             Job parameters can be called using the <scheduler_method class="Task" method="params" /> method.
         <!--Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.-->
         </p>
+
+        <a name="param_auftrag" />
+        <h3>Auftrags Parameters</h3>
+    <!--<h3>Auftrags-Parameter</h3>-->
         <p>
-            The parameters of an order can be called using the <scheduler_method class="Order" method="params" /> method.
+            Order parameters can be called using the <scheduler_method class="Order" method="params" /> method.
         <!--Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="params" /> abgerufen werden.-->
         </p>
-        <p>
-            See also the <scheduler_method class="Variable_set" /> class.
-        <!--Siehe auch die Klasse <scheduler_method class="Variable_set" />.-->
-        </p>
+
     </description>
 
     <xml_parent_elements>
@@ -48,12 +171,16 @@
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="name" title="Unique Name"/>
-    <!--<xml_attribute name="name" title="Eindeutiger Name"/>-->
-        <xml_attribute name="value"/>
+        <xml_attribute name="name" title="Unique Names"/>
+		<!--<xml_attribute name="name" title="Eindeutiger Name"/>-->
+        <xml_attribute name="value" subst_env="yes">
+            <description>
+            </description>
+        </xml_attribute>
     </xml_attributes>
-        
-    
+
+
     <behavior_with_xml_element element="base" complete_attribute="name"/>
-    
+
 </xml_element>
+
