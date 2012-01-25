@@ -1,36 +1,32 @@
 package com.sos.scheduler.engine.plugins.event;
 
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
-
-import javax.jms.Message;
-import javax.jms.TextMessage;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
-
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
-import com.sos.scheduler.engine.kernel.plugin.Plugin;
-import com.sos.scheduler.engine.kernel.plugin.PluginFactory;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.JSEvent;
+import javax.inject.Inject;
+import javax.jms.Message;
+import javax.jms.TextMessage;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
 
 /**
- * \file JMSPlugIn.java \brief JS Plugin to connect the JMS
+ * \file JMSPlugIn.java
+ * \brief JS Plugin to connect the JMS
  * 
- * \class JMSPlugIn \brief JS Plugin to connect the JMS
+ * \class JMSPlugIn
+ * \brief JS Plugin to connect the JMS
  * 
  * \details \code \endcode
  * 
- * \version 1.0 - 12.04.2011 11:54:06 <div class="sos_branding">
- * <p>
- * (c) 2011 SOS GmbH - Berlin (<a style='color:silver'
- * href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)
- * </p>
+ * \version 1.0 - 12.04.2011 11:54:06
+ * <div class="sos_branding">
+ * <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 public class JMSEventPlugin extends AbstractPlugin {
@@ -42,13 +38,13 @@ public class JMSEventPlugin extends AbstractPlugin {
 
 	private SchedulerObjectFactory objFactory;
 
+	@Inject
 	JMSEventPlugin(Scheduler scheduler, Element pluginElement) {
 		this.scheduler = scheduler;
-		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
-		String persistenceDir = stringXPath(pluginElement, "jms/connection/@persistenceDirectory", Configuration.persistenceDirectory);
+		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", ActiveMQConfiguration.vmProviderUrl);
+		String persistenceDir = stringXPath(pluginElement, "jms/connection/@persistenceDirectory", ActiveMQConfiguration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
-		scheduler.log().info( getClass().getName() + ": providerUrl=" + providerUrl);
-		// TODO PlugIns sollen eigenes PrefixLog bekommen
+		logger.info( getClass().getName() + ": providerUrl=" + providerUrl);
 
 		logger.info("initializing SchedulerObjectFactory for " + scheduler.getHostname() + ":" + scheduler.getTcpPort());
 		objFactory = new SchedulerObjectFactory(scheduler.getHostname(), scheduler.getTcpPort());
@@ -83,8 +79,8 @@ public class JMSEventPlugin extends AbstractPlugin {
 	 * called. The JobScheduler internal event will be converted in a
 	 * represantation for the JMS and provided as TextMessage (in XML format).
 	 */
-	@HotEventHandler public void handleEvent(Event e, EventSource eventSource) throws Exception {
-
+	@HotEventHandler
+	public void handleEvent(Event e, EventSource eventSource) throws Exception {
 		TextMessage m = connector.newTextMessage();
 		try {
 			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e, eventSource);
@@ -96,7 +92,6 @@ public class JMSEventPlugin extends AbstractPlugin {
 		} catch(SchedulerException ev) {
 			logger.warn(ev.getMessage());
 		}
-
 	}
 
 	
@@ -117,15 +112,6 @@ public class JMSEventPlugin extends AbstractPlugin {
 		m.setStringProperty("hostname", scheduler.getHostname());
 		m.setStringProperty("port", Integer.toString(scheduler.getTcpPort()) );
 		m.setStringProperty("id", scheduler.getSchedulerId());
-	}
-
-	public static PluginFactory factory() {
-		return new PluginFactory() {
-			@Override
-			public Plugin newInstance(Scheduler scheduler, Element plugInElement) {
-				return new JMSEventPlugin(scheduler, plugInElement);
-			}
-		};
 	}
 
 }

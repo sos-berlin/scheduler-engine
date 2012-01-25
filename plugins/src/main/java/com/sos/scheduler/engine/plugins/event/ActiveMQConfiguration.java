@@ -9,8 +9,8 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
-public class Configuration {
-    private static final Logger logger = Logger.getLogger(Configuration.class);
+public class ActiveMQConfiguration {
+    private static final Logger logger = Logger.getLogger(ActiveMQConfiguration.class);
     public static final String brokerName = "localhost"; //"com.sos.scheduler";
     public static final String initialContextFactoryName = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     public static final String topicConnectionFactoryName = "TopicCF";
@@ -23,18 +23,18 @@ public class Configuration {
     public final TopicConnectionFactory topicConnectionFactory;
     public final Topic topic;
 
-    private Configuration(TopicConnectionFactory cf, Topic t) {
+    private ActiveMQConfiguration(TopicConnectionFactory cf, Topic t) {
         topicConnectionFactory = cf;
         topic = t;
     }
 
-    public static Configuration newInstance(String providerUrl) {
+    public static ActiveMQConfiguration newInstance(String providerUrl) {
     	try {
             InitialContext c = new InitialContext(jmsProperties(providerUrl));
             TopicConnectionFactory cf = (TopicConnectionFactory)c.lookup(topicConnectionFactoryName);
             Topic topic = (Topic)c.lookup(topicName);
             logger.debug("try to connect with provider " + providerUrl);
-            return new Configuration(cf, topic);
+            return new ActiveMQConfiguration(cf, topic);
         } catch (NamingException x) { throw new RuntimeException(x); }
     }
 

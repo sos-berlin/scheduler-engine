@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.plugins.event.Configuration;
+import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 import com.sos.scheduler.model.events.EventOrderFinished;
@@ -60,10 +60,10 @@ public class JS628Test extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
-    private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
+    private static final String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
 
     private static final Time schedulerTimeout = Time.of(5);
-    private static Configuration conf;
+    private static ActiveMQConfiguration conf;
 
     private static Logger logger;
     private final Topic topic = conf.topic;
@@ -80,7 +80,7 @@ public class JS628Test extends SchedulerTest {
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
 		logger = Logger.getLogger(JS628Test.class);
-		conf = Configuration.newInstance(providerUrl);
+		conf = ActiveMQConfiguration.newInstance(providerUrl);
 	}
     
     public JS628Test() throws Exception {

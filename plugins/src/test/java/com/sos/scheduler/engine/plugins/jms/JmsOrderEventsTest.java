@@ -1,42 +1,33 @@
 package com.sos.scheduler.engine.plugins.jms;
 
-import static org.junit.Assert.assertEquals;
-
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.model.SchedulerObjectFactory;
+import com.sos.scheduler.model.events.Event;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
-
+import javax.jms.*;
 import org.apache.log4j.Logger;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.plugins.event.Configuration;
-import com.sos.scheduler.engine.plugins.event.Connector;
-import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.Event;
 
 
 public class JmsOrderEventsTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
-    private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
-
-    private static final Time schedulerTimeout = Time.of(15);
-    private static Configuration conf;
-
-    private static Logger logger;
+    private final static String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
+    private final static ActiveMQConfiguration conf = ActiveMQConfiguration.newInstance(providerUrl);
+    private final static Logger logger = Logger.getLogger(JmsOrderEventsTest.class);
+    private static final JSCommandUtils util = JSCommandUtils.getInstance();
+    private final static String jobchain = "jmstest";
 
     private final Topic topic = conf.topic;
     private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
@@ -46,13 +37,12 @@ public class JmsOrderEventsTest extends SchedulerTest {
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
     
     private final TopicSubscriber topicSubscriber;
-    
-    private final SchedulerObjectFactory objFactory;
+    private final SchedulerObjectFactory objFactory;    
+    private int orderFinished = 0;
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		logger = Logger.getLogger(Connector.class);
-		conf = Configuration.newInstance(providerUrl);
+    	logger.debug("test started for class " + JmsOrderEventsTest.class.getSimpleName());
 	}
     
     
@@ -76,10 +66,13 @@ public class JmsOrderEventsTest extends SchedulerTest {
     }
 
     
-    @Test public void test() throws Exception {
+    @Test
+    public void test() throws Exception {
     	try {
-	        controller().runSchedulerAndTerminate(schedulerTimeout, "-e -loglevel=warn");
-//	        runScheduler(schedulerTimeout, "-e");
+    		controller().activateScheduler();
+	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order1").getCommand() );
+	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order2").getCommand() );
+    		controller().waitForTermination(shortTimeout);
 	        assertEvent("EventOrderTouched",2);
 	        assertEvent("EventOrderStateChanged",4);
 	        assertEvent("EventOrderFinished",2);
@@ -96,6 +89,14 @@ public class JmsOrderEventsTest extends SchedulerTest {
     		if(e.equals(eventName)) cnt++;
     	}
         assertEquals(eventName,exceptedEvents,cnt);
+    }
+	
+    @HotEventHandler
+    public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder o) throws Exception {
+    	logger.debug("ORDERFINISHED: " + o.getId().getString());
+    	orderFinished++;
+    	if (orderFinished == 2)
+    		controller().scheduler().terminate();
     }
 
 

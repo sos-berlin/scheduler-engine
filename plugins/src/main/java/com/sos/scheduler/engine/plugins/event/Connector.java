@@ -42,9 +42,9 @@ public class Connector implements Closeable {
     
 //	private static final Logger logger = LoggerFactory.getLogger(Connector.class);
 
-    Connector(Configuration c) {
+    Connector(ActiveMQConfiguration c) {
         try {
-            //brokerService.setBrokerName(Configuration.brokerName);
+            //brokerService.setBrokerName(ActiveMQConfiguration.brokerName);
             //brokerService.addConnector("tcp://localhost:63102");
             connection = c.topicConnectionFactory.createTopicConnection();
             topic = c.topic;
@@ -149,7 +149,7 @@ public class Connector implements Closeable {
 //			e.printStackTrace();
 //		}
 		
-        return new Connector(Configuration.newInstance(providerUrl));
+        return new Connector(ActiveMQConfiguration.newInstance(providerUrl));
     }
 
 //    private static void startActiveMqBroker(String providerUrl, String persistenceDirectory) throws Exception {

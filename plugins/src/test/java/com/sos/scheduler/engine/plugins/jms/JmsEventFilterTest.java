@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jms;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -15,13 +16,15 @@ import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
 import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.plugins.event.Configuration;
-import com.sos.scheduler.engine.plugins.event.Connector;
+import com.sos.scheduler.engine.test.util.JSCommandUtils;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 
@@ -30,30 +33,24 @@ public class JmsEventFilterTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
-    private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
-
-    private static final Time schedulerTimeout = Time.of(15);
-    private static Configuration conf;
-
-    private static Logger logger;
-//    private static final boolean noLocal = false;
+    private static final String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
+    private static final ActiveMQConfiguration conf = ActiveMQConfiguration.newInstance(providerUrl);
+    private static final Logger logger = Logger.getLogger(JmsEventFilterTest.class);
+    private static final JSCommandUtils util = JSCommandUtils.getInstance();
 
     private final Topic topic = conf.topic;
     private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
     private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
+    private final TopicSubscriber topicSubscriber;
+    
+    private final String eventToProvide = "EventOrderTouched";
+    private final String jobchain = "jmstest";
+    private int orderFinished = 0;
     
     // Queue for collecting the fired events in the listener thread
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
     
-    private final TopicSubscriber topicSubscriber;
-    
     private final SchedulerObjectFactory objFactory;
-    
-    @BeforeClass
-    public static void setUpBeforeClass () throws Exception {
-		logger = Logger.getLogger(Connector.class);
-		conf = Configuration.newInstance(providerUrl);
-	}
     
     public JmsEventFilterTest() throws Exception {
     	
@@ -68,7 +65,7 @@ public class JmsEventFilterTest extends SchedulerTest {
 
 
     private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = "eventName = 'EventOrderTouched'";
+        String messageSelector = "eventName = '" + eventToProvide + "'";
         boolean noLocal = false;
     	logger.info("createSubscriber with filter: " + messageSelector);
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
@@ -78,11 +75,24 @@ public class JmsEventFilterTest extends SchedulerTest {
     @Test
     public void test() throws Exception {
     	try {
-	        controller().runSchedulerAndTerminate(schedulerTimeout, "-e -log-level=warn");
-	        assertEquals("EventOrderTouched",2,resultQueue.size());
+	        controller().activateScheduler("-e -log-level=warn");
+	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order1").getCommand() );
+	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order2").getCommand() );
+	        controller().waitForTermination(shortTimeout);
+	        assertEquals("two events of " + eventToProvide + " expected",2,resultQueue.size());
+	        assertTrue("'order1' is not in result queue",resultQueue.contains("order1"));
+	        assertTrue("'order2' is not in result queue",resultQueue.contains("order2"));
 		} finally {
 			topicSubscriber.close();
 		}
+    }
+	
+    @HotEventHandler
+    public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder o) throws Exception {
+    	logger.debug("ORDERFINISHED: " + o.getId().getString());
+    	orderFinished++;
+    	if (orderFinished == 2)
+    		controller().scheduler().terminate();
     }
     
     private class MyListener implements javax.jms.MessageListener {
@@ -98,13 +108,11 @@ public class JmsEventFilterTest extends SchedulerTest {
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
             	logger.info("subscribe " + ev.getName());
             	logger.debug(xmlContent);
-//throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + getClass());
-                if (ev.getEventOrderTouched() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderTouched().getInfoOrder().getId() + " touched");
+                if (ev.getEventOrderTouched() == null) {
+                	throw new SchedulerException(ev.getName() + " not expected - expected event is " + eventToProvide);
                 }
                 textMessage.acknowledge();
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                assertEquals(ev.getName(), "EventOrderTouched" );
                 result = ev.getEventOrderTouched().getInfoOrder().getId();
             }
             catch (JMSException x) { throw new RuntimeException(x); }
