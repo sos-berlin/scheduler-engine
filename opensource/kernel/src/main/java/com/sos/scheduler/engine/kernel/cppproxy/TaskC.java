@@ -8,5 +8,7 @@ import com.sos.scheduler.engine.kernel.job.Task;
 public interface TaskC extends CppProxyWithSister<Task> {
     Task.Type sisterType = new Task.Type();
 
+    int id();
     JobC job();
+    OrderC order();
 }

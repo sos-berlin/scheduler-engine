@@ -10,6 +10,19 @@ final class TaskCImpl
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public int id() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return id__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int id__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -23,6 +36,21 @@ final class TaskCImpl
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.JobC job__native(long cppReference);
+
+
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.OrderC order() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.OrderC result = order__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.OrderC.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.OrderC order__native(long cppReference);
 
 
 }
