@@ -16,11 +16,6 @@ package sos.spooler;
 
 public class Spooler_program
 {
-    /** Start des Schedulers mit Kommandozeile als String.
-      * Der erste Parameter bezeichnet den Pfad der zu der <code>scheduler.dll</code> passenden <code>scheduler.exe</code>.
-     */
-    
-    public                  Spooler_program         ( String parameters )               { construct( parameters ); }
 
 
     /** Start des Schedulers mit Kommandozeile als Array.
@@ -29,7 +24,6 @@ public class Spooler_program
     
     public                  Spooler_program         ( String parameters[] )             { construct_argv( parameters ); }
 
-    private native void     construct               ( String parameters );
     private native void     construct_argv          ( String[] parameters );
 
 
