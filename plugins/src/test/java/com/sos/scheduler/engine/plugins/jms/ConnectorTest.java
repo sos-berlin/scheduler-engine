@@ -9,8 +9,6 @@ import javax.jms.TopicConnection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
-import com.sos.scheduler.engine.plugins.event.Connector;
 
 public class ConnectorTest {
 	

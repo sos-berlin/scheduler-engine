@@ -3,8 +3,6 @@ package com.sos.scheduler.engine.plugins.jms;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
-import com.sos.scheduler.engine.plugins.event.SchedulerTestJms;
 import com.sos.scheduler.engine.test.util.JSCommandUtils;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
@@ -18,7 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 
-public class JmsOrderEventsTest extends SchedulerTestJms {
+public class JmsOrderEventsTest extends JMSConnection {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */

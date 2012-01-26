@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.event;
+package com.sos.scheduler.engine.plugins.jms;
 
 import java.util.Properties;
 import javax.jms.Topic;

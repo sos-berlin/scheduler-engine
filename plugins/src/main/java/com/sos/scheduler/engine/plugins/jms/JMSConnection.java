@@ -1,4 +1,7 @@
-package com.sos.scheduler.engine.plugins.event;
+package com.sos.scheduler.engine.plugins.jms;
+
+import java.util.Iterator;
+import java.util.List;
 
 import javax.jms.*;
 import org.apache.log4j.Logger;
@@ -7,9 +10,9 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 //import com.sos.scheduler.engine.test.util.JSCommandUtils;
 
 
-public class SchedulerTestJms extends SchedulerTest {
+public class JMSConnection extends SchedulerTest {
 
-    private static final Logger logger = Logger.getLogger(SchedulerTestJms.class);
+    private static final Logger logger = Logger.getLogger(JMSConnection.class);
 //    private static final JSCommandUtils util = JSCommandUtils.getInstance();
 
 	/** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
@@ -20,25 +23,35 @@ public class SchedulerTestJms extends SchedulerTest {
 
     private static final boolean noLocal = false;
     
+    private final String providerUrl;
     private final Topic topic;
     private final TopicConnection topicConnection;
     private final TopicSession topicSession;
     private final TopicSubscriber topicSubscriber;
     
-    public SchedulerTestJms(String providerUrl, String eventFilter) throws Exception {
+    public JMSConnection(String providerUrl, List<String> eventFilter) throws Exception {
     	super();
+    	this.providerUrl = providerUrl;
     	this.conf = ActiveMQConfiguration.newInstance(providerUrl);
     	this.topic = conf.topic;
     	this.topicConnection = conf.topicConnectionFactory.createTopicConnection();
     	this.topicSession = topicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
 
-    	String messageSelector = "eventName = '" + eventFilter + "'";
+//    	String messageSelector = "eventName = '" + eventFilter + "'";
+    	String eventString = "";
+    	Iterator<String> it = eventFilter.iterator();
+    	while (it.hasNext()) {
+    		String eventName = it.next();
+    		eventString += "'" + eventName + "',";
+    	}
+    	String messageSelector = "eventName IN (" + eventString.substring(0,eventString.length()-1) + ")";
     	logger.info("createSubscriber with filter: " + messageSelector);
     	this.topicSubscriber = topicSession.createSubscriber(topic, messageSelector, noLocal);
     }
     
-    public SchedulerTestJms(String providerUrl) throws Exception {
+    public JMSConnection(String providerUrl) throws Exception {
     	super();
+    	this.providerUrl = providerUrl;
     	this.conf = ActiveMQConfiguration.newInstance(providerUrl);
     	this.topic = conf.topic;
     	this.topicConnection = conf.topicConnectionFactory.createTopicConnection();
@@ -74,4 +87,7 @@ public class SchedulerTestJms extends SchedulerTest {
     	return (t.getTopicName()!=null) ? t.getTopicName() : "???";
     }
 
+    protected String getProviderUrl() {
+    	return providerUrl;
+    }
 }

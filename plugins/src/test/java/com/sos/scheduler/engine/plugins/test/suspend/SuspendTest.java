@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
+import com.sos.scheduler.engine.plugins.jms.ActiveMQConfiguration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 import com.sos.scheduler.model.events.EventOrderSuspended;

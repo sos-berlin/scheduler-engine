@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.event;
+package com.sos.scheduler.engine.plugins.jms;
 
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;

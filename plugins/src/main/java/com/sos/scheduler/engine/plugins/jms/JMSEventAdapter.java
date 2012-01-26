@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.event;
+package com.sos.scheduler.engine.plugins.jms;
 
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;
@@ -7,6 +7,10 @@ import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
+import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
+import com.sos.scheduler.engine.kernel.job.events.TaskEvent;
+import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
@@ -17,15 +21,7 @@ import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.EventLogError;
-import com.sos.scheduler.model.events.EventOrderFinished;
-import com.sos.scheduler.model.events.EventOrderResumed;
-import com.sos.scheduler.model.events.EventOrderStateChanged;
-import com.sos.scheduler.model.events.EventOrderStepEnded;
-import com.sos.scheduler.model.events.EventOrderStepStarted;
-import com.sos.scheduler.model.events.EventOrderSuspended;
-import com.sos.scheduler.model.events.EventOrderTouched;
-import com.sos.scheduler.model.events.JSEvent;
+import com.sos.scheduler.model.events.*;
 
 public class JMSEventAdapter {
 	
@@ -97,6 +93,25 @@ public class JMSEventAdapter {
 				flgFound = true;
 			}
 
+		}
+		
+		if (event instanceof TaskEvent) {
+
+            UnmodifiableTask task = (UnmodifiableTask)eventSource;
+
+			if (event instanceof TaskStartedEvent) {
+				ev = objFactory.createEvent("EventTaskStarted");
+				EventTaskStarted te = ev.getEventTaskStarted();
+				te.setInfoTask( JMSTaskAdapter.createInstance(task));
+				flgFound = true;
+			}
+
+			if (event instanceof TaskEndedEvent) {
+				ev = objFactory.createEvent("EventTaskEnded");
+				EventTaskEnded te = ev.getEventTaskEnded();
+				te.setInfoTask( JMSTaskAdapter.createInstance(task));
+				flgFound = true;
+			}
 		}
 		
 		if (event instanceof SchedulerCloseEvent) {

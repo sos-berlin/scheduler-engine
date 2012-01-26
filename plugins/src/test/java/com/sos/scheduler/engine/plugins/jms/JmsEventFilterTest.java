@@ -1,8 +1,10 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -17,15 +19,13 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
-import com.sos.scheduler.engine.plugins.event.SchedulerTestJms;
 import com.sos.scheduler.engine.test.util.JSCommandUtils;
 import com.sos.scheduler.engine.test.util.JSFileUtils;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 
 
-public class JmsEventFilterTest extends SchedulerTestJms {
+public class JmsEventFilterTest extends JMSConnection {
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
@@ -34,18 +34,18 @@ public class JmsEventFilterTest extends SchedulerTestJms {
     private static final Logger logger = Logger.getLogger(JmsEventFilterTest.class);
     private static final JSCommandUtils util = JSCommandUtils.getInstance();
 
-    private final static String eventToProvide = "EventOrderTouched";
+    private static final List<String> eventsToListen = asList("EventOrderTouched");
     private final static String jobchain = "jmstest";
     private int orderFinished = 0;
     
-    // Queue for collecting the fired events in the listener thread
+    // Queue for collecting the fired eventsToListen in the listener thread
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
     
     private SchedulerObjectFactory objFactory;
     
     public JmsEventFilterTest() throws Exception {
     	
-    	super(providerUrl,eventToProvide);
+    	super(providerUrl,eventsToListen);
     	setMessageListener( new MyListener() );
 
     }
@@ -60,7 +60,7 @@ public class JmsEventFilterTest extends SchedulerTestJms {
 	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order1").getCommand() );
 	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order2").getCommand() );
 	        controller().waitForTermination(shortTimeout);
-	        assertEquals("two events of " + eventToProvide + " expected",2,resultQueue.size());
+	        assertEquals("two eventsToListen of " + eventsToListen.get(0) + " expected",2,resultQueue.size());
 	        assertTrue("'order1' is not in result queue",resultQueue.contains("order1"));
 	        assertTrue("'order2' is not in result queue",resultQueue.contains("order2"));
 		} finally {
@@ -90,7 +90,7 @@ public class JmsEventFilterTest extends SchedulerTestJms {
             	logger.info("subscribe " + ev.getName());
             	logger.debug(xmlContent);
                 if (ev.getEventOrderTouched() == null) {
-                	throw new SchedulerException(ev.getName() + " not expected - expected event is " + eventToProvide);
+                	throw new SchedulerException(ev.getName() + " not expected - expected");
                 }
                 textMessage.acknowledge();
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
