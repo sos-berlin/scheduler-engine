@@ -71,8 +71,8 @@
           </p>
           <p>
             This parameter is particularly useful, 
-						when already existing shell scripts are to be controlled by the JobScheduler. 
-						When
+						when already existing shell scripts are to be controlled by the JobScheduler.<br/><br/>
+            It is possible to configure the JobScheduler so that job or order parameters can be directly used in shell scripts when
         <!--Der Parameter ist inbesondere dann nützlich, 
 						wenn bestehende shell Scripte mit dem JobScheduler gesteuert werden sollen. 
 						Durch Angabe von -->
@@ -80,7 +80,7 @@
    &lt;param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="*NONE" />
 &lt;/params>
 </pre>
-            is specified in the <i>scheduler.xml</i> central configuration file, it is possible to configure the JobScheduler so that job or order parameters can be directly used in shell scripts. 
+            is specified in the <i>scheduler.xml</i> central configuration file.
         <!--in der zentralen Konfigurationsdatei <i>scheduler.xml</i> kann der JobScheduler so konfiguriert werden, 		das die shell Scripte direkt mit Parametern aus einem Auftrag oder Job versorgt werden können. -->
           </p>
 
@@ -121,7 +121,7 @@
 </pre>
           
           <p>
-          The <i>sample</i> job is a shell job, 
+          The <i>sample</i> job is a shell job 
 					that uses the order parameter as well as providing an additional parameter (JOB_PARAM) for the shell script.
           <b>It is important that the parameters forwarded by the order and the job are addressed using the prefix <i>MYPREFIX_</i>.</b>
       <!--Der Job <i>sample</i> ist ein shell job, 
