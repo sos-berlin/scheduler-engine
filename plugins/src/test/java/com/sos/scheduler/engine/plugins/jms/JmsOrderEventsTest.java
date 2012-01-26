@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.plugins.event.ActiveMQConfiguration;
-import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.plugins.event.SchedulerTestJms;
 import com.sos.scheduler.engine.test.util.JSCommandUtils;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
@@ -14,30 +14,25 @@ import java.util.concurrent.BlockingQueue;
 import javax.jms.*;
 import org.apache.log4j.Logger;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 
-public class JmsOrderEventsTest extends SchedulerTest {
+public class JmsOrderEventsTest extends SchedulerTestJms {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     private final static String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
-    private final static ActiveMQConfiguration conf = ActiveMQConfiguration.newInstance(providerUrl);
+//    private static final String providerUrl = "tcp://w2k3.sos:61616";  // in scheduler.xml einstellen
     private final static Logger logger = Logger.getLogger(JmsOrderEventsTest.class);
     private static final JSCommandUtils util = JSCommandUtils.getInstance();
     private final static String jobchain = "jmstest";
 
-    private final Topic topic = conf.topic;
-    private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
-    private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
     
     // Queue for collecting the fired events in the listener thread
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
     
-    private final TopicSubscriber topicSubscriber;
-    private final SchedulerObjectFactory objFactory;    
+    private SchedulerObjectFactory objFactory;    
     private int orderFinished = 0;
     
     @BeforeClass
@@ -47,29 +42,16 @@ public class JmsOrderEventsTest extends SchedulerTest {
     
     
     public JmsOrderEventsTest() throws Exception {
-    	
-    	topicSubscriber = newTopicSubscriber();
-        topicSubscriber.setMessageListener(new MyListener());
-        topicConnection.start();
-
-        //TODO Connect with hostname & port from the scheduler intance
-		objFactory = new SchedulerObjectFactory("localhost", 4444);
-		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
+    	super(providerUrl);
+    	setMessageListener( new MyListener() );
     }
 
-
-    private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = null;
-        boolean noLocal = false;
-    	logger.info("createSubscriber with filter: " + messageSelector);
-        return topicSession.createSubscriber(topic, messageSelector, noLocal);
-    }
-
-    
     @Test
     public void test() throws Exception {
     	try {
     		controller().activateScheduler();
+    		objFactory = new SchedulerObjectFactory(scheduler().getHostname(), scheduler().getTcpPort());
+    		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
 	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order1").getCommand() );
 	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order2").getCommand() );
     		controller().waitForTermination(shortTimeout);
@@ -77,7 +59,7 @@ public class JmsOrderEventsTest extends SchedulerTest {
 	        assertEvent("EventOrderStateChanged",4);
 	        assertEvent("EventOrderFinished",2);
     	} finally {
-    		topicSubscriber.close();
+    		close();
     	}
     }
     
@@ -138,22 +120,4 @@ public class JmsOrderEventsTest extends SchedulerTest {
         }
     }
     
-    private void showMessageHeader(Message m) throws JMSException {
-    	logger.debug("getJMSCorrelationID=" + m.getJMSCorrelationID() );
-    	logger.debug("getJMSDeliveryMode (persistent/non persistent)=" + m.getJMSDeliveryMode() );
-    	logger.debug("getJMSExpiration=" + m.getJMSExpiration() );
-    	logger.debug("getJMSMessageID=" + m.getJMSMessageID() );
-    	logger.debug("getJMSPriority=" + m.getJMSPriority() );
-    	logger.debug("getJMSTimestamp=" + m.getJMSTimestamp() );
-    	logger.debug("getJMSDestination=" + m.getJMSType() );
-    	logger.debug("getJMSRedelivered=" + m.getJMSRedelivered() );
-    	logger.debug("getJMSDestination (Topicname)=" + getTopicname(m) );
-    	if (m.getJMSReplyTo()!=null) logger.debug("getJMSReplyTo=" + m.getJMSReplyTo().toString() );
-    }
-    
-    private String getTopicname(Message m) throws JMSException {
-    	Topic t = (Topic)m.getJMSDestination();
-    	return (t.getTopicName()!=null) ? t.getTopicName() : "???";
-    }
-
 }

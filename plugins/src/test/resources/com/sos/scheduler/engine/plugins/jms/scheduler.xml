@@ -7,8 +7,8 @@
             <plugin java_class="com.sos.scheduler.engine.plugins.event.JMSEventPlugin">
                 <plugin.config>
                     <jms>
-                    	<connection providerUrl="tcp://w2k3.sos:61616" />
-                        <!--  connection providerUrl="vm:localhost" / -->
+                    	<!--  -->connection providerUrl="tcp://w2k3.sos:61616" / -->
+                        <connection providerUrl="vm:localhost" />
                         <!--  connection providerUrl="vm:localhost" persistenceDirectory="c:/temp/amq" / -->
                         <!--  connection providerUrl="tcp://localhost:61616"/>  -->
                         <!--connection providerUrl="vm:com.sos.scheduler"/-->
