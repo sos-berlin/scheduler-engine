@@ -19,12 +19,12 @@ import com.sos.scheduler.engine.test.util.JSFileUtils;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 
-public class TaskObserverListener extends JMSConnection implements javax.jms.MessageListener, TaskInfo {
+public class TaskObserverPlugin extends JMSConnection implements javax.jms.MessageListener, TaskInfo {
 
-	private static final Logger logger = Logger.getLogger(TaskObserverListener.class);
+	private static final Logger logger = Logger.getLogger(TaskObserverPlugin.class);
 
 	private static SchedulerObjectFactory objFactory;
-	private static TaskObserverListener instance = null;
+	private static TaskObserverPlugin instance = null;
 	private static final String resultfileName = "stresstest_result.csv";
     private static final List<String> eventsToListen = asList("EventTaskStarted","EventTaskEnded");
 
@@ -36,7 +36,7 @@ public class TaskObserverListener extends JMSConnection implements javax.jms.Mes
 	private static TaskObserver loggerTask = null;
 	private static Timer timer;
 
-	private TaskObserverListener(String providerUrl, int estimated) throws Exception {
+	private TaskObserverPlugin(String providerUrl, int estimated) throws Exception {
 		super(providerUrl, eventsToListen);
 		setMessageListener(this);
 		estimatedTasks = estimated;
@@ -51,9 +51,9 @@ public class TaskObserverListener extends JMSConnection implements javax.jms.Mes
 
 	}
 
-	public static TaskObserverListener getInstance(String providerUrl, int estimated) throws Exception {
+	public static TaskObserverPlugin getInstance(String providerUrl, int estimated) throws Exception {
 		if (instance == null)
-			instance = new TaskObserverListener(providerUrl, estimated);
+			instance = new TaskObserverPlugin(providerUrl, estimated);
 		return instance;
 	}
 

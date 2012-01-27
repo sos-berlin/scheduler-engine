@@ -36,7 +36,7 @@ public class StressTest extends SchedulerTest {
 	public void eventTest() throws Exception {
 //        controller().activateScheduler("-e -log-level=debug","-log=" + JSFileUtils.getLocalFile(this.getClass(), "scheduler.log"));
         controller().activateScheduler();
-        TaskObserverListener l = TaskObserverListener.getInstance(providerUrl,ESTIMATED_TASKS);
+        TaskObserverPlugin l = TaskObserverPlugin.getInstance(providerUrl,ESTIMATED_TASKS);
         l.start(1000L,1000L);
 		for (int i=0; i < ESTIMATED_TASKS; i++) {
 			controller().scheduler().executeXml(
