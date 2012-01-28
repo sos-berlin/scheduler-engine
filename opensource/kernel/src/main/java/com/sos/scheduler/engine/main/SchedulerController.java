@@ -9,6 +9,8 @@ public interface SchedulerController {
     /** @throws IllegalStateException, wenn nach {@link #startScheduler(String...)} aufgerufen. */
     void setSettings(Settings o);
 
+    Settings getSettings();
+
     /** Startet den Scheduler ohne zu warten. */
     void startScheduler(String... arguments);
 

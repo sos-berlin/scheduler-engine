@@ -13,6 +13,10 @@ abstract class DelegatingSchedulerController implements SchedulerController {
         delegate.setSettings(o);
     }
 
+    @Override public final Settings getSettings() {
+        return delegate.getSettings();
+    }
+
     @Override public final void terminateScheduler() {
         delegate.terminateScheduler();
     }

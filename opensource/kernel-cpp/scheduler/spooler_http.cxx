@@ -187,9 +187,7 @@ string get_content_type_parameter( const string& content_type, const string& par
 
 bool Http_server::subsystem_initialize()
 {
-    _base_directory = subst_env( read_profile_string( _spooler->_factory_ini, "spooler", "html_dir" ) );
-    if( _base_directory == "" )  _base_directory = _spooler->home_directory() + "/operations_gui";
-
+    _base_directory = _spooler->settings()->_html_dir;
     _subsystem_state = subsys_initialized;
     return true;
 }

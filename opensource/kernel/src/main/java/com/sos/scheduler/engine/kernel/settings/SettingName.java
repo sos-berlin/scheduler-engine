@@ -5,9 +5,12 @@ public enum SettingName {
     dbName(1),
 
     /** Erweitert den Class-Path für einen Java-Job. */
-    jobJavaClassPath(2);
+    jobJavaClassPath(2),
 
-    /** Die Zahl muss mit der Zahl im C++-Code übereinstimmen. */
+    /** Default für factory.ini [spooler] html_dir */
+    htmlDir(3);
+
+    /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;
 
     SettingName(int number) {

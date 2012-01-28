@@ -1461,6 +1461,7 @@ void Spooler::read_ini_file()
     modifiable_settings()->_db_name =        read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _db_check_integrity         =            read_profile_bool      ( _factory_ini, "spooler", "db_check_integrity" , _db_check_integrity );
     _db_log_level               = make_log_level(read_profile_string( _factory_ini ,"spooler", "db_log_level"       , as_string( _db_log_level ) ) );
+    modifiable_settings()->_html_dir = subst_env(read_profile_string( _factory_ini, "spooler", "html_dir" ) );
 
     // need_db=yes|no|strict
     string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
@@ -1732,16 +1733,18 @@ void Spooler::load()
 
     read_xml_configuration();
     _db = Z_NEW(Database(this));
+
     initialize_java_subsystem();
     new_subsystems();
     _java_subsystem->initialize_java_sister();
+    _modifiable_settings->set_defaults(this);
+    _settings = _modifiable_settings;   // Von Scheduler.java befüllt
+
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
-
-    _settings = _modifiable_settings;
 }
 
 //---------------------------------------------------------------------------Spooler::open_pid_file
