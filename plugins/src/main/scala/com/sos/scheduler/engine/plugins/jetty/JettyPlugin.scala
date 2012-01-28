@@ -21,7 +21,7 @@ import org.eclipse.jetty.server._
 import org.eclipse.jetty.util.security.Constraint
 import org.w3c.dom.Element
 
-/**JS-795: Einbau von Jetty in den JobScheduler. */
+/** JS-795: Einbau von Jetty in den JobScheduler. */
 final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, configuration: Configuration)
   extends AbstractPlugin {
 
@@ -233,7 +233,6 @@ object JettyPlugin {
   // TODO XML oder JSON
   // TODO Authentifizierung
   // TODO HTTPS
-  // TODO Request-Log
   // TODO WAR-Files
   // TODO GZIP
   // TODO Massentests: Viele Anfragen gleichzeitig. Anzahl der Threads soll klein bleiben.

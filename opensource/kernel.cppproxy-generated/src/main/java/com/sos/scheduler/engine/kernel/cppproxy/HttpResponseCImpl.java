@@ -10,6 +10,19 @@ final class HttpResponseCImpl
         requireContextIsNull(context);
     }
 
+    @Override public void Release() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            Release__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void Release__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.HttpChunkReaderC chunk_reader() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

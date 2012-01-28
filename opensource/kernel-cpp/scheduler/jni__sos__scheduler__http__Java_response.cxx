@@ -17,6 +17,22 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL Release(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::http::Java_response* o_ = has_proxy< ::sos::scheduler::http::Java_response >::of_cpp_reference(cppReference,"::sos::scheduler::http::Java_response::Release()");
+        (o_->Release());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL chunk_1reader(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -83,6 +99,7 @@ static jint JNICALL status(JNIEnv* jenv, jobject, jlong cppReference)
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"Release__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Release },
     { (char*)"chunk_reader__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/HttpChunkReaderC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::chunk_1reader },
     { (char*)"close__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::close },
     { (char*)"header_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::header_1string },
@@ -94,7 +111,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::http::Java_response >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::http::Java_response >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 4);
+        int ret = env->RegisterNatives(*cls, native_methods, 5);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 
