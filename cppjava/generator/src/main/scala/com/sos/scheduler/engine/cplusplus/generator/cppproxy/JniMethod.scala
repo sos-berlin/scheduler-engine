@@ -53,20 +53,15 @@ class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
         "has_proxy< " +cppClassName + " >::of_cpp_reference(" + reference + "," + quoted(debugString) + ")"
     }
 
-    private def jniExpressionStringOfCpp(typ: Class[_], expr: String) =
-        if (typ.isArray)
-            "java_array_from_c("+ expr +")"
-        else
-        if (isStringClass(typ))
-            "env.jstring_from_string(" + expr + ")"
-        else
-        if (classOf[CppProxy] isAssignableFrom typ)
-            "Has_proxy::jobject_of(" + expr + ")"
-        else
-        if (isClass(typ))  // Method returns a real Java object, that means the method is used only for Java calls.
-            "(" + expr + ").local_ref()"  // Global reference is lost after call, therefore we make a local reference
-        else
-          "(" + expr + ")"
+    private def jniExpressionStringOfCpp(t: Class[_], expr: String) = t match {
+      case _ if isByteArrayClass(t) => "java_byte_array_from_c("+ expr +")"
+      case _ if t.isArray => "java_array_from_c("+ expr +")"
+      case _ if isStringClass(t) => "env.jstring_from_string("+ expr +")"
+      case _ if classOf[CppProxy] isAssignableFrom t =>  "Has_proxy::jobject_of("+ expr +")"
+      case _ if isClass(t) =>  // Method returns a real Java object, that means the method is used only for Java calls.
+        "("+ expr +").local_ref()"  // Global reference is lost after call, therefore we make a local reference
+      case _ => "("+ expr +")"
+    }
 
     def registerNativeArrayEntry =
         List("(char*)" + quoted(m.nativeJavaName), "(char*)" + quoted(signatureString), "(void*)" + jniName)

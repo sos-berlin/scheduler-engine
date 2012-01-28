@@ -72,8 +72,8 @@ object ClassOps {
      */
     def withoutOverriddenVariantMethods(methods: List[Method]): List[Method] = {
         class MethodVariant(val name: String, val parameterTypes: Seq[JavaClass]) {
-            override def equals(o: Any) = o.isInstanceOf[MethodVariant] && equals(o.asInstanceOf[MethodVariant])
-            def equals(o: MethodVariant) = name == o.name  &&  parameterTypes.corresponds(o.parameterTypes){ _ == _ }
+            override def equals(o: Any) = o.isInstanceOf[MethodVariant] && eq(o.asInstanceOf[MethodVariant])
+            def eq(o: MethodVariant) = name == o.name  &&  parameterTypes.corresponds(o.parameterTypes){ _ == _ }
             override def hashCode = name.hashCode + parameterTypes.foldLeft(0){ _ + _.hashCode }
         }
 
@@ -120,6 +120,7 @@ object ClassOps {
     def isVoid(t: Class[_]) = t == classOf[Void]  ||  t.getName == "void"
     def isClass(t: Class[_]) = classOf[Object] isAssignableFrom t
     def isStringClass(t: Class[_]) = classOf[String] isAssignableFrom t
+    def isByteArrayClass(t: Class[_]) = t.isArray && t.getComponentType.getName == "byte"
 
     def compareClassSeqs(a: Seq[Class[_]], b: Seq[Class[_]]): Int =
         a zip b map { x => compareClasses(x._1, x._2) } find { _ != 0 } match {

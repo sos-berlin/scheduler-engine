@@ -51,11 +51,11 @@ final class HttpChunkReaderCImpl
     private static native boolean next_chunk_is_ready__native(long cppReference);
 
 
-    @Override public java.lang.String read_from_chunk(int p0) {
+    @Override public byte[] read_from_chunk(int p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = read_from_chunk__native(cppReference(), p0);
-            checkIsNotReleased(java.lang.String.class, result);
+            byte[] result = read_from_chunk__native(cppReference(), p0);
+            checkIsNotReleased(byte[].class, result);
             return result;
         }
         finally {
@@ -63,7 +63,7 @@ final class HttpChunkReaderCImpl
         }
     }
 
-    private static native java.lang.String read_from_chunk__native(long cppReference, int p0);
+    private static native byte[] read_from_chunk__native(long cppReference, int p0);
 
 
 }

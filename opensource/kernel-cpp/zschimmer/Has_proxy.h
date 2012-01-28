@@ -13,9 +13,9 @@ namespace javabridge {
 struct Proxy_class;
 
 //----------------------------------------------------------------------------------------Has_proxy
-// Legt bei Bedarf einen CppProxy an (vom Java-C++-Generator erzeugt) und und lï¿½st ihn am Ende wieder.
-// Der CppProxy hï¿½lt nicht dieses C++-Object. Wenn das C++-Objekt zerstï¿½rt wird, wird die Verbindung vom
-// CppProxy zum C++-Objekt gelï¿½st und die nï¿½chste Verwendung des CppProxy liefert den Fehler Z-JAVA-111.
+// Legt bei Bedarf einen CppProxy an (vom Java-C++-Generator erzeugt) und und löst ihn am Ende wieder.
+// Der CppProxy hält nicht dieses C++-Object. Wenn das C++-Objekt zerstört wird, wird die Verbindung vom
+// CppProxy zum C++-Objekt gelöst und die nächste Verwendung des CppProxy liefert den Fehler Z-JAVA-111.
 
 struct Has_proxy
 {
@@ -43,8 +43,8 @@ private:
 
     Proxy_class const*         _proxy_class;
     Global_jobject2            _proxy;
-    Has_proxy* const           _sister_context_proxy;       // Kontext fï¿½r die Java-Schwester oder NULL
-    Global_jobject2            _java_sister;                // Manche C++-Klassen haben neben dem C++-Proxy eine Java-Schwester, eine von C++ unabhï¿½ngige Klasse
+    Has_proxy* const           _sister_context_proxy;       // Kontext für die Java-Schwester oder NULL
+    Global_jobject2            _java_sister;                // Manche C++-Klassen haben neben dem C++-Proxy eine Java-Schwester, eine von C++ unabhängige Klasse
 };
 
 //--------------------------------------------------------------------------------------has_proxy<>
@@ -77,10 +77,10 @@ struct Proxy_jobject {
 };
 
 //----------------------------------------------------------------------------------proxy_jobject<>
-// Typsicheres jobject, fï¿½r Parameterï¿½bergabe von C++ an Java, 
+// Typsicheres jobject, für Parameterübergabe von C++ an Java, 
 // damit nicht Global_jobject2 mit NewGlobalRef() und DeleteGlobalRef() verwendet werden muss.
 
-template<class PROXY>   // PROXY: Vom C++/Java-Generator erzeugte Klasse fï¿½r Java-Proxy, z.B. SpoolerC
+template<class PROXY>   // PROXY: Vom C++/Java-Generator erzeugte Klasse für Java-Proxy, z.B. SpoolerC
 struct proxy_jobject : Proxy_jobject
 {
                                 proxy_jobject               (jobject jo = NULL)                     : Proxy_jobject(jo) { if (jo) PROXY::java_class_()->assert_is_assignable_from(jo); }
@@ -88,9 +88,10 @@ struct proxy_jobject : Proxy_jobject
 
 //--------------------------------------------------------------------------------java_array_from_c
 
-jobjectArray java_array_from_c(const std::vector<string>& v);
+jobjectArray java_array_from_c(const std::vector<string>&);
+jbyteArray java_byte_array_from_c(const string&);
 
-//Fï¿½r Has_proxy nicht getestet:
+//Für Has_proxy nicht getestet:
 //template<class T>
 //jobjectArray java_array_from_c(const std::vector<T>& v) {
 //    JNIEnv* jenv = jni_env();

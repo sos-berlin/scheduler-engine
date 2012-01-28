@@ -68,16 +68,16 @@ static jboolean JNICALL next_1chunk_1is_1ready(JNIEnv* jenv, jobject, jlong cppR
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jstring JNICALL read_1from_1chunk__I(JNIEnv* jenv, jobject, jlong cppReference, jint p0)
+static jobject JNICALL read_1from_1chunk__I(JNIEnv* jenv, jobject, jlong cppReference, jint p0)
 {
     Env env = jenv;
     try {
         ::sos::scheduler::http::Chunk_reader* o_ = has_proxy< ::sos::scheduler::http::Chunk_reader >::of_cpp_reference(cppReference,"::sos::scheduler::http::Chunk_reader::read_from_chunk()");
-        return env.jstring_from_string(o_->read_from_chunk(p0));
+        return java_byte_array_from_c(o_->read_from_chunk(p0));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
-        return jstring();
+        return jobject();
     }
 }
 
@@ -87,7 +87,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"content_type__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::content_1type },
     { (char*)"get_next_chunk_size__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::get_1next_1chunk_1size },
     { (char*)"next_chunk_is_ready__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1chunk_1is_1ready },
-    { (char*)"read_from_chunk__native", (char*)"(JI)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::read_1from_1chunk__I }
+    { (char*)"read_from_chunk__native", (char*)"(JI)[B", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::read_1from_1chunk__I }
 };
 
 namespace zschimmer { namespace javabridge { 
