@@ -65,11 +65,13 @@ public final class PrefixLog implements Sister, SchedulerLogger {
 //    }
 
     private LogSubscription[] subscriptionsSnapshot() {
-        synchronized (subscriptions) {
-            if (subscriptionsModified) {
-                subscriptionsModified = false;
-                subscriptionsSnapshot = subscriptions.isEmpty()?
-                        emptyLogSubscriptions : subscriptions.toArray(new LogSubscription[subscriptions.size()]);
+        if (subscriptionsModified) {
+            synchronized (subscriptions) {
+                if (subscriptionsModified) {
+                    subscriptionsModified = false;
+                    subscriptionsSnapshot = subscriptions.isEmpty()? emptyLogSubscriptions
+                            : subscriptions.toArray(new LogSubscription[subscriptions.size()]);
+                }
             }
         }
         return subscriptionsSnapshot;
