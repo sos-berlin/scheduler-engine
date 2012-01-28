@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import java.io.OutputStreamWriter
 import java.net.URLDecoder
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nullable
@@ -28,7 +27,7 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
   }
 
   private def newOperation(request: HttpServletRequest, response: HttpServletResponse) = new SchedulerHttpResponse {
-    private val writer = new OutputStreamWriter(response.getOutputStream, SchedulerConstants.schedulerEncoding)
+    private val _isClosed = new AtomicBoolean(false)
 
     private val asyncListener = new AsyncListener {
       def onComplete(event: AsyncEvent) {
@@ -45,7 +44,6 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
     }
 
     /** Das C++-Objekt httpResponseC MUSS mit Release() wieder freigegeben werden, sonst Speicherleck. */
-    private val _isClosed = new AtomicBoolean(false)
     private lazy val httpResponseC = schedulerHttpService.executeHttpRequest(new ServletSchedulerHttpRequest(request), this)
     private lazy val httpResponseCRef = CppReference.of(httpResponseC)
     @Nullable private lazy val chunkReaderC = httpResponseC.chunk_reader
@@ -68,7 +66,7 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
       if (chunkReaderC != null) {
         serveChunks()
         if (!isClosed) startAsync()
-        else writer.flush()
+        else response.getOutputStream.flush()
       } else
         logger.warn("chunkReaderC==null")
     }
@@ -84,10 +82,10 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
       while (!isClosed && chunkReaderC != null && chunkReaderC.next_chunk_is_ready) {
         chunkReaderC.get_next_chunk_size match {
           case 0 => close()
-          case size => writer.append(chunkReaderC.read_from_chunk(size))
+          case size => response.getOutputStream.write(chunkReaderC.read_from_chunk(size))
         }
       }
-      writer.flush()
+      response.getOutputStream.flush()
     }
 
     def onNextChunkIsReady() {

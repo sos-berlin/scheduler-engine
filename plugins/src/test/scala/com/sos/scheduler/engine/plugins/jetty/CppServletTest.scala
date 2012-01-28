@@ -16,6 +16,8 @@ import org.joda.time.Duration
 
 import JettyPluginTest._
 import org.apache.log4j.Logger
+import com.google.common.io.Files
+import java.io.File
 
 @RunWith(classOf[JUnitRunner])
 final class CppServletTest extends ScalaSchedulerTest {
@@ -51,6 +53,14 @@ final class CppServletTest extends ScalaSchedulerTest {
     test("Kommando über GET "+testConf) {
       val result = stringFromResponse(client.resource(uri).path("<show_state/>").accept(TEXT_XML_TYPE).get(classOf[ClientResponse]))
       result should include ("<state")
+    }
+
+    test("Alle Bitmuster "+testConf) {
+      val bytes = (0 to 255 map { _.toByte }).toArray
+      val filename = "test.txt"
+      Files.write(bytes, new File(httpDirectory, filename))
+      val response = checkedResponse(client.resource(uri).path(filename).get(classOf[ClientResponse]))
+      response.getEntity(classOf[Array[Byte]]) should equal(bytes)
     }
 
     test("show_log?task=... "+testConf) {

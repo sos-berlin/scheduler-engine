@@ -9,5 +9,5 @@ public interface HttpChunkReaderC extends CppProxy {
     //int recommended_block_size();
     boolean next_chunk_is_ready();
     int get_next_chunk_size();
-    String read_from_chunk(int size);
+    byte[] read_from_chunk(int size);
 }
