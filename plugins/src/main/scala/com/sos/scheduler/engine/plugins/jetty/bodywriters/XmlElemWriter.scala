@@ -26,6 +26,7 @@ class XmlElemWriter extends MessageBodyWriter[Elem] {
     val encoding = UTF_8
     // TODO encoding im Header setzen?
     val w = new OutputStreamWriter(out, encoding)
+    w.write("<?xml version='1.0'?>")  // encoding='"+encoding+"'?>")
     w.write(o.toString())
     w.close()
   }
