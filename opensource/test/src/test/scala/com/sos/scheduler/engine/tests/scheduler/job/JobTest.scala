@@ -11,7 +11,7 @@ import org.scalatest.junit.JUnitRunner
 class JobTest extends ScalaSchedulerTest {
   import JobTest._
 
-  private val job = scheduler.getJobSubsystem.job(jobPath)
+  private lazy val job = scheduler.getJobSubsystem.job(jobPath)
 
   test("job.name") {
     assert(job.getName === "a")

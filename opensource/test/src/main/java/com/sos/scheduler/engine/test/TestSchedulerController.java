@@ -47,7 +47,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private final Environment environment;
     private boolean terminateOnError = true;
     private String logCategories = "";
-    private Scheduler scheduler_ = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
+    private Scheduler _scheduler = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
     public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath) {
         File directory = workDirectory(testClass);
@@ -136,25 +136,18 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final Scheduler scheduler() {
-        if (scheduler_ == null) {
+        if (_scheduler == null) {
             automaticStart();
             waitUntilSchedulerIsActive();
         }
-        return scheduler_;
-    }
-
-    private void automaticStart() {
-        if (!getDelegate().isStarted()) {
-            checkState(Thread.currentThread() == thread, "TestSchedulerController.automaticStart() must be called in constructing thread");
-            startScheduler();
-        }
+        return _scheduler;
     }
 
     /** Wartet, bis das Objekt {@link Scheduler} verfügbar ist. */
     public final void waitUntilSchedulerIsActive() {
-        Scheduler previous = scheduler_;
-        scheduler_ = getDelegate().waitUntilSchedulerState(SchedulerState.active);
-        if (scheduler_ == null) throw new RuntimeException("Scheduler aborted before startup");
+        Scheduler previous = _scheduler;
+        _scheduler = getDelegate().waitUntilSchedulerState(SchedulerState.active);
+        if (_scheduler == null) throw new RuntimeException("Scheduler aborted before startup");
         if (previous == null && terminateOnError) checkForErrorLogLine();
     }
 
@@ -164,8 +157,16 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         if (!ok) throw new SchedulerRunningAfterTimeoutException(timeout);
     }
 
+    private void automaticStart() {
+        if (!getDelegate().isStarted()) {
+            checkState(Thread.currentThread() == thread, "TestSchedulerController.automaticStart() must be called in constructing thread");
+            throw new RuntimeException("JobScheduler is not active yet");
+//            startScheduler();
+        }
+    }
+
     private void checkForErrorLogLine() {
-        String lastErrorLine = scheduler_.log().lastByLevel(SchedulerLogLevel.error);
+        String lastErrorLine = _scheduler.log().lastByLevel(SchedulerLogLevel.error);
         if (!lastErrorLine.isEmpty())
             throw new RuntimeException("Test terminated after error log line: "+ lastErrorLine);
     }
@@ -203,6 +204,10 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         closingRunnables.add(new Runnable() {
             @Override public void run() { eventBus.unregisterAnnotated(o); }
         });
+    }
+
+    public final boolean isStarted() {
+        return getDelegate().isStarted();
     }
 
     public final void useDatabase() {

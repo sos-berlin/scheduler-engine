@@ -7,6 +7,13 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with CheckedBef
   val controller = TestSchedulerController.of(getClass)
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
+  def injector = scheduler.getInjector
+
+  override protected def checkedBeforeAll(configMap: Map[String, Any]) {
+    super.checkedBeforeAll(configMap)
+    if (!controller.isStarted)
+      controller.activateScheduler()
+  }
 
   override def afterAll(configMap: Map[String, Any]) {
     try controller.close()
