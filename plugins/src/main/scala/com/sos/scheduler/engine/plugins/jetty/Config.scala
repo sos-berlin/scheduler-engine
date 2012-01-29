@@ -10,6 +10,7 @@ class Config(pluginElement: Element, configuration: SchedulerConfiguration) {
 
   val portOption = xmlAttributeIntOption(pluginElement, "port")
   val tryUntilPortOption = xmlAttributeIntOption(pluginElement, "tryUntilPort")
+  val jettyXmlFileOption = Option(new File(configuration.localConfigurationDirectory, "jetty.xml")) filter { _.exists }
   val accessLogFile = new File(configuration.logDirectory, "http.log")
 }
 

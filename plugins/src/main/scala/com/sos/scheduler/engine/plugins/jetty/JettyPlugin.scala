@@ -19,6 +19,7 @@ import org.eclipse.jetty.server.handler.{RequestLogHandler, HandlerCollection}
 import org.eclipse.jetty.server._
 import org.eclipse.jetty.util.security.Constraint
 import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.xml.XmlConfiguration
 import org.w3c.dom.Element
 import java.net.{ServerSocket, BindException}
 
@@ -42,6 +43,7 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 //    ))
     newServer(
       port = config.tryUntilPortOption map { until => findFreePort(config.portOption getOrElse until, until) } orElse config.portOption,
+      configuration = config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
       handlers = List(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
         newContextHandler(contextPath,
@@ -64,8 +66,9 @@ object JettyPlugin {
   private val logger = Logger.getLogger(classOf[JettyPlugin])
   private val contextPath = ""  // Mehrere Kontexte funktionieren nicht und GuiceFilter meldet einen Konflikt. Deshalb simulieren wir mit prefixPath.
 
-  private def newServer(port: Option[Int], handlers: Iterable[Handler], beans: Iterable[AnyRef] = Iterable()) = {
+  private def newServer(port: Option[Int], handlers: Iterable[Handler], configuration: Option[XmlConfiguration], beans: Iterable[AnyRef] = Iterable()) = {
     val result = new Server
+    for (c <- configuration) c.configure(result)
     for (p <- port) result.addConnector(newConnector(p))
     result.setHandler(newHandlerCollection(handlers))
     for (bean <- beans) result.addBean(bean)

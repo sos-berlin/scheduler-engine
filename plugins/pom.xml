@@ -115,6 +115,10 @@
             <artifactId>jersey-server</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-xml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-guice</artifactId>
         </dependency>
