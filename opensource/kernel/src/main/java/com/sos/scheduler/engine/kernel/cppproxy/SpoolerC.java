@@ -33,6 +33,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
 //??    const schedule::Holidays&   holidays                    () const                            { return _holidays; }
     boolean is_service();
     String directory();
+    String local_configuration_directory();
     String string_need_db();
 //??    void                        log_show_state              ( Prefix_log* log = NULL );
     void log_show_state();

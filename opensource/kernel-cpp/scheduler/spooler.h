@@ -438,6 +438,7 @@ struct Spooler : Object,
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
     string                      home_directory              () const                            { return _home_directory; }
+    string                      local_configuration_directory() const                           { return _configuration_directories[confdir_local]; }
     string                      string_need_db              () const;
 
     void                        log_show_state              ( Prefix_log* log = NULL );

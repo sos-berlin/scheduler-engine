@@ -59,7 +59,7 @@ public final class Scheduler implements HasPlatform, Sister,
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
     private final SpoolerC cppProxy;
-    private final Configuration configuration;
+    private final SchedulerConfiguration configuration;
     private final SchedulerControllerBridge controllerBridge;
     private final PrefixLog _log;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
     private final Platform platform;
@@ -75,23 +75,26 @@ public final class Scheduler implements HasPlatform, Sister,
     private final EventSubsystem eventSubsystem;
     private final CommandSubsystem commandSubsystem;
     private boolean threadInitiallyLocked = false;
+    private final Lazy<Injector> injector = new Lazy<Injector>() {
+        @Override protected Injector compute() { return Guice.createInjector(guiceModule.get()); }
+    };
 
     private final Lazy<Module> guiceModule = new Lazy<Module>() {
         @Override protected Module compute() {
             return new AbstractModule() {
                 @Override protected void configure() {
-                    bind(Scheduler.class).toInstance(Scheduler.this);
-                    bind(Configuration.class).toInstance(configuration);
-                    bind(SchedulerInstanceId.class).toInstance(instanceId);
-                    bind(HasGuiceModule.class).toInstance(Scheduler.this);  //TODO Provisorisch für MyJettyServer
-                    bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
-                    bind(SchedulerHttpService.class).toInstance(Scheduler.this);
+                    bind(EventBus.class).toInstance(eventBus);
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
+                    bind(HasGuiceModule.class).toInstance(Scheduler.this);  // Für JettyPlugin
                     bind(JobSubsystem.class).toInstance(jobSubsystem);
+                    bind(Scheduler.class).toInstance(Scheduler.this);
+                    bind(SchedulerConfiguration.class).toInstance(configuration);
+                    bind(SchedulerHttpService.class).toInstance(Scheduler.this);
+                    bind(SchedulerInstanceId.class).toInstance(instanceId);
+                    bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
                     bind(OrderSubsystem.class).toInstance(orderSubsystem);
                     bind(OperationQueue.class).toInstance(operationExecutor);
-                    bind(EventBus.class).toInstance(eventBus);
                     bind(PrefixLog.class).toInstance(_log);
                 }
             };
@@ -100,7 +103,7 @@ public final class Scheduler implements HasPlatform, Sister,
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         this.cppProxy = cppProxy;
-        configuration = new Configuration(this, cppProxy);
+        configuration = new SchedulerConfiguration(this, cppProxy);
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
         cppProxy.setSister(this);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
@@ -116,18 +119,17 @@ public final class Scheduler implements HasPlatform, Sister,
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());
         orderSubsystem = new OrderSubsystem(platform, this.cppProxy.order_subsystem());
-        Lazy<Injector> injector = new Lazy<Injector>() { @Override protected Injector compute() { return newInjector(); } };
         pluginSubsystem = new PluginSubsystem(this, injector, eventBus);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
         initializeThreadLock();
     }
 
-    private Injector newInjector() {
-        return Guice.createInjector(guiceModule.get());
+    public Injector getInjector() {
+        return injector.get();
     }
 
-    @Override public final Module getGuiceModule() {
+    @Override public Module getGuiceModule() {
         return guiceModule.get();
     }
 

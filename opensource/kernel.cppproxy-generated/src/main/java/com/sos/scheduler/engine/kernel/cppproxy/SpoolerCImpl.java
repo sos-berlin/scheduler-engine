@@ -722,6 +722,21 @@ final class SpoolerCImpl
     private static native void load_arg__native(long cppReference);
 
 
+    @Override public java.lang.String local_configuration_directory() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = local_configuration_directory__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String local_configuration_directory__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
