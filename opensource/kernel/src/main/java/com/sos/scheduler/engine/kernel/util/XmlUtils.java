@@ -30,6 +30,9 @@ import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.util.xml.NamedChildElements;
 import com.sos.scheduler.engine.util.xml.SiblingElementIterator;
 
+import static javax.xml.transform.OutputKeys.*;
+import static org.w3c.dom.Node.DOCUMENT_NODE;
+
 public final class XmlUtils {
     private XmlUtils() {}
 
@@ -65,13 +68,17 @@ public final class XmlUtils {
     public static String toXml(Node n) {
         StringWriter w = new StringWriter();
         writeXmlTo(n, w);
-        return w.toString();
+        String result = w.toString();
+        return n.getNodeType() != DOCUMENT_NODE && result.startsWith("<?")?
+                result.replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "")   // Manche DOM-Implementierung liefert den XML-Prolog.
+                : result;
     }
 
     public static void writeXmlTo(Node n, Writer w) {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty("omit-xml-declaration", "false");   //TODO Funktioniert nur mit org.jdom?
+            if (n.getNodeType() == DOCUMENT_NODE)
+                transformer.setOutputProperty(OMIT_XML_DECLARATION, "no");   //TODO Funktioniert nur mit org.jdom?
             transformer.transform(new DOMSource(n), new StreamResult(w));
         } catch (TransformerException x) { throw new XmlException(x); }
     }
@@ -80,7 +87,7 @@ public final class XmlUtils {
         String value = xmlElement.getAttribute(attributeName);
         Boolean result = booleanOrNullOf(value, defaultValue);
         if (result == null)
-            throw new RuntimeException("Ungültiger Boolescher Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">");
+            throw new RuntimeException("Invalid Boolean value in <"+ xmlElement.getNodeName() +" "+ attributeName + "=" + xmlQuoted(value) + ">");
         return result;
     }
 
@@ -100,20 +107,20 @@ public final class XmlUtils {
         String value = xmlElement.getAttribute(attributeName);
         if (value.isEmpty()) {
             if (defaultValue == null)
-                throw new RuntimeException("Fehlender Angabe in <"+ xmlElement.getNodeName() +" "+ attributeName +"=''");
+                throw new RuntimeException("Missing attribute in <"+ xmlElement.getNodeName() +" "+ attributeName +"=''");
             return defaultValue;
         }
 
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException x) {
-            throw new RuntimeException("Ungültiger numerischer Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">", x);
+            throw new RuntimeException("Invalid numeric value in <"+ xmlElement.getNodeName() +" "+ attributeName +"="+ xmlQuoted(value) +">", x);
         }
     }
 
     public static Element elementXPath(Node baseNode, String xpathExpression) {
         Element result = elementXPathOrNull(baseNode, xpathExpression);
-        if (result == null)  throw new XmlException("XPath liefert kein Element: " + xpathExpression);
+        if (result == null)  throw new XmlException("XPath does not return an element: "+ xpathExpression);
         return result;
     }
 
@@ -141,7 +148,7 @@ public final class XmlUtils {
     public static String stringXPath(Node baseNode, String xpathExpression) {
         try {
             String result = (String)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.STRING);
-            if (result == null)  throw new XmlException("XPath passt nicht: " + xpathExpression);
+            if (result == null)  throw new XmlException("XPath does not match: "+ xpathExpression);
             return result;
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
