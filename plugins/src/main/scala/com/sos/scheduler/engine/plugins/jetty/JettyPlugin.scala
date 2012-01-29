@@ -2,14 +2,13 @@ package com.sos.scheduler.engine.plugins.jetty
 
 import com.google.inject.{Injector, Guice}
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
-import com.sos.scheduler.engine.kernel.scheduler.{Configuration, HasGuiceModule}
+import com.sos.scheduler.engine.kernel.scheduler.{SchedulerConfiguration, HasGuiceModule}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
-import com.sos.scheduler.engine.kernel.util.XmlUtils.{childElementOrNull, intXmlAttribute}
+import com.sos.scheduler.engine.kernel.util.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginConfiguration._
 import com.sos.scheduler.engine.plugins.jetty.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
-import java.io.File
 import javax.inject.Inject
 import javax.servlet.Filter
 import org.apache.log4j.Logger
@@ -19,18 +18,22 @@ import org.eclipse.jetty.servlets.GzipFilter
 import org.eclipse.jetty.server.handler.{RequestLogHandler, HandlerCollection}
 import org.eclipse.jetty.server._
 import org.eclipse.jetty.util.security.Constraint
+import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.w3c.dom.Element
+import java.net.{ServerSocket, BindException}
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
-final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, configuration: Configuration)
+final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, configuration: SchedulerConfiguration)
   extends AbstractPlugin {
 
   import JettyPlugin._
 
-  val accessLogFile = new File(configuration.getLogDirectory, "http.log");
+  private val config = new Config(pluginElement, configuration)
 
-  private lazy val server = {
-    val schedulerModule = hasGuiceModule.getGuiceModule
+  /** Der Port des ersten Connector */
+  def port = server.getConnectors.iterator.next().getPort
+
+  private val server = {
 //    val contexts = new ContextHandlerCollection()
 //    contexts.setHandlers(Array(
 //      newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule())),
@@ -38,21 +41,13 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 //      //Funktioniert nicht: injector.createChildInjector(newServletModule())
 //    ))
     newServer(
-      port = intXmlAttribute(pluginElement, "port"),
-      handler = newHandlerCollection(
-        newRequestLogHandler(new NCSARequestLog(accessLogFile.toString)),
-        newContextHandler(
-          contextPath,
-          injector = Guice.createInjector(schedulerModule, newServletModule()),
-          loginService = childElementOption(pluginElement, "loginService") map PluginLoginService.apply))
+      port = config.tryUntilPortOption map { until => findFreePort(config.portOption getOrElse until, until) } orElse config.portOption,
+      handlers = List(
+        newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
+        newContextHandler(contextPath,
+          Guice.createInjector(hasGuiceModule.getGuiceModule, newServletModule()),
+          childElementOption(pluginElement, "loginService") map PluginLoginService.apply))
     )
-  }
-
-  private def newServer(port: Int, handler: Handler, beans: Iterable[AnyRef] = List()) = {
-    val result = new Server(port)
-    result.setHandler(handler)
-    beans foreach { bean => result.addBean(bean) }
-    result
   }
 
   override def activate() {
@@ -69,7 +64,21 @@ object JettyPlugin {
   private val logger = Logger.getLogger(classOf[JettyPlugin])
   private val contextPath = ""  // Mehrere Kontexte funktionieren nicht und GuiceFilter meldet einen Konflikt. Deshalb simulieren wir mit prefixPath.
 
-  private def newHandlerCollection(handlers: Handler*) = {
+  private def newServer(port: Option[Int], handlers: Iterable[Handler], beans: Iterable[AnyRef] = Iterable()) = {
+    val result = new Server
+    for (p <- port) result.addConnector(newConnector(p))
+    result.setHandler(newHandlerCollection(handlers))
+    for (bean <- beans) result.addBean(bean)
+    result
+  }
+
+  private def newConnector(port: Int) = {
+    val connector = new SelectChannelConnector
+    connector.setPort(port)
+    connector
+  }
+
+  private def newHandlerCollection(handlers: Iterable[Handler]) = {
     val result = new HandlerCollection
     result.setHandlers(handlers.toArray)
     result
@@ -94,9 +103,7 @@ object JettyPlugin {
     //result.addFilter(classOf[GzipFilter], "/*", null);
     result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
     result.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
-    loginService foreach { s =>
-      result.setSecurityHandler(newConstraintSecurityHandler(s))
-    }
+    for (s <- loginService)  result.setSecurityHandler(newConstraintSecurityHandler(s))
     result
   }
 
@@ -149,7 +156,21 @@ object JettyPlugin {
     }
   }
 
+  def findFreePort(begin: Int, end: Int): Int =
+    if (begin >= end)
+      begin
+    else
+      try {
+        val backlog = 1
+        val s = new ServerSocket(begin, backlog)
+        s.close()
+        begin
+      } catch {
+        case _: BindException => findFreePort(begin + 1, end)
+      }
+
   private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
+
 
 
   // TODO URIs und REST

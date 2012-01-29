@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import java.io.{BufferedReader, Reader}
-import java.net.URI
 import javax.ws.rs.core.MediaType._
-import com.sun.jersey.api.client.{WebResource, Client}
+import com.sun.jersey.api.client.WebResource
 import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.apache.log4j.Logger
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
-import JettyPluginTest._
+import JettyPluginTests._
 
 //TODO Wechsel der Datei bei Log.start_new_file() und instance_number berücksichtigen
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
@@ -19,12 +18,12 @@ import JettyPluginTest._
 final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   import LogServletTest._
 
+  private lazy val objectsResource = newAuthResource(javaContextUri(injector)+"/objects")
+
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
     controller.activateScheduler()
     super.checkedBeforeAll(configMap)
   }
-
-  private val objectsResource = newAuthResource(contextUri+"/objects")
 
   test("Read a task log") {
     startLogThread(objectsResource.path("job.log").queryParam("job", "a"))
@@ -58,8 +57,6 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
 
 object LogServletTest {
   private val logger = Logger.getLogger(classOf[LogServletTest])
-  private val jettyPortNumber = 44440
-  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPluginConfiguration.prefixPath)
 
   private def logReader(reader: Reader) {
     val r = new BufferedReader(reader)

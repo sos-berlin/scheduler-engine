@@ -1,23 +1,21 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.google.common.io.Files
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sun.jersey.api.client.filter.{ClientFilter, GZIPContentEncodingFilter}
+import com.sun.jersey.api.client.filter.ClientFilter
 import com.sun.jersey.api.client.{Client, ClientResponse}
 import com.sos.scheduler.engine.kernel.settings.SettingName
-import java.net.URI
+import java.io.File
 import java.util.zip.GZIPInputStream
 import javax.ws.rs.core.MediaType._
-import javax.ws.rs.core.Response.Status.UNAUTHORIZED
+import javax.ws.rs.core.Response.Status._
+import org.joda.time.Duration
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
-import org.joda.time.Duration
 
-import JettyPluginTest._
-import org.apache.log4j.Logger
-import com.google.common.io.Files
-import java.io.File
+import JettyPluginTests._
 
 @RunWith(classOf[JUnitRunner])
 final class CppServletTest extends ScalaSchedulerTest {
@@ -32,7 +30,7 @@ final class CppServletTest extends ScalaSchedulerTest {
   }
 
   private val readTimeout = new Duration(15*1000)
-  private val uri = contextUri
+  private lazy val uri = cppContextUri(injector)
 
   for (testConf <- TestConf(newClient(), withGzip = false) :: Nil) {
                    //TestConf(newClient(new GZIPContentEncodingFilter(false)), withGzip = true) :: Nil) {
@@ -45,7 +43,7 @@ final class CppServletTest extends ScalaSchedulerTest {
 
     test("Kommando über POST ohne Authentifizierung "+testConf) {
       val x = intercept[com.sun.jersey.api.client.UniformInterfaceException] {
-        Client.create().resource(contextUri).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
+        Client.create().resource(uri).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
       }
       x.getResponse.getStatus should equal(UNAUTHORIZED.getStatusCode)
     }
@@ -75,9 +73,8 @@ final class CppServletTest extends ScalaSchedulerTest {
     def stringFromResponse(r: ClientResponse) = checkedResponse(r).getEntity(classOf[String])
 
     def checkedResponse(r: ClientResponse) = {
-      assert(r.getStatus === 200)
-      assert(r.getEntityInputStream.isInstanceOf[GZIPInputStream] == testConf.withGzip,
-          (if (testConf.withGzip) "" else " No ") +"gzip compressed data expected")
+      assert(fromStatusCode(r.getStatus) === OK, "Unexpected HTTP status")
+      assert(r.getEntityInputStream.isInstanceOf[GZIPInputStream] == testConf.withGzip, testConf +" expected")
       r
     }
   }
@@ -90,15 +87,13 @@ final class CppServletTest extends ScalaSchedulerTest {
 }
 
 object CppServletTest {
-  private val logger = Logger.getLogger(classOf[CppServletTest])
+  //private val logger = Logger.getLogger(classOf[CppServletTest])
   //Logger.getLogger(classOf[CppServlet]).setLevel(Level.ALL)
 
-  private val jettyPortNumber = 44440
-  private val contextUri = new URI("http://localhost:"+ jettyPortNumber + JettyPluginConfiguration.cppPrefixPath)
   private val jobChainPath = "a"
   private val orderId = "1"
 
   private case class TestConf(client: Client, withGzip: Boolean) {
-    override def toString = if (withGzip) " mit gzip" else ""
+    override def toString = if (withGzip) " compressed with gzip" else ""
   }
 }

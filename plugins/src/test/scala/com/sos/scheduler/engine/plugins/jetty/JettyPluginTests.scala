@@ -4,9 +4,22 @@ import java.net.URI
 import com.sun.jersey.api.client.{Client, WebResource}
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter
 import org.joda.time.Duration
+import com.google.inject.Injector
+import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginConfiguration._
 
-object JettyPluginTest {
+object JettyPluginTests {
   val defaultTimeout = new Duration(60*1000)
+
+  def cppContextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + cppPrefixPath)
+
+  def javaContextUri(injector: Injector) = "http://localhost:"+ jettyPortNumber(injector) + prefixPath
+
+  def jettyPortNumber(injector: Injector) = {
+    val pluginSubsystem = injector.getInstance(classOf[PluginSubsystem])
+    val jettyPlugin = pluginSubsystem.pluginByClass(classOf[JettyPlugin])
+    jettyPlugin.port
+  }
 
   def newAuthentifyingClient(timeout: Duration = defaultTimeout) = {
     val result = Client.create()
