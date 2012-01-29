@@ -95,6 +95,7 @@ public final class Scheduler implements HasPlatform, Sister,
                     bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
                     bind(OrderSubsystem.class).toInstance(orderSubsystem);
                     bind(OperationQueue.class).toInstance(operationExecutor);
+                    bind(PluginSubsystem.class).toInstance(pluginSubsystem);
                     bind(PrefixLog.class).toInstance(_log);
                 }
             };

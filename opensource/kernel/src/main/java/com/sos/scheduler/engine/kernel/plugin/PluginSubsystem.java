@@ -68,17 +68,22 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     }
 
     CommandPluginAdapter commandPluginByClassName(String className) {
-        PluginAdapter a = pluginByClassName(className);
+        PluginAdapter a = pluginAdapterByClassName(className);
         if (!(a instanceof CommandPluginAdapter))
             throw new SchedulerException("Plugin is not a " + CommandPlugin.class.getSimpleName());
         return (CommandPluginAdapter)a;
     }
 
-    private PluginAdapter pluginByClassName(String className) {
+    private PluginAdapter pluginAdapterByClassName(String className) {
         PluginAdapter result = plugins.get(className);
         if (result == null)
             throw new SchedulerException("Unknown plugin '" + className + "'");
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Plugin> T pluginByClass(Class<T> c) {
+        return (T)pluginAdapterByClassName(c.getName()).getPlugin();
     }
 
     @Override public Collection<CommandHandler> getCommandHandlers() {
