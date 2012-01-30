@@ -5,6 +5,8 @@ import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 
 public final class LogSubsystem implements Subsystem {
+    private static final Logger logger = Logger.getLogger(LogSubsystem.class);
+
     private final Appender appender;
 
     public LogSubsystem(SchedulerLog schedulerLog) {
@@ -13,11 +15,14 @@ public final class LogSubsystem implements Subsystem {
 
     public void close() {
         Logger l = Logger.getRootLogger();
-        if (l != null)
+        if (l != null) {
+            logger.info("Closed");
             Logger.getRootLogger().removeAppender(appender);
+        }
     }
 
     public void activate() {
         Logger.getRootLogger().addAppender(appender);
+        logger.info("Activated");
     }
 }
