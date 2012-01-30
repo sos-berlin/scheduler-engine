@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.filter.ClientFilter
 import com.sun.jersey.api.client.{Client, ClientResponse}
 import com.sos.scheduler.engine.kernel.settings.SettingName
+import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter
 import java.io.File
 import java.util.zip.GZIPInputStream
 import javax.ws.rs.core.MediaType._
@@ -32,8 +33,9 @@ final class CppServletTest extends ScalaSchedulerTest {
   private val readTimeout = new Duration(15*1000)
   private lazy val uri = cppContextUri(injector)
 
-  for (testConf <- TestConf(newClient(), withGzip = false) :: Nil) {
-                   //TestConf(newClient(new GZIPContentEncodingFilter(false)), withGzip = true) :: Nil) {
+  for (testConf <- TestConf(newClient(), withGzip = false) ::
+                   //TestConf(newClient(new GZIPContentEncodingFilter(false)), withGzip = true) ::
+                   Nil) {
     val client = testConf.client
 
     test("Kommando über POST "+testConf) {
@@ -74,7 +76,8 @@ final class CppServletTest extends ScalaSchedulerTest {
 
     def checkedResponse(r: ClientResponse) = {
       assert(fromStatusCode(r.getStatus) === OK, "Unexpected HTTP status")
-      assert(r.getEntityInputStream.isInstanceOf[GZIPInputStream] == testConf.withGzip, testConf +" expected")
+      if (testConf.withGzip) assert(r.getEntityInputStream.isInstanceOf[GZIPInputStream], r.getEntityInputStream.getClass +" should be a GZIPInputStream")
+      else assert(!r.getEntityInputStream.isInstanceOf[GZIPInputStream], r.getEntityInputStream.getClass +" should not be a GZIPInputStream")
       r
     }
   }
@@ -94,6 +97,6 @@ object CppServletTest {
   private val orderId = "1"
 
   private case class TestConf(client: Client, withGzip: Boolean) {
-    override def toString = if (withGzip) " compressed with gzip" else ""
+    override def toString = if (withGzip) "compressed with gzip" else ""
   }
 }

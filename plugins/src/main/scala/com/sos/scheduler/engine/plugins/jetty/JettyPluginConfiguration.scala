@@ -5,12 +5,13 @@ object JettyPluginConfiguration {
   val prefixPath = "/JobScheduler/engine"
   val cppPrefixPath = ""
 
-  val gzipContentTypes = List(
-    "application/javascript",
-    "application/xhtml+xml",
-    "image/svg+xml",
-    "text/css",
-    "text/html",
-    "text/plain",
-    "text/xml")
+//  val gzipContentTypes = List(
+//    "application/javascript",
+//    "application/xhtml+xml",
+//    "image/svg+xml",
+//    "text/css",
+//    "text/html",
+//    "text/javascript",
+//    "text/plain",
+//    "text/xml")
 }

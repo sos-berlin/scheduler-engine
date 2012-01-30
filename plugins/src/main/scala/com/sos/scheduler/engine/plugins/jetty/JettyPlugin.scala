@@ -102,7 +102,7 @@ object JettyPlugin {
 
     result.setContextPath(contextPath)
     result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
-    //addFilter(classOf[GzipFilter], "/*", "mimeTypes" -> gzipContentTypes.mkString(","))
+    addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
     //result.addFilter(classOf[GzipFilter], "/*", null);
     result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
     result.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
@@ -159,18 +159,14 @@ object JettyPlugin {
     }
   }
 
-  def findFreePort(begin: Int, end: Int): Int =
-    if (begin >= end)
+  def findFreePort(begin: Int, end: Int): Int = if (begin >= end) begin else
+    try {
+      val backlog = 1
+      new ServerSocket(begin, backlog).close()
       begin
-    else
-      try {
-        val backlog = 1
-        val s = new ServerSocket(begin, backlog)
-        s.close()
-        begin
-      } catch {
-        case _: BindException => findFreePort(begin + 1, end)
-      }
+    } catch {
+      case _: BindException => findFreePort(begin + 1, end)
+    }
 
   private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
 
