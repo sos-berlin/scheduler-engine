@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
     <Filter Include="Quellcodedateien">
@@ -228,7 +228,6 @@
     <ClCompile Include="jni__sos__scheduler__Prefix_log.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    
     <ClCompile Include="scheduler_messages.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
@@ -292,7 +291,22 @@
     <ClCompile Include="jni__sos__scheduler__Task.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-  <ClCompile Include="jni__sos__scheduler__Spooler.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="jni__sos__scheduler__Spooler.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="jni__sos__scheduler__http__Java_response.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile></ItemGroup>
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__http__Java_response.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
       <Filter>Quellcodedateien</Filter>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -165,6 +165,7 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AssemblerOutput>All</AssemblerOutput>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -286,7 +287,6 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="jni__sos__scheduler__order__job_chain__Order_queue_node.cxx" />
     <ClCompile Include="jni__sos__scheduler__order__Order_subsystem.cxx" />
     <ClCompile Include="jni__sos__scheduler__Prefix_log.cxx" />
-    
     <ClCompile Include="scheduler_messages.cxx" />
     <ClCompile Include="..\kram\sosmain.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -304,7 +304,11 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="jni__sos__scheduler__order__job_chain__Job_node.cxx" />
     <ClCompile Include="jni__sos__scheduler__Settings.cxx" />
     <ClCompile Include="jni__sos__scheduler__Task.cxx" />
-  <ClCompile Include="jni__sos__scheduler__Spooler.cxx" /><ClCompile Include="jni__sos__scheduler__Spooler.cxx" /><ClCompile Include="jni__sos__scheduler__http__Java_response.cxx" /><ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx" /></ItemGroup>
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx" />
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx" />
+    <ClCompile Include="jni__sos__scheduler__http__Java_response.cxx" />
+    <ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx" />
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />
