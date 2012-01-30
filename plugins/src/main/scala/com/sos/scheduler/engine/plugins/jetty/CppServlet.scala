@@ -1,5 +1,12 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.google.common.base.Charsets._
+import com.google.common.base.Objects._
+import com.google.common.io.CharStreams
+import com.sos.scheduler.engine.cplusplus.runtime.CppReference
+import com.sos.scheduler.engine.kernel.http.{SchedulerHttpRequest, SchedulerHttpResponse}
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerHttpService
+import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.getOrSetAttribute
 import java.net.URLDecoder
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nullable
@@ -7,13 +14,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.{AsyncEvent, AsyncListener}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import com.sos.scheduler.engine.cplusplus.runtime.CppReference
-import com.sos.scheduler.engine.kernel.http.{SchedulerHttpRequest, SchedulerHttpResponse}
-import com.sos.scheduler.engine.kernel.scheduler.{SchedulerHttpService, SchedulerConstants}
-import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.getOrSetAttribute
-import com.google.common.base.Charsets._
-import com.google.common.base.Objects._
-import com.google.common.io.CharStreams
 import org.apache.log4j.{Level, Logger}
 
 @Singleton
@@ -43,9 +43,10 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
       def onStartAsync(event: AsyncEvent) {}
     }
 
+    //FIXME Wenn httpResponseC erst nach Scheduler-Ende freigegeben wird, gibt's einen Absturz, weil Spooler freigegeben ist.
     /** Das C++-Objekt httpResponseC MUSS mit Release() wieder freigegeben werden, sonst Speicherleck. */
-    private lazy val httpResponseC = schedulerHttpService.executeHttpRequest(new ServletSchedulerHttpRequest(request), this)
-    private lazy val httpResponseCRef = CppReference.of(httpResponseC)
+    private lazy val httpResponseCRef = new CppReference(schedulerHttpService.executeHttpRequest(new ServletSchedulerHttpRequest(request), this))
+    private def httpResponseC = httpResponseCRef.get
     @Nullable private lazy val chunkReaderC = httpResponseC.chunk_reader
 
     try {
@@ -65,8 +66,8 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
     def continue() {
       if (chunkReaderC != null) {
         serveChunks()
+        response.getOutputStream.flush()
         if (!isClosed) startAsync()
-        else response.getOutputStream.flush()
       } else
         logger.warn("chunkReaderC==null")
     }
@@ -85,7 +86,6 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
           case size => response.getOutputStream.write(chunkReaderC.read_from_chunk(size))
         }
       }
-      response.getOutputStream.flush()
     }
 
     def onNextChunkIsReady() {
