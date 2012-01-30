@@ -54,7 +54,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 
 @ForCpp
 public final class Scheduler implements HasPlatform, Sister,
-        SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
+        SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
@@ -75,6 +75,7 @@ public final class Scheduler implements HasPlatform, Sister,
     private final EventSubsystem eventSubsystem;
     private final CommandSubsystem commandSubsystem;
     private boolean threadInitiallyLocked = false;
+    private boolean closed = false;
     private final Lazy<Injector> injector = new Lazy<Injector>() {
         @Override protected Injector compute() { return Guice.createInjector(guiceModule.get()); }
     };
@@ -93,6 +94,7 @@ public final class Scheduler implements HasPlatform, Sister,
                     bind(SchedulerHttpService.class).toInstance(Scheduler.this);
                     bind(SchedulerInstanceId.class).toInstance(instanceId);
                     bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
+                    bind(SchedulerIsClosed.class).toInstance(Scheduler.this);
                     bind(OrderSubsystem.class).toInstance(orderSubsystem);
                     bind(OperationQueue.class).toInstance(operationExecutor);
                     bind(PluginSubsystem.class).toInstance(pluginSubsystem);
@@ -153,6 +155,7 @@ public final class Scheduler implements HasPlatform, Sister,
     @Override public void onCppProxyInvalidated() {}
 
     @ForCpp public void onClose() {
+        closed = true;
         try {
             eventBus.publish(new SchedulerCloseEvent());
             eventBus.dispatchEvents();
@@ -173,6 +176,10 @@ public final class Scheduler implements HasPlatform, Sister,
             }
         }
         eventBus.dispatchEvents();
+    }
+
+    @Override public boolean isClosed() {
+        return closed;
     }
 
     @ForCpp public void onLoad(String configurationXml) {
