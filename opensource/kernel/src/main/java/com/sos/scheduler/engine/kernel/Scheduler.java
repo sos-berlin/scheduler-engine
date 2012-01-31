@@ -189,12 +189,12 @@ public final class Scheduler implements HasPlatform, Sister,
     }
 
     private void onLoad(Element configElement) {
+        logSubsystem.activate();
         pluginSubsystem.load(configElement);
         controllerBridge.onSchedulerStarted(this);
     }
 
     @ForCpp public void onActivate() {
-        logSubsystem.activate();
         pluginSubsystem.activate();
     }
 
