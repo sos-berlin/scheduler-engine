@@ -75,7 +75,7 @@ final class CppServletTest extends ScalaSchedulerTest {
     def stringFromResponse(r: ClientResponse) = checkedResponse(r).getEntity(classOf[String])
 
     def checkedResponse(r: ClientResponse) = {
-      assert(fromStatusCode(r.getStatus) === OK, "Unexpected HTTP status")
+      assert(fromStatusCode(r.getStatus) === OK, "Unexpected HTTP status "+r.getStatus)
       if (testConf.withGzip) assert(r.getEntityInputStream.isInstanceOf[GZIPInputStream], r.getEntityInputStream.getClass +" should be a GZIPInputStream")
       else assert(!r.getEntityInputStream.isInstanceOf[GZIPInputStream], r.getEntityInputStream.getClass +" should not be a GZIPInputStream")
       r

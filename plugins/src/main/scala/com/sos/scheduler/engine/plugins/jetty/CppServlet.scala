@@ -3,9 +3,7 @@ package com.sos.scheduler.engine.plugins.jetty
 import com.google.common.base.Charsets._
 import com.google.common.base.Objects._
 import com.google.common.io.CharStreams
-import com.sos.scheduler.engine.cplusplus.runtime.CppReference
 import com.sos.scheduler.engine.kernel.http.{SchedulerHttpRequest, SchedulerHttpResponse}
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerHttpService
 import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.getOrSetAttribute
 import java.net.URLDecoder
 import java.util.concurrent.atomic.AtomicBoolean
@@ -14,16 +12,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.{AsyncEvent, AsyncListener}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import org.apache.log4j.{Level, Logger}
+import org.slf4j.{Logger, LoggerFactory}
+import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, DisposableCppProxyRegister}
+import com.sos.scheduler.engine.kernel.scheduler.{SchedulerIsClosed, SchedulerHttpService}
 
 @Singleton
-class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends HttpServlet {
+class CppServlet @Inject()(
+    schedulerHttpService: SchedulerHttpService,
+    disposableCppProxyRegister: DisposableCppProxyRegister,
+    schedulerIsClosed: SchedulerIsClosed)
+    extends HttpServlet {
+
   import CppServlet._
 
   override def service(request: HttpServletRequest, response: HttpServletResponse) {
     val operation = getOrSetAttribute(request, classOf[CppServlet].getName) { newOperation(request, response) }
-    try operation.continue()
-    catch { case x => operation.close(); throw x }
+    try operation.continueOrClose()
+    catch {
+      case x: InterruptedException => logger.debug(x.toString)
+      case x: RuntimeException if x.getCause.isInstanceOf[InterruptedException] => logger.debug(x.toString)
+      case x: CppProxyInvalidatedException => logger.debug(x.toString)
+    }
   }
 
   private def newOperation(request: HttpServletRequest, response: HttpServletResponse) = new SchedulerHttpResponse {
@@ -45,7 +54,7 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
 
     //FIXME Wenn httpResponseC erst nach Scheduler-Ende freigegeben wird, gibt's einen Absturz, weil Spooler freigegeben ist.
     /** Das C++-Objekt httpResponseC MUSS mit Release() wieder freigegeben werden, sonst Speicherleck. */
-    private lazy val httpResponseCRef = new CppReference(schedulerHttpService.executeHttpRequest(new ServletSchedulerHttpRequest(request), this))
+    private lazy val httpResponseCRef = disposableCppProxyRegister.reference(schedulerHttpService.executeHttpRequest(new ServletSchedulerHttpRequest(request), this))
     private def httpResponseC = httpResponseCRef.get
     @Nullable private lazy val chunkReaderC = httpResponseC.chunk_reader
 
@@ -59,7 +68,25 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
       if (!_isClosed.getAndSet(true)) {
         httpResponseC.close()
         logger.debug("httpResponseC.dispose()")
-        httpResponseCRef.dispose()
+        disposableCppProxyRegister.dispose(httpResponseCRef)
+      }
+    }
+
+    def tryClose() {
+      try close()
+      catch {
+        case x =>
+          if (schedulerIsClosed.isClosed) logger.error(x.toString)
+          else logger.error(x.toString, x)
+      }
+    }
+
+    def continueOrClose() {
+      try continue()
+      catch {
+        case x =>
+          tryClose()
+          throw x
       }
     }
 
@@ -89,7 +116,7 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
     }
 
     def onNextChunkIsReady() {
-      onThrowableLogOnly(Level.ERROR) {
+      onThrowableLogOnly {
         if (request.isAsyncStarted)
           request.getAsyncContext.dispatch()
       }
@@ -100,7 +127,7 @@ class CppServlet @Inject()(schedulerHttpService: SchedulerHttpService) extends H
 }
 
 object CppServlet {
-  private implicit val logger: Logger = Logger.getLogger(classOf[CppServlet])
+  private implicit val logger: Logger = LoggerFactory.getLogger(classOf[CppServlet])
 
   private def splittedHeaders(headers: String): Iterable[(String,String)] = headers match {
     case "" => Iterable()
@@ -118,14 +145,30 @@ object CppServlet {
     val body = CharStreams.toString(request.getReader)
   }
 
-  def onThrowableLogOnly(level: Level)(f: => Unit)(implicit log: Logger) {
-    onThrowableLogOnly(log, level, f)
+//  def onThrowable[A](f: => A) = new {
+//    def rollback(r: => Unit) = {
+//      try f
+//      catch {
+//        case x =>
+//          try r
+//          catch {
+//            case rollbackThrowable =>
+//              logger.error(x.toString, x)
+//              throw rollbackThrowable
+//          }
+//          throw x
+//      }
+//    }
+//  }
+
+  def onThrowableLogOnly(f: => Unit)(implicit log: Logger) {
+    onThrowableLogOnly(log, f)
   }
 
-  def onThrowableLogOnly(log: Logger, level: Level, f: => Unit) {
+  def onThrowableLogOnly(log: Logger, f: => Unit) {
     try f
     catch {
-      case x => logger.log(level, x, x)
+      case x => logger.error(x.toString, x)
     }
   }
 }

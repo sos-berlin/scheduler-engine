@@ -6,6 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
+import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.eventbus.EventBus;
@@ -42,9 +43,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -75,6 +74,7 @@ public final class Scheduler implements HasPlatform, Sister,
     private final EventSubsystem eventSubsystem;
     private final CommandSubsystem commandSubsystem;
     private boolean threadInitiallyLocked = false;
+    private final DisposableCppProxyRegister disposableCppProxyRegister = new DisposableCppProxyRegister();
     private boolean closed = false;
     private final Lazy<Injector> injector = new Lazy<Injector>() {
         @Override protected Injector compute() { return Guice.createInjector(guiceModule.get()); }
@@ -99,6 +99,7 @@ public final class Scheduler implements HasPlatform, Sister,
                     bind(OperationQueue.class).toInstance(operationExecutor);
                     bind(PluginSubsystem.class).toInstance(pluginSubsystem);
                     bind(PrefixLog.class).toInstance(_log);
+                    bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
                 }
             };
         }
@@ -176,6 +177,7 @@ public final class Scheduler implements HasPlatform, Sister,
             }
         }
         eventBus.dispatchEvents();
+        disposableCppProxyRegister.tryDisposeAll();
     }
 
     @Override public boolean isClosed() {
@@ -207,7 +209,7 @@ public final class Scheduler implements HasPlatform, Sister,
 
     public void terminate() {
         if (!cppProxy.cppReferenceIsValid())
-            _log.debug("Scheduler.terminate() ignored because C++ object has already been destructed");
+            _log.debug("Scheduler.terminate() ignored because C++ object has already been destroyed");
         else
             cppProxy.cmd_terminate();
     }

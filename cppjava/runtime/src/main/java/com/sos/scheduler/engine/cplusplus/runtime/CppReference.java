@@ -10,7 +10,7 @@ public class CppReference<T extends ReleasableCppProxy> {
         this.cppProxy = new AtomicReference<T>(cppProxy);
     }
 
-    public final void dispose() {
+    final void dispose() {
         if (cppProxy != null) {
             T o = cppProxy.getAndSet(null);
             if (o != null)
@@ -24,5 +24,9 @@ public class CppReference<T extends ReleasableCppProxy> {
 
     public static <T extends ReleasableCppProxy> CppReference<T> of(T o) {
         return new CppReference<T>(o);
+    }
+
+    @Override public String toString() {
+        return "CppReference->"+cppProxy;
     }
 }
