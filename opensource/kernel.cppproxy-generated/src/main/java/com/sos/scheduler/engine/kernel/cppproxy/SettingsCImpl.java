@@ -15,6 +15,7 @@ final class SettingsCImpl
         try {
             set__native(cppReference(), p0, p1);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }

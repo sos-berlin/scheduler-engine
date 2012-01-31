@@ -17,6 +17,7 @@ final class Job_chainCImpl
             checkIsNotReleased(java.util.List.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -32,6 +33,7 @@ final class Job_chainCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -47,6 +49,7 @@ final class Job_chainCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.OrderC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -62,6 +65,7 @@ final class Job_chainCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -75,6 +79,7 @@ final class Job_chainCImpl
         try {
             set_force_file_reread__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }

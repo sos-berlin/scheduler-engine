@@ -17,6 +17,7 @@ final class OrderCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -32,6 +33,7 @@ final class OrderCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Job_chainC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -47,6 +49,7 @@ final class OrderCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -62,6 +65,7 @@ final class OrderCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -77,6 +81,7 @@ final class OrderCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -90,6 +95,7 @@ final class OrderCImpl
         try {
             set_end_state__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -103,6 +109,7 @@ final class OrderCImpl
         try {
             set_id__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -118,6 +125,7 @@ final class OrderCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -133,6 +141,7 @@ final class OrderCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -148,6 +157,7 @@ final class OrderCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -163,6 +173,7 @@ final class OrderCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }

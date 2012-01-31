@@ -15,6 +15,7 @@ final class SpoolerCImpl
         try {
             abort_immediately__native(cppReference(), p0, p1);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -28,6 +29,7 @@ final class SpoolerCImpl
         try {
             abort_immediately_after_distribution_error__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -41,6 +43,7 @@ final class SpoolerCImpl
         try {
             abort_now__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -54,6 +57,7 @@ final class SpoolerCImpl
         try {
             activate__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -67,6 +71,7 @@ final class SpoolerCImpl
         try {
             assert_are_orders_distributed__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -80,6 +85,7 @@ final class SpoolerCImpl
         try {
             assert_is_activated__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -93,6 +99,7 @@ final class SpoolerCImpl
         try {
             assign_stdout__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -106,6 +113,7 @@ final class SpoolerCImpl
         try {
             begin_dont_suspend_machine__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -119,6 +127,7 @@ final class SpoolerCImpl
         try {
             check_cluster__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -132,6 +141,7 @@ final class SpoolerCImpl
         try {
             check_name__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -145,6 +155,7 @@ final class SpoolerCImpl
         try {
             return cluster_is_active__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -160,6 +171,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -173,6 +185,7 @@ final class SpoolerCImpl
         try {
             cmd_continue__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -186,6 +199,7 @@ final class SpoolerCImpl
         try {
             cmd_let_run_terminate_and_restart__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -199,6 +213,7 @@ final class SpoolerCImpl
         try {
             cmd_pause__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -212,6 +227,7 @@ final class SpoolerCImpl
         try {
             cmd_terminate__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -225,6 +241,7 @@ final class SpoolerCImpl
         try {
             cmd_terminate__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -238,6 +255,7 @@ final class SpoolerCImpl
         try {
             cmd_terminate__native(cppReference(), p0, p1);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -251,6 +269,7 @@ final class SpoolerCImpl
         try {
             cmd_terminate__native(cppReference(), p0, p1, p2);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -264,6 +283,7 @@ final class SpoolerCImpl
         try {
             cmd_terminate__native(cppReference(), p0, p1, p2, p3);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -277,6 +297,7 @@ final class SpoolerCImpl
         try {
             cmd_terminate_after_error__native(cppReference(), p0, p1);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -290,6 +311,7 @@ final class SpoolerCImpl
         try {
             cmd_terminate_and_restart__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -305,6 +327,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.DatabaseC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -320,6 +343,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -335,6 +359,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -348,6 +373,7 @@ final class SpoolerCImpl
         try {
             detect_warning_and_send_mail__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -363,6 +389,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -378,6 +405,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -391,6 +419,7 @@ final class SpoolerCImpl
         try {
             end_dont_suspend_machine__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -404,6 +433,7 @@ final class SpoolerCImpl
         try {
             end_waiting_tasks__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -417,6 +447,7 @@ final class SpoolerCImpl
         try {
             execute_config_commands__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -430,6 +461,7 @@ final class SpoolerCImpl
         try {
             execute_state_cmd__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -445,6 +477,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -460,6 +493,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -473,6 +507,7 @@ final class SpoolerCImpl
         try {
             return has_any_task__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -486,6 +521,7 @@ final class SpoolerCImpl
         try {
             return has_exclusiveness__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -501,6 +537,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -516,6 +553,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -531,6 +569,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -546,6 +585,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -561,6 +601,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -576,6 +617,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -589,6 +631,7 @@ final class SpoolerCImpl
         try {
             return is_cluster__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -602,6 +645,7 @@ final class SpoolerCImpl
         try {
             return is_machine_suspendable__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -615,6 +659,7 @@ final class SpoolerCImpl
         try {
             return is_service__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -628,6 +673,7 @@ final class SpoolerCImpl
         try {
             return is_termination_state_cmd__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -643,6 +689,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -658,6 +705,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -673,6 +721,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -688,6 +737,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -701,6 +751,7 @@ final class SpoolerCImpl
         try {
             load__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -714,6 +765,7 @@ final class SpoolerCImpl
         try {
             load_arg__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -729,6 +781,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -744,6 +797,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -759,6 +813,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -772,6 +827,7 @@ final class SpoolerCImpl
         try {
             log_show_state__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -787,6 +843,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.SettingsC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -802,6 +859,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -815,6 +873,7 @@ final class SpoolerCImpl
         try {
             return name_is_valid__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -828,6 +887,7 @@ final class SpoolerCImpl
         try {
             nichts_getan__native(cppReference(), p0, p1);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -843,6 +903,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -856,6 +917,7 @@ final class SpoolerCImpl
         try {
             return orders_are_distributed__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -871,6 +933,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -884,6 +947,7 @@ final class SpoolerCImpl
         try {
             register_pid__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -897,6 +961,7 @@ final class SpoolerCImpl
         try {
             register_pid__native(cppReference(), p0, p1);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -910,6 +975,7 @@ final class SpoolerCImpl
         try {
             run__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -923,6 +989,7 @@ final class SpoolerCImpl
         try {
             run_check_ctrl_c__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -936,6 +1003,7 @@ final class SpoolerCImpl
         try {
             self_check__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -949,6 +1017,7 @@ final class SpoolerCImpl
         try {
             send_cmd__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -962,6 +1031,7 @@ final class SpoolerCImpl
         try {
             set_id__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -975,6 +1045,7 @@ final class SpoolerCImpl
         try {
             signal__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -988,6 +1059,7 @@ final class SpoolerCImpl
         try {
             return signaled__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1001,6 +1073,7 @@ final class SpoolerCImpl
         try {
             start__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1016,6 +1089,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1029,6 +1103,7 @@ final class SpoolerCImpl
         try {
             stop__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1044,6 +1119,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1057,6 +1133,7 @@ final class SpoolerCImpl
         try {
             suspend_machine__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1070,6 +1147,7 @@ final class SpoolerCImpl
         try {
             return tcp_port__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1085,6 +1163,7 @@ final class SpoolerCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1098,6 +1177,7 @@ final class SpoolerCImpl
         try {
             return udp_port__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1111,6 +1191,7 @@ final class SpoolerCImpl
         try {
             unregister_pid__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1124,6 +1205,7 @@ final class SpoolerCImpl
         try {
             update_console_title__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -1139,6 +1221,7 @@ final class SpoolerCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }

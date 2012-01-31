@@ -15,6 +15,7 @@ final class Variable_setCImpl
         try {
             return count__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -30,6 +31,7 @@ final class Variable_setCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -45,6 +47,7 @@ final class Variable_setCImpl
             checkIsNotReleased(java.util.ArrayList.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -58,6 +61,7 @@ final class Variable_setCImpl
         try {
             set_var__native(cppReference(), p0, p1);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }

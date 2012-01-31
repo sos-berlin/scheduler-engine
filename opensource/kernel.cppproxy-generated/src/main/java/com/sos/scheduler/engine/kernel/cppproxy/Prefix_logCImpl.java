@@ -15,6 +15,7 @@ final class Prefix_logCImpl
         try {
             debug3__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -28,6 +29,7 @@ final class Prefix_logCImpl
         try {
             error__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -41,6 +43,7 @@ final class Prefix_logCImpl
         try {
             info__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -56,6 +59,7 @@ final class Prefix_logCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -69,6 +73,7 @@ final class Prefix_logCImpl
         try {
             return started__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -84,6 +89,7 @@ final class Prefix_logCImpl
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -97,6 +103,7 @@ final class Prefix_logCImpl
         try {
             warn__native(cppReference(), p0);
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }

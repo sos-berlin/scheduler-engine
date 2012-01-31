@@ -15,6 +15,7 @@ final class Order_subsystemCImpl
         try {
             return finished_orders_count__native(cppReference());
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -30,6 +31,7 @@ final class Order_subsystemCImpl
             checkIsNotReleased(com.sos.scheduler.engine.kernel.order.jobchain.JobChain.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
@@ -45,6 +47,7 @@ final class Order_subsystemCImpl
             checkIsNotReleased(java.util.ArrayList.class, result);
             return result;
         }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }

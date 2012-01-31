@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.main;
 
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.Settings;
@@ -11,7 +12,6 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
 import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 
 /** Steuert den {@link SchedulerThread}. */
@@ -81,11 +81,8 @@ public class SchedulerThreadController implements SchedulerController {
     @Override public final void terminateScheduler() {
         try {
             controllerBridge.terminate();
-        } catch (Exception x) {
-            if (x.toString().contains("Z-JAVA-111"))    // TODO Z-JAVA-111 als eigene Java-Exception zurückgeben
-                logger.debug(x);
-            else
-                throw propagate(x);
+        } catch (CppProxyInvalidatedException x) {
+            logger.debug(x);
         }
     }
 

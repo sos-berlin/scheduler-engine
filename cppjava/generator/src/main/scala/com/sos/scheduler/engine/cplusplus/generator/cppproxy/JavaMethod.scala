@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util.Util._
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxies
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
 
 class JavaMethod(m: ProcedureSignature) {
@@ -41,6 +42,7 @@ class JavaMethod(m: ProcedureSignature) {
             "        try {\n" +
             code +
             "        }\n" +
+            "        catch (Exception x) { throw "+classOf[CppProxies].getName+".propagateCppException(x, this); }\n"+
             "        finally {\n" +
             "            " + threadLock + ".unlock();\n" +
             "        }\n"
