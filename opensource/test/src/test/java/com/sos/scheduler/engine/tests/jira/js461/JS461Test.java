@@ -16,7 +16,7 @@ import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.JSCommandBuilder;
 
 /**
  * \file JS461Test.java
@@ -50,7 +50,7 @@ public class JS461Test extends SchedulerTest {
 
 	@SuppressWarnings("unused")
 	private static Logger logger;
-	private final static JSCommandUtils utils = JSCommandUtils.getInstance();
+	private final JSCommandBuilder utils = new JSCommandBuilder();
 
 	// Queue for collecting the fired events in the listener thread
 	private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
@@ -64,7 +64,7 @@ public class JS461Test extends SchedulerTest {
 	public void test() throws Exception {
 		controller().setTerminateOnError(false);
 		controller().activateScheduler();
-		utils.buildCommandAddOrder(JOB_CHAIN);
+		utils.addOrder(JOB_CHAIN);
 		controller().scheduler().executeXml(utils.getCommand());
 		while (numberOfEvents("OrderSuspendedEvent") == 0) {}
 		controller().scheduler().executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + JOB_CHAIN + "' state='success'/>");

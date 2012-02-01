@@ -24,7 +24,7 @@ public class LockFileTest implements Observer {
 	@Test (expected=FileAlreadyLockedException.class)
 	public void testLockFileTwice() throws Exception {
 		preprocessing();
-		File lock = JSFileUtils.getLocalResourceFile(JSCommandUtilsTest.class, lockfile);
+		File lock = JSFileUtils.getLocalResourceFile(JSCommandBuilderTest.class, lockfile);
 		LockFile l = new LockFile(lock, 2);
 		l.addObserver(this);
 		l.lock();
@@ -37,7 +37,7 @@ public class LockFileTest implements Observer {
 	@Ignore
 	public void testLockFileSingle() throws Exception {
 		preprocessing();
-		File lock = JSFileUtils.getLocalResourceFile(JSCommandUtilsTest.class, lockfile);
+		File lock = JSFileUtils.getLocalResourceFile(JSCommandBuilderTest.class, lockfile);
 		LockFile l = new LockFile(lock, 2);		// lock the file for 2 seconds
 		l.addObserver(this);
 		l.lock();

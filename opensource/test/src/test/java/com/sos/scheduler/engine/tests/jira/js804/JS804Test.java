@@ -15,7 +15,7 @@ import org.w3c.dom.Document;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.JSCommandBuilder;
 import com.sos.scheduler.engine.test.util.What;
 
 /**
@@ -42,7 +42,7 @@ public class JS804Test extends SchedulerTest {
 	private final String order_setback = "js804";		// to be started via the test
 	private final String order_simple = "js804-1";		// not started but scheduled
 	private Document showCalendarAnswer;	
-	private JSCommandUtils util = JSCommandUtils.getInstance();
+	private final JSCommandBuilder util = new JSCommandBuilder();
 	private boolean result_setback = false;
 	private boolean result_simple = true;
 	
@@ -50,7 +50,7 @@ public class JS804Test extends SchedulerTest {
 	public void TestSetback() throws InterruptedException, IOException {
 		controller().setTerminateOnError(false);
 		controller().startScheduler();
-		controller().scheduler().executeXml( util.buildCommandModifyOrder(order_setback).getCommand() );
+		controller().scheduler().executeXml( util.modifyOrder(order_setback).getCommand() );
 		controller().tryWaitForTermination(shortTimeout);
 		assertTrue("order " + order_setback + " is not in setback",result_setback);
 		assertFalse("order " + order_simple + " is in setback",result_simple);
@@ -66,7 +66,7 @@ public class JS804Test extends SchedulerTest {
 	}
 
     private void showCalendar() {
-    	showCalendarAnswer = loadXml(scheduler().executeXml(util.buildCommandShowCalendar(ONE_DAY, What.orders).getCommand()));
+    	showCalendarAnswer = loadXml(scheduler().executeXml(util.showCalendar(ONE_DAY, What.orders).getCommand()));
         StringWriter sw = new StringWriter();
         writeXmlTo(showCalendarAnswer.getFirstChild(),sw);
         logger.debug(sw.toString());

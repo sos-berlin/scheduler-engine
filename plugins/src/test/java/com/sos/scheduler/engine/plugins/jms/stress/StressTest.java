@@ -1,6 +1,9 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
 import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -10,7 +13,8 @@ import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.JSCommandBuilder;
+import com.sos.scheduler.engine.test.util.JSFileUtils;
 
 /**
  * This class is a stress test for JobScheduler. You can determine the number of tasks and the runtime of each
@@ -29,10 +33,10 @@ import com.sos.scheduler.engine.test.util.JSCommandUtils;
  * @version 1.0 - 27.01.2012 09:05:52
  *
  */
-public class StressTest extends SchedulerTest {
+public class StressTest extends SchedulerTest implements TaskInfoListener {
 
     private static final Logger logger = Logger.getLogger(StressTest.class);
-    private static final JSCommandUtils util = JSCommandUtils.getInstance();
+    private final JSCommandBuilder util = new JSCommandBuilder();
 
 	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";
@@ -51,13 +55,15 @@ public class StressTest extends SchedulerTest {
 	
 	@Test
 	public void eventTest() throws Exception {
-//        controller().activateScheduler("-e -log-level=debug","-log=" + JSFileUtils.getLocalFile(this.getClass(), "scheduler.log"));
-        controller().activateScheduler();
-        TaskObserverPlugin l = TaskObserverPlugin.getInstance(providerUrl,ESTIMATED_TASKS);
+        controller().activateScheduler("-e -log-level=debug","-log=" + JSFileUtils.getLocalFile(this.getClass(), "scheduler.log"));
+//        controller().activateScheduler();
+        File resultFile = JSFileUtils.getLocalFile(this.getClass(), "result.csv");
+        JMSTaskObserver l = JMSTaskObserver.getInstance(providerUrl,ESTIMATED_TASKS, resultFile);
+        l.addListener(this);
         l.start(1000L,1000L);
 		for (int i=0; i < ESTIMATED_TASKS; i++) {
 			controller().scheduler().executeXml(
-					util.buildCommandStartJobImmediately(jobName)
+					util.startJobImmediately(jobName)
 					.addParam("DELAY", String.valueOf(JOB_RUNTIME_IN_SECONDS))
 					.getCommand());
 		}
@@ -73,5 +79,10 @@ public class StressTest extends SchedulerTest {
     	if (taskFinished == ESTIMATED_TASKS)
     		controller().scheduler().terminate();
     }
+
+	@Override
+	public void onInterval(TaskInfo info) {
+		logger.info(info.currentlyRunningTasks() + " tasks running");
+	}
     
 }

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.jms;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.JSCommandBuilder;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 import java.util.Iterator;
@@ -23,7 +23,7 @@ public class JmsOrderEventsTest extends JMSConnection {
     private final static String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";  // in scheduler.xml einstellen
     private final static Logger logger = Logger.getLogger(JmsOrderEventsTest.class);
-    private static final JSCommandUtils util = JSCommandUtils.getInstance();
+    private final JSCommandBuilder util = new JSCommandBuilder();
     private final static String jobchain = "jmstest";
 
     
@@ -50,8 +50,8 @@ public class JmsOrderEventsTest extends JMSConnection {
     		controller().activateScheduler();
     		objFactory = new SchedulerObjectFactory(scheduler().getHostname(), scheduler().getTcpPort());
     		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
-	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order1").getCommand() );
-	        controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain, "order2").getCommand() );
+	        controller().scheduler().executeXml( util.addOrder(jobchain, "order1").getCommand() );
+	        controller().scheduler().executeXml( util.addOrder(jobchain, "order2").getCommand() );
     		controller().waitForTermination(shortTimeout);
 	        assertEvent("EventOrderTouched",2);
 	        assertEvent("EventOrderStateChanged",4);

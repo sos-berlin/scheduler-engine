@@ -31,7 +31,7 @@ import com.sos.scheduler.engine.test.util.*;
 public class JS498Test extends SchedulerTest {
 
 	private final String jobchain = "chain_rhino";
-	private final JSCommandUtils util = JSCommandUtils.getInstance();
+	private final JSCommandBuilder util = new JSCommandBuilder();
 	private VariableSet resultSet;
 
 	/*
@@ -43,7 +43,7 @@ public class JS498Test extends SchedulerTest {
 	@Ignore
 	public void testFunctions() throws InterruptedException, IOException {
 		controller().activateScheduler("-e","-log-level=info","-log=" + JSFileUtils.getLocalPath(this.getClass()) + "/scheduler.log");
-		controller().scheduler().executeXml( util.buildCommandAddOrder(jobchain).getCommand() );
+		controller().scheduler().executeXml( util.addOrder(jobchain).getCommand() );
 		controller().waitForTermination(shortTimeout);
 		testAssertions();
 	}

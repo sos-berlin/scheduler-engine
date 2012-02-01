@@ -12,13 +12,14 @@ import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandUtils;
+import com.sos.scheduler.engine.test.util.JSCommandBuilder;
 
 public class SimpleEventTest extends SchedulerTest {
 
 	private final static Logger logger = Logger.getLogger(SimpleEventTest.class);
-	private final static JSCommandUtils utils = JSCommandUtils.getInstance();
 	private final static String jobChain = "EventPluginTest";
+	
+	private final JSCommandBuilder utils = new JSCommandBuilder();
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -29,17 +30,15 @@ public class SimpleEventTest extends SchedulerTest {
 	public void test() throws Exception {
 		controller().activateScheduler();
 		controller().scheduler().executeXml(
-				utils.buildCommandAddOrder(jobChain,jobChain).addParam("myParam", "EventPluginTest").getCommand());
+				utils.addOrder(jobChain,jobChain).addParam("myParam", "EventPluginTest").getCommand());
 		controller().waitForTermination(shortTimeout);
 	}
 	
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder o) throws Exception {
     	logger.debug("ORDERFINISHED: " + o.getId().getString());
-    	if (o.getId().getString().equals(jobChain)) {
-    		Thread.sleep(3000);
+    	if (o.getId().getString().equals(jobChain))
     		controller().scheduler().terminate();
-    	}
     }
 
 }

@@ -21,7 +21,7 @@ public class SimpleTest extends SchedulerTest {
 
 	private static final Logger logger = Logger.getLogger(SimpleTest.class);
 	
-	private final static JSCommandUtils util = JSCommandUtils.getInstance();
+	private final JSCommandBuilder util = new JSCommandBuilder();
 	
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -31,7 +31,7 @@ public class SimpleTest extends SchedulerTest {
 	@Test
 	public void test() throws InterruptedException {
         controller().activateScheduler();
-        util.buildCommandAddOrder("jobchain1");
+        util.addOrder("jobchain1");
 		controller().scheduler().executeXml( util.getCommand() );
         controller().waitForTermination(shortTimeout);
 	}
@@ -43,7 +43,7 @@ public class SimpleTest extends SchedulerTest {
 	
 	@HotEventHandler
 	public void handleTaskStartedEvent(TaskStartedEvent e, UnmodifiableTask t) throws IOException {
-		logger.debug("TASKEVENT: " + t.getOrder().getId().getString());
+		logger.debug("TASKEVENT: " + t.getOrderOrNull().getId().getString());
 	}
 	
 	@HotEventHandler

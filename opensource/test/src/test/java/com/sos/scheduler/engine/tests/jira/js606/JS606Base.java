@@ -20,7 +20,7 @@ public class JS606Base extends SchedulerTest {
 	
 	private File resultfile;
 	private String jobchainName;
-	private JSCommandUtils util = JSCommandUtils.getInstance();
+	private final JSCommandBuilder util = new JSCommandBuilder();
 	
 	
 	protected void prepareTest(String jobchain) {
@@ -32,7 +32,7 @@ public class JS606Base extends SchedulerTest {
 	}
 	
 	protected void startOrder() {
-		util.buildCommandAddOrder(jobchainName)
+		util.addOrder(jobchainName)
 			.addParam("RESULT_FILE", resultfile.getAbsolutePath())
 			.addParam("ORDER_PARAM", "ORDER_PARAM")
 		;
