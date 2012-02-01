@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.kernel.job;
 
+import javax.annotation.Nullable;
+
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
-import com.sos.scheduler.engine.kernel.order.OrderId;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC;
@@ -33,12 +34,13 @@ public final class Task extends FileBased implements UnmodifiableTask {
     }
 
 	@Override
-	public UnmodifiableOrder getOrder() {
+	@Nullable
+	public UnmodifiableOrder getOrderOrNull() {
 		return cppProxy.order().getSister();
 	}
 
 	@Override
-	public int getId() {
-		return cppProxy.id();
+	public TaskId getId() {
+		return new TaskId( cppProxy.id() );
 	}
 }
