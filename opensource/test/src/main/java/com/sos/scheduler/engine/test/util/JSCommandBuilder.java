@@ -42,7 +42,7 @@ public class JSCommandBuilder {
 	}
 	
 	public JSCommandBuilder addOrder(String jobchainName, String id) {
-		lastId = jobchainName;
+		lastId = id;
 		commandPrefix = "<add_order id='" + getId() + "' job_chain='" + jobchainName + "'>";
 		commandSuffix = "</add_order>";
 		return this;
