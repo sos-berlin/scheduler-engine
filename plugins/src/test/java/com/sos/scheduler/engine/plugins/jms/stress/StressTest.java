@@ -7,6 +7,8 @@ import java.io.File;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
@@ -55,9 +57,10 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	
 	@Test
 	public void eventTest() throws Exception {
-        controller().activateScheduler("-e -log-level=debug","-log=" + JSFileUtils.getLocalFile(this.getClass(), "scheduler.log"));
-//        controller().activateScheduler();
-        File resultFile = JSFileUtils.getLocalFile(this.getClass(), "result.csv");
+//        controller().activateScheduler("-e -log-level=debug","-log=" + JSFileUtils.getLocalFile(this.getClass(), "scheduler.log"));
+        controller().activateScheduler();
+        File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
+        logger.warn("resultfile=" + resultFile);
         JMSTaskObserver l = JMSTaskObserver.getInstance(providerUrl,ESTIMATED_TASKS, resultFile);
         l.addListener(this);
         l.start(1000L,1000L);
@@ -72,9 +75,9 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
         l.stop();
 	}
 	
-    @HotEventHandler
-    public void handleTaskEnd(TaskEndedEvent e, UnmodifiableTask t) throws Exception {
-    	logger.debug("TASKENDED: " + t.getId());
+    @EventHandler
+    public void handleTaskEnd(TaskEndedEvent e) throws Exception {
+    	logger.debug("TASKENDED: " + e.getObject() );
     	taskFinished++;
     	if (taskFinished == ESTIMATED_TASKS)
     		controller().scheduler().terminate();

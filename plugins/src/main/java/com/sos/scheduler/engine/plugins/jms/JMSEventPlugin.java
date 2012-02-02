@@ -45,6 +45,7 @@ public class JMSEventPlugin extends AbstractPlugin {
 		String persistenceDir = stringXPath(pluginElement, "jms/connection/@persistenceDirectory", ActiveMQConfiguration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
 		logger.info( getClass().getName() + ": providerUrl=" + providerUrl);
+		scheduler.log().info("providing messages to " + providerUrl);
 
 		logger.info("initializing SchedulerObjectFactory for " + scheduler.getHostname() + ":" + scheduler.getTcpPort());
 		objFactory = new SchedulerObjectFactory(scheduler.getHostname(), scheduler.getTcpPort());
