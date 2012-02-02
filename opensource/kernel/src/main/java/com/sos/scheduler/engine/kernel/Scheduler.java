@@ -267,6 +267,10 @@ public final class Scheduler implements HasPlatform, Sister,
         }
     }
 
+    public SchedulerConfiguration getConfiguration() {
+        return configuration;
+    }
+
     public FolderSubsystem getFolderSubsystem() {
         return folderSubsystem;
     }
