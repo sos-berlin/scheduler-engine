@@ -12,6 +12,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
+import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -19,8 +20,6 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.test.util.JSCommandBuilder;
-import com.sos.scheduler.engine.test.util.JSFileUtils;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 
@@ -33,7 +32,7 @@ public class JmsEventFilterTest extends JMSConnection {
 //  private static final String providerUrl = "tcp://w2k3.sos:61616";  // in scheduler.xml einstellen
     private static final Logger logger = Logger.getLogger(JmsEventFilterTest.class);
     
-    private final JSCommandBuilder util = new JSCommandBuilder();
+    private final CommandBuilder util = new CommandBuilder();
 
     private static final List<String> eventsToListen = asList("EventOrderTouched");
     private final static String jobchain = "jmstest";
@@ -54,7 +53,7 @@ public class JmsEventFilterTest extends JMSConnection {
     @Test
     public void test() throws Exception {
     	try {
-//	        controller().activateScheduler("-e -log-level=debug","-log=" + JSFileUtils.getLocalFile(this.getClass(), "scheduler.log"));
+//	        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
 	        controller().activateScheduler();
 			objFactory = new SchedulerObjectFactory(scheduler().getHostname(), scheduler().getTcpPort());
 			objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);

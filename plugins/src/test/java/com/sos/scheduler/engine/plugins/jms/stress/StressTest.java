@@ -9,14 +9,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandBuilder;
-import com.sos.scheduler.engine.test.util.JSFileUtils;
+import com.sos.scheduler.engine.test.util.CommandBuilder;
 
 /**
  * This class is a stress test for JobScheduler. You can determine the number of tasks and the runtime of each
@@ -38,7 +35,7 @@ import com.sos.scheduler.engine.test.util.JSFileUtils;
 public class StressTest extends SchedulerTest implements TaskInfoListener {
 
     private static final Logger logger = Logger.getLogger(StressTest.class);
-    private final JSCommandBuilder util = new JSCommandBuilder();
+    private final CommandBuilder util = new CommandBuilder();
 
 	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";
@@ -57,10 +54,9 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	
 	@Test
 	public void eventTest() throws Exception {
-//        controller().activateScheduler("-e -log-level=debug","-log=" + JSFileUtils.getLocalFile(this.getClass(), "scheduler.log"));
+//        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
         controller().activateScheduler();
         File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
-        logger.warn("resultfile=" + resultFile);
         JMSTaskObserver l = JMSTaskObserver.getInstance(providerUrl,ESTIMATED_TASKS, resultFile);
         l.addListener(this);
         l.start(1000L,1000L);

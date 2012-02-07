@@ -4239,6 +4239,10 @@
     <register_entry register_file='xml/http_directory.xml#attribute_url_path' register_title='&lt;http_directory&gt; (Konfiguration)'  register_keyword='url_path' type='definition'/>
     <register_entry register_file='xml/web_service.xml#attribute_url_path' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='url_path' type='definition'/>
 </register_keyword>
+<register_keyword keyword='use-xml-schema'>
+    <register_keyword_display><code>-use-xml-schema=</code></register_keyword_display>
+    <register_entry register_file='command_line.xml#option_use-xml-schema' register_title='Kommandozeilenoptionen'  register_keyword='use-xml-schema' type='definition'/>
+</register_keyword>
 <register_keyword keyword='User Interface'>
     <register_entry register_file='http.xml' register_title='HTTP Server und Web Services'  register_keyword='User Interface'/>
 </register_keyword>

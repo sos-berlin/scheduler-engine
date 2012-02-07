@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -111,7 +111,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__log__ErrorLogEvent.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__log__LogEvent.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderFinishedEvent.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderId.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderState.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.cxx" />

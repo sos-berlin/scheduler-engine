@@ -1,25 +1,21 @@
 package com.sos.scheduler.engine.plugins.event;
 
+import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.folder.events.FileBasedActivatedEvent;
-import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandBuilder;
 
 public class SimpleEventTest extends SchedulerTest {
 
 	private final static Logger logger = Logger.getLogger(SimpleEventTest.class);
 	private final static String jobChain = "EventPluginTest";
 	
-	private final JSCommandBuilder utils = new JSCommandBuilder();
+	private final CommandBuilder utils = new CommandBuilder();
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

@@ -20,14 +20,14 @@ public class JS606Base extends SchedulerTest {
 	
 	private File resultfile;
 	private String jobchainName;
-	private final JSCommandBuilder util = new JSCommandBuilder();
+	private final CommandBuilder util = new CommandBuilder();
 	
 	
 	protected void prepareTest(String jobchain) {
 		
 		this.jobchainName = jobchain;
 
-		resultfile = JSFileUtils.createEmptyTestresultFile(this.getClass(), "result_" + jobchainName + ".txt");
+		resultfile = FileUtils.alwaysCreateEmptyResourceFile(this.getClass(), "result_" + jobchainName + ".txt");
 		logger.debug("results of the jobs will be written in file " + resultfile.getAbsolutePath());
 	}
 	

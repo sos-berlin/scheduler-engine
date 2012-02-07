@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,7 +17,6 @@ import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandBuilder;
 
 /**
  * \file JS461Test.java
@@ -50,7 +50,7 @@ public class JS461Test extends SchedulerTest {
 
 	@SuppressWarnings("unused")
 	private static Logger logger;
-	private final JSCommandBuilder utils = new JSCommandBuilder();
+	private final CommandBuilder utils = new CommandBuilder();
 
 	// Queue for collecting the fired events in the listener thread
 	private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);

@@ -7,13 +7,13 @@ import javax.jms.*;
 import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
-//import com.sos.scheduler.engine.test.util.JSCommandBuilder;
+//import com.sos.scheduler.engine.test.util.CommandBuilder;
 
 
 public class JMSConnection extends SchedulerTest {
 
     private static final Logger logger = Logger.getLogger(JMSConnection.class);
-//    private static final JSCommandBuilder util = JSCommandBuilder.getInstance();
+//    private static final CommandBuilder util = CommandBuilder.getInstance();
 
 	/** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	

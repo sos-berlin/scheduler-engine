@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -15,7 +16,6 @@ import org.w3c.dom.Document;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.JSCommandBuilder;
 import com.sos.scheduler.engine.test.util.What;
 
 /**
@@ -42,7 +42,7 @@ public class JS804Test extends SchedulerTest {
 	private final String order_setback = "js804";		// to be started via the test
 	private final String order_simple = "js804-1";		// not started but scheduled
 	private Document showCalendarAnswer;	
-	private final JSCommandBuilder util = new JSCommandBuilder();
+	private final CommandBuilder util = new CommandBuilder();
 	private boolean result_setback = false;
 	private boolean result_simple = true;
 	

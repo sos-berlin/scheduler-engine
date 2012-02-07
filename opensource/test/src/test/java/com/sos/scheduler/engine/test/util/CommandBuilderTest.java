@@ -15,10 +15,10 @@ import org.junit.Test;
 
 import com.google.common.io.Files;
 
-public class JSCommandBuilderTest {
+public class CommandBuilderTest {
 	
-	private static final Logger logger = Logger.getLogger(JSCommandBuilderTest.class);
-	private final JSCommandBuilder util = new JSCommandBuilder();
+	private static final Logger logger = Logger.getLogger(CommandBuilderTest.class);
+	private final CommandBuilder util = new CommandBuilder();
 	
 	private static final String estimatedBuildCommandAddOrder = "estimatedBuildCommandAddOrder.txt";
 	private static final String estimatedBuildCommandAddOrderWithParams = "estimatedBuildCommandAddOrderWithParams.txt";
@@ -29,18 +29,18 @@ public class JSCommandBuilderTest {
 	@Test
 	public void addOrderTest() throws IOException {
 		String command = util.addOrder("myJobchain").getCommand();
-		File file = JSFileUtils.createEmptyTestresultFile(JSCommandBuilderTest.class,"testBuildCommandAddOrder.txt");
+		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandAddOrder.txt");
 		Files.append(command, file, Charset.defaultCharset());
-		File estimated = JSFileUtils.getLocalResourceFile(JSCommandBuilderTest.class, estimatedBuildCommandAddOrder);
+		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandAddOrder);
 		compareFiles(file,estimated);
 	}
 
 	@Test
 	public void addOrderWithParamsTest() throws IOException {
 		String command = util.addOrder("myJobchain").addParam("myParam1", "value1").getCommand();
-		File file = JSFileUtils.createEmptyTestresultFile(JSCommandBuilderTest.class,"testBuildCommandAddOrderWithParam.txt");
+		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandAddOrderWithParam.txt");
 		Files.append(command, file, Charset.defaultCharset());
-		File estimated = JSFileUtils.getLocalResourceFile(JSCommandBuilderTest.class, estimatedBuildCommandAddOrderWithParams);
+		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandAddOrderWithParams);
 		compareFiles(file,estimated);
 	}
 
@@ -49,9 +49,9 @@ public class JSCommandBuilderTest {
 		util.addParam("myParam1", "value1");
 		util.addParam("myParam2", "value2");
 		String command = util.addOrder("myJobchain").getCommand();
-		File file = JSFileUtils.createEmptyTestresultFile(JSCommandBuilderTest.class,"testBuildCommandAddOrderWithParam2.txt");
+		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandAddOrderWithParam2.txt");
 		Files.append(command, file, Charset.defaultCharset());
-		File estimated = JSFileUtils.getLocalResourceFile(JSCommandBuilderTest.class, estimatedBuildCommandAddOrderWithParams2);
+		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandAddOrderWithParams2);
 		compareFiles(file,estimated);
 	}
 
@@ -71,14 +71,15 @@ public class JSCommandBuilderTest {
 		util.addParam("myParam1", "value1");
 		util.addParam("myParam2", "value2");
 		String command = util.startJobImmediately("myJob").getCommand();
-		File file = JSFileUtils.createEmptyTestresultFile(JSCommandBuilderTest.class,"testBuildCommandStartJobImmidiately.txt");
+		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandStartJobImmidiately.txt");
 		Files.append(command, file, Charset.defaultCharset());
-		File estimated = JSFileUtils.getLocalResourceFile(JSCommandBuilderTest.class, estimatedBuildCommandStartJobImmidiately);
+		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandStartJobImmidiately);
 		compareFiles(file,estimated);
 	}
 	
 	private void compareFiles(File file, File estimated) throws IOException {
-		if (!estimated.exists()) throw new FileNotFoundException(estimated.getAbsolutePath());
+        if (!file.exists()) throw new FileNotFoundException(file.getAbsolutePath());
+        if (!estimated.exists()) throw new FileNotFoundException(estimated.getAbsolutePath());
 		String estimatedContent = Files.toString(estimated, Charset.defaultCharset());
 		logger.debug("estimated content: " + estimatedContent);
 		assertTrue("content of file '" + file.getAbsolutePath() + "' is not estimated",Files.equal(file, estimated));

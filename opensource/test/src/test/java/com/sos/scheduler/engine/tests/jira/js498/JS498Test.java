@@ -1,20 +1,18 @@
 package com.sos.scheduler.engine.tests.jira.js498;
 
 
-import static org.junit.Assert.assertTrue;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.*;
+import com.sos.scheduler.engine.test.util.CommandBuilder;
+import com.sos.scheduler.engine.test.util.FileUtils;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * This is a test for scripting with the Rhino engine. The jobchain chain_scripting executes a job with all knwowing API
@@ -31,7 +29,7 @@ import com.sos.scheduler.engine.test.util.*;
 public class JS498Test extends SchedulerTest {
 
 	private final String jobchain = "chain_rhino";
-	private final JSCommandBuilder util = new JSCommandBuilder();
+	private final CommandBuilder util = new CommandBuilder();
 	private VariableSet resultSet;
 
 	/*
@@ -40,9 +38,10 @@ public class JS498Test extends SchedulerTest {
 	 * Unter Windows (lokal) funktioniert er.
 	 * Der Test wurde deshalb zunächst deaktiviert.
 	 */
-	@Ignore
+	@Test
 	public void testFunctions() throws InterruptedException, IOException {
-		controller().activateScheduler("-e","-log-level=info","-log=" + JSFileUtils.getLocalPath(this.getClass()) + "/scheduler.log");
+        File resultFile = FileUtils.getResourceFile(this.getClass(), "scheduler.log");
+		controller().activateScheduler("-e","-log-level=info","-log=" + resultFile);
 		controller().scheduler().executeXml( util.addOrder(jobchain).getCommand() );
 		controller().waitForTermination(shortTimeout);
 		testAssertions();
@@ -59,7 +58,7 @@ public class JS498Test extends SchedulerTest {
 		assertObject("spooler_task.order.job_chain.name","chain_rhino");
 		assertObject("spooler_task.params.names","taskparam1;taskparam2");
 		assertObject("spooler_job.order_queue.length","1");
-		assertObject("spooler_task.order.id","test_chain_rhino");
+		assertObject("spooler_task.order.id","chain_rhino");
 		assertFunction("spooler_init");
 		assertFunction("spooler_open");
 		assertFunction("spooler_process");
@@ -74,8 +73,6 @@ public class JS498Test extends SchedulerTest {
 
 	/**
 	 * checks if an estimated funtion was called.
-	 * @param chain
-	 * @param content
 	 * @param function
 	 */
 	private void assertFunction(String function) {
@@ -84,9 +81,6 @@ public class JS498Test extends SchedulerTest {
 	
 	/**
 	 * checks if an estimated object was given
-	 * @param chain
-	 * @param content
-	 * @param function
 	 */
 	private void assertObject(String varname, String expected) {
 		String value = resultSet.get(varname);

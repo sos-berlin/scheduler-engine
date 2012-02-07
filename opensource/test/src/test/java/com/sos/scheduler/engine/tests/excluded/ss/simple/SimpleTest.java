@@ -10,7 +10,6 @@ import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
-import com.sos.scheduler.engine.kernel.job.events.TaskEvent;
 import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
@@ -21,7 +20,7 @@ public class SimpleTest extends SchedulerTest {
 
 	private static final Logger logger = Logger.getLogger(SimpleTest.class);
 	
-	private final JSCommandBuilder util = new JSCommandBuilder();
+	private final CommandBuilder util = new CommandBuilder();
 	
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
