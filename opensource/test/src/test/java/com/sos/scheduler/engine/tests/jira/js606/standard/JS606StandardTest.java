@@ -1,6 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js606.standard;
 
+import java.io.File;
 import java.io.IOException;
+
+import com.sos.scheduler.engine.test.util.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -21,8 +21,9 @@ extern const string spooler_on_success_name     = "spooler_on_success()V";
 extern const string spooler_api_version_name    = "spooler_api_version()Ljava.lang.String;";
 const string        default_monitor_name        = "scheduler";
 
-const string shell_language_name         = "shell";
-const int encoding_code_page_none        = -1;
+const string shell_language_name           = "shell";
+const string shell_variable_prefix_default = "SCHEDULER_PARAM_";
+const int encoding_code_page_none          = -1;
 
 //-----------------------------------------------------------Text_with_includes::Text_with_includes
 
@@ -264,6 +265,12 @@ void Module::init0()
     #ifdef Z_WINDOWS        
         _encoding_code_page = CP_OEMCP;
     #endif
+
+    string prefix = "";
+    if (_spooler && _spooler->variables())
+      prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
+    _process_shell_variable_prefix = (prefix.empty()) ? shell_variable_prefix_default : (prefix == "*NONE") ? "" : prefix;
+    Z_LOG2("scheduler","the prefix for shell variables is " << _process_shell_variable_prefix << "\n");
 
     _monitors = Z_NEW( Module_monitors( this ) );
 }

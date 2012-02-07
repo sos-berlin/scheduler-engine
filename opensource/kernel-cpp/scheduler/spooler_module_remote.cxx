@@ -499,6 +499,7 @@ AGAIN:
                 params_array[ nr++ ] = "process.log_filename="  + _module->_process_log_filename;
                 params_array[ nr++ ] = "process.ignore_error="  + as_string( (int)_module->_process_ignore_error );
                 params_array[ nr++ ] = "process.ignore_signal=" + as_string( (int)_module->_process_ignore_signal );
+                params_array[ nr++ ] = "process.shell_variable_prefix=" + _module->_process_shell_variable_prefix;
 
                 Z_FOR_EACH( Module_monitors::Monitor_map, _module->_monitors->_monitor_map, m )
                 {

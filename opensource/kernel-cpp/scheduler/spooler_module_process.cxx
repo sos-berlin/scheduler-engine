@@ -886,16 +886,6 @@ void Process_module_instance::end__end()
 
 void Process_module_instance::fill_process_environment_with_params()
 {
-    // the default prefix for scheduler environment variables is SCHEDULER_PARAM_, but it can overwrite with the scheduler variable
-    // SCHEDULER_VARIABLE_NAME_PREFIX. Use SCHEDULER_VARIABLE_NAME_PREFIX=*NONE to use your scheduler environment variables without prefix.
-    string prefix;
-    if( _spooler && _spooler->variables() )
-       prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
-
-    string environment_variable_name_prefix = "SCHEDULER_PARAM_";
-    if (!prefix.empty())
-       environment_variable_name_prefix = (prefix == "*NONE") ? "" : prefix;
-
     ptr<Com_variable_set> task_params;
     ptr<Com_variable_set> order_params;
 
@@ -921,14 +911,14 @@ void Process_module_instance::fill_process_environment_with_params()
     }
 
     Z_FOR_EACH_CONST( Com_variable_set::Map, task_params->_map, v )  
-        _process_environment->set_var( ucase( environment_variable_name_prefix + v->second->name() ), v->second->string_value() );
+        _process_environment->set_var( ucase( _module->_process_shell_variable_prefix + v->second->name() ), v->second->string_value() );
 
     if( order_params )
     {
         Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v ) {
            string environment_variable_name_suffix = get_parameter_name(v->second->name());
            if (environment_variable_name_suffix != "")
-              _process_environment->set_var( ucase( environment_variable_name_prefix + environment_variable_name_suffix ), v->second->string_value() );
+              _process_environment->set_var( ucase( _module->_process_shell_variable_prefix + environment_variable_name_suffix ), v->second->string_value() );
         }
     }
 }

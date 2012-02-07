@@ -351,6 +351,8 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "process.ignore_signal" )  _server->_module->_process_ignore_signal = as_bool( value );
                 else
+                if( key_word == "process.shell_variable_prefix"  )  _server->_module->_process_shell_variable_prefix = value;
+                else
                 if( key_word == "monitor.language" ) // Muss der erste Parameter für den Module_monitor sein!
                 {
                     monitor = Z_NEW( Module_monitor );
