@@ -4,7 +4,8 @@ import org.scalatest.{FunSuite, BeforeAndAfterAll}
 import com.sos.scheduler.engine.test.{TestSchedulerController, SchedulerTest}
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with CheckedBeforeAll {
-  val controller = TestSchedulerController.of(getClass)
+  val configurationPackage = getClass.getPackage
+  lazy val controller = TestSchedulerController.of(getClass, configurationPackage)
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
   def injector = scheduler.getInjector

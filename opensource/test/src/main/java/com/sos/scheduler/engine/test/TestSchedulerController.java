@@ -226,6 +226,10 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** @param testClass Test-Klasse, für Benennung des Scheduler-Arbeitsverzeichnisses und Ort der Konfigurationsresourcen. */
     public static TestSchedulerController of(Class<?> testClass) {
-        return new TestSchedulerController(testClass, new ResourcePath(testClass.getPackage()));
+        return TestSchedulerController.of(testClass, testClass.getPackage());
+    }
+
+    public static TestSchedulerController of(Class<?> testClass, Package p) {
+        return new TestSchedulerController(testClass, new ResourcePath(p));
     }
 }

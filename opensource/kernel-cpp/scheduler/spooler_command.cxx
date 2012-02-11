@@ -1886,7 +1886,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
             {
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
-                    if( !path.empty() && !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende führt zum erneuten GET mit demselben Pfad
+                    if( !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende führt zum erneuten GET mit demselben Pfad
                     {
                         // (Man könnte hier noch prüfen, ob's wirklich ein Verzeichnis ist.)
                         // Der Browser soll dem Verzeichnisnamen einen Schräger anhängen und das als Basisadresse für weitere Anfragen verwenden.
