@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.google.inject.{Injector, Guice}
+import com.google.inject.Guice.createInjector
+import com.google.inject.Injector
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
 import com.sos.scheduler.engine.kernel.scheduler.{SchedulerConfiguration, HasGuiceModule}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
@@ -12,27 +13,28 @@ import com.sos.scheduler.engine.plugins.jetty.rest.{CommandResource, JobResource
 import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
-import java.net.{ServerSocket, BindException}
+import java.net.{URL, ServerSocket, BindException}
 import javax.inject.Inject
 import javax.servlet.Filter
-import org.apache.log4j.Logger
 import org.eclipse.jetty.security._
 import org.eclipse.jetty.server._
-import org.eclipse.jetty.server.handler.{DefaultHandler, RequestLogHandler, HandlerCollection}
+import org.eclipse.jetty.server.handler._
 import org.eclipse.jetty.server.nio.SelectChannelConnector
-import org.eclipse.jetty.servlet.{Holder, FilterHolder, DefaultServlet, ServletContextHandler}
+import org.eclipse.jetty.servlet._
 import org.eclipse.jetty.servlets.GzipFilter
 import org.eclipse.jetty.util.security.Constraint
+import org.eclipse.jetty.webapp.{WebXmlConfiguration, WebAppContext}
 import org.eclipse.jetty.xml.XmlConfiguration
+import org.slf4j.LoggerFactory
 import org.w3c.dom.Element
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
-final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, configuration: SchedulerConfiguration)
+final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, schedulerConfiguration: SchedulerConfiguration)
   extends AbstractPlugin {
 
   import JettyPlugin._
 
-  private val config = new Config(pluginElement, configuration)
+  private val config = new Config(pluginElement, schedulerConfiguration)
 
   /** Der Port des ersten Connector */
   def port = server.getConnectors.head.getPort
@@ -45,10 +47,46 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
       config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
       newHandlerCollection(Iterable(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
-        newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule()), loginServiceOption),
+        new StatisticsHandler,
+        jobSchedulerContextHandler(contextPath, createInjector(schedulerModule, newServletModule()), loginServiceOption),
+        newRootContextHandler(),
         new DefaultHandler())))
-    //newContextHandler("/JobScheduler/engine", Guice.createInjector(schedulerModule, newServletModule()), loginServiceOption),
-    //newContextHandler("/JobScheduler/engine-cpp", Guice.createInjector(schedulerModule, newCppServletModule()), loginServiceOption)))
+  }
+
+  private def newRootContextHandler() = {
+    val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
+    result.setContextPath("/")
+    result.addServlet(classOf[RootForwardingServlet], "/")
+    result
+  }
+
+  private def jobSchedulerContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
+    val result = newWebAppContext(resourceBaseURL)
+
+    def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
+      result.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
+    }
+
+    result.setContextPath(contextPath)
+    result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
+    addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
+    // GuiceFilter (Guice 3.0) kann nur einmal verwendet werden, siehe http://code.google.com/p/google-guice/issues/detail?id=635
+    result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
+    if (!servletContextHandlerHasWebXml(result)) {
+      logger.debug("No web.xml, adding DefaultServlet")
+      result.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
+      //TODO init-parameter dirAllowed=false
+    }
+    for (s <- loginService)  result.setSecurityHandler(newConstraintSecurityHandler(s))
+    result
+  }
+
+  private def newWebAppContext(baseUrl: URL) = {
+    val result = new WebAppContext
+    result.setResourceBase(baseUrl.toString)
+    for (f <- config.webXmlFileOption)  result.setDescriptor(f.getPath)
+    new WebXmlConfiguration().configure(result)
+    result
   }
 
   override def activate() {
@@ -62,7 +100,7 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 }
 
 object JettyPlugin {
-  private val logger = Logger.getLogger(classOf[JettyPlugin])
+  private val logger = LoggerFactory.getLogger(classOf[JettyPlugin])
 
   private def newServer(port: Option[Int], configuration: Option[XmlConfiguration], handler: Handler, beans: Iterable[AnyRef] = Iterable()) = {
     val result = new Server
@@ -91,21 +129,9 @@ object JettyPlugin {
     result
   }
 
-  private def newContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
-    val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
-
-    def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
-      result.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
-    }
-
-    result.setContextPath(contextPath)
-    result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
-    addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
-    // GuiceFilter (Guice 3.0) kann nur einmal verwendet werden, siehe http://code.google.com/p/google-guice/issues/detail?id=635
-    result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
-    result.addServlet(classOf[DefaultServlet], "/")   // Failing to do this will cause 404 errors. This is not needed if web.xml is used instead.
-    for (s <- loginService)  result.setSecurityHandler(newConstraintSecurityHandler(s))
-    result
+  private def servletContextHandlerHasWebXml(h: ServletContextHandler) = h match {
+    case w: WebAppContext => w.getWebInf != null
+    case _ => false
   }
 
   private def newFilterHolder[F <: Filter](c: Class[F], initParameters: Iterable[(String, String)]) = {

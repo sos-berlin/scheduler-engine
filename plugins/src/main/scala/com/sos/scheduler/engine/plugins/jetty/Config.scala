@@ -1,17 +1,21 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import java.io.File
-import com.sos.scheduler.engine.kernel.util.XmlUtils._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
+import com.sos.scheduler.engine.kernel.util.XmlUtils._
 import org.w3c.dom.Element
 
-class Config(pluginElement: Element, configuration: SchedulerConfiguration) {
+class Config(pluginElement: Element, conf: SchedulerConfiguration) {
   import Config._
 
-  val portOption = xmlAttributeIntOption(pluginElement, "port")
-  val tryUntilPortOption = xmlAttributeIntOption(pluginElement, "tryUntilPort")
-  val jettyXmlFileOption = Option(new File(configuration.localConfigurationDirectory, "jetty.xml")) filter { _.exists }
-  val accessLogFile = new File(configuration.logDirectory, "http.log")
+  val portOption: Option[Int] = xmlAttributeIntOption(pluginElement, "port")
+  val tryUntilPortOption: Option[Int] = xmlAttributeIntOption(pluginElement, "tryUntilPort")
+  val jettyXmlFileOption: Option[File] = configFileIfExists("jetty.xml")
+  val webXmlFileOption: Option[File] = configFileIfExists("web.xml")
+  val accessLogFile = new File(conf.logDirectory, "http.log")
+  //val resourceBaseOption: Option[URL] = Option(emptyToNull(conf.webDirectory())) map { f => new File(f).getAbsoluteFile.toURI.toURL }
+
+  private def configFileIfExists(filename: String) = Option(new File(conf.localConfigurationDirectory, filename)) filter { _.exists }
 }
 
 object Config {
@@ -19,6 +23,7 @@ object Config {
   val contextPath = "/JobScheduler"
   val enginePrefixPath = "/engine"
   val cppPrefixPath = "/engine-cpp"
+  val resourceBaseURL = getClass.getResource("/com/sos/scheduler/engine/web")
 
   //  val gzipContentTypes = List(
   //    "application/javascript",
