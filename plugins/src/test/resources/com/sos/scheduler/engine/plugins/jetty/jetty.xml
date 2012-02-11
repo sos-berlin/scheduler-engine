@@ -8,4 +8,21 @@
             </New>
         </Arg>
     </Call-->
+    <!--Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                <Arg>
+                    <New class="org.eclipse.jetty.util.ssl.SslContextFactory">
+                        <Set name="keyStore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
+                        <Set name="keyStorePassword">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
+                        <Set name="keyManagerPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
+                        <Set name="trustStore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
+                        <Set name="trustStorePassword">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
+                    </New>
+                </Arg>
+                <Set name="port">8443</Set>
+                <Set name="maxIdleTime">30000</Set>
+            </New>
+        </Arg>
+    </Call-->
 </Configure>

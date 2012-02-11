@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.google.inject.{Injector, Guice}
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
 import com.sos.scheduler.engine.kernel.scheduler.{SchedulerConfiguration, HasGuiceModule}
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
@@ -9,19 +8,20 @@ import com.sos.scheduler.engine.plugins.jetty.JettyPluginConfiguration._
 import com.sos.scheduler.engine.plugins.jetty.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
+import java.net.{ServerSocket, BindException}
 import javax.inject.Inject
 import javax.servlet.Filter
 import org.apache.log4j.Logger
 import org.eclipse.jetty.security._
 import org.eclipse.jetty.servlet.{Holder, FilterHolder, DefaultServlet, ServletContextHandler}
 import org.eclipse.jetty.servlets.GzipFilter
-import org.eclipse.jetty.server.handler.{RequestLogHandler, HandlerCollection}
 import org.eclipse.jetty.server._
-import org.eclipse.jetty.util.security.Constraint
+import org.eclipse.jetty.server.handler.{ContextHandlerCollection, RequestLogHandler, HandlerCollection}
 import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.util.security.Constraint
 import org.eclipse.jetty.xml.XmlConfiguration
 import org.w3c.dom.Element
-import java.net.{ServerSocket, BindException}
+import com.google.inject.{Injector, Guice}
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, configuration: SchedulerConfiguration)
@@ -32,24 +32,19 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
   private val config = new Config(pluginElement, configuration)
 
   /** Der Port des ersten Connector */
-  def port = server.getConnectors.iterator.next().getPort
+  def port = server.getConnectors.head.getPort
 
   private val server = {
-//    val contexts = new ContextHandlerCollection()
-//    contexts.setHandlers(Array(
-//      newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule())),
-//      newContextHandler(cppContextPath, Guice.createInjector(schedulerModule, newCppServletModule()))
-//      //Funktioniert nicht: injector.createChildInjector(newServletModule())
-//    ))
+    val schedulerModule = hasGuiceModule.getGuiceModule
+    val loginServiceOption = childElementOption(pluginElement, "loginService") map PluginLoginService.apply
     newServer(
-      port = config.tryUntilPortOption map { until => findFreePort(config.portOption getOrElse until, until) } orElse config.portOption,
-      configuration = config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
-      handlers = List(
+      config.tryUntilPortOption map { until => findFreePort(config.portOption.get, until) } orElse config.portOption,
+      config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
+      List(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
-        newContextHandler(contextPath,
-          Guice.createInjector(hasGuiceModule.getGuiceModule, newServletModule()),
-          childElementOption(pluginElement, "loginService") map PluginLoginService.apply))
-    )
+        newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule()), loginServiceOption)))
+    //newContextHandler("/JobScheduler/engine", Guice.createInjector(schedulerModule, newServletModule()), loginServiceOption),
+    //newContextHandler("/JobScheduler/engine-cpp", Guice.createInjector(schedulerModule, newCppServletModule()), loginServiceOption)))
   }
 
   override def activate() {
@@ -66,11 +61,17 @@ object JettyPlugin {
   private val logger = Logger.getLogger(classOf[JettyPlugin])
   private val contextPath = ""  // Mehrere Kontexte funktionieren nicht und GuiceFilter meldet einen Konflikt. Deshalb simulieren wir mit prefixPath.
 
-  private def newServer(port: Option[Int], handlers: Iterable[Handler], configuration: Option[XmlConfiguration], beans: Iterable[AnyRef] = Iterable()) = {
+  private def newContextHandlerCollection(handlers: Iterable[Handler]) = {
+    val result = new ContextHandlerCollection()
+    result.setHandlers(handlers.toArray)
+    result
+  }
+
+  private def newServer(port: Option[Int], configuration: Option[XmlConfiguration], handlers: Iterable[Handler], beans: Iterable[AnyRef] = Iterable()) = {
     val result = new Server
     for (c <- configuration) c.configure(result)
     for (p <- port) result.addConnector(newConnector(p))
-    result.setHandler(newHandlerCollection(handlers))
+    result.setHandler(newHandlerCollection(Option(result.getHandler) ++ handlers))
     for (bean <- beans) result.addBean(bean)
     result
   }
@@ -82,8 +83,12 @@ object JettyPlugin {
   }
 
   private def newHandlerCollection(handlers: Iterable[Handler]) = {
+    def resolveHandlerCollection(h: Handler): Iterable[Handler] = h match {
+      case c: HandlerCollection => c.getHandlers
+      case _ => Iterable(h)
+    }
     val result = new HandlerCollection
-    result.setHandlers(handlers.toArray)
+    result.setHandlers((handlers flatMap resolveHandlerCollection).toArray)
     result
   }
 
@@ -159,14 +164,17 @@ object JettyPlugin {
     }
   }
 
-  def findFreePort(begin: Int, end: Int): Int = if (begin >= end) begin else
-    try {
-      val backlog = 1
-      new ServerSocket(begin, backlog).close()
-      begin
-    } catch {
-      case _: BindException => findFreePort(begin + 1, end)
-    }
+  def findFreePort(firstPort: Int, end: Int): Int =
+    if (firstPort >= end) firstPort
+    else {
+      try {
+        val backlog = 1
+        new ServerSocket(firstPort, backlog).close()
+        firstPort
+      } catch {
+        case _: BindException => findFreePort(firstPort + 1, end)
+      }
+  }
 
   private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
 
