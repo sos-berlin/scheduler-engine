@@ -46,10 +46,15 @@
             <artifactId>com.sos.JSHelper</artifactId>
             <version>${sos.jars.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>cppjava.runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>web</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
