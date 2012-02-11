@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.log
 
 import javax.inject.Inject
 import javax.inject.Singleton

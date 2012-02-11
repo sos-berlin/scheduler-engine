@@ -1,19 +1,19 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import java.net.URI
+import com.google.inject.Injector
 import com.sun.jersey.api.client.{Client, WebResource}
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter
-import org.joda.time.Duration
-import com.google.inject.Injector
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.plugins.jetty.JettyPluginConfiguration._
+import com.sos.scheduler.engine.plugins.jetty.Config._
+import org.joda.time.Duration
 
 object JettyPluginTests {
   val defaultTimeout = new Duration(60*1000)
 
-  def cppContextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + cppPrefixPath)
+  def cppContextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + cppPrefixPath)
 
-  def javaContextUri(injector: Injector) = "http://localhost:"+ jettyPortNumber(injector) + prefixPath
+  def javaContextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + enginePrefixPath)
 
   def jettyPortNumber(injector: Injector) = {
     val pluginSubsystem = injector.getInstance(classOf[PluginSubsystem])

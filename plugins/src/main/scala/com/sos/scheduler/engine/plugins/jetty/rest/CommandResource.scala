@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.rest
 
 import javax.inject.Inject
 import javax.ws.rs._

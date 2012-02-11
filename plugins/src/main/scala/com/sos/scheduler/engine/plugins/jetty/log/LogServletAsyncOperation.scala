@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.log
 
 import javax.servlet.{AsyncEvent, AsyncListener}
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
@@ -19,11 +19,13 @@ object LogServletAsyncOperation {
         logger.info("onStarted")
         operation.start(log.getFile)
       }
+
       def onClosed() {
         logger.info("onClosed")
         operation.end()
         // Unter Windows kann jetzt der Fehler SCHEDULER-291 kommen, weil die Datei noch vom Servlet geöffnet ist.
       }
+
       def onLogged() {
         operation.wake()
       }
@@ -36,12 +38,16 @@ object LogServletAsyncOperation {
 
     asyncContext.addListener(new AsyncListener {
       def onStartAsync(event: AsyncEvent) {}
+
       def onComplete(event: AsyncEvent) { close() }
+
       def onTimeout(event: AsyncEvent) { close() }
+
       def onError(event: AsyncEvent) {
         logger.error(event.getThrowable, event.getThrowable)
         close()
       }
+
       private def close() {
         log.unsubscribe(logSubscription)
         operation.close()

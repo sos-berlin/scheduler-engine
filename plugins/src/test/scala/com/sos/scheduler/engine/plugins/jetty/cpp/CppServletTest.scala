@@ -1,12 +1,13 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.cpp
 
 import com.google.common.io.Files
+import com.sos.scheduler.engine.kernel.settings.SettingName
+import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.{newAuthentifyingClient, cppContextUri}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.filter.ClientFilter
 import com.sun.jersey.api.client.{Client, ClientResponse}
-import com.sos.scheduler.engine.kernel.settings.SettingName
-import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter
 import java.io.File
 import java.util.zip.GZIPInputStream
 import javax.ws.rs.core.MediaType._
@@ -16,12 +17,11 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
-import JettyPluginTests._
-
 @RunWith(classOf[JUnitRunner])
 final class CppServletTest extends ScalaSchedulerTest {
   import CppServletTest._
 
+  override val configurationPackage = classOf[JettyPlugin].getPackage
   private val httpDirectory = controller.environment.directory
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
@@ -67,8 +67,8 @@ final class CppServletTest extends ScalaSchedulerTest {
       scheduler.executeXml(<order job_chain={jobChainPath} id={orderId}/>)
       Thread.sleep(500)  //TODO TaskStartedEvent
       val result = stringFromResponse(client.resource(uri).path("show_log").queryParam("task", "1").accept(TEXT_HTML_TYPE).get(classOf[ClientResponse]))
-      result should include("SCHEDULER-918  state=closed")
-      result should include("SCHEDULER-962")  // "Protocol ends in ..."
+      result should include ("SCHEDULER-918  state=closed")
+      result should include ("SCHEDULER-962") // "Protocol ends in ..."
       result.trim should endWith("</html>")
     }
 

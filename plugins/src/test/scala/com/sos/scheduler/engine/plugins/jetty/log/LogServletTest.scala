@@ -1,15 +1,15 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.log
 
 import java.io.{BufferedReader, Reader}
 import javax.ws.rs.core.MediaType._
 import com.sun.jersey.api.client.WebResource
+import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.{javaContextUri, newAuthResource}
 import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.apache.log4j.Logger
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-
-import JettyPluginTests._
 
 //TODO Wechsel der Datei bei Log.start_new_file() und instance_number berücksichtigen
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
@@ -18,7 +18,8 @@ import JettyPluginTests._
 final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   import LogServletTest._
 
-  private lazy val objectsResource = newAuthResource(javaContextUri(injector)+"/objects")
+  override val configurationPackage = classOf[JettyPlugin].getPackage
+  private lazy val objectsResource = newAuthResource(javaContextUri(injector) + "/objects")
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
     controller.activateScheduler()
@@ -46,7 +47,7 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   }
 
   private def startLogThread(r: WebResource) {
-    new Thread("LogReader "+r) {
+    new Thread("LogReader " + r) {
       override def run() {
         logReader(r.accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
         logger.info("---------------------")

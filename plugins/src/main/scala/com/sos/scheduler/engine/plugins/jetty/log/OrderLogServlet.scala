@@ -1,13 +1,10 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.log
 
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import javax.ws.rs.WebApplicationException
-import javax.ws.rs.core.Response.Status.BAD_REQUEST
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.order.{OrderId, OrderSubsystem}
-import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions._
 
 @Singleton
 class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServlet {

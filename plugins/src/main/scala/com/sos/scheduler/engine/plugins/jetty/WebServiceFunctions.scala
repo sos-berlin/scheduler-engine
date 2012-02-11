@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import javax.ws.rs.core.CacheControl
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants
-import javax.ws.rs.core.Response.ResponseBuilder
-import scala.xml.Elem
 import javax.servlet.ServletRequest
+import javax.ws.rs.core.CacheControl
+import scala.xml.Elem
 
 object WebServiceFunctions {
   val noCache = {
@@ -16,8 +15,6 @@ object WebServiceFunctions {
   object HeaderConstants {
     val server = SchedulerConstants.productWithVersion
   }
-
-  //def finishResponse(r: ResponseBuilder) = r.header("Server", HeaderConstants.server).build()
 
   def wrapXmlResponse(e: Seq[Elem]) = <scheduler>{e}</scheduler>
 

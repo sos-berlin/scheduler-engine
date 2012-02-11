@@ -1,11 +1,9 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.rest
 
 import scala.collection.JavaConversions._
 import javax.inject.Inject
 import javax.ws.rs._
 import javax.ws.rs.core.{MediaType, Response}
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.{noCache, wrapXmlResponse}
 

@@ -1,17 +1,18 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
+import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.{javaContextUri, newAuthResource}
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
-import JettyPluginTests._
-
-/** JS-795: Einbau von Jetty in den JobScheduler. */
+/**JS-795: Einbau von Jetty in den JobScheduler. */
 @RunWith(classOf[JUnitRunner])
 final class CommandResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
-  private lazy val commandResource = newAuthResource(javaContextUri(injector)+"/command")
+  override val configurationPackage = classOf[JettyPlugin].getPackage
+  private lazy val commandResource = newAuthResource(javaContextUri(injector) + "/command")
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
     controller.activateScheduler("-e")
@@ -29,6 +30,6 @@ final class CommandResourceTest extends ScalaSchedulerTest with CheckedBeforeAll
   }
 
   private def checkCommandResult(result: String) {
-    result should include ("<state");
+    result should include("<state");
   }
 }

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.log
 
 import java.io._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.google.common.io.Closeables.closeQuietly
 
 class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServletResponse) {
-  import FileServletAsyncOperation._
+//  import FileServletAsyncOperation._
 
   private var file: File = null
   private var in: FileInputStream = null
@@ -64,6 +64,6 @@ class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServl
   override def toString = classOf[FileServletAsyncOperation].getName+"("+file+")"
 }
 
-object FileServletAsyncOperation {
-  private val logger = Logger.getLogger(classOf[FileServletAsyncOperation])
-}
+//object FileServletAsyncOperation {
+//  private val logger = Logger.getLogger(classOf[FileServletAsyncOperation])
+//}

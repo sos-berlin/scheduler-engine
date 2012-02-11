@@ -15,5 +15,20 @@ class Config(pluginElement: Element, configuration: SchedulerConfiguration) {
 }
 
 object Config {
+  val adminstratorRoleName = "administrator"
+  val contextPath = "/JobScheduler"
+  val enginePrefixPath = "/engine"
+  val cppPrefixPath = "/engine-cpp"
+
+  //  val gzipContentTypes = List(
+  //    "application/javascript",
+  //    "application/xhtml+xml",
+  //    "image/svg+xml",
+  //    "text/css",
+  //    "text/html",
+  //    "text/javascript",
+  //    "text/plain",
+  //    "text/xml")
+
   private def xmlAttributeIntOption(e: Element, name: String) = if (e.hasAttribute(name)) Some(intXmlAttribute(e, name)) else None
 }

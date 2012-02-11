@@ -1,6 +1,5 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.rest
 
-import scala.collection.JavaConversions._
 import javax.inject.Inject
 import javax.ws.rs._
 import javax.ws.rs.core.{MediaType, Response, Variant}
