@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
-import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.{javaContextUri, newAuthResource}
+import com.sos.scheduler.engine.plugins.jetty.util.JettyPluginTests.{javaContextUri, newAuthResource}
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -12,11 +12,6 @@ import org.scalatest.matchers.ShouldMatchers._
 final class JobResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val jobResource = newAuthResource(javaContextUri(injector) + "/objects/job").queryParam("job", "a")
-
-  override protected def checkedBeforeAll(configMap: Map[String, Any]) {
-    controller.activateScheduler()
-    super.checkedBeforeAll(configMap)
-  }
 
   test("Read a job configuration") {
     val result = jobResource.path("configuration").accept(TEXT_XML_TYPE).get(classOf[String])

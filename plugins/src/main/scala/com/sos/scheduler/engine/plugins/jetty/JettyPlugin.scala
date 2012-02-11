@@ -17,11 +17,11 @@ import javax.inject.Inject
 import javax.servlet.Filter
 import org.apache.log4j.Logger
 import org.eclipse.jetty.security._
+import org.eclipse.jetty.server._
+import org.eclipse.jetty.server.handler.{DefaultHandler, RequestLogHandler, HandlerCollection}
+import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.servlet.{Holder, FilterHolder, DefaultServlet, ServletContextHandler}
 import org.eclipse.jetty.servlets.GzipFilter
-import org.eclipse.jetty.server._
-import org.eclipse.jetty.server.handler.{ContextHandlerCollection, RequestLogHandler, HandlerCollection}
-import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.util.security.Constraint
 import org.eclipse.jetty.xml.XmlConfiguration
 import org.w3c.dom.Element
@@ -43,9 +43,10 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
     newServer(
       config.tryUntilPortOption map { until => findFreePort(config.portOption.get, until) } orElse config.portOption,
       config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
-      List(
+      newHandlerCollection(Iterable(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
-        newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule()), loginServiceOption)))
+        newContextHandler(contextPath, Guice.createInjector(schedulerModule, newServletModule()), loginServiceOption),
+        new DefaultHandler())))
     //newContextHandler("/JobScheduler/engine", Guice.createInjector(schedulerModule, newServletModule()), loginServiceOption),
     //newContextHandler("/JobScheduler/engine-cpp", Guice.createInjector(schedulerModule, newCppServletModule()), loginServiceOption)))
   }
@@ -63,18 +64,12 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 object JettyPlugin {
   private val logger = Logger.getLogger(classOf[JettyPlugin])
 
-  private def newContextHandlerCollection(handlers: Iterable[Handler]) = {
-    val result = new ContextHandlerCollection()
-    result.setHandlers(handlers.toArray)
-    result
-  }
-
-  private def newServer(port: Option[Int], configuration: Option[XmlConfiguration], handlers: Iterable[Handler], beans: Iterable[AnyRef] = Iterable()) = {
+  private def newServer(port: Option[Int], configuration: Option[XmlConfiguration], handler: Handler, beans: Iterable[AnyRef] = Iterable()) = {
     val result = new Server
     for (c <- configuration) c.configure(result)
     for (p <- port) result.addConnector(newConnector(p))
-    result.setHandler(newHandlerCollection(Option(result.getHandler) ++ handlers))
-    for (bean <- beans) result.addBean(bean)
+    result.setHandler(newHandlerCollection(Option(result.getHandler) ++ Iterable(handler)))
+    for (b <- beans) result.addBean(b)
     result
   }
 
@@ -85,10 +80,6 @@ object JettyPlugin {
   }
 
   private def newHandlerCollection(handlers: Iterable[Handler]) = {
-//    def resolveHandlerCollection(h: Handler): Iterable[Handler] = h match {
-//      case c: HandlerCollection => c.getHandlers
-//      case _ => Iterable(h)
-//    }
     val result = new HandlerCollection
     result.setHandlers(handlers.toArray)
     result

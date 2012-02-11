@@ -5,11 +5,10 @@ import javax.inject.Singleton
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.getOrSetAttribute
+import com.sos.scheduler.engine.plugins.jetty.rest.WebServiceFunctions.getOrSetAttribute
 
 @Singleton
 class JobLogServlet @Inject()(jobSubsystem: JobSubsystem) extends HttpServlet {
-
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     val operation = getOrSetAttribute(request, classOf[JobLogServlet].getName) {
       val jobPathString = Option(request.getParameter("job")).get

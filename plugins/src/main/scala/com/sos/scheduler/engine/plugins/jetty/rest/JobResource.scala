@@ -6,8 +6,8 @@ import javax.ws.rs._
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
-import com.sos.scheduler.engine.plugins.jetty.Constants._
-import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.noCache
+import com.sos.scheduler.engine.plugins.jetty.rest.Tests._
+import com.sos.scheduler.engine.plugins.jetty.rest.WebServiceFunctions.noCache
 
 @Path("/objects/job")
 class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: SchedulerInstanceId,

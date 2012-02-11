@@ -1,6 +1,5 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.rest
 
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants
 import javax.servlet.ServletRequest
 import javax.ws.rs.core.CacheControl
 import scala.xml.Elem
@@ -12,13 +11,9 @@ object WebServiceFunctions {
     result
   }
 
-  object HeaderConstants {
-    val server = SchedulerConstants.productWithVersion
-  }
-
   def wrapXmlResponse(e: Seq[Elem]) = <scheduler>{e}</scheduler>
 
-  def stripFromEnd(s: String, end: String) = s ensuring {_ endsWith end} substring (0, s.length - end.length)
+  def stripFromEnd(s: String, end: String) = s ensuring { _ endsWith end } substring (0, s.length - end.length)
 
   def getOrSetAttribute[A](request: ServletRequest, attributeName: String)(f: => A) =
     Option(request.getAttribute(attributeName).asInstanceOf[A]) getOrElse {

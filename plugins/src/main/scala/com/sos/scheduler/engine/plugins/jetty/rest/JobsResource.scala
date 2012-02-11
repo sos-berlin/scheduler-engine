@@ -5,7 +5,7 @@ import javax.inject.Inject
 import javax.ws.rs._
 import javax.ws.rs.core.{MediaType, Response}
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.WebServiceFunctions.{noCache, wrapXmlResponse}
+import com.sos.scheduler.engine.plugins.jetty.rest.WebServiceFunctions.{noCache, wrapXmlResponse}
 
 @Path("/objects/jobs")
 class JobsResource @Inject()(jobSubsystem: JobSubsystem) {

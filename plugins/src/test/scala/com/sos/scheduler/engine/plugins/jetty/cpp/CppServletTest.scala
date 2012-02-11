@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.jetty.cpp
 import com.google.common.io.Files
 import com.sos.scheduler.engine.kernel.settings.SettingName
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
-import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.{newAuthentifyingClient, cppContextUri}
+import com.sos.scheduler.engine.plugins.jetty.util.JettyPluginTests.{newAuthentifyingClient, cppContextUri}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.filter.ClientFilter
