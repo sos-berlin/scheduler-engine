@@ -25,7 +25,7 @@ final class CppServletTest extends ScalaSchedulerTest {
   private val httpDirectory = controller.environment.directory
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
-    controller.getSettings.set(SettingName.htmlDir, httpDirectory.getPath)
+    controller.getSettings.set(SettingName.htmlDir, httpDirectory.getPath)    // Für Bitmuster-Test
     controller.activateScheduler()
     super.checkedBeforeAll(configMap)
   }

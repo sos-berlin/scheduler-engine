@@ -13,7 +13,7 @@ class CppServlet @Inject()(
     schedulerHttpService: SchedulerHttpService,
     cppProxyRegister: DisposableCppProxyRegister,
     schedulerIsClosed: SchedulerIsClosed)
-    extends HttpServlet {
+  extends HttpServlet {
 
   import CppServlet._
 
