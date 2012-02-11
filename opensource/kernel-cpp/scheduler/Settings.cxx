@@ -7,6 +7,13 @@ namespace scheduler {
 
 Settings::~Settings() {}
 
+//---------------------------------------------------------------------------Settings::set_defaults
+
+void Settings::set_defaults(Spooler* spooler) {
+    if (_html_dir.empty())  
+        _html_dir = spooler->home_directory() + "/operations_gui";
+}
+
 //------------------------------------------------------------------------------------Settings::set
 
 void Settings::set(int number, const string& value) {
@@ -27,11 +34,18 @@ void Settings::set(int number, const string& value) {
     }
 }
 
-//---------------------------------------------------------------------------Settings::set_defaults
+//------------------------------------------------------------------------------------Settings::get
 
-void Settings::set_defaults(Spooler* spooler) {
-    if (_html_dir.empty())  
-        _html_dir = spooler->home_directory() + "/operations_gui";
+string Settings::get(int number) const {
+    // number wird in Java SettingName festgelegt.
+
+    switch (number) {
+        case 1: return _db_name;
+        case 2: return _job_java_class_path;
+        case 3: return _html_dir;
+        default:
+            z::throw_xc("UNKNOWN_SETTING", number);
+    }
 }
 
 }} //namespace sos::scheduler

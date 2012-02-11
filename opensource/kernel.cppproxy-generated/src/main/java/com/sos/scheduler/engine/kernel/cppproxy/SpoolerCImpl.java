@@ -1040,6 +1040,22 @@ final class SpoolerCImpl
     private static native void set_id__native(long cppReference, java.lang.String p0);
 
 
+    @Override public java.lang.String setting(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = setting__native(cppReference(), p0);
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String setting__native(long cppReference, int p0);
+
+
     @Override public void signal(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

@@ -413,6 +413,7 @@ struct Spooler : Object,
     jobject                     java_main_context           () const                            { return _java_main_context; }
     Thread_id                   thread_id                   () const                            { return _thread_id; }
     const Settings*             settings                    () const;
+    string                      setting                     (int i) const                       { return settings()->get(i); }
     Settings*                   modifiable_settings         () const;
     void                    set_id                          ( const string& );
     const string&               id                          () const                            { return _spooler_id; }

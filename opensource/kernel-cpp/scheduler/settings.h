@@ -8,8 +8,9 @@ struct Spooler;
 
 struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     virtual                    ~Settings                    ();
-    void                        set                         (int number, const string& value);
     void                        set_defaults                (Spooler*);
+    void                        set                         (int number, const string& value);
+    string                      get                         (int number) const;
 
     string                     _db_name;
     string                     _job_java_class_path;

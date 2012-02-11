@@ -17,7 +17,7 @@ public enum SettingName {
         this.number = number;
     }
 
-    int getNumber() {
+    public int getNumber() {
         return number;
     }
 }
