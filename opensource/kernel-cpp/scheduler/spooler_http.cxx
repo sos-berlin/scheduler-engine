@@ -1681,7 +1681,7 @@ string Log_chunk_reader::html_insertion()
 
 //-------------------------------------------------------------Html_chunk_reader::Html_chunk_reader
 
-Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& title )
+Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& base_url, const string& title )
 : 
     Chunk_reader_filter( chunk_reader, "text/html; charset=" + get_content_type_parameter( chunk_reader->content_type(), "charset" ) ),
     _zero_(this+1), 
@@ -1689,7 +1689,8 @@ Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& 
     _at_begin_of_line(true)
 {
     _html_prefix = "<html>\n" 
-                        "<head>\n" 
+                        "<head>\n"+
+                            (base_url.empty() ? "" : "<base href='"+ base_url +"'>\n") +
                             "<style type='text/css'>\n"
                                 "@import 'scheduler.css';\n"
                                 "pre { font-family: Lucida Console, monospace; font-size: 10pt }\n"

@@ -4,23 +4,19 @@
 
 <head>
     <meta name="vs_targetSchema"    content="http://schemas.microsoft.com/intellisense/ie5"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
-
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Scheduler</title>
-
-    <style type="text/css">
-        @import "scheduler.css";
-    </style>
+    <link rel="stylesheet" type="text/css" charset="utf-8" href="scheduler.css">
 </head>
 
 <body>
 
 <span id="stylesheet_output"></span>
 
-<script type="text/javascript" src="scheduler.js" ></script>
-<script type="text/javascript" src="browser_dependencies.js"></script>
+<script type="text/javascript" charset="utf-8" src="scheduler.js" ></script>
+<script type="text/javascript" charset="utf-8" src="browser_dependencies.js"></script>
 <!--script defer="true" type="text/javascript" src="translation_de.js"></script-->
-<script type="text/javascript" src="popup_menu.js"></script>
+<script type="text/javascript" charset="utf-8" src="popup_menu.js"></script>
 
 <script language="javascript"><!--
 //--------------------------------------------------------------------------------------------const
@@ -62,7 +58,7 @@ function do_onload()
         _translation_table = new Object();
         init_translation_table( _translation_table );
         
-        // Auch für großgeschriebene Wörter:
+        // Auch fÃ¼r groÃŸgeschriebene WÃ¶rter:
         for( word in _translation_table )  _translation_table[ word.substring.substring( 0, 1 ).toUpper() + word.substring( 1 ) ];
     }
     
@@ -269,7 +265,7 @@ function show_job_details( job_path, job_chain_path )
     var job_element  = _response.selectSingleNode( ".//job[@path='" + job_path + "']" );
 
     /*
-    if( job_chain_name )    // <task> und <order> mit job_chain != job_chain_name löschen
+    if( job_chain_name )    // <task> und <order> mit job_chain != job_chain_name lÃ¶schen
     {
         var alien_nodes = job_element.selectNodes( "tasks/task                   [ order/@job_chain != '" + job_chain_name + "' ] | " +
                                                    "tasks/task/order_queue/order [ @job_chain != '" + job_chain_name + "' ] " );

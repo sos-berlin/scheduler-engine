@@ -1,9 +1,9 @@
 /*  $Id: scheduler.css 13751 2009-03-01 17:14:58Z jz $ 
 
-    STYLESHEET FÜR DEN SCHEDULER
+    STYLESHEET FÃœR DEN SCHEDULER
 
 
-    In der custom.css (im selben Verzeichnis) können Sie eigene Einstellungen vornehmen.
+    In der custom.css (im selben Verzeichnis) kÃ¶nnen Sie eigene Einstellungen vornehmen.
 */
 
 
@@ -106,7 +106,7 @@ a:hover                 { background-color: #e0e0FF }
 .menu_click:visited     { color: #0000a0; background-color: inherit; }
 .menu_click:hover       { background-color: #e0e0FF }
 
-/* Für die Job-<description> */
+/* FÃ¼r die Job-<description> */
 body#job_description    { background-color: #80ecff }
 
 .cluster                { background-color: #ffffa0 }
@@ -119,7 +119,7 @@ body#job_description    { background-color: #80ecff }
 .has_title:hover        { border-bottom: dotted 1px black;  border-top: dotted 1px black; }
 
 
-/* Fürs Protokoll */
+/* FÃ¼rs Protokoll */
 body.log                { margin-left: 0; padding-left: 0 }
 pre.log                 { font-family: Lucida Console, monospace; font-size: 10px; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
 

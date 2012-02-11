@@ -140,7 +140,7 @@ Popup_menu_builder.prototype.html = function()
 {
     if( !this._finished )
     {
-        //if( window.createPopup == undefined )       // Solange das Popupmenü nicht durch einen Klick woandershin verschwindet (wie beim Internet Explorer)
+        //if( window.createPopup == undefined )       // Solange das PopupmenÃ¼ nicht durch einen Klick woandershin verschwindet (wie beim Internet Explorer)
         //{
         //    this.add_bar();
         //    this.add_entry( "(close menu)", "__current_popup_menu.close()" );

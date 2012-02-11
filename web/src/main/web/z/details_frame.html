@@ -4,15 +4,9 @@
 
 <head>
     <meta name="vs_targetSchema"    content="http://schemas.microsoft.com/intellisense/ie5"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
-
-
-    <style type="text/css">
-        @import "scheduler.css";
-    </style>
-
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" charset="utf-8" href="scheduler.css">
     <title>Scheduler</title>
-
 </head>
 
 <body>
@@ -37,9 +31,9 @@
 
 <span id="stylesheet_output"></span>
 
-<script defer="true" type="text/javascript" src="scheduler.js"></script>
-<script defer="true" type="text/javascript" src="browser_dependencies.js"></script>
-<script defer="true" type="text/javascript" src="popup_menu.js"></script>
+<script defer="true" type="text/javascript" charset="utf-8" src="scheduler.js"></script>
+<script defer="true" type="text/javascript" charset="utf-8" src="browser_dependencies.js"></script>
+<script defer="true" type="text/javascript" charset="utf-8" src="popup_menu.js"></script>
 
 <!-- script type="text/javascript" for="window" event="onload"> do_onload(); </script-->
 
@@ -181,7 +175,7 @@ function show_job_description()
 {
     var job_element =  _job_element;
                       
-    var url         = document.location.href.replace( /\/[^\/]*$/, "/" ) + "job_description?job=" + job_element.getAttribute( "job" );
+    var url         = scheduler_engine_cpp_url+"job_description?job=" + job_element.getAttribute( "job" );
     var window_name = "scheduler_job_description";
     var features    = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
     

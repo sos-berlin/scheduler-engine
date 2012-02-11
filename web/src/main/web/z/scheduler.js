@@ -12,7 +12,9 @@ var ie       = 0;   // Microsoft Internet Explorer
 var netscape = 0;   // Netscape
 var firefox  = 0;   // Mozilla Firefox
 var opera    = 0;   // Opera
-
+var scheduler_gui_base_url = ( document.location.href + "" ).replace( /[/][^/]*$/, "/" );  // Dateiname abschneiden, nur das Verzeichnis nehmen
+var scheduler_base_url = scheduler_gui_base_url.replace(/[/][^/]+[/]$/, "/")
+var scheduler_engine_cpp_url = scheduler_base_url+"engine-cpp/"
 
 //--------------------------------------------------------------------------------------------const
 
@@ -48,7 +50,7 @@ function check_browser()
         {
             if( window.navigator.appName == "Microsoft Internet Explorer" )
             {
-                //if( !window.clientInformation )       Könnte Opera sein, oder auch nicht.
+                //if( !window.clientInformation )       KÃ¶nnte Opera sein, oder auch nicht.
                 //{
                 //    opera = 7;  // Vermutlich Opera, der sich als ie ausgibt. Aber welche Version von Opera ist das?
                 //}
@@ -138,7 +140,6 @@ Time_log.prototype.get_line = function Time_log__get_line()
 
 function Scheduler()
 {
-    this._url               = ( document.location.href + "" ).replace( /[/][^/]*$/, "/" );  // Dateiname abschneiden, nur das Verzeichnis nehmen
     this._xml_http          = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
     this._dependend_windows = new Object();
     this._time_log          = new Time_log;
@@ -200,7 +201,7 @@ Scheduler.prototype.execute = function Scheduler__execute( xml )
 
 Scheduler.prototype.call_http = function( text, debug_text )
 {
-    this._xml_http.open( "POST", this._url, false );
+    this._xml_http.open( "POST", scheduler_engine_cpp_url, false );
     this._xml_http.setRequestHeader( "Cache-Control", "no-cache" );
 
 
@@ -263,7 +264,7 @@ Scheduler.prototype.add_datetime_attributes_for_xslt = function( response, now, 
 
 Scheduler.prototype.modify_datetime_for_xslt = function( response )
 {
-    // Für Firefox, dass kein Skript im Stylesheet zulässt.
+    // FÃ¼r Firefox, dass kein Skript im Stylesheet zulÃ¤sst.
     var now;
 
     var datetime = response.selectSingleNode( "/spooler/answer/@time" );
@@ -496,9 +497,9 @@ function xslt_short_number( positive_number )
     
     return n + ( n >= 10  ||
                  fragment < 0.25? "" :
-                 fragment < 0.5 ? "¼" :
-                 fragment < 0.75? "½"
-                                : "¾" );
+                 fragment < 0.5 ? "Â¼" :
+                 fragment < 0.75? "Â½"
+                                : "Â¾" );
 }
 
 //-----------------------------------------------------------------------date_from_datetime
@@ -639,7 +640,7 @@ function update__onclick()
 
 function modify_response( response )
 {
-    // Antwort manipulieren: <tasks> mit <task> auffüllen, bis <job tasks=".."> erreicht ist.
+    // Antwort manipulieren: <tasks> mit <task> auffÃ¼llen, bis <job tasks=".."> erreicht ist.
 
     var job_elements = response.selectNodes( ".//job" );
     for( var j = 0; j < job_elements.length; j++ )
@@ -659,7 +660,7 @@ function modify_response( response )
     }
     
 
-    // Werte der Checkboxen show_tasks_checkbox und show_my_orders ins XML-Dokument übernehmen (für XSL)
+    // Werte der Checkboxen show_tasks_checkbox und show_my_orders ins XML-Dokument Ã¼bernehmen (fÃ¼r XSL)
     
     var spooler_element = response.selectSingleNode( "spooler" );
     if( spooler_element )
@@ -674,8 +675,8 @@ function modify_response( response )
         spooler_element.setAttribute( "my_max_orders"    , window.parent.left_frame._max_orders    );
         spooler_element.setAttribute( "my_show_card"     , window.parent.left_frame._show_card     );
         spooler_element.setAttribute( "my_update_seconds", window.parent.left_frame.update_seconds );
-        spooler_element.setAttribute( "my_url_base"      , document.location.href    .replace( /\/[^\/]*$/, "/" ) );   // Alles bis zum letzten Schräger
-        spooler_element.setAttribute( "my_url_path_base" , document.location.pathname.replace( /\/[^\/]*$/, "/" ) );   // Pfad bis zum letzten Schräger
+        spooler_element.setAttribute( "my_url_base"      , document.location.href    .replace( /\/[^\/]*$/, "/" ) );   // Alles bis zum letzten SchrÃ¤ger
+        spooler_element.setAttribute( "my_url_path_base" , document.location.pathname.replace( /\/[^\/]*$/, "/" ) );   // Pfad bis zum letzten SchrÃ¤ger
     }
 
     if( _scheduler )  _scheduler._time_log.log( "modify_response" );
@@ -763,7 +764,7 @@ function Popup_menu_builder__add_command( html, xml_command, is_active )
 }
 
 //-------------------------------------------------------------------------------popup_menu.execute
-// Für Popup_menu_builder.add_command()
+// FÃ¼r Popup_menu_builder.add_command()
 
 function popup_menu__execute( xml_command )
 {
@@ -785,7 +786,7 @@ function Popup_menu_builder__add_show_log( html, show_log_command, window_name, 
 }
 
 //--------------------------------------------------------------------popup_menu__show_log__onclick
-// Für Popup_menu_builder.add_show_log()
+// FÃ¼r Popup_menu_builder.add_show_log()
 
 function popup_menu__show_log__onclick( show_log_command, window_name )
 {
@@ -794,13 +795,13 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
 
     var features = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
     features +=  ", width="       + ( window.screen.availWidth - 11 ) +
-                 ", innerwidth="  + ( window.screen.availWidth - 11 ) +                             // Für Firefox
+                 ", innerwidth="  + ( window.screen.availWidth - 11 ) +                             // FÃ¼r Firefox
                  ", height="      + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +
-                 ", innerheight=" + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +        // Für Firefox
+                 ", innerheight=" + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +        // FÃ¼r Firefox
                  ", left=0"       +
                  ", top="         +  Math.floor( window.screen.availHeight * 0.8 );
 
-    var log_window = window.open( document.location.href.replace( /\/[^\/]*$/, "/" ) + show_log_command, window_name, features, true );
+    var log_window = window.open( scheduler_engine_cpp_url+show_log_command+"&base_url="+scheduler_gui_base_url, window_name, features, true );
 
     if( log_window )   // null, wenn Popups blockiert sind.
     {
@@ -822,7 +823,7 @@ function scheduler_menu__onclick( x, y )
 
     var command = function( cmd ) { return "<modify_spooler cmd='" + cmd + "'/>"; }
 
-    popup_builder.add_show_log( "Show log"                       , "show_log?", "show_log" );
+    popup_builder.add_show_log( "Show log"                       , "show_log?x", "show_log" );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
     popup_builder.add_command ( "Pause"                          , command( "pause"    ) , state != "paused" && !waiting_errno );

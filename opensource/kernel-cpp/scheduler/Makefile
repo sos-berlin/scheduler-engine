@@ -51,7 +51,6 @@ objects = \
  spooler_config.o\
  spooler_event.o\
  spooler_embedded_files.o\
- spooler_embedded_files_z.o\
  spooler_http.o\
  spooler_job.o\
  spooler_log.o\

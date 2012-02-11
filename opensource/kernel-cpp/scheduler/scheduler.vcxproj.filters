@@ -102,9 +102,6 @@
     <ClCompile Include="spooler_embedded_files.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
-    <ClCompile Include="spooler_embedded_files_z.cxx">
-      <Filter>Quellcodedateien</Filter>
-    </ClCompile>
     <ClCompile Include="spooler_event.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
@@ -302,6 +299,9 @@
     </ClCompile>
     <ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
+      <Filter>Quellcodedateien</Filter>
     </ClCompile>
     <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
       <Filter>Quellcodedateien</Filter>

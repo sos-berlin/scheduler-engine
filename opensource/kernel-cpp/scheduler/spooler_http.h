@@ -163,7 +163,7 @@ struct Html_chunk_reader : Chunk_reader_filter
     enum State { reading_prefix, reading_text, reading_suffix, reading_finished };
 
 
-                                Html_chunk_reader           ( Chunk_reader*, const string& title );
+                                Html_chunk_reader           ( Chunk_reader*, const string& url_base, const string& title );
                                ~Html_chunk_reader           ();
 
     virtual void                recommend_block_size        ( int size )                            { _chunk_reader->recommend_block_size( size );

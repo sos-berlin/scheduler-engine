@@ -300,7 +300,7 @@
                           class   = "small"
                           style   = "cursor: pointer; text-decoration: underline;">
                     </span-->
-                    <a href="/doc/" target="scheduler_documentation" onclick="open_url( '/doc/', 'scheduler_documentation' )" class="small">Doc</a>&#160;
+                    <a href="/JobScheduler/doc/" target="scheduler_documentation" onclick="open_url( '/doc/', 'scheduler_documentation' )" class="small">Doc</a>&#160;
                     <!--a href="javascript:void(0)" onclick="open_url( '/doc/index.xml', 'scheduler_documentation' )" target="scheduler_documentation" class="small">Doku</a>&#160;-->
 
                     <xsl:call-template name="command_menu">
@@ -311,7 +311,7 @@
 
             <tr>
                 <td colspan="99">
-                    <a href="show_config?" target="config_xml">
+                    <a href="/JobScheduler/engine-cpp/show_config?" target="config_xml">
                         <xsl:value-of select="state/@config_file"/>
                     </a>
                 </td>

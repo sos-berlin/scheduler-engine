@@ -45,7 +45,6 @@ using xml::Xml_writer;
 //-------------------------------------------------------------------------------------------------
 
 const string default_filename = "index.html";
-extern const Embedded_files embedded_files_z;   // Zschimmers HTML-Dateien (/z/index.html etc.)
 
 //-------------------------------------------------------------------Log_categories_reset_operation
 
@@ -1741,6 +1740,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
             else
             if( string_ends_with( path, "?" ) )
             {
+                string base_url = http_request->parameter("base_url");
                 http_response->set_header( "Cache-Control", "no-cache" );
 
                 if( string_ends_with( path, show_log_request ) )
@@ -1769,12 +1769,12 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                                 if( e.nodeName_is( "log" ) )
                                 {
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Task und Log anlegen
-                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.nodeValue(), "text/plain; charset=" + scheduler_character_encoding ) ), title ) ) );
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.nodeValue(), "text/plain; charset=" + scheduler_character_encoding ) ), base_url, title ) ) );
                                     return;
                                 }
                             }
 
-                            http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( "Das Protokoll ist nicht lesbar." ) ), title ) ) );
+                            http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( "Das Protokoll ist nicht lesbar." ) ), base_url, title ) ) );
                             return;
                         }
                     }
@@ -1798,7 +1798,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                                 if( order )
                                 {
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben
-                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( order->log()->as_string(), "text/plain; charset=" + scheduler_character_encoding ) ), order->log()->title() ) ) );
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( order->log()->as_string(), "text/plain; charset=" + scheduler_character_encoding ) ), base_url, order->log()->title() ) ) );
                                     return;
                                 }
                             }
@@ -1837,7 +1837,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                                                                   " where `history_id`=" + history_id );
                                 string title = "Auftrag " + order_id;
                                 //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen
-                                http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( log_text ) ), title ) ) );
+                                http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( log_text ) ), base_url, title ) ) );
                                 return;
                             }
 
@@ -1853,7 +1853,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
                     if( log )
                     {
-                        http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::Log_chunk_reader( log ) ), log->title() ) ) );
+                        http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::Log_chunk_reader( log ) ), base_url, log->title() ) ) );
                         return;
                     }
                 }
@@ -1942,45 +1942,8 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
               //else
               //if( extension == "jar"  )  response_content_type = "application/x-java-archive";
 
-                try
-                {
-                    Mapped_file file ( filename, "r" );
-                    //struct stat s;                                                   
-                    //if( fstat( file, &s ) == 0 )  http_response->set_header( "Last-Modified", http::date_string( s.st_mtime ) );
-                    response_body = file.as_string();
-                }
-                catch( exception& )
-                {                                                        
-                    string fn = path.substr( 1 );    // '/' abschneiden
-                    if( string_begins_with( fn, "jz/" ) )  fn = "z/" + fn.substr( 3 );
-                    const Embedded_file* f = embedded_files_z.get_embedded_file_or_null( "html/" + fn );
-                    if( !f ) 
-                    {
-                        /*
-                        if( fn == default_filename )
-                        {
-                            fn = "jz/" + fn;
-                            for( f = inline_files; f->filename &&  f->filename != fn; f++ );
-                            if( f->filename ) 
-                            {
-                                ptr<http::Response> response = Z_NEW( http::Response( http_request, NULL, "" ) );
-
-                                path = "/" + fn;
-                                response->set_status( 301, "" );
-                                response->set_header_field( "Location", "http://" + http_request->header_field( "host" ) + path );
-                                return +response;
-                            }
-                        }
-                        */
-
-                        if( fn == xml_schema_path )  f = embedded_files.get_embedded_file_or_null( fn );
-                        if( !f )  throw;
-                    }
-
-                    //http_response->set_header( "Last-Modified", http::date_string( f->_last_modified_time ) );
-                    response_body = string_gzip_deflate( f->_content, f->_length );
-                    //response_body.assign( f->_content, f->_length );
-                }
+                Mapped_file file ( filename, "r" );
+                response_body = file.as_string();
             }
         }
         else
