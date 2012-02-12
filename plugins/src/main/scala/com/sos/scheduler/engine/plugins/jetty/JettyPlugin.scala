@@ -35,6 +35,7 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
   import JettyPlugin._
 
   private val config = new Config(pluginElement, schedulerConfiguration)
+  private var started = false
 
   /** Der Port des ersten Connector */
   def port = server.getConnectors.head.getPort
@@ -91,11 +92,15 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
 
   override def activate() {
     server.start()
+    started = true
   }
 
   override def close() {
     server.stop()
-    server.join()
+    if (started) {
+      server.join()
+      started = false
+    }
   }
 }
 
