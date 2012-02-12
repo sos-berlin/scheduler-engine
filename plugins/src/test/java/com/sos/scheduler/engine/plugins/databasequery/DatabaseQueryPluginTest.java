@@ -15,13 +15,13 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 public final class DatabaseQueryPluginTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(DatabaseQueryPluginTest.class);
     
-    private Time timeout = Time.of(20);
-
-    private static final Gate<Boolean> gate = new Gate<Boolean>();
+    private final Time timeout = Time.of(20);
+    private final Gate<Boolean> gate = new Gate<Boolean>();
 
     public DatabaseQueryPluginTest() throws Exception {
         controller().useDatabase();
-        controller().startScheduler();
+        controller().setLogCategories("java.stackTrace-");  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
+        controller().activateScheduler();
     }
 
     @Test

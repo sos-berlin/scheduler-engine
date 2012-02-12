@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -34,13 +35,15 @@ public class JMSEventPlugin extends AbstractPlugin {
 	private static Logger logger = Logger.getLogger(JMSEventPlugin.class);
 
     private final Scheduler scheduler;
+    private final SchedulerConfiguration schedulerConfiguration;
 	private final Connector connector;
 
 	private SchedulerObjectFactory objFactory;
 
 	@Inject
-	JMSEventPlugin(Scheduler scheduler, Element pluginElement) {
-		this.scheduler = scheduler;
+	public JMSEventPlugin(Scheduler scheduler, SchedulerConfiguration schedulerConfiguration, Element pluginElement) {
+        this.scheduler = scheduler;
+		this.schedulerConfiguration = schedulerConfiguration;
 		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", ActiveMQConfiguration.vmProviderUrl);
 		String persistenceDir = stringXPath(pluginElement, "jms/connection/@persistenceDirectory", ActiveMQConfiguration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
@@ -112,7 +115,6 @@ public class JMSEventPlugin extends AbstractPlugin {
 		m.setStringProperty("eventName", ev.getName()); // for filtering
 		m.setStringProperty("hostname", scheduler.getHostname());
 		m.setStringProperty("port", Integer.toString(scheduler.getTcpPort()) );
-		m.setStringProperty("id", scheduler.getSchedulerId());
+		m.setStringProperty("id", schedulerConfiguration.schedulerId().getString());
 	}
-
 }

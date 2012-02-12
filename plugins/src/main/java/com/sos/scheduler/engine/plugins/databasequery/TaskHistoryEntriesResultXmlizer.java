@@ -6,15 +6,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.newDocument;
 
-
 public class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHistoryEntriesResult> {
     public static final TaskHistoryEntriesResultXmlizer singleton = new TaskHistoryEntriesResultXmlizer();
 
-    
     public TaskHistoryEntriesResultXmlizer() {
         super(TaskHistoryEntriesResult.class);
     }
-
 
     @Override protected final Element doToElement(TaskHistoryEntriesResult r) {
         Document doc = newDocument();
@@ -24,13 +21,12 @@ public class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHi
         return result;
     }
 
-
     private static Element elementOfTaskHistoryEntity(Document doc, TaskHistoryEntity e) {
         Element result = doc.createElement("row");
         if (!e.getClusterMemberId().isEmpty())
             result.setAttribute("clusterMemberId", e.getClusterMemberId());
         if (!e.getSchedulerId().isEmpty())
-            result.setAttribute("schedulerId", e.getSchedulerId());
+            result.setAttribute("schedulerId", e.getSchedulerId().getString());
         if (!e.getJobPath().isEmpty())
             result.setAttribute("job", e.getJobPath());
         if (e.getCause() != null)

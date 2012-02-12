@@ -1,10 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.google.inject.*;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
@@ -43,6 +40,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
 import java.util.*;
 
 import static com.google.common.base.Objects.firstNonNull;
@@ -86,20 +84,25 @@ public final class Scheduler implements HasPlatform, Sister,
                 @Override protected void configure() {
                     bind(EventBus.class).toInstance(eventBus);
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
+                    bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
+                    bind(EntityManager.class).toProvider(new Provider<EntityManager>(){
+                        @Override public EntityManager get() {
+                            return databaseSubsystem.getEntityManager();
+                        }
+                    });
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  // Für JettyPlugin
                     bind(JobSubsystem.class).toInstance(jobSubsystem);
-                    bind(Scheduler.class).toInstance(Scheduler.this);
-                    bind(SchedulerConfiguration.class).toInstance(configuration);
-                    bind(SchedulerHttpService.class).toInstance(Scheduler.this);
-                    bind(SchedulerInstanceId.class).toInstance(instanceId);
-                    bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
-                    bind(SchedulerIsClosed.class).toInstance(Scheduler.this);
                     bind(OrderSubsystem.class).toInstance(orderSubsystem);
                     bind(OperationQueue.class).toInstance(operationExecutor);
                     bind(PluginSubsystem.class).toInstance(pluginSubsystem);
                     bind(PrefixLog.class).toInstance(_log);
-                    bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
+                    bind(Scheduler.class).toInstance(Scheduler.this);
+                    bind(SchedulerConfiguration.class).toInstance(configuration);
+                    bind(SchedulerHttpService.class).toInstance(Scheduler.this);
+                    bind(SchedulerInstanceId.class).toInstance(instanceId);
+                    bind(SchedulerIsClosed.class).toInstance(Scheduler.this);
+                    bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
                 }
             };
         }
@@ -295,14 +298,6 @@ public final class Scheduler implements HasPlatform, Sister,
         return operationExecutor;
     }
 
-    public String getSchedulerId() {
-        return cppProxy.id();
-    }
-
-    public String getClusterMemberId() {
-        return cppProxy.cluster_member_id();
-    }
-
     public String getHttpUrl() {
         return cppProxy.http_url();
     }
@@ -311,10 +306,14 @@ public final class Scheduler implements HasPlatform, Sister,
         return cppProxy.tcp_port();
     }
 
+    /** Das ist einfach der C-Systemaufruf gethostname(). */
+    @Deprecated
     public String getHostname() {
         return cppProxy.hostname();
     }
 
+    /** Das ist ein Systemaufruf, gehört nicht zum Scheduler. */
+    @Deprecated
     public String getHostnameLong() {
         return cppProxy.hostname_complete();
     }

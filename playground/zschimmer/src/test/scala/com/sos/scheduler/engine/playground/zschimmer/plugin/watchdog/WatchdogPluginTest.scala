@@ -14,7 +14,7 @@ class WatchdogPluginTest extends SchedulerTest {
     private val sleepTime = Time.of(11)
 
     @Test def test() {
-        controller.startScheduler()
+        controller.activateScheduler("-e")
         Thread.sleep(schedulerTimeout.getMillis)
         assertThat(scheduler.log.lastByLevel(SchedulerLogLevel.warn), Matchers.startsWith("SCHEDULER-721"));
         controller.terminateScheduler()

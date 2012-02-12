@@ -27,20 +27,18 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
             new PluginCommandExecutor(this),
             new PluginCommandCommandXmlParser(this),
             new PluginCommandResultXmlizer(this) };
-    private final Scheduler scheduler;
     private final Lazy<Injector> lazyInjector;
     private final Map<String,PluginAdapter> plugins = new HashMap<String,PluginAdapter>();
     private final EventBus eventBus;
 
     public PluginSubsystem(Scheduler scheduler, Lazy<Injector> injector, EventBus eventBus) {
         super(scheduler.getPlatform());
-        this.scheduler = scheduler;
         this.lazyInjector = injector;
         this.eventBus = eventBus;
     }
 
     public void load(Element root) {
-        PluginReader pluginReader = new PluginReader(log(), lazyInjector, scheduler);
+        PluginReader pluginReader = new PluginReader(log(), lazyInjector);
         Element pluginsElement = elementXPathOrNull(root, "config/plugins");
         if (pluginsElement != null) {
             for (Element e: elementsXPath(pluginsElement, "plugin")) {

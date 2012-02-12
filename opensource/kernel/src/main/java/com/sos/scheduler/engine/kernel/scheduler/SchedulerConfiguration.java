@@ -18,6 +18,10 @@ public final class SchedulerConfiguration {
         this.spoolerC = spoolerC;
     }
 
+    public ClusterMemberId clusterMemberId() {
+        return new ClusterMemberId(spoolerC.cluster_member_id());
+    }
+
     public File localConfigurationDirectory() {
         return new File(spoolerC.local_configuration_directory());
     }
@@ -28,11 +32,15 @@ public final class SchedulerConfiguration {
         return new File(result);
     }
 
-    public String webDirectory() {
-        return setting(htmlDir);
+    public SchedulerId schedulerId() {
+        return new SchedulerId(spoolerC.id());
     }
 
     String setting(SettingName name) {
         return spoolerC.setting(name.getNumber());
+    }
+
+    public String webDirectory() {
+        return setting(htmlDir);
     }
 }

@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.kernel.database.entity;
 
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerId;
+
 import java.util.Date;
 import javax.persistence.*;
 import static com.google.common.base.Strings.*;
 import static javax.persistence.TemporalType.*;
-
 
 @Entity
 @Table(name="SCHEDULER_HISTORY")
@@ -23,46 +24,37 @@ public class TaskHistoryEntity {
     @Column(name="error_code") private String errorCode;
     @Column(name="error_text") private String errorText;
 
-
     public int getId() {
         return id;
     }
-
 
     public void setId(int id) {
         this.id = id;
     }
 
-
-    public String getSchedulerId() {
-        return schedulerId.equals(DatabaseSubsystem.emptyIdInDatabase)? "" : schedulerId;
+    public SchedulerId getSchedulerId() {
+        return new SchedulerId(schedulerId.equals(DatabaseSubsystem.emptyIdInDatabase)? "" : schedulerId);
     }
 
-
-    public void setSchedulerId(String schedulerID) {
-        this.schedulerId = DatabaseSubsystem.idForDatabase(schedulerID);
+    public void setSchedulerId(SchedulerId id) {
+        this.schedulerId = DatabaseSubsystem.idForDatabase(id);
     }
-
 
     public String getClusterMemberId() {
         return nullToEmpty(clusterMemberId);
     }
 
-
     public void setClusterMemberId(String clusterMemberId) {
         this.clusterMemberId = emptyToNull(clusterMemberId);
     }
-
 
     public String getJobPath() {
         return jobPath.equals(schedulerDummyJobPath)? "" : "/" + jobPath;
     }
 
-
     public void setJobPath(String p) {
         this.jobPath = p.isEmpty()? schedulerDummyJobPath : p.replaceFirst("^/", "");
     }
-
 
     @Override public String toString() {
         return "schedulerId=" + getSchedulerId() +
@@ -70,31 +62,25 @@ public class TaskHistoryEntity {
                 " jobName=" + getJobPath();
     }
 
-
     public String getCause() {
         return cause;
     }
-
 
     public Integer getSteps() {
         return steps;
     }
 
-
     public String getErrorCode() {
         return errorCode;
     }
-
 
     public String getErrorText() {
         return errorText;
     }
 
-
     public Date getStartTime() {
         return startTime;
     }
-
 
     public Date getEndTime() {
         return endTime;

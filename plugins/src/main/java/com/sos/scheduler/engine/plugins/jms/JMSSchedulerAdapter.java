@@ -11,7 +11,7 @@ public class JMSSchedulerAdapter extends InfoScheduler {
 		setPort(kernelEvent.getTcpPort());
 		setHttpUrl(kernelEvent.getHttpUrl());
 		setVersion(kernelEvent.getVersion());
-		setId(kernelEvent.getSchedulerId());
+		//setId(kernelEvent.getSchedulerId().getString);
 	}
 
 	public static JMSSchedulerAdapter createInstance(Scheduler kernelEvent) {

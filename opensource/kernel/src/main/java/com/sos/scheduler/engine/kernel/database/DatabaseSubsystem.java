@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.database;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerId;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.DatabaseC;
@@ -53,7 +54,7 @@ public class DatabaseSubsystem implements Subsystem {
         return cppProxy.properties().getSister();
     }
 
-    public static String idForDatabase(String id) {
-        return id.isEmpty()? emptyIdInDatabase : id;
+    public static String idForDatabase(SchedulerId id) {
+        return id.isEmpty()? emptyIdInDatabase : id.getString();
     }
 }
