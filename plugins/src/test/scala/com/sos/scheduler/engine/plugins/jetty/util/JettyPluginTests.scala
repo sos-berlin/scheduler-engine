@@ -16,11 +16,13 @@ object JettyPluginTests {
 
   def javaContextUri(injector: Injector) = new URI("http://localhost:" + jettyPortNumber(injector) + contextPath + enginePrefixPath)
 
+  def contextUri(injector: Injector) = new URI("http://localhost:" + jettyPortNumber(injector) + contextPath)
+
   private def jettyPortNumber(injector: Injector) = injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).port
 
   def newAuthResource(uri: String): WebResource = newAuthentifyingResource(new URI(uri))
 
-  def newAuthentifyingResource(uri: URI, timeout: Duration = defaultTimeout) = {
+  private def newAuthentifyingResource(uri: URI, timeout: Duration = defaultTimeout) = {
     val client = newAuthentifyingClient(timeout)
     client.resource(uri)
   }
