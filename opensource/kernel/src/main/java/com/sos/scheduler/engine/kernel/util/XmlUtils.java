@@ -104,18 +104,33 @@ public final class XmlUtils {
     }
 
     public static int intXmlAttribute(Element xmlElement, String attributeName, @Nullable Integer defaultValue) {
-        String value = xmlElement.getAttribute(attributeName);
-        if (value.isEmpty()) {
+        String value = xmlAttribute(xmlElement, attributeName, "");
+        if (!value.isEmpty()) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException x) {
+                throw new RuntimeException("Invalid numeric value in <"+ xmlElement.getNodeName() +" "+ attributeName +"="+ xmlQuoted(value) +">", x);
+            }
+        } else {
             if (defaultValue == null)
-                throw new RuntimeException("Missing attribute in <"+ xmlElement.getNodeName() +" "+ attributeName +"=''");
+                throw missingAttributeException(xmlElement, attributeName);
             return defaultValue;
         }
+    }
 
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException x) {
-            throw new RuntimeException("Invalid numeric value in <"+ xmlElement.getNodeName() +" "+ attributeName +"="+ xmlQuoted(value) +">", x);
+    public static String xmlAttribute(Element xmlElement, String attributeName, @Nullable String defaultValue) {
+        String result = xmlElement.getAttribute(attributeName);
+        if (!result.isEmpty())
+            return result;
+        else {
+            if (defaultValue == null)
+                throw missingAttributeException(xmlElement, attributeName);
+            return defaultValue;
         }
+    }
+
+    private static RuntimeException missingAttributeException(Element e, String attributeName) {
+        return new RuntimeException("Missing attribute <"+ e.getNodeName() +" "+ attributeName +"=...>");
     }
 
     public static Element elementXPath(Node baseNode, String xpathExpression) {
@@ -124,7 +139,7 @@ public final class XmlUtils {
         return result;
     }
 
-    public static Element elementXPathOrNull(Node baseNode, String xpathExpression) {
+    @Nullable public static Element elementXPathOrNull(Node baseNode, String xpathExpression) {
         try {
             return (Element)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.NODE);
         } catch (XPathExpressionException x) { throw new XmlException(x); }
@@ -184,7 +199,7 @@ public final class XmlUtils {
 //        return result;
     }
 
-    public static Element childElementOrNull(Element e, String name) {
+    @Nullable public static Element childElementOrNull(Element e, String name) {
         Iterator<Element> i = new NamedChildElements(name, e).iterator();
         return i.hasNext()? i.next() : null;
     }
