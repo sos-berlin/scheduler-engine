@@ -1159,9 +1159,8 @@ void Env::throw_java( const string& text1, const string& text2 )
         jthrowable x = jenv->ExceptionOccurred();
         if( x )
         {
-#ifdef Z_DEBUG
-            _jni_env->ExceptionDescribe();  // Provisorisch, schreibt nach stderr
-#endif
+            if (log_category_is_set("java.stackTrace")) 
+                _jni_env->ExceptionDescribe();  // Provisorisch, schreibt nach stderr
 
             Z_LOG2( Vm::java_log_category, "Vm::static_vm=" << (void*)Vm::static_vm << "  _debug=" << ( Vm::static_vm? Vm::static_vm->_debug : false ) << "\n" );
             if( Vm::static_vm && Vm::static_vm->_debug )  { Z_LOG2( Vm::java_log_category, "jenv->ExceptionDescribe()\n" ); jenv->ExceptionDescribe(); }     // Ausgabe �ber java_vfprintf()

@@ -3787,6 +3787,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
     add_message_code_texts( sos::scheduler::scheduler_messages );
 
+#   ifdef Z_DEBUG
+        set_log_category_default ( "java.stackTrace"     , true );
+#   endif
     set_log_category_default ( "log4j.*"             , true );      // Fürs Loggen aus Java
     set_log_category_default ( "scheduler"           , true );
   //set_log_category_default ( "scheduler.*"         , true );
@@ -3798,7 +3801,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
   //set_log_category_default ( "scheduler.file_order", true );
   //set_log_category_default ( "scheduler.cluster"   , true );      
     set_log_category_default ( "JS-644"              , true );
-
 
 
     int     ret                = 0;
