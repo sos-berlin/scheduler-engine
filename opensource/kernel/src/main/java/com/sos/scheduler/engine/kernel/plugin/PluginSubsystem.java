@@ -20,8 +20,6 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 import static java.util.Arrays.asList;
 
-//TODO Eigenes PrefixLog einführen
-
 public final class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
     private final CommandHandler[] commandHandlers = {
             new PluginCommandExecutor(this),
@@ -38,7 +36,7 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     }
 
     public void load(Element root) {
-        PluginReader pluginReader = new PluginReader(log(), lazyInjector);
+        PluginReader pluginReader = new PluginReader(log());
         Element pluginsElement = elementXPathOrNull(root, "config/plugins");
         if (pluginsElement != null) {
             for (Element e: elementsXPath(pluginsElement, "plugin")) {
@@ -52,10 +50,18 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     }
 
     public void activate() {
-        for (PluginAdapter p: plugins.values()) {
-            eventBus.registerAnnotated(p.getPlugin());
-            p.tryActivate();
-        }
+        for (PluginAdapter p: plugins.values())
+            if (p.getConfiguration().getActivationMode() == ActivationMode.activateOnStart)
+                activatePluginAdapter(p);
+    }
+
+    public void activatePlugin(Class<? extends Plugin> c) {
+        activatePluginAdapter(pluginAdapterByClassName(c.getName()));
+    }
+
+    void activatePluginAdapter(PluginAdapter p) {
+        p.tryActivate(lazyInjector.get());
+        eventBus.registerAnnotated(p.getPlugin());
     }
 
     public void close() {
@@ -65,14 +71,7 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         }
     }
 
-    CommandPluginAdapter commandPluginByClassName(String className) {
-        PluginAdapter a = pluginAdapterByClassName(className);
-        if (!(a instanceof CommandPluginAdapter))
-            throw new SchedulerException("Plugin is not a " + CommandPlugin.class.getSimpleName());
-        return (CommandPluginAdapter)a;
-    }
-
-    private PluginAdapter pluginAdapterByClassName(String className) {
+    PluginAdapter pluginAdapterByClassName(String className) {
         PluginAdapter result = plugins.get(className);
         if (result == null)
             throw new SchedulerException("Unknown plugin '" + className + "'");
@@ -89,6 +88,6 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     }
 
     static void logError(PrefixLog log, String pluginName, Throwable t) {
-        log.error(pluginName + ": " + t + "\n" + getStackTraceAsString(t));
+        log.error(pluginName +": "+ t +"\n"+ getStackTraceAsString(t));
     }
 }
