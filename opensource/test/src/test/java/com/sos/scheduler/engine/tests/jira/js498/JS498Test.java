@@ -38,7 +38,7 @@ public class JS498Test extends SchedulerTest {
 	 * Unter Windows (lokal) funktioniert er.
 	 * Der Test wurde deshalb zunächst deaktiviert.
 	 */
-	@Test
+	@Ignore
 	public void testFunctions() throws InterruptedException, IOException {
         File resultFile = FileUtils.getResourceFile(this.getClass(), "scheduler.log");
 		controller().activateScheduler("-e","-log-level=info","-log=" + resultFile);
