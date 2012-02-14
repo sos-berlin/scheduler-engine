@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.test.util.FileUtils;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import java.io.File;
 import java.io.IOException;
