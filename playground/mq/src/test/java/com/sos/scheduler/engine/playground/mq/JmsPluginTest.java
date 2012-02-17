@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.startsWith;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -17,14 +18,12 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
 
-public class JmsPluginTest extends SchedulerTest {
+public final class JmsPluginTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPluginTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
-    private static final Time schedulerTimeout = Time.of(5);
     private static final Configuration conf = Configuration.newInstance(providerUrl);
     private static final Logger logger = Logger.getLogger(JmsPluginTest.class);
 
@@ -33,7 +32,7 @@ public class JmsPluginTest extends SchedulerTest {
     private final TopicSession topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
     private final Gate<Boolean> resultGate = new Gate<Boolean>();
 
-    public JmsPluginTest() throws Exception {
+    public JmsPluginTest() throws JMSException {
         newTopicSubscriber().setMessageListener(new MyListener());
         topicConnection.start();
     }
@@ -44,12 +43,12 @@ public class JmsPluginTest extends SchedulerTest {
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
     }
 
-    @Test public void test() throws Exception {
-        controller().startScheduler();
-        assertThat(resultGate.poll(schedulerTimeout), equalTo(true));
+    @Test public void test() throws InterruptedException {
+        controller().activateScheduler();
+        assertThat(resultGate.poll(shortTimeout), equalTo(true));
     }
 
-    private class MyListener implements javax.jms.MessageListener {
+    private final class MyListener implements MessageListener {
         @Override public void onMessage(Message message) {
             // Läuft in einem Thread von JMS
             boolean result = false;
