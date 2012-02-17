@@ -9,8 +9,6 @@ import com.sos.scheduler.engine.kernel.util.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.plugins.jetty.Config._
 import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet
 import com.sos.scheduler.engine.plugins.jetty.log.{JobLogServlet, OrderLogServlet, MainLogServlet}
-import com.sos.scheduler.engine.plugins.jetty.rest.{CommandResource, JobResource, JobsResource}
-import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.XmlElemWriter
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.net.{URL, ServerSocket, BindException}
@@ -173,10 +171,7 @@ object JettyPlugin {
       serveRegex(enginePrefixPath+"/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
       serveRegex(enginePrefixPath+"/log").`with`(classOf[MainLogServlet])
       serve(enginePrefixPath+"/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
-      bind(classOf[CommandResource])
-      bind(classOf[JobResource])
-      bind(classOf[JobsResource])
-      bind(classOf[XmlElemWriter])
+      for (c <- Config.guiceClasses) bind(c)
       serve(cppPrefixPath).`with`(classOf[CppServlet])
       serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])
     }
@@ -195,83 +190,37 @@ object JettyPlugin {
   }
 
   private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
-
-
-
-  // TODO URIs und REST
-  // Alle REST-Aufrufe liefern XML oder JSON.
-
-  // jobscheduler/engine/folders/PATH" liefert Ordner
-  // jobscheduler/engine/jobs//PATH
-  // jobscheduler/engine/jobs//PATH/info
-  // jobscheduler/engine/jobs//PATH/description
-  // jobscheduler/engine/jobs//PATH/log
-  // jobscheduler/engine/jobs//PATH/log.snapshot
-  // jobscheduler/engine/jobs//PATH/tasks/TASKID/info
-  // jobscheduler/engine/jobs//PATH/tasks/TASKID/log
-  // jobscheduler/engine/job_chains//PATH/orders/ORDERID/log
-  // jobscheduler/engine/job_chains//PATH => XML-Konfiguration oder <show_job_chain>
-  // jobscheduler/engine/orders//PATH/ORDERID => XML-Konfiguration
-  // jobscheduler/engine/orders//PATH/ORDERID/info => <show_order>
-  // jobscheduler/engine/orders//PATH/ORDERID/log
-  // jobscheduler/engine/orders//PATH/ORDERID/log&historyId=.."
-
-  // jobscheduler/engine/folders/PATH => Unterordner
-  // jobscheduler/engine/jobs//PATH => Job-Konfiguration
-  // jobscheduler/engine/jobs//PATH/*description
-  // jobscheduler/engine/jobs//PATH?part=log
-  // jobscheduler/engine/jobs//PATH?part=log.snapshot
-  // jobscheduler/engine/tasks//PATH?id=TASKID&part=info
-  // jobscheduler/engine/tasks//PATH?id=TASKID&part=log
-  // jobscheduler/engine/job_chains//PATH => XML-Konfiguration
-  // jobscheduler/engine/job_chains//PATH?part=info => <show_job_chain>
-  // jobscheduler/engine/orders//PATH/ => Aufträge
-  // jobscheduler/engine/orders//PATH/ORDERID&part=log
-  // jobscheduler/engine/orders//PATH/ORDERID => XML-Konfiguration
-  // jobscheduler/engine/orders//PATH/ORDERID?part=info => <show_order>
-  // jobscheduler/engine/orders//PATH/ORDERID?part=log
-  // jobscheduler/engine/orders//PATH/ORDERID?historyId=..&part=log
-  // jobscheduler/engine/orders//PATH/ORDERID&part=log&historyId=.."
-
-  // jobscheduler/engine/folders/PATH => Unterordner
-  // jobscheduler/engine/job?job=PATH => Job-Konfiguration
-  // jobscheduler/engine/job.description?job=PATH
-  // jobscheduler/engine/job.log?job=PATH
-  // jobscheduler/engine/job.log.snapshot?job=PATH
-  // jobscheduler/engine/task.info?job=PATH&task=TASKID
-  // jobscheduler/engine/task.log?job?PATH&task=TASKID
-  // jobscheduler/engine/job_chain?job_chain=PATH => XML-Konfiguration
-  // jobscheduler/engine/job_chain.info?job_chain=PATH => <show_job_chain>
-  // ...
-
-  // ODER
-  // jobscheduler/engine/folders//PATH/ liefert Inhalt des Pfads: Ordner, Jobs usw., nicht verschachtelt
-  // jobscheduler/engine/folders//PATH/?deep=true wie vorher, aber verschachtelt
-  // jobscheduler/engine/folders//PATH/*.job liefert Jobs
-  // jobscheduler/engine/folders//PATH/*.job?deep=true wie vorher, aber verschachtelt
-  // jobscheduler/engine/folders//PATH.job/log  Liefert fortlaufend bis Log beendet ist
-  // jobscheduler/engine/folders//PATH.job/log.snapshot  liefert nur den aktuellen Stand
-  // jobscheduler/engine/folders//PATH.job/description
-  // jobscheduler/engine/folders//PATH.task/TASKID/log
-  // jobscheduler/engine/folders//PATH.job_chain/orders/ORDERID/log
-  // jobscheduler/engine/folders//PATH.job_chain/orders/ORDERID/log&history_id=..
-  // KONFLIKT
-  // jobscheduler/engine/folders//PATH.job_chain/orders/a.job/log
-
-  // "/jobscheduler/engine/log" Hauptprotokoll
-  // "/jobscheduler/engine/configuration.xml"
-  // "/jobscheduler/engine/" liefert <show_state what="all,orders"/>
-
-  // "/jobscheduler/z/" ?
-  // "/jobscheduler/gui/"  Operations GUI
-  // "/" verweist auf "/jobscheduler" -> "/jobscheduler/gui/"
-
-  // ERLEDIGT:
-  // "/jobscheduler/engine/command&command=XMLCOMMAND"
-  // "/jobscheduler/engine/command"  POST
-
-  // TODO XML oder JSON
-  // TODO HTTPS
-  // TODO WAR-Files
-  // TODO Massentests: Viele Anfragen gleichzeitig. Anzahl der Threads soll klein bleiben.
 }
+
+// TODO REST-URIs, Lieferung als XML, JSON, HTML
+// TODO HTTPS
+// TODO Massentests: Viele Anfragen gleichzeitig. Anzahl der Threads soll klein bleiben.
+
+// jobscheduler/engine/  Übersicht über den Zustand und weitere URIs
+// jobscheduler/engine/log  Hauptprotokoll
+// jobscheduler/engine/log.snapshot  Hauptprotokoll
+// jobscheduler/engine/configuration
+// jobscheduler/engine/folders?folder=PATH?type={folder,job,jobChain,...}&deep={false,true}
+// jobscheduler/engine/{folders,jobs,jobChains}?folder=PATH&deep={false,true}
+// jobscheduler/engine/{folder,job,jobChain}?job=PATH  Übersicht über alle Informationen zum Objekt
+// jobscheduler/engine/tasks => Liste der Tasks
+// jobscheduler/engine/task/TASKID/state
+// jobscheduler/engine/task/TASKID/log
+// jobscheduler/engine/task/TASKID/log.state
+// jobscheduler/engine/order?jobChain=PATH&order=ORDERID
+// jobscheduler/engine/order/configuration?jobChain=PATH&order=ORDERID
+// jobscheduler/engine/order/log?jobChain=PATH&order=ORDERID&historyId=...
+// jobscheduler/engine/order/log?jobChain=PATH&order=ORDERID
+// jobscheduler/engine/order/log.snapshot?jobChain=PATH&order=ORDERID
+// jobscheduler/engine/job_chain/configuration?jobChain=PATH
+// jobscheduler/engine/job_chain/state?jobChain=PATH
+// / -> jobscheduler/ -> jobscheduler/engine/
+
+// ERLEDIGT:
+// jobscheduler/engine/gui/  Operations GUI, wenn über web.xml konfiguriert
+// jobscheduler/engine/z/  Alte GUI
+// jobscheduler/engine/command&command=XMLCOMMAND
+// jobscheduler/engine/command  POST
+// jobscheduler/engine/job/configuration?job=PATH => Job-Konfiguration
+// jobscheduler/engine/job/description?job=PATH
+// jobscheduler/engine/job/log.snapshot?job=PATH
