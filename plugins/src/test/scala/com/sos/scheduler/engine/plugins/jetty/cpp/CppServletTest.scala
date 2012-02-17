@@ -1,18 +1,19 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
 import com.google.common.io.Files
+import com.google.inject.Injector
 import com.sos.scheduler.engine.kernel.settings.SettingName
+import com.sos.scheduler.engine.plugins.jetty.Config._
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
-import com.sos.scheduler.engine.plugins.jetty.util.JettyPluginTests.{newAuthentifyingClient, cppContextUri}
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sun.jersey.api.client.filter.ClientFilter
 import com.sun.jersey.api.client.{Client, ClientResponse}
 import java.io.File
+import java.net.URI
 import java.util.zip.GZIPInputStream
 import javax.ws.rs.core.MediaType._
 import javax.ws.rs.core.Response.Status._
-import org.joda.time.Duration
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
@@ -30,28 +31,25 @@ final class CppServletTest extends ScalaSchedulerTest {
     super.checkedBeforeAll(configMap)
   }
 
-  private val readTimeout = new Duration(15*1000)
-  private lazy val uri = cppContextUri(injector)
-
-  for (testConf <- TestConf(newClient(), withGzip = false) ::
-                   //TestConf(newClient(new GZIPContentEncodingFilter(false)), withGzip = true) ::
+  for (testConf <- TestConf(newAuthentifyingClient(), withGzip = false) ::
+                   //TestConf(newAuthentifyingClient(filters=Iterable(new GZIPContentEncodingFilter(false))), withGzip = true) ::
                    Nil) {
-    val client = testConf.client
+    lazy val resource = cppResource(injector, testConf.client)
 
     test("Kommando über POST "+testConf) {
-      val result = stringFromResponse(client.resource(uri).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[ClientResponse], "<show_state/>"))
+      val result = stringFromResponse(resource.`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[ClientResponse], "<show_state/>"))
       result should include ("<state")
     }
 
     test("Kommando über POST ohne Authentifizierung "+testConf) {
       val x = intercept[com.sun.jersey.api.client.UniformInterfaceException] {
-        Client.create().resource(uri).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
+        cppResource(injector, Client.create()).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
       }
       x.getResponse.getStatus should equal(UNAUTHORIZED.getStatusCode)
     }
 
     test("Kommando über GET "+testConf) {
-      val result = stringFromResponse(client.resource(uri).path("<show_state/>").accept(TEXT_XML_TYPE).get(classOf[ClientResponse]))
+      val result = stringFromResponse(resource.path("<show_state/>").accept(TEXT_XML_TYPE).get(classOf[ClientResponse]))
       result should include ("<state")
     }
 
@@ -59,14 +57,14 @@ final class CppServletTest extends ScalaSchedulerTest {
       val bytes = (0 to 255 map { _.toByte }).toArray
       val filename = "test.txt"
       Files.write(bytes, new File(httpDirectory, filename))
-      val response = checkedResponse(client.resource(uri).path(filename).get(classOf[ClientResponse]))
+      val response = checkedResponse(resource.path(filename).get(classOf[ClientResponse]))
       response.getEntity(classOf[Array[Byte]]) should equal(bytes)
     }
 
     test("show_log?task=... "+testConf) {
       scheduler.executeXml(<order job_chain={jobChainPath} id={orderId}/>)
       Thread.sleep(500)  //TODO TaskStartedEvent
-      val result = stringFromResponse(client.resource(uri).path("show_log").queryParam("task", "1").accept(TEXT_HTML_TYPE).get(classOf[ClientResponse]))
+      val result = stringFromResponse(resource.path("show_log").queryParam("task", "1").accept(TEXT_HTML_TYPE).get(classOf[ClientResponse]))
       result should include ("SCHEDULER-918  state=closed")
       result should include ("SCHEDULER-962") // "Protocol ends in ..."
       result.trim should endWith("</html>")
@@ -81,12 +79,6 @@ final class CppServletTest extends ScalaSchedulerTest {
       r
     }
   }
-
-  private def newClient(filters: ClientFilter*) = {
-    val result = newAuthentifyingClient(timeout = readTimeout)
-    for (f <- filters) result.addFilter(f)
-    result
-  }
 }
 
 object CppServletTest {
@@ -95,6 +87,10 @@ object CppServletTest {
 
   private val jobChainPath = "a"
   private val orderId = "1"
+
+  def cppResource(injector: Injector, client: Client) = client.resource(cppContextUri(injector))
+
+  private def cppContextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + cppPrefixPath)
 
   private case class TestConf(client: Client, withGzip: Boolean) {
     override def toString = if (withGzip) "compressed with gzip" else ""

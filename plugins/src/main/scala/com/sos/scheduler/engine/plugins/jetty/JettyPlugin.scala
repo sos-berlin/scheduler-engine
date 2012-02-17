@@ -38,7 +38,7 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
   private var started = false
 
   /** Der Port des ersten Connector */
-  def port = server.getConnectors.head.getPort
+  def tcpPortNumber = server.getConnectors.head.getPort
 
   private val server = {
     val schedulerModule = hasGuiceModule.getGuiceModule

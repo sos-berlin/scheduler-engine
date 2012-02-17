@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.jetty.log
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import com.sos.scheduler.engine.plugins.jetty.rest.WebServiceFunctions.getOrSetAttribute
+import com.sos.scheduler.engine.plugins.jetty.rest.WebServices.getOrSetAttribute
 import com.sos.scheduler.engine.kernel.Scheduler
 
 @Singleton

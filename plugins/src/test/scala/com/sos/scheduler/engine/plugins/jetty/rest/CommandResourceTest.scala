@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
-import com.sos.scheduler.engine.plugins.jetty.util.JettyPluginTests.{javaContextUri, newAuthResource}
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -12,7 +12,7 @@ import org.scalatest.matchers.ShouldMatchers._
 @RunWith(classOf[JUnitRunner])
 final class CommandResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
   override val configurationPackage = classOf[JettyPlugin].getPackage
-  private lazy val commandResource = newAuthResource(javaContextUri(injector) + "/command")
+  private lazy val commandResource = javaResource(injector).path("command")
 
   test("Execute a command via POST") {
     val result = commandResource.accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], "<show_state/>");

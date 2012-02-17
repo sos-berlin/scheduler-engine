@@ -5,7 +5,7 @@ import javax.inject.Singleton
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.rest.WebServiceFunctions.getOrSetAttribute
+import com.sos.scheduler.engine.plugins.jetty.rest.WebServices.getOrSetAttribute
 
 @Singleton
 class JobLogServlet @Inject()(jobSubsystem: JobSubsystem) extends HttpServlet {

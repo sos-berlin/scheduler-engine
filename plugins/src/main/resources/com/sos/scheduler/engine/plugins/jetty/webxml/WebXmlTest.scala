@@ -1,21 +1,21 @@
 package com.sos.scheduler.engine.plugins.jetty.webxml
 
-import com.sos.scheduler.engine.plugins.jetty.util.JettyPluginTests
+import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.google.common.base.Charsets.UTF_8
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
-import com.sos.scheduler.engine.kernel.util.{ClassResource, Time}
+import com.sos.scheduler.engine.kernel.util.Time
 import com.google.common.io.{Resources, Files}
 
 @RunWith(classOf[JUnitRunner])
 final class WebXmlTest extends ScalaSchedulerTest {
   private val baseDir = controller.environment.directory
   private val configDir = controller.environment.configDirectory
-  private lazy val resource = JettyPluginTests.newAuthResource(JettyPluginTests.contextUri(injector) +"")
+  private lazy val resource = newAuthResource(contextUri(injector))
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {
     controller.activateScheduler()
@@ -42,7 +42,7 @@ final class WebXmlTest extends ScalaSchedulerTest {
   }
 
   test("Web server should deliver external files described in web.xml") {
-    val resource = JettyPluginTests.newAuthResource(JettyPluginTests.contextUri(injector) +"")
+    val resource = newAuthResource(contextUri(injector))
     val expected = readFile(new File(configDir, "scheduler.xml"))
     val a = resource.path(configDir.getName +"/scheduler.xml").get(classOf[String])
     assert( a === expected)

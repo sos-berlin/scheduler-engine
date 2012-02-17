@@ -4,7 +4,7 @@ import java.io.{BufferedReader, Reader}
 import javax.ws.rs.core.MediaType._
 import com.sun.jersey.api.client.WebResource
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
-import com.sos.scheduler.engine.plugins.jetty.util.JettyPluginTests.{javaContextUri, newAuthResource}
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
 import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.apache.log4j.Logger
@@ -19,7 +19,7 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   import LogServletTest._
 
   override val configurationPackage = classOf[JettyPlugin].getPackage
-  private lazy val resource = newAuthResource(javaContextUri(injector)+"")
+  private lazy val resource = javaResource(injector)
 
   test("Read a task log") {
     startLogThread(resource.path("job.log").queryParam("job", "a"))
