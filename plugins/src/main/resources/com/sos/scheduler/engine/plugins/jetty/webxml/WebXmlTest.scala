@@ -1,15 +1,15 @@
 package com.sos.scheduler.engine.plugins.jetty.webxml
 
+import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
+import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.google.common.base.Charsets.UTF_8
+import com.google.common.io.{Resources, Files}
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.kernel.util.Time
-import com.google.common.io.{Resources, Files}
 
 @RunWith(classOf[JUnitRunner])
 final class WebXmlTest extends ScalaSchedulerTest {
@@ -31,7 +31,7 @@ final class WebXmlTest extends ScalaSchedulerTest {
     Files.write(a, webXmlFile, UTF_8)
   }
 
-  ignore("(for debugging only") {
+  ignore("(for debugging only)") {
     controller.waitForTermination(Time.of(3600))
   }
 
@@ -47,5 +47,6 @@ final class WebXmlTest extends ScalaSchedulerTest {
     val a = resource.path(configDir.getName +"/scheduler.xml").get(classOf[String])
     assert( a === expected)
   }
+
   private def readFile(f: File) = Files.toString(f, UTF_8)
 }
