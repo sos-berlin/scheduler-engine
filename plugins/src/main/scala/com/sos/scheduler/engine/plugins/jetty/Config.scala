@@ -20,7 +20,7 @@ class Config(pluginElement: Element, conf: SchedulerConfiguration) {
 
 object Config {
   val adminstratorRoleName = "administrator"
-  val contextPath = "/JobScheduler"
+  val contextPath = "/jobscheduler"
   val enginePrefixPath = "/engine"
   val cppPrefixPath = "/engine-cpp"
   val resourceBaseURL = getClass.getResource("/com/sos/scheduler/engine/web")

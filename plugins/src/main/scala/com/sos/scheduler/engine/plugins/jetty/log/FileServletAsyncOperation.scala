@@ -23,7 +23,6 @@ class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServl
     response.setStatus(HttpServletResponse.SC_OK)
     response.setContentType("text/xml;charset="+logFileEncoding)
     response.setHeader("Cache-Control", "no-cache")
-    //response.setHeader("Server", "JobScheduler")
     in = new FileInputStream(file)
     started = true
   }
