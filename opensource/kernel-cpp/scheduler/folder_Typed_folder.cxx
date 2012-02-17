@@ -564,6 +564,16 @@ File_based* Typed_folder::file_based_or_null( const string& name ) const
                                       : it->second;
 }
 
+//------------------------------------------------------------------------------Typed_folder::names
+
+vector<string> Typed_folder::names() const {
+    vector<string> result (_file_based_map.size());
+    Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) 
+        if (i->second->is_visible()) 
+            result.push_back(i->first);
+    return result;
+}
+
 //----------------------------------------------------------------------------Typed_folder::set_dom
 
 void Typed_folder::set_dom( const xml::Element_ptr& element )

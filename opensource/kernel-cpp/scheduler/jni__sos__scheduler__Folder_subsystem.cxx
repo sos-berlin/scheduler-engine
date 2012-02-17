@@ -32,8 +32,26 @@ static jboolean JNICALL handle_1folders__D(JNIEnv* jenv, jobject, jlong cppRefer
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL java_1names__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::java_names()");
+        return java_array_from_c(o_->java_names(env.string_from_jstring(p0), env.string_from_jstring(p1)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
-    { (char*)"handle_folders__native", (char*)"(JD)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::handle_1folders__D }
+    { (char*)"handle_folders__native", (char*)"(JD)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::handle_1folders__D },
+    { (char*)"java_names__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1names__Ljava_lang_String_2Ljava_lang_String_2 }
 };
 
 namespace zschimmer { namespace javabridge { 
@@ -41,7 +59,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Folder_subsystem >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Folder_subsystem >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 1);
+        int ret = env->RegisterNatives(*cls, native_methods, 2);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

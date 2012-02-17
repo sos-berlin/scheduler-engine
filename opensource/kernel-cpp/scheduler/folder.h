@@ -363,6 +363,7 @@ struct Typed_folder : Scheduler_object,
     virtual void                set_dom                     ( const xml::Element_ptr& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     virtual xml::Element_ptr    new_dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
+    vector<string>              names                       () const;
 
   private:
     Fill_zero                  _zero_;
@@ -442,6 +443,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     bool                        adjust_with_directory       ( directory_observer::Directory* );
 
     Typed_folder*               typed_folder                ( const File_based_subsystem* ) const;
+    Typed_folder*               typed_folder                (const string& type_name) const;
     Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
     lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
     Job_folder*                 job_folder                  ()                                      { return _job_folder; }
@@ -844,6 +846,8 @@ struct Folder_subsystem : Object,
     bool                        handle_folders              ( double minimum_age = 0 );
     xml::Element_ptr            execute_xml                 ( const xml::Element_ptr& );
 
+    vector<string>              java_names                  (const string& path, const string& type_name) { return names(Absolute_path(path), type_name); }
+    vector<string>              names                       (const Absolute_path&, const string& type_name);
     void                        write_configuration_file_xml( const Absolute_path& folder_path, const xml::Element_ptr& content );
 
 

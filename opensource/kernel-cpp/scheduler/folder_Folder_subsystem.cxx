@@ -242,6 +242,12 @@ Configuration* Folder_subsystem::configuration( Configuration_origin which )
     return result;
 }
 
+//--------------------------------------------------------------------------Folder_subsystem::names
+
+vector<string> Folder_subsystem::names(const Absolute_path& path, const string& type_name) {
+    return folder(path)->typed_folder(type_name)->names();
+}
+
 //---------------------------------------------------Folder_subsystem::write_configuration_file_xml
 
 void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder_path, const xml::Element_ptr& element )

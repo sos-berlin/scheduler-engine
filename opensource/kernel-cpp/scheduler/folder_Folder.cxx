@@ -56,6 +56,17 @@ Typed_folder* Folder::typed_folder( const File_based_subsystem* subsystem ) cons
     return it->second;
 }
 
+//-----------------------------------------------------------------------------Folder::typed_folder
+
+Typed_folder* Folder::typed_folder(const string& type_name) const
+{
+    string filename_extension = type_name == "folder"? _spooler->_folder_subsystem->filename_extension()
+        : string(".")+ type_name +".xml";
+    Typed_folder_map::const_iterator it = _typed_folder_map.find(filename_extension);
+    if( it == _typed_folder_map.end() )  z::throw_xc( Z_FUNCTION, type_name );
+    return it->second;
+}
+
 //----------------------------------------------------------------------------------Folder::~Folder
     
 Folder::~Folder()

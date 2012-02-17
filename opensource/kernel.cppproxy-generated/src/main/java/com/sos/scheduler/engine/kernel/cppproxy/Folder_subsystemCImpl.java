@@ -24,4 +24,20 @@ final class Folder_subsystemCImpl
     private static native boolean handle_folders__native(long cppReference, double p0);
 
 
+    @Override public String[] java_names(java.lang.String p0, java.lang.String p1) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            String[] result = java_names__native(cppReference(), p0, p1);
+            checkIsNotReleased(String[].class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native String[] java_names__native(long cppReference, java.lang.String p0, java.lang.String p1);
+
+
 }
