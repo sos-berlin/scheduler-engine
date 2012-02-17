@@ -19,10 +19,10 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   import LogServletTest._
 
   override val configurationPackage = classOf[JettyPlugin].getPackage
-  private lazy val objectsResource = newAuthResource(javaContextUri(injector) + "/objects")
+  private lazy val resource = newAuthResource(javaContextUri(injector)+"")
 
   test("Read a task log") {
-    startLogThread(objectsResource.path("job.log").queryParam("job", "a"))
+    startLogThread(resource.path("job.log").queryParam("job", "a"))
     for (i <- 1 to 3) {
       Thread.sleep(1000)
       scheduler.executeXml(<start_job job='/a'/>)
@@ -31,13 +31,13 @@ final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
   }
 
   test("Read a job snapshot log") {
-    logReader(objectsResource.path("job/log.snapshot").queryParam("job", "a").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
+    logReader(resource.path("job/log.snapshot").queryParam("job", "a").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
   }
 
   // Fehler SCHEDULER-291  Error when removing protocol file: ERRNO-13  Permission denied
   ignore("Read an order log") {
     scheduler.executeXml(<order job_chain='/a' id='1'/>)
-    startLogThread(objectsResource.path("order.log").queryParam("job_chain", "a").queryParam("order", "1"))
+    startLogThread(resource.path("order.log").queryParam("job_chain", "a").queryParam("order", "1"))
     Thread.sleep(1000)
   }
 

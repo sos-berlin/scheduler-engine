@@ -169,8 +169,8 @@ object JettyPlugin {
 
   private def newServletModule() = new JerseyServletModule {
     override def configureServlets() {
-      serveRegex(enginePrefixPath+"/objects/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
-      serveRegex(enginePrefixPath+"/objects/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
+      serveRegex(enginePrefixPath+"/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
+      serveRegex(enginePrefixPath+"/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
       serveRegex(enginePrefixPath+"/log").`with`(classOf[MainLogServlet])
       serve(enginePrefixPath+"/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
       bind(classOf[CommandResource])
@@ -201,47 +201,47 @@ object JettyPlugin {
   // TODO URIs und REST
   // Alle REST-Aufrufe liefern XML oder JSON.
 
-  // jobscheduler/engine/objects/folders/PATH" liefert Ordner
-  // jobscheduler/engine/objects/jobs//PATH
-  // jobscheduler/engine/objects/jobs//PATH/info
-  // jobscheduler/engine/objects/jobs//PATH/description
-  // jobscheduler/engine/objects/jobs//PATH/log
-  // jobscheduler/engine/objects/jobs//PATH/log.snapshot
-  // jobscheduler/engine/objects/jobs//PATH/tasks/TASKID/info
-  // jobscheduler/engine/objects/jobs//PATH/tasks/TASKID/log
-  // jobscheduler/engine/objects/job_chains//PATH/orders/ORDERID/log
-  // jobscheduler/engine/objects/job_chains//PATH => XML-Konfiguration oder <show_job_chain>
-  // jobscheduler/engine/objects/orders//PATH/ORDERID => XML-Konfiguration
-  // jobscheduler/engine/objects/orders//PATH/ORDERID/info => <show_order>
-  // jobscheduler/engine/objects/orders//PATH/ORDERID/log
-  // jobscheduler/engine/objects/orders//PATH/ORDERID/log&historyId=.."
+  // jobscheduler/engine/folders/PATH" liefert Ordner
+  // jobscheduler/engine/jobs//PATH
+  // jobscheduler/engine/jobs//PATH/info
+  // jobscheduler/engine/jobs//PATH/description
+  // jobscheduler/engine/jobs//PATH/log
+  // jobscheduler/engine/jobs//PATH/log.snapshot
+  // jobscheduler/engine/jobs//PATH/tasks/TASKID/info
+  // jobscheduler/engine/jobs//PATH/tasks/TASKID/log
+  // jobscheduler/engine/job_chains//PATH/orders/ORDERID/log
+  // jobscheduler/engine/job_chains//PATH => XML-Konfiguration oder <show_job_chain>
+  // jobscheduler/engine/orders//PATH/ORDERID => XML-Konfiguration
+  // jobscheduler/engine/orders//PATH/ORDERID/info => <show_order>
+  // jobscheduler/engine/orders//PATH/ORDERID/log
+  // jobscheduler/engine/orders//PATH/ORDERID/log&historyId=.."
 
-  // jobscheduler/engine/objects/folders/PATH => Unterordner
-  // jobscheduler/engine/objects/jobs//PATH => Job-Konfiguration
-  // jobscheduler/engine/objects/jobs//PATH/*description
-  // jobscheduler/engine/objects/jobs//PATH?part=log
-  // jobscheduler/engine/objects/jobs//PATH?part=log.snapshot
-  // jobscheduler/engine/objects/tasks//PATH?id=TASKID&part=info
-  // jobscheduler/engine/objects/tasks//PATH?id=TASKID&part=log
-  // jobscheduler/engine/objects/job_chains//PATH => XML-Konfiguration
-  // jobscheduler/engine/objects/job_chains//PATH?part=info => <show_job_chain>
-  // jobscheduler/engine/objects/orders//PATH/ => Aufträge
-  // jobscheduler/engine/objects/orders//PATH/ORDERID&part=log
-  // jobscheduler/engine/objects/orders//PATH/ORDERID => XML-Konfiguration
-  // jobscheduler/engine/objects/orders//PATH/ORDERID?part=info => <show_order>
-  // jobscheduler/engine/objects/orders//PATH/ORDERID?part=log
-  // jobscheduler/engine/objects/orders//PATH/ORDERID?historyId=..&part=log
-  // jobscheduler/engine/objects/orders//PATH/ORDERID&part=log&historyId=.."
+  // jobscheduler/engine/folders/PATH => Unterordner
+  // jobscheduler/engine/jobs//PATH => Job-Konfiguration
+  // jobscheduler/engine/jobs//PATH/*description
+  // jobscheduler/engine/jobs//PATH?part=log
+  // jobscheduler/engine/jobs//PATH?part=log.snapshot
+  // jobscheduler/engine/tasks//PATH?id=TASKID&part=info
+  // jobscheduler/engine/tasks//PATH?id=TASKID&part=log
+  // jobscheduler/engine/job_chains//PATH => XML-Konfiguration
+  // jobscheduler/engine/job_chains//PATH?part=info => <show_job_chain>
+  // jobscheduler/engine/orders//PATH/ => Aufträge
+  // jobscheduler/engine/orders//PATH/ORDERID&part=log
+  // jobscheduler/engine/orders//PATH/ORDERID => XML-Konfiguration
+  // jobscheduler/engine/orders//PATH/ORDERID?part=info => <show_order>
+  // jobscheduler/engine/orders//PATH/ORDERID?part=log
+  // jobscheduler/engine/orders//PATH/ORDERID?historyId=..&part=log
+  // jobscheduler/engine/orders//PATH/ORDERID&part=log&historyId=.."
 
-  // jobscheduler/engine/objects/folders/PATH => Unterordner
-  // jobscheduler/engine/objects/job?job=PATH => Job-Konfiguration
-  // jobscheduler/engine/objects/job.description?job=PATH
-  // jobscheduler/engine/objects/job.log?job=PATH
-  // jobscheduler/engine/objects/job.log.snapshot?job=PATH
-  // jobscheduler/engine/objects/task.info?job=PATH&task=TASKID
-  // jobscheduler/engine/objects/task.log?job?PATH&task=TASKID
-  // jobscheduler/engine/objects/job_chain?job_chain=PATH => XML-Konfiguration
-  // jobscheduler/engine/objects/job_chain.info?job_chain=PATH => <show_job_chain>
+  // jobscheduler/engine/folders/PATH => Unterordner
+  // jobscheduler/engine/job?job=PATH => Job-Konfiguration
+  // jobscheduler/engine/job.description?job=PATH
+  // jobscheduler/engine/job.log?job=PATH
+  // jobscheduler/engine/job.log.snapshot?job=PATH
+  // jobscheduler/engine/task.info?job=PATH&task=TASKID
+  // jobscheduler/engine/task.log?job?PATH&task=TASKID
+  // jobscheduler/engine/job_chain?job_chain=PATH => XML-Konfiguration
+  // jobscheduler/engine/job_chain.info?job_chain=PATH => <show_job_chain>
   // ...
 
   // ODER

@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServiceFunctions.noCache
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, OrderId}
 
-@Path("/objects/{path:.+}.job_chain/orders/{orderId}")
+@Path("/{path:.+}.job_chain/orders/{orderId}")
 class OrderResource @Inject()(@PathParam("path") jobChainPathString: String, @PathParam("orderId") orderId: OrderId,
     orderSubsystem: OrderSubsystem, schedulerInstanceId: SchedulerInstanceId) {
 

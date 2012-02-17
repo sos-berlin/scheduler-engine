@@ -11,7 +11,7 @@ import org.scalatest.matchers.ShouldMatchers._
 @RunWith(classOf[JUnitRunner])
 final class JobsResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
   override val configurationPackage = classOf[JettyPlugin].getPackage
-  private lazy val jobsResource = newAuthResource(javaContextUri(injector)+"/objects/jobs")
+  private lazy val jobsResource = newAuthResource(javaContextUri(injector)+"/jobs")
 
   test("Read job list") {
     val xml = jobsResource.accept(TEXT_XML_TYPE).get(classOf[String])

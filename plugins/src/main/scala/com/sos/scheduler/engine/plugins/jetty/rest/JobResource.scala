@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.rest.Tests._
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServiceFunctions.noCache
 
-@Path("/objects/job")
+@Path("/job")
 class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: SchedulerInstanceId,
     @QueryParam("job") pathString: String) {
 
