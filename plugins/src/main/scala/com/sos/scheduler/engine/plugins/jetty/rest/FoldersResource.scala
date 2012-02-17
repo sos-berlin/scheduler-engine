@@ -35,7 +35,7 @@ class FoldersResource @Inject()(folderSubsystem: FolderSubsystem) {
   private def get(pathString: String, typeName: String, u: UriInfo) = {
     //TODO Bei Fehler SCHEDULER-161 404 liefern.
     val path = AbsolutePath.of(pathString)
-    def toXml(name: String) = <name name={name} uri={u.getBaseUriBuilder.path(typeName)}/>
+    def toXml(name: String) = <name name={name} uri={u.getBaseUriBuilder.path(typeName).build().toString}/>
     val contents = folderSubsystem.names(path, typeName) map toXml
     <names path={path.withTrailingSlash} type={typeName}>{contents}</names>
   }
