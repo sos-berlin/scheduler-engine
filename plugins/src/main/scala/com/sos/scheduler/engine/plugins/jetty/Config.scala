@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.kernel.util.XmlUtils._
 import org.w3c.dom.Element
 import com.sos.scheduler.engine.plugins.jetty.rest.{JobsResource, JobResource, FoldersResource, CommandResource}
-import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.XmlElemWriter
+import com.sos.scheduler.engine.plugins.jetty.rest.transform.XmlElemWriter
 
 class Config(pluginElement: Element, conf: SchedulerConfiguration) {
   import Config._
