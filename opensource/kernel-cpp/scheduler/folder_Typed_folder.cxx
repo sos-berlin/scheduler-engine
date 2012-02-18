@@ -568,6 +568,7 @@ File_based* Typed_folder::file_based_or_null( const string& name ) const
 
 vector<string> Typed_folder::names() const {
     vector<string> result (_file_based_map.size());
+    result.resize(0);
     Z_FOR_EACH_CONST(File_based_map, _file_based_map, i) 
         if (i->second->is_visible()) 
             result.push_back(i->first);
