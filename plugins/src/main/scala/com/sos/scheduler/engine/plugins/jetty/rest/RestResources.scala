@@ -6,5 +6,6 @@ object RestResources {
     classOf[CommandResource],
     classOf[FoldersResource],
     classOf[JobResource],
-    classOf[JobsResource])
+    classOf[JobsResource],
+    classOf[RootResource])
 }

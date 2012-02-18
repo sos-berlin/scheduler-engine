@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import java.io.File
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.kernel.util.XmlUtils._
+import java.io.File
 import org.w3c.dom.Element
 
 class Config(pluginElement: Element, conf: SchedulerConfiguration) {

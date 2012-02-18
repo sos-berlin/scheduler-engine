@@ -9,13 +9,17 @@
                     <xsl:text>JobScheduler </xsl:text>
                     <xsl:value-of select="@type"/>
                     <xsl:text> </xsl:text>
-                    <xsl:value-of select="@path"/>
+                    <xsl:value-of select="@folder"/>
                 </title>
             </head>
             <body>
+                <h3>
+                    <xsl:text>Folder </xsl:text>
+                    <xsl:value-of select="@folder"/>
+                </h3>
                 <xsl:for-each select="name">
                     <p>
-                        <a href="{1}">
+                        <a href="{@uri}">
                             <xsl:value-of select="@name"/>
                         </a>
                     </p>

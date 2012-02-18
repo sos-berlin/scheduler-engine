@@ -1,61 +1,42 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
-import com.google.common.io.Closeables.closeQuietly
+import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.kernel.folder.{AbsolutePath, FolderSubsystem}
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServices.noCache
-import java.io.{StringReader, StringWriter}
 import javax.inject.Inject
 import javax.ws.rs._
+import javax.ws.rs.core.Response.Status.NOT_FOUND
 import javax.ws.rs.core._
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.stream.{StreamResult, StreamSource}
 import scala.collection.JavaConversions._
+import com.sos.scheduler.engine.plugins.jetty.rest.annotations.HtmlXsltResource
 
 @Path("folders")
 class FoldersResource @Inject()(folderSubsystem: FolderSubsystem) {
-  import FoldersResource._
-
   @GET
-  @Produces(Array(MediaType.TEXT_HTML))
-  def getHtml(@QueryParam("path") @DefaultValue("") pathString: String,
-              @QueryParam("type") @DefaultValue("") typeName: String,
-              @Context u: UriInfo) = {
-    val result = transform(get(pathString, typeName, u))
+  @Produces(Array(MediaType.TEXT_XML, MediaType.TEXT_HTML))
+  @HtmlXsltResource(path="com/sos/scheduler/engine/plugins/jetty/rest/FoldersResource.xsl")
+  def getXml(@QueryParam("folder") @DefaultValue("") pathString: String,
+             @QueryParam("type") @DefaultValue("") typeName: String,
+             @Context u: UriInfo) = {
+    val path = AbsolutePath.of(pathString)
+    val result = namesAsXml(path, typeName, u)
     Response.ok(result).cacheControl(noCache).build()
   }
 
-  @GET
-  @Produces(Array(MediaType.TEXT_XML))
-  def getXml(@QueryParam("path") @DefaultValue("") pathString: String,
-             @QueryParam("type") @DefaultValue("") typeName: String,
-             @Context u: UriInfo) = {
-    Response.ok(get(pathString, typeName, u)).cacheControl(noCache).build()
-  }
-
-  private def get(pathString: String, typeName: String, u: UriInfo) = {
-    //TODO Bei Fehler SCHEDULER-161 404 liefern.
-    val path = AbsolutePath.of(pathString)
+  private def namesAsXml(folderPath: AbsolutePath, typeName: String, u: UriInfo) = {
     def toXml(name: String) = {
-      val p = AbsolutePath.of(path, name)
-      val uri = u.getBaseUriBuilder.path(typeName).queryParam("path", p.toString).build()
+      val uri = u.getBaseUriBuilder.path(typeName).queryParam("job", AbsolutePath.of(folderPath, name).toString).build()
       <name name={name} uri={uri.toString}/>
     }
-    val contents = folderSubsystem.names(path, typeName) map toXml
-    <names path={path.withTrailingSlash} type={typeName}>{contents}</names>
-  }
-}
-
-object FoldersResource {
-  private lazy val transformer = {
-    val in = classOf[FoldersResource].getResourceAsStream("FoldersResource.xsl")
-    try TransformerFactory.newInstance().newTransformer(new StreamSource(in))
-    finally closeQuietly(in)
+    val contents = names(folderPath, typeName) map toXml
+    <names folder={folderPath.withTrailingSlash} type={typeName}>{contents}</names>
   }
 
-  def transform(e: xml.Elem) = {
-    val w = new StringWriter
-    val x = e.toString()
-    transformer.transform(new StreamSource(new StringReader(x)), new StreamResult(w));
-    w.toString
+  private def names(path: AbsolutePath, typeName: String) = {
+    try folderSubsystem.names(path, typeName)
+    catch {
+      case x: CppException if x.getCode == "SCHEDULER-161" =>
+        throw new WebApplicationException(x, NOT_FOUND)
+    }
   }
 }

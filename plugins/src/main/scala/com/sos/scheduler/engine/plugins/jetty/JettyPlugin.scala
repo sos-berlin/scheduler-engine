@@ -14,8 +14,8 @@ import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.BodyWriters
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.net.{URL, ServerSocket, BindException}
-import javax.inject.Inject
 import javax.servlet.Filter
+import javax.inject.Inject
 import org.eclipse.jetty.security._
 import org.eclipse.jetty.server._
 import org.eclipse.jetty.server.handler._
@@ -54,13 +54,6 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
         new DefaultHandler())))
   }
 
-  private def newRootContextHandler() = {
-    val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
-    result.setContextPath("/")
-    result.addServlet(classOf[RootForwardingServlet], "/")
-    result
-  }
-
   private def jobSchedulerContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
     val result = newWebAppContext(resourceBaseURL)
 
@@ -87,6 +80,13 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
     result.setResourceBase(baseUrl.toString)
     for (f <- config.webXmlFileOption)  result.setDescriptor(f.getPath)
     new WebXmlConfiguration().configure(result)
+    result
+  }
+
+  private def newRootContextHandler() = {
+    val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
+    result.setContextPath("/")
+    result.addServlet(classOf[RootForwardingServlet], "/")
     result
   }
 

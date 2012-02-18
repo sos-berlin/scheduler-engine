@@ -14,8 +14,14 @@ final class FoldersResourceTest extends ScalaSchedulerTest with CheckedBeforeAll
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val resource = javaResource(injector).path("folders")
 
-  test("Read job list as xml") {
-    val doc = resource.queryParam("type", "job").queryParam("path", "/").accept(TEXT_XML_TYPE).get(classOf[Document])
+  test("Read job list as XML") {
+    val doc = resource.queryParam("type", "job").queryParam("folder", "/").accept(TEXT_XML_TYPE).get(classOf[Document])
     assert(stringXPath(doc, "/names/name[@name='a']/@uri") != "")
+  }
+
+  test("Read job list as HTML") {
+    val result = resource.queryParam("type", "job").queryParam("folder", "/").accept(TEXT_HTML_TYPE).get(classOf[String])
+    assert(result contains "<html")
+    assert(result contains "/a")
   }
 }

@@ -7,7 +7,7 @@ import javax.ws.rs.core.{MediaType, Response}
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServices.{noCache, wrapXmlResponse}
 
-@Path("/jobs")
+@Path("jobs")
 class JobsResource @Inject()(jobSubsystem: JobSubsystem) {
   @GET
   @Produces(Array(MediaType.TEXT_XML))
