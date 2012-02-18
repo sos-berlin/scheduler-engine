@@ -38,14 +38,14 @@ final class WebXmlTest extends ScalaSchedulerTest {
   test("Web server should deliver integrated resource as without a web.xml") {
     val expected = Resources.toString(getClass.getResource("/com/sos/scheduler/engine/web/z/index.html"), UTF_8)
     val a = resource.path("z/index.html").get(classOf[String])
-    assert( a === expected)
+    assert(a === expected)
   }
 
   test("Web server should deliver external files described in web.xml") {
     val resource = newAuthResource(contextUri(injector))
     val expected = readFile(new File(configDir, "scheduler.xml"))
     val a = resource.path(configDir.getName +"/scheduler.xml").get(classOf[String])
-    assert( a === expected)
+    assert(a === expected)
   }
 
   private def readFile(f: File) = Files.toString(f, UTF_8)

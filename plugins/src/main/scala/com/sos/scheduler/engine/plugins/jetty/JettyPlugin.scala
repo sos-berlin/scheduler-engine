@@ -9,6 +9,8 @@ import com.sos.scheduler.engine.kernel.util.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.plugins.jetty.Config._
 import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet
 import com.sos.scheduler.engine.plugins.jetty.log.{JobLogServlet, OrderLogServlet, MainLogServlet}
+import com.sos.scheduler.engine.plugins.jetty.rest._
+import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.BodyWriters
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.net.{URL, ServerSocket, BindException}
@@ -171,7 +173,7 @@ object JettyPlugin {
       serveRegex(enginePrefixPath+"/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
       serveRegex(enginePrefixPath+"/log").`with`(classOf[MainLogServlet])
       serve(enginePrefixPath+"/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
-      for (c <- Config.guiceClasses) bind(c)
+      for (c <- BodyWriters.messageBodyWriters ++ RestResources.resources) bind(c)
       serve(cppPrefixPath).`with`(classOf[CppServlet])
       serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])
     }

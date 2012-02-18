@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest.transform
+package com.sos.scheduler.engine.plugins.jetty.rest.bodywriters
 
 import scala.xml.Elem
 import java.lang.reflect.Type
@@ -24,7 +24,6 @@ class XmlElemWriter extends MessageBodyWriter[Elem] {
   def writeTo(o: Elem, c: Class[_], genericType: Type, annotations: Array[Annotation], mediaType: MediaType,
       httpHeaders: MultivaluedMap[String, AnyRef], out: OutputStream) {
     val encoding = UTF_8
-    // TODO encoding im Header setzen?
     val w = new OutputStreamWriter(out, encoding)
     w.write("<?xml version='1.0'?>")  // encoding='"+encoding+"'?>")
     w.write(o.toString())

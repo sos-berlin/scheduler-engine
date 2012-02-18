@@ -6,10 +6,10 @@ import com.sos.scheduler.engine.plugins.jetty.rest.WebServices.noCache
 import java.io.{StringReader, StringWriter}
 import javax.inject.Inject
 import javax.ws.rs._
+import javax.ws.rs.core._
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.{StreamResult, StreamSource}
 import scala.collection.JavaConversions._
-import javax.ws.rs.core._
 
 @Path("folders")
 class FoldersResource @Inject()(folderSubsystem: FolderSubsystem) {
@@ -35,7 +35,11 @@ class FoldersResource @Inject()(folderSubsystem: FolderSubsystem) {
   private def get(pathString: String, typeName: String, u: UriInfo) = {
     //TODO Bei Fehler SCHEDULER-161 404 liefern.
     val path = AbsolutePath.of(pathString)
-    def toXml(name: String) = <name name={name} uri={u.getBaseUriBuilder.path(typeName).build().toString}/>
+    def toXml(name: String) = {
+      val p = AbsolutePath.of(path, name)
+      val uri = u.getBaseUriBuilder.path(typeName).queryParam("path", p.toString).build()
+      <name name={name} uri={uri.toString}/>
+    }
     val contents = folderSubsystem.names(path, typeName) map toXml
     <names path={path.withTrailingSlash} type={typeName}>{contents}</names>
   }

@@ -4,8 +4,6 @@ import java.io.File
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.kernel.util.XmlUtils._
 import org.w3c.dom.Element
-import com.sos.scheduler.engine.plugins.jetty.rest.{JobsResource, JobResource, FoldersResource, CommandResource}
-import com.sos.scheduler.engine.plugins.jetty.rest.transform.XmlElemWriter
 
 class Config(pluginElement: Element, conf: SchedulerConfiguration) {
   import Config._
@@ -27,13 +25,6 @@ object Config {
   val cppPrefixPath = "/engine-cpp"
   val resourceBaseURL = getClass.getResource("/com/sos/scheduler/engine/web")
 
-  /** REST-Resourcen und MessageBodyWriter. */
-  val guiceClasses = Iterable(
-    classOf[CommandResource],
-    classOf[FoldersResource],
-    classOf[JobResource],
-    classOf[JobsResource],
-    classOf[XmlElemWriter])
 
   //  val gzipContentTypes = List(
   //    "application/javascript",
