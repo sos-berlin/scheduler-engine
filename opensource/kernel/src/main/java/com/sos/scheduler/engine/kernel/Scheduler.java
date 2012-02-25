@@ -48,6 +48,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.version;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 
 @ForCpp
 public final class Scheduler implements HasPlatform, Sister,
@@ -129,6 +130,7 @@ public final class Scheduler implements HasPlatform, Sister,
         pluginSubsystem = new PluginSubsystem(this, injector, eventBus);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
+        enableJavaUtilLoggingOverSLF4J();
         initializeThreadLock();
     }
 

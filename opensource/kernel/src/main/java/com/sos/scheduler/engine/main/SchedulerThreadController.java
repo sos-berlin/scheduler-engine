@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 
 /** Steuert den {@link SchedulerThread}. */
 public class SchedulerThreadController implements SchedulerController {
@@ -25,10 +24,6 @@ public class SchedulerThreadController implements SchedulerController {
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThreadControllerBridge controllerBridge = new SchedulerThreadControllerBridge(this, eventBus);
     private final SchedulerThread thread = new SchedulerThread(controllerBridge);
-
-    public SchedulerThreadController() {
-        enableJavaUtilLoggingOverSLF4J();
-    }
 
     @Override public final void setSettings(Settings o) {
         checkIsNotStarted();
