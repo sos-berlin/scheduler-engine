@@ -7,15 +7,9 @@ import com.sos.scheduler.engine.kernel.scheduler.{SchedulerConfiguration, HasGui
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
 import com.sos.scheduler.engine.kernel.util.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.plugins.jetty.Config._
-import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet
-import com.sos.scheduler.engine.plugins.jetty.log.{JobLogServlet, OrderLogServlet, MainLogServlet}
-import com.sos.scheduler.engine.plugins.jetty.rest._
-import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.BodyWriters
-import com.sun.jersey.guice.JerseyServletModule
-import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.net.{URL, ServerSocket, BindException}
-import javax.servlet.Filter
 import javax.inject.Inject
+import javax.servlet.Filter
 import org.eclipse.jetty.security._
 import org.eclipse.jetty.server._
 import org.eclipse.jetty.server.handler._
@@ -43,13 +37,15 @@ final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGui
   private val server = {
     val schedulerModule = hasGuiceModule.getGuiceModule
     val loginServiceOption = childElementOption(pluginElement, "loginService") map PluginLoginService.apply
+    val myInjector = createInjector(schedulerModule, Config.newServletModule())
+    val contextHandler = jobSchedulerContextHandler(contextPath, myInjector, loginServiceOption)
     newServer(
       config.tryUntilPortOption map { until => findFreePort(config.portOption.get, until) } orElse config.portOption,
       config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
       newHandlerCollection(Iterable(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
         new StatisticsHandler,
-        jobSchedulerContextHandler(contextPath, createInjector(schedulerModule, newServletModule()), loginServiceOption),
+        contextHandler,
         newRootContextHandler(),
         new DefaultHandler())))
   }
@@ -167,18 +163,6 @@ object JettyPlugin {
     result
   }
 
-  private def newServletModule() = new JerseyServletModule {
-    override def configureServlets() {
-      serveRegex(enginePrefixPath+"/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
-      serveRegex(enginePrefixPath+"/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
-      serveRegex(enginePrefixPath+"/log").`with`(classOf[MainLogServlet])
-      serve(enginePrefixPath+"/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
-      for (c <- BodyWriters.messageBodyWriters ++ RestResources.resources) bind(c)
-      serve(cppPrefixPath).`with`(classOf[CppServlet])
-      serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])
-    }
-  }
-
   def findFreePort(firstPort: Int, end: Int): Int =
     if (firstPort >= end) firstPort
     else {
@@ -193,11 +177,6 @@ object JettyPlugin {
 
   private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
 }
-
-// TODO REST-URIs, Lieferung als XML, JSON, HTML
-// TODO HTTPS
-// TODO Massentests: Viele Anfragen gleichzeitig. Anzahl der Threads soll klein bleiben.
-
 // jobscheduler/engine/  Übersicht über den Zustand und weitere URIs
 // jobscheduler/engine/log  Hauptprotokoll
 // jobscheduler/engine/log.snapshot  Hauptprotokoll

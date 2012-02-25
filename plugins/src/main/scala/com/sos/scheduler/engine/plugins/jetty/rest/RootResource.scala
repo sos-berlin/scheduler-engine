@@ -1,19 +1,21 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
 import javax.inject.Inject
-import javax.ws.rs.core.MediaType._
 import javax.ws.rs._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.rest.annotations.HtmlXsltResource
-import javax.ws.rs.core.{UriInfo, Context, Response}
+import com.sos.scheduler.engine.plugins.jetty.rest.views.RootView
+import javax.ws.rs.core._
 
 @Path("")
 class RootResource @Inject()(schedulerInstanceId: SchedulerInstanceId) {
+  private lazy val tag = new EntityTag(schedulerInstanceId.getString)
+
   @GET
-  @Produces(Array(TEXT_HTML))
+  @Produces(Array(MediaType.APPLICATION_JSON))
   @HtmlXsltResource(path="com/sos/scheduler/engine/plugins/jetty/rest/RootResource.xsl")
   def get(@Context u: UriInfo) = {
-    val result = <engine/>
-    Response.ok(result).build()
+    val result = new RootView(u.getBaseUri)
+    Response.ok(result).tag(tag).build()
   }
 }

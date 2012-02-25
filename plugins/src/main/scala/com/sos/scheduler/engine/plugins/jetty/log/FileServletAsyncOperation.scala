@@ -4,9 +4,9 @@ import java.io._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import com.google.common.io.ByteStreams.copy
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFileEncoding
-import org.apache.log4j.Logger
 import java.util.concurrent.atomic.AtomicBoolean
 import com.google.common.io.Closeables.closeQuietly
+import org.eclipse.jetty.http.HttpException
 
 class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServletResponse) {
 //  import FileServletAsyncOperation._
@@ -19,7 +19,7 @@ class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServl
 
   def start(file: File) {
     require(!started)
-    require(!file.toString.isEmpty, "Log has no file")
+    if (file.toString.isEmpty)  throw new HttpException(javax.servlet.http.HttpServletResponse.SC_NOT_FOUND, "Log has no file")
     response.setStatus(HttpServletResponse.SC_OK)
     response.setContentType("text/xml;charset="+logFileEncoding)
     response.setHeader("Cache-Control", "no-cache")

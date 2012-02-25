@@ -8,8 +8,6 @@ import com.sos.scheduler.engine.kernel.order.{OrderId, OrderSubsystem}
 
 @Singleton
 class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServlet {
-  import OrderLogServlet._
-
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     val attributeName = classOf[OrderLogServlet].getName
     Option(request.getAttribute(attributeName).asInstanceOf[FileServletAsyncOperation]) match {
@@ -24,17 +22,6 @@ class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServ
       case Some(operation) =>
         operation.continue()
     }
-//    val operation = getOrSetAttribute(request, classOf[OrderLogServlet].getName) {
-//      request.getPathInfo match {
-//        case PathInfoRegex(jobChainPathString, orderIdString) =>
-//          val jobChain = orderSubsystem.jobChain(AbsolutePath.of(jobChainPathString))
-//          val order = jobChain.order(new OrderId(orderIdString))
-//          LogServletAsyncOperation(request, response, order.getLog)
-//        case _ =>
-//          throw new WebApplicationException(BAD_REQUEST)
-//      }
-//    }
-//    operation.continue()
   }
 }
 

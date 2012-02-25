@@ -8,9 +8,9 @@ import com.sos.scheduler.engine.kernel.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServices._
-import com.sos.scheduler.engine.plugins.jetty.rest.annotations.HtmlXsltResource
 import javax.ws.rs.core.Response.Status.NOT_FOUND
-import javax.ws.rs.core.{UriInfo, Context, EntityTag, Response}
+import com.sos.scheduler.engine.plugins.jetty.rest.views.JobView
+import javax.ws.rs.core._
 
 @Path("job")
 class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: SchedulerInstanceId,
@@ -27,13 +27,8 @@ class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: Sch
   private lazy val jobTag = new EntityTag(job.getUuid.toString);
 
   @GET
-  @Produces(Array(TEXT_HTML))
-  @HtmlXsltResource(path= "com/sos/scheduler/engine/plugins/jetty/rest/JobResource.xsl")
-  def getRoot(@Context u: UriInfo) = {
-    val uri = u.getBaseUriBuilder.path("job").build()
-    val result = <job job={path.toString} uri={uri.toString}/>
-    Response.ok(result).tag(jobTag).build()
-  }
+  @Produces(Array(APPLICATION_JSON))
+  def get(@Context u: UriInfo) = new JobView(path, UriBuilder.fromUri(u.getBaseUri).path("job").queryParam("job", path).build())
 
   @GET @Path("configuration")
   @Produces(Array(TEXT_XML))

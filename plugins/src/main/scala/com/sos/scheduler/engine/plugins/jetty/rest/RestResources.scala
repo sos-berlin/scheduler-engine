@@ -4,7 +4,7 @@ object RestResources {
   /** REST-Ressourcen. */
   val resources: Iterable[Class[_]] = Iterable(
     classOf[CommandResource],
-    classOf[FoldersResource],
+    classOf[FolderResource],
     classOf[JobResource],
     classOf[JobsResource],
     classOf[RootResource])
