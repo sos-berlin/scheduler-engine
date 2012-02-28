@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: job_com.xml 16609 2012-02-28 05:01:03Z kb $-->
 
 <description 
     title    = "Implementation of JobScheduler scripts as COM Classes" 
     base_dir = ""
     author   = "Author: jz "
-    date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $"
+    date     = "$Date$"
 >
     <scheduler_keyword keyword="COM"/>
     
