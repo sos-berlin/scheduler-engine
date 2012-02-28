@@ -4,9 +4,9 @@
 <!--$Id: job_com.xml 3623 2005-04-20 06:53:16Z jz $-->
 
 <description 
-    title    = "Implementation of Spooler-Skripts as COM Classes" 
+    title    = "Implementation of JobScheduler scripts as COM Classes" 
     base_dir = ""
-    author   = "$Author: jz $"
+    author   = "Author: jz "
     date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $"
 >
     <scheduler_keyword keyword="COM"/>
@@ -16,7 +16,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="right">
-&#160;1. Juli 2002
+&#160;1. January 2012
 </td>
 </tr>
 </table>
@@ -24,20 +24,20 @@
 
 <p>&#160;</p>
 
-<p>In previous versions of the Job Scheduler, scripts were created using a Scripting Engine and
+<p>In previous versions of the JobScheduler, scripts were created using a Scripting Engine and
 scripts (VBScript, JScript, PerlScript) were directly entered in the <font class="mono">&lt;script&gt;</font> element.</p>
 <!--
-<p>Bisher wird ein Skript im Spooler mit einer Scripting Engine realisiert. Das Skript in einer Skriptsprache
+<p>Bisher wird ein Skript im JobScheduler mit einer Scripting Engine realisiert. Das Skript in einer Skriptsprache
 (VBScript, JScript, PerlScript) wird direkt im Element <font class="mono">&lt;script&gt;</font> angegeben.</p>
 -->
 <p>
-A Job Scheduler script can also be implemented as a <span style="font-variant: small-caps">com</span> class. 
+A JobScheduler script can also be implemented as a <span style="font-variant: small-caps">com</span> class. 
 This class can be implemented in every language which supports <span style="font-variant: small-caps">com</span>, 
 such as C++, Delphi und VisualBasic. 
 The <span style="font-variant: small-caps">com</span> class can, however, also be implemented with 
 VBScript, JScript und PerlScript using the &quot;Windows Script Component&quot;.</p>
 <!--
-<p>Ein Spooler-Skript lässt sich auch als <span style="font-variant: small-caps">com</span>-Klasse
+<p>Ein JobScheduler-Skript lässt sich auch als <span style="font-variant: small-caps">com</span>-Klasse
 implementieren. Die <span style="font-variant: small-caps">com</span>-Klasse
 kann in jeder Sprache, die <span style="font-variant: small-caps">com</span>
 unterstützt, implementiert werden, u.a. C++, Delphi und VisualBasic. Mit Hilfe
@@ -46,34 +46,34 @@ Script Component&quot; lässt sich die <span style="font-variant: small-caps">co
 auch mit VBScript, JScript und (vermutlich) PerlScript realisieren.</p>
 -->
 
-<p>This class allows use of job, thread script or Job Scheduler script methods as follows:</p>
+<p>This class allows use of job, thread script or JobScheduler script methods as follows:</p>
 <!--
 <p>Die Klasse stellt die Methoden eines Jobs, Thread-Skripts oder
-Spooler-Skripts bereit, also:</p>
+JobScheduler-Skripts bereit, also:</p>
 -->
 
-<p class="indent"><font class="mono">spooler_init()<br/>
-spooler_exit()<br/>
-spooler_open()<br/>
-spooler_close()<br/>
-spooler_process()<br/>
-spooler_on_success()<br/>
-spooler_on_error()</font></p>
+<p class="indent"><font class="mono">JobScheduler_init()<br/>
+JobScheduler_exit()<br/>
+JobScheduler_open()<br/>
+JobScheduler_close()<br/>
+JobScheduler_process()<br/>
+JobScheduler_on_success()<br/>
+JobScheduler_on_error()</font></p>
 
 <p>Each method is optional. Should a method not be implemented, 
-then the existing Job Scheduler script procedure will be followed.</p>
+then the existing JobScheduler script procedure will be followed.</p>
 <!--
 <p>Jede Methode ist optional. Ist sie nicht implementiert, wird wie bei den
-bisherigen Spooler-Skripten verfahren.</p>
+bisherigen JobScheduler-Skripten verfahren.</p>
 -->
 
-<p>In addition, this class should provide a method with which the Job Scheduler context can be assigned:</p>
+<p>In addition, this class should provide a method with which the JobScheduler context can be assigned:</p>
 <!--
 <p>Die Klasse sollte außerdem eine Methode bereitstellen, mit der der
-Spooler-Kontext übergeben wird:</p>
+JobScheduler-Kontext übergeben wird:</p>
 -->
 
-<p class="indent"><font class="mono">spooler_set_context(context)</font></p>
+<p class="indent"><font class="mono">JobScheduler_set_context(context)</font></p>
 
 <p>This context is a <span style="font-variant: small-caps">com</span> object
 (<font class="mono">IDispatch</font>) with the following properties:</p>
@@ -83,21 +83,21 @@ Spooler-Kontext übergeben wird:</p>
 -->
 
 <p class="indent"><font class="mono">log<br/>
-spooler<br/>
+JobScheduler<br/>
 thread<br/>
 job<br/>
 task</font></p>
 
 <p>These properties deliver the 
-<font class="mono">spooler_log</font>,
-<font class="mono">spooler_task</font>, 
-<font class="mono">spooler_job</font>, 
-<font class="mono">spooler_thread</font> and 
-<font class="mono">spooler</font> objects, known from the Spooler-Script.</p>
+<font class="mono">JobScheduler_log</font>,
+<font class="mono">JobScheduler_task</font>, 
+<font class="mono">JobScheduler_job</font>, 
+<font class="mono">JobScheduler_thread</font> and 
+<font class="mono">JobScheduler</font> objects, known from the JobScheduler-Script.</p>
 <!--
-<p>Diese Eigenschaften liefern die aus dem Spooler-Skripten bekannten Objekte <font class="mono">spooler_log</font>,
-<font class="mono">spooler_task</font>, <font class="mono">spooler_job</font>, <font class="mono">spooler_thread</font>
-und <font class="mono">spooler</font>.</p>
+<p>Diese Eigenschaften liefern die aus dem JobScheduler-Skripten bekannten Objekte <font class="mono">JobScheduler_log</font>,
+<font class="mono">JobScheduler_task</font>, <font class="mono">JobScheduler_job</font>, <font class="mono">JobScheduler_thread</font>
+und <font class="mono">JobScheduler</font>.</p>
 -->
 
 <p class="zwischentitel">Similarities between script in the Scripting Engine und the 
@@ -109,15 +109,15 @@ und <font class="mono">spooler</font>.</p>
 <ul>
 <li>the <font class="mono"> use_engine=&quot;task&quot;</font>
 	and <font class="mono">use_engine =&quot;job&quot;</font> attributes are allowed in both;</li>
-<li>both can be used as job script, thread script and as Job Scheduler script (or class)</li>
-<li>the (<font class="mono">spooler_init()</font>, <font class="mono">spooler_open()</font>
+<li>both can be used as job script, thread script and as JobScheduler script (or class)</li>
+<li>the (<font class="mono">JobScheduler_init()</font>, <font class="mono">JobScheduler_open()</font>
 	etc.) requests are the same in both</li>
 <li>requests are optional in both</li>
 <!--
 <li>Attribut <font class="mono"> use_engine=&quot;task&quot;</font>
 	und <font class="mono">use_engine =&quot;job&quot;</font> möglich.</li>
-<li>Als Job-Skript, Thread-Skript und Spooler-Skript (bzw. -Klasse) verwendbar</li>
-<li>Aufrufe (<font class="mono">spooler_init()</font>, <font class="mono">spooler_open()</font>
+<li>Als Job-Skript, Thread-Skript und JobScheduler-Skript (bzw. -Klasse) verwendbar</li>
+<li>Aufrufe (<font class="mono">JobScheduler_init()</font>, <font class="mono">JobScheduler_open()</font>
 	etc.) sind gleich</li>
 <li>Die Aufrufe sind optional</li>
 -->
@@ -149,9 +149,9 @@ und <font class="mono">spooler</font>.</p>
 			</td>
 			<td width="4%" valign="top" align="left"></td>
 			<td width="48%" valign="top" align="left"><p>
-				Implementation is independent of the Spooler.
+				Implementation is independent of the JobScheduler.
 				Any language which generates COM classes with late binding (<font class="mono">IDispatch</font>) can be used.</p>
-		<!--Implementierung ist unabhänging vom Spooler.
+		<!--Implementierung ist unabhänging vom JobScheduler.
 				Jede Sprache, die COM-Klassen mit später Bindung (<font class="mono">IDispatch</font>)
 				generiert, kann verwendet werden.</p>-->
 			</td>
@@ -159,21 +159,21 @@ und <font class="mono">spooler</font>.</p>
 		<tr>
 			<td width="48%" valign="top" align="left"><p>
 				The context makes the following predefined variables available to the script:
-				<font class="mono">spooler_log</font>,
-				<font class="mono">spooler</font>, 
-				<font class="mono">spooler_thread</font>, 
-				<font class="mono">spooler_job</font> and 
-				<font class="mono">spooler_task</font>.&#160;</p>
-		<!--Der Kontext steht dem Skript mit den vordefinierten Variablen <font class="mono">spooler_log</font>,
-				<font class="mono">spooler</font>, <font class="mono">spooler_thread</font>, <font class="mono">spooler_job</font>
-				und <font class="mono">spooler_task</font> zur Verfügung.&#160;</p>-->
+				<font class="mono">JobScheduler_log</font>,
+				<font class="mono">JobScheduler</font>, 
+				<font class="mono">JobScheduler_thread</font>, 
+				<font class="mono">JobScheduler_job</font> and 
+				<font class="mono">JobScheduler_task</font>.&#160;</p>
+		<!--Der Kontext steht dem Skript mit den vordefinierten Variablen <font class="mono">JobScheduler_log</font>,
+				<font class="mono">JobScheduler</font>, <font class="mono">JobScheduler_thread</font>, <font class="mono">JobScheduler_job</font>
+				und <font class="mono">JobScheduler_task</font> zur Verfügung.&#160;</p>-->
 			</td>
 			<td width="4%" valign="top" align="left"></td>
 			<td width="48%" valign="top" align="left"><p>
-				The Job Scheduler makes the <font class="mono">spooler_set_context()</font> 
+				The JobScheduler makes the <font class="mono">JobScheduler_set_context()</font> 
 				method of the <span style="font-variant: small-caps">com</span> object available.</p>
-		<!--Der Spooler übergibt den Kontext dem <span style="font-variant: small-caps">com</span>-Objekt
-				mit dessen Methode <font class="mono">spooler_set_context()</font>.</p>-->
+		<!--Der JobScheduler übergibt den Kontext dem <span style="font-variant: small-caps">com</span>-Objekt
+				mit dessen Methode <font class="mono">JobScheduler_set_context()</font>.</p>-->
 			</td>
 		</tr>
 		<tr>
@@ -212,8 +212,8 @@ und <font class="mono">spooler</font>.</p>
 
 <p>&#160;</p>
 
-		<p class="zwischentitel">Declaration in the Job Scheduler Configuration&#160;</p>
-<!--<p class="zwischentitel">Deklaration in der Spooler-Konfiguration&#160;</p>-->
+		<p class="zwischentitel">Declaration in the JobScheduler Configuration&#160;</p>
+<!--<p class="zwischentitel">Deklaration in der JobScheduler-Konfiguration&#160;</p>-->
 
 <p><br/>
 A job registered with a <span style="font-variant: small-caps">com</span> class
@@ -222,8 +222,8 @@ can be addressed by its class name:</p>
 Job kann über seinen Klassennamen angegeben werden:</p>-->
 
 <p class="indent"><font class="mono">&lt;job name=&quot;delphijob&quot;&gt;<br/>
-		&#160;&#160;&#160; &lt;script <b>com_class=</b>&quot;my_spooler_job_class&quot;/&gt;<br/>
-<!--&#160;&#160;&#160; &lt;script <b>com_class=</b>&quot;meine_spooler_job_klasse&quot;/&gt;<br/>-->
+		&#160;&#160;&#160; &lt;script <b>com_class=</b>&quot;my_JobScheduler_job_class&quot;/&gt;<br/>
+<!--&#160;&#160;&#160; &lt;script <b>com_class=</b>&quot;meine_JobScheduler_job_klasse&quot;/&gt;<br/>-->
 &lt;/job&gt;</font></p>
 
 <p><br/>
@@ -243,13 +243,13 @@ angegeben werden:</p>-->
 		The <font class="mono">use_engine</font> attribute can also be used for a COM object. 
 		If <font class="mono">use_engine=&quot;job&quot;</font> is used, 
 		then the object will be retained for multiple tasks.
-		Whilst <font class="mono">spooler_init()</font> is still only called up once, 
-		<font class="mono">spooler_open()</font> is called up for each task (every job start).
+		Whilst <font class="mono">JobScheduler_init()</font> is still only called up once, 
+		<font class="mono">JobScheduler_open()</font> is called up for each task (every job start).
 		&#160;The meaning of these attributes remains, however, the same.
 <!--Das Attribut <font class="mono">use_engine</font> kann auch für ein
 		COM-Objekt verwendet werden. Bei <font class="mono">use_engine=&quot;job&quot;</font>
-		wird das Objekt für mehrere Tasks beibehalten. Wie bisher wird <font class="mono">spooler_init()</font>
-		nur einmal, <font class="mono">spooler_open()</font> aber für jede Task (jeden
+		wird das Objekt für mehrere Tasks beibehalten. Wie bisher wird <font class="mono">JobScheduler_init()</font>
+		nur einmal, <font class="mono">JobScheduler_open()</font> aber für jede Task (jeden
 		Jobstart) aufgerufen.&#160;Die Bedeutung ist dieselbe wie bisher.-->
 </p>
 
@@ -260,12 +260,12 @@ angegeben werden:</p>-->
 
 <p>
 		<i><font color="#FF0000">When a DLL requires a further DLL which cannot be loaded, 
-		then Windows stops the Job Scheduler with a message box.
-		The Job Scheduler continues only after the ok button is clicked.
+		then Windows stops the JobScheduler with a message box.
+		The JobScheduler continues only after the ok button is clicked.
 		Specification of the DLL is therefore not suitable for unsupervised use.</font></i>
 <!--<i><font color="#FF0000">Wenn die DLL eine weitere DLL braucht, die nicht
-		geladen werden kann, hält Windows den Spooler mit einer Messagebox an. Erst wenn
-		der OK-Knopf gedrückt wird, setzt der Spooler fort. Die Angabe der DLL ist also
+		geladen werden kann, hält Windows den JobScheduler mit einer Messagebox an. Erst wenn
+		der OK-Knopf gedrückt wird, setzt der JobScheduler fort. Die Angabe der DLL ist also
 		nicht für den unbeaufsichtigten Betrieb geeignet.</font></i>-->
 </p>
 
@@ -306,43 +306,43 @@ angegeben werden:</p>-->
 &#160;&#160;&#160; /><br/>
 <br/>
 &#160;&#160;&#160; &lt;public><br/>
-&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_set_context"/><br/>
-&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_init"/><br/>
-&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_exit"/><br/>
-&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_open"/><br/>
-&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_process"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="JobScheduler_set_context"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="JobScheduler_init"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="JobScheduler_exit"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="JobScheduler_open"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="JobScheduler_process"/><br/>
 &#160;&#160;&#160; &lt;/public><br/>
 <br/>
 &#160;&#160;&#160; &lt;script language="VBScript"><br/>
 &#160;&#160;&#160; &lt;![CDATA[<br/>
 <br/>
-dim spooler_log<br/>
-dim spooler_task<br/>
+dim JobScheduler_log<br/>
+dim JobScheduler_task<br/>
 dim i<br/>
 <br/>
-function spooler_set_context(c)<br/>
-&#160;&#160;&#160; set spooler_log&#160; = c.log<br/>
-&#160;&#160;&#160; set spooler_task = c.task<br/>
-&#160;&#160;&#160; spooler_log "Script component spooler_set_context"<br/>
+function JobScheduler_set_context(c)<br/>
+&#160;&#160;&#160; set JobScheduler_log&#160; = c.log<br/>
+&#160;&#160;&#160; set JobScheduler_task = c.task<br/>
+&#160;&#160;&#160; JobScheduler_log "Script component JobScheduler_set_context"<br/>
 end function<br/>
 <br/>
-function spooler_init<br/>
-&#160;&#160;&#160; spooler_log "Script component spooler_init"<br/>
+function JobScheduler_init<br/>
+&#160;&#160;&#160; JobScheduler_log "Script component JobScheduler_init"<br/>
 end function<br/>
 <br/>
-function spooler_exit<br/>
-&#160;&#160;&#160; spooler_log "Script component spooler_exit"<br/>
+function JobScheduler_exit<br/>
+&#160;&#160;&#160; JobScheduler_log "Script component JobScheduler_exit"<br/>
 end function<br/>
 <br/>
-function spooler_open<br/>
-&#160;&#160;&#160; spooler_log "Script component spooler_open"<br/>
+function JobScheduler_open<br/>
+&#160;&#160;&#160; JobScheduler_log "Script component JobScheduler_open"<br/>
 &#160;&#160;&#160; i = 3<br/>
 end function<br/>
 <br/>
-function spooler_process<br/>
-&#160;&#160;&#160; spooler_log "Script component spooler_process i=" &amp; i<br/>
+function JobScheduler_process<br/>
+&#160;&#160;&#160; JobScheduler_log "Script component JobScheduler_process i=" &amp; i<br/>
 &#160;&#160;&#160; i = i - 1<br/>
-&#160;&#160;&#160; spooler_process = i > 0<br/>
+&#160;&#160;&#160; JobScheduler_process = i > 0<br/>
 end function<br/>
 <br/>
 &#160;&#160;&#160; ]]&gt;<br/>
@@ -361,8 +361,8 @@ end function<br/>
 
 <p>
 		<br/>
-		The server can be specified in the Job Scheduler configuration with its class name:
-<!--In der Spooler-Konfiguration kann der Server mit seinem Klassennamen angegeben	werden:-->
+		The server can be specified in the JobScheduler configuration with its class name:
+<!--In der JobScheduler-Konfiguration kann der Server mit seinem Klassennamen angegeben	werden:-->
 </p>
 
 <p class="indent">
@@ -407,10 +407,10 @@ end function<br/>
 <!--<li>
 			Bindung zur Compile-Zeit über Header-Dateien statt Verwendung von <font class="mono">IDispatch</font>.</li>-->
 		<li>
-			the <span style="font-variant: small-caps">com</span> class inherits fron the Spooler.Job class</li>
+			the <span style="font-variant: small-caps">com</span> class inherits fron the JobScheduler.Job class</li>
 <!--<li>
 			Die <span style="font-variant: small-caps">com</span>-Klasse erbt von der
-			Klasse Spooler.Job</li>-->
+			Klasse JobScheduler.Job</li>-->
 		<li>
 			all requests are implemented.
 			Requests are no longer optional.
