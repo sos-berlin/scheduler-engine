@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: job_com.xml 3623 2005-04-20 06:53:16Z jz $-->
+<!--$Id$-->
 
 <description 
     title    = "Implementation of JobScheduler scripts as COM Classes" 
