@@ -15,7 +15,11 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <method name="add_process_class">
-        <com/>
+      <com>
+        <com.parameter name="pc">
+          <com.type class="Process_class"/>
+        </com.parameter>
+      </com>
 
         <title>
             Fügt dem Scheduler eine Prozessklasse hinzu

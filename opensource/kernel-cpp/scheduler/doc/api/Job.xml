@@ -126,7 +126,7 @@ spooler_job.start_when_directory_changed( "c:/tmp", "^.*[^~]$" );</pre>
 
     <method name="start">
         <com>
-            <com.parameter optional="true">
+            <com.parameter optional="true" name="variables">
                 <com.type class="Variable_set"/>
             </com.parameter>
 

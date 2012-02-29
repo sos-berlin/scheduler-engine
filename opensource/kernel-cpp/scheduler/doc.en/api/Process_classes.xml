@@ -15,7 +15,11 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <method name="add_process_class">
-        <com/>
+      <com>
+        <com.parameter name="pc">
+          <com.type class="Process_class"/>
+        </com.parameter>
+      </com>
 
         <title>
             Adds a process class to the Job Scheduler

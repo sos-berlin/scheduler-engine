@@ -16,7 +16,7 @@
 
     <method name="add_lock">
         <com>
-            <com.parameter>
+            <com.parameter name="lck">
                 <com.type class="Lock"/>
             </com.parameter>
         </com>

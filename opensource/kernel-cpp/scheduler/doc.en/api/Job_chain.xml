@@ -283,7 +283,7 @@ sub xml_attribute
 
 <method name="add_or_replace_order">
     <com>
-        <com.parameter>
+        <com.parameter name="order">
             <com.type class="Order"/>
         </com.parameter>
     </com>

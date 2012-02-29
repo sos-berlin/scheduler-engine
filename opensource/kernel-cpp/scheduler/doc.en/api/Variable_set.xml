@@ -226,7 +226,7 @@ while( t.hasMoreTokens() )
 
 <method name="merge">
     <com>
-        <com.parameter>
+        <com.parameter name="vs">
             <com.type class="Variable_set"/>
         </com.parameter>
     </com>
@@ -256,7 +256,7 @@ while( t.hasMoreTokens() )
             <!--Die Zeichenkette mit den ersetzten $-Variablen-->
             </description>
         </com.result>
-        <com.parameter>
+        <com.parameter name="sustitution_string">
             <com.type type="BSTR"/>
         </com.parameter>
     </com>
