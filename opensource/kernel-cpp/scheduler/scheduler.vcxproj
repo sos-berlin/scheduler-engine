@@ -343,7 +343,6 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClInclude Include="spooler_module_process.h" />
     <ClInclude Include="spooler_module_remote.h" />
     <ClInclude Include="spooler_module_remote_server.h" />
-    <ClInclude Include="spooler_module_script.h" />
     <ClInclude Include="spooler_order.h" />
     <ClInclude Include="spooler_order_file.h" />
     <ClInclude Include="spooler_process.h" />

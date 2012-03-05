@@ -13,7 +13,7 @@ public class APIModuleInstanceTest {
 	private static final Logger logger = Logger.getLogger(APIModuleInstanceTest.class);
 
 	@Test
-	public void javascriptApi() throws NoSuchMethodException {
+	public void javascriptApi() throws Exception {
 		String script = "var cnt;\n"
 			+ "function spooler_init() {\n"
 			+ "   cnt = 0;\n"
@@ -40,7 +40,7 @@ public class APIModuleInstanceTest {
 	 * the current behavior for using the scripting API  
 	 */
 	@Test
-	public void javascriptWithoutFunctions() {
+	public void javascriptWithoutFunctions() throws Exception {
 		logger.debug("START javascriptWithoutFunctions ---------------------------------------------------------------------");
 		String script =	"print('script ran successfully\\n');\n";
 		APIModuleInstance module = new APIModuleInstance("javascript",script);
@@ -63,7 +63,7 @@ public class APIModuleInstanceTest {
 	 * jar-file: inherited in java
 	 */
 	@Test
-	public void javascriptWithObjects() {
+	public void javascriptWithObjects() throws Exception {
 		logger.debug("START javascriptWithObjects ---------------------------------------------------------------------");
 		String script =	"print('hello, my name ist ' + name + '\\n');\n" +
 				"log.debug('hello my name ist ' + name + '\\n')\n";
@@ -117,7 +117,7 @@ public class APIModuleInstanceTest {
 //	 @Test
 	//	maven dependencies not found for groovy
 	@Ignore
-	public void groovyScriptFromFile() throws NoSuchMethodException {
+	public void groovyScriptFromFile() throws Exception {
 		logger.debug("START groovyScriptFromFile --------------------------------------------------------------------");
 		ScriptInstance module = new ScriptInstance("groovy");
 		module.setSourceFile(script_root + "test.groovy");

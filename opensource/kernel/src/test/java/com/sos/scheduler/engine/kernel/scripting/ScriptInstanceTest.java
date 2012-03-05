@@ -40,7 +40,7 @@ public class ScriptInstanceTest {
 	private final static String script_root = "./src/test/scripts/";    // FIXME Sollte eine Resource im Package sein. Pfad ist in IntelliJ-IDE nicht auffindbar. Zschimmer 20.10.2011
 
 	@Test
-	public void javaScript() {
+	public void javaScript() throws UnsupportedScriptLanguageException {
 		logger.debug("===== javaScript: " + ScriptInstanceTest.class.getPackage().getName());
 		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode("print('Hallo Welt\\n');");
@@ -48,7 +48,7 @@ public class ScriptInstanceTest {
 	}
 
 	@Test
-	public void javaScriptWithParams() {
+	public void javaScriptWithParams() throws UnsupportedScriptLanguageException {
 		logger.debug("===== javaScriptWithParams");
 		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode("print('Hallo ' + name + '\\n');");
@@ -57,7 +57,7 @@ public class ScriptInstanceTest {
 	}
 
 	@Test
-	public void javaScriptWithFunction() {
+	public void javaScriptWithFunction() throws UnsupportedScriptLanguageException {
 		logger.debug("===== javaScriptWithFunction");
 		String script = "function show () {print('hallo welt\\n'); }\n";
 		ScriptInstance module = new ScriptInstance("javascript");
@@ -70,7 +70,7 @@ public class ScriptInstanceTest {
 	}
 
 	@Test
-	public void javaScriptWithFunctions() {
+	public void javaScriptWithFunctions() throws UnsupportedScriptLanguageException {
 		logger.debug("===== javaScriptWithFunctions");
 		String script = "function add (a, b) {c = a + b; param = 'abc';return c; }";
 		ScriptInstance module = new ScriptInstance("javascript");
@@ -89,7 +89,7 @@ public class ScriptInstanceTest {
 	}
 
 	@Test
-	public void javaScriptDoubleFunction() {
+	public void javaScriptDoubleFunction() throws UnsupportedScriptLanguageException {
 		logger.debug("===== javaScriptDoubleFunction");
 		String script = "function divide (a, b) {c = a / b; return c; }";
 		ScriptInstance module = new ScriptInstance("javascript");
@@ -104,7 +104,7 @@ public class ScriptInstanceTest {
 	}
 
 	@Test
-	public void javaScriptFromFile() throws NoSuchMethodException {
+	public void javaScriptFromFile() throws NoSuchMethodException, UnsupportedScriptLanguageException {
 		logger.debug("===== javaScriptFromFile");
 		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceFile(script_root + "test.js");
@@ -130,7 +130,7 @@ public class ScriptInstanceTest {
 
 	// @Test - maven dependencies not found for bean
 	// http://www.beanshell.org/
-	public void beanScript() {
+	public void beanScript() throws UnsupportedScriptLanguageException {
 		logger.debug("===== beanScript");
 		String script = "for (int i=0; i<5; i++)\n" + "print(i);\n" + "print(\"Hello \" + name);\n";
 		ScriptInstance module = new ScriptInstance("bsh");
@@ -155,7 +155,7 @@ public class ScriptInstanceTest {
 	 */
 	// @Test
 	//	maven dependencies not found for bean
-	public void jythonScriptFromFile() throws NoSuchMethodException {
+	public void jythonScriptFromFile() throws NoSuchMethodException, UnsupportedScriptLanguageException {
 		logger.debug("===== jythonScriptFromFile");
 		ScriptInstance module = new ScriptInstance("jython");
 		module.setSourceFile(script_root + "test.py");
@@ -178,7 +178,7 @@ public class ScriptInstanceTest {
 	 */
 	// @Test
 	//	maven dependencies not found for bean
-	public void groovyScript() {
+	public void groovyScript() throws UnsupportedScriptLanguageException {
 		logger.debug("===== groovyScript");
 		String script = "println 'hello, groovy world'\n";
 		ScriptInstance module = new ScriptInstance("groovy");
@@ -187,7 +187,7 @@ public class ScriptInstanceTest {
 	}
 
 	@Test(expected = UnsupportedScriptLanguageException.class)
-	public void unsupportedScriptLanguage() {
+	public void unsupportedScriptLanguage() throws UnsupportedScriptLanguageException {
 		logger.debug("===== unsupportedScriptLanguage");
 		try {
 			ScriptInstance module = new ScriptInstance("tolami");
@@ -199,7 +199,7 @@ public class ScriptInstanceTest {
 	}
 
 	@Test(expected = InvalidScriptException.class)
-	public void missingScriptCode() {
+	public void missingScriptCode() throws UnsupportedScriptLanguageException {
 		logger.debug("===== missingScriptCode");
 		try {
 			ScriptInstance module = new ScriptInstance("javascript");

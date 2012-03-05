@@ -24,7 +24,7 @@ public class InvokeFunctionTest {
 	}
 	
 	@Test
-	public void invokeFuntion() throws ScriptException, NoSuchMethodException {
+	public void invokeFunction() throws ScriptException, NoSuchMethodException {
 		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
         bindings.put("parm1", "hello");
         

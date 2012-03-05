@@ -49,9 +49,9 @@ public class ScriptInstance implements Script {
 	private String				sourceCode;
 	private ScriptFunction		lastFunction	= null;
 
-	public ScriptInstance(String scriptlanguage) {
-		languageId = scriptlanguage;
-		logger.debug("the language id is " + scriptlanguage);
+	public ScriptInstance(String scriptLanguage) throws UnsupportedScriptLanguageException {
+		languageId = scriptLanguage;
+		logger.info("the language id is " + scriptLanguage);
 
 		ScriptEngineManager sm;
 		ScriptEngine se;
@@ -62,7 +62,9 @@ public class ScriptInstance implements Script {
 			sb = se.getBindings(ScriptContext.ENGINE_SCOPE);
 		}
 		catch (Exception e) {
-			throw new UnsupportedScriptLanguageException(e, "Scriptlanguage " + getLanguageId() + " is not supported.", scriptlanguage);
+            String message = "Scriptlanguage " + languageId + " is not supported.";
+            logger.error(message);
+			throw new UnsupportedScriptLanguageException(e, message);
 		}
 		scriptengine = se;
 		scriptbindings = sb;

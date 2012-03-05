@@ -33,11 +33,11 @@ public class ScriptFunction {
 	private String	functionName	= "";
 	private String	typeId			= "";
 	
-	public ScriptFunction(String fullname) {
+	public ScriptFunction(String fullName) {
 		boolean propsToSet = true;
-		if (fullname.contains(")") && !fullname.endsWith(")")) {
+		if (fullName.contains(")") && !fullName.endsWith(")")) {
 			Pattern p = Pattern.compile("^(.*)([^\\)])$");
-			Matcher m = p.matcher(fullname);
+			Matcher m = p.matcher(fullName);
 			if (m.matches()) {
 				functionName = m.group(1);
 				typeId = m.group(2);
@@ -45,7 +45,7 @@ public class ScriptFunction {
 			}
 		}
 		if (propsToSet) {
-			functionName = fullname;
+			functionName = fullName;
 			functionName = getNativeFunctionName() + "()";
 			typeId = "V"; // void
 		}
@@ -69,12 +69,12 @@ public class ScriptFunction {
 	 * the presence of a function is determined with the functionname followed by optional whitespaces 
 	 * and an opened brace sign, that means ( or { or [.
 	 * 
-	 * @param scriptcode
+	 * @param scriptCode
 	 * @return
 	 */
-	public boolean isFunction(String scriptcode) {
+	public boolean isFunction(String scriptCode) {
 		final Pattern p = Pattern.compile( getNativeFunctionName() + "\\s*(\\(|\\{|\\[)");
-		Matcher m = p.matcher(scriptcode); 
+		Matcher m = p.matcher(scriptCode);
 		return m.find();
 	}
 

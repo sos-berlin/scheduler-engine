@@ -53,9 +53,9 @@ struct Text_with_includes : Non_cloneable
 
     xml::Element_ptr            dom_element                 ()                                      { return _dom_document.documentElement(); }
     void                        append_dom                  ( const xml::Element_ptr& dom );
+    void                        initialize                  ();
 
   private:
-    void                        initialize                  ();
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;

@@ -306,6 +306,9 @@
     <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
@@ -411,9 +414,6 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="spooler_module_remote_server.h">
-      <Filter>Header-Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="spooler_module_script.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="spooler_order.h">

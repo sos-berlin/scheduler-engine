@@ -1,90 +1,45 @@
-/**
- * \file spooler_module_script
- * \brief script-Verarbeitung über JAVA interface
- * \details 
- * Verarbeitet Jobs, die in einer Scriptsprache geschrieben sind über ein JAVA-Modul
- *
- * \author SS
- * \version 2.1.1 - 2010-05-07
- * \copyright © 2010 by SS
- * <div class="sos_branding">
- *    <p>© 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
 #include "spooler.h"
-#include "../javaproxy/java__lang__String.h"
-#include "../zschimmer/java_com.h"
 
+#include "../kram/sos_java.h"
+#include "../zschimmer/java.h"
+
+using namespace std;
 using namespace zschimmer::javabridge;
 
 namespace sos {
 namespace scheduler {
 
-//-----------------------------------------------------------------Script_module::Script_module
-    
-Script_module::Script_module( Spooler* spooler, Prefix_log* log )
-:
-    Module( spooler, (File_based*)NULL, "::NO-INCLUDE-PATH::", log )
-{
-    _kind = kind_scripting_engine_java;
-    _set = true;
-}
+//------------------------------------------------Java_module_script_instance::Java_module_instance
 
-//---------------------------------------------------Internal_instance_base::Script_module_instance
-    
-Script_module_instance::Script_module_instance( Module* module )             
+Java_module_script_instance::Java_module_script_instance( Module* module )
 : 
-    Module_instance(module),
-    _zero_(this+1),
-    _java_module_instance( javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance::new_instance( module->_language, module->read_source_script()) )
+    Java_module_instance(module)
 {
 }
+//----------------------------------------------------------------Java_module_script_instance::init
 
-//----------------------------------------------------------------Script_module_instance::add_obj
-    
-void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
+void Java_module_script_instance::init()
 {
-    Z_LOG2("scheduler","Script_module_instance::add_obj name=" << name << "\n");
+    Env         env;
+    Local_frame local_frame ( 10 );
+    Java_idispatch_stack_frame stack_frame;
 
-    ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(idispatch, name);
-    _added_jobjects.push_back( java_idispatch );
-    _java_module_instance.addObject( java_idispatch->get_jobject(), name );            // registriert das Object in ScriptInterface
-    Module_instance::add_obj( idispatch, name );
-}
+    Module_instance::init();
 
-//-----------------------------------------------------------Script_module_instance::call
+    _java_class = env.find_class( java_adapter_job() );
+    jmethodID method_id = java_method_id( "<init>(Ljava/lang/String;Ljava/lang/String;)V" );   // Konstruktor
+    if( !method_id )  env.throw_java( "GetMethodID" );
 
-Variant Script_module_instance::call( const string& name )
-{
-    Z_LOG2("scheduler","Script_module_instance::call name=" << name << "\n");
-    Com_env env = _module->_java_vm->jni_env();
-    javaproxy::java::lang::Object result = _java_module_instance.call(name);
-    return (result == NULL) ? empty_variant : env.jobject_to_variant( result ); 
-}
+    jstring language = env.jstring_from_string(_module->_language);
+    jstring code = env.jstring_from_string(_module->read_source_script());
 
-//-------------------------------------------------------------------Script_module_instance::call
+    assert( _jobject == NULL );
+    _jobject = env->NewObject( _java_class, method_id, code );
+    if( !_jobject || env->ExceptionCheck() )  env.throw_java( java_adapter_job() + " Konstruktor" );
 
-Variant Script_module_instance::call( const string& name, const Variant& p1, const Variant& p2 )
-{
-    if (p2 != missing_variant ) 
-       assert(0), z::throw_xc( "SCHEDULER-481", name, "(p1,p2)" );
-
-    Z_LOG2("scheduler","Script_module_instance::call\n");
-    Com_env env = _module->_java_vm->jni_env();
-    javaproxy::java::lang::Object result = _java_module_instance.call(name,p1.as_bool());
-    return (result == NULL) ? empty_variant : env.jobject_to_variant( result ); 
-}
-
-//------------------------------------------------------------Script_module_instance::name_exists
-
-bool Script_module_instance::name_exists( const string& name )
-{
-    Z_LOG2("scheduler","Script_module_instance::name_exists name=" << name << "\n");
-    return (_java_module_instance.nameExists(name) != 0);  // weil name_exists jboolean zurück gibt (will JZ noch ändern)
 }
 
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler
 } //namespace sos
-

@@ -76,6 +76,16 @@ struct Java_module_instance : Module_instance
     Fill_end                   _end_;
 };
 
+//----------------------------------------------------------------------Java_module_script_instance
+// Für Scripting-Objekte via javax
+
+struct Java_module_script_instance : Java_module_instance
+{
+                                Java_module_script_instance ( Module* );
+    void                        init                        ();
+    string                      java_adapter_job            () const                            { return "sos/spooler/jobs/ScriptAdapterJob"; }
+};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

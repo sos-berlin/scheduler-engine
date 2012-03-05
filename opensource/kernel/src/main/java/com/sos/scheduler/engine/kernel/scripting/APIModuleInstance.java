@@ -1,21 +1,16 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
 /**
- * \file APIModuleInstance.java
- * \brief implementation of the script api from the job scheduler.
- *  
- * \class ModuleInstance 
- * \brief implementation of the script api from the job scheduler.
- * 
- * \details
+ * Implementation of the script api from the job scheduler.
+ *
  * This class is a general implementation of the scheduler script api for using with
  * all script languages supported by the javax interface for scripting.
  * 
  * see http://java.sun.com/developer/technicalArticles/J2SE/Desktop/scripting/
  * see https://scripting.dev.java.net/
  *
- * \author Stefan Schaedlich
- * \version 1.0 - 2010-12-17
+ * @author Stefan Schaedlich
+ * @version 1.0 - 2010-12-17
  * <div class="sos_branding">
  *   <p>(c) 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
@@ -41,8 +36,8 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	private final String schedulerLanguageId;
 	private final JobSchedulerLog4JAppender jsAppender;
 
-	@ForCpp public APIModuleInstance(String scriptlanguage, String sourcecode) {
-		super(getScriptLanguage(scriptlanguage));
+	@ForCpp public APIModuleInstance(String scriptLanguage, String sourcecode) throws UnsupportedScriptLanguageException {
+		super(getScriptLanguage(scriptLanguage));
 	
 		JobSchedulerLog4JAppender bapn = null;
 		Appender stdoutAppender = logger.getAppender("scheduler");
@@ -53,21 +48,20 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 		jsAppender = bapn;
 
 		setSourceCode(sourcecode);
-		schedulerLanguageId = scriptlanguage;
+		schedulerLanguageId = scriptLanguage;
 	}
 
 	/**
-	 * \brief the script language to use \return String
+	 * The script language to use
+     * @return String
 	 */
 	private static String getScriptLanguage(String scriptlanguage) {
 		return scriptlanguage.toLowerCase().replace(LANGUAGE_PREFIX, "");
 	}
 
 	/**
-	 * \brief the content from the language attribute of the script element
-	 * \details In case of javascript it will return 'javax.script:javascript'
-	 * 
-	 * \return String
+	 * The content from the language attribute of the script element. In case of javascript it will return 'javax.script:javascript'
+	 * @return String
 	 */
 	public String getSchedulerLanguageId() {
 		return schedulerLanguageId;
@@ -93,37 +87,40 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	}
 
 	/**
-	 * \brief
-	 * call a script function
+	 * Call a script function
+	 * It's just the same like the call method of the superclass, but the error handling is different. The JS
+	 * calls the script for any function of the api (scheduler_init, scheduler_open etc.), but it is not necessary
+     * the functions are present in the script.
 	 * 
-	 * \details It's just the same like the call
-	 * method of the superclass, but the error handling is different. The JS
-	 * calls the script for any function of the api (scheduler_init, scheduler_open
-	 * etc.), but it is not necessary the functions are present in the script.
+	 * scheduler_process has to be present. If not the whole script will run without functions.
 	 * 
-	 * scheduler_process has to be present. If not the whole script will run
-	 * without functions.
+	 * @return Object - with the result of the script
 	 * 
-	 * \return Object - with the result of the script
-	 * 
-	 * @param functionname
+	 * @param rawFunctionName
+     * @param params
 	 */
 	@Override
     @ForCpp
-	public Object call(String rawfunctionname, Object[] params) {
+	public Object call(String rawFunctionName, Object[] params) {
 		Object result = null;
-		ScriptFunction fobj = new ScriptFunction(rawfunctionname);
-		String function = fobj.getNativeFunctionName();
-		if ( fobj.isFunction(getSourcecode())) {
+		ScriptFunction functionObject = new ScriptFunction(rawFunctionName);
+		String function = functionObject.getNativeFunctionName();
+        logger.info("try to call function " + function);
+		if ( functionObject.isFunction(getSourcecode())) {
 			try {
+                logger.info("call for function " + function + " (" + rawFunctionName + ")");
 				result = super.call(function, params);
+                logger.info("result is " + result);
 			} catch (NoSuchMethodException e) {
 				logger.error("the function " + function + " does not exist.");
 			}
 		} else {
+            logger.info("not found");
 			if (function.equals(SCHEDULER_PROCESS)) {
+                logger.info("call for function " + function + " (" + rawFunctionName + ")");
 				result = super.call();
 				result = (result == null) ? Boolean.FALSE : result;
+                logger.info("result is " + result);
 			}
 		}
 		return result;
@@ -131,8 +128,8 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 
 	@Override
     @ForCpp
-	public Object call(String rawfunctionname) {
-		return call(rawfunctionname, new Object[] {});
+	public Object call(String rawFunctionName) {
+		return call(rawFunctionName, new Object[] {});
 	}
 
 	@Override
@@ -145,14 +142,14 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	 * \brief dummy for checking the existence of a function
 	 * \details
 	 * 
-	 * @param name
+	 * @param rawFunctionName
 	 * @return true
 	 */
 	@Override
 	@ForCpp
-    public boolean nameExists(String rawfunctionname) {
-		ScriptFunction fobj = new ScriptFunction(rawfunctionname);
-		return fobj.isFunction(getSourcecode());
+    public boolean nameExists(String rawFunctionName) {
+		ScriptFunction functionObject = new ScriptFunction(rawFunctionName);
+		return functionObject.isFunction(getSourcecode());
 	}
 
 }

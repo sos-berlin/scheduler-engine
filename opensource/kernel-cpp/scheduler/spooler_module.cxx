@@ -270,7 +270,6 @@ void Module::init0()
     if (_spooler && _spooler->variables())
       prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
     _process_shell_variable_prefix = (prefix.empty()) ? shell_variable_prefix_default : (prefix == "*NONE") ? "" : prefix;
-    Z_LOG2("scheduler","the prefix for shell variables is " << _process_shell_variable_prefix << "\n");
 
     _monitors = Z_NEW( Module_monitors( this ) );
 }
@@ -531,7 +530,7 @@ ptr<Module_instance> Module::create_instance_impl()
                 Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
             }
             
-            ptr<Script_module_instance> p = Z_NEW( Script_module_instance( this ) );
+            ptr<Java_module_script_instance> p = Z_NEW( Java_module_script_instance( this ) );
             result = +p;
             break;
         }

@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.excluded.ss.simple;
 
 import java.io.IOException;
 
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
