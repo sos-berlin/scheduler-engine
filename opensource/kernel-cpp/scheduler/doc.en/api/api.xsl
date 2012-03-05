@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<!-- $Id: api.xsl 5814 2008-06-30 09:30:32Z jz $ -->
+<!-- $Id: api.xsl 14199 2011-01-25 12:13:10Z ss $ -->
 
 
 
@@ -222,6 +222,10 @@
 
                         <xsl:call-template name="programming_language_selector">
                             <xsl:with-param name="this_programming_language">javax.script</xsl:with-param>
+                        </xsl:call-template>
+						
+						<xsl:call-template name="programming_language_selector">
+                            <xsl:with-param name="this_programming_language">Powershell</xsl:with-param>
                         </xsl:call-template>
                         
                     </td>
@@ -581,6 +585,12 @@
                             <xsl:with-param name="is_in_table" select="$is_in_table"/>
                         </xsl:apply-templates>
                     </xsl:when>
+					<xsl:when test="parent::property and $selected_programming_language='Powershell' and com.parameter">
+						<xsl:apply-templates select="." mode="parameter_list">
+                            <xsl:with-param name="parameters" select="java.parameter | java.result | com.parameter | com.result"/>
+                            <xsl:with-param name="is_in_table" select="$is_in_table"/>
+                        </xsl:apply-templates>
+					</xsl:when>
                     <xsl:otherwise>
                         <xsl:apply-templates select="." mode="parameter_list">
                             <xsl:with-param name="parameters" select="java.parameter | com.parameter"/>
@@ -591,10 +601,17 @@
             </xsl:if>
 
             <xsl:if test="parent::property and $language_has_properties and $access='write'">
-                <span class="mono"> = </span>
-                <xsl:apply-templates select="com.result">
-                    <xsl:with-param name="is_in_table" select="$is_in_table"/>
-                </xsl:apply-templates>
+				<xsl:choose>
+					<xsl:when test="$selected_programming_language='Powershell' and com.parameter">
+						<!-- dann nichts schreiben -->
+					</xsl:when>
+					<xsl:otherwise>
+						<span class="mono"> = </span>
+						<xsl:apply-templates select="com.result">
+							<xsl:with-param name="is_in_table" select="$is_in_table"/>
+						</xsl:apply-templates>
+					</xsl:otherwise>					
+				</xsl:choose>
             </xsl:if>
 
 

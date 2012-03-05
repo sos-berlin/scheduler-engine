@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- $Id: Order_queue-perl.xml 11850 2006-01-31 11:42:37Z jz $ -->
+<?xml-stylesheet href="api-powershell.xsl" type="text/xsl"?>
+<api.class name="Order_queue" base_dir="../" />

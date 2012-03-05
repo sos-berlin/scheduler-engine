@@ -55,7 +55,8 @@
 
 <property name="var">
     <not_implemented programming_language="javascript"/>        <!-- var ist Schlüsselwort -->
-
+	<not_implemented programming_language="Powershell"/>
+	
     <com>
         <com.parameter name="name">
             <com.type type="BSTR"/>

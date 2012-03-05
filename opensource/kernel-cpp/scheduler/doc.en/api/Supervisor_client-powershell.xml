@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- $Id: Log-perl.xml 4070 2006-01-31 11:42:37Z jz $ -->
+<?xml-stylesheet href="api-powershell.xsl" type="text/xsl"?>
+<api.class name="Supervisor_client" base_dir="../" />

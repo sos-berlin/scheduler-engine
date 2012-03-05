@@ -19,11 +19,11 @@
             Jobs which use the Job Scheduler API may be implemented in Java, JavaScript 
             (the Mozilla Spidermonkey implementation) and Perl
             (Perl 5.8 is supported for Unix and an ActiveState implementation is required for Windows).
-            In addition, JScript and VBScript scripting languages are available on Microsoft Windows systems.
+            In addition, JScript, VBScript and Powershell scripting languages are available on Microsoft Windows systems.
         <!--Jobs, die die Programmschnittstelle des Schedulers nutzen,
             können in den Sprachen Java, JavaScript (Mozilla) und Perl implementiert werden
             (beachten Sie die Installationsvoraussetzungen).
-            Unter Microsoft Windows stehen auch JScript und VBScript zur Verfügung.-->
+            Unter Microsoft Windows stehen auch JScript, VBScript und Powershell zur Verfügung.-->
         </p>
         <p/>
         <hr/>
