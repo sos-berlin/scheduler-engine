@@ -309,7 +309,6 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_module.h"
 #include "spooler_module_com.h"
 #include "spooler_module_internal.h"
-#include "spooler_module_script.h"                     // JS-498
 #include "spooler_module_java.h"
 #include "spooler_module_process.h"
 #include "database.h"
@@ -445,7 +444,6 @@ struct Spooler : Object,
     void                        log_show_state              ( Prefix_log* log = NULL );
     int                         launch                      ( int argc, char** argv, const string& params );
     void                        assign_stdout               ();
-    static string               get_env                     (const string name, const string default_value);
 
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
