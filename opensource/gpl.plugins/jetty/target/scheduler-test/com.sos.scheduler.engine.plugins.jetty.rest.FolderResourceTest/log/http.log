@@ -1,1 +1,0 @@
-127.0.0.1 -  -  [05/Mrz/2012:11:21:35 +0000] "GET /jobscheduler/engine/folder?type=job&folder=/ HTTP/1.1" 200 0 "-" "Java/1.6.0_26"

@@ -1,2 +1,0 @@
-id	spooler_id	job_name	start_time	end_time	cause	steps	error	error_code	error_text	parameters	cluster_member_id	exit_code	pid
-1	test	order	2012-03-05 12:21:18	2012-03-05 12:21:25	order	3	0				

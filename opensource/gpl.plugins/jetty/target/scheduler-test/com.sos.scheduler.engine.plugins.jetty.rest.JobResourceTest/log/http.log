@@ -1,3 +1,0 @@
-127.0.0.1 -  -  [05/Mrz/2012:11:21:37 +0000] "GET /jobscheduler/engine/job/configuration?job=a HTTP/1.1" 200 0 "-" "Java/1.6.0_26"
-127.0.0.1 -  -  [05/Mrz/2012:11:21:37 +0000] "GET /jobscheduler/engine/job/description?job=a HTTP/1.1" 200 0 "-" "Java/1.6.0_26"
-127.0.0.1 -  -  [05/Mrz/2012:11:21:37 +0000] "GET /jobscheduler/engine/job/log.snapshot?job=a HTTP/1.1" 200 0 "-" "Java/1.6.0_26"
