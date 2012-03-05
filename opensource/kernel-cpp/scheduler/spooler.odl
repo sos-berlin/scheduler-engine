@@ -824,7 +824,7 @@ library Spooler
         HRESULT                 Job                     ( [out,retval] Idispatch** Job );
 
         [id(5),propget]
-        HRESULT                 Task                    ( [out,retval] Idispatch** task );
+        HRESULT                 Task                    ( [out,retval] Itask** task );
     }
 
     [

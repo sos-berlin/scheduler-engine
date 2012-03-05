@@ -21,7 +21,7 @@
             Jobs, die die Programmschnittstelle des Schedulers nutzen,
             können in den Sprachen Java, JavaScript (Mozilla) und Perl implementiert werden
             (beachten Sie die Installationsvoraussetzungen).
-            Unter Microsoft Windows stehen auch JScript und VBScript zur Verfügung.
+            Unter Microsoft Windows stehen auch JScript, VBScript und Powershell zur Verfügung.
         </p>
         <p/>
         <hr/>
