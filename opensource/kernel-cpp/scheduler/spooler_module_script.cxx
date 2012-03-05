@@ -34,7 +34,7 @@ void Java_module_script_instance::init()
     jstring code = env.jstring_from_string(_module->read_source_script());
 
     assert( _jobject == NULL );
-    _jobject = env->NewObject( _java_class, method_id, code );
+    _jobject = env->NewObject( _java_class, method_id, language, code );
     if( !_jobject || env->ExceptionCheck() )  env.throw_java( java_adapter_job() + " Konstruktor" );
 
 }
