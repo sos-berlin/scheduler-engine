@@ -1,0 +1,1 @@
+id	spooler_id	job_name	start_time	end_time	cause	steps	error	error_code	error_text	parameters	cluster_member_id	exit_code	pid

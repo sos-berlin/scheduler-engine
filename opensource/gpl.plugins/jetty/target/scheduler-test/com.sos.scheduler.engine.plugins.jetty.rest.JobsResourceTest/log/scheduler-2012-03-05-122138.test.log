@@ -1,0 +1,32 @@
+2012-03-05 12:21:38.206 [info]   SCHEDULER-900  Scheduler 1.3.12.2020-SNAPSHOT (Debug) is starting with C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\config\scheduler.xml, pid=6988
+2012-03-05 12:21:38.215 [info]   Plugin com.sos.scheduler.engine.plugins.jetty.JettyPlugin added
+2012-03-05 12:21:38.223 [info]   (Job a*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\config\a.job.xml' (2012-03-05 11:21:35.000 UTC) is going to be be loaded into this new Job
+2012-03-05 12:21:38.232 [info]   (Job order*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\config\order.job.xml' (2012-03-05 11:21:35.000 UTC) is going to be be loaded into this new Job
+2012-03-05 12:21:38.235 [info]   (Job_chain /a*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\config\a.job_chain.xml' (2012-03-05 11:21:35.000 UTC) is going to be be loaded into this new Job_chain
+2012-03-05 12:21:38.263 [info]   (Job  a) 
+2012-03-05 12:21:38.263 [info]   (Job  a) Job a - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\log/job.a.log
+2012-03-05 12:21:38.270 [info]   (Job  order) 
+2012-03-05 12:21:38.270 [info]   (Job  order) Job order - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\log/job.order.log
+2012-03-05 12:21:38.489 [info]   (Folder_subsystem) SCHEDULER-718  Using 'local' configuration directory 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\config\'
+2012-03-05 12:21:38.490 [info]   (Folder /) SCHEDULER-893  Folder is 'active' now
+2012-03-05 12:21:38.492 [info]   (Process_class ) SCHEDULER-893  Process_class is 'active' now
+2012-03-05 12:21:38.492 [info]   (Process_class (temporaries)) SCHEDULER-893  Process_class is 'active' now
+2012-03-05 12:21:38.493 [info]   (Job  scheduler_file_order_sink) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:38.494 [info]   (Job  scheduler_service_forwarder) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:39.932 [info]   (Job  a) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:39.933 [info]   (Job  order) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:39.934 [info]   (Job_chain /scheduler_service_forwarding) SCHEDULER-893  Job_chain is 'active' now
+2012-03-05 12:21:39.935 [info]   (Job_chain /a) SCHEDULER-893  Job_chain is 'active' now
+2012-03-05 12:21:39.936 [info]   --------------------------------------------
+2012-03-05 12:21:39.936 [info]   SCHEDULER-902  state=running
+2012-03-05 12:21:40.015 [info]   --------------------------------------------
+2012-03-05 12:21:40.015 [info]   SCHEDULER-902  state=stopping
+2012-03-05 12:21:40.021 [info]   (Job  a) SCHEDULER-931  state=stopped
+2012-03-05 12:21:40.021 [info]   (Job  order) SCHEDULER-931  state=stopped
+2012-03-05 12:21:40.030 [info]   (Job  order) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\log/job.order.log
+2012-03-05 12:21:40.033 [info]   (Job  a) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\log/job.a.log
+2012-03-05 12:21:40.035 [info]   (Job  scheduler_service_forwarder) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\log/job.scheduler_service_forwarder.log
+2012-03-05 12:21:40.038 [info]   (Job  scheduler_file_order_sink) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.rest.JobsResourceTest\log/job.scheduler_file_order_sink.log
+2012-03-05 12:21:40.111 [info]   --------------------------------------------
+2012-03-05 12:21:40.111 [info]   SCHEDULER-902  state=stopped
+2012-03-05 12:21:40.113 [info]   SCHEDULER-999  Scheduler has been terminated properly

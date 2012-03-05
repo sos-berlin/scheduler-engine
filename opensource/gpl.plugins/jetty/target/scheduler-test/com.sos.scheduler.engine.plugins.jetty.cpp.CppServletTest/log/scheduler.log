@@ -1,0 +1,733 @@
+05 12:21:11.603 java   31  6988.1BB0 464.652MB (25910  +25910 bytes) 
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (25910      +0 bytes) ----------------------Mon Mar 05 12:21:11 2012
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (25974     +64 bytes) Aufruf: (unknown)  
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (25942     -32 bytes) host=MOBILE-2, user=schaedi, pid=6988
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (25958     +16 bytes) Microsoft Windows 6.1, Service Pack 1, Build 7601
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (25974     +16 bytes) GetCommandLine(): C:\Programme\Java\jdk1.6.0_26\jre\bin\java  -jar C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\surefire\surefirebooter969701227560107883.jar C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\surefire\surefire1619740410502110630tmp C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\surefire\surefire1302304828155015097tmp
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26198    +224 bytes) Compiler Microsoft Visual C++ 10.0  (1600), Feb 18 2012
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26357    +159 bytes) get_temp_path() => C:\Users\schaedi\AppData\Local\Temp\
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26373     +16 bytes) working directory = C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26405     +32 bytes) Modul C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\scheduler-test-binaries\scheduler.dll  ProductName=Scheduler ProductVersion=1.3.12.2020-SNAPSHOT (Debug) OriginalFilename=scheduler.exe
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26176    -229 bytes) Programm C:\Programme\Java\jdk1.6.0_26\jre\bin\java.exe  ProductName=Java(TM) Platform SE 6 U26 ProductVersion=6.0.260.3 OriginalFilename=java.exe
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26240     +64 bytes) 
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26080    -160 bytes) Hostware 1.6.131. (Debug)
+05 12:21:11.603 java    0  6988.1BB0 464.652MB (26112     +32 bytes) java.exe     HMODULE=  400000 C:\Programme\Java\jdk1.6.0_26\jre\bin\java.exe  ProductName=Java(TM) Platform SE 6 U26 ProductVersion=6.0.260.3 OriginalFilename=java.exe
+05 12:21:11.603 java    0  6988.1BB0 465.051MB (26221    +109 bytes) ntdll.dll    HMODULE=77810000 C:\Windows\SYSTEM32\ntdll.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=ntdll.dll.mui
+05 12:21:11.603 java    0  6988.1BB0 465.938MB (26093    -128 bytes) kernel32.dll HMODULE=75EE0000 C:\Windows\system32\kernel32.dll          ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=kernel32
+05 12:21:11.603 java    0  6988.1BB0 465.938MB (26285    +192 bytes) KERNELBASE.dll HMODULE=75B70000 C:\Windows\system32\KERNELBASE.dll        ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=Kernelbase
+05 12:21:11.603 java    0  6988.1BB0 465.938MB (26180    -105 bytes) ADVAPI32.dll HMODULE=77580000 C:\Windows\system32\ADVAPI32.dll          ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=advapi32.dll.mui
+05 12:21:11.603 java    0  6988.1BB0 465.938MB (26292    +112 bytes) msvcrt.dll   HMODULE=75FC0000 C:\Windows\system32\msvcrt.dll            ProductName=Microsoft® Windows® Operating System ProductVersion=7.0.7601.17744 OriginalFilename=msvcrt.dll
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26244     -48 bytes) sechost.dll  HMODULE=77A20000 C:\Windows\SYSTEM32\sechost.dll           ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=sechost.dll.mui
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26109    -135 bytes) RPCRT4.dll   HMODULE=77970000 C:\Windows\system32\RPCRT4.dll            ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=rpcrt4.dll.mui
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26301    +192 bytes) msvcr71.dll  HMODULE=7C340000 C:\Programme\Java\jdk1.6.0_26\jre\bin\msvcr71.dll  ProductName=Microsoft® Visual Studio .NET ProductVersion=7.10.3052.4 OriginalFilename=MSVCR71.DLL
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26157    -144 bytes) jvm.dll      HMODULE=6D8A0000 C:\Programme\Java\jdk1.6.0_26\jre\bin\client\jvm.dll  ProductName=Java(TM) Platform SE 6u26 ProductVersion=6.0.260.3 OriginalFilename=jvm.dll
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26253     +96 bytes) USER32.dll   HMODULE=77090000 C:\Windows\system32\USER32.dll            ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7601.17514 OriginalFilename=user32
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26228     -25 bytes) GDI32.dll    HMODULE=773D0000 C:\Windows\system32\GDI32.dll             ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7601.17514 OriginalFilename=gdi32
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26276     +48 bytes) LPK.dll      HMODULE=76100000 C:\Windows\system32\LPK.dll               ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=LanguagePack
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26277      +1 bytes) USP10.dll    HMODULE=77330000 C:\Windows\system32\USP10.dll             ProductName=Microsoft(R) Uniscribe Unicode script processor ProductVersion=1.0626.7601.17514 OriginalFilename=Uniscribe
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26164    -113 bytes) WINMM.dll    HMODULE=749A0000 C:\Windows\system32\WINMM.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=WINMM.DLL.MUI
+05 12:21:11.603 java    0  6988.1BB0 465.941MB (26292    +128 bytes) IMM32.DLL    HMODULE=77160000 C:\Windows\system32\IMM32.DLL             ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7601.17514 OriginalFilename=imm32
+05 12:21:11.603 java    0  6988.1BB0 465.949MB (26205     -87 bytes) MSCTF.dll    HMODULE=77260000 C:\Windows\system32\MSCTF.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=MSCTF.DLL.MUI
+05 12:21:11.603 java    0  6988.1BB0 465.949MB (26269     +64 bytes) apphelp.dll  HMODULE=758D0000 C:\Windows\system32\apphelp.dll           ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7601.17514 OriginalFilename=Apphelp
+05 12:21:11.603 java    0  6988.1BB0 465.949MB (26272      +3 bytes) verify.dll   HMODULE=6D850000 C:\Programme\Java\jdk1.6.0_26\jre\bin\verify.dll  ProductName=Java(TM) Platform SE 6 U26 ProductVersion=6.0.260.3 OriginalFilename=verify.dll
+05 12:21:11.603 java    0  6988.1BB0 465.949MB (26148    -124 bytes) java.dll     HMODULE=6D3D0000 C:\Programme\Java\jdk1.6.0_26\jre\bin\java.dll  ProductName=Java(TM) Platform SE 6 U26 ProductVersion=6.0.260.3 OriginalFilename=java.dll
+05 12:21:11.603 java    0  6988.1BB0 465.949MB (26276    +128 bytes) PSAPI.DLL    HMODULE=77950000 C:\Windows\system32\PSAPI.DLL             ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=PSAPI
+05 12:21:11.603 java    0  6988.1BB0 465.949MB (26253     -23 bytes) zip.dll      HMODULE=6D890000 C:\Programme\Java\jdk1.6.0_26\jre\bin\zip.dll  ProductName=Java(TM) Platform SE 6 U26 ProductVersion=6.0.260.3 OriginalFilename=zip.dll
+05 12:21:11.603 java    0  6988.1BB0 465.949MB (26349     +96 bytes) scheduler.dll HMODULE=10000000 C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\scheduler-test-binaries\scheduler.dll  ProductName=Scheduler ProductVersion=1.3.12.2020-SNAPSHOT (Debug) OriginalFilename=scheduler.exe
+05 12:21:11.603 java    0  6988.1BB0 465.965MB (26269     -80 bytes) WSOCK32.dll  HMODULE=73170000 C:\Windows\system32\WSOCK32.dll           ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=wsock32.dll.mui
+05 12:21:11.603 java    0  6988.1BB0 468.281MB (26180     -89 bytes) WS2_32.dll   HMODULE=77420000 C:\Windows\system32\WS2_32.dll            ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=ws2_32.dll.mui
+05 12:21:11.603 java    0  6988.1BB0 468.281MB (26292    +112 bytes) NSI.dll      HMODULE=77960000 C:\Windows\system32\NSI.dll               ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=nsi.dll
+05 12:21:11.603 java    0  6988.1BB0 468.281MB (26228     -64 bytes) VERSION.dll  HMODULE=74D90000 C:\Windows\system32\VERSION.dll           ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=VERSION.DLL
+05 12:21:11.627 java   31  6988.1BB0 468.285MB (26308     +80 bytes) OLEAUT32.dll HMODULE=76070000 C:\Windows\system32\OLEAUT32.dll           ProductVersion=6.1.7601.17676 
+05 12:21:11.627 java    0  6988.1BB0 468.285MB (26228     -80 bytes) ole32.dll    HMODULE=77620000 C:\Windows\system32\ole32.dll             ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=OLE32.DLL.MUI
+05 12:21:11.627 java    0  6988.1BB0 468.285MB (26308     +80 bytes) CRYPTBASE.dll HMODULE=75920000 C:\Windows\system32\CRYPTBASE.dll         ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7600.16385 OriginalFilename=cryptbase.dll
+05 12:21:11.627 java    0  6988.1BB0 468.293MB (26253     -55 bytes) uxtheme.dll  HMODULE=74410000 C:\Windows\system32\uxtheme.dll           ProductName=Betriebssystem Microsoft® Windows® ProductVersion=6.1.7600.16385 OriginalFilename=UxTheme.dll.mui
+05 12:21:11.627 java    0  6988.1BB0 468.293MB (26030    -223 bytes) SspiCli.dll  HMODULE=758B0000 C:\Windows\system32\SspiCli.dll           ProductName=Microsoft® Windows® Operating System ProductVersion=6.1.7601.17725 OriginalFilename=sspicli.dll
+05 12:21:11.628 java    0  6988.1BB0 468.293MB (25958     -72 bytes) {scheduler} Scheduler 1.3.12.2020-SNAPSHOT (Debug)
+05 12:21:11.685 java   63  6988.1BB0 468.293MB (31094   +5136 bytes) sos.ini=C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\sos.ini
+05 12:21:11.829 java  140  6988.1BB0 470.293MB (436499 +405405 bytes) {scheduler} [debug3] --------------------------------------------
+05 12:21:11.830 java    0  6988.1BB0 470.293MB (436347    -152 bytes) {scheduler} [debug3] SCHEDULER-902  state=loading
+05 12:21:11.991 java  156  6988.1BB0 470.293MB (439410   +3063 bytes) {scheduler} [debug3] the home-directory is C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target
+05 12:21:12.130 java  140  6988.1BB0 473.105MB (440089    +679 bytes) GetComputerNameEx()
+05 12:21:12.151 java   32  6988.1BB0 473.105MB (441189   +1100 bytes) open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml")  => 4
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (442053    +864 bytes) close(4) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (442005     -48 bytes) {scheduler} sos::scheduler::Command_processor::execute_config_file
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441877    -128 bytes) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml:
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441989    +112 bytes) <?xml version="1.0" encoding="ISO-8859-1"?>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441845    -144 bytes) <spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441973    +128 bytes)     <config>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441797    -176 bytes)         <plugins>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441829     +32 bytes)             <plugin java_class="com.sos.scheduler.engine.plugins.jetty.JettyPlugin">
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441893     +64 bytes)                 <plugin.config port="44440" tryUntilPort="50000">
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441845     -48 bytes)                     <loginService>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441845      +0 bytes)                         <logins>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441845      +0 bytes)                             <login name="testName" password=? roles="administrator"/>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441893     +48 bytes)                         </logins>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441845     -48 bytes)                     </loginService>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441845      +0 bytes)                 </plugin.config>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441853      +8 bytes)             </plugin>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441885     +32 bytes)         </plugins>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441885      +0 bytes)     </config>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441853     -32 bytes) </spooler>
+05 12:21:12.152 java    0  6988.1BB0 473.105MB (441853      +0 bytes) 
+05 12:21:12.215 java   62  6988.1BB0 473.105MB (451638   +9785 bytes) {scheduler} Java_subsystem: switch_subsystem_state initialized
+05 12:21:12.287 java   62  6988.1BB0 473.105MB (458774   +7136 bytes) .{scheduler} Java_subsystem: state=initialized
+05 12:21:13.505 java 1217  6988.1BB0 474.426MB (563255 +104481 bytes) {scheduler} Event_subsystem: switch_subsystem_state initialized
+05 12:21:13.505 java    0  6988.1BB0 474.426MB (563287     +32 bytes) .{scheduler} Event_subsystem: state=initialized
+05 12:21:13.505 java    0  6988.1BB0 474.426MB (563271     -16 bytes) {scheduler} Folder_subsystem: switch_subsystem_state initialized
+05 12:21:13.623 java  125  6988.1BB0 474.426MB (589779  +26508 bytes) .{scheduler} Folder_subsystem: state=initialized
+05 12:21:13.623 java    0  6988.1BB0 474.426MB (589763     -16 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state initialized
+05 12:21:13.639 java   16  6988.1BB0 474.426MB (589779     +16 bytes) .{scheduler} Schedule_subsystem: state=initialized
+05 12:21:13.639 java    0  6988.1BB0 474.426MB (589763     -16 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state initialized
+05 12:21:13.650 java   15  6988.1BB0 474.426MB (598043   +8280 bytes) .{scheduler} Process_class_subsystem: state=initialized
+05 12:21:13.651 java    0  6988.1BB0 474.426MB (598027     -16 bytes) {scheduler} Lock_subsystem: switch_subsystem_state initialized
+05 12:21:13.651 java    0  6988.1BB0 474.426MB (598043     +16 bytes) .{scheduler} Lock_subsystem: state=initialized
+05 12:21:13.651 java    0  6988.1BB0 474.426MB (598011     -32 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state initialized
+05 12:21:13.705 java   47  6988.1BB0 474.426MB (611970  +13959 bytes) .{scheduler} Job_chain_subsystem: state=initialized
+05 12:21:13.706 java    0  6988.1BB0 474.426MB (611954     -16 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state initialized
+05 12:21:13.706 java    0  6988.1BB0 474.426MB (611970     +16 bytes) .{scheduler} Standing_order_subsystem: state=initialized
+05 12:21:13.706 java    0  6988.1BB0 474.426MB (611954     -16 bytes) {scheduler} Http_server: switch_subsystem_state initialized
+05 12:21:13.706 java    0  6988.1BB0 474.426MB (612130    +176 bytes) .{scheduler} Http_server: state=initialized
+05 12:21:13.707 java    0  6988.1BB0 474.426MB (612114     -16 bytes) {scheduler} Web_services: switch_subsystem_state initialized
+05 12:21:13.726 java   31  6988.1BB0 474.426MB (617125   +5011 bytes) .{scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><job visible="no" name="scheduler_service_forwarder" order="yes" title="Web-service forwarder"><script language="java" java_class="sos.spooler.jobs.Web_service_forwarder"/></job>
+05 12:21:13.780 java   47  6988.1BB0 474.426MB (631509  +14384 bytes) .{scheduler} [debug9] (Job  ) SCHEDULER-893  Job is 'undefined' now
+05 12:21:13.782 java    0  6988.1BB0 474.426MB (631621    +112 bytes) .{scheduler} [debug9] (Job scheduler_service_forwarder*) SCHEDULER-893  Job is 'not_initialized' now
+05 12:21:13.795 java   16  6988.1BB0 474.426MB (631124    -497 bytes) .{scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><job_chain visible="no" name="scheduler_service_forwarding"><job_chain_node state="forward" job="scheduler_service_forwarder"/><job_chain_node state="finished"/></job_chain>
+05 12:21:13.815 java   15  6988.1BB0 474.426MB (636876   +5752 bytes) .{scheduler} [debug9] (Job_chain) SCHEDULER-893  Job_chain is 'undefined' now
+05 12:21:13.872 java   63  6988.1BB0 474.426MB (641027   +4151 bytes) .{scheduler} [debug9] (Job_chain /scheduler_service_forwarding*) SCHEDULER-893  Job_chain is 'not_initialized' now
+05 12:21:13.872 java    0  6988.1BB0 474.426MB (640659    -368 bytes) .{JS-644} job_chain::Node scheduler_service_forwarding:1::sos::scheduler::folder::Dependant::add_requisite 'Job /scheduler_service_forwarder'
+05 12:21:13.873 java    0  6988.1BB0 474.426MB (641071    +412 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::add_requisite job_chain::Node scheduler_service_forwarding:1 '/scheduler_service_forwarder'
+05 12:21:13.873 java    0  6988.1BB0 474.426MB (641431    +360 bytes) .{scheduler} sos::scheduler::order::Order_sources::initialize
+05 12:21:13.874 java    0  6988.1BB0 474.426MB (641727    +296 bytes) .{scheduler} [debug9] (Job_chain /scheduler_service_forwarding*) SCHEDULER-893  Job_chain is 'initialized' now
+05 12:21:13.877 java    0  6988.1BB0 474.426MB (636229   -5498 bytes) .{scheduler} Web_services: state=initialized
+05 12:21:13.925 java   46  6988.1BB0 474.426MB (636165     -64 bytes) {scheduler} Supervisor: switch_subsystem_state initialized
+05 12:21:13.965 java   47  6988.1BB0 474.426MB (644249   +8084 bytes) .{scheduler} Supervisor: state=initialized
+05 12:21:13.966 java    0  6988.1BB0 474.426MB (644233     -16 bytes) {scheduler} Job_subsystem: switch_subsystem_state initialized
+05 12:21:13.967 java    0  6988.1BB0 474.426MB (644265     +32 bytes) .{scheduler} Job scheduler_file_order_sink.initialize()
+05 12:21:13.968 java    0  6988.1BB0 474.426MB (644273      +8 bytes) ..{JS-644} Job scheduler_file_order_sink::sos::scheduler::folder::Dependant::add_requisite 'Process_class '
+05 12:21:13.968 java    0  6988.1BB0 474.426MB (644685    +412 bytes) ..{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::add_requisite Job scheduler_file_order_sink ''
+05 12:21:13.979 java   16  6988.1BB0 474.426MB (648577   +3892 bytes) ..{JS-644} Schedule_use Job scheduler_file_order_sink-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:13.980 java    0  6988.1BB0 474.426MB (648893    +316 bytes) ..{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:13.991 java    0  6988.1BB0 474.426MB (652654   +3761 bytes) .{scheduler} [debug9] (Job scheduler_file_order_sink) SCHEDULER-893  Job is 'initialized' now
+05 12:21:13.991 java    0  6988.1BB0 474.426MB (652246    -408 bytes) .{scheduler} Job scheduler_service_forwarder.initialize()
+05 12:21:13.991 java    0  6988.1BB0 474.426MB (652222     -24 bytes) ..{JS-644} Job scheduler_service_forwarder::sos::scheduler::folder::Dependant::add_requisite 'Process_class '
+05 12:21:13.992 java   15  6988.1BB0 474.426MB (652634    +412 bytes) ..{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::add_requisite Job scheduler_service_forwarder ''
+05 12:21:13.992 java    0  6988.1BB0 474.426MB (656202   +3568 bytes) ..{JS-644} Schedule_use Job scheduler_service_forwarder-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:13.993 java    0  6988.1BB0 474.426MB (656518    +316 bytes) ..{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:13.993 java    0  6988.1BB0 474.426MB (660131   +3613 bytes) .{scheduler} [debug9] (Job scheduler_service_forwarder) SCHEDULER-893  Job is 'initialized' now
+05 12:21:13.994 java    0  6988.1BB0 474.426MB (659723    -408 bytes) .{scheduler} Job_subsystem: state=initialized
+05 12:21:13.994 java    0  6988.1BB0 474.426MB (659659     -64 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state initialized
+05 12:21:13.994 java    0  6988.1BB0 474.426MB (659691     +32 bytes) .{scheduler} Scheduler_script_subsystem: state=initialized
+05 12:21:13.995 java    0  6988.1BB0 474.426MB (665379   +5688 bytes) {scheduler} [debug3] --------------------------------------------
+05 12:21:13.996 java    0  6988.1BB0 474.426MB (665355     -24 bytes) {scheduler} [debug3] SCHEDULER-902  state=starting
+05 12:21:13.997 java    0  6988.1BB0 474.426MB (667095   +1740 bytes) {scheduler} [info]   SCHEDULER-900  Scheduler 1.3.12.2020-SNAPSHOT (Debug) is starting with C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.x
+05 12:21:13.997 java    0  6988.1BB0 474.426MB (667319    +224 bytes) l, pid=6988
+05 12:21:13.998 java    0  6988.1BB0 474.426MB (666399    -920 bytes) {scheduler} sos::scheduler::time::Time::set_current_difference_to_utc -3600 tz=-3600 is_dst=0 dstbias=-3600 (old=0)
+05 12:21:14.022 java   16  6988.1BB0 474.426MB (668995   +2596 bytes) {scheduler} Web_services: switch_subsystem_state loaded
+05 12:21:14.023 java   16  6988.1BB0 474.426MB (668931     -64 bytes) .{scheduler} Web_services: state=loaded
+05 12:21:14.023 java    0  6988.1BB0 474.426MB (668915     -16 bytes) {scheduler} _getmaxstdio()=512
+05 12:21:14.023 java    0  6988.1BB0 474.426MB (668915      +0 bytes) {scheduler} _setmaxstdio(2048), _getmaxstdio()=2048
+05 12:21:14.032 java    0  6988.1BB0 474.426MB (668971     +56 bytes) {scheduler} Java_subsystem: switch_subsystem_state loaded
+05 12:21:14.033 java    0  6988.1BB0 474.426MB (669179    +208 bytes) .open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml")  => 5
+05 12:21:14.033 java    0  6988.1BB0 474.426MB (669851    +672 bytes) .close(5) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml
+05 12:21:14.040 java   15  6988.1BB0 474.426MB (670723    +872 bytes) .{log4j.com.sos.scheduler.engine.kernel.log.LogSubsystem} Activated
+05 12:21:14.069 java   16  6988.1BB0 474.426MB (670859    +136 bytes) .{scheduler} [info]   Plugin com.sos.scheduler.engine.plugins.jetty.JettyPlugin added
+05 12:21:14.074 java   15  6988.1BB0 474.426MB (669938    -921 bytes) .{scheduler} Java_subsystem: state=loaded
+05 12:21:14.075 java    0  6988.1BB0 474.426MB (669890     -48 bytes) {scheduler} Event_subsystem: switch_subsystem_state loaded
+05 12:21:14.075 java    0  6988.1BB0 474.426MB (670186    +296 bytes) .{scheduler} Event_subsystem: state=loaded
+05 12:21:14.075 java    0  6988.1BB0 474.426MB (670170     -16 bytes) {scheduler} Folder_subsystem: switch_subsystem_state loaded
+05 12:21:14.076 java    0  6988.1BB0 474.426MB (676134   +5964 bytes) .{scheduler} [debug9] (Folder /) SCHEDULER-893  Folder is 'initialized' now
+05 12:21:14.076 java    0  6988.1BB0 474.426MB (676150     +16 bytes) .{scheduler} [debug9] (Folder /) SCHEDULER-893  Folder is 'loaded' now
+05 12:21:14.076 java    0  6988.1BB0 474.426MB (675838    -312 bytes) .{JS-644} Dependencies(Folder_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Folder /
+05 12:21:14.080 java    0  6988.1BB0 474.426MB (679290   +3452 bytes) .open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job.xml")  => 5
+05 12:21:14.081 java    0  6988.1BB0 474.426MB (679546    +256 bytes) .close(5) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job.xml
+05 12:21:14.087 java   16  6988.1BB0 474.426MB (693566  +14020 bytes) .{scheduler} [debug9] (Job  ) SCHEDULER-893  Job is 'undefined' now
+05 12:21:14.088 java    0  6988.1BB0 474.426MB (695026   +1460 bytes) .{scheduler} [info]   (Job a*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job.xml' (2012-03-05 11:21:04.000 UTC) is going to be be loaded into this new Job
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698561   +3535 bytes) .{scheduler} C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job.xml:
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698737    +176 bytes) .<?xml version="1.0" encoding="ISO-8859-1"?>
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698577    -160 bytes) .<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698697    +120 bytes) .    stop_on_error="no"
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698617     -80 bytes) .>
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698585     -32 bytes) .    <description>TEST-DESCRIPTION mit Ümläüten</description>
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698649     +64 bytes) .    <script java_class="com.sos.scheduler.engine.plugins.jetty.TestJob"/>
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698665     +16 bytes) .</job>
+05 12:21:14.089 java    0  6988.1BB0 474.426MB (698585     -80 bytes) .
+05 12:21:14.092 java    0  6988.1BB0 474.426MB (699361    +776 bytes) .{scheduler} [debug9] (Job a) SCHEDULER-893  Job is 'not_initialized' now
+05 12:21:14.092 java    0  6988.1BB0 474.426MB (699129    -232 bytes) .{scheduler} Job a.initialize()
+05 12:21:14.093 java    0  6988.1BB0 474.426MB (699105     -24 bytes) ..{JS-644} Job a::sos::scheduler::folder::Dependant::add_requisite 'Process_class '
+05 12:21:14.093 java    0  6988.1BB0 474.426MB (699517    +412 bytes) ..{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::add_requisite Job a ''
+05 12:21:14.094 java    0  6988.1BB0 474.426MB (703069   +3552 bytes) ..{JS-644} Schedule_use Job a-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:14.094 java    0  6988.1BB0 474.426MB (703385    +316 bytes) ..{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:14.095 java    0  6988.1BB0 474.426MB (707078   +3693 bytes) .{scheduler} [debug9] (Job a) SCHEDULER-893  Job is 'initialized' now
+05 12:21:14.095 java    0  6988.1BB0 474.426MB (702263   -4815 bytes) .open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\order.job.xml")  => 5
+05 12:21:14.096 java    0  6988.1BB0 474.426MB (702519    +256 bytes) .close(5) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\order.job.xml
+05 12:21:14.102 java   16  6988.1BB0 474.426MB (716539  +14020 bytes) .{scheduler} [debug9] (Job  ) SCHEDULER-893  Job is 'undefined' now
+05 12:21:14.102 java    0  6988.1BB0 474.426MB (717999   +1460 bytes) .{scheduler} [info]   (Job order*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\order.job.xml' (2012-03-05 11:21:04.000 UTC) is going to be be loaded into this new Job
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721458   +3459 bytes) .{scheduler} C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\order.job.xml:
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721634    +176 bytes) .<?xml version="1.0" encoding="ISO-8859-1"?>
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721474    -160 bytes) .<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721594    +120 bytes) .    order="yes" stop_on_error="no"
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721530     -64 bytes) .>
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721482     -48 bytes) .    <script java_class="com.sos.scheduler.engine.test.jobs.EmptyOrderJob"/>
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721562     +80 bytes) .</job>
+05 12:21:14.104 java    0  6988.1BB0 474.426MB (721482     -80 bytes) .
+05 12:21:14.106 java    0  6988.1BB0 474.426MB (722194    +712 bytes) .{scheduler} [debug9] (Job order) SCHEDULER-893  Job is 'not_initialized' now
+05 12:21:14.106 java    0  6988.1BB0 474.426MB (721962    -232 bytes) .{scheduler} Job order.initialize()
+05 12:21:14.107 java    0  6988.1BB0 474.426MB (721938     -24 bytes) ..{JS-644} Job order::sos::scheduler::folder::Dependant::add_requisite 'Process_class '
+05 12:21:14.107 java    0  6988.1BB0 474.426MB (722350    +412 bytes) ..{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::add_requisite Job order ''
+05 12:21:14.108 java    0  6988.1BB0 474.426MB (725918   +3568 bytes) ..{JS-644} Schedule_use Job order-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:14.108 java    0  6988.1BB0 474.426MB (726234    +316 bytes) ..{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:14.109 java    0  6988.1BB0 474.426MB (729911   +3677 bytes) .{scheduler} [debug9] (Job order) SCHEDULER-893  Job is 'initialized' now
+05 12:21:14.109 java    0  6988.1BB0 474.426MB (725212   -4699 bytes) .open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job_chain.xml")  => 5
+05 12:21:14.110 java    0  6988.1BB0 474.426MB (725564    +352 bytes) .close(5) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job_chain.xml
+05 12:21:14.110 java    0  6988.1BB0 474.426MB (731016   +5452 bytes) .{scheduler} [debug9] (Job_chain) SCHEDULER-893  Job_chain is 'undefined' now
+05 12:21:14.111 java    0  6988.1BB0 474.426MB (732508   +1492 bytes) .{scheduler} [info]   (Job_chain /a*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job_chain.xml' (2012-03-05 11:21:04.000 UTC) is going to be be loaded into this new Job_chain
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737218   +4710 bytes) .{scheduler} C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job_chain.xml:
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737378    +160 bytes) .<?xml version="1.0" encoding="ISO-8859-1"?>
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737218    -160 bytes) .<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737282     +64 bytes) .    <job_chain_node delay="2" state="A" job="/order"/>
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737234     -48 bytes) .    <job_chain_node delay="1" state="B" job="/order"/>
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737234      +0 bytes) .    <job_chain_node delay="1" state="C" job="/order"/>
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737234      +0 bytes) .    <job_chain_node.end state="end"/>
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737226      -8 bytes) .</job_chain>
+05 12:21:14.112 java    0  6988.1BB0 474.426MB (737226      +0 bytes) .
+05 12:21:14.118 java   15  6988.1BB0 474.426MB (749537  +12311 bytes) .{scheduler} [debug9] (Job_chain /a) SCHEDULER-893  Job_chain is 'not_initialized' now
+05 12:21:14.118 java    0  6988.1BB0 474.426MB (749281    -256 bytes) .{JS-644} job_chain::Node a:1::sos::scheduler::folder::Dependant::add_requisite 'Job /order'
+05 12:21:14.119 java    0  6988.1BB0 474.426MB (749645    +364 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::add_requisite job_chain::Node a:1 '/order'
+05 12:21:14.119 java    0  6988.1BB0 474.426MB (750013    +368 bytes) .{JS-644} job_chain::Node a:1::sos::scheduler::folder::Dependant::add_requisite 'Job /order'
+05 12:21:14.120 java    0  6988.1BB0 474.426MB (750345    +332 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::add_requisite job_chain::Node a:1 '/order'
+05 12:21:14.120 java    0  6988.1BB0 474.426MB (750389     +44 bytes) .{JS-644} job_chain::Node a:1::sos::scheduler::folder::Dependant::add_requisite 'Job /order'
+05 12:21:14.121 java    0  6988.1BB0 474.426MB (750721    +332 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::add_requisite job_chain::Node a:1 '/order'
+05 12:21:14.121 java    0  6988.1BB0 474.426MB (750757     +36 bytes) .{scheduler} sos::scheduler::order::Order_sources::initialize
+05 12:21:14.121 java    0  6988.1BB0 474.426MB (751005    +248 bytes) .{scheduler} [debug9] (Job_chain /a) SCHEDULER-893  Job_chain is 'initialized' now
+05 12:21:14.122 java    0  6988.1BB0 474.426MB (744302   -6703 bytes) .{scheduler} Folder_subsystem: state=loaded
+05 12:21:14.122 java    0  6988.1BB0 474.426MB (744254     -48 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state loaded
+05 12:21:14.122 java    0  6988.1BB0 474.426MB (744874    +620 bytes) .{scheduler} [debug9] (Process_class ) SCHEDULER-893  Process_class is 'initialized' now
+05 12:21:14.123 java    0  6988.1BB0 474.426MB (744842     -32 bytes) .{scheduler} [debug9] (Process_class ) SCHEDULER-893  Process_class is 'loaded' now
+05 12:21:14.123 java    0  6988.1BB0 474.426MB (744498    -344 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Process_class 
+05 12:21:14.123 java    0  6988.1BB0 474.426MB (744546     +48 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_file_order_sink->on_requisite_loaded()
+05 12:21:14.124 java    0  6988.1BB0 474.426MB (744530     -16 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded Job order->on_requisite_loaded()
+05 12:21:14.124 java    0  6988.1BB0 474.426MB (744514     -16 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_service_forwarder->on_requisite_loaded()
+05 12:21:14.124 java    0  6988.1BB0 474.426MB (744546     +32 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded Job a->on_requisite_loaded()
+05 12:21:14.125 java    0  6988.1BB0 474.426MB (745118    +572 bytes) .{scheduler} [debug9] (Process_class (temporaries)) SCHEDULER-893  Process_class is 'initialized' now
+05 12:21:14.125 java    0  6988.1BB0 474.426MB (745070     -48 bytes) .{scheduler} [debug9] (Process_class (temporaries)) SCHEDULER-893  Process_class is 'loaded' now
+05 12:21:14.125 java    0  6988.1BB0 474.426MB (744694    -376 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Process_class (temporaries)
+05 12:21:14.126 java    0  6988.1BB0 474.426MB (744710     +16 bytes) .{scheduler} Process_class_subsystem: state=loaded
+05 12:21:14.126 java    0  6988.1BB0 474.426MB (744630     -80 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state loaded
+05 12:21:14.126 java    0  6988.1BB0 474.426MB (744630      +0 bytes) .{scheduler} Schedule_subsystem: state=loaded
+05 12:21:14.127 java    0  6988.1BB0 474.426MB (744614     -16 bytes) {scheduler} Lock_subsystem: switch_subsystem_state loaded
+05 12:21:14.127 java    0  6988.1BB0 474.426MB (744630     +16 bytes) .{scheduler} Lock_subsystem: state=loaded
+05 12:21:14.127 java    0  6988.1BB0 474.426MB (744614     -16 bytes) {scheduler} Job_subsystem: switch_subsystem_state loaded
+05 12:21:14.128 java    0  6988.1BB0 474.426MB (744654     +40 bytes) .{scheduler} Job scheduler_file_order_sink.load()
+05 12:21:14.295 java  172  6988.1BB0 474.426MB (746078   +1424 bytes) ..open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.scheduler_file_order_sink.txt")  => 6
+05 12:21:14.297 java    0  6988.1BB0 474.426MB (747474   +1396 bytes) ..{scheduler} [debug3] (Job  scheduler_file_order_sink) SCHEDULER-910  New history file opened: C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.scheduler_file_order_sink.txt
+05 12:21:14.298 java    0  6988.1BB0 474.426MB (746810    -664 bytes) ..{scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-931  state=loaded
+05 12:21:14.298 java    0  6988.1BB0 474.426MB (746962    +152 bytes) .{scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-893  Job is 'loaded' now
+05 12:21:14.298 java    0  6988.1BB0 474.426MB (746570    -392 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_file_order_sink
+05 12:21:14.299 java    0  6988.1BB0 474.426MB (746618     +48 bytes) .{scheduler} Job scheduler_service_forwarder.load()
+05 12:21:14.305 java   15  6988.1BB0 474.426MB (747978   +1360 bytes) ..open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.scheduler_service_forwarder.txt")  => 8
+05 12:21:14.307 java    0  6988.1BB0 474.426MB (749470   +1492 bytes) ..{scheduler} [debug3] (Job  scheduler_service_forwarder) SCHEDULER-910  New history file opened: C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.scheduler_service_forwarder.txt
+05 12:21:14.307 java    0  6988.1BB0 474.426MB (748758    -712 bytes) ..{scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-931  state=loaded
+05 12:21:14.307 java    0  6988.1BB0 474.426MB (748910    +152 bytes) .{scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-893  Job is 'loaded' now
+05 12:21:14.308 java    0  6988.1BB0 474.426MB (748502    -408 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job scheduler_service_forwarder
+05 12:21:14.309 java    0  6988.1BB0 474.426MB (748550     +48 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded job_chain::Node scheduler_service_forwarding:1->on_requisite_loaded()
+05 12:21:14.309 java    0  6988.1BB0 474.426MB (748566     +16 bytes) .{JS-644} sos::scheduler::order::job_chain::Job_node::on_requisite_loaded job_chain::Node scheduler_service_forwarding:1::on_requisite_loaded()
+05 12:21:14.310 java    0  6988.1BB0 474.426MB (748566      +0 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node scheduler_service_forwarding:1)
+05 12:21:14.310 java    0  6988.1BB0 474.426MB (748578     +12 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=never state=loaded
+05 12:21:14.311 java    0  6988.1BB0 474.426MB (748562     -16 bytes) .{scheduler} Job a.load()
+05 12:21:14.316 java    0  6988.1BB0 474.426MB (749482    +920 bytes) ..{scheduler} [info]   (Job  a) 
+05 12:21:14.317 java    0  6988.1BB0 474.426MB (749498     +16 bytes) ..{scheduler} [info]   (Job  a) Job a - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.a.log
+05 12:21:14.318 java    0  6988.1BB0 474.426MB (749858    +360 bytes) ..open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.a.txt")  => 10
+05 12:21:14.319 java   16  6988.1BB0 474.426MB (750782    +924 bytes) ..{scheduler} [debug3] (Job  a) SCHEDULER-910  New history file opened: C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.a.txt
+05 12:21:14.320 java    0  6988.1BB0 474.426MB (750414    -368 bytes) ..{scheduler} [debug9] (Job  a) SCHEDULER-931  state=loaded
+05 12:21:14.320 java    0  6988.1BB0 474.426MB (750262    -152 bytes) .{scheduler} [debug9] (Job  a) SCHEDULER-893  Job is 'loaded' now
+05 12:21:14.320 java    0  6988.1BB0 474.426MB (749966    -296 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job a
+05 12:21:14.321 java    0  6988.1BB0 474.426MB (749998     +32 bytes) .{scheduler} Job order.load()
+05 12:21:14.326 java    0  6988.1BB0 474.426MB (750998   +1000 bytes) ..{scheduler} [info]   (Job  order) 
+05 12:21:14.327 java    0  6988.1BB0 474.426MB (751014     +16 bytes) ..{scheduler} [info]   (Job  order) Job order - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.order.log
+05 12:21:14.328 java    0  6988.1BB0 474.426MB (751374    +360 bytes) ..open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.order.txt")  => 12
+05 12:21:14.329 java    0  6988.1BB0 474.426MB (752282    +908 bytes) ..{scheduler} [debug3] (Job  order) SCHEDULER-910  New history file opened: C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.order.txt
+05 12:21:14.330 java    0  6988.1BB0 474.426MB (751914    -368 bytes) ..{scheduler} [debug9] (Job  order) SCHEDULER-931  state=loaded
+05 12:21:14.330 java    0  6988.1BB0 474.426MB (751762    -152 bytes) .{scheduler} [debug9] (Job  order) SCHEDULER-893  Job is 'loaded' now
+05 12:21:14.330 java    0  6988.1BB0 474.426MB (751466    -296 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job order
+05 12:21:14.331 java    0  6988.1BB0 474.426MB (751514     +48 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded job_chain::Node a:1->on_requisite_loaded()
+05 12:21:14.331 java    0  6988.1BB0 474.426MB (751514      +0 bytes) .{JS-644} sos::scheduler::order::job_chain::Job_node::on_requisite_loaded job_chain::Node a:1::on_requisite_loaded()
+05 12:21:14.332 java    0  6988.1BB0 474.426MB (751514      +0 bytes) .{JS-644} Job order::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node a:1)
+05 12:21:14.333 java    0  6988.1BB0 474.426MB (751510      -4 bytes) .{JS-644} Job order::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=never state=loaded
+05 12:21:14.333 java    0  6988.1BB0 474.426MB (751510      +0 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded job_chain::Node a:1->on_requisite_loaded()
+05 12:21:14.333 java    0  6988.1BB0 474.426MB (751526     +16 bytes) .{JS-644} sos::scheduler::order::job_chain::Job_node::on_requisite_loaded job_chain::Node a:1::on_requisite_loaded()
+05 12:21:14.334 java    0  6988.1BB0 474.426MB (751526      +0 bytes) .{JS-644} Job order::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node a:1)
+05 12:21:14.335 java   16  6988.1BB0 474.426MB (751522      -4 bytes) .{JS-644} Job order::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=never state=loaded
+05 12:21:14.335 java    0  6988.1BB0 474.426MB (751522      +0 bytes) .{JS-644} sos::scheduler::folder::Dependencies::announce_requisite_loaded job_chain::Node a:1->on_requisite_loaded()
+05 12:21:14.335 java    0  6988.1BB0 474.426MB (751538     +16 bytes) .{JS-644} sos::scheduler::order::job_chain::Job_node::on_requisite_loaded job_chain::Node a:1::on_requisite_loaded()
+05 12:21:14.336 java    0  6988.1BB0 474.426MB (751538      +0 bytes) .{JS-644} Job order::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node a:1)
+05 12:21:14.337 java    0  6988.1BB0 474.426MB (751534      -4 bytes) .{JS-644} Job order::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=never state=loaded
+05 12:21:14.337 java    0  6988.1BB0 474.426MB (751510     -24 bytes) .{scheduler} Job_subsystem: state=loaded
+05 12:21:14.337 java    0  6988.1BB0 474.426MB (751446     -64 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state loaded
+05 12:21:14.338 java    0  6988.1BB0 474.426MB (751902    +456 bytes) .{scheduler} [debug9] (Job_chain /scheduler_service_forwarding) SCHEDULER-893  Job_chain is 'loaded' now
+05 12:21:14.338 java    0  6988.1BB0 474.426MB (751526    -376 bytes) .{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job_chain /scheduler_service_forwarding
+05 12:21:14.339 java    0  6988.1BB0 474.426MB (751886    +360 bytes) .{scheduler} [debug9] (Job_chain /a) SCHEDULER-893  Job_chain is 'loaded' now
+05 12:21:14.339 java    0  6988.1BB0 474.426MB (751494    -392 bytes) .{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_loaded Job_chain /a
+05 12:21:14.340 java    0  6988.1BB0 474.426MB (751526     +32 bytes) .{scheduler} Job_chain_subsystem: state=loaded
+05 12:21:14.340 java    0  6988.1BB0 474.426MB (751446     -80 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state loaded
+05 12:21:14.341 java    0  6988.1BB0 474.426MB (751478     +32 bytes) .{scheduler} Standing_order_subsystem: state=loaded
+05 12:21:14.341 java    0  6988.1BB0 474.426MB (751462     -16 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state loaded
+05 12:21:14.341 java    0  6988.1BB0 474.426MB (751478     +16 bytes) .{scheduler} Scheduler_script_subsystem: state=loaded
+05 12:21:14.341 java    0  6988.1BB0 474.426MB (751462     -16 bytes) {scheduler} Java_subsystem: switch_subsystem_state active
+05 12:21:15.730 java 1388  6988.1BB0 478.211MB (751462      +0 bytes) .{scheduler} Java_subsystem: state=active
+05 12:21:15.731 java    0  6988.1BB0 478.211MB (751446     -16 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state active
+05 12:21:15.731 java    0  6988.1BB0 478.211MB (751478     +32 bytes) .{scheduler} Scheduler_script_subsystem: state=active
+05 12:21:15.731 java    0  6988.1BB0 478.211MB (751462     -16 bytes) {scheduler} Event_subsystem: switch_subsystem_state active
+05 12:21:15.732 java    0  6988.1BB0 478.211MB (751462      +0 bytes) .{scheduler} Event_subsystem: state=active
+05 12:21:15.732 java    0  6988.1BB0 478.211MB (751446     -16 bytes) {scheduler} Folder_subsystem: switch_subsystem_state active
+05 12:21:15.732 java    0  6988.1BB0 478.211MB (753114   +1668 bytes) .{scheduler} [info]   (Folder_subsystem) SCHEDULER-718  Using 'local' configuration directory 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\'
+05 12:21:15.733 java    0  6988.1BB0 478.211MB (752682    -432 bytes) .{scheduler} FindFirstChangeNotification( "C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_D
+05 12:21:15.733 java    0  6988.1BB0 478.211MB (752698     +16 bytes) .R_NAME );
+05 12:21:15.734 java    0  6988.1BB0 478.211MB (752858    +160 bytes) .{scheduler} [info]   (Folder /) SCHEDULER-893  Folder is 'active' now
+05 12:21:15.736 java    0  6988.1BB0 478.211MB (752694    -164 bytes) .{scheduler} Folder_subsystem: state=active
+05 12:21:15.736 java    0  6988.1BB0 478.211MB (752662     -32 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state active
+05 12:21:15.737 java    0  6988.1BB0 478.211MB (753154    +492 bytes) .{scheduler} [info]   (Process_class ) SCHEDULER-893  Process_class is 'active' now
+05 12:21:15.737 java    0  6988.1BB0 478.211MB (753382    +228 bytes) .{scheduler} [info]   (Process_class (temporaries)) SCHEDULER-893  Process_class is 'active' now
+05 12:21:15.737 java    0  6988.1BB0 478.211MB (753086    -296 bytes) .{scheduler} Process_class_subsystem: state=active
+05 12:21:15.738 java    0  6988.1BB0 478.211MB (753038     -48 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state active
+05 12:21:15.738 java    0  6988.1BB0 478.211MB (753038      +0 bytes) .{scheduler} Schedule_subsystem: state=active
+05 12:21:15.738 java    0  6988.1BB0 478.211MB (753022     -16 bytes) {scheduler} Lock_subsystem: switch_subsystem_state active
+05 12:21:15.738 java    0  6988.1BB0 478.211MB (753038     +16 bytes) .{scheduler} Lock_subsystem: state=active
+05 12:21:15.739 java   16  6988.1BB0 478.211MB (753022     -16 bytes) {scheduler} Job_subsystem: switch_subsystem_state active
+05 12:21:15.739 java    0  6988.1BB0 478.211MB (753398    +376 bytes) .{scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-931  state=pending
+05 12:21:15.739 java    0  6988.1BB0 478.211MB (753094    -304 bytes) .{JS-644} Job scheduler_file_order_sink::sos::scheduler::Job::on_activate next_time=never next_start_time=never
+05 12:21:15.740 java    0  6988.1BB0 478.211MB (754006    +912 bytes) .{scheduler} [debug3] (Job  scheduler_file_order_sink) SCHEDULER-921  Next period is <period begin="2012-03-05 00:00:00.000" end="2012-03-06 00:00:00.000"/>, Schedule ''
+05 12:21:15.740 java    0  6988.1BB0 478.211MB (753794    -212 bytes) .{scheduler} [info]   (Job  scheduler_file_order_sink) SCHEDULER-893  Job is 'active' now
+05 12:21:15.743 java    0  6988.1BB0 478.211MB (754242    +448 bytes) .{scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-931  state=pending
+05 12:21:15.744 java    0  6988.1BB0 478.211MB (753890    -352 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Job::on_activate next_time=never next_start_time=never
+05 12:21:15.745 java    0  6988.1BB0 478.211MB (754818    +928 bytes) .{scheduler} [debug3] (Job  scheduler_service_forwarder) SCHEDULER-921  Next period is <period begin="2012-03-05 00:00:00.000" end="2012-03-06 00:00:00.000"/>, Schedule ''
+05 12:21:15.766 java   15  6988.1BB0 478.211MB (754606    -212 bytes) .{scheduler} [info]   (Job  scheduler_service_forwarder) SCHEDULER-893  Job is 'active' now
+05 12:21:15.767 java    0  6988.1BB0 478.211MB (754374    -232 bytes) .{scheduler} [debug9] (Job  a) SCHEDULER-931  state=pending
+05 12:21:15.768 java    0  6988.1BB0 478.211MB (754086    -288 bytes) .{JS-644} Job a::sos::scheduler::Job::on_activate next_time=never next_start_time=never
+05 12:21:15.769 java    0  6988.1BB0 478.211MB (754918    +832 bytes) .{scheduler} [debug3] (Job  a) SCHEDULER-921  Next period is <period begin="2012-03-05 00:00:00.000" end="2012-03-06 00:00:00.000"/>, Schedule ''
+05 12:21:17.207 java 1451  6988.1BB0 478.211MB (754622    -296 bytes) .{scheduler} [info]   (Job  a) SCHEDULER-893  Job is 'active' now
+05 12:21:17.208 java    0  6988.1BB0 478.211MB (754486    -136 bytes) .{scheduler} [debug9] (Job  order) SCHEDULER-931  state=pending
+05 12:21:17.208 java    0  6988.1BB0 478.211MB (754230    -256 bytes) .{JS-644} Job order::sos::scheduler::Job::on_activate next_time=never next_start_time=never
+05 12:21:17.209 java    0  6988.1BB0 478.211MB (755046    +816 bytes) .{scheduler} [debug3] (Job  order) SCHEDULER-921  Next period is <period begin="2012-03-05 00:00:00.000" end="2012-03-06 00:00:00.000"/>, Schedule ''
+05 12:21:17.209 java    0  6988.1BB0 478.211MB (754750    -296 bytes) .{scheduler} [info]   (Job  order) SCHEDULER-893  Job is 'active' now
+05 12:21:17.210 java    0  6988.1BB0 478.211MB (754334    -416 bytes) .{scheduler} Job_subsystem: state=active
+05 12:21:17.210 java    0  6988.1BB0 478.211MB (754302     -32 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state active
+05 12:21:17.210 java    0  6988.1BB0 478.211MB (754350     +48 bytes) .{JS-644} job_chain::Node scheduler_service_forwarding:1::sos::scheduler::order::job_chain::Order_queue_node::wake_orders (no processable order)
+05 12:21:17.211 java    0  6988.1BB0 478.211MB (754430     +80 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node scheduler_service_forwarding:1)
+05 12:21:17.212 java    0  6988.1BB0 478.211MB (754430      +0 bytes) .{JS-644} Job scheduler_service_forwarder::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=2012-03-06 00:00:00.000 state=pending
+05 12:21:17.213 java    0  6988.1BB0 478.211MB (754430      +0 bytes) .{scheduler} sos::scheduler::order::Order_sources::activate
+05 12:21:17.213 java    0  6988.1BB0 478.211MB (754842    +412 bytes) .{scheduler} [info]   (Job_chain /scheduler_service_forwarding) SCHEDULER-893  Job_chain is 'active' now
+05 12:21:17.215 java    0  6988.1BB0 478.211MB (754562    -280 bytes) .{JS-644} job_chain::Node a:1::sos::scheduler::order::job_chain::Order_queue_node::wake_orders (no processable order)
+05 12:21:17.216 java    0  6988.1BB0 478.211MB (754578     +16 bytes) .{JS-644} job_chain::Node a:1::sos::scheduler::order::job_chain::Order_queue_node::wake_orders (no processable order)
+05 12:21:17.216 java    0  6988.1BB0 478.211MB (754578      +0 bytes) .{JS-644} job_chain::Node a:1::sos::scheduler::order::job_chain::Order_queue_node::wake_orders (no processable order)
+05 12:21:17.217 java    0  6988.1BB0 478.211MB (754578      +0 bytes) .{JS-644} Job order::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node a:1)
+05 12:21:17.218 java    0  6988.1BB0 478.211MB (754562     -16 bytes) .{JS-644} Job order::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=2012-03-06 00:00:00.000 state=pending
+05 12:21:17.218 java    0  6988.1BB0 478.211MB (754594     +32 bytes) .{JS-644} Job order::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node a:1)
+05 12:21:17.219 java    0  6988.1BB0 478.211MB (754562     -32 bytes) .{JS-644} Job order::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=2012-03-06 00:00:00.000 state=pending
+05 12:21:17.220 java    0  6988.1BB0 478.211MB (754594     +32 bytes) .{JS-644} Job order::sos::scheduler::Combined_job_nodes::connect_job_node (job_chain::Node a:1)
+05 12:21:17.220 java    0  6988.1BB0 478.211MB (754562     -32 bytes) .{JS-644} Job order::sos::scheduler::Job::connect_job_node calculate_next_time() next_time=2012-03-06 00:00:00.000 state=pending
+05 12:21:17.220 java    0  6988.1BB0 478.211MB (754594     +32 bytes) .{scheduler} sos::scheduler::order::Order_sources::activate
+05 12:21:17.221 java   16  6988.1BB0 478.211MB (754826    +232 bytes) .{scheduler} [info]   (Job_chain /a) SCHEDULER-893  Job_chain is 'active' now
+05 12:21:17.221 java    0  6988.1BB0 478.211MB (754514    -312 bytes) .{scheduler} Job_chain_subsystem: state=active
+05 12:21:17.221 java    0  6988.1BB0 478.211MB (754482     -32 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state active
+05 12:21:17.222 java    0  6988.1BB0 478.211MB (754514     +32 bytes) .{scheduler} Standing_order_subsystem: state=active
+05 12:21:17.222 java    0  6988.1BB0 478.211MB (754498     -16 bytes) {scheduler} Web_services: switch_subsystem_state active
+05 12:21:17.222 java    0  6988.1BB0 478.211MB (754498      +0 bytes) .{scheduler} Web_services: state=active
+05 12:21:17.223 java    0  6988.1BB0 478.211MB (754778    +280 bytes) {scheduler} [info]   --------------------------------------------
+05 12:21:17.223 java    0  6988.1BB0 478.211MB (754997    +219 bytes) {scheduler} [info]   SCHEDULER-902  state=running
+05 12:21:17.415 java  187  6988.1BB0 478.211MB (759407   +4410 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><show_state what="folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations"/>
+05 12:21:17.476 java   62  6988.1BB0 478.211MB (778259  +18852 bytes) {scheduler} 
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778067    -192 bytes) 
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778067      +0 bytes) <?xml version="1.0" encoding="ISO-8859-1"?>
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778115     +48 bytes) <spooler>
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778067     -48 bytes)   <answer time="2012-03-05 12:21:17.223">
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778115     +48 bytes)     <state time="2012-03-05 12:21:17" id="test" spooler_id="test" spooler_running_since="2012-03-05 12:21:13" state="running" log_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/scheduler-2012-03-05-122113.test.log" version="1.3.12.2020-SNAPSHOT (Debug)" pid="6988" config_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml" host="mobile-2" db="" cpu_time="6.162" loop="1" waits="0">
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778243    +128 bytes)       <folder path="/">
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778099    -144 bytes)         <file_based state="active">
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778115     +16 bytes)           <requisites/>
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778099     -16 bytes)         </file_based>
+05 12:21:17.476 java    0  6988.1BB0 478.211MB (778099      +0 bytes)         <process_classes>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)           <process_class path="" max_processes="30" processes="0">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778147     +48 bytes)             <file_based state="active">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115     -32 bytes)               <requisites/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     -16 bytes)             </file_based>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)           </process_class>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)           <process_class path="/(temporaries)" name="(temporaries)" max_processes="30" processes="0">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778179     +80 bytes)             <file_based state="active">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115     -64 bytes)               <requisites/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     -16 bytes)             </file_based>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)           </process_class>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)         </process_classes>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)         <jobs>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)           <job path="/a" name="a" job="a" state="pending" all_steps="0" all_tasks="0" log_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.a.log" order="no" tasks="1" has_description="yes" cmd="enable" in_period="yes" enabled="yes">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778307    +208 bytes)             <file_based state="active" file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job.xml" last_write_time="2012-03-05T11:21:04.000Z">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778275     -32 bytes)               <requisites/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099    -176 bytes)             </file_based>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)             <params count="0" estimated_byte_count="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778067     -32 bytes)             <tasks count="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115     +48 bytes)             <queued_tasks length="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115      +0 bytes)             <log level="info" highest_level="info" last_info="SCHEDULER-893  Job is 'active' now" smtp="-"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778179     +64 bytes)           </job>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     -80 bytes)           <job path="/order" name="order" job="order" state="pending" all_steps="0" all_tasks="0" log_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.order.log" order="yes" tasks="1" cmd="enable" in_period="yes" job_chain_priority="3" enabled="yes">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778371    +272 bytes)             <file_based state="active" file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\order.job.xml" last_write_time="2012-03-05T11:21:04.000Z">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778339     -32 bytes)               <requisites/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099    -240 bytes)             </file_based>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)             <params count="0" estimated_byte_count="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778131     +32 bytes)             <tasks count="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115     -16 bytes)             <queued_tasks length="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115      +0 bytes)             <order_queue length="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115      +0 bytes)             <log level="info" highest_level="info" last_info="SCHEDULER-893  Job is 'active' now" smtp="-"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778067     -48 bytes)           </job>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     +32 bytes)         </jobs>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)         <job_chains>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)           <job_chain path="/a" name="a" orders="0" running_orders="0" state="running" orders_recoverable="yes">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778195     +96 bytes)             <file_based state="active" file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job_chain.xml" last_write_time="2012-03-05T11:21:04.000Z">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778227     +32 bytes)               <requisites/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099    -128 bytes)             </file_based>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)             <job_chain_node state="A" next_state="B" job="/order">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778147     +48 bytes)               <order_queue length="0" next_start_time="never"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115     -32 bytes)             </job_chain_node>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     -16 bytes)             <job_chain_node state="B" next_state="C" job="/order">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778147     +48 bytes)               <order_queue length="0" next_start_time="never"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778147      +0 bytes)             </job_chain_node>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     -48 bytes)             <job_chain_node state="C" next_state="end" job="/order">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778067     -32 bytes)               <order_queue length="0" next_start_time="never"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778147     +80 bytes)             </job_chain_node>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     -48 bytes)             <job_chain_node state="end"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778115     +16 bytes)           </job_chain>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     -16 bytes)         </job_chains>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)       </folder>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)       <subprocesses/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes)       <remote_schedulers count="0" connected="0"/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778131     +32 bytes)       <http_server/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778067     -64 bytes)       <connections/>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099     +32 bytes)       <operations>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778099      +0 bytes) Directory_observer(C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\), at 2012-03-05 11:22:15 UTC
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778291    +192 bytes) Daylight_saving_time_transition_detector, possible begin of daylight saving time, at 2012-03-06 00:59:59 UTC
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778203     -88 bytes) </operations>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778123     -80 bytes)       <java_subsystem GlobalRef="79" NewGlobalRef="128" DeleteGlobalRef="49">
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778203     +80 bytes) <!--For debugging only-->
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778155     -48 bytes)       </java_subsystem>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778155      +0 bytes)     </state>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778123     -32 bytes)   </answer>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778123      +0 bytes) </spooler>
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778123      +0 bytes) 
+05 12:21:17.481 java    0  6988.1BB0 478.211MB (778123      +0 bytes) 
+05 12:21:17.631 java  156  6988.1EA4 478.211MB (761873  -16250 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><show_state/>
+05 12:21:17.673 java   47  6988.1EA4 478.211MB (761476    -397 bytes) {scheduler} ~Java_response()
+05 12:21:17.813 java  140  6988.1864 478.523MB (762824   +1348 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><show_state/>
+05 12:21:17.818 java    0  6988.1864 478.523MB (762171    -653 bytes) {scheduler} ~Java_response()
+05 12:21:17.831 java   16  6988.12C4 478.523MB (759667   -2504 bytes) open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\test.txt")  => 13
+05 12:21:17.832 java    0  6988.12C4 478.523MB (759899    +232 bytes) close(13) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\test.txt
+05 12:21:17.833 java    0  6988.12C4 478.523MB (759291    -608 bytes) {scheduler} ~Java_response()
+05 12:21:17.862 java   31  6988.1D30 478.523MB (762730   +3439 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><order id="1" job_chain="a"/>
+05 12:21:17.894 java   31  6988.1D30 478.523MB (769722   +6992 bytes) {scheduler} [debug3] (Order_queue a:A) SCHEDULER-990  Adding Order a:1
+05 12:21:18.020 java  125  6988.1BB0 478.523MB (772422   +2700 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-842  Task is going to process Order a:1, state=A, on Scheduler 
+05 12:21:18.021 java    0  6988.1BB0 478.523MB (772342     -80 bytes) {scheduler} [debug3] (Job  order) Task starts for Order a:1
+05 12:21:18.022 java    0  6988.1BB0 478.523MB (772274     -68 bytes) {scheduler} [debug9] (Job  order) SCHEDULER-931  state=running
+05 12:21:18.023 java    0  6988.1BB0 478.523MB (772714    +440 bytes) {scheduler} [info]   (Job  order) SCHEDULER-930  Task 1 started - cause: Order a:1
+05 12:21:18.025 java    0  6988.1BB0 478.523MB (774041   +1327 bytes) {scheduler} [info]   (Task order:1) 
+05 12:21:18.026 java    0  6988.1BB0 478.523MB (773993     -48 bytes) {scheduler} [info]   (Task order:1) Task order:1 - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/task.order.log
+05 12:21:18.077 java   47  6988.1BB0 478.523MB (780326   +6333 bytes) sopen("C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp")
+05 12:21:18.079 java   16  6988.1BB0 478.523MB (780182    -144 bytes) sopen("C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp")
+05 12:21:18.133 java   46  6988.1BB0 478.523MB (789866   +9684 bytes) sopen("C:\Users\schaedi\AppData\Local\Temp\sosBA6E.tmp")
+05 12:21:18.134 java    0  6988.1BB0 478.523MB (790960   +1094 bytes) CreateProcess("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\scheduler-test-binaries\scheduler.exe",""C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\scheduler-test-binaries\scheduler.exe" "-sos.ini=C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\sos.ini" "-ini=C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\factory.ini" "-O" "-job=order" "-task-id=1" "-log=exception.* log4j.* >+C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\scheduler.log" "-controller=127.0.0.1:59999"")
+05 12:21:18.152 java   16  6988.1BB0 478.523MB (790952      -8 bytes) pid=6268
+05 12:21:18.153 java    0  6988.1BB0 478.523MB (790952      +0 bytes) close(17) C:\Users\schaedi\AppData\Local\Temp\sosBA6E.tmp
+05 12:21:18.153 java    0  6988.1BB0 478.523MB (791016     +64 bytes) close(15) C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp
+05 12:21:18.153 java    0  6988.1BB0 478.523MB (791016      +0 bytes) close(16) C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp
+05 12:21:18.154 java    0  6988.1BB0 478.523MB (789134   -1882 bytes) {scheduler} [debug9] SCHEDULER-948  Process pid=6268 started
+05 12:21:18.154 java    0  6988.1BB0 478.523MB (787950   -1184 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-918  state=starting (at=never)
+05 12:21:18.404 java  250  6988.1F88 478.523MB (844365  +56415 bytes) open("C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/task.order.log")  => 15
+05 12:21:18.419 scheduler    0  6268.1C5C 54.949MB (23590  +23590 bytes) 
+05 12:21:18.419 scheduler    0  6268.1C5C 54.949MB (23590      +0 bytes) ----------------------Mon Mar 05 12:21:18 2012
+05 12:21:18.419 scheduler    0  6268.1C5C 54.949MB (23654     +64 bytes) Aufruf: C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\scheduler-test-binaries\scheduler.exe  -sos.ini=C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\sos.ini  -ini=C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\factory.ini  -O  -job=order  -task-id=1  -log=exception.* log4j.* >+C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\scheduler.log  -controller=127.0.0.1:59999  
+05 12:21:18.419 scheduler    0  6268.1C5C 54.949MB (23670     +16 bytes) {scheduler} Scheduler 1.3.12.2020-SNAPSHOT (Debug)
+05 12:21:18.427 scheduler   16  6268.1C5C 58.273MB (74686  +51016 bytes) .{socket.connect} pid=0 connect(156,127.0.0.1:59999) ...
+05 12:21:18.430 scheduler    0  6268.1C5C 58.273MB (74686      +0 bytes) .{socket.connect} pid=0 connect(156,127.0.0.1:59999) OK
+05 12:21:18.446 java   46  6988.1BB0 478.523MB (844585    +220 bytes) .pid=6268 accept()  errno=0
+05 12:21:18.447 scheduler   15  6268.1C5C 58.273MB (76986   +2300 bytes) .pid=0 Session::execute_create_instance({FEEE47A3-6C1B-11D8-8103-000476EE8AFB})
+05 12:21:18.447 scheduler    0  6268.1C5C 58.273MB (77190    +204 bytes) ..sos.ini=C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\sos.ini
+05 12:21:18.452 scheduler    0  6268.1C5C 58.715MB (92464  +15274 bytes) .
+05 12:21:18.455 scheduler   16  6268.1C5C 58.715MB (115215  +22751 bytes) .{scheduler} LoadLibrary C:\Program Files\Java\jre6\bin\client\jvm.dll
+05 12:21:18.579 scheduler  125  6268.1C5C 454.164MB (130815  +15600 bytes) .Java Native Interface (JNI) 1.6, loaded from C:\Program Files\Java\jre6\bin\client\jvm.dll
+05 12:21:18.621 scheduler   31  6268.1C5C 460.164MB (127462   -3353 bytes) .{scheduler} METHOD ID: <init>()V
+05 12:21:18.625 scheduler   16  6268.1C5C 460.164MB (127782    +320 bytes) .{scheduler} METHOD ID: spooler_init()Z
+05 12:21:18.626 scheduler    0  6268.1C5C 460.164MB (127866     +84 bytes) ..{scheduler.call} Java_module_instance.spooler_init() begin
+05 12:21:18.626 scheduler    0  6268.1C5C 460.164MB (127874      +8 bytes) ..{scheduler.call} Java_module_instance.spooler_init() end
+05 12:21:18.668 scheduler   31  6268.1C5C 460.164MB (127386    -488 bytes) .{scheduler} METHOD ID: spooler_open()Z
+05 12:21:18.668 scheduler    0  6268.1C5C 460.164MB (127454     +68 bytes) ..{scheduler.call} Java_module_instance.spooler_open() begin
+05 12:21:18.668 scheduler    0  6268.1C5C 460.164MB (127462      +8 bytes) ..{scheduler.call} Java_module_instance.spooler_open() end
+05 12:21:18.669 scheduler    0  6268.1C5C 460.164MB (127386     -76 bytes) .{scheduler} METHOD ID: spooler_process()Z
+05 12:21:18.669 scheduler    0  6268.1C5C 460.164MB (127518    +132 bytes) ..{scheduler.call} Java_module_instance.spooler_process() begin
+05 12:21:18.670 scheduler    0  6268.1C5C 460.164MB (127526      +8 bytes) ..{scheduler.call} Java_module_instance.spooler_process() end
+05 12:21:18.671 java  234  6988.1BB0 478.523MB (849810   +5225 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-843  Task has ended processing of Order a:1, state=A, on Scheduler 
+05 12:21:18.704 java   32  6988.1BB0 478.523MB (849870     +60 bytes) {scheduler} [debug9] (Order_queue a:A) remove_order Order a:1
+05 12:21:18.705 java    0  6988.1BB0 478.523MB (850062    +192 bytes) {scheduler} [info]   (Order a:1) set_state B, Job /order, at=2012-03-05 12:21:19.705
+05 12:21:18.708 java    0  6988.1BB0 478.523MB (851021    +959 bytes) {scheduler} [info]   (Order a:1) SCHEDULER-938  Order will be processed at 2012-03-05 12:21:19.705
+05 12:21:19.664 java  951  6988.1BB0 478.523MB (848017   -3004 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp")  => 16
+05 12:21:19.665 java    0  6988.1BB0 478.523MB (847889    -128 bytes) close(16) C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp
+05 12:21:19.665 java    0  6988.1BB0 478.523MB (847969     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp")  => 16
+05 12:21:19.666 java    0  6988.1BB0 478.523MB (847889     -80 bytes) close(16) C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp
+05 12:21:19.706 java   47  6988.1BB0 478.523MB (848361    +472 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-842  Task is going to process Order a:1, state=B, on Scheduler 
+05 12:21:19.707 scheduler 1045  6268.1C5C 460.164MB (127534      +8 bytes) ..{scheduler.call} Java_module_instance.spooler_process() begin
+05 12:21:19.708 scheduler    0  6268.1C5C 460.164MB (127526      -8 bytes) ..{scheduler.call} Java_module_instance.spooler_process() end
+05 12:21:19.709 java    0  6988.1BB0 478.523MB (850737   +2376 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-843  Task has ended processing of Order a:1, state=B, on Scheduler 
+05 12:21:19.709 java    0  6988.1BB0 478.523MB (850749     +12 bytes) {scheduler} [debug9] (Order_queue a:B) remove_order Order a:1
+05 12:21:19.710 java    0  6988.1BB0 478.523MB (850729     -20 bytes) {scheduler} [info]   (Order a:1) set_state C, Job /order, at=2012-03-05 12:21:20.710
+05 12:21:19.711 java    0  6988.1BB0 478.523MB (850849    +120 bytes) {scheduler} [info]   (Order a:1) SCHEDULER-938  Order will be processed at 2012-03-05 12:21:20.710
+05 12:21:20.711 java  998  6988.1BB0 478.523MB (848621   -2228 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-842  Task is going to process Order a:1, state=C, on Scheduler 
+05 12:21:20.714 scheduler  998  6268.1C5C 460.164MB (127534      +8 bytes) ..{scheduler.call} Java_module_instance.spooler_process() begin
+05 12:21:20.714 scheduler    0  6268.1C5C 460.164MB (127526      -8 bytes) ..{scheduler.call} Java_module_instance.spooler_process() end
+05 12:21:20.715 java   16  6988.1BB0 478.523MB (850837   +2216 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-843  Task has ended processing of Order a:1, state=C, on Scheduler 
+05 12:21:20.716 java    0  6988.1BB0 478.523MB (850849     +12 bytes) {scheduler} [debug9] (Order_queue a:C) remove_order Order a:1
+05 12:21:20.716 java    0  6988.1BB0 478.523MB (850637    -212 bytes) {scheduler} [info]   (Order a:1) set_state end
+05 12:21:20.718 java    0  6988.1BB0 478.523MB (851189    +552 bytes) {scheduler} [info]   (Order a:1) SCHEDULER-945  No further job in job chain - order has been carried out
+05 12:21:20.718 java    0  6988.1BB0 478.523MB (851141     -48 bytes) {scheduler} [info]   (Order a:1) SCHEDULER-940  Removing order from job chain
+05 12:21:20.719 java    0  6988.1BB0 478.523MB (850769    -372 bytes) {JS-644} Schedule_use Order 1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:20.719 java    0  6988.1BB0 478.523MB (851133    +364 bytes) {JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:20.720 java    0  6988.1BB0 478.523MB (852062    +929 bytes) {scheduler} [info]   (Order 1) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/order.a.1.log
+05 12:21:20.721 java    0  6988.1BB0 478.523MB (851334    -728 bytes) unlink C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/order.a.1.log
+05 12:21:20.721 java    0  6988.1BB0 478.523MB (851278     -56 bytes) {JS-644} Order 1::sos::scheduler::folder::Dependant::remove_requisite 'Job_chain '
+05 12:21:20.722 java    0  6988.1BB0 478.523MB (851498    +220 bytes) {JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:20.722 java    0  6988.1BB0 478.523MB (851514     +16 bytes) {JS-644} Schedule_use Order 1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:20.722 java    0  6988.1BB0 478.523MB (851530     +16 bytes) {JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:20.723 java    0  6988.1BB0 478.523MB (851514     -16 bytes) {JS-644} Order 1::sos::scheduler::folder::Dependant::remove_requisite 'Job_chain '
+05 12:21:20.723 java    0  6988.1BB0 478.523MB (851498     -16 bytes) {JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:20.724 java    0  6988.1BB0 478.523MB (849106   -2392 bytes) {JS-644} Schedule_use Order 1-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:20.724 java    0  6988.1BB0 478.523MB (849122     +16 bytes) {JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.726 java 5008  6988.1BB0 478.211MB (842174   -6948 bytes) {scheduler} [debug9] (Task order:1) SCHEDULER-916  idle_timeout is over, terminating task
+05 12:21:25.727 scheduler 5024  6268.1C5C 460.164MB (127498     -28 bytes) .{scheduler} METHOD ID: spooler_close()V
+05 12:21:25.727 scheduler    0  6268.1C5C 460.164MB (127630    +132 bytes) ..{scheduler.call} Java_module_instance.spooler_close() begin
+05 12:21:25.727 scheduler    0  6268.1C5C 460.164MB (127638      +8 bytes) ..{scheduler.call} Java_module_instance.spooler_close() end
+05 12:21:25.728 scheduler    0  6268.1C5C 460.164MB (127694     +56 bytes) .{scheduler} METHOD ID: spooler_on_success()V
+05 12:21:25.728 scheduler    0  6268.1C5C 460.164MB (127858    +164 bytes) ..{scheduler.call} Java_module_instance.spooler_on_success() begin
+05 12:21:25.728 scheduler    0  6268.1C5C 460.164MB (127882     +24 bytes) ..{scheduler.call} Java_module_instance.spooler_on_success() end
+05 12:21:25.729 scheduler    0  6268.1C5C 460.164MB (127770    -112 bytes) .{scheduler} METHOD ID: spooler_exit()V
+05 12:21:25.729 scheduler    0  6268.1C5C 460.164MB (127822     +52 bytes) ..{scheduler.call} Java_module_instance.spooler_exit() begin
+05 12:21:25.729 scheduler    0  6268.1C5C 460.164MB (127830      +8 bytes) ..{scheduler.call} Java_module_instance.spooler_exit() end
+05 12:21:25.743 java   15  6988.1BB0 478.211MB (840990   -1184 bytes) .pid=6268 GetExitCodeProcess() => 0, Prozess hat geendet
+05 12:21:25.744 java    0  6988.1BB0 478.211MB (840942     -48 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp")  => 13
+05 12:21:25.745 java    0  6988.1BB0 478.211MB (840862     -80 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp
+05 12:21:25.745 java    0  6988.1BB0 478.211MB (840942     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp")  => 13
+05 12:21:25.746 java    0  6988.1BB0 478.211MB (840862     -80 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp
+05 12:21:25.746 java    0  6988.1BB0 478.211MB (840942     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp")  => 13
+05 12:21:25.746 java    0  6988.1BB0 478.211MB (840870     -72 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp
+05 12:21:25.747 java    0  6988.1BB0 478.211MB (840942     +72 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp")  => 13
+05 12:21:25.747 java    0  6988.1BB0 478.211MB (840870     -72 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp
+05 12:21:25.747 java    0  6988.1BB0 478.211MB (840942     +72 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp")  => 13
+05 12:21:25.748 java    0  6988.1BB0 478.211MB (840862     -80 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp
+05 12:21:25.748 java    0  6988.1BB0 478.211MB (840942     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp")  => 13
+05 12:21:25.748 java    0  6988.1BB0 478.211MB (840862     -80 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp
+05 12:21:25.749 java    0  6988.1BB0 478.211MB (840942     +80 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp")  => 13
+05 12:21:25.749 java    0  6988.1BB0 478.211MB (840870     -72 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp
+05 12:21:25.749 java    0  6988.1BB0 478.211MB (840942     +72 bytes) open("C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp")  => 13
+05 12:21:25.750 java    0  6988.1BB0 478.211MB (840870     -72 bytes) close(13) C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp
+05 12:21:25.752 java    0  6988.1BB0 478.211MB (840842     -28 bytes) unlink("C:\Users\schaedi\AppData\Local\Temp\sosBA6E.tmp")
+05 12:21:25.753 java    0  6988.1BB0 478.211MB (840842      +0 bytes) unlink("C:\Users\schaedi\AppData\Local\Temp\sosBA2E.tmp")
+05 12:21:25.753 java    0  6988.1BB0 478.211MB (840842      +0 bytes) unlink("C:\Users\schaedi\AppData\Local\Temp\sosBA2F.tmp")
+05 12:21:25.804 java   63  6988.1BB0 478.211MB (826705  -14137 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-918  state=closed
+05 12:21:25.806 java    0  6988.1BB0 478.211MB (826661     -44 bytes) {scheduler} [debug9] (Job  order) SCHEDULER-931  state=pending
+05 12:21:25.808 java    0  6988.1BB0 478.211MB (827293    +632 bytes) {scheduler} [info]   (Task order:1) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/task.order.log
+05 12:21:25.812 java    0  6988.10BC 478.211MB (822306   -4987 bytes) close(15) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/task.order.log
+05 12:21:25.813 java    0  6988.10BC 478.211MB (821946    -360 bytes) {scheduler} ~Java_response()
+05 12:21:25.818 java   15  6988.1BB0 478.523MB (762751  -59195 bytes) {scheduler} [info]   --------------------------------------------
+05 12:21:25.819 java    0  6988.1BB0 478.523MB (762759      +8 bytes) {scheduler} [info]   SCHEDULER-902  state=stopping
+05 12:21:25.820 java    0  6988.1BB0 478.523MB (767169   +4410 bytes) {scheduler} Execute <?xml version="1.0" encoding="ISO-8859-1"?><show_state what="folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785978  +18809 bytes) {scheduler} 
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786    -192 bytes) 
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786      +0 bytes) <?xml version="1.0" encoding="ISO-8859-1"?>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     +48 bytes) <spooler>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786     -48 bytes)   <answer time="2012-03-05 12:21:25.819">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     +48 bytes)     <state time="2012-03-05 12:21:25" id="test" spooler_id="test" spooler_running_since="2012-03-05 12:21:13" state="stopping" log_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/scheduler-2012-03-05-122113.test.log" version="1.3.12.2020-SNAPSHOT (Debug)" pid="6988" config_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml" host="mobile-2" db="" cpu_time="6.599" loop="46" waits="23" wait_until="2012-03-06 00:00:00.000">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785994    +160 bytes)       <folder path="/">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818    -176 bytes)         <file_based state="active">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     +16 bytes)           <requisites/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -16 bytes)         </file_based>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786     -32 bytes)         <process_classes>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     +32 bytes)           <process_class path="" max_processes="30" processes="0">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785866     +48 bytes)             <file_based state="active">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     -32 bytes)               <requisites/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -16 bytes)             </file_based>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)           </process_class>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)           <process_class path="/(temporaries)" name="(temporaries)" max_processes="30" processes="0">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     +16 bytes)             <file_based state="active">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834      +0 bytes)               <requisites/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -16 bytes)             </file_based>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)           </process_class>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)         </process_classes>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)         <jobs>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)           <job path="/a" name="a" job="a" state="pending" all_steps="0" all_tasks="0" log_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.a.log" order="no" tasks="1" has_description="yes" in_period="yes" enabled="yes">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (786042    +224 bytes)             <file_based state="active" file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job.xml" last_write_time="2012-03-05T11:21:04.000Z">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (786026     -16 bytes)               <requisites/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818    -208 bytes)             </file_based>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)             <params count="0" estimated_byte_count="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     +16 bytes)             <tasks count="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834      +0 bytes)             <queued_tasks length="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834      +0 bytes)             <log level="info" highest_level="info" last_info="SCHEDULER-893  Job is 'active' now" smtp="-"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785898     +64 bytes)           </job>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -80 bytes)           <job path="/order" name="order" job="order" state="pending" all_steps="3" all_tasks="1" log_file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.order.log" order="yes" tasks="1" in_period="yes" job_chain_priority="3" enabled="yes">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786     -32 bytes)             <file_based state="active" file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\order.job.xml" last_write_time="2012-03-05T11:21:04.000Z">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (786074    +288 bytes) 
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786    -288 bytes)               <requisites/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786      +0 bytes)             </file_based>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     +32 bytes)             <params count="0" estimated_byte_count="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785850     +32 bytes)             <tasks count="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     -16 bytes)             <queued_tasks length="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834      +0 bytes)             <order_queue length="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834      +0 bytes)             <log level="info" highest_level="debug9" last_info="SCHEDULER-930  Task 1 started - cause: Order a:1" smtp="-"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834      +0 bytes)           </job>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -16 bytes)         </jobs>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)         <job_chains>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)           <job_chain path="/a" name="a" orders="0" running_orders="0" state="running" orders_recoverable="yes">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785914     +96 bytes)             <file_based state="active" file="C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job_chain.xml" last_write_time="2012-03-05T11:21:04.000Z">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785978     +64 bytes)               <requisites/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818    -160 bytes)             </file_based>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)             <job_chain_node state="A" next_state="B" job="/order">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786     -32 bytes)               <order_queue length="0" next_start_time="never"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785866     +80 bytes)             </job_chain_node>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -48 bytes)             <job_chain_node state="B" next_state="C" job="/order">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785866     +48 bytes)               <order_queue length="0" next_start_time="never"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785866      +0 bytes)             </job_chain_node>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -48 bytes)             <job_chain_node state="C" next_state="end" job="/order">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     +16 bytes)               <order_queue length="0" next_start_time="never"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785866     +32 bytes)             </job_chain_node>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -48 bytes)             <job_chain_node state="end"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785834     +16 bytes)           </job_chain>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     -16 bytes)         </job_chains>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)       </folder>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)       <subprocesses/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)       <remote_schedulers count="0" connected="0"/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785786     -32 bytes)       <http_server/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818     +32 bytes)       <connections/>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes)       <operations>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785818      +0 bytes) Directory_observer(C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\), at 2012-03-05 11:22:15 UTC
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (786010    +192 bytes) Daylight_saving_time_transition_detector, possible begin of daylight saving time, at 2012-03-06 00:59:59 UTC
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785954     -56 bytes) </operations>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785842    -112 bytes)       <java_subsystem GlobalRef="93" NewGlobalRef="230" DeleteGlobalRef="137">
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785938     +96 bytes) <!--For debugging only-->
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785874     -64 bytes)       </java_subsystem>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785874      +0 bytes)     </state>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785842     -32 bytes)   </answer>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785842      +0 bytes) </spooler>
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785842      +0 bytes) 
+05 12:21:25.825 java    0  6988.1BB0 478.523MB (785842      +0 bytes) 
+05 12:21:25.842 java   16  6988.1BB0 478.523MB (762759  -23083 bytes) {scheduler} [debug9] (Job  scheduler_file_order_sink) SCHEDULER-931  state=stopped
+05 12:21:25.842 java    0  6988.1BB0 478.523MB (762871    +112 bytes) {scheduler} [debug9] (Job  scheduler_service_forwarder) SCHEDULER-931  state=stopped
+05 12:21:25.843 java    0  6988.1BB0 478.523MB (762775     -96 bytes) {scheduler} [info]   (Job  a) SCHEDULER-931  state=stopped
+05 12:21:25.843 java    0  6988.1BB0 478.523MB (762743     -32 bytes) {scheduler} [info]   (Job  order) SCHEDULER-931  state=stopped
+05 12:21:25.843 java    0  6988.1BB0 478.523MB (762431    -312 bytes) {scheduler} Scheduler_script_subsystem: switch_subsystem_state stopped
+05 12:21:25.843 java    0  6988.1BB0 478.523MB (762431      +0 bytes) .{scheduler} Scheduler_script_subsystem: state=stopped
+05 12:21:25.844 java    0  6988.1BB0 478.523MB (762415     -16 bytes) {scheduler} Web_services: switch_subsystem_state stopped
+05 12:21:25.844 java    0  6988.1BB0 478.523MB (762415      +0 bytes) .{scheduler} Web_services: state=active
+05 12:21:25.844 java    0  6988.1BB0 478.523MB (762399     -16 bytes) {scheduler} Standing_order_subsystem: switch_subsystem_state stopped
+05 12:21:25.845 java    0  6988.1BB0 478.523MB (762431     +32 bytes) .{scheduler} Standing_order_subsystem: state=stopped
+05 12:21:25.845 java    0  6988.1BB0 478.523MB (762415     -16 bytes) {scheduler} Job_chain_subsystem: switch_subsystem_state stopped
+05 12:21:25.845 java    0  6988.1BB0 478.523MB (762431     +16 bytes) .{scheduler} sos::scheduler::order::Order_subsystem_impl::close
+05 12:21:25.845 java    0  6988.1BB0 478.523MB (762447     +16 bytes) ..{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job_chain /a
+05 12:21:25.847 java    0  6988.1BB0 478.523MB (762467     +20 bytes) ..{scheduler} Job_chain /a.close()
+05 12:21:25.847 java    0  6988.1BB0 478.523MB (762371     -96 bytes) ...{scheduler} sos::scheduler::order::Order_sources::close
+05 12:21:25.847 java    0  6988.1BB0 478.523MB (762395     +24 bytes) ...{JS-644} job_chain::Node a:2::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.848 java   15  6988.1BB0 478.523MB (762395      +0 bytes) ...{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.848 java    0  6988.1BB0 478.523MB (762375     -20 bytes) ...{JS-644} Job order::sos::scheduler::Combined_job_nodes::disconnect_job_node (job_chain::Node a:2)
+05 12:21:25.849 java    0  6988.1BB0 478.523MB (759555   -2820 bytes) ...{JS-644} job_chain::Node a:2::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.849 java    0  6988.1BB0 478.523MB (759507     -48 bytes) ...{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.850 java    0  6988.1BB0 478.523MB (759487     -20 bytes) ...{JS-644} Job order::sos::scheduler::Combined_job_nodes::disconnect_job_node (job_chain::Node a:2)
+05 12:21:25.850 java    0  6988.1BB0 478.523MB (756751   -2736 bytes) ...{JS-644} job_chain::Node a:2::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.851 java    0  6988.1BB0 478.523MB (756703     -48 bytes) ...{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.851 java    0  6988.1BB0 478.523MB (756359    -344 bytes) ...{JS-644} Job order::sos::scheduler::Combined_job_nodes::disconnect_job_node (job_chain::Node a:2)
+05 12:21:25.852 java    0  6988.1BB0 478.523MB (754071   -2288 bytes) ..{scheduler} [debug9] (Job_chain_folder /) SCHEDULER-861  'Job_chain /a' has been removed
+05 12:21:25.853 java    0  6988.1BB0 478.523MB (754263    +192 bytes) ...{scheduler} Job_chain /a.close()
+05 12:21:25.854 java    0  6988.1BB0 478.523MB (754215     -48 bytes) ....{scheduler} sos::scheduler::order::Order_sources::close
+05 12:21:25.854 java    0  6988.1BB0 478.523MB (754239     +24 bytes) ....{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.854 java    0  6988.1BB0 478.523MB (754271     +32 bytes) ....{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.855 java    0  6988.1BB0 478.523MB (754287     +16 bytes) ....{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.855 java    0  6988.1BB0 478.523MB (754271     -16 bytes) ....{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.856 java    0  6988.1BB0 478.523MB (754287     +16 bytes) ....{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.856 java    0  6988.1BB0 478.523MB (754271     -16 bytes) ....{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.857 java    0  6988.1BB0 478.523MB (754015    -256 bytes) ..{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.857 java    0  6988.1BB0 478.523MB (753999     -16 bytes) ..{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.857 java    0  6988.1BB0 478.523MB (752599   -1400 bytes) ..{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.858 java    0  6988.1BB0 478.523MB (752583     -16 bytes) ..{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.858 java    0  6988.1BB0 478.523MB (751183   -1400 bytes) ..{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /order'
+05 12:21:25.859 java    0  6988.1BB0 478.523MB (751167     -16 bytes) ..{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/order'
+05 12:21:25.859 java    0  6988.1BB0 478.523MB (742781   -8386 bytes) ..{JS-644} Dependencies(Job_chain_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job_chain /scheduler_service_forwarding
+05 12:21:25.861 java    0  6988.1BB0 478.523MB (742801     +20 bytes) ..{scheduler} Job_chain /scheduler_service_forwarding.close()
+05 12:21:25.861 java    0  6988.1BB0 478.523MB (742705     -96 bytes) ...{scheduler} sos::scheduler::order::Order_sources::close
+05 12:21:25.861 java    0  6988.1BB0 478.523MB (742745     +40 bytes) ...{JS-644} job_chain::Node scheduler_service_forwarding:2::sos::scheduler::folder::Dependant::remove_requisite 'Job /scheduler_service_forwarder'
+05 12:21:25.862 java    0  6988.1BB0 478.523MB (742761     +16 bytes) ...{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/scheduler_service_forwarder'
+05 12:21:25.862 java    0  6988.1BB0 478.523MB (742321    -440 bytes) ...{JS-644} Job scheduler_service_forwarder::sos::scheduler::Combined_job_nodes::disconnect_job_node (job_chain::Node scheduler_service_forwarding:2)
+05 12:21:25.863 java    0  6988.1BB0 478.523MB (740193   -2128 bytes) ..{scheduler} [debug9] (Job_chain_folder /) SCHEDULER-861  'Job_chain /scheduler_service_forwarding' has been removed
+05 12:21:25.864 java   16  6988.1BB0 478.523MB (739649    -544 bytes) ...{scheduler} Job_chain /scheduler_service_forwarding.close()
+05 12:21:25.864 java    0  6988.1BB0 478.523MB (739585     -64 bytes) ....{scheduler} sos::scheduler::order::Order_sources::close
+05 12:21:25.864 java    0  6988.1BB0 478.523MB (739625     +40 bytes) ....{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /scheduler_service_forwarder'
+05 12:21:25.865 java    0  6988.1BB0 478.523MB (739689     +64 bytes) ....{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/scheduler_service_forwarder'
+05 12:21:25.865 java    0  6988.1BB0 478.523MB (739417    -272 bytes) ..{JS-644} job_chain::Node :3::sos::scheduler::folder::Dependant::remove_requisite 'Job /scheduler_service_forwarder'
+05 12:21:25.865 java    0  6988.1BB0 478.523MB (739417      +0 bytes) ..{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite '/scheduler_service_forwarder'
+05 12:21:25.866 java    0  6988.1BB0 478.523MB (732510   -6907 bytes) .{scheduler} Job_chain_subsystem: state=stopped
+05 12:21:25.866 java    0  6988.1BB0 478.523MB (732446     -64 bytes) {scheduler} Job_subsystem: switch_subsystem_state stopped
+05 12:21:25.867 java    0  6988.1BB0 478.523MB (732470     +24 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job order
+05 12:21:25.868 java    0  6988.1BB0 478.523MB (733314    +844 bytes) .{scheduler} [info]   (Job  order) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.order.log
+05 12:21:25.869 java    0  6988.1BB0 478.523MB (732618    -696 bytes) .close(12) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.order.txt
+05 12:21:25.882 java   16  6988.1BB0 478.523MB (732358    -260 bytes) .{JS-644} Schedule_use Job order-->Schedule ::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.883 java    0  6988.1BB0 478.523MB (732262     -96 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.884 java    0  6988.1BB0 478.523MB (725337   -6925 bytes) .{JS-644} Schedule_use Job order-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.884 java    0  6988.1BB0 478.523MB (725353     +16 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.884 java    0  6988.1BB0 478.523MB (724601    -752 bytes) .{scheduler} [debug9] (Job_folder /) SCHEDULER-861  'Job order' has been removed
+05 12:21:25.885 java    0  6988.1BB0 478.523MB (715157   -9444 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.886 java    0  6988.1BB0 478.523MB (708081   -7076 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job a
+05 12:21:25.887 java    0  6988.1BB0 478.523MB (708877    +796 bytes) .{scheduler} [info]   (Job  a) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.a.log
+05 12:21:25.888 java    0  6988.1BB0 478.523MB (708181    -696 bytes) .close(10) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.a.txt
+05 12:21:25.889 java    0  6988.1BB0 478.523MB (707921    -260 bytes) .{JS-644} Schedule_use Job a-->Schedule ::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.889 java    0  6988.1BB0 478.523MB (707825     -96 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.890 java    0  6988.1BB0 478.523MB (700900   -6925 bytes) .{JS-644} Schedule_use Job a-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.890 java    0  6988.1BB0 478.523MB (700900      +0 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.890 java    0  6988.1BB0 478.523MB (700016    -884 bytes) .{scheduler} [debug9] (Job_folder /) SCHEDULER-861  'Job a' has been removed
+05 12:21:25.891 java    0  6988.1BB0 478.523MB (690524   -9492 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.892 java    0  6988.1BB0 478.523MB (683464   -7060 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job scheduler_service_forwarder
+05 12:21:25.893 java    0  6988.1BB0 478.523MB (684612   +1148 bytes) .{scheduler} [info]   (Job  scheduler_service_forwarder) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.scheduler_ser
+05 12:21:25.893 java    0  6988.1BB0 478.523MB (684756    +144 bytes) .ice_forwarder.log
+05 12:21:25.894 java    0  6988.1BB0 478.523MB (683532   -1224 bytes) .close(8) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.scheduler_service_forwarder.txt
+05 12:21:25.895 java   15  6988.1BB0 478.523MB (683528      -4 bytes) .{JS-644} Schedule_use Job scheduler_service_forwarder-->Schedule ::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.895 java    0  6988.1BB0 478.523MB (683432     -96 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.896 java    0  6988.1BB0 478.523MB (676603   -6829 bytes) .{JS-644} Schedule_use Job scheduler_service_forwarder-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.896 java    0  6988.1BB0 478.523MB (676635     +32 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.896 java    0  6988.1BB0 478.523MB (675815    -820 bytes) .{scheduler} [debug9] (Job_folder /) SCHEDULER-861  'Job scheduler_service_forwarder' has been removed
+05 12:21:25.897 java    0  6988.1BB0 478.523MB (666643   -9172 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.898 java    0  6988.1BB0 478.523MB (659919   -6724 bytes) .{JS-644} Dependencies(Job_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Job scheduler_file_order_sink
+05 12:21:25.899 java    0  6988.1BB0 478.523MB (661051   +1132 bytes) .{scheduler} [info]   (Job  scheduler_file_order_sink) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.scheduler_file_
+05 12:21:25.899 java    0  6988.1BB0 478.523MB (661195    +144 bytes) .rder_sink.log
+05 12:21:25.900 java    0  6988.1BB0 478.523MB (659955   -1240 bytes) .close(6) C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log\history.test.job.scheduler_file_order_sink.txt
+05 12:21:25.901 java    0  6988.1BB0 478.523MB (659983     +28 bytes) .{JS-644} Schedule_use Job scheduler_file_order_sink-->Schedule ::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.901 java    0  6988.1BB0 478.523MB (659887     -96 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.902 java    0  6988.1BB0 478.523MB (653058   -6829 bytes) .{JS-644} Schedule_use Job scheduler_file_order_sink-->(no schedule)::sos::scheduler::folder::Dependant::remove_requisite 'Schedule '
+05 12:21:25.902 java    0  6988.1BB0 478.523MB (653090     +32 bytes) .{JS-644} Dependencies(Schedule_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.902 java    0  6988.1BB0 478.523MB (652190    -900 bytes) .{scheduler} [debug9] (Job_folder /) SCHEDULER-861  'Job scheduler_file_order_sink' has been removed
+05 12:21:25.903 java    0  6988.1BB0 478.523MB (643082   -9108 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::remove_requisite ''
+05 12:21:25.904 java    0  6988.1BB0 478.523MB (635987   -7095 bytes) .{scheduler} Job_subsystem: state=stopped
+05 12:21:25.904 java    0  6988.1BB0 478.523MB (635923     -64 bytes) {scheduler} Task_subsystem: switch_subsystem_state stopped
+05 12:21:25.904 java    0  6988.1BB0 478.523MB (635939     +16 bytes) .{scheduler} Task_subsystem: state=not_initialized
+05 12:21:25.904 java    0  6988.1BB0 478.523MB (635939      +0 bytes) {scheduler} Lock_subsystem: switch_subsystem_state stopped
+05 12:21:25.904 java    0  6988.1BB0 478.523MB (635939      +0 bytes) .{scheduler} Lock_subsystem: state=stopped
+05 12:21:25.905 java    0  6988.1BB0 478.523MB (635923     -16 bytes) {scheduler} Process_class_subsystem: switch_subsystem_state stopped
+05 12:21:25.905 java    0  6988.1BB0 478.523MB (635971     +48 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Process_class (temporaries)
+05 12:21:25.906 java    0  6988.1BB0 478.523MB (636575    +604 bytes) .{scheduler} [debug9] (Process_class_folder /) SCHEDULER-861  'Process_class (temporaries)' has been removed
+05 12:21:25.907 java    0  6988.1BB0 478.523MB (631667   -4908 bytes) .{JS-644} Dependencies(Process_class_subsystem)::sos::scheduler::folder::Dependencies::announce_requisite_to_be_removed Process_class 
+05 12:21:25.907 java    0  6988.1BB0 478.523MB (631963    +296 bytes) .{scheduler} [debug9] (Process_class_folder /) SCHEDULER-861  'Process_class' has been removed
+05 12:21:25.908 java    0  6988.1BB0 478.523MB (627167   -4796 bytes) .{scheduler} Process_class_subsystem: state=stopped
+05 12:21:25.908 java    0  6988.1BB0 478.523MB (627135     -32 bytes) {scheduler} Schedule_subsystem: switch_subsystem_state stopped
+05 12:21:25.908 java    0  6988.1BB0 478.523MB (627151     +16 bytes) .{scheduler} Schedule_subsystem: state=stopped
+05 12:21:25.908 java    0  6988.1BB0 478.523MB (627119     -32 bytes) {scheduler} Folder_subsystem: switch_subsystem_state stopped
+05 12:21:25.908 java    0  6988.1BB0 478.523MB (627111      -8 bytes) .{scheduler} FindCloseChangeNotification(Event Remote_configurations C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\)
+05 12:21:25.909 java    0  6988.1BB0 478.523MB (622235   -4876 bytes) .{scheduler} Folder_subsystem: state=stopped
+05 12:21:25.909 java    0  6988.1BB0 478.523MB (622027    -208 bytes) {scheduler} Event_subsystem: switch_subsystem_state stopped
+05 12:21:25.909 java    0  6988.1BB0 478.523MB (622043     +16 bytes) .{scheduler} Event_subsystem: state=active
+05 12:21:25.909 java    0  6988.1BB0 478.523MB (622027     -16 bytes) {scheduler} Supervisor: switch_subsystem_state stopped
+05 12:21:25.910 java   16  6988.1BB0 478.523MB (613975   -8052 bytes) .{scheduler} Supervisor: state=stopped
+05 12:21:25.935 java   15  6988.1BB0 478.523MB (613591    -384 bytes) {scheduler} Java_subsystem: switch_subsystem_state stopped
+05 12:21:26.009 java   78  6988.1BB0 475.398MB (613687     +96 bytes) .{log4j.com.sos.scheduler.engine.kernel.log.LogSubsystem} Closed
+05 12:21:26.009 java    0  6988.1BB0 475.398MB (613623     -64 bytes) .{scheduler} Java_subsystem: state=stopped
+05 12:21:26.010 java    0  6988.1BB0 475.398MB (613887    +264 bytes) {scheduler} [info]   --------------------------------------------
+05 12:21:26.010 java    0  6988.1BB0 475.398MB (614219    +332 bytes) {scheduler} [info]   SCHEDULER-902  state=stopped
+05 12:21:26.012 java    0  6988.1BB0 475.398MB (547330  -66889 bytes) {scheduler} [info]   SCHEDULER-999  Scheduler has been terminated properly
+05 12:21:26.016 java    0  6988.1BB0 475.398MB (52590 -494740 bytes) {scheduler} Executable will be terminated.

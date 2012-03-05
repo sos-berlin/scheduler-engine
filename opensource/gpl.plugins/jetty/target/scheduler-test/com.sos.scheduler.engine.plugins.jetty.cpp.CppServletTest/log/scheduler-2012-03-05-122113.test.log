@@ -1,0 +1,52 @@
+2012-03-05 12:21:13.997 [info]   SCHEDULER-900  Scheduler 1.3.12.2020-SNAPSHOT (Debug) is starting with C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\scheduler.xml, pid=6988
+2012-03-05 12:21:14.069 [info]   Plugin com.sos.scheduler.engine.plugins.jetty.JettyPlugin added
+2012-03-05 12:21:14.087 [info]   (Job a*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job.xml' (2012-03-05 11:21:04.000 UTC) is going to be be loaded into this new Job
+2012-03-05 12:21:14.102 [info]   (Job order*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\order.job.xml' (2012-03-05 11:21:04.000 UTC) is going to be be loaded into this new Job
+2012-03-05 12:21:14.111 [info]   (Job_chain /a*) SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\a.job_chain.xml' (2012-03-05 11:21:04.000 UTC) is going to be be loaded into this new Job_chain
+2012-03-05 12:21:14.316 [info]   (Job  a) 
+2012-03-05 12:21:14.316 [info]   (Job  a) Job a - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.a.log
+2012-03-05 12:21:14.326 [info]   (Job  order) 
+2012-03-05 12:21:14.326 [info]   (Job  order) Job order - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.order.log
+2012-03-05 12:21:15.732 [info]   (Folder_subsystem) SCHEDULER-718  Using 'local' configuration directory 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\config\'
+2012-03-05 12:21:15.734 [info]   (Folder /) SCHEDULER-893  Folder is 'active' now
+2012-03-05 12:21:15.737 [info]   (Process_class ) SCHEDULER-893  Process_class is 'active' now
+2012-03-05 12:21:15.737 [info]   (Process_class (temporaries)) SCHEDULER-893  Process_class is 'active' now
+2012-03-05 12:21:15.740 [info]   (Job  scheduler_file_order_sink) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:15.766 [info]   (Job  scheduler_service_forwarder) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:17.207 [info]   (Job  a) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:17.209 [info]   (Job  order) SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:17.213 [info]   (Job_chain /scheduler_service_forwarding) SCHEDULER-893  Job_chain is 'active' now
+2012-03-05 12:21:17.221 [info]   (Job_chain /a) SCHEDULER-893  Job_chain is 'active' now
+2012-03-05 12:21:17.222 [info]   --------------------------------------------
+2012-03-05 12:21:17.223 [info]   SCHEDULER-902  state=running
+2012-03-05 12:21:18.019 [info]   (Task order:1) SCHEDULER-842  Task is going to process Order a:1, state=A, on Scheduler 
+2012-03-05 12:21:18.023 [info]   (Job  order) SCHEDULER-930  Task 1 started - cause: Order a:1
+2012-03-05 12:21:18.025 [info]   (Task order:1) 
+2012-03-05 12:21:18.025 [info]   (Task order:1) Task order:1 - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/task.order.log
+2012-03-05 12:21:18.154 [info]   (Task order:1) SCHEDULER-918  state=starting (at=never)
+2012-03-05 12:21:18.671 [info]   (Task order:1) SCHEDULER-843  Task has ended processing of Order a:1, state=A, on Scheduler 
+2012-03-05 12:21:18.705 [info]   (Order a:1) set_state B, Job /order, at=2012-03-05 12:21:19.705
+2012-03-05 12:21:18.708 [info]   (Order a:1) SCHEDULER-938  Order will be processed at 2012-03-05 12:21:19.705
+2012-03-05 12:21:19.706 [info]   (Task order:1) SCHEDULER-842  Task is going to process Order a:1, state=B, on Scheduler 
+2012-03-05 12:21:19.708 [info]   (Task order:1) SCHEDULER-843  Task has ended processing of Order a:1, state=B, on Scheduler 
+2012-03-05 12:21:19.710 [info]   (Order a:1) set_state C, Job /order, at=2012-03-05 12:21:20.710
+2012-03-05 12:21:19.711 [info]   (Order a:1) SCHEDULER-938  Order will be processed at 2012-03-05 12:21:20.710
+2012-03-05 12:21:20.711 [info]   (Task order:1) SCHEDULER-842  Task is going to process Order a:1, state=C, on Scheduler 
+2012-03-05 12:21:20.715 [info]   (Task order:1) SCHEDULER-843  Task has ended processing of Order a:1, state=C, on Scheduler 
+2012-03-05 12:21:20.716 [info]   (Order a:1) set_state end
+2012-03-05 12:21:20.718 [info]   (Order a:1) SCHEDULER-945  No further job in job chain - order has been carried out
+2012-03-05 12:21:20.718 [info]   (Order a:1) SCHEDULER-940  Removing order from job chain
+2012-03-05 12:21:20.720 [info]   (Order 1) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/order.a.1.log
+2012-03-05 12:21:25.804 [info]   (Task order:1) SCHEDULER-918  state=closed
+2012-03-05 12:21:25.808 [info]   (Task order:1) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/task.order.log
+2012-03-05 12:21:25.818 [info]   --------------------------------------------
+2012-03-05 12:21:25.819 [info]   SCHEDULER-902  state=stopping
+2012-03-05 12:21:25.842 [info]   (Job  a) SCHEDULER-931  state=stopped
+2012-03-05 12:21:25.843 [info]   (Job  order) SCHEDULER-931  state=stopped
+2012-03-05 12:21:25.868 [info]   (Job  order) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.order.log
+2012-03-05 12:21:25.887 [info]   (Job  a) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.a.log
+2012-03-05 12:21:25.893 [info]   (Job  scheduler_service_forwarder) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.scheduler_service_forwarder.log
+2012-03-05 12:21:25.899 [info]   (Job  scheduler_file_order_sink) SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.cpp.CppServletTest\log/job.scheduler_file_order_sink.log
+2012-03-05 12:21:26.010 [info]   --------------------------------------------
+2012-03-05 12:21:26.010 [info]   SCHEDULER-902  state=stopped
+2012-03-05 12:21:26.012 [info]   SCHEDULER-999  Scheduler has been terminated properly

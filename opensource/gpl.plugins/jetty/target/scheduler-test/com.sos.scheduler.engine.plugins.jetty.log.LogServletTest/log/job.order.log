@@ -1,0 +1,6 @@
+2012-03-05 12:21:26.194 [info]   SCHEDULER-891  Configuration file 'C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.log.LogServletTest\config\order.job.xml' (2012-03-05 11:21:23.000 UTC) is going to be be loaded into this new Job
+2012-03-05 12:21:26.232 [info]   
+2012-03-05 12:21:26.232 [info]   Job order - Protocol starts in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.log.LogServletTest\log/job.order.log
+2012-03-05 12:21:27.928 [info]   SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:31.213 [info]   SCHEDULER-931  state=stopped
+2012-03-05 12:21:31.240 [info]   SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.log.LogServletTest\log/job.order.log

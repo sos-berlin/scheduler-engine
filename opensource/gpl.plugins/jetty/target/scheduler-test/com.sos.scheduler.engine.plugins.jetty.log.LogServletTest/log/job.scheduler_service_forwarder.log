@@ -1,0 +1,2 @@
+2012-03-05 12:21:26.479 [info]   SCHEDULER-893  Job is 'active' now
+2012-03-05 12:21:31.247 [info]   SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.log.LogServletTest\log/job.scheduler_service_forwarder.log

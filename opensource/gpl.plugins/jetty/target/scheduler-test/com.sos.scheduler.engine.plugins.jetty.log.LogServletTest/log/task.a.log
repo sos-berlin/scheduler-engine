@@ -1,0 +1,6 @@
+2012-03-05 12:21:29.051 [info]   SCHEDULER-918  state=starting (at=2012-03-05 12:21:29.036)
+2012-03-05 12:21:29.319 [info]   Step
+2012-03-05 12:21:30.379 [info]   Step
+2012-03-05 12:21:31.212 [info]   SCHEDULER-914  end() called, task will terminate
+2012-03-05 12:21:31.229 [info]   SCHEDULER-918  state=closed
+2012-03-05 12:21:31.230 [info]   SCHEDULER-962  Protocol ends in C:\scheduler\scheduler.src.devel\engine\opensource\gpl.plugins\jetty\target\test-classes\..\scheduler-test\com.sos.scheduler.engine.plugins.jetty.log.LogServletTest\log/task.a.log
