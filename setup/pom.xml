@@ -119,7 +119,7 @@ call prepare-setup.sh <version> to use this pom
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>plugins</artifactId>
+            <artifactId>jetty</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
