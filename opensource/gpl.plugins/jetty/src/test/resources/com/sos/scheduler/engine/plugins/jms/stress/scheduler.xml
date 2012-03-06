@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd"
+>
+    <config port="4444">
+        <plugins>
+        	<!--
+        	Use the JMSEventPlugin to put all JobScheduler events in a message queue.
+        	If you want change the providerUrl you have to change it also in the testclass StressTest.  
+        	-->
+            <plugin java_class="com.sos.scheduler.engine.plugins.jms.JMSEventPlugin">
+                <plugin.config>
+                    <jms>
+<!--                     	<connection providerUrl="tcp://w2k3.sos:61616" /> -->
+                        <connection providerUrl="vm:localhost" />
+                    </jms>
+                </plugin.config>
+            </plugin>
+        </plugins>
+    </config>
+</spooler>

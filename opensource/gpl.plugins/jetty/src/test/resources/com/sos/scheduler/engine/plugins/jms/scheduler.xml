@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.plugins.jms.JMSEventPlugin">
+                <plugin.config>
+                    <jms>
+                    	<!--  -->connection providerUrl="tcp://w2k3.sos:61616" / -->
+                        <connection providerUrl="vm:localhost" />
+                        <!--  connection providerUrl="vm:localhost" persistenceDirectory="c:/temp/amq" / -->
+                        <!--  connection providerUrl="tcp://localhost:61616"/>  -->
+                        <!--connection providerUrl="vm:com.sos.scheduler"/-->
+                        <!--brokerService name="com.sos.scheduler">
+                            <connector url="tcp://localhost:63102"/>
+                        </brokerService-->
+                    </jms>
+                </plugin.config>
+            </plugin>
+        </plugins>
+    </config>
+</spooler>

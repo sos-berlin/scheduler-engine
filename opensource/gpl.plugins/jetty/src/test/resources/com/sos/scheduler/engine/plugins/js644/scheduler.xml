@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+>
+    <config>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.plugins.js644.JS644Plugin"/>
+        </plugins>
+    </config>
+</spooler>
