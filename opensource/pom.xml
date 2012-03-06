@@ -25,5 +25,6 @@
         <module>kernel-cpp</module>
         <module>test</module>
         <module>jar</module>
+        <module>opensource.plugins</module>
     </modules>
 </project>
