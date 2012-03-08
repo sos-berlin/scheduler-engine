@@ -1,18 +1,14 @@
 package com.sos.scheduler.engine.tests.jira.js498;
 
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.test.util.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.junit.Ignore;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,37 +32,32 @@ public class JS498Test extends SchedulerTest {
     private final static Logger logger = Logger.getLogger(JS498Test.class);
 
     private final String jobchain = "chain_rhino";
-    private final String job = "rhino_simple";
 	private final CommandBuilder util = new CommandBuilder();
+
+    private boolean orderEnded = false;
+
 	private VariableSet resultSet;
 
-	/*
-	 * Unter linux gibt es Probleme beim Zugriff auf den Scheduler-Objekten untegeordneten Objekte, so führt
-	 * beispielsweise der Zugriff auf spooler_task.order() zum Absturz dem JVM.
-	 * Unter Windows (lokal) funktioniert er.
-	 * Der Test wurde deshalb zunächst deaktiviert.
-	 */
 	@Test
 	public void testFunctions() throws InterruptedException, IOException {
         File resultFile = FileUtils.getResourceFile(this.getClass(), "scheduler.log");
         logger.info("resultfile=" + resultFile);
 		controller().activateScheduler("-e","-log-level=info","-log=" + resultFile);
-//		controller().scheduler().executeXml( util.addOrder(jobchain).getCommand() );
-		controller().scheduler().executeXml( util.startJobImmediately(job).getCommand() );
-		controller().waitForTermination(shortTimeout);
-//		testAssertions();
+		controller().scheduler().executeXml( util.addOrder(jobchain).getCommand() );
+//		controller().scheduler().executeXml( util.startJobImmediately(job).getCommand() );
+
+        while (!orderEnded) {;}
+        showResultSet();
+//        testAssertions();
+        controller().terminateScheduler();
+//		controller().waitForTermination(shortTimeout);
 	}
 	
 	@HotEventHandler
 	public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
 		resultSet = scheduler().getVariables();
-		controller().terminateScheduler();
+        orderEnded = true;
 	}
-
-    @EventHandler
-    public void handleTaskEnd(TaskEndedEvent e) throws IOException {
-        controller().terminateScheduler();
-    }
 
 	public void testAssertions() throws IOException {
 		assertObject("spooler.variables.count","2");
@@ -85,6 +76,12 @@ public class JS498Test extends SchedulerTest {
 		assertFunction("spooler_process_before");
 		assertFunction("spooler_process_after");
 	}
+    
+    private void showResultSet() {
+        for(String key : resultSet.getNames()) {
+            logger.info(key + "=" + resultSet.get(key));
+        }
+    }
 
 	/**
 	 * checks if an estimated funtion was called.

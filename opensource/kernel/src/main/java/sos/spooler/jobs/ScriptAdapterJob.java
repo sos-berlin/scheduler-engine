@@ -12,12 +12,9 @@
 
 package sos.spooler.jobs;
 
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scripting.APIModuleInstance;
 import sos.spooler.Job_impl;
-import sos.spooler.Monitor_impl;
-import sos.spooler.Variable_set;
-
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,7 +24,9 @@ import java.util.Map;
  */
 public class ScriptAdapterJob extends Job_impl {
 
-    private APIModuleInstance scriptModule = null;
+    private final APIModuleInstance scriptModule;
+    private final String language;
+    private final String code;
 
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
     //TODO Was passiert, wenn der Scriptcode aus einer Datei geladen wird
@@ -37,33 +36,27 @@ public class ScriptAdapterJob extends Job_impl {
 
     private boolean bindingsSet = false;
 
-    public ScriptAdapterJob() {
-        System.err.println("empty konstruktor");
-    }
-
-    public ScriptAdapterJob(int x) {
-        System.err.println("empty konstruktor " + x);
-    }
-
     public ScriptAdapterJob(String language, String code) {
 
-        System.err.println("language=" + language);
-        System.err.println("code=" + code);
+//        System.err.println("language=" + language);
+//        System.err.println("code=" + code);
+        this.language = language;
+        this.code = code;
         try {
-            scriptModule = new APIModuleInstance(language, code);
+            this.scriptModule = new APIModuleInstance(language, code);
         } catch (Exception e) {
-            System.err.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new SchedulerException("error creating instance of APIModuleInstance",e);
         }
     }
 
     public boolean spooler_init() throws Exception {
+        String method = "spooler_init";
         try {
             setBindings();
-            callMethod("spooler_init");
+            callMethod(method);
         } catch (Exception e) {
             spooler_log.error(e.getMessage());
-            throw new RuntimeException(e);
+            throw new SchedulerException(method + " failed",e);
         }
         return true;
     }
@@ -93,12 +86,13 @@ public class ScriptAdapterJob extends Job_impl {
     }
 
     public boolean spooler_task_before() throws Exception {
+        String method = "spooler_task_before";
         try {
             setBindings();
-            callMethod("spooler_task_before");
+            callMethod(method);
         } catch (Exception e) {
             spooler_log.error(e.getMessage());
-            throw new RuntimeException(e);
+            throw new SchedulerException(method + " failed",e);
         }
         return true;
     }
@@ -119,50 +113,17 @@ public class ScriptAdapterJob extends Job_impl {
     }
 
     private void callMethod(String function) {
-        if (scriptModule != null) {
-            spooler_log.info("call function " + function);
-            scriptModule.call(function);
-        }
+        spooler_log.info("call function " + function);
+        scriptModule.call(function);
     }
 
     private boolean callMethod(String function, boolean defaultResult) {
         boolean result = defaultResult;
-        if (scriptModule != null) {
-            spooler_log.info("call function " + function);
-            Object resultValue = scriptModule.call(function);
-            if (resultValue != null)
-                result = (Boolean) resultValue;
-        } else
-            spooler_log.info("script module not set");
-        spooler_log.info("result is " + result);
+        spooler_log.info("call function " + function);
+        Object resultValue = scriptModule.call(function);
+        if (resultValue != null)
+            result = (Boolean) resultValue;
         return result;
-    }
-
-    private void prepareEnvironment() {
-        if (scriptModule == null) {
-            String test = System.getProperty("test");
-            Variable_set v = spooler_task.params();
-            String language = v.var("SCHEDULER_SCRIPT_LANGUAGE");
-            String code = v.var("SCHEDULER_SCRIPT_CODE");
-            // String adapter = v.var("SCHEDULER_SCRIPT_ADAPTER_JOB");
-            spooler_log.info("language=" + language);
-            spooler_log.info("code=" + code);
-            spooler_log.info("test=" + code);
-            // spooler_log.info("adapter=" + adapter);
-            //
-            Map<String, String> env = System.getenv();
-            for (String envName : env.keySet()) {
-                if (envName.startsWith("SCHEDULER_")) spooler_log.info(envName + "=" + env.get(envName));
-            }
-
-            try {
-                scriptModule = new APIModuleInstance(language, code);
-                setBindings();
-            } catch (Exception e) {
-                spooler_log.error(e.getMessage());
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private void setBindings() {
