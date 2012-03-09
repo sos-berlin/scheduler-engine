@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js498;
 
 
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -34,8 +34,6 @@ public class JS498Test extends SchedulerTest {
     private final String jobchain = "chain_rhino";
 	private final CommandBuilder util = new CommandBuilder();
 
-    private boolean orderEnded = false;
-
 	private VariableSet resultSet;
 
 	@Test
@@ -44,19 +42,15 @@ public class JS498Test extends SchedulerTest {
         logger.info("resultfile=" + resultFile);
 		controller().activateScheduler("-e","-log-level=info","-log=" + resultFile);
 		controller().scheduler().executeXml( util.addOrder(jobchain).getCommand() );
-//		controller().scheduler().executeXml( util.startJobImmediately(job).getCommand() );
-
-        while (!orderEnded) {;}
+		controller().waitForTermination(shortTimeout);
+	}
+	
+	@EventHandler
+	public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
+		resultSet = scheduler().getVariables();
         showResultSet();
 //        testAssertions();
         controller().terminateScheduler();
-//		controller().waitForTermination(shortTimeout);
-	}
-	
-	@HotEventHandler
-	public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
-		resultSet = scheduler().getVariables();
-        orderEnded = true;
 	}
 
 	public void testAssertions() throws IOException {
