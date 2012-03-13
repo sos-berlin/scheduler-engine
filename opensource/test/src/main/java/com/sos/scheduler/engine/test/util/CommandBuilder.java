@@ -78,6 +78,21 @@ public class CommandBuilder {
 		return this;
 	}
 
+    public CommandBuilder killTaskImmediately(String jobName, String id) {
+        return killTask(jobName,id,true);
+    }
+
+    public CommandBuilder killTask(String jobName, String id, boolean immediately) {
+        lastId = id;
+        commandPrefix = "<kill_task id='" + getId() + "' job='" + jobName + "' immediately='" + getYesOrNo(immediately) + "'>";
+        commandSuffix = "</kill_task>";
+        return this;
+    }
+
+    private String getYesOrNo(boolean flag) {
+        return (flag) ? "yes" : "no";
+    }
+
 	public DateTime getLastBegin() {
 		return lastBegin;
 	}
