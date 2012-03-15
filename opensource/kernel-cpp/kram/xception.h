@@ -52,7 +52,7 @@ struct Source_pos
     int                        _line;                   // 0..n-1, -1: Keine Zeilenangabe
     int                        _col;                    // 0..m-1, -1: Keine Spaltenangabe
 
-    void                        filename                ( const char* f )                 { memcpy( _file, f, min( sizeof _file, strlen(f) + 1 ) ); _file[sizeof _file] = '\0'; }
+    void                        filename                ( const char* f )                 { memcpy( _file, f, min( sizeof _file, strlen(f) + 1 ) ); _file[sizeof _file - 1] = '\0'; }
     const char*                 filename                () const                          { return _file; }
     Bool                        empty                   () const                          { return _file[0] == '\0' && _col == -1; }
 
