@@ -8,32 +8,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>opensource.plugins</artifactId>
-        <groupId>com.sos.scheduler.engine</groupId>
-        <version>1.3.12.2020-SNAPSHOT</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jetty</artifactId>
+
+    <parent>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>opensource.plugins</artifactId>
+        <version>1.3.12.2020-SNAPSHOT</version>
+    </parent>
+
     <name>${project.artifactId}</name>
     <inceptionYear>2011</inceptionYear>
-    <description>jetty plugin of the scheduler kernel.</description>
+    <description>Jetty plugin for the JobScheduler engine</description>
 
     <build>
-        <testResources>
-            <testResource>
-                <!-- Standard wiederholen -->
-                <directory>${basedir}/src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
-                <directory>${project.build.testSourceDirectory}</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </testResource>
-        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.scala-tools</groupId>
@@ -48,31 +37,11 @@
             <artifactId>kernel</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>kernel.cppproxy-generated</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>kernel-cpp</artifactId>
-            <version>${project.version}</version>
-            <classifier>${osArch}</classifier>
-            <scope>test</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>test</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
@@ -138,5 +107,4 @@
             <artifactId>jackson-jaxrs</artifactId>
         </dependency>
     </dependencies>
-
 </project>
