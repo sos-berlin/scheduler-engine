@@ -11,7 +11,6 @@
 #include "../kram/sosctype.h"
 #include "../kram/sosopt.h"
 #include "../kram/sosfield.h"
-#include "../kram/typereg.h"
 #include "../kram/dynobj.h" 
 #include "../file/anyfile.h"
 #include "../file/anyfile2.h"
@@ -120,7 +119,6 @@ void Any_file::rewind           ( Key::Number n )                               
 void Any_file::del              ()                                                          { _file->del(); }
 void Any_file::del              ( const Key& key )                                          { _file->del( key ); }
 void Any_file::lock             ( const Key& key, Record_lock lock )                        { _file->lock( key, lock ); }
-void Any_file::obj_owner        ( Sos_object* o )                                           { _file->obj_owner( o ); }
 Bool Any_file::opened           ()                                                          { return _file != NULL && _file->_opened; }
 
 Const_area         Any_file::current_key             ()                                     { return _file->current_key(); }
@@ -535,22 +533,6 @@ void Any_file_obj::prepare_open_preprocessing( Any_file_param* param )
             if( o.with_value( "key-position" )
              || o.with_value( "kp"         ) )  _spec._key_specs._key_spec._key_position = as_uint( o.value() );
             else
-            if( o.with_value( "cobol-type" ) )  callers_object_type( cobol_record_type( o.value() ) );
-            else
-            if( o.with_value( "frame-type" ) )  callers_object_type( frame_record_type( o.value() ) );
-            else
-          //if( o.with_value( "sql-type"   ) )  callers_object_type( sql_record_type( o.value() ) );
-          //else
-            if( o.with_value( "type"       ) )  
-            {
-                value = o.value(); 
-                if( length( value ) >= 1  &&  value[0] == '(' ) {
-                    callers_object_type( make_record_type( c_str( value ) ) );
-                } else {
-                    callers_object_type( type_register_ptr()->record_type( c_str( value ) ) ); 
-                }
-            }
-            else
             if( o.with_value( "modify-fields")) param->_modify_field_names = o.value();
             else
             if( o.with_value( "fields"     ) )  param->_field_names = o.value();
@@ -585,7 +567,6 @@ void Any_file_obj::prepare_open_preprocessing( Any_file_param* param )
 
     select_file_type( param );
 
-    _f->obj_owner( this );
     _f->_any_file_ptr = this;
     _f->any_file_ptr( this );
 }
@@ -653,9 +634,6 @@ void Any_file_obj::_prepare_open( Any_file_param* param )
     }
     catch( Xc_base& x )
     {
-//#       if !defined SYSTEM_SOLARIS   // jz 960417   x wird zerkloppt? Auch nur bei Sos_option_error?
-          x.insert( _filename );
-//#       endif
         throw;
     }
 }
@@ -710,34 +688,10 @@ void Any_file_obj::prepare_open_postprocessing( Any_file_param* param )
     if( _spec._field_type_ptr
      && !_spec.key_specs()._key_spec.field_descr_ptr() )
     {
-/*
-        int key_len = 0;
-        int key_pos = 0;
-
-        try {
-            key_len = _f->key_length(0);
-            key_pos = _f->key_position(0);
-        }
-        catch( const Xc& x ) { LOG( "Any_file::prepare_open kl/kp: " << x << '\n' ); }
-*/
         if( _f->_key_len  &&  _f->_key_pos >= 0 ) {
             Sos_ptr<Record_type> key_type = Record_type::create();
 
             build_key_type( key_type, _spec._field_type_ptr, 0 );
-/*jz 4.12.97
-            for( int i = 0; i < _spec._field_type_ptr->field_count(); i++ ) {
-                Field_descr* f = _spec._field_type_ptr->field_descr_ptr( i );
-                if( f
-                 && f->offset() >= key_pos
-                 && f->offset() + f->type().field_size() <= key_pos + key_len )
-                {
-                    Sos_ptr<Field_descr> f2 = SOS_NEW( Field_descr( f->type_ptr(),
-                                                                    f->name(),
-                                                                    f->offset() - key_pos ) );
-                    key_type->add_field( f2 );
-                }
-            }
-*/
             if( key_type->field_count() ) {
                 const char* name = "key";
                 if( key_type->field_count() == 1 )  name = key_type->field_descr_ptr( 0 )->name();
@@ -771,38 +725,11 @@ void Any_file_obj::new_file( Any_file* any_file )
     Sos_ptr<Abs_file> f = any_file->_file->_f;
     _f = f;
 
-    _f->obj_owner( this );
     _f->_any_file_ptr = this;
     _f->any_file_ptr( this );
 
 }
 
-//--------------------------------------------------------------------Any_file_obj::filter_open
-/*
-void Any_file_obj::filter_open( const Sos_string& filename, Open_mode open_mode, Any_file* base_file )
-{
-    // Dateityp ermitteln und Filter_file (erbt von Abs_file) anlegen.
-    // prepare_open() und open() aufrufen, um Schalter auswerten zu können.
-    // pipe darf nicht angegeben werden, denn die Datei ist ja schon geöffnet.
-
-    prepare_open_preprocessing( filename, open_mode, std_file_spec );
-
-    SOS_CAST( Filter_file, _f )->_file = *base_file;
-
-    _f->prepare_open( c_str( param->_parameter ), open_mode, _spec );
-
-    prepare_open_postprocessing();
-}
-*/
-//-----------------------------------------------------------------Any_file_obj::bind_parameter
-/*
-void Any_file_obj::bind_parameters( int par_no, const Field_type*, const void* )
-{
-    Sos_ptr<Record_type> record_type = SOS_NEW( Record_type );
-    record_type->add_field( param.type(), "param1", 0 );
-    f.bind_parameters( SOS_CAST( Record_type, record_type ), param.ptr() );
-}
-*/
 //---------------------------------------------------------------Any_file_obj::clear_parameters
 
 void Any_file_obj::clear_parameters()
@@ -1022,10 +949,6 @@ void Any_file_obj::close( Close_mode close_mode )
         _f->close( close_mode );
     }
 }
-
-//----------------------------------------------------------------------AB HIER WIRD OPTIMIERT!
-
-#include "../kram/optimize.h"
 
 //----------------------------------------------------------------------------Any_file_obj::eof
 

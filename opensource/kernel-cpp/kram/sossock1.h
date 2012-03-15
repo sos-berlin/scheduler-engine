@@ -61,11 +61,4 @@
 #endif
 
 
-namespace sos
-{
-    void throw_sos_socket_error( int errno_, const char* insertion );
-    void throw_sos_socket_error( const char* insertion );
-    void throw_sos_socket_error( const char* insertion, const char* ins2 );
-}
-
 #endif

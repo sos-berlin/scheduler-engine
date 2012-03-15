@@ -270,7 +270,7 @@ typedef Bool Sos_bool;  // Für Herrn Püschel
 //#endif
 #define SYSTEM_RTTI
 //----------------------------------------------------------------------------------SYSTEM_ODBC
-#if defined SYSTEM_WIN || defined SYSTEM_LINUX //|| defined SYSTEM_SOLARIS
+#if defined SYSTEM_WIN
 #    define SYSTEM_ODBC
 #endif
 //------------------------------------------------------------------------------SYSTEM_STARVIEW

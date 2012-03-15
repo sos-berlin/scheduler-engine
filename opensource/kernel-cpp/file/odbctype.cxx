@@ -2,7 +2,6 @@
 //#define COPYRIGHT   "©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
-//#include "../kram/optimize.h"
 #include "precomp.h"
 #include "../kram/sysdep.h"
 

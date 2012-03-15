@@ -15,19 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="a2a.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="area.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="assert.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="charset.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cobfield.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="com_server.cxx">
@@ -36,37 +24,10 @@
     <ClCompile Include="com_simple_standards.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="decimal.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="delphi.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dynobj.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="e2a.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ebc2iso.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ebcdic.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ebcdifld.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="env.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="exp10.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="frmfield.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="iso2ebc.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="itoa.cxx">
@@ -81,28 +42,10 @@
     <ClCompile Include="log.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="logwin.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="msec.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nullasgn.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="olereg.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="olestd.CXX">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="optional.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pointer.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="profile.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sleep.cxx">
@@ -117,16 +60,10 @@
     <ClCompile Include="sos_mail_jmail.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sos_perl.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sosalloc.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sosarray.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosbeep.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sosclien.cxx">
@@ -138,49 +75,19 @@
     <ClCompile Include="sosdate.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sosdde.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosdll.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosdumcl.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="soserror.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosfact.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sosfield.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sosfiltr.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sosfld2.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosfunc.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="soslimt2.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="soslimtx.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="soslist.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sosmain0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosmsg.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosmswin.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sosobj.cxx">
@@ -189,25 +96,64 @@
     <ClCompile Include="sosobjba.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sosole.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sosopt.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sosprof.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sosprog.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sosscrpt.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sosset.cxx">
+    <ClCompile Include="sossock.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sossock.cxx">
+    <ClCompile Include="sosstat.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sosstrg0.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sosstrng.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sosuser.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdfield.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="strupr.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sysxcept.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="truncsp.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="xception.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_precomp.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sossv2.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sostimer.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sosdll.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="soslimt2.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="olestd.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sossql_group_by.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sossql1.cxx">
@@ -225,109 +171,37 @@
     <ClCompile Include="sossql4.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sossql_group_by.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sossqlfl.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossqlfn.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sossqlty.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sosstat.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosstrea.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosstrg0.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosstrng.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossv.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossv2.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossys.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sostimer.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosuser.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="soswin.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="soswnmsg.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sosxml.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sqlfield.cxx">
+    <ClCompile Include="sosset.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sqlutil.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stdfield.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="strlwr.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="strupr.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="subrange.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="svstring.cxx">
+    <ClCompile Include="sossqlfn.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sysdep.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sysxcept.cxx">
+    <ClCompile Include="sqlfield.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thread.cxx">
+    <ClCompile Include="decimal.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thread_semaphore.cxx">
+    <ClCompile Include="sosstrea.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="truncsp.cxx">
+    <ClCompile Include="sosfunc.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="typereg.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="video.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="videowin.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="xception.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="xlat.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="xlatgerm.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="_precomp.cxx">
+    <ClCompile Include="ebc2iso.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -371,10 +245,16 @@
     <ClInclude Include="xml_dom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dynobj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="kram.hrc">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\..\engine-svn\opensource\kernel-cpp\kram\sosset.inl">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

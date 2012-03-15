@@ -13,14 +13,7 @@ anderen Module frei von StarView sind.
 
 #undef cerr   // sysdep.h soll cerr nur für win16 sperren
 
-#if defined SYSTEM_STARVIEWxxxxxxx
-#   include <sv.hxx>
-#elif defined SYSTEM_WIN
-#   include <windows.h>
-#endif
-
 #include "../kram/sos.h"
-//#include "../kram/sossv.h"
 #include "../kram/log.h"
 
 using namespace std;
@@ -31,12 +24,6 @@ Bool sos_gui = true;   // Wird von sosmain.cxx = false gesetzt
 extern Sos_string   module_filename();
 
 //--------------------------------------------------------------------show_msg()
-
-#if 0
-typedef void (* _RTLENTRY new_handler)() /* throw(xalloc) */;
-
-new_handler _RTLENTRY set_new_handler(new_handler);
-#endif
 
 typedef void (* Msg_func)( const char* text );
 
@@ -56,13 +43,7 @@ extern void show_msg( const char* text_ptr )
         return;
     }
 
-#   if defined SYSTEM_STARVIEWxxxxxx
-        if( InSendMessage() ) {
-            LOG( "in SendMessage()!\n" );
-        } else {
-            ErrorBox( NULL, WB_OK, text_ptr ).Execute();
-        }
-#   elif defined SYSTEM_WIN
+#   if defined SYSTEM_WIN
         if( sos_gui ) {
             if( InSendMessage() ) {
                 LOG( "in SendMessage()!\n" );

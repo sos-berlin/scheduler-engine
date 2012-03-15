@@ -975,19 +975,6 @@ inline char             as_char             ( const Field_descr* f, const Byte* 
 inline Sos_string       as_string           ( const Field_type*  t, const Byte* p )  { return t->as_string( p ); }
 inline Sos_string       as_string           ( const Field_descr* f, const Byte* p )  { return f->as_string( p ); }
 
-//----------------------------------------------------------------------------cobol_record_type
-
-Sos_ptr<Record_type> cobol_record_type( const Sos_string& filename );
-
-//----------------------------------------------------------------------------frame_record_type
-
-Sos_ptr<Record_type> frame_record_type( ::std::istream* s, const Source_pos&, Bool check_eof = false );
-Sos_ptr<Record_type> frame_record_type( const char* filename );
-
-inline Sos_ptr<Record_type> frame_record_type( const Sos_string& filename )
-{
-    return frame_record_type( c_str( filename ) );
-}
 //------------------------------------------------------------------------------sql_record_type
 
 Sos_ptr<Record_type> sql_record_type( ::std::istream*, Bool check_eof = false );

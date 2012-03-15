@@ -99,10 +99,10 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>../misc/lib/libctleasy.lib;delayimp.lib;ws2_32.lib;version.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>delayimp.lib;ws2_32.lib;version.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)scheduler.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DelayLoadDLLs>winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetPath).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
@@ -172,10 +172,10 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>../misc/lib/libctleasy.lib;delayimp.lib;ws2_32.lib;version.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>delayimp.lib;ws2_32.lib;version.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)scheduler.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DelayLoadDLLs>winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetPath).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
@@ -403,10 +403,6 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     </ProjectReference>
     <ProjectReference Include="..\file\file.vcxproj">
       <Project>{5b3ca6e0-dc6c-4f07-b475-6c86e538d7bf}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\fs\fs.vcxproj">
-      <Project>{0b06ffb7-86c9-4721-a177-bac872992375}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\javaproxy\javaproxy.vcxproj">

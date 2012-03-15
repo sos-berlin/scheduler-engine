@@ -250,9 +250,6 @@ void Sos_database_session::read_profile()
         _qualifier          = read_profile_string( "", c_str( section ), "qualifier", c_str( _qualifier ) );
         _user               = read_profile_string( "", c_str( section ), "user"     , c_str( _user ) );
         _password           = read_profile_string( "", c_str( section ), "password" , c_str( _password ) );
-        _transaction_timeout= read_profile_uint  ( "", c_str( section ), "transaction-timeout", _transaction_timeout );
-      //_multiple_sessions  = read_profile_bool  ( "", c_str( section ), "multiple-sessions", _multiple_sessions );   // Wirkt das hier? jz 30.11.97
-      //_keep_sessions_open = read_profile_bool  ( "", c_str( section ), "keep-sessions-open", _keep_sessions_open );
 
         if( _first_cmds != "" )  _first_cmds += ';';
         _first_cmds        += read_profile_string( "", c_str( section ), "first" );
@@ -299,7 +296,6 @@ void Sos_database_session::open( Sos_database_file* first_file )
     _user                = first_file->_user;
     _password            = first_file->_password;
     _open_mode           = first_file->_open_mode;
-    _transaction_timeout = first_file->_transaction_timeout;
     _debug               = first_file->_debug;
 
     _first_cmds          = _static->_first_cmds;
@@ -420,10 +416,6 @@ Sos_database_session::Properties Sos_database_session::properties() {
 
 void Sos_database_session::check_transaction()
 {
-    if( _transaction_timed_out ) {
-        _transaction_timed_out = false;
-        throw_xc( "SOS-1331", _transaction_timeout );
-    }
 }
 
 //---------------------------------------------------------Sos_database_session::execute_direct
@@ -1145,71 +1137,11 @@ void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_ar
     if( append_for_update )  result_area->append( "  FOR UPDATE" );
 }
 
-//-------------------------------------------------------------------------sosdb_timer_callback
-
-int __cdecl sosdb_timer_callback( void* param )
-{
-    return ((Sos_database_session*)param)->timer_callback();
-}
-
-//---------------------------------------------------------Sos_database_session::timer_callback
-
-int Sos_database_session::timer_callback()
-{
-    _transaction_timer = NULL;
-
-    if( _write_transaction_open ) {
-#       if defined SYSTEM_UNIX
-            std::cerr << time_stamp() << "   Transaktion-Zeitlimit ist abgelaufen. Die Transaktion wird jetzt zurückgesetzt. "
-                 << *this  << '\n';
-#       endif
-
-        Z_LOG2( "sosdb", "Transaktion-Zeitlimit ist abgelaufen. Die Transaktion wird jetzt zurückgesetzt. "
-             << *this  << '\n' );
-
-        _transaction_timed_out = true;  // falls rollback() Exception auswirft
-        rollback();
-        _transaction_timed_out = true;
-    }
-
-    return 0;
-}
-
-//------------------------------------------------------Sos_database_session::transaction_begun
-
-void Sos_database_session::set_transaction_timer()
-{
-    if( _transaction_timeout ) {
-        if( _transaction_timer ) {
-            _transaction_timer->remove();
-            _transaction_timer = NULL;
-        }
-
-        _transaction_timer = sos_static_ptr()->_timer_manager->add_timer(
-                                 &sosdb_timer_callback,
-                                 this,
-                                 clock_as_double() + _transaction_timeout
-                             );
-    }
-}
-
 //-----------------------------------------------------Sos_database_session::transaction_begun
 
 void Sos_database_session::transaction_begun()
 {
     _write_transaction_open = true;
-    //cerr << "Session " << _session_no  << " begin transaction " << st << '\n';
-
-    set_transaction_timer();
-
-/*jz 12.4.97
-    if( _transaction_timeout ) {
-        _transaction_timer = sos_static_ptr()->_timer_manager
-                               ->add_timer( &sosdb_timer_callback,
-                                            this,
-                                            clock_as_double() + _transaction_timeout );
-    }
-*/
 }
 
 //-------------------------------------------------------Sos_database_session::transaction_ends
@@ -1220,12 +1152,6 @@ void Sos_database_session::transaction_begun()
 void Sos_database_session::transaction_ends()
 {
     _write_transaction_open = false;
-    // << "Session " << _session_no  << ' ' << st << '\n';
-
-    if( _transaction_timer )  {
-        _transaction_timer->remove();
-        _transaction_timer = NULL;
-    }
 }
 
 //-----------------------------------------------------------------Sos_database_session::commit
@@ -1404,18 +1330,12 @@ void Sos_database_file::get_static( const char* dbms_name )
 void Sos_database_file::get_session()
 {
     Sos_database_session* session = 0;
-    Sos_client*           client = 0;
     int i;
 
     session_disconnect();   // Im Falle eines Falles
 
 
-    if( _static->_multiple_sessions ) {
-        client = obj_client();
-    } else {
-        client = +sos_static_ptr()->_std_client;
-    }
-
+    Sos_client* client = +sos_static_ptr()->_std_client;
 
     for( i = client->_session_array.first_index(); i <= client->_session_array.last_index(); i++ )
     {

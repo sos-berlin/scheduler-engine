@@ -160,21 +160,6 @@ Bool read_profile_bool( const char* filename, const char* group_name, const char
     return def;
 }
 
-//----------------------------------------------------------------------------file_exists
-/*
-Bool file_exists( const char* filename )
-{
-    Any_file f;
-
-    try {
-        f.open( filename, File_base::in );
-        f.close();
-        return true;
-    } catch ( const Xc& ) {
-        return false;
-    }
-}
-*/
 //---------------------------------------------------------------------------read_registry
 #if defined SYSTEM_WIN
 

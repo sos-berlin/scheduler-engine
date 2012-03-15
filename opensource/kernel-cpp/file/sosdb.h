@@ -87,12 +87,8 @@ struct Sos_database_session : Sos_self_deleting
   protected:
     void                        transaction_begun       ();
     void                        transaction_ends        ();
-    void                        set_transaction_timer   ();
-    int                         timer_callback          ();
     std::vector<string>         parse_argumentlist      ( const char** pp, const char* p_end, int n );
     string                      parse_argument          ( const char** pp, const char* p_end );
-
-    friend Sos_timer_callback   sosdb_timer_callback;
 
   public:
 
@@ -120,8 +116,6 @@ struct Sos_database_session : Sos_self_deleting
     long                       _row_count;
     Bool                       _single;                 // "-single" Genau ein Satz soll betroffen sein
     Bool                       _write_transaction_open;
-    int                        _transaction_timeout;
-    Sos_timer_handle           _transaction_timer;
     int                        _ref_count;
     bool                       _auto_commit;
 

@@ -309,6 +309,9 @@
     <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__Spooler.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">

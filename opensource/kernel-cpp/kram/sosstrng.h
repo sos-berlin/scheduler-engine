@@ -11,36 +11,11 @@
 // Solaris: Tools.h++ Klasse: RWCString
 // Sonst selbst programmiert
 
-/*
-#if !defined SOS_STRING || !defined SOS_STRING_STARVIEW ||  !defined SOS_STRING_BORLAND || !defined SOS_STRING_SOS
-#   if defined SYSTEM_SOLARIS
-#       define SOS_STRING_RW            // Rogue Wave Tools.h++
-#   elif defined SYSTEM_STARVIEW
-#       define SOS_STRING_STARVIEW      
-#   elif defined __BORLANDC__
-#       define SOS_STRING_BORLAND
-#   elif defined SYSTEM_GNU
-#       define SOS_STRING_STL
-#   else
-#       define SOS_STRING_SOS
-#   endif
-#endif
-*/
-
 #define SOS_STRING_STL
 
 
 #if defined SOS_STRING_STL
 #   include <string>
-#elif defined SOS_STRING_RW
-#   include <rw/cstring.h>
-#   include <rw/regexp.h>
-#elif defined _MSC_VER
-#   include <afx.h>        // MFC Microsoft Foundation Classes
-#elif defined SOS_STRING_STARVIEW
-#   include <svstring.h>
-#elif defined SOS_STRING_BORLAND
-#   include <borstrng.h>
 #else
 #   if !defined __STRING_H  &&  !defined _STRING_H
 #       include <string.h>

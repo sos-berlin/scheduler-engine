@@ -181,28 +181,13 @@ struct Sos_static : Sos_static_0
 #endif
 
     Sos_static_ptr<mail::Mail_static>                  _mail;
-    Sos_static_ptr<Cache_file_static>                  _cache_file;
-    Sos_static_ptr<Ebo_static>                         _ebo;                        // Eichenauer
-    Sos_static_ptr<Sos_timer_manager>                  _timer_manager;
-    Sos_static_ptr<Hostword_static>                    _hostword;                   // hostword.cxx (letter)
-    Sos_static_ptr<Hostapi>                            _hostapi;
     Sos_static_ptr<Sos_client>                         _std_client;
     Sos_pointer                                        _init_parameters_ptr;       // init.cxx
     Sos_static_ptr<Type_register>                      _type_register;
     Sos_pointer                                        _file_type_common_head;
     Sos_pointer                                        _factory_agent;             // sosfact.cxx
-    Sos_static_ptr<Sos_msg_queue>                      _msg_queue_ptr;             // sosmsg.cxx
-    Sos_static_ptr<Any_file>                           _error_text_file;
-    Sos_pointer                                        _ddeml_instance_ptr;        // sosdde.cxx
-    Sos_pointer                                        _wbtrint2_ptr;              // wbtrint2.cxx
-    Sos_pointer                                        _mswin_msg_window_manager_ptr;
-    Sos_static_ptr<Sos_socket_manager>                 _socket_manager_ptr;        // sossock.cxx
-    Sos_static_ptr<Fs_common>                          _fs_common;                 // fsfile.cxx
     Sos_static_ptr<Odbc_static>                        _odbcfile;
     Sos_static_ptr<Sosdb_static>                       _sosdb;
-    Sos_static_ptr<Fle370>                             _fle370;
-    Sos_static_ptr<Sossql_static>                      _sossql;
-    Sos_static_ptr<Comfile_static>                     _comfile;
     Sos_static_ptr<Sos_licence>                        _licence;
     Sos_static_ptr<Sos_function_register>              _function_register;
     Sos_static_ptr<Sosprof_static>                     _sosprof;                   // sosprof.cxx (.ini-files)

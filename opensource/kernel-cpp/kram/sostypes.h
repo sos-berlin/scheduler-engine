@@ -37,38 +37,3 @@ struct Sos_time : Time
 
   Bool          valid           ();
 };
-
-template <uint size>
-struct Sos_fixed_text : Area {
-                Sos_fixed_text  ( const char* str = 0 ) : Area(_text,size) { text(str); };          
-  operator      const char*     () const { return _text; };
-  const char*   text            () const { return _text; };
-  void          text            ( const char* str = 0 );
-private:
-  char _text[size+1];
-};
-
-template <uint size>
-inline void Sos_fixed_text<size>::Sos_fixed_text( const char* str ) {
-  if ( str == 0 ) {
-    _text[0] = 0;
-    length(0);
-    return;
-  }
-  uint len = min( strlen( str ), size() );
-  strncpy( _text, str, len );
-  _text[len] = 0;
-  length(len);
-};
-
-template <uint first, uint last>
-struct Sos_number {
-                Sos_number  () : _number(first), _nks(0) {}; 
-                Sos_number  ( uint4 n, nks = 0 ) : _nks(nks) { number(n); };         
-  operator      uint4() const { return _number; };
-  uint4         number() { return _number; };
-  void          number( uint4 n ) { if (n>=first&&n<=last) _number = n; };
-private:
-  uint4  _number;
-  uint   _nks;
-};

@@ -7,10 +7,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#if defined SYSTEM_WIN && defined SYSTEM_STARVIEW
-#   include <svwin.h>
-#endif
-
 #include "../kram/sosstrng.h"
 #include "../kram/sos.h"
 #include "../kram/sosctype.h"

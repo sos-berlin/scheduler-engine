@@ -61,8 +61,6 @@
 #include "../kram/sosdate.h"
 #include "../file/absfile.h"
 #include "../file/sosdb.h"
-
-#include "../kram/sosmswin.h"   // <<HINSTANCE
 #include "../file/odbctype.h"
 #include "../kram/env.h"
 

@@ -5,9 +5,6 @@
       <UniqueIdentifier>{4cbcfeac-0f98-43aa-b453-f5ee423d59a2}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Quellcodedateien\rtf">
-      <UniqueIdentifier>{72a37400-72d7-4bef-b00a-901f635b2f8b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Quellcodedateien\xml">
       <UniqueIdentifier>{d8eb550a-c46e-4b56-a338-f79eedd6d3cb}</UniqueIdentifier>
     </Filter>
@@ -148,15 +145,6 @@
     </ClCompile>
     <ClCompile Include="zschimmer.cxx">
       <Filter>Quellcodedateien</Filter>
-    </ClCompile>
-    <ClCompile Include="rtf\rtf.cxx">
-      <Filter>Quellcodedateien\rtf</Filter>
-    </ClCompile>
-    <ClCompile Include="rtf\rtf_doc.cxx">
-      <Filter>Quellcodedateien\rtf</Filter>
-    </ClCompile>
-    <ClCompile Include="rtf\rtf_parser.cxx">
-      <Filter>Quellcodedateien\rtf</Filter>
     </ClCompile>
     <ClCompile Include="xml_end_finder.cxx">
       <Filter>Quellcodedateien\xml</Filter>

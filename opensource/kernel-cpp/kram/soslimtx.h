@@ -4,11 +4,6 @@
 #ifndef __SOSLIMTX_H
 #define __SOSLIMTX_H
 
-//#pragma interface
-
-#if !defined __STORABLE_H
-//#   include <storable.h>
-#endif
 
 #if !defined __SOSSTRG0_H
 #   include "sosstrg0.h"
@@ -147,16 +142,6 @@ void add_sos_limited_text_field(
 #define RECORD_TYPE_ADD_LIMTEXT_NULL( NAME, FLAGS )   \
     add_sos_limited_text_field( t, &o->_##NAME, #NAME, o->_##NAME.static_size(), &o->_##NAME##_null, FLAGS )
 
-
-// Funktioniert das für RECORD_TYPE_ADD_FIELD?
-/*
-template< int SIZE >
-inline void add_field( Record_type* t, const Sos_limited_text<SIZE>* offset, const char* name,
-                       const Bool* null_offset = (Bool*)-1, uint flags = 0 )
-{
-    add_sos_limited_text_field( t, offset, name, SIZE, null_offset, flags )
-}
-*/
 #endif
 //-----------------------------------------------------------------------String0_area::String0_area
 
@@ -263,19 +248,6 @@ inline Sos_limited_text<SIZE>& Sos_limited_text<SIZE>::operator= ( const Sos_str
 }
 
 #endif
-//-------------------------------------------------------------------------------------object_check
-/*jz 20.9.96
-inline void object_check( const Sos_string& str, String0_area* string0_area_ptr )
-{
-    string0_area_ptr->assign( c_str( str ) );
-}
-*/
-/*
-inline Sos_string as_string( const Abs_limited_string& str )
-{
-    return str.sos_string();
-}
-*/
 
 } //namespace sos
 

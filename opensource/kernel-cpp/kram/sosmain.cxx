@@ -26,9 +26,6 @@
 
 namespace sos {
 
-extern Bool sos_gui;
-
-
 #ifdef SYSTEM_WIN
     HINSTANCE _hinstance = 0; 
 #endif
@@ -39,55 +36,16 @@ extern Bool sos_gui;
 
 extern int sos_main0( int argc, char** argv );
 
-
-#if defined __BORLANDC__
-
-
-    struct Sos_standard_application : Sos_application
-    {
-        virtual void _main( int, char*[] );
-    };
-
-
-    void Sos_standard_application::_main( int argc, char* argv[] )
-    {
-        sos_gui = true;
-        sos_main0( argc, argv );
-        //sos_static_ptr()->close();
-    }
-
-    Sos_standard_application sos_application;
-
-#else
-
 //---------------------------------------------------------------------------------------------main
 
-    //int    _argc;
-    //char** _argv;
-
-    extern "C" int __cdecl main( int argc, char** argv )
-    {
-        _argc = argc;
-        _argv = argv;
-
-        sos_gui = false;
-
-        int rc = sos_main0( argc, argv );
-
-        return rc;
-    }
-
-#endif
-
-
-//--------------------------------------------------------------------Sos_program::InitInstance
-#ifdef SYSTEM_MFC
-
-BOOL Sos_program::InitInstance()  
+extern "C" int __cdecl main( int argc, char** argv )
 {
-    return FALSE;
-}
+    _argc = argc;
+    _argv = argv;
 
-#endif
+    int rc = sos_main0( argc, argv );
+
+    return rc;
+}
 
 } //namespace sos

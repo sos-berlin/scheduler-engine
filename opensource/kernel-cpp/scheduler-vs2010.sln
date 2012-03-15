@@ -2,8 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "file", "file\file.vcxproj", "{5B3CA6E0-DC6C-4F07-B475-6C86E538D7BF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fs", "fs\fs.vcxproj", "{0B06FFB7-86C9-4721-A177-BAC872992375}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kram", "kram\kram.vcxproj", "{1F4BD831-1AD6-4A63-AC49-531F918998ED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libxml2", "3rd_party\libxml2\libxml2.vcxproj", "{56595346-8FE5-4DBC-8F4A-CC0E3A943F92}"
@@ -35,10 +33,6 @@ Global
 		{5B3CA6E0-DC6C-4F07-B475-6C86E538D7BF}.Debug|Win32.Build.0 = Debug|Win32
 		{5B3CA6E0-DC6C-4F07-B475-6C86E538D7BF}.Release|Win32.ActiveCfg = Release|Win32
 		{5B3CA6E0-DC6C-4F07-B475-6C86E538D7BF}.Release|Win32.Build.0 = Release|Win32
-		{0B06FFB7-86C9-4721-A177-BAC872992375}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0B06FFB7-86C9-4721-A177-BAC872992375}.Debug|Win32.Build.0 = Debug|Win32
-		{0B06FFB7-86C9-4721-A177-BAC872992375}.Release|Win32.ActiveCfg = Release|Win32
-		{0B06FFB7-86C9-4721-A177-BAC872992375}.Release|Win32.Build.0 = Release|Win32
 		{1F4BD831-1AD6-4A63-AC49-531F918998ED}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1F4BD831-1AD6-4A63-AC49-531F918998ED}.Debug|Win32.Build.0 = Debug|Win32
 		{1F4BD831-1AD6-4A63-AC49-531F918998ED}.Release|Win32.ActiveCfg = Release|Win32

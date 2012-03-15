@@ -41,11 +41,6 @@
 #   include "sosfunc.h"
 #endif
 
-#if defined SYSTEM_WIN32
-#   define SOSSQL_OLE
-#   include "sosole.h"
-#endif
-
 #include <vector>
 using std::vector;
 

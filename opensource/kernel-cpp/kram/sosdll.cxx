@@ -18,8 +18,6 @@
 #include "../kram/log.h"
 #include "../kram/sosdll.h"
 
-#include "../kram/sosmswin.h"
-
 using namespace std;
 namespace sos {
 

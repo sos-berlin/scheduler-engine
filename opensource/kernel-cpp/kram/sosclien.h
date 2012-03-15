@@ -31,15 +31,10 @@ struct Sos_client : Sos_self_deleting
                                ~Sos_client              ();
 
     void                        close                   ();
-  //void                        obj_print_status        ( ostream* s )                          { _obj_print_status( s ); }
-
-  //void                       _obj_print_status        ( ostream* );
 
     void                       _obj_print               ( std::ostream* ) const;
 
     Sos_string                 _name;
-  //Sos_static_ptr<Ingres_session> _ingres_session;
-  //Sos_object_ptr             _ingres_session;
     Sos_simple_array< Sos_static_ptr<Sos_database_session> > _session_array;
 };
 

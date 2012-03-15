@@ -18,9 +18,6 @@
 
 #include "../kram/sosstrng.h"
 #include "../kram/sos.h"
-#if defined SYSTEM_WIN
-#   include "../kram/sosmswin.h"
-#endif
 #include "../kram/sosalloc.h"
 #include "../kram/sosdate.h"
 #include "../kram/sosprof.h"

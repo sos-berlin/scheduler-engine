@@ -278,8 +278,6 @@ void Sql_file::prepare_open( const char* filename, Open_mode open_mode, const Fi
      _key_pos = file_spec.key_position();
      _key_len = file_spec.key_length();
 
-     _file.obj_owner( this );
-
      if( length( field_names ) > 2
       && field_names[ 0 ] == '('
       && field_names[ (int)length( field_names ) - 1 ] == ')' )
@@ -290,7 +288,6 @@ void Sql_file::prepare_open( const char* filename, Open_mode open_mode, const Fi
 
      if( !file_spec._field_type_ptr )   // Kein Select mit Ergebnismenge, also SQL-Anweisungen werden geschrieben
      {
-        _session.obj_owner( this );
         _session.open( _db_filename, Any_file::Open_mode( open_mode & Any_file::inout ) );
 
         if( length( _identifier_quote_begin ) == 0 ) {
@@ -407,8 +404,6 @@ void Sql_file::prepare_open( const char* filename, Open_mode open_mode, const Fi
 
      _open_mode = open_mode;
     //_file_spec = file_spec;
-
-    _file.obj_owner( this );
 }
 
 
@@ -650,7 +645,6 @@ void Sql_file::get_record_key( Area& area, const Key& key )
 
     append_where_clause( &_stmt, key );
 
-    f.obj_owner( this );
     LOG( "Sql_file::get_record_key: " << _stmt << '\n' );
 
     try {

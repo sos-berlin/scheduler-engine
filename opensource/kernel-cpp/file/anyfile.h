@@ -116,7 +116,6 @@ struct Any_file : Sos_self_deleting, File_base
     Record                      create_record           ();                                                 
 
     Bool                        opened                  ();   
-    void                        obj_owner               ( Sos_object* );
 
     Sos_string                  identifier_quote_begin  ();
     Sos_string                  identifier_quote_end    ();

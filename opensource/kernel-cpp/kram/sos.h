@@ -520,11 +520,6 @@ enum Close_mode
 #include "../kram/xception.h"       /* Xc */
 //#include <sosstat.h>        /* Sos_static */
 
-/* jz 5.7.95
-#include <pointer.h>
-#include <subrange.h>
-#include <chkarray.h>
-*/
 //=======================================================================================xlat.h
 //  #include <xlat.h>
 

@@ -25,7 +25,6 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "../kram/optimize.h"
 #include "../kram/sosstrng.h"
 #include "../kram/sos.h"
 #include "../kram/log.h"
@@ -34,7 +33,6 @@
 #include "../kram/xlat.h"
 
 #include "../kram/sosfield.h"
-#include "../kram/exp10.h"
 #include "../kram/stdfield.h"
 
 using namespace std;

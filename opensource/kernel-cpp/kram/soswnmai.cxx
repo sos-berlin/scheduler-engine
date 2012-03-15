@@ -27,15 +27,10 @@
 #include "sosprog.h"    // MFC
 #include "log.h"
 
-#if defined SYSTEM_STARVIEW
-#   include "soswin.h"
-#endif
-
 
 namespace sos 
 {
     extern int sos_main0( int argc, char** argv );
-    extern Bool sos_gui;
 }
 
 

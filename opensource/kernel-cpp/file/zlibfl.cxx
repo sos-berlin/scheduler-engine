@@ -161,7 +161,6 @@ void Zlib_file::open( const char* param, Open_mode open_mode, const File_spec& f
 
     if( inflate_only  &&  _deflate )  _do_nothing = true;
 
-    _file.obj_owner( this );
     _file.open( filename, Open_mode( open_mode | ( !_do_nothing && deflated? binary : 0 ) ), file_spec );
 
     _z_stream.opaque = this;

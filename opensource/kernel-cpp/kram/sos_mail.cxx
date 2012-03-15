@@ -265,30 +265,7 @@ void Message::set_subject( const string& subject )
 
 void Message::add_file( const string& real_filename, const string& mail_filename, const string& content_type, const string& encoding )
 {
-    //if( real_filename.find( '|' ) )     // Hostware-Dateiname?
-    //{
-/*
-        int increment = 10*1024*1024;
-        
-        Dynamic_area buffer ( 1024*1024 );
-        Any_file     file   ( "-in -binary " + real_filename);
-        
-        while(1)
-        {
-            try
-            {
-                if( buffer.rest().length() == 0 )  buffer.resize_min( buffer.size() + increment );
-                file.get( buffer.rest() );
-            }
-            catch( const Eof_error& ) { break; }
-        }
-*/
-    //    add_attachment( file_as_string( real_filename ), mail_filename, content_type, encoding );
-    //}
-    //else
-    {
-        add_file_( real_filename, mail_filename, content_type, encoding );
-    }
+    add_file_( real_filename, mail_filename, content_type, encoding );
 }
 
 //------------------------------------------------------------------------------------Message::send

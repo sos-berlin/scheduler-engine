@@ -222,7 +222,6 @@ void Alias_file::prepare_open( const char* parameter, Open_mode open_mode, const
     filename += " ";
     filename += opt.rest();
 
-    _file.obj_owner( this );
     _file.prepare_open( filename, open_mode, file_spec );
 
     _any_file_ptr->new_file( &_file );

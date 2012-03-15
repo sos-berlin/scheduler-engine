@@ -38,19 +38,6 @@ struct Mail_static : Sos_self_deleting
     Any_file                   _dir;
 };
 
-//---------------------------------------------------------------------------------------Email_addr
-/*
-struct Email_addr
-{
-                                Email_addr                  ()                                      {}
-                                Email_addr                  ( const string& );
-
-    const char*                 parse                       ( const char* );
-
-    string                     _addr;
-    string                     _name;
-};
-*/
 //------------------------------------------------------------------------------------------Message
 
 struct Message : Sos_self_deleting

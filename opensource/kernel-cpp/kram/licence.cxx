@@ -621,8 +621,9 @@ void Sos_licence::check_from_file( const Sos_string& filename )
         ulong hostname_len = NO_OF( hostname );
         if( !GetComputerName( hostname, &hostname_len ) )  throw_mswin_error( "GetComputerName" );
 #    else
-        Sos_string hostname;
-        hostname = Sos_socket::my_host_name();
+        char hostname [ 100 ];
+        memset( hostname, 0, sizeof hostname );
+        gethostname( hostname, sizeof hostname - 1 );
 #   endif
 
     Sos_string licence_keys = read_profile_string( c_str( filename ), "licence", c_str( hostname ) );
