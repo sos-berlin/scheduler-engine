@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.kernel.variable;
 
-import java.util.Collection;
+import com.google.common.collect.ImmutableCollection;
 
 import javax.annotation.Nullable;
 
 public interface UnmodifiableVariableSet {
     @Nullable String tryGet(String name);
     String get(String name);
-    Collection<String> getNames();
+    ImmutableCollection<String> getNames();
 }

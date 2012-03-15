@@ -1,10 +1,14 @@
 package com.sos.scheduler.engine.kernel.util;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.util.xml.NamedChildElements;
+import com.sos.scheduler.engine.util.xml.SiblingElementIterator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,19 +22,10 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.*;
+import java.util.Iterator;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.util.xml.NamedChildElements;
-import com.sos.scheduler.engine.util.xml.SiblingElementIterator;
-
-import static javax.xml.transform.OutputKeys.*;
+import static javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION;
 import static org.w3c.dom.Node.DOCUMENT_NODE;
 
 public final class XmlUtils {
@@ -146,17 +141,17 @@ public final class XmlUtils {
     }
 
 
-    public static Collection<Element> elementsXPath(Node baseNode, String xpathExpression) {
+    public static ImmutableList<Element> elementsXPath(Node baseNode, String xpathExpression) {
         try {
             return listFromNodeList((NodeList)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.NODESET));
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
 
-    public static List<Element> listFromNodeList(NodeList list) {
-        ArrayList<Element> result = new ArrayList<Element>(list.getLength());
+    public static ImmutableList<Element> listFromNodeList(NodeList list) {
+        ImmutableList.Builder<Element> result = ImmutableList.builder();
         for (int i = 0; i < list.getLength(); i++)  result.add((Element)list.item(i));
-        return result;
+        return result.build();
     }
 
 
@@ -187,7 +182,7 @@ public final class XmlUtils {
         return XPathFactory.newInstance().newXPath();
     }
 
-    public static List<Element> childElements(Element element) {
+    public static ImmutableList<Element> childElements(Element element) {
         return ImmutableList.copyOf(new SiblingElementIterator(element.getFirstChild()));
 //        NodeList children = element.getChildNodes();
 //        ArrayList<Element> result = new ArrayList<Element>(children.getLength());

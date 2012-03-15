@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -11,14 +13,12 @@ import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.w3c.dom.Element;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
-import static java.util.Arrays.asList;
 
 public final class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
     private final CommandHandler[] commandHandlers = {
@@ -83,8 +83,8 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
         return (T)pluginAdapterByClassName(c.getName()).getPlugin();
     }
 
-    @Override public Collection<CommandHandler> getCommandHandlers() {
-        return asList(commandHandlers);
+    @Override public ImmutableCollection<CommandHandler> getCommandHandlers() {
+        return ImmutableList.copyOf(commandHandlers);
     }
 
     static void logError(PrefixLog log, String pluginName, Throwable t) {

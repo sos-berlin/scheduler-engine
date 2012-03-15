@@ -2,12 +2,10 @@ package com.sos.scheduler.engine.eventbus;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Collections.emptyList;
 import static org.apache.log4j.Level.DEBUG;
 import static org.apache.log4j.Level.ERROR;
 import static org.apache.log4j.Level.FATAL;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +14,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.sos.scheduler.engine.eventbus.annotated.EventSourceMethodEventSubscription;
@@ -63,7 +62,7 @@ public abstract class AbstractEventBus implements EventBus {
         subscribers.remove(s.getEventClass(), s);
     }
 
-    protected final synchronized Collection<Call> calls(Event e) {
+    protected final synchronized ImmutableCollection<Call> calls(Event e) {
         Class<? extends Event> realEventClass = (e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e).getClass();
         ImmutableList.Builder<Call> result = null;
         for (Class<? extends Event> c: allSuperEventClasses(realEventClass)) {
@@ -75,7 +74,7 @@ public abstract class AbstractEventBus implements EventBus {
                 }
             }
         }
-        if (result == null) return emptyList();
+        if (result == null) return ImmutableList.of();
         else return result.build();
     }
 
@@ -109,7 +108,7 @@ public abstract class AbstractEventBus implements EventBus {
         }
     }
 
-    private Set<Class<? extends Event>> allSuperEventClasses(Class<? extends Event> eventClass) {
+    private ImmutableSet<Class<? extends Event>> allSuperEventClasses(Class<? extends Event> eventClass) {
         ImmutableSet<Class<? extends Event>> result = cachedSuperEventClasses.get(eventClass);
         if (result == null) {
             Set<Class<? extends Event>> classes = newHashSet();

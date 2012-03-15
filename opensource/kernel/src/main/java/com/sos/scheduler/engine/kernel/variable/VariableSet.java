@@ -1,18 +1,14 @@
 package com.sos.scheduler.engine.kernel.variable;
 
-import static org.apache.commons.collections.ListUtils.unmodifiableList;
-
-import java.util.Collection;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+
+import javax.annotation.Nullable;
 
 @ForCpp public final class VariableSet implements Sister, UnmodifiableVariableSet {
     private final Variable_setC cppProxy;
@@ -28,8 +24,8 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<String> getNames() {
-        return unmodifiableList(cppProxy.java_names());
+    public ImmutableList<String> getNames() {
+        return ImmutableList.copyOf(cppProxy.java_names());
     }
 
     @Override @Nullable public String tryGet(String name) {
