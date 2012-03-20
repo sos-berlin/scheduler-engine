@@ -24,11 +24,12 @@ final class JS803Test extends SchedulerTest {
     import JS803Test._
     private var count = 0
 
-    controller.activateScheduler()
+    controller.activateScheduler("-e")
     private val startTime = secondNow() plusSeconds orderDelay
 
     //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht helfen uns die Logzeilen weiter.
-    @Ignore def test() {
+    @Ignore
+    def test() {
         execute(addDailyOrderElem(new OrderKey(jobChainPath, new OrderId("dailyOrder")), startTime))
         execute(addSingleOrderElem(new OrderKey(jobChainPath, new OrderId("singleOrder")), startTime))
         execute(addSingleRuntimeOrderElem(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), startTime))
