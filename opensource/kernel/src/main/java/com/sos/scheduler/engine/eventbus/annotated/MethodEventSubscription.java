@@ -38,7 +38,7 @@ abstract class MethodEventSubscription implements EventSubscription {
     protected static void checkMethodParameterCount(Method m, int min, int max) {
         int n = m.getParameterTypes().length;
         if (!(n >= min && n <= max))
-            throw new IllegalArgumentException("Method "+m+" must have "+min+"..."+max+" arguments");
+            throw new IllegalArgumentException("Method "+m+" must have "+(min == max? min : min+" through "+max)+" arguments");
     }
 
     private static void checkReturnType(Method m) {
