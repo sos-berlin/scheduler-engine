@@ -11,78 +11,87 @@ import org.junit.Assert._
 import org.junit.Test
 import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.test.SchedulerTest
-import org.junit.Ignore
+import scala.collection.mutable
 
 /** Ticket JS-803.
  * @see <a href='http://www.sos-berlin.com/jira/browse/JS-803'>JS-803</a>
  * @see com.sos.scheduler.engine.tests.jira.js653.JS653Test */
 final class JS803Test extends SchedulerTest {
-    import JS803Test._
-    private var count = 0
+  import JS803Test._
+  private val expectedOrders = new mutable.HashSet[OrderId]
+  private val terminatedOrders = new mutable.HashSet[OrderId]
 
-    controller.activateScheduler("-e")
-    private val startTime = secondNow() plusSeconds orderDelay
+  controller.activateScheduler("-e")
+  private val startTime = secondNow() plusSeconds orderDelay
 
-    //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht helfen uns die Logzeilen weiter.
-    @Ignore
-    def test() {
-        execute(addDailyOrderElem(new OrderKey(jobChainPath, new OrderId("dailyOrder")), startTime))
-        execute(addSingleOrderElem(new OrderKey(jobChainPath, new OrderId("singleOrder")), startTime))
-        execute(addSingleRuntimeOrderElem(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), startTime))
-        controller.waitForTermination(shortTimeout)
+  //@Ignore  //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht helfen uns die Logzeilen weiter.
+  @Test def test() {
+    addOrder(new OrderKey(jobChainPath, new OrderId("dailyOrder")), addDailyOrderElem)
+    addOrder(new OrderKey(jobChainPath, new OrderId("singleOrder")), addSingleOrderElem)
+    addOrder(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), addSingleRuntimeOrderElem)
+    try controller.waitForTermination(shortTimeout)
+    finally (expectedOrders diff terminatedOrders).toList match {
+      case List() =>
+      case notTerminatedOrders => logger.error("Orders failed to terminate: "+ (notTerminatedOrders mkString ", "))
     }
+  }
 
-    private def execute(command: Elem) {
-        logger.debug(trim(command))
-        controller.scheduler.executeXml(command)
-    }
+  private def addOrder(orderKey: OrderKey, orderElemFunction: (OrderKey, DateTime) => Elem) {
+    execute(orderElemFunction(orderKey, startTime))
+    expectedOrders.add(orderKey.getId)
+  }
 
-    @EventHandler def handleEvent(e: OrderTouchedEvent) {
-        assertTrue("Order "+e.getKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
-    }
+  private def execute(command: Elem) {
+    logger.debug(trim(command))
+    controller.scheduler.executeXml(command)
+  }
 
-    @HotEventHandler def handleEvent(event: OrderFinishedEvent, order: UnmodifiableOrder) {
-        assertThat("Wrong end state of order "+event.getKey, order.getState, equalTo(expectedEndState))
-        count += 1
-        if (count == 3)  controller.terminateScheduler()
-    }
+  @EventHandler def handleEvent(e: OrderTouchedEvent) {
+    assertTrue("Order "+e.getKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
+  }
+
+  @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder) {
+    assertThat("Wrong end state of order "+event.getKey, order.getState, equalTo(expectedEndState))
+  }
+
+  @EventHandler def handleEvent(event: OrderFinishedEvent) {
+    terminatedOrders.add(event.getKey.getId)
+    if (terminatedOrders == expectedOrders)  controller.terminateScheduler()
+  }
 }
 
 object JS803Test {
-    private val logger = Logger.getLogger(classOf[JS803Test])
-    private val shortTimeout = SchedulerTest.shortTimeout
-    private val orderDelay = 3+1
-    private val jobChainPath = new AbsolutePath("/super")
-    private val expectedEndState = new OrderState("state.nestedC.end")
-    private val hhmmssFormatter = DateTimeFormat.forPattern("HH:mm:ss")
-    private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+  private val logger = Logger.getLogger(classOf[JS803Test])
+  private val shortTimeout = SchedulerTest.shortTimeout
+  private val orderDelay = 3+1
+  private val jobChainPath = new AbsolutePath("/super")
+  private val expectedEndState = new OrderState("state.nestedC.end")
+  private val hhmmssFormatter = DateTimeFormat.forPattern("HH:mm:ss")
+  private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
 
-    private def secondNow() = {
-        val now = new DateTime()
-        now minusMillis now.millisOfSecond.get
-    }
+  private def secondNow() = {
+    val now = new DateTime()
+    now minusMillis now.millisOfSecond.get
+  }
 
-    private def addDailyOrderElem(orderKey: OrderKey, startTime: DateTime) =
-        <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}>
-            <run_time>
-                <period single_start={hhmmssFormatter.print(startTime)}/>
-            </run_time>
-        </add_order>
+  private def addDailyOrderElem(orderKey: OrderKey, startTime: DateTime) =
+    <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}>
+      <run_time>
+        <period single_start={hhmmssFormatter.print(startTime)}/>
+      </run_time>
+    </add_order>
 
-    private def addSingleOrderElem(orderKey: OrderKey, startTime: DateTime) =
-        <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}
-                   at={yyyymmddhhmmssFormatter.print(startTime)}/>
+  private def addSingleOrderElem(orderKey: OrderKey, startTime: DateTime) =
+    <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}
+               at={yyyymmddhhmmssFormatter.print(startTime)}/>
 
-    private def addSingleRuntimeOrderElem(orderKey: OrderKey, startTime: DateTime) =
-        <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}>
-            <run_time>
-                <at at={yyyymmddhhmmssFormatter.print(startTime)}/>
-            </run_time>
-        </add_order>
-
-    private case class TimeEvent(t: Time, e: OrderEvent)
+  private def addSingleRuntimeOrderElem(orderKey: OrderKey, startTime: DateTime) =
+    <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}>
+      <run_time>
+        <at at={yyyymmddhhmmssFormatter.print(startTime)}/>
+      </run_time>
+    </add_order>
 }
