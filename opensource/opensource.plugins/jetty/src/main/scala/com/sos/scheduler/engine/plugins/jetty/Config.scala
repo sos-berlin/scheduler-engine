@@ -23,7 +23,7 @@ class Config(pluginElement: Element, conf: SchedulerConfiguration) {
   val accessLogFile = new File(conf.logDirectory, "http.log")
   //val resourceBaseOption: Option[URL] = Option(emptyToNull(conf.webDirectory())) map { f => new File(f).getAbsoluteFile.toURI.toURL }
 
-  private def configFileIfExists(filename: String) = Option(new File(conf.localConfigurationDirectory, filename)) filter { _.exists }
+  private def configFileIfExists(filename: String) = Option(new File(conf.mainConfigurationDirectory, filename)) filter { _.exists }
 }
 
 object Config {
