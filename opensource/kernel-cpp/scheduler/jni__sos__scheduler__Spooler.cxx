@@ -371,6 +371,23 @@ static void JNICALL cmd_1terminate_1and_1restart__I(JNIEnv* jenv, jobject, jlong
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL configuration_1file_1path(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::configuration_file_path()");
+        return env.jstring_from_string(o_->configuration_file_path());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL db(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -1440,6 +1457,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"cmd_terminate__native", (char*)"(JZILjava/lang/String;Z)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::cmd_1terminate__ZILjava_lang_String_2Z },
     { (char*)"cmd_terminate_after_error__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::cmd_1terminate_1after_1error__Ljava_lang_String_2Ljava_lang_String_2 },
     { (char*)"cmd_terminate_and_restart__native", (char*)"(JI)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::cmd_1terminate_1and_1restart__I },
+    { (char*)"configuration_file_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::configuration_1file_1path },
     { (char*)"db__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/DatabaseC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::db },
     { (char*)"db_cluster_member_id__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::db_1cluster_1member_1id },
     { (char*)"db_distributed_member_id__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::db_1distributed_1member_1id },
@@ -1510,7 +1528,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Spooler >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Spooler >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 85);
+        int ret = env->RegisterNatives(*cls, native_methods, 86);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

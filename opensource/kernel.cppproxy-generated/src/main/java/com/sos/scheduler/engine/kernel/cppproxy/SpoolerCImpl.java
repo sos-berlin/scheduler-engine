@@ -320,6 +320,22 @@ final class SpoolerCImpl
     private static native void cmd_terminate_and_restart__native(long cppReference, int p0);
 
 
+    @Override public java.lang.String configuration_file_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = configuration_file_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String configuration_file_path__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.DatabaseC db() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

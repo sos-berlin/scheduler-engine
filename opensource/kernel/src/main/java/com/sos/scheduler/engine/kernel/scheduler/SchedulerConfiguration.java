@@ -6,10 +6,13 @@ import com.sos.scheduler.engine.kernel.settings.SettingName;
 
 import java.io.File;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sos.scheduler.engine.kernel.settings.SettingName.htmlDir;
 
 public final class SchedulerConfiguration {
+    private static final File workingDirectory = new File(".");
+
     private final Scheduler scheduler;
     private final SpoolerC spoolerC;
 
@@ -22,6 +25,15 @@ public final class SchedulerConfiguration {
         return new ClusterMemberId(spoolerC.cluster_member_id());
     }
 
+    public File mainConfigurationDirectory() {
+        return firstNonNull(mainConfigurationFile().getParentFile(), workingDirectory);
+    }
+
+    public File mainConfigurationFile() {
+        return new File(spoolerC.configuration_file_path());
+    }
+
+    /** Das Verzeichnis der Konfigurationsdatei scheduler.xml, Normalerweise "config" */
     public File localConfigurationDirectory() {
         return new File(spoolerC.local_configuration_directory());
     }

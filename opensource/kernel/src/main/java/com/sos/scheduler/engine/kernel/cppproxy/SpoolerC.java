@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppThreadSafe;
+import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest;
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse;
-import com.sos.scheduler.engine.kernel.settings.SettingName;
 
 @CppClass(clas="sos::scheduler::Spooler", directory="scheduler", include="spooler.h")
 public interface SpoolerC extends CppProxyWithSister<Scheduler> {
@@ -33,6 +32,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
 //??    Security::Level             security_level              ( const Ip_address& );
 //??    const schedule::Holidays&   holidays                    () const                            { return _holidays; }
     boolean is_service();
+    String configuration_file_path();
     String directory();
     String local_configuration_directory();
     String string_need_db();

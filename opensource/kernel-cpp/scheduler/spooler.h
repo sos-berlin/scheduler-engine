@@ -436,6 +436,7 @@ struct Spooler : Object,
     Security::Level             security_level              ( const Ip_address& );
     const schedule::Holidays&   holidays                    () const                            { return _holidays; }
     bool                        is_service                  () const                            { return _is_service; }
+    const file::File_path&      configuration_file_path     () const                            { return _configuration_file_path; }
     string                      directory                   () const                            { return _directory; }
     string                      home_directory              () const                            { return _home_directory; }
     string                      local_configuration_directory() const                           { return _configuration_directories[confdir_local]; }
