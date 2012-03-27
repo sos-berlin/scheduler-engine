@@ -1,0 +1,21 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+order="yes" title="succeeded for JS628 (process=true, process_before=true)" stop_on_error="no" name="js628-1-success">
+    <script language="javascript">
+        <![CDATA[
+function spooler_process(){
+   return true;
+}
+                ]]>
+    </script>
+    <monitor name="process0" ordering="0">
+        <script language="javascript">
+            <![CDATA[
+<!-- if spooler_process_before results true, the jobchin should be ended normally -->                    
+function spooler_process_before(){
+   return true;
+}
+                    ]]>
+        </script>
+    </monitor>
+    <run_time />
+</job>
