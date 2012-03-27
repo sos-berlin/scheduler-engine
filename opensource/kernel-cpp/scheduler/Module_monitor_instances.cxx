@@ -240,7 +240,7 @@ Variant Module_monitor_instances::spooler_process_after( Variant result )
         Module_monitor_instance* monitor_instance = *m;
 
         Variant call_result = monitor_instance->_module_instance->call_if_exists( spooler_process_after_name, check_result( result ) );
-        if( result.vt != VT_ERROR  &&  V_ERROR( &result ) != DISP_E_UNKNOWNNAME )  result = call_result;
+        if( call_result.vt != VT_ERROR && result.vt != VT_ERROR  &&  V_ERROR( &result ) != DISP_E_UNKNOWNNAME )  result = call_result;
     }
 
     return result;
