@@ -5,8 +5,8 @@
   -->
 
 <job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
-           orders_recoverable="yes" visible="yes" name="js628-chain-fail-1">
-    <job_chain_node state="1" job="js628-fail-1" next_state="success" error_state="error" />
+    orders_recoverable="yes" visible="yes" name="js628-chain-fail-4">
+    <job_chain_node state="1" job="js628-fail-4" next_state="success" error_state="error" />
     <job_chain_node state="success" />
     <job_chain_node state="error" />
 </job_chain>

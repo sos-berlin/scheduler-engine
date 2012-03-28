@@ -1,7 +1,12 @@
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
 <job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
         orders_recoverable="yes" visible="yes" name="js628-chain-fail-2">
-    <job_chain_node state="1" job="js628-1-fail-2" next_state="2" error_state="error" />
-    <job_chain_node state="2" job="js628-2" next_state="success" error_state="error" />
+    <job_chain_node state="1" job="js628-fail-2" next_state="success" error_state="error" />
     <job_chain_node state="success" />
     <job_chain_node state="error" />
 </job_chain>

@@ -20,12 +20,12 @@ import static org.junit.Assert.assertEquals;
  * This test contain four jobchains for various combinations of the result from spooler_process and
  * spooler_process_before:
  *
- * spooler_process 		spooler_process_before 		result				job_chain
- * ================== 	======================== 	=================	=====================
- * true					false						error				js628_chain_fail_1
- * false				false						error				js628_chain_fail_2
- * false				true						error				js628_chain_fail_3
- * true					true						success				js628_chain_success
+ * spooler_process      spooler_process_before      result              job_chain
+ * ==================   ========================    =================   =====================
+ * true                 false                       error               js628_chain_fail_1
+ * false                false                       error               js628_chain_fail_2
+ * false                true                        error               js628_chain_fail_3
+ * true                 true                        success             js628_chain_success
  *
  * It should be clarify that the job ends only if the tesult of spooler_process AND spooler_process_before
  * is true.
@@ -43,7 +43,18 @@ import static org.junit.Assert.assertEquals;
  */
 public class JS628Test extends SchedulerTest {
 
-    private final String[] JOB_CHAINS = {"js628-chain-success","js628-chain-fail-1","js628-chain-fail-2","js628-chain-fail-3"};
+    private final String[] JOB_CHAINS =
+            {
+                    "js628-chain-success-1",
+                    "js628-chain-success-2",
+                    "js628-chain-fail-1",
+                    "js628-chain-fail-2",
+                    "js628-chain-fail-3",
+                    "js628-chain-fail-4"
+            };
+
+    private static final int expectedErrorCount = 4;
+    private static final int expectedSuccessCount = 2;
 
     private int finishedOrderCount = 0;
     private int errorCount = 0;
@@ -52,15 +63,15 @@ public class JS628Test extends SchedulerTest {
     @Test
     public void test() throws Exception {
         final CommandBuilder commandBuilder = new CommandBuilder();
-        controller().activateScheduler();
+        controller().activateScheduler("-e");
         for(String jobChain : JOB_CHAINS) { 
         String cmd = commandBuilder.addOrder(jobChain).getCommand();
             controller().scheduler().executeXml(cmd);
         }
         controller().waitForTermination(shortTimeout);
         assertEquals("total number of events", JOB_CHAINS.length, finishedOrderCount);
-        assertEquals("successfull orders", 1, successCount);
-        assertEquals("unsuccessfull orders", 3, errorCount);
+        assertEquals("successfull orders", expectedSuccessCount, successCount);
+        assertEquals("unsuccessfull orders", expectedErrorCount, errorCount);
     }
 
     @HotEventHandler

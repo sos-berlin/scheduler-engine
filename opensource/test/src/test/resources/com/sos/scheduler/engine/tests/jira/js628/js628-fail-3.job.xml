@@ -1,8 +1,15 @@
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
-     order="yes" title="failed for JS628 (process=false, process_before=true)" stop_on_error="no" name="js628-1-fail-3">
+     order="yes" title="failed for JS628 (process=false, process_before=true)" stop_on_error="no" name="js628-fail-3">
     <script language="javascript">
         <![CDATA[
 function spooler_process(){
+    spooler_log.info("spooler_process is called");
    return false;
 }
                 ]]>
@@ -10,8 +17,9 @@ function spooler_process(){
     <monitor name="process0" ordering="0">
         <script language="javascript">
             <![CDATA[
-<!-- if spooler_process_before results false, the jobchin should be failed anyway -->
+<!-- if spooler_process_before results true, the jobchain should run normally and spooler_process() should called -->
 function spooler_process_before(){
+    spooler_log.info("spooler_process_before is called");
    return true;
 }
                     ]]>
