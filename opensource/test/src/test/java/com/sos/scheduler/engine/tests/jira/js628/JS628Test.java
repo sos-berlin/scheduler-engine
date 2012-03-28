@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js628;
 
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.*;
+import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -44,42 +43,34 @@ import static org.junit.Assert.assertEquals;
  */
 public class JS628Test extends SchedulerTest {
 
-	private final String[] JOB_CHAINS = {"js628-chain-success","js628-chain-fail-1","js628-chain-fail-2","js628-chain-fail-3"};
+    private final String[] JOB_CHAINS = {"js628-chain-success","js628-chain-fail-1","js628-chain-fail-2","js628-chain-fail-3"};
 
-	@SuppressWarnings("unused")
-	private static Logger logger;
-
-	private final CommandBuilder utils = new CommandBuilder();
     private int finishedOrderCount = 0;
     private int errorCount = 0;
     private int successCount = 0;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		logger = Logger.getLogger(JS628Test.class);
-	}
-
-	@Test
-	public void test() throws Exception {
-		controller().setTerminateOnError(false);
-		controller().activateScheduler();
+    @Test
+    public void test() throws Exception {
+        final CommandBuilder commandBuilder = new CommandBuilder();
+        controller().activateScheduler();
         for(String jobChain : JOB_CHAINS) { 
-		    String cmd = utils.addOrder(jobChain).getCommand();
+        String cmd = commandBuilder.addOrder(jobChain).getCommand();
             controller().scheduler().executeXml(cmd);
         }
-		controller().waitForTermination(shortTimeout);
+        controller().waitForTermination(shortTimeout);
         assertEquals("total number of events", JOB_CHAINS.length, finishedOrderCount);
         assertEquals("successfull orders", 1, successCount);
         assertEquals("unsuccessfull orders", 3, errorCount);
-	}
+    }
 
-	@HotEventHandler
-	public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) throws InterruptedException {
+    @HotEventHandler
+    public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) throws InterruptedException {
         String endState = order.getState().getString();
         if (endState.equals("error")) errorCount++;
         if (endState.equals("success")) successCount++;
         finishedOrderCount++;
         if (finishedOrderCount == JOB_CHAINS.length)
-			controller().scheduler().terminate();
-	}
+            controller().scheduler().terminate();
+    }
+
 }
