@@ -23,7 +23,6 @@
 
 #include "../kram/sos.h"
 #include "../kram/sosstat.h"
-#include "../kram/soswin.h"
 #include "../kram/sosarray.h"
 #include "../kram/msec.h"
 #include "../kram/log.h"
@@ -32,7 +31,6 @@
 #include "../kram/sosfield.h"
 #include "../kram/stdfield.h"
 #include "../kram/sossock.h"
-#include "../kram/waitmsg.h"
 
 using namespace std;
 namespace sos {
@@ -493,16 +491,6 @@ int Sos_msg_queue::dispatch_next_msg( int count, const Sos_object* object_ptr, B
 
             //Increment_semaphore( &sosmsg_dispatcher_active );
 
-            if( Sos_socket::open_event_count() > 0 ) {
-                LOGI( "warte auf " << Sos_socket::open_event_count() << " Socket-Botschaften ...\n" );
-                //uint4 t = elapsed_msec();
-                while(1) {
-                    Sos_socket::select();   // Ruft evtl. rekursiv dispatch_waiting_msg() !!!
-                    if( _queue_begin != _queue_end )  break;
-                }
-                //LOG( ( elapsed_msec() - t ) << " ms\n" );
-            }
-            else
             {
 #             if defined SYSTEM_WIN
               //if( windows_open_event_count  gesetzt von e370.mode( m_terminal_input ) ...

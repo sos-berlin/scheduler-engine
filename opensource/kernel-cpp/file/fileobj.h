@@ -7,10 +7,6 @@
 #   include "../kram/sosfiltr.h"
 #endif
 
-#if !defined __RAPID_H
-#   include "../fs/rapid.h"
-#endif
-
 #if !defined __ABSFILE_H
 #   include "absfile.h"
 #endif
@@ -35,11 +31,8 @@ struct Get_direct_msg : Get_msg
                                                           const Const_area_handle& key );
 
     const Const_area_handle&    key                     () const  { return _key; }  
-    Rapid::Parflget::Flags     _flags;
     uint4                      _position;       // -1, oder seek()-Wert oder Satznummer
     Const_area_handle          _key;
-  //Const_area_handle          _key_end;
-  //Sos_string                 _name;           // evtl. SQL-SELECT?
     int4                       _record_count;   // Geschätzte Anzahl erwarteter Sätze
 };
 

@@ -8,7 +8,6 @@
 #include "../kram/sosobj.h"
 #include "../kram/sosmsg.h"
 #include "../kram/sosfiltr.h"
-#include "../kram/sosblock.h"
 #include "../kram/log.h"
 
 using namespace std;
