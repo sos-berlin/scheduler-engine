@@ -23,12 +23,16 @@ objects = \
  sosctype.o\
  sosdate.o\
  sosdll.o\
+ sosdumcl.o\
+ sosfact.o\
+ sosfiltr.o\
  soserror.o\
  sosfield.o\
  sosfld2.o\
  sosfunc.o\
  soslimt2.o\
  soslimtx.o\
+ sosmsg.o\
  sosobj.o\
  sosobjba.o\
  sosopt.o\

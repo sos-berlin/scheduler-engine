@@ -227,9 +227,10 @@ void Sos_static::close()
     //2011-08-24 Wegen Absturzes bei statischem Sos_static nicht: clear_environment_from_sos_ini();
 
     SOS_DELETE( _std_client );
-
+    SOS_DELETE( _comfile );
     SOS_DELETE( _odbcfile );
     SOS_DELETE( _sosdb );
+    SOS_DELETE( _msg_queue_ptr );
     SOS_DELETE( _sosprof );
     SOS_DELETE( _factory_agent );
     SOS_DELETE( _mail );

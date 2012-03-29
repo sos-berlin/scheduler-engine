@@ -186,8 +186,10 @@ struct Sos_static : Sos_static_0
     Sos_static_ptr<Type_register>                      _type_register;
     Sos_pointer                                        _file_type_common_head;
     Sos_pointer                                        _factory_agent;             // sosfact.cxx
+    Sos_static_ptr<Sos_msg_queue>                      _msg_queue_ptr;             // sosmsg.cxx
     Sos_static_ptr<Odbc_static>                        _odbcfile;
     Sos_static_ptr<Sosdb_static>                       _sosdb;
+    Sos_static_ptr<Comfile_static>                     _comfile;
     Sos_static_ptr<Sos_licence>                        _licence;
     Sos_static_ptr<Sos_function_register>              _function_register;
     Sos_static_ptr<Sosprof_static>                     _sosprof;                   // sosprof.cxx (.ini-files)

@@ -32,9 +32,12 @@ void init_file_types()
     initialized = true;
 
     REFERENCE_FOR_LINKER( const Abs_file_type&, alias_file_type         );  // alias.cxx
+    REFERENCE_FOR_LINKER( const Abs_file_type&, com_file_type           );  // comfile.cxx
+    REFERENCE_FOR_LINKER( const Abs_file_type&, head_file_type          );  // head_file.cxx
     REFERENCE_FOR_LINKER( const Abs_file_type&, jdbc_file_type          );  // jdbc.cxx
     REFERENCE_FOR_LINKER( const Abs_file_type&, jmail_file_type         );  // jmail_file.cxx
     REFERENCE_FOR_LINKER( const Abs_file_type&, licence_key_file_type   );  // licenceg.cxx
+    REFERENCE_FOR_LINKER( const Abs_file_type&, object_file_type        );  // objfile.cxx
 #ifdef SYSTEM_ODBC
     REFERENCE_FOR_LINKER( const Abs_file_type&, odbc_file_type          );  // odbc.cxx
 #endif

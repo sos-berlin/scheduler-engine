@@ -236,8 +236,13 @@
       </BrowseInformation>
     </ClCompile>
     <ClCompile Include="sosdll.cxx" />
+    <ClCompile Include="sosdumcl.cxx" />
+    <ClCompile Include="sosfact.cxx" />
+    <ClCompile Include="sosfiltr.cxx" />
     <ClCompile Include="sosfunc.cxx" />
     <ClCompile Include="soslimt2.cxx" />
+    <ClCompile Include="soslist.cxx" />
+    <ClCompile Include="sosmsg.cxx" />
     <ClCompile Include="sosset.cxx" />
     <ClCompile Include="sossql1.cxx" />
     <ClCompile Include="sossql2.cxx" />
@@ -452,6 +457,11 @@
     <ClInclude Include="dynobj.h" />
     <ClInclude Include="env.h" />
     <ClInclude Include="rtf_parser.h" />
+    <ClInclude Include="sosdumcl.h" />
+    <ClInclude Include="sosfact.h" />
+    <ClInclude Include="sosfiltr.h" />
+    <ClInclude Include="soslist.h" />
+    <ClInclude Include="sosmsg.h" />
     <ClInclude Include="sos_java.h" />
     <ClInclude Include="sos_perl.h" />
     <ClInclude Include="soserror.h" />

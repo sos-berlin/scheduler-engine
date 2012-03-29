@@ -60,9 +60,27 @@
     <ClCompile Include="flstream.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="comfile.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="objfile.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="head_file.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="odbctype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fileobj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="objfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -204,6 +204,21 @@
     <ClCompile Include="ebc2iso.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sosdumcl.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sosfact.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sosfiltr.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="soslist.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sosmsg.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="com.h">
@@ -246,6 +261,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dynobj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sosdumcl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sosfact.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sosfiltr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="soslist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sosmsg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

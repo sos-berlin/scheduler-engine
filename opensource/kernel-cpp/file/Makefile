@@ -6,11 +6,14 @@ objects = \
  absfile.o\
  alias.o \
  anyfile.o \
+ comfile.o \
  filebase.o \
  filetab.o \
  flstream.o\
+ head_file.o\
  jdbc.o \
  jmail_file.o\
+ objfile.o\
  odbctype.o \
  sosdb.o \
  sqlfile.o\
