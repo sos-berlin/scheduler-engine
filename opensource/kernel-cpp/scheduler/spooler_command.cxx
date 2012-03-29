@@ -2098,7 +2098,6 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
 
         if( _spooler->_validate_xml  &&  _validate )  
         {
-            //command_doc.validate_against_dtd( _spooler->_dtd );
             _spooler->_schema.validate( command_doc );
         }
 

@@ -14,36 +14,21 @@
 #endif
 
 #ifdef Z_WINDOWS
-#   define SPOOLER_USE_LIBXML2              // Gnomes libxml2
-//# define SPOOLER_USE_MSXML                // Microsofts msxml3
+#   import <msxml.tlb> rename_namespace("msxml")    // Wir brauchen IXMLDOMDocument (wird von spooler.odl in Variable_set::get_dom() verlangt)
 #else
-#   define SPOOLER_USE_LIBXML2              // Gnomes libxml2
+    namespace msxml { struct IXMLDOMDocument; }     // Dummy
 #endif
 
+#include "../zschimmer/xml_libxml2.h"
+#include "../zschimmer/xslt_libxslt.h"
 
-#ifdef SPOOLER_USE_MSXML
-#   include "../zschimmer/xml_msxml.h"
-    using namespace zschimmer::xml_msxml;
-#else
-#   ifdef Z_WINDOWS
-#       include "../zschimmer/xml_msxml.h"              // Wir brauchen IXMLDOMDocument (wird von spooler.odl in Variable_set::get_dom() verlangt)
-#   else
-        namespace msxml { struct IXMLDOMDocument; }     // Dummy
-#   endif
-#endif
-
-#ifdef SPOOLER_USE_LIBXML2
-#   include "../zschimmer/xml_libxml2.h"
-#   include "../zschimmer/xslt_libxslt.h"
-    //using namespace zschimmer::xml_libxml2;
-    namespace zschimmer
+namespace zschimmer
+{
+    namespace xml
     {
-        namespace xml
-        {
-            using namespace libxml2;
-        }
+        using namespace libxml2;
     }
-#endif
+}
 
 #ifndef Z_WINDOWS
     const int _dstbias = -3600;

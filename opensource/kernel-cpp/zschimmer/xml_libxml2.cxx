@@ -50,15 +50,6 @@ static Message_code_text error_codes[] =
     { NULL         , NULL }
 };
 
-/*
-    { "LIBXML2-001", "Fehler bei $1" },
-    { "LIBXML2-002", "Knoten $1 erwartet, an der Stelle ist aber $2: $3" },
-    { "LIBXML2-003", "Attribut $1 fehlt" },
-    { "LIBXML2-004", "XML-Dokument ist nicht valide: $1" },
-    { "LIBXML2-005", "XML-Element <$1> fehlt" },
-    { "LIBXML2-006", "XML-Schema ist nicht geladen" },
-    { "LIBXML2-007", "XML-Dokument entspricht nicht dem Schema" },
-*/
 //-------------------------------------------------------------------------------------------Z_INIT
 
 static struct Xml_libxml2_static
@@ -76,13 +67,6 @@ static struct Xml_libxml2_static
 }
 __static__;
 
-//----------------------------------------------------------------------------string_from_DOMString
-/*
-inline string string_from_DOMString( const xmlChar* s )
-{
-    return s? (const char*)s : "";
-}
-*/
 //-------------------------------------------------------------------------------------------sd_free
 
 string sd_free( xmlChar* s )
@@ -92,27 +76,6 @@ string sd_free( xmlChar* s )
     return result;
 }
 
-//----------------------------------------------------------------------------DOMString_from_string
-/*
-inline const xmlChar* DOMString_from_string( const string& s )
-{
-    return (const xmlChar*)s.c_str();
-}
-*/
-//-----------------------------------------------------------------------------------------------ds
-/*
-inline const xmlChar* ds( const string& s )
-{
-    //return (const xmlChar*)s.c_str();
-}
-*/
-//-----------------------------------------------------------------------------------------------ds
-/*
-inline const xmlChar* ds( const char* s )
-{
-    return (const xmlChar*)( s? s : "" );
-}
-*/
 //----------------------------------------------------------------------------------xml_print_error
 
 static void xml_print_error( void* context, const char* format, ... )
@@ -125,7 +88,6 @@ static void xml_print_error( void* context, const char* format, ... )
     va_end( args );
 
     if( ret > 0 )  ((Libxml2_error_text*)context)->_error_text.append( buf, ret );
-    //if( ret > 0 )  thread_data->_error_text.append( buf, ret );
 }
 
 //---------------------------------------------------------Activate_error_text::Activate_error_text
@@ -284,33 +246,6 @@ string name_of_node_type( const NodeType& n )
     }
 };
 
-//----------------------------------------------------------------------------------------sax_print
-// Wird mit gesperrtem Mutex libxml_parser_mutex gerufen.
-// Schnell raus hier!
-/*
-static void sax_print( void*, const char *format_msg, ... )
-{
-    va_list list;
-
-    va_start( list, format_msg );
-
-    vfprintf( stderr, format_msg, list );
-
-    char buffer [1024];
-    int ret = _vsnprintf( buffer, sizeof buffer, format_msg, list );
-    static_parser_messages += buffer;
-
-    va_end( list );
-}
-*/
-//-----------------------------------------------------------------------Document_ptr::Document_ptr
-/* nicht geprüft
-Document_ptr::Document_ptr( const Element_ptr& root_to_clone )
-{
-    create();
-    appendChild( clone( root_to_clone ) );
-}
-*/
 //----------------------------------------------------------------------------Document_ptr::release
 
 void Document_ptr::release()
@@ -442,91 +377,6 @@ void Document_ptr::load_xml( const BSTR xml_text )
     load_xml( string_from_bstr( xml_text ) );
 }
 
-//--------------------------------------------------------Document_ptr::validate_against_dtd_string
-
-void Document_ptr::validate_against_dtd_string( const string& dtd_string ) const
-{
-    assert( _ptr );
-
-    Dtd_ptr dtd ( dtd_string );
-    validate_against_dtd( dtd );
-}
-
-//---------------------------------------------------------------Document_ptr::validate_against_dtd
-
-void Document_ptr::validate_against_dtd( xmlDtdPtr dtd ) const
-{
-    assert( _ptr );
-
-    Print_context print_context;
-    xmlValidCtxt  validation_context;   memset( &validation_context, 0, sizeof validation_context );
-    
-
-    validation_context.userData = (void*)                  &print_context;
-    validation_context.error    = (xmlValidityErrorFunc)   Print_context::static_print;
-    validation_context.warning  = (xmlValidityWarningFunc) Print_context::static_print;
-
-    int ok = xmlValidateDtd( &validation_context, (xmlDocPtr)_ptr, dtd );
-    if( !ok )  throw_xc( "LIBXML2-004", print_context._messages );
-}
-
-//-----------------------------------------------------Document_ptr::validate_against_schema_string
-/*
-void Document_ptr::validate_against_schema_string( const string& schema_string ) const
-{
-    Schema_ptr schema ( schema_string );
-    validate_against_schema( schema );
-}
-
-//------------------------------------------------------------Document_ptr::validate_against_schema
-
-void Document_ptr::validate_against_schema( xmlSchemaPtr schema ) const
-{
-    Print_context print_context;
-
-
-
-
-    string schema_str;
-    xmlSchemaParserCtxtPtr  schema_parser = xmlSchemaNewMemParserCtxt( schema_str, schema_str.length() );
-
-
-
-    xmlSchemaParserCtxtPtr parser_context;
-
-     parser = xmlSchemaNewParserCtxt(STR2CSTR(uri));
-     sptr = xmlSchemaParse(parser);
-     xmlSchemaFreeParserCtxt(parser);
-    break;
-
-    xmlValidCtxt  validation_context;   memset( &validation_context, 0, sizeof validation_context );
-    
-
-    validation_context.userData = (void*)                  &print_context;
-    validation_context.error    = (xmlValidityErrorFunc)   Print_context::static_print;
-    validation_context.warning  = (xmlValidityWarningFunc) Print_context::static_print;
-
-    int ok = xmlValidateDtd( &validation_context, (xmlDocPtr)_ptr, dtd );
-    if( !ok )  throw_xc( "LIBXML2-004", print_context._messages );
-}
-*/
-
-//----------------------------------------------------------------------------delete_ascii_encoding
-
-//static char* delete_ascii_encoding( char* xml_text )
-//{
-//    char*       result         = xml_text;
-//    static char ascii_header[] = "<?xml version=\"1.0\" encoding=\"ASCII\"";
-//
-//    if( strncmp( xml_text, ascii_header, sizeof ascii_header - 1 ) == 0 )
-//    {
-//        result = xml_text + sizeof ascii_header - 1 - 19;
-//        memmove( result, xml_text, 19 );
-//    }
-//
-//    return result;
-//}
-
 //--------------------------------------------------------------------------------Document_ptr::xml
 
 string Document_ptr::xml( const string& encoding, const string& indent_string ) const
@@ -553,7 +403,6 @@ string Document_ptr::xml( const string& encoding, const string& indent_string ) 
 
         
     xml_text = (char*)buffer;
-    //xml_text = delete_ascii_encoding( (char*)buffer );
     length -= xml_text - (char*)buffer;
 
 
@@ -581,15 +430,6 @@ string Document_ptr::xml( const string& encoding, const string& indent_string ) 
     return result;
 }
 
-/*
-string Document_ptr::append_child_and_get_xml( const xml::Element_ptr& element )
-{
-    create();
-    appendChild( element );
-
-    return document.xml();
-}
-*/
 //----------------------------------------------------------------------Document_ptr::createElement
 
 Element_ptr Document_ptr::createElement( const string& tagName ) const
@@ -760,12 +600,6 @@ Simple_node_ptr Simple_node_ptr::parentNode() const
     return _ptr->parent; 
 }
 
-//----------------------------------------------------------------------Simple_node_ptr::childNodes
-/*
-NodeList_ptr Simple_node_ptr::childNodes() const
-{
-}
-*/
 //----------------------------------------------------------------------Simple_node_ptr::firstChild
 
 Simple_node_ptr Simple_node_ptr::firstChild() const
@@ -780,14 +614,6 @@ Simple_node_ptr Simple_node_ptr::lastChild() const
 { 
     assert( _ptr );
     return xmlGetLastChild( _ptr ); 
-}
-
-//-----------------------------------------------------------------Simple_node_ptr::previousSibling
-
-Simple_node_ptr Simple_node_ptr::previousSibling() const
-{ 
-    assert( _ptr );
-    return _ptr->prev; 
 }
 
 //---------------------------------------------------------------------Simple_node_ptr::nextSibling
@@ -904,14 +730,6 @@ static bool node_contains_node(const xmlNode* a, const xmlNode* b) {
 
 bool Simple_node_ptr::contains_node(const Simple_node_ptr& node) const {
     return node_contains_node(_ptr, node._ptr);
-}
-
-//----------------------------------------------------------------------Simple_node_ptr::childNodes
-
-NodeList_ptr Simple_node_ptr::childNodes() const
-{ 
-    assert( _ptr );
-    return _ptr->children; 
 }
 
 //-------------------------------------------------------------------Simple_node_ptr::ownerDocument
@@ -1203,15 +1021,6 @@ int Element_ptr::uint_getAttribute( const string& name, int deflt ) const
           else  return deflt;
 }
 
-//-----------------------------------------------------------------Element_ptr::time_t_getAttribute
-
-//time_t Element_ptr::time_t_getAttribute( const string& name, time_t deflt ) const
-//{
-//    Attr_ptr attr = getAttributeNode( name );
-//    if( attr )  return as_uint( attr.value() );
-//          else  return deflt;
-//}
-
 //------------------------------------------------------------------------Element_ptr::setAttribute
 
 void Element_ptr::setAttribute( const string& name, bool value ) const
@@ -1345,36 +1154,6 @@ Comment_ptr Element_ptr::append_new_comment( const string& comment )
     return result;
 }
 
-//---------------------------------------------------------------------------------Element_ptr::xml
-/*
-string Element_ptr::xml( bool indented ) const
-{ 
-    string   result;
-    xmlChar* buffer = NULL;
-    int      length = 0;
-
-    if( indented )  xmlNodeDump( ptr(), &buffer, &length, 1 );
-              else  xmlElemDump( ptr(), &buffer, &length );
-
-
-    // Doppeltes <?xml?> entfernen
-    
-    const char* p = (const char*)buffer;
-
-    if( length > 1+5 )
-    {
-        const char* p2 = (const char*)memchr( p+1, '<', min( 400, length - 5 ) );
-        if( p2 &&  memcmp( p2, "<?xml", 5 ) == 0 )  p = p2;
-    }
-
-
-    result = make_string( p, (const char*)buffer + length - p );
-
-    xmlFree( buffer );
-
-    return result;
-}
-*/
 //-------------------------------------------------------------------------------Document_ptr::text
 
 string Element_ptr::text() const
@@ -1458,88 +1237,17 @@ string Attr_ptr::value()
     return sd_free( xmlNodeGetContent( _ptr->children ) ); 
 }
 
-//---------------------------------------------------------------------------------Dtd_ptr::release
-
-void Dtd_ptr::release()
-{ 
-    if( _ptr )
-    {
-        xmlFreeDtd( _ptr );
-        _ptr = NULL; 
-    }
-}
-
-//------------------------------------------------------------------------------------Dtd_ptr::read
-
-void Dtd_ptr::read( const string& dtd_string )
-{
-    release();
-
-    /*
-    XML_CHAR_ENCODING_8859_1, XML_CHAR_ENCODING_UTF8 
-    xmlIOParseDTD        (xmlSAXHandlerPtr sax,                      xmlParserInputBufferPtr input,                      xmlCharEncoding enc)
-
-    xmlParserCtxtPtr xmlCreateIOParserCtxt    (xmlSAXHandlerPtr sax,
-                     void *user_data,
-                     xmlInputReadCallback   ioread,
-                     xmlInputCloseCallback  ioclose,
-                     void *ioctx,
-                     xmlCharEncoding enc);
-
-    */
-
-    xmlParserInputBufferPtr input_buffer = xmlParserInputBufferCreateMem( dtd_string.data(), dtd_string.length(), XML_CHAR_ENCODING_NONE ); 
-    if( !input_buffer )  throw_xc( "LIBXML2-001", "xmlParserInputBufferCreateMem()" );
-
-
-    /*
-    xmlSAXHandler sax_handler;
-    memset( &sax_handler, 0, sizeof sax_handler );
-
-    sax_handler.fatalError  = (fatalErrorSAXFunc)sax_print;
-    sax_handler.error       = (errorSAXFunc)     sax_print;
-    sax_handler.warning     = (warningSAXFunc)   sax_print;
-    sax_handler.initialized = 1;
-    */
-
-    //Z_MUTEX( libxml_parser_mutex )
-    {
-        //static_parser_messages = "";
-
-        _ptr = xmlIOParseDTD( NULL, input_buffer, XML_CHAR_ENCODING_NONE ); 
-
-        if( !_ptr )  throw_xc( "LIBXML2-001", "xmlIOParseDTD()", static_parser_messages );
-    }
-    //Offenbar von xmlIOParseDTD() erledigt: xmlFreeParserInputBuffer( input_buffer );
-
-}
-
 //------------------------------------------------------------------------------Schema_ptr::release
 
 void Schema_ptr::release()
-{ 
+{
     if( _ptr )
     {
         xmlSchemaFree( _ptr );
-        _ptr = NULL; 
+        _ptr = NULL;
     }
 }
 
-//---------------------------------------------------------------------------------Schema_ptr::read
-/*
-void Schema_ptr::read( const string& schema_string )
-{
-    release();
-
-    xmlSchemaParserCtxtPtr parser_context = xmlSchemaNewMemParserCtx( schema_string.data(), schema_string.length() );
-    if( !parser_context )  throw_xc( "LIBXML2-001", "xmlSchemaNewMemParserCtx()", static_parser_messages );
-
-    _ptr = xmlSchemaParse( parser_context );
-    xmlSchemaFreeParserCtxt( parser_context );
-
-    if( !_ptr )  throw_xc( "LIBXML2-001", "xmlSchemaParse()", static_parser_messages );
-}
-*/
 //---------------------------------------------------------------------------------Schema_ptr::read
 
 void Schema_ptr::read( const Document_ptr& schema_document )

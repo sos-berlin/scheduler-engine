@@ -152,9 +152,6 @@
     <ClCompile Include="xml_libxml2.cxx">
       <Filter>Quellcodedateien\xml</Filter>
     </ClCompile>
-    <ClCompile Include="xml_msxml.cxx">
-      <Filter>Quellcodedateien\xml</Filter>
-    </ClCompile>
     <ClCompile Include="xslt_libxslt.cxx">
       <Filter>Quellcodedateien\xml</Filter>
     </ClCompile>

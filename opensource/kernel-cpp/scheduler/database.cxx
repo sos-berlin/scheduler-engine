@@ -2422,29 +2422,9 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                             history_entry.appendChild( create_error_element( doc, x ) );
                         }
 
-
-                        int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
-
-
-#ifndef SPOOLER_USE_LIBXML2     // libxml2 stürzt in Dump() ab:
-                        if( _use_db ) 
-                            param_xml = file_as_string( "-binary " + _spooler->_db->_db_name + "-table=" + _job_history_tablename + " -clob=parameters where `id`=" + as_string(id), "" );
-
-                        if( !param_xml.empty() )
-                        {
-                            try {
-                                dom_append_nl( history_element );
-                                xml::Document_ptr par_doc;
-                                par_doc.create();
-                                par_doc.load_xml( param_xml );
-                                if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
-                            }
-                            catch( exception&  x ) { _log->warn( string("History: ") + x.what() ); }
-                            catch( const _com_error& x ) { _log->warn( string("History: ") + w_as_string(x.Description() )) ; }
-                        }
-#endif
                         if( with_log )
                         {
+                            int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
                             try
                             {
                                 ta.set_transaction_read();
