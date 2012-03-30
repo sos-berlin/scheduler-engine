@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.jms;
 
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;
+import com.sos.scheduler.engine.kernel.event.SimpleMessage;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
@@ -123,7 +124,7 @@ public class JMSEventAdapter {
 			ev = objFactory.createEvent("EventLogError");
 			EventLogError oe = ev.getEventLogError();
 			ErrorLogEvent logEvent = (ErrorLogEvent)event;
-			oe.setInfoLog( JMSMessageAdapter.createInstance(logEvent.getMessage()) );
+			oe.setInfoLog( JMSMessageAdapter.createInstance(new SimpleMessage(logEvent.getMessage())) );  //TODO SimpleMessage, damit es übersetzbar ist. Zschimmer 30.03.2012
 			flgFound = true;
 		}
 			

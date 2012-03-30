@@ -1,19 +1,17 @@
 package com.sos.scheduler.engine.kernel.log;
 
+import com.sos.scheduler.engine.eventbus.AbstractEvent;
+
 import static com.sos.scheduler.engine.kernel.util.Util.stringOrException;
 
-import com.sos.scheduler.engine.eventbus.AbstractEvent;
-import com.sos.scheduler.engine.kernel.event.Message;
-import com.sos.scheduler.engine.kernel.event.SimpleMessage;
-
 public abstract class LogEvent extends AbstractEvent {
-    private final Message message;
+    private final String message;
 
     protected LogEvent(String message) {
-        this.message = new SimpleMessage(message);
+        this.message = message;
     }
 
-    public final Message getMessage() {
+    public final String getMessage() {
         return message;
     }
 

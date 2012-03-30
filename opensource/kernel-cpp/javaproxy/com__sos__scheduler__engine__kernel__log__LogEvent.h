@@ -47,6 +47,7 @@ struct LogEvent : ::zschimmer::javabridge::proxy_jobject< LogEvent >, ::javaprox
     }
   public:
 
+    ::javaproxy::java::lang::String getMessage();
     ::javaproxy::java::lang::String toString();
 
     ::zschimmer::javabridge::Class* java_object_class_();

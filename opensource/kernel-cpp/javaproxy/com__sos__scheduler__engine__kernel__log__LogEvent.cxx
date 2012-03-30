@@ -13,6 +13,7 @@ struct LogEvent__class : ::zschimmer::javabridge::Class
     LogEvent__class(const string& class_name);
    ~LogEvent__class();
 
+    ::zschimmer::javabridge::Method const _getMessage____method;
     ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< LogEvent__class > class_factory;
@@ -22,6 +23,7 @@ const ::zschimmer::javabridge::class_factory< LogEvent__class > LogEvent__class:
 
 LogEvent__class::LogEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
+    ,_getMessage____method(this, "getMessage", "()Ljava/lang/String;")
     ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
 
 LogEvent__class::~LogEvent__class() {}
@@ -41,6 +43,14 @@ LogEvent::~LogEvent() { assign_(NULL); }
 
 
 
+
+::javaproxy::java::lang::String LogEvent::getMessage() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    LogEvent__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getMessage____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
 
 ::javaproxy::java::lang::String LogEvent::toString() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
