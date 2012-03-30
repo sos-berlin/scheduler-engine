@@ -73,7 +73,7 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	
     @EventHandler
     public void handleTaskEnd(TaskEndedEvent e) throws Exception {
-    	logger.debug("TASKENDED: " + e.getObject() );
+    	logger.debug("TASKENDED: " + e);
     	taskFinished++;
     	if (taskFinished == ESTIMATED_TASKS)
     		controller().scheduler().terminate();

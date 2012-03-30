@@ -6,13 +6,10 @@
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERSTATECHANGEDEVENT_H_
 
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrderEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderState; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -22,7 +19,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct OrderStateChangedEvent__class;
 
 struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrderEvent {
-    static OrderStateChangedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1);
+  private:
+    static OrderStateChangedEvent new_instance();  // Not implemented
+  public:
 
     OrderStateChangedEvent(jobject = NULL);
 
@@ -49,6 +48,7 @@ struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderSta
     }
   public:
 
+    static ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderStateChangedEvent of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

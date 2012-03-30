@@ -24,7 +24,11 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  */
 @ForCpp
 public class OrderTouchedEvent extends ModifiableOrderEvent {
-    @ForCpp public OrderTouchedEvent(Order order) {
-        super(order);
+    @ForCpp public OrderTouchedEvent(OrderKey key) {
+        super(key);
+    }
+
+    @ForCpp public static OrderTouchedEvent of(String jobChainPath, String orderId) {
+        return new OrderTouchedEvent(OrderKey.of(jobChainPath, orderId));
     }
 }

@@ -49,8 +49,10 @@ struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >
     }
   public:
 
+    void checkNumberOfEventCodes(jint p0);
     void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent >& p0);
     void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
+    void reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

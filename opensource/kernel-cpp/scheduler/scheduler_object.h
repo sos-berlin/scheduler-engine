@@ -3,6 +3,8 @@
 #ifndef __SCHEDULER_OBJECT_H
 #define __SCHEDULER_OBJECT_H
 
+#include "Event_code.h"
+
 #include "../javaproxy/com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 typedef javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent AbstractEventJ;
 
@@ -99,6 +101,7 @@ struct Scheduler_object
     virtual void                close                       ()                                      {}
     void                        report_event                (const AbstractEventJ&);
     void                        report_event                (const AbstractEventJ&, const ObjectJ& eventSource);
+    void                        report_event_code           (Event_code event_code, const ObjectJ& eventSource);
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
     virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }

@@ -7,22 +7,12 @@
     Task
 */
 
-
-
-
 #include "spooler.h"
 #include "file_logger.h"
 #include "../kram/sleep.h"
 #include "../zschimmer/z_signals.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__kernel__job__UnmodifiableTask.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__job__events__TaskStartedEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__job__events__TaskEndedEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepStartedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepEndedEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::kernel::job::events::TaskStartedEvent TaskStartedEventJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::job::events::TaskEndedEvent TaskEndedEventJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepStartedEvent OrderStepStartedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepEndedEvent OrderStepEndedEventJ;
 
 #ifndef Z_WINDOWS
@@ -1505,7 +1495,7 @@ bool Task::do_something()
                                                 _module_instance->kind() == Module::kind_remote? s_running_remote_process 
                                                                                                : s_running_process
                                            : s_opening );
-                                report_event(TaskStartedEventJ::new_instance(java_sister()));
+                                report_event_code(taskStartedEvent, java_sister());
                                 loop = true;
                             }
 
@@ -1893,7 +1883,7 @@ bool Task::do_something()
                                     }                                                               
                                 }                                                               
 
-                                report_event(TaskEndedEventJ::new_instance(java_sister()));
+                                report_event_code(taskEndedEvent, java_sister());
                                 set_state_direct( s_deleting_files );
                                 loop = true;
                             }
@@ -2159,7 +2149,7 @@ bool Task::step__end()
 
         if( _order )  
         {
-            report_event( OrderStepEndedEventJ::new_instance(_order->java_sister(),result));
+            report_event( OrderStepEndedEventJ::of(_order->job_chain_path(), _order->string_id(), result), _order->java_sister());
             postprocess_order( _delay_until_locks_available? Order::post_keep_state :
                                result                      ? Order::post_success 
                                                            : Order::post_error        );
@@ -2892,7 +2882,7 @@ Async_operation* Job_module_task::do_step__start()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
-    if (_order) report_event( OrderStepStartedEventJ::new_instance(_order->java_sister()));
+    if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
     return _module_instance->step__start();
 }
 

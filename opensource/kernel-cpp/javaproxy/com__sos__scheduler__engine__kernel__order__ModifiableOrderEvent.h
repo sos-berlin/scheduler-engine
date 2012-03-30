@@ -6,11 +6,9 @@
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_MODIFIABLEORDEREVENT_H_
 
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct Order; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderEvent; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -50,7 +48,6 @@ struct ModifiableOrderEvent : ::zschimmer::javabridge::proxy_jobject< Modifiable
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::Order getOrder();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

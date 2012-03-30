@@ -6,11 +6,9 @@
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_FOLDER_EVENTS_FILEBASEDACTIVATEDEVENT_H_
 
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct ObjectEvent; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct AbstractEvent; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -19,8 +17,8 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct FileBasedActivatedEvent__class;
 
-struct FileBasedActivatedEvent : ::zschimmer::javabridge::proxy_jobject< FileBasedActivatedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent {
-    static FileBasedActivatedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased >& p0);
+struct FileBasedActivatedEvent : ::zschimmer::javabridge::proxy_jobject< FileBasedActivatedEvent >, ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent {
+    static FileBasedActivatedEvent new_instance();
 
     FileBasedActivatedEvent(jobject = NULL);
 
@@ -43,7 +41,7 @@ struct FileBasedActivatedEvent : ::zschimmer::javabridge::proxy_jobject< FileBas
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< FileBasedActivatedEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent::set_jobject(jo);
     }
   public:
 

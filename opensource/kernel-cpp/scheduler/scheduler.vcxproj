@@ -304,6 +304,7 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Event_code.h" />
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />
     <ClInclude Include="log_cache_Request_cache.h" />

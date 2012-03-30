@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-
 /**
  * \file OrderFinishedEvent.java
  * \brief This event fired if an order reach the end state 
@@ -22,9 +20,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-@ForCpp
 public class OrderFinishedEvent extends UnmodifiableOrderEvent {
-    @ForCpp public OrderFinishedEvent(UnmodifiableOrder order) {
-        super(order);
+    public OrderFinishedEvent(OrderKey key) {
+        super(key);
+    }
+
+    public static OrderFinishedEvent of(String jobChainPath, String orderId) {
+        return new OrderFinishedEvent(OrderKey.of(jobChainPath, orderId));
     }
 }

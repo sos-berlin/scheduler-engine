@@ -3,7 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "java__lang__String.h"
 
@@ -14,7 +13,6 @@ struct ModifiableOrderEvent__class : ::zschimmer::javabridge::Class
     ModifiableOrderEvent__class(const string& class_name);
    ~ModifiableOrderEvent__class();
 
-    ::zschimmer::javabridge::Method const _getOrder____method;
 
     static const ::zschimmer::javabridge::class_factory< ModifiableOrderEvent__class > class_factory;
 };
@@ -23,7 +21,7 @@ const ::zschimmer::javabridge::class_factory< ModifiableOrderEvent__class > Modi
 
 ModifiableOrderEvent__class::ModifiableOrderEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_getOrder____method(this, "getOrder", "()Lcom/sos/scheduler/engine/kernel/order/Order;"){}
+{}
 
 ModifiableOrderEvent__class::~ModifiableOrderEvent__class() {}
 
@@ -42,14 +40,6 @@ ModifiableOrderEvent::~ModifiableOrderEvent() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::Order ModifiableOrderEvent::getOrder() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    ModifiableOrderEvent__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::Order result;
-    result.steal_local_ref(cls->_getOrder____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* ModifiableOrderEvent::java_object_class_() { return _class.get(); }

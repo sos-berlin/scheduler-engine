@@ -33,6 +33,7 @@ struct Event_subsystem_impl : Event_subsystem
     // Event_subsystem
     void                        report                      (const AbstractEventJ&);
     void                        report                      (const AbstractEventJ&, const ObjectJ&);
+    virtual void                report_event_code           (Event_code, const ObjectJ& event_source);
 
 private:
     Fill_zero                  _zero_;
@@ -56,13 +57,6 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
     return +result;
 }
 
-//----------------------------------------------------------------------Event_subsystem_impl::close
-
-//void Event_subsystem_impl::close()
-//{
-//    _eventSubsystemJ.close();
-//}
-
 //-------------------------------------------------------Event_subsystem_impl::subsystem_initialize
 
 bool Event_subsystem_impl::subsystem_initialize()
@@ -77,6 +71,7 @@ bool Event_subsystem_impl::subsystem_load()
 {
     _eventSubsystemJ.assign_( _spooler->schedulerJ().getEventSubsystem() );
     assert(_eventSubsystemJ != NULL);
+    _eventSubsystemJ.checkNumberOfEventCodes((int)end_event_code);
 
     _subsystem_state = subsys_loaded;
     return true;
@@ -105,12 +100,12 @@ void Event_subsystem_impl::report(const AbstractEventJ& eventJ, const ObjectJ& e
         _eventSubsystemJ.report(eventJ, eventSourceJ);
 }
 
-//---------------------------------------------------------------------Event_subsystem_impl::report
+//----------------------------------------------------------Event_subsystem_impl::report_event_code
 
-//void Event_subsystem_impl::report( const Scheduler_event2& event )
-//{
-//    _eventSubsystemJ.report(event.j());
-//}
+void Event_subsystem_impl::report_event_code(Event_code event_code, const ObjectJ& eventSourceJ) {
+    if (_eventSubsystemJ) 
+        _eventSubsystemJ.reportEventClass((int)event_code, eventSourceJ);
+}
 
 //-------------------------------------------------------------------------------------------------
 

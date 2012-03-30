@@ -1,15 +1,7 @@
 package com.sos.scheduler.engine.kernel.order;
 
 public abstract class ModifiableOrderEvent extends OrderEvent {
-    private final Order order;
-
-    protected ModifiableOrderEvent(Order o) {
-        super(o.getKey());
-        this.order = o;
-    }
-
-    @Deprecated
-    @Override public final Order getOrder() {
-        return order;
+    protected ModifiableOrderEvent(OrderKey key) {
+        super(key);
     }
 }

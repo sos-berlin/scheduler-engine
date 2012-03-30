@@ -27,8 +27,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 public class OrderStateChangedEvent extends UnmodifiableOrderEvent {
     private final OrderState previousState;
 
-    @ForCpp public OrderStateChangedEvent(UnmodifiableOrder order, OrderState previousState) {
-        super(order);
+    public OrderStateChangedEvent(OrderKey key, OrderState previousState) {
+        super(key);
         this.previousState = previousState;
     }
 
@@ -38,5 +38,9 @@ public class OrderStateChangedEvent extends UnmodifiableOrderEvent {
 
     @Override public final String toString() {
         return super.toString() + ", previousState=" + previousState;
+    }
+
+    @ForCpp public static OrderStateChangedEvent of(String jobChainPath, String orderId, String state) {
+        return new OrderStateChangedEvent(OrderKey.of(jobChainPath, orderId), new OrderState(state));
     }
 }

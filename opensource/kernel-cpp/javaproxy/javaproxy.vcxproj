@@ -105,12 +105,12 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__event__ObjectEvent.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__log__ErrorLogEvent.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__log__LogEvent.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderFinishedEvent.cxx" />
+    
     
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderState.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.cxx" />
@@ -122,8 +122,8 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderSuspendedEvent.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderResumedEvent.cxx" />
+    
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderEvent.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.cxx" />
@@ -135,10 +135,10 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SettingsC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__TaskC.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__job__events__TaskEndedEvent.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__job__UnmodifiableTask.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__job__events__TaskEvent.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__job__events__UnmodifiableTaskEvent.cxx" />
+    
+    
     <ClCompile Include="com__sos__scheduler__engine__eventbus__AbstractEvent.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__eventbus__Event.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.cxx" />
@@ -147,7 +147,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__variable__VariableSet.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__folder__events__FileBasedActivatedEvent.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__folder__events__FileBasedRemovedEvent.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__job__events__TaskStartedEvent.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpResponseC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx" />

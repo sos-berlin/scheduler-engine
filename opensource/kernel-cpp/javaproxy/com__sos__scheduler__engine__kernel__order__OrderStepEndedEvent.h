@@ -6,13 +6,11 @@
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERSTEPENDEDEVENT_H_
 
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct ModifiableOrderEvent; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct Order; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -22,7 +20,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct OrderStepEndedEvent__class;
 
 struct OrderStepEndedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStepEndedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::ModifiableOrderEvent {
-    static OrderStepEndedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, jboolean p1);
+  private:
+    static OrderStepEndedEvent new_instance();  // Not implemented
+  public:
 
     OrderStepEndedEvent(jobject = NULL);
 
@@ -49,6 +49,7 @@ struct OrderStepEndedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStepEn
     }
   public:
 
+    static ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepEndedEvent of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jboolean p2);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

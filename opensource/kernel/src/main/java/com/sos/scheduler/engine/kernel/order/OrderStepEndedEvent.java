@@ -26,16 +26,20 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 public class OrderStepEndedEvent extends ModifiableOrderEvent {
     private final boolean ok;
 
-    @ForCpp public OrderStepEndedEvent(Order order, boolean ok) {
-        super(order);
+    public OrderStepEndedEvent(OrderKey key, boolean ok) {
+        super(key);
         this.ok = ok;
     }
 
-    public final boolean getOk() {
+    public final boolean isOk() {
         return ok;
     }
 
     @Override public final String toString() {
         return super.toString() + ", ok=" + ok;
+    }
+
+    @ForCpp public static OrderStepEndedEvent of(String jobChainPath, String orderId, boolean ok) {
+        return new OrderStepEndedEvent(OrderKey.of(jobChainPath, orderId), ok);
     }
 }

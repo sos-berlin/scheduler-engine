@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-
 /**
  * \file OrderResumedEvent.java
  * \brief This event fired if an order was resumed 
@@ -22,9 +20,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-@ForCpp
 public class OrderResumedEvent extends UnmodifiableOrderEvent {
-    @ForCpp public OrderResumedEvent(UnmodifiableOrder order) {
-        super(order);
+    public OrderResumedEvent(OrderKey key) {
+        super(key);
+    }
+
+    public static OrderResumedEvent of(String jobChainPath, String orderId) {
+        return new OrderResumedEvent(OrderKey.of(jobChainPath, orderId));
     }
 }

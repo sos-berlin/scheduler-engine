@@ -6,11 +6,9 @@
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDEREVENT_H_
 
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct ObjectEvent; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct AbstractEvent; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -19,7 +17,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct OrderEvent__class;
 
-struct OrderEvent : ::zschimmer::javabridge::proxy_jobject< OrderEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent {
+struct OrderEvent : ::zschimmer::javabridge::proxy_jobject< OrderEvent >, ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent {
   private:
     static OrderEvent new_instance();  // Not implemented
   public:
@@ -45,11 +43,10 @@ struct OrderEvent : ::zschimmer::javabridge::proxy_jobject< OrderEvent >, ::java
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< OrderEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::event::ObjectEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent::set_jobject(jo);
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder getOrder();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

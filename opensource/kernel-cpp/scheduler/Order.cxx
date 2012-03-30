@@ -3,19 +3,8 @@
 #include "spooler.h"
 #include "Order_subsystem_impl.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderState.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderFinishedEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderSuspendedEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderResumedEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderStateJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStateChangedEvent OrderStateChangedEventJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderFinishedEvent OrderFinishedEventJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderTouchedEvent OrderTouchedEventJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderSuspendedEvent OrderSuspendedEventJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderResumedEvent OrderResumedEventJ;
 
 namespace sos {
 namespace scheduler {
@@ -344,7 +333,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
             _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
         order_subsystem()->count_started_orders();
-        report_event( OrderTouchedEventJ::new_instance(java_sister()) );
+        report_event_code(orderTouchedEvent, java_sister());
     }
 }
 
@@ -2093,7 +2082,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if (is_in_job_chain())
         {
-            report_event( OrderStateChangedEventJ::new_instance(java_sister(), OrderStateJ::new_instance(previous_state.as_string())) );
+            report_event( OrderStateChangedEventJ::of(_job_chain_path, string_id(), previous_state.as_string()), java_sister() );
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );
@@ -2344,7 +2333,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( node->is_suspending_order() )  {
             _suspended = true;   
-            report_event(OrderSuspendedEventJ::new_instance(java_sister()));
+            report_event_code(orderSuspendedEvent, java_sister());
         }
 
         if( !_is_distribution_inhibited  &&  job_chain->is_distributed() )  set_distributed();
@@ -2596,7 +2585,7 @@ void Order::handle_end_state()
         Time  next_start    = next_start_time( is_first_call );
         State s             = _outer_job_chain_path != ""? _outer_job_chain_state : _state;
 
-        report_event(OrderFinishedEventJ::new_instance(java_sister()));
+        report_event_code(orderFinishedEvent, java_sister());
 
         if( ( has_base_file()  ||  next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
            (s != _initial_state || _initial_state == _end_state) )   // JS-730  
@@ -2827,10 +2816,10 @@ void Order::set_suspended( bool suspended )
 
             if( _suspended )  {
                _log->info( message_string( "SCHEDULER-991" ) );
-                report_event(OrderSuspendedEventJ::new_instance(java_sister()));
+                report_event_code(orderSuspendedEvent, java_sister());
             } else {
                _log->info( message_string( "SCHEDULER-992", _setback ) );
-                report_event(OrderResumedEventJ::new_instance(java_sister()));
+                report_event_code(orderResumedEvent, java_sister());
             }
         }
 

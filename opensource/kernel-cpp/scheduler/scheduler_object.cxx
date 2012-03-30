@@ -132,6 +132,14 @@ void Scheduler_object::report_event(const AbstractEventJ& e, const ObjectJ& even
             s->report(e, eventSource);
 }
 
+//-------------------------------------------------------------------Scheduler_object::report_event
+
+void Scheduler_object::report_event_code(Event_code event_code, const ObjectJ& eventSource) {
+    if (Spooler* sp = spooler())
+        if (Event_subsystem* s = sp->event_subsystem()) 
+            s->report_event_code(event_code, eventSource);
+}
+
 //-------------------------------------------------------Scheduler_object::write_element_attributes
 
 void Scheduler_object::write_element_attributes( const xml::Element_ptr& ) const
