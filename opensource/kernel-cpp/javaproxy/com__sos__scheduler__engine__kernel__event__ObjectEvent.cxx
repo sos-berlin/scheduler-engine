@@ -4,6 +4,7 @@
 
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
+#include "com__sos__scheduler__engine__eventbus__Event.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { 

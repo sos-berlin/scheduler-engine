@@ -9,6 +9,7 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct AbstractEvent; }}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct Event; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
