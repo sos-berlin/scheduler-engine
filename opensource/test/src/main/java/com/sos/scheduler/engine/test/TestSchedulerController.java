@@ -19,11 +19,9 @@ import org.apache.log4j.Logger;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
-import com.sos.scheduler.engine.eventbus.EventSubscriberAdaptingEventSubscription;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.settings.SettingName;
 import com.sos.scheduler.engine.kernel.settings.Settings;
@@ -95,26 +93,10 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         logCategories = o;
     }
 
-    @Deprecated
-    public final void subscribeEvents(EventSubscriber s) {
-        eventBus.registerHot(new EventSubscriberAdaptingEventSubscription(s));
-    }
-
     /** @param timeout Wenn ab Bereitschaft des Schedulers mehr Zeit vergeht, wird eine Exception ausgelöst */
     public final void runScheduler(Time timeout, String... args) {
         activateScheduler(args);
         waitForTermination(timeout);
-    }
-
-    @Deprecated  // Statt den Scheduler nach Frist zu beenden, soll der Test das bitte selbst machen, sobald alles okay ist. Zschimmer 8.11.2011
-    public final void runSchedulerAndTerminate(Time timeout, String... args) {
-        startScheduler(args);
-        waitUntilSchedulerIsActive();
-        try {
-            waitForTermination(timeout);
-        } catch (SchedulerRunningAfterTimeoutException x) {
-            logger.warn("runSchedulerAndTerminate():"+ x.getMessage());
-        }
     }
 
     /** Startet den Scheduler und wartet, bis er aktiv ist. */
@@ -226,7 +208,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** @param testClass Test-Klasse, für Benennung des Scheduler-Arbeitsverzeichnisses und Ort der Konfigurationsresourcen. */
     public static TestSchedulerController of(Class<?> testClass) {
-        return TestSchedulerController.of(testClass, testClass.getPackage());
+        return of(testClass, testClass.getPackage());
     }
 
     public static TestSchedulerController of(Class<?> testClass, Package p) {
