@@ -152,7 +152,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpChunkReaderC.cxx" />
-  </ItemGroup>
+  <ClCompile Include="com__sos__scheduler__engine__kernel__log__InfoLogEvent.cxx" /></ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />
   </ItemGroup>
