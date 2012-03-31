@@ -24,7 +24,7 @@ import com.sos.scheduler.engine.eventbus.ModifiableSourceEvent;
  * </div>
  */
 @ForCpp
-public class OrderStepEndedEvent extends ModifiableOrderEvent implements ModifiableSourceEvent {
+public class OrderStepEndedEvent extends OrderEvent implements ModifiableSourceEvent {
     private final boolean ok;
 
     public OrderStepEndedEvent(OrderKey key, boolean ok) {

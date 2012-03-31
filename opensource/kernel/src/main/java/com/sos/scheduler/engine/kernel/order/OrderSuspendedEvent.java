@@ -20,7 +20,7 @@ package com.sos.scheduler.engine.kernel.order;
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class OrderSuspendedEvent extends UnmodifiableOrderEvent {
+public class OrderSuspendedEvent extends OrderEvent {
     public OrderSuspendedEvent(OrderKey key) {
         super(key);
     }

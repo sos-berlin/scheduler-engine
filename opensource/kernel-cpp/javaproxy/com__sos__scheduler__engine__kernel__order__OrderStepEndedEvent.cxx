@@ -3,7 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__OrderStepEndedEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 

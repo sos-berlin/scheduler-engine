@@ -24,7 +24,7 @@ import com.sos.scheduler.engine.eventbus.ModifiableSourceEvent;
  * </div>
  */
 @ForCpp
-public class OrderTouchedEvent extends ModifiableOrderEvent implements ModifiableSourceEvent {
+public class OrderTouchedEvent extends OrderEvent implements ModifiableSourceEvent {
     @ForCpp public OrderTouchedEvent(OrderKey key) {
         super(key);
     }

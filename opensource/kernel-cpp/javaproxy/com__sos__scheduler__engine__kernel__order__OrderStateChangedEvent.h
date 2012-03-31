@@ -7,9 +7,9 @@
 
 #include "com__sos__scheduler__engine__eventbus__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrderEvent.h"
 #include "java__lang__Object.h"
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderEvent; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -18,7 +18,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct OrderStateChangedEvent__class;
 
-struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrderEvent {
+struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent {
   private:
     static OrderStateChangedEvent new_instance();  // Not implemented
   public:
@@ -44,7 +44,7 @@ struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderSta
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrderEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent::set_jobject(jo);
     }
   public:
 
