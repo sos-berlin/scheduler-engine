@@ -7,7 +7,6 @@
 
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct Event; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -18,7 +17,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct AbstractEvent__class;
 
 struct AbstractEvent : ::zschimmer::javabridge::proxy_jobject< AbstractEvent >, ::javaproxy::java::lang::Object {
-    static AbstractEvent new_instance();
+  private:
+    static AbstractEvent new_instance();  // Not implemented
+  public:
 
     AbstractEvent(jobject = NULL);
 
@@ -45,7 +46,6 @@ struct AbstractEvent : ::zschimmer::javabridge::proxy_jobject< AbstractEvent >, 
     }
   public:
 
-    ::javaproxy::java::lang::String toString();
 
     ::zschimmer::javabridge::Class* java_object_class_();
 
