@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.eventbus.EventSourceEvent;
  * @{@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode mit einem
  * Parameter für das {@link Event} und einem zweiten Parameter für {@link EventSource}
  * mit dem auslösenden Objekt. Das auslösende Objekt (zum Beispiel eine Order) ist nur in einem
- * @{@link com.sos.scheduler.engine.eventbus.HotEventHandler} gültig, weshalb es nicht ins {@link Event} aufgenommen wird. */
+ * @{@code HotEventHandler} gültig, weshalb es nicht ins {@code Event} aufgenommen wird. */
 public class EventSourceMethodEventSubscription extends MethodEventSubscription {
     private final Class<? extends EventSource> eventSourceClass;
 
@@ -22,11 +22,11 @@ public class EventSourceMethodEventSubscription extends MethodEventSubscription 
         checkMethodParameterCount(method, 1, 2);
     }
 
-    public boolean eventSourceMatches(EventSourceEvent e) {
-        return getEventSourceClass().isAssignableFrom(e.getEventSource().getClass());
+    public final boolean eventSourceMatches(EventSourceEvent e) {
+        return eventSourceClass.isAssignableFrom(e.getEventSource().getClass());
     }
 
-    @Override protected void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException {
+    @Override protected final void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException {
         EventSourceEvent e = (EventSourceEvent)event;
         getMethod().invoke(getAnnotatedObject(), e.getEvent(), e.getEventSource());
     }
@@ -34,9 +34,5 @@ public class EventSourceMethodEventSubscription extends MethodEventSubscription 
     @Override public String toString() {
         return getMethod().getDeclaringClass().getSimpleName() +"."+ getMethod().getName() +
                 "("+ getEventClass().getSimpleName() +","+ eventSourceClass.getSimpleName() +")";
-    }
-
-    final Class<? extends EventSource> getEventSourceClass() {
-        return eventSourceClass;
     }
 }
