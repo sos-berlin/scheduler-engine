@@ -56,6 +56,7 @@ class OrderEventsTest extends ScalaSchedulerTest {
   }
 
   private def checkCollectedOrderEvents(orderKey: OrderKey) {
+    controller.getEventBus.dispatchEvents()  // Das letzte OrderFinishedEvent kann sonst verloren gehen.
     coldEvents should equal (Map(
       "OrderTouched"   -> new OrderTouchedEvent(orderKey),
       "OrderFinished"  -> new OrderFinishedEvent(orderKey),
