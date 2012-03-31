@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.eventbus;
 
+import com.sos.scheduler.engine.data.event.Event;
+
 public class SchedulerEventBus implements EventBus {
     private final HotEventBus hotEventBus = new HotEventBus();
     private final ColdEventBus coldEventBus = new ColdEventBus();

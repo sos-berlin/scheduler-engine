@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.stress.order;
 
-import org.junit.Test;
-
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 
 public final class OrderStressTest extends SchedulerTest {
     // In Maven setzen mit -DargLine=-DOrderStressTest.limit=26 (Surefire plugin 2.6), 2010-11-28

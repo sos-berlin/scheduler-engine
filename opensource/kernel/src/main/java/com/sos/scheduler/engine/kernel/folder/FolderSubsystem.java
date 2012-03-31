@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.folder;
 
 import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC;
 
 public final class FolderSubsystem implements FileBasedSubsystem {

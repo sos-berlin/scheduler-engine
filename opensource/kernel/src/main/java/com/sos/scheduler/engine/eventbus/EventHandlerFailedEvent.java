@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.eventbus;
 
+import com.sos.scheduler.engine.data.event.Event;
+
 public final class EventHandlerFailedEvent implements Event {
     private final Call call;
     private final Throwable throwable;

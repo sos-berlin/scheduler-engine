@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.test;
 
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventPredicate;
+import com.sos.scheduler.engine.data.event.Event;
 
-import javax.script.*;
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 
 public class ScriptEventPredicateEngine {

@@ -1,21 +1,20 @@
 package com.sos.scheduler.engine.tests.jira.js793;
 
-import static org.junit.Assert.assertTrue;
+import com.google.common.io.Files;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.util.FileUtils;
+import org.apache.log4j.Logger;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.google.common.io.Files;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.FileUtils;
+import static org.junit.Assert.assertTrue;
 
 /**
  * This test show how to set specific parameter for jobchain nodes. To do this, you have to sepcify order parameters

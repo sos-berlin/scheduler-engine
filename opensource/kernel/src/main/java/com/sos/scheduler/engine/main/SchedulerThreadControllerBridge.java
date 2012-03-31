@@ -1,19 +1,18 @@
 package com.sos.scheduler.engine.main;
 
-import static com.sos.scheduler.engine.main.SchedulerState.active;
-import static com.sos.scheduler.engine.main.SchedulerState.started;
-import static com.sos.scheduler.engine.main.SchedulerState.terminated;
-
-import javax.annotation.Nullable;
-
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
+import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
-import com.sos.scheduler.engine.kernel.settings.Settings;
+
+import javax.annotation.Nullable;
+
+import static com.sos.scheduler.engine.main.SchedulerState.active;
+import static com.sos.scheduler.engine.main.SchedulerState.terminated;
 
 final class SchedulerThreadControllerBridge implements SchedulerControllerBridge, EventHandlerAnnotated {
     private final SchedulerThreadController schedulerThreadController;

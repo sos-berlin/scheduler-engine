@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.log;
 
-import com.sos.scheduler.engine.kernel.util.StringValue;
+import com.sos.scheduler.engine.data.base.StringValue;
 
 
 public class LogCategory extends StringValue {

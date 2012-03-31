@@ -8,10 +8,10 @@ import com.sos.scheduler.engine.plugins.jetty.rest.RestResources
 import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.BodyWriters
 import com.sos.scheduler.engine.plugins.jetty.rest.marshal.MarshallerRegister
 import com.sos.scheduler.engine.plugins.jetty.rest.views.{RootViewMarshaller, JobViewMarshaller, FolderViewMarshaller}
-import java.io.File
-import org.w3c.dom.Element
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
+import java.io.File
+import org.w3c.dom.Element
 
 class Config(pluginElement: Element, conf: SchedulerConfiguration) {
   import Config._

@@ -36,6 +36,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>data</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.sos</groupId>
             <artifactId>com.sos.util</artifactId>
             <version>${sos.jars.version}</version>
@@ -54,7 +58,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>web</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>

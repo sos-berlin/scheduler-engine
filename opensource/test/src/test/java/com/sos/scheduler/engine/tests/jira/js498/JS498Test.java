@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js498;
 
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;

@@ -2,10 +2,10 @@ package com.sos.scheduler.engine.tests.jira.js655;
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
-import com.sos.scheduler.engine.kernel.folder.Path;
-import com.sos.scheduler.engine.kernel.folder.events.FileBasedActivatedEvent;
-import com.sos.scheduler.engine.kernel.folder.events.FileBasedRemovedEvent;
+import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
+import com.sos.scheduler.engine.data.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.Path;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.util.Files;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;

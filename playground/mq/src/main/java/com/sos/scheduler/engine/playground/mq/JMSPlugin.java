@@ -1,17 +1,16 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
+import com.sos.scheduler.engine.data.event.Event;
+import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
-import org.w3c.dom.Element;
-
-import com.sos.scheduler.engine.eventbus.Event;
-import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 
 public class JMSPlugin extends AbstractPlugin {
     private final Connector connector;

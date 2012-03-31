@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
 import com.sos.scheduler.engine.kernel.command.Result;
-import com.sos.scheduler.engine.kernel.database.entity.TaskHistoryEntity;
+import com.sos.scheduler.engine.data.database.TaskHistoryEntity;
 import java.util.Collection;
 
 

@@ -1,22 +1,21 @@
 package com.sos.scheduler.engine.tests.jira.js461;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Iterator;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.data.order.OrderEvent;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderResumedEvent;
+import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
+import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderEvent;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderSuspendedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
+import java.util.Iterator;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * \file JS461Test.java

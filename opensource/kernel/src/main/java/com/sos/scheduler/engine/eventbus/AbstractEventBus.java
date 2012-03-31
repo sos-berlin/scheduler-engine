@@ -1,24 +1,18 @@
 package com.sos.scheduler.engine.eventbus;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
-import static org.apache.log4j.Level.DEBUG;
-import static org.apache.log4j.Level.ERROR;
-import static org.apache.log4j.Level.FATAL;
+import com.google.common.collect.*;
+import com.sos.scheduler.engine.eventbus.annotated.EventSourceMethodEventSubscription;
+import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactory;
+import com.sos.scheduler.engine.data.event.Event;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import com.sos.scheduler.engine.eventbus.annotated.EventSourceMethodEventSubscription;
-import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactory;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
+import static org.apache.log4j.Level.*;
 
 public abstract class AbstractEventBus implements EventBus {
     private static final Logger logger = Logger.getLogger(AbstractEventBus.class);

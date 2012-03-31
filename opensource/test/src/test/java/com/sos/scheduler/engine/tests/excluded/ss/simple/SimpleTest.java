@@ -1,21 +1,19 @@
 package com.sos.scheduler.engine.tests.excluded.ss.simple;
 
-import java.io.IOException;
-
-import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskStartedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.util.CommandBuilder;
+import com.sos.scheduler.engine.data.event.Event;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.eventbus.Event;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
-import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.*;
+import java.io.IOException;
 
 public class SimpleTest extends SchedulerTest {
 

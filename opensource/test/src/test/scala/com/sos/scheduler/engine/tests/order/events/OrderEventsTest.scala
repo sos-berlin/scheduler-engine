@@ -1,14 +1,16 @@
 package com.sos.scheduler.engine.tests.order.events
 
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
+import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.junit.runner.RunWith
+import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
-import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler, Event}
+import com.sos.scheduler.engine.data.order._
 
 /** Testet, ob die erwarteten Auftrags-Events in der richtigen Reihenfolge eintreffen,
  * außerdem @EventHandler und @HotEventHandler. */

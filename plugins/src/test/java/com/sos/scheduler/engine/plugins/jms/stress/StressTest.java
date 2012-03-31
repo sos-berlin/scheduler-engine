@@ -1,19 +1,18 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-
-import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import org.apache.log4j.Logger;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.File;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * This class is a stress test for JobScheduler. You can determine the number of tasks and the runtime of each

@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel.scheduler;
 
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
+import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.settings.SettingName;

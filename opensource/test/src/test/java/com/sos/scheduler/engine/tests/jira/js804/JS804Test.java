@@ -1,22 +1,20 @@
 package com.sos.scheduler.engine.tests.jira.js804;
 
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.writeXmlTo;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.StringWriter;
-
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import com.sos.scheduler.engine.test.util.What;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.What;
+import java.io.IOException;
+import java.io.StringWriter;
+
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * This test demonstrates the result attribute <i>setback</i> of the <i>show_calendar</i> command.

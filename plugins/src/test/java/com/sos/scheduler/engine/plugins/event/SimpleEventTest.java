@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.plugins.event;
 
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class SimpleEventTest extends SchedulerTest {
 

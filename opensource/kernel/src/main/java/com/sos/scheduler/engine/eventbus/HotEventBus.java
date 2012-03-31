@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.eventbus;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
-import org.apache.log4j.Logger;
-
 import com.sos.scheduler.engine.eventbus.annotated.HotMethodEventSubscriptionFactory;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
+import com.sos.scheduler.engine.data.event.Event;
+import org.apache.log4j.Logger;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
 
 public class HotEventBus extends AbstractEventBus {
     private static final Logger logger = Logger.getLogger(HotEventBus.class);

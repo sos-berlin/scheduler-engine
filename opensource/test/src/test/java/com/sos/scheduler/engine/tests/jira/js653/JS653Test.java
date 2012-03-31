@@ -1,26 +1,24 @@
 package com.sos.scheduler.engine.tests.jira.js653;
 
-import static java.lang.System.currentTimeMillis;
-import static java.lang.Thread.sleep;
+import com.google.common.collect.ImmutableSet;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import com.google.common.collect.ImmutableSet;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.test.SchedulerTest;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
 
 /** Ticket JS-653.
  * @see <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a>
  * @see com.sos.scheduler.engine.tests.jira.js803.JS803Test */
 public final class JS653Test extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(JS653Test.class);
+    //private static final Logger logger = Logger.getLogger(JS653Test.class);
     private static final long idleTimeoutMs = 5*1000;
     private static final ImmutableSet<OrderIdAndState> expectedOrderStarts = ImmutableSet.of(
             OrderIdAndState.of("simpleShouldRun", "state.job1"),

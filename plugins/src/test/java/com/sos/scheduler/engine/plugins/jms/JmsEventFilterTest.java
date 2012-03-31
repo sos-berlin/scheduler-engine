@@ -1,27 +1,25 @@
 package com.sos.scheduler.engine.plugins.jms;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.test.util.CommandBuilder;
+import com.sos.scheduler.model.SchedulerObjectFactory;
+import com.sos.scheduler.model.events.Event;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
-import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.Event;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class JmsEventFilterTest extends JMSConnection {

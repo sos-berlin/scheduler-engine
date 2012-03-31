@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.google.common.collect.AbstractIterator
-import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventBus, Event, EventHandler}
+import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventBus, EventHandler}
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServices._
 import java.io.OutputStream
 import java.util.concurrent.{TimeUnit, ArrayBlockingQueue}

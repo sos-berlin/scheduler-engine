@@ -22,9 +22,10 @@
         <module>kernel</module>
         <module>kernel.cppproxy-generated</module>
         <module>kernel-cpp</module>
-        <module>jar</module>
+        <module>data</module>
         <module>opensource.plugins</module>
         <module>test</module>
         <module>web</module>
+        <module>jar</module>
     </modules>
 </project>

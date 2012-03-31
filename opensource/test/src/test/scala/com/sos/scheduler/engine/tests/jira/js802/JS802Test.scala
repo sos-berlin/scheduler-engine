@@ -4,13 +4,13 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
 import org.junit.Test
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.kernel.order._
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent
-import scala.collection.mutable
+import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.data.order.{OrderTouchedEvent, OrderId, OrderKey}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.SchedulerTest
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import scala.collection.mutable
 
 /** JS-802 "http://www.sos-berlin.com/jira/browse/JS-802": Testet einen Auftrag und einen Job.
  * @see <a href="http://www.sos-berlin.com/jira/browse/JS-802">JS-802</a>*/

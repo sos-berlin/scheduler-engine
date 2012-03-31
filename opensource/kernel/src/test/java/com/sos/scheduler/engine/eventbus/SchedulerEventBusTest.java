@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
 import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.data.event.AbstractEvent;
 import org.junit.Test;
 
 public final class SchedulerEventBusTest {

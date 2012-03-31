@@ -1,28 +1,26 @@
 package com.sos.scheduler.engine.plugins.js644;
 
-import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobActivated;
-import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobchainActivated;
-import static org.hamcrest.MatcherAssert.assertThat;
+import com.sos.scheduler.engine.data.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.kernel.job.Job;
+import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
+import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.kernel.util.sync.Gate;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
-import com.sos.scheduler.engine.kernel.folder.events.FileBasedActivatedEvent;
-import com.sos.scheduler.engine.kernel.job.Job;
-import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernel.util.sync.Gate;
+import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobActivated;
+import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobchainActivated;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class JS644PluginTest extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(JS644PluginTest.class);
+    //private static final Logger logger = Logger.getLogger(JS644PluginTest.class);
     private static final AbsolutePath jobPath = new AbsolutePath("/a");
     private static final AbsolutePath jobChainPath = new AbsolutePath("/A");
     private static final Time timeout = shortTimeout;

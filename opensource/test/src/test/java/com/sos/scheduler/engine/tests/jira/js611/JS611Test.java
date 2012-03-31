@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js611;
 
-import org.junit.Test;
-
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 
 //TODO Wie prüfen wir das? Erstmal durch Blick ins scheduler.log: {JS-611}.
 /** Test, ob Scheduler Log-Dateien verübergehen schließt, wenn mehr Logs als festgelegt geschrieben werden.

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;

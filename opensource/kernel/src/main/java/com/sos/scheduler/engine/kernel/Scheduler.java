@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
@@ -29,19 +30,19 @@ import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
-import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.util.XmlUtils;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import com.sos.scheduler.engine.util.xml.NamedChildElements;
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -53,7 +54,7 @@ import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggi
 @ForCpp
 public final class Scheduler implements HasPlatform, Sister,
         SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
-    private static final Logger logger = Logger.getLogger(Scheduler.class);
+    //private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
     private final SpoolerC cppProxy;

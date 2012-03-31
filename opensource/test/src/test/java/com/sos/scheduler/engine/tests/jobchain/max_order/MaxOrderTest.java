@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.tests.jobchain.max_order;
 
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
+
 import static java.lang.Math.max;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-
-import org.junit.Test;
-
-import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
 
 public class MaxOrderTest extends SchedulerTest {
     private static final int maxOrders = 3;         // Derselbe Wert wie <job_chain max_orders="">

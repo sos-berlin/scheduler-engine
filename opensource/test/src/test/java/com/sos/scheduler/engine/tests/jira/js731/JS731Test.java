@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.tests.jira.js731;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
-
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-731'>JS-731</a> */
 public class JS731Test extends SchedulerTest {

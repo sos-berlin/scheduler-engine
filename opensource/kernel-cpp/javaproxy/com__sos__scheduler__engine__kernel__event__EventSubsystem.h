@@ -8,7 +8,7 @@
 #include "com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace eventbus { struct AbstractEvent; }}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace event { struct AbstractEvent; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace scheduler { struct AbstractHasPlatform; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
@@ -50,8 +50,8 @@ struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >
   public:
 
     void checkNumberOfEventCodes(jint p0);
-    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent >& p0);
-    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
+    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0);
+    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
     void reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
 
     ::zschimmer::javabridge::Class* java_object_class_();

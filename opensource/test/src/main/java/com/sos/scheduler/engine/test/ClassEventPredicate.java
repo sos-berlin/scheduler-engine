@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test;
 
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventPredicate;
+import com.sos.scheduler.engine.data.event.Event;
 
 public class ClassEventPredicate implements EventPredicate {
     private final Class<? extends Event> eventClass;

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.*;
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.AbsolutePath;
 
 //Aufteilen in JobChainSubsystem und OrderSubsystem?
 

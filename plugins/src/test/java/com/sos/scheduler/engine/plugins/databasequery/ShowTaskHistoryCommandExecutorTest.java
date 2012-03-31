@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.plugins.databasequery;
 
 import javax.persistence.EntityManager;
 
-import com.sos.scheduler.engine.kernel.scheduler.ClusterMemberId;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerId;
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
+import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import org.junit.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;

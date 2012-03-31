@@ -1,14 +1,15 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
+import com.sos.scheduler.engine.data.database.TaskHistoryEntity;
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
+import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.kernel.command.GenericCommandExecutor;
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
-import com.sos.scheduler.engine.kernel.database.entity.TaskHistoryEntity;
-import com.sos.scheduler.engine.kernel.scheduler.ClusterMemberId;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerId;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
+
+import static com.sos.scheduler.engine.data.database.SchedulerDatabases.idForDatabase;
 
 public class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowTaskHistoryCommand, TaskHistoryEntriesResult> {
     private final EntityManager em;
@@ -32,7 +33,7 @@ public class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowT
             result = em.createQuery(sql, TaskHistoryEntity.class);
             result.setParameter("clusterMemberId", clusterMemberId);
         }        
-        result.setParameter("schedulerId", DatabaseSubsystem.idForDatabase(schedulerId));
+        result.setParameter("schedulerId", idForDatabase(schedulerId));
         result.setParameter("schedulerDummyJobPath", TaskHistoryEntity.schedulerDummyJobPath);
         return result;
     }

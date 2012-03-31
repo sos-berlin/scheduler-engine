@@ -10,10 +10,11 @@ import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
 import org.junit.Test
 import com.sos.scheduler.engine.kernel.order._
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.test.SchedulerTest
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import scala.collection.mutable
 
 /** Ticket JS-803.

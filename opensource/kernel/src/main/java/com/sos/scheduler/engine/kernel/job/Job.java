@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.cppproxy.JobC;
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.folder.FileBasedState;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;

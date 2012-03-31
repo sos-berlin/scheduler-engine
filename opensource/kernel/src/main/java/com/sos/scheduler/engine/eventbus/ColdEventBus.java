@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.eventbus;
 
+import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory;
+import com.sos.scheduler.engine.data.event.Event;
+
 import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory;
 
 public class ColdEventBus extends AbstractEventBus {
     private final Queue<Call> callQueue = new ConcurrentLinkedQueue<Call>();

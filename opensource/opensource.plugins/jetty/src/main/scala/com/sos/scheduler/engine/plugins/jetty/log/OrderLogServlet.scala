@@ -3,8 +3,9 @@ package com.sos.scheduler.engine.plugins.jetty.log
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.kernel.order.{OrderId, OrderSubsystem}
+import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.order.OrderId
+import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 
 @Singleton
 class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServlet {

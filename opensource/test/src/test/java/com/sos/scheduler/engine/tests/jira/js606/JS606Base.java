@@ -1,18 +1,18 @@
 package com.sos.scheduler.engine.tests.jira.js606;
 
-import static org.junit.Assert.assertTrue;
+import com.google.common.io.Files;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.util.CommandBuilder;
+import com.sos.scheduler.engine.test.util.FileUtils;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.apache.log4j.Logger;
-
-import com.google.common.io.Files;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.*;
+import static org.junit.Assert.assertTrue;
 
 public class JS606Base extends SchedulerTest {
 

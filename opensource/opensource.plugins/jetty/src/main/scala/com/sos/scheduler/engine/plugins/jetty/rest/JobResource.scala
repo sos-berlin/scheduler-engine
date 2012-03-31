@@ -4,7 +4,7 @@ import javax.inject.Inject
 import javax.ws.rs.core.MediaType._
 import javax.ws.rs._
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
+import com.sos.scheduler.engine.data.folder.AbsolutePath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServices._

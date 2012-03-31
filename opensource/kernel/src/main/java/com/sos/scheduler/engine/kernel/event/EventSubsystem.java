@@ -1,7 +1,10 @@
 package com.sos.scheduler.engine.kernel.event;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.eventbus.*;
+import com.sos.scheduler.engine.data.event.AbstractEvent;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.eventbus.EventSource;
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
@@ -21,12 +24,12 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
         this.eventBus = eventBus;
     }
 
-    /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+    /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
     @ForCpp public final void report(AbstractEvent e) {
         eventBus.publish(e);
     }
 
-    /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.eventbus.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig.
+    /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig.
      * @param eventSource {@link Object} statt {@link EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
     @ForCpp public final void report(AbstractEvent e, Object eventSource) {
         EventSource o = (EventSource)eventSource;

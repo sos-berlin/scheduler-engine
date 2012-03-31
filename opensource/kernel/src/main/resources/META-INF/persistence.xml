@@ -4,6 +4,6 @@
 	version="2.0" xmlns="http://java.sun.com/xml/ns/persistence"
 >
     <persistence-unit name="schedulerEngine">
-        <class>com.sos.scheduler.engine.kernel.database.entity.TaskHistoryEntity</class>
+        <class>com.sos.scheduler.engine.data.database.TaskHistoryEntity</class>
     </persistence-unit>
 </persistence>

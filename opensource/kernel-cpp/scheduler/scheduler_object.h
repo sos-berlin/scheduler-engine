@@ -5,8 +5,8 @@
 
 #include "Event_code.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__eventbus__AbstractEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::eventbus::AbstractEvent AbstractEventJ;
+#include "../javaproxy/com__sos__scheduler__engine__data__event__AbstractEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent AbstractEventJ;
 
 namespace sos {
 namespace scheduler {

@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.test;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
-import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
 import java.io.File;
@@ -10,7 +9,7 @@ import java.io.File;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.kernel.folder.Path;
+import com.sos.scheduler.engine.data.folder.Path;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.main.CppBinaries;

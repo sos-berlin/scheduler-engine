@@ -1,26 +1,25 @@
 package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
-import static com.google.common.collect.Iterables.transform;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.util.List;
-
+import com.google.common.base.Function;
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
+import com.sos.scheduler.engine.data.folder.Path;
+import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.kernel.util.sync.Gate;
+import com.sos.scheduler.engine.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.junit.SlowTestRule;
 import org.apache.log4j.Logger;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
-import com.google.common.base.Function;
-import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.folder.Path;
-import com.sos.scheduler.engine.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.junit.SlowTestRule;
-import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernel.util.sync.Gate;
+import java.io.File;
+import java.util.List;
+
+import static com.google.common.collect.Iterables.transform;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.fail;
 
 /** Der Test lässt einen Auftrag kontinuierlich durch eine Jobkette laufen.
  * Der Thread {@link FilesModifierRunnable} ändert zu zufälligen Zeitpunkten einen Job

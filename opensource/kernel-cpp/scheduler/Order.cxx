@@ -3,9 +3,6 @@
 #include "spooler.h"
 #include "Order_subsystem_impl.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStateChangedEvent OrderStateChangedEventJ;
-
 namespace sos {
 namespace scheduler {
 namespace order {
@@ -2082,7 +2079,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if (is_in_job_chain())
         {
-            report_event( OrderStateChangedEventJ::of(_job_chain_path, string_id(), previous_state.as_string()), java_sister() );
+            report_event( CppEventFactoryJ::newOrderStateChangedEvent(_job_chain_path, string_id(), previous_state.as_string()), java_sister() );
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );

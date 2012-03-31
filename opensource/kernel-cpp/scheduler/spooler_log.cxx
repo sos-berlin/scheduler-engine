@@ -26,11 +26,6 @@
 #    include <unistd.h>   // read(), write(), close()
 #endif
 
-#include "../javaproxy/com__sos__scheduler__engine__kernel__log__ErrorLogEvent.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__log__InfoLogEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::kernel::log::InfoLogEvent InfoLogEventJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::log::ErrorLogEvent ErrorLogEventJ;
-
 const int log_buffer_max = 100*1000;
 
 namespace sos {
@@ -1124,10 +1119,10 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if (_object  &&  javabridge::Vm::is_active()) {
         switch (level) {
             case log_info:
-                _object->report_event(InfoLogEventJ::new_instance(line) );
+                _object->report_event(CppEventFactoryJ::newInfoLogEvent(line) );
                 break;
             case log_error:
-                _object->report_event(ErrorLogEventJ::new_instance(line));
+                _object->report_event(CppEventFactoryJ::newErrorLogEvent(line));
                 break;
             default: ;
         }

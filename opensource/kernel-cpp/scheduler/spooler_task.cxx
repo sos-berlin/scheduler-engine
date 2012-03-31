@@ -12,9 +12,6 @@
 #include "../kram/sleep.h"
 #include "../zschimmer/z_signals.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepEndedEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepEndedEvent OrderStepEndedEventJ;
-
 #ifndef Z_WINDOWS
 #   include <signal.h>
 #   include <sys/signal.h>
@@ -2149,7 +2146,7 @@ bool Task::step__end()
 
         if( _order )  
         {
-            report_event( OrderStepEndedEventJ::of(_order->job_chain_path(), _order->string_id(), result), _order->java_sister());
+            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), result), _order->java_sister());
             postprocess_order( _delay_until_locks_available? Order::post_keep_state :
                                result                      ? Order::post_success 
                                                            : Order::post_error        );

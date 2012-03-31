@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.eventbus;
 
+import com.sos.scheduler.engine.data.event.Event;
+
 public class Call {
     private final Event event;
     private final EventSubscription subscription;

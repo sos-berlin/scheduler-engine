@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 import com.sos.scheduler.engine.main.event.TerminatedEvent
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.util.Time
+import com.sos.scheduler.engine.data.event.Event
 
 class EventPipe extends EventHandlerAnnotated {
     import EventPipe._

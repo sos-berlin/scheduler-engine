@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.eventbus.annotated;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.EventSourceEvent;
+import com.sos.scheduler.engine.data.event.Event;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /** Eine {@link com.sos.scheduler.engine.eventbus.EventSubscription} für eine mit
  * @{@link com.sos.scheduler.engine.eventbus.HotEventHandler} annotierte Methode mit einem

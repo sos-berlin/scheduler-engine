@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.kernel.order;
 
+import com.sos.scheduler.engine.data.order.OrderId;
+import com.sos.scheduler.engine.data.order.OrderKey;
+import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;

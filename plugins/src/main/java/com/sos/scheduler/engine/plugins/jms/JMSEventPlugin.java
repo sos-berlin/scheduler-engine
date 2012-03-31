@@ -1,20 +1,22 @@
 package com.sos.scheduler.engine.plugins.jms;
 
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.JSEvent;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
+
 import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.TextMessage;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
+
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 
 /**
  * \file JMSPlugIn.java
@@ -32,7 +34,7 @@ import org.w3c.dom.Element;
  */
 public class JMSEventPlugin extends AbstractPlugin {
 	
-	private static Logger logger = Logger.getLogger(JMSEventPlugin.class);
+	private static final Logger logger = Logger.getLogger(JMSEventPlugin.class);
 
     private final Scheduler scheduler;
     private final SchedulerConfiguration schedulerConfiguration;

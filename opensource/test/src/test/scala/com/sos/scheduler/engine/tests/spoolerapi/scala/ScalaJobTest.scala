@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.tests.spoolerapi.scala
 
 import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.kernel.folder.AbsolutePath
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent
+import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
 import com.sos.scheduler.engine.test.scala._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 

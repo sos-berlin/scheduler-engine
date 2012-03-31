@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js817;
 
-import org.junit.Test;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderId;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 
 /** JS-801 "JobScheduler crashes if order_state is set to a delayed jobchain_node by api".
  * @see <a href="http://www.sos-berlin.com/jira/browse/JS-801">JS-801</a> */

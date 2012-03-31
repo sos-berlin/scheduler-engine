@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.eventbus;
 
+import com.sos.scheduler.engine.data.event.Event;
+
 public class EventSourceEvent implements Event {
     private final Event event;
     private final EventSource eventSource;

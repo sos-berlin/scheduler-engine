@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.util;
 
+import com.sos.scheduler.engine.data.base.*;
 import org.junit.Test;
 
 public class StringValueTest {

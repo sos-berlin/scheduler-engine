@@ -1,0 +1,27 @@
+package com.sos.scheduler.engine.data.folder;
+
+import com.sos.scheduler.engine.data.base.StringValue;
+
+public class Path extends StringValue {
+    public Path(String p) {
+        super(p);
+    }
+
+    public final void assertIsAbsolute() {
+        if (!isAbsolute())  throw new RuntimeException("Absolute path expected: " + this);
+    }
+
+    public final void assertIsEmptyOrAbsolute() {
+        boolean ok = isEmpty() || isAbsolute();
+        if (!ok)  throw new RuntimeException("Absolute path expected: " + this);
+    }
+
+    public final boolean isAbsolute() {
+        return getString().startsWith("/");
+    }
+
+    public boolean equals(Object o) {
+        // Path und AbsolutePath sind vergleichbar
+        return o instanceof Path && getString().equals(((Path)o).getString());
+    }
+}

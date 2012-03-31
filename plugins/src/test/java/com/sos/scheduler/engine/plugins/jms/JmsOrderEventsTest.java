@@ -1,19 +1,23 @@
 package com.sos.scheduler.engine.plugins.jms;
 
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
+import org.apache.log4j.Logger;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.TextMessage;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import javax.jms.*;
-import org.apache.log4j.Logger;
+
 import static org.junit.Assert.assertEquals;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 
 public class JmsOrderEventsTest extends JMSConnection {

@@ -1,24 +1,21 @@
 package com.sos.scheduler.engine.tests.jira.js644.stop;
 
-import static com.sos.scheduler.engine.tests.jira.js644.stop.JS644StoppedJobTest.M.orderStateChanged;
-import static com.sos.scheduler.engine.tests.jira.js644.stop.JS644StoppedJobTest.M.taskEnded;
-import static com.sos.scheduler.engine.tests.jira.js644.stop.JS644StoppedJobTest.M.terminated;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
+import com.sos.scheduler.engine.data.folder.Path;
+import com.sos.scheduler.engine.kernel.util.sync.Gate;
+import com.sos.scheduler.engine.main.event.TerminatedEvent;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.folder.Path;
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
-import com.sos.scheduler.engine.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.sync.Gate;
+import static com.sos.scheduler.engine.tests.jira.js644.stop.JS644StoppedJobTest.M.*;
 
 /** Testet ob ein gestoppter und veränderter Job wieder korrekt in die Jobkette eingehängt wird und erneut anläuft. */
 public final class JS644StoppedJobTest extends SchedulerTest {

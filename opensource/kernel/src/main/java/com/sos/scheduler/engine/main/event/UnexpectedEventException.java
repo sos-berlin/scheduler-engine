@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.main.event;
 
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventPredicate;
+import com.sos.scheduler.engine.data.event.Event;
 
 public class UnexpectedEventException extends RuntimeException {
     private static final long serialVersionUID = 2011040301;

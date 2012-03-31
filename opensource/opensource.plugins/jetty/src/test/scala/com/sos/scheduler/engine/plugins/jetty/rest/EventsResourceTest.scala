@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sun.jersey.api.client.WebResource
+import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
 import java.io.{BufferedReader, IOException, Reader}

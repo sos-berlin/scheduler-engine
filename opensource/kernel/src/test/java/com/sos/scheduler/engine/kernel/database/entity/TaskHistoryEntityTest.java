@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.kernel.database.entity;
 import java.util.List;
 import java.util.Properties;
 import javax.persistence.*;
+
+import com.sos.scheduler.engine.data.database.TaskHistoryEntity;
 import org.junit.Ignore;
 import org.junit.Test;
 

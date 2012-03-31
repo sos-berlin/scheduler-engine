@@ -1,28 +1,9 @@
 package com.sos.scheduler.engine.test;
 
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.concat;
-import static com.google.common.collect.Iterables.toArray;
-import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
-import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel;
-import org.apache.log4j.Logger;
-
-import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
-import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
+import com.sos.scheduler.engine.data.log.ErrorLogEvent;
+import com.sos.scheduler.engine.eventbus.*;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
+import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel;
 import com.sos.scheduler.engine.kernel.settings.SettingName;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Files;
@@ -34,8 +15,20 @@ import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.main.SchedulerState;
 import com.sos.scheduler.engine.test.binary.TestCppBinaries;
 
+import javax.annotation.Nullable;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.toArray;
+import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
+import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
+
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
-    private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
+    //private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
     private static final String workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory";
     public static final Time shortTimeout = Time.of(15);
 
@@ -82,7 +75,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         }
     }
 
-    /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.kernel.log.ErrorLogEvent} ausgelöst worden ist. */
+    /** Bricht den Test mit Fehler ab, wenn ein {@link com.sos.scheduler.engine.data.log.ErrorLogEvent} ausgelöst worden ist. */
     public final void setTerminateOnError(boolean o) {
         getDelegate().checkIsNotStarted();
         terminateOnError = o;

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;

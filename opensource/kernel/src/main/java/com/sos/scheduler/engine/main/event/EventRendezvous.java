@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.main.event;
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Rendezvous;
+import com.sos.scheduler.engine.data.event.Event;
 
 public class EventRendezvous extends Rendezvous<Event,Object> {
     private static final Object dummyResult = new Object();

@@ -55,6 +55,7 @@
                                 <argument>-c++-output-directory=${basedir}</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                                 <argument>java.util.ArrayList</argument>
+                                <argument>com.sos.scheduler.engine.data.event.AbstractEvent</argument>
                             </arguments>
                         </configuration>
                     </execution>

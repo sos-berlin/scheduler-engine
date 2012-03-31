@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.kernel.folder.{AbsolutePath, FolderSubsystem}
+import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServices.noCache
 import com.sos.scheduler.engine.plugins.jetty.rest.views.FolderView
 import javax.inject.Inject

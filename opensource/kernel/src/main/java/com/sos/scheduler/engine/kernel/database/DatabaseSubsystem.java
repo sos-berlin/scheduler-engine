@@ -1,21 +1,19 @@
 package com.sos.scheduler.engine.kernel.database;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerId;
-import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
-import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.DatabaseC;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
+import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @ForCpp
 public class DatabaseSubsystem implements Subsystem {
-    public static final String emptyIdInDatabase = "-";
     private static final String persistenceUnitName = "schedulerEngine";
 
     private EntityManagerFactory entityManagerFactory = null;
@@ -52,9 +50,5 @@ public class DatabaseSubsystem implements Subsystem {
     /** Liefert auch "password" */
     public final UnmodifiableVariableSet getProperties() {
         return cppProxy.properties().getSister();
-    }
-
-    public static String idForDatabase(SchedulerId id) {
-        return id.isEmpty()? emptyIdInDatabase : id.getString();
     }
 }

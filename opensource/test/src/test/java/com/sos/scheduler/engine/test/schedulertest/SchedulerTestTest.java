@@ -1,17 +1,16 @@
 package com.sos.scheduler.engine.test.schedulertest;
 
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
-
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.data.event.Event;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertThat;
 
 /** Testet {@link SchedulerTest} */
 public final class SchedulerTestTest extends SchedulerTest {
