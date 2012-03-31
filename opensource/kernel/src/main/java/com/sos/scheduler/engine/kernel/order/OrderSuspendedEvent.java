@@ -24,8 +24,4 @@ public class OrderSuspendedEvent extends OrderEvent {
     public OrderSuspendedEvent(OrderKey key) {
         super(key);
     }
-
-    public static OrderSuspendedEvent of(String jobChainPath, String orderId) {
-        return new OrderSuspendedEvent(OrderKey.of(jobChainPath, orderId));
-    }
 }

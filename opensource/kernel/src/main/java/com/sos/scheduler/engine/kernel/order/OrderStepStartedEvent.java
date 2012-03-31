@@ -28,8 +28,4 @@ public class OrderStepStartedEvent extends OrderEvent implements ModifiableSourc
     public OrderStepStartedEvent(OrderKey key) {
         super(key);
     }
-
-    @ForCpp public static OrderStepStartedEvent of(String jobChainPath, String orderId) {
-        return new OrderStepStartedEvent(OrderKey.of(jobChainPath, orderId));
-    }
 }

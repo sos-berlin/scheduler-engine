@@ -24,8 +24,4 @@ public class OrderResumedEvent extends OrderEvent {
     public OrderResumedEvent(OrderKey key) {
         super(key);
     }
-
-    public static OrderResumedEvent of(String jobChainPath, String orderId) {
-        return new OrderResumedEvent(OrderKey.of(jobChainPath, orderId));
-    }
 }

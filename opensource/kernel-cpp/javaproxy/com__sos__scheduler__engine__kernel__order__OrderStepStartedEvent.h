@@ -48,7 +48,6 @@ struct OrderStepStartedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStep
     }
   public:
 
-    static ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepStartedEvent of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

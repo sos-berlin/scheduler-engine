@@ -28,8 +28,4 @@ public class OrderTouchedEvent extends OrderEvent implements ModifiableSourceEve
     @ForCpp public OrderTouchedEvent(OrderKey key) {
         super(key);
     }
-
-    @ForCpp public static OrderTouchedEvent of(String jobChainPath, String orderId) {
-        return new OrderTouchedEvent(OrderKey.of(jobChainPath, orderId));
-    }
 }

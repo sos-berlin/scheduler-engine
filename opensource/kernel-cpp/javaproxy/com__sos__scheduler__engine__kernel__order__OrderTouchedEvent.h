@@ -48,7 +48,6 @@ struct OrderTouchedEvent : ::zschimmer::javabridge::proxy_jobject< OrderTouchedE
     }
   public:
 
-    static ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderTouchedEvent of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 

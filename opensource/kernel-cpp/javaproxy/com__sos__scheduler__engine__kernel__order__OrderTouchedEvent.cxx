@@ -13,7 +13,6 @@ struct OrderTouchedEvent__class : ::zschimmer::javabridge::Class
     OrderTouchedEvent__class(const string& class_name);
    ~OrderTouchedEvent__class();
 
-    ::zschimmer::javabridge::Static_method const _of__Ljava_lang_String_2Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< OrderTouchedEvent__class > class_factory;
 };
@@ -22,7 +21,7 @@ const ::zschimmer::javabridge::class_factory< OrderTouchedEvent__class > OrderTo
 
 OrderTouchedEvent__class::OrderTouchedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_of__Ljava_lang_String_2Ljava_lang_String_2__method(this, "of", "(Ljava/lang/String;Ljava/lang/String;)Lcom/sos/scheduler/engine/kernel/order/OrderTouchedEvent;"){}
+{}
 
 OrderTouchedEvent__class::~OrderTouchedEvent__class() {}
 
@@ -41,16 +40,6 @@ OrderTouchedEvent::~OrderTouchedEvent() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::OrderTouchedEvent OrderTouchedEvent::of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) {
-    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    parameter_list._jvalues[1].l = p1.get_jobject();
-    OrderTouchedEvent__class* cls = OrderTouchedEvent__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderTouchedEvent result;
-    result.steal_local_ref(cls->_of__Ljava_lang_String_2Ljava_lang_String_2__method.jobject_call(cls->get_jclass(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* OrderTouchedEvent::java_object_class_() { return _class.get(); }

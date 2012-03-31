@@ -24,8 +24,4 @@ public class OrderFinishedEvent extends OrderEvent {
     public OrderFinishedEvent(OrderKey key) {
         super(key);
     }
-
-    public static OrderFinishedEvent of(String jobChainPath, String orderId) {
-        return new OrderFinishedEvent(OrderKey.of(jobChainPath, orderId));
-    }
 }
