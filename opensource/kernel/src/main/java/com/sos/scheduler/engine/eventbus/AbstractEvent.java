@@ -6,6 +6,6 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 @ForCpp
 public abstract class AbstractEvent implements Event {
     @Override public String toString() {
-        return getClass().getName();
+        return getClass().getSimpleName();
     }
 }

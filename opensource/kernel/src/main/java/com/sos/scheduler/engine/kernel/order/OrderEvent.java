@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.eventbus.AbstractEvent;
 
+import static com.google.common.base.Objects.equal;
+
 public abstract class OrderEvent extends AbstractEvent {
     private final OrderKey key;
 
@@ -11,5 +13,17 @@ public abstract class OrderEvent extends AbstractEvent {
 
     public OrderKey getKey() {
         return key;
+    }
+
+    @Override public boolean equals(Object o) {
+        return o == this || o instanceof OrderEvent && eq((OrderEvent)o);
+    }
+
+    private boolean eq(OrderEvent o) {
+        return equal(key, o.key);
+    }
+
+    @Override public String toString() {
+        return super.toString() +" "+ key;
     }
 }
