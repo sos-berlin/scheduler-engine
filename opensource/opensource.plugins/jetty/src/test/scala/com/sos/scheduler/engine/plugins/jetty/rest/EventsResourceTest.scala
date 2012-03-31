@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sun.jersey.api.client.WebResource
-import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
@@ -12,7 +12,7 @@ import org.scalatest.matchers.ShouldMatchers._
 import org.slf4j.LoggerFactory
 
 @RunWith(classOf[JUnitRunner])
-final class EventsResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
+final class EventsResourceTest extends ScalaSchedulerTest {
   import EventsResourceTest._
 
   override val configurationPackage = classOf[JettyPlugin].getPackage

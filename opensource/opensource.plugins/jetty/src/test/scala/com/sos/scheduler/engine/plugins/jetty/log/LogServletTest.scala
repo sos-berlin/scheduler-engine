@@ -5,7 +5,7 @@ import javax.ws.rs.core.MediaType._
 import com.sun.jersey.api.client.WebResource
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
-import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.apache.log4j.Logger
 import org.junit.runner.RunWith
@@ -15,7 +15,7 @@ import org.scalatest.junit.JUnitRunner
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
 
 @RunWith(classOf[JUnitRunner])
-final class LogServletTest extends ScalaSchedulerTest with CheckedBeforeAll {
+final class LogServletTest extends ScalaSchedulerTest {
   import LogServletTest._
 
   override val configurationPackage = classOf[JettyPlugin].getPackage

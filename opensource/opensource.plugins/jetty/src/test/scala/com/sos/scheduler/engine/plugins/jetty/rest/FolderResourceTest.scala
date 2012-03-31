@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
-import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.Reader
 import javax.ws.rs.core.MediaType._
 import org.codehaus.jackson.map.ObjectMapper
@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class FolderResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
+final class FolderResourceTest extends ScalaSchedulerTest {
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val resource = javaResource(injector).path("folder")
   private val objectMapper = new ObjectMapper

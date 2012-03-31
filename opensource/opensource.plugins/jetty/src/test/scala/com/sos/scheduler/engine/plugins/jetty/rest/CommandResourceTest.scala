@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
-import com.sos.scheduler.engine.test.scala.{CheckedBeforeAll, ScalaSchedulerTest}
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
 import javax.ws.rs.core.MediaType._
@@ -10,7 +10,7 @@ import org.scalatest.matchers.ShouldMatchers._
 
 /**JS-795: Einbau von Jetty in den JobScheduler. */
 @RunWith(classOf[JUnitRunner])
-final class CommandResourceTest extends ScalaSchedulerTest with CheckedBeforeAll {
+final class CommandResourceTest extends ScalaSchedulerTest {
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val commandResource = javaResource(injector).path("command")
 
