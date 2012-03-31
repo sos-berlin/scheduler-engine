@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.plugins.jms;
 import com.sos.scheduler.engine.eventbus.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.kernel.event.SimpleMessage;
-import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.events.SchedulerCloseEvent;
@@ -13,7 +12,6 @@ import com.sos.scheduler.engine.kernel.job.events.TaskEndedEvent;
 import com.sos.scheduler.engine.kernel.job.events.TaskEvent;
 import com.sos.scheduler.engine.kernel.job.events.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
-import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
@@ -31,10 +29,9 @@ public class JMSEventAdapter {
 
 		boolean flgFound = false;
 		JSEvent ev = null;
-		if (event instanceof ModifiableOrderEvent) {
+		if (event instanceof OrderEvent) {
 
-			ModifiableOrderEvent kernelEvent = (ModifiableOrderEvent)event;
-            Order order = (Order)eventSource;
+            UnmodifiableOrder order = (UnmodifiableOrder)eventSource;
 
 			if (event instanceof OrderTouchedEvent) {
 				ev = objFactory.createEvent("EventOrderTouched");
@@ -49,13 +46,6 @@ public class JMSEventAdapter {
 				oe.setInfoOrder( JMSOrderAdapter.createInstance(order) );
 				flgFound = true;
 			}
-
-		}
-
-		if (event instanceof OrderEvent) {
-
-			OrderEvent kernelEvent = (OrderEvent)event;
-            UnmodifiableOrder order = (UnmodifiableOrder)eventSource;
 
 			if (event instanceof OrderStateChangedEvent) {
 				ev = objFactory.createEvent("EventOrderStateChanged");

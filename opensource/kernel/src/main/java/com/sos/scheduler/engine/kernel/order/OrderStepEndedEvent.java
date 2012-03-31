@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.eventbus.ModifiableSourceEvent;
 
 /**
  * \file OrderStepEndedEvent.java
@@ -23,7 +24,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStepEndedEvent extends ModifiableOrderEvent {
+public class OrderStepEndedEvent extends ModifiableOrderEvent implements ModifiableSourceEvent {
     private final boolean ok;
 
     public OrderStepEndedEvent(OrderKey key, boolean ok) {
@@ -33,6 +34,14 @@ public class OrderStepEndedEvent extends ModifiableOrderEvent {
 
     public final boolean isOk() {
         return ok;
+    }
+
+    @Override public boolean equals(Object o) {
+        return o == this || o instanceof OrderStepEndedEvent && eqOrderStepEndedEvent((OrderStepEndedEvent) o);
+    }
+
+    private boolean eqOrderStepEndedEvent(OrderStepEndedEvent o) {
+        return ok == o.ok && super.equals(o);
     }
 
     @Override public final String toString() {

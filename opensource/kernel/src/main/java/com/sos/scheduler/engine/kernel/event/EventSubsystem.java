@@ -1,16 +1,14 @@
 package com.sos.scheduler.engine.kernel.event;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.eventbus.AbstractEvent;
-import com.sos.scheduler.engine.eventbus.Event;
-import com.sos.scheduler.engine.eventbus.EventSource;
-import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
+import com.sos.scheduler.engine.eventbus.*;
 import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import org.apache.log4j.Logger;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmodifiableEventSource;
 
 @ForCpp
 public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
@@ -43,7 +41,7 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
         try {
             EventSource o = (EventSource)eventSource;
             Event e = CppEventFactory.newInstance(CppEventCode.values()[cppEventCode], o);
-            eventBus.publish(e, o);
+            eventBus.publish(e, tryUnmodifiableEventSource(e, o));
         } catch (Exception x) {
             logger.error("EventSubsystem.reportEventClass("+cppEventCode+"): "+x, x);
         }

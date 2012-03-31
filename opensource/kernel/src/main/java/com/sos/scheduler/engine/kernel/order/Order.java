@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
@@ -17,7 +18,7 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 
 @ForCpp
-public final class Order extends FileBased implements UnmodifiableOrder, Sister {
+public final class Order extends FileBased implements UnmodifiableOrder, HasUnmodifiableDelegate<UnmodifiableOrder>, Sister {
     private final OrderC cppProxy;
     private final Lazy<UnmodifiableOrder> unmodifiableDelegate = new Lazy<UnmodifiableOrder>() {
         @Override protected UnmodifiableOrder compute() {

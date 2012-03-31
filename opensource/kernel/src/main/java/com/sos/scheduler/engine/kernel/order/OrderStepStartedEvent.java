@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.eventbus.ModifiableSourceEvent;
 
 /**
  * \file OrderStepStartedEvent.java
@@ -23,7 +24,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStepStartedEvent extends ModifiableOrderEvent {
+public class OrderStepStartedEvent extends ModifiableOrderEvent implements ModifiableSourceEvent {
     public OrderStepStartedEvent(OrderKey key) {
         super(key);
     }
