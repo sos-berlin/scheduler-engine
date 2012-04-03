@@ -23,6 +23,7 @@
     <modules>
         <module>cppjava</module>
         <module>opensource</module>
+        <module>parent</module>
         <module>plugins</module>
         <module>playground</module>
         <module>setup</module>
