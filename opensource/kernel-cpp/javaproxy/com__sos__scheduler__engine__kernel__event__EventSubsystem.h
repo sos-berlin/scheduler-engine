@@ -5,11 +5,9 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_EVENTSUBSYSTEM_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_EVENTSUBSYSTEM_H_
 
-#include "com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace event { struct AbstractEvent; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace scheduler { struct AbstractHasPlatform; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -19,7 +17,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct EventSubsystem__class;
 
-struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >, ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::AbstractHasPlatform {
+struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >, ::javaproxy::java::lang::Object {
   private:
     static EventSubsystem new_instance();  // Not implemented
   public:
@@ -45,7 +43,7 @@ struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< EventSubsystem >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::AbstractHasPlatform::set_jobject(jo);
+        ::javaproxy::java::lang::Object::set_jobject(jo);
     }
   public:
 

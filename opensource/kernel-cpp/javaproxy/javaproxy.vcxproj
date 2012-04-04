@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://schemas.microsoft.com/developer/msbuild/2003 ">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DefaultTargets="Build" ToolsVersion="4.0" xsi:schemaLocation="http://schemas.microsoft.com/developer/msbuild/2003 ">
     <ItemGroup Label="ProjectConfigurations">
         <ProjectConfiguration Include="Debug|Win32">
             <Configuration>Debug</Configuration>
@@ -16,7 +14,7 @@
         <RootNamespace>javaproxy</RootNamespace>
         <ProjectGuid>{A17661D7-20A6-47A8-B629-F31828D5A046}</ProjectGuid>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
         <ConfigurationType>StaticLibrary</ConfigurationType>
         <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -26,18 +24,16 @@
         <ConfigurationType>StaticLibrary</ConfigurationType>
         <CharacterSet>MultiByte</CharacterSet>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
     <ImportGroup Label="ExtensionSettings">
     </ImportGroup>
     <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-                Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     </ImportGroup>
     <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-                Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     </ImportGroup>
-    <PropertyGroup Label="UserMacros"/>
+    <PropertyGroup Label="UserMacros" />
     <PropertyGroup>
         <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
         <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
@@ -93,68 +89,68 @@
             </PrecompiledHeaderFile>
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
         </ClCompile>
-        <ClCompile Include="java__lang__Object.cxx"/>
-        <ClCompile Include="java__lang__String.cxx"/>
-        <ClCompile Include="java__util__AbstractCollection.cxx"/>
-        <ClCompile Include="java__util__AbstractList.cxx"/>
-        <ClCompile Include="java__util__ArrayList.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__cplusplus__runtime__Sister.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__JobC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx"/>
+        <ClCompile Include="java__lang__Object.cxx" />
+        <ClCompile Include="java__lang__String.cxx" />
+        <ClCompile Include="java__util__AbstractCollection.cxx" />
+        <ClCompile Include="java__util__AbstractList.cxx" />
+        <ClCompile Include="java__util__ArrayList.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__cplusplus__runtime__Sister.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__JobC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx" />
 
-        <ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx"/>
-
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.cxx"/>
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__log__PrefixLog.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__scripting__ScriptInstance.cxx"/>
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.cxx"/>
+        <ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx" />
 
 
-        <ClCompile Include="com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.cxx"/>
+        <ClCompile Include="com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.cxx" />
+
+        <ClCompile Include="com__sos__scheduler__engine__kernel__log__PrefixLog.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__scripting__ScriptInstance.cxx" />
+
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.cxx" />
 
 
-        <ClCompile Include="com__sos__scheduler__engine__kernel__order__Order.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Folder_subsystemC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SettingsC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__TaskC.cxx"/>
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__job__UnmodifiableTask.cxx"/>
+        <ClCompile Include="com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.cxx" />
 
 
-        <ClCompile Include="com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__scheduler__Platform.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__main__SchedulerControllerBridge.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__variable__VariableSet.cxx"/>
+        <ClCompile Include="com__sos__scheduler__engine__kernel__order__Order.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Folder_subsystemC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SettingsC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__TaskC.cxx" />
+
+        <ClCompile Include="com__sos__scheduler__engine__kernel__job__UnmodifiableTask.cxx" />
 
 
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpResponseC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpChunkReaderC.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__data__event__AbstractEvent.cxx"/>
-        <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory.cxx"/>
+        
+        
+        <ClCompile Include="com__sos__scheduler__engine__main__SchedulerControllerBridge.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__variable__VariableSet.cxx" />
+
+
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpResponseC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpChunkReaderC.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__data__event__AbstractEvent.cxx" />
+        <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory.cxx" />
     </ItemGroup>
     <ItemGroup>
-        <ClInclude Include="_precompiled.h"/>
+        <ClInclude Include="_precompiled.h" />
     </ItemGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
     <ImportGroup Label="ExtensionTargets">
     </ImportGroup>
 </Project>

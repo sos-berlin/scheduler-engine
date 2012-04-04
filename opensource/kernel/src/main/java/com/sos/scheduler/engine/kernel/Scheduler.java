@@ -31,7 +31,6 @@ import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
 import com.sos.scheduler.engine.kernel.util.Lazy;
-import com.sos.scheduler.engine.kernel.util.XmlUtils;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import com.sos.scheduler.engine.util.xml.NamedChildElements;
@@ -52,7 +51,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
 import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 
 @ForCpp
-public final class Scheduler implements HasPlatform, Sister,
+public final class Scheduler implements Sister,
         SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
     //private static final Logger logger = Logger.getLogger(Scheduler.class);
 
@@ -61,7 +60,6 @@ public final class Scheduler implements HasPlatform, Sister,
     private final SchedulerConfiguration configuration;
     private final SchedulerControllerBridge controllerBridge;
     private final PrefixLog _log;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
-    private final Platform platform;
     private final SchedulerEventBus eventBus;
     private final OperationExecutor operationExecutor;
 
@@ -118,16 +116,15 @@ public final class Scheduler implements HasPlatform, Sister,
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
 
         _log = cppProxy.log().getSister();
-        platform = new Platform(_log);
         eventBus = controllerBridge.getEventBus();
         operationExecutor = new OperationExecutor(_log);
 
         logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
-        eventSubsystem = new EventSubsystem(platform, eventBus);
+        eventSubsystem = new EventSubsystem(eventBus);
         databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
-        jobSubsystem = new JobSubsystem(platform, this.cppProxy.job_subsystem());
-        orderSubsystem = new OrderSubsystem(platform, this.cppProxy.order_subsystem());
+        jobSubsystem = new JobSubsystem(this.cppProxy.job_subsystem());
+        orderSubsystem = new OrderSubsystem(this.cppProxy.order_subsystem());
         pluginSubsystem = new PluginSubsystem(this, injector, eventBus);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
@@ -149,14 +146,6 @@ public final class Scheduler implements HasPlatform, Sister,
             if (o instanceof HasCommandHandlers)
                 result.addAll(((HasCommandHandlers)o).getCommandHandlers());
         return result;
-    }
-
-    @Override public Platform getPlatform() {
-        return platform;
-    }
-
-    @Override public PrefixLog log() {
-        return _log;
     }
 
     @Override public void onCppProxyInvalidated() {}
@@ -250,7 +239,7 @@ public final class Scheduler implements HasPlatform, Sister,
         String prolog = "<?xml version='1.0' encoding='iso-8859-1'?>";   // Für libxml2, damit Umlaute korrekt erkant werden.
         String result = uncheckedExecuteXml(prolog + xml);
         if (result.contains("<ERROR")) {
-            Document doc = XmlUtils.loadXml(result);
+            Document doc = loadXml(result);
             for (Element e: childElements(doc.getDocumentElement()))
                 for (Element error: new NamedChildElements("ERROR", e))
                     throw new SchedulerException(error.getAttribute("code") +" "+ error.getAttribute("text"));
@@ -277,14 +266,6 @@ public final class Scheduler implements HasPlatform, Sister,
         return configuration;
     }
 
-    public FolderSubsystem getFolderSubsystem() {
-        return folderSubsystem;
-    }
-
-    public DatabaseSubsystem getDatabaseSubsystem() {
-        return databaseSubsystem;
-    }
-
     @ForCpp public EventSubsystem getEventSubsystem() {
         return eventSubsystem;
     }
@@ -295,10 +276,6 @@ public final class Scheduler implements HasPlatform, Sister,
 
     public OrderSubsystem getOrderSubsystem() {
         return orderSubsystem;
-    }
-
-    public OperationQueue getOperationQueue() {
-        return operationExecutor;
     }
 
     public String getHttpUrl() {
@@ -313,12 +290,6 @@ public final class Scheduler implements HasPlatform, Sister,
     @Deprecated
     public String getHostname() {
         return cppProxy.hostname();
-    }
-
-    /** Das ist ein Systemaufruf, gehört nicht zum Scheduler. */
-    @Deprecated
-    public String getHostnameLong() {
-        return cppProxy.hostname_complete();
     }
 
     public void callCppAndDoNothing() {
@@ -336,5 +307,9 @@ public final class Scheduler implements HasPlatform, Sister,
 
     public VariableSet getVariables() {
         return cppProxy.variables().getSister();
+    }
+
+    public PrefixLog log() {
+        return _log;
     }
 }

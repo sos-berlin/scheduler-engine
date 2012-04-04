@@ -9,10 +9,9 @@ import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
-import com.sos.scheduler.engine.kernel.scheduler.HasPlatform;
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 
-@ForCpp public interface UnmodifiableOrder extends EventSource, HasPlatform {
+@ForCpp public interface UnmodifiableOrder extends EventSource {
     OrderKey getKey();
 	OrderId getId();
 	OrderState getState();

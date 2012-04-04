@@ -29,10 +29,6 @@ package com.sos.scheduler.engine.kernel.scheduler;
  */
 
 public class LogMock {
-
-	public LogMock() {
-	}
-	
 	public void debug(String text) {
 		System.out.println(text);
 	}
@@ -48,5 +44,4 @@ public class LogMock {
 	public void error(String text) {
 		System.err.println(text);
 	}
-
 }

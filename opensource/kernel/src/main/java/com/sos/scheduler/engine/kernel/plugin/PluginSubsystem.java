@@ -6,7 +6,6 @@ import com.google.inject.Injector;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
-import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
@@ -20,7 +19,7 @@ import org.w3c.dom.Element;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
-public final class PluginSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
+public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
     private final CommandHandler[] commandHandlers = {
             new PluginCommandExecutor(this),
             new PluginCommandCommandXmlParser(this),
@@ -28,22 +27,23 @@ public final class PluginSubsystem extends AbstractHasPlatform implements Subsys
     private final Lazy<Injector> lazyInjector;
     private final Map<String,PluginAdapter> plugins = new HashMap<String,PluginAdapter>();
     private final EventBus eventBus;
+    private final PrefixLog log;
 
     public PluginSubsystem(Scheduler scheduler, Lazy<Injector> injector, EventBus eventBus) {
-        super(scheduler.getPlatform());
         this.lazyInjector = injector;
         this.eventBus = eventBus;
+        this.log = scheduler.log();
     }
 
     public void load(Element root) {
-        PluginReader pluginReader = new PluginReader(log());
+        PluginReader pluginReader = new PluginReader(log);
         Element pluginsElement = elementXPathOrNull(root, "config/plugins");
         if (pluginsElement != null) {
             for (Element e: elementsXPath(pluginsElement, "plugin")) {
                 PluginAdapter a = pluginReader.tryReadPlugin(e);
                 if (a != null) {
                     plugins.put(a.getPluginClassName(), a);
-                    log().info(a + " added");
+                    log.info(a + " added");
                 }
             }
         }

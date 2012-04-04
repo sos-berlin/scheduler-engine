@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate;
 import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC;
@@ -29,8 +28,7 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
         }
     };
 
-    Order(Platform platform, OrderC cppProxy) {
-        super(platform);
+    Order(OrderC cppProxy) {
         this.cppProxy = cppProxy;
     }
 
@@ -101,7 +99,7 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
 
     public static class Type implements SisterType<Order, OrderC> {
         @Override public Order sister(OrderC proxy, Sister context) {
-            return new Order(Platform.of(context), proxy);
+            return new Order(proxy);
         }
     }
 }

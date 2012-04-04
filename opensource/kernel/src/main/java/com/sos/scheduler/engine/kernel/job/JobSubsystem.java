@@ -1,17 +1,14 @@
 package com.sos.scheduler.engine.kernel.job;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC;
 import com.sos.scheduler.engine.data.folder.AbsolutePath;
+import com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC;
 import com.sos.scheduler.engine.kernel.folder.FileBasedSubsystem;
-import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
 
-public final class JobSubsystem extends AbstractHasPlatform implements FileBasedSubsystem {
+public final class JobSubsystem implements FileBasedSubsystem {
     private final Job_subsystemC cppproxy;
     
-    public JobSubsystem(Platform platform, Job_subsystemC cppproxy) {
-        super(platform);
+    public JobSubsystem(Job_subsystemC cppproxy) {
         this.cppproxy = cppproxy;
     }
     

@@ -5,11 +5,10 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_FOLDER_FILEBASED_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_FOLDER_FILEBASED_H_
 
-#include "com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace scheduler { struct AbstractHasPlatform; }}}}}}}
+namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -18,7 +17,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct FileBased__class;
 
-struct FileBased : ::zschimmer::javabridge::proxy_jobject< FileBased >, ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::AbstractHasPlatform {
+struct FileBased : ::zschimmer::javabridge::proxy_jobject< FileBased >, ::javaproxy::java::lang::Object {
   private:
     static FileBased new_instance();  // Not implemented
   public:
@@ -44,7 +43,7 @@ struct FileBased : ::zschimmer::javabridge::proxy_jobject< FileBased >, ::javapr
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< FileBased >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::AbstractHasPlatform::set_jobject(jo);
+        ::javaproxy::java::lang::Object::set_jobject(jo);
     }
   public:
 

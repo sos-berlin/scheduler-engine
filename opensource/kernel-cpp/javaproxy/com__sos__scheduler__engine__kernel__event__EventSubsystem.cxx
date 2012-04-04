@@ -4,7 +4,6 @@
 
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "com__sos__scheduler__engine__data__event__AbstractEvent.h"
-#include "com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 

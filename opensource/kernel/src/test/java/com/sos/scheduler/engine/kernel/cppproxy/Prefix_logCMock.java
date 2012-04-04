@@ -2,20 +2,14 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.io.Writer;
-
-
-/**
- *
- * @author Zschimmer.sos
- */
+/** @author Zschimmer.sos */
 public class Prefix_logCMock extends CppProxyImpl<PrefixLog> implements Prefix_logC {
-    private final Writer writer;
+    private final Logger logger;
 
-    public Prefix_logCMock(Writer w) { 
-        writer = w;
+    public Prefix_logCMock(Logger o) {
+        logger = o;
     }
 
     @Override public boolean cppReferenceIsValid() { 
@@ -51,8 +45,6 @@ public class Prefix_logCMock extends CppProxyImpl<PrefixLog> implements Prefix_l
     }
 
     private void logLine(String level, String line) {
-        try {
-            writer.write(level + " " + line + "\n" );
-        } catch(IOException x) { throw new RuntimeException(x); }
+        logger.debug(level +" "+ line);
     }
 }

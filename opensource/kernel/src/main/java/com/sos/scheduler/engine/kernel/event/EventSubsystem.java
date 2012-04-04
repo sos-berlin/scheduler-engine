@@ -5,8 +5,6 @@ import com.sos.scheduler.engine.data.event.AbstractEvent;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.kernel.scheduler.AbstractHasPlatform;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import org.apache.log4j.Logger;
 
@@ -14,13 +12,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmodifiableEventSource;
 
 @ForCpp
-public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
+public class EventSubsystem implements Subsystem {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 
     private final SchedulerEventBus eventBus;
 
-    public EventSubsystem(Platform platform, SchedulerEventBus eventBus) {
-        super(platform);
+    public EventSubsystem(SchedulerEventBus eventBus) {
         this.eventBus = eventBus;
     }
 

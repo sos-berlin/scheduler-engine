@@ -8,7 +8,6 @@ import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.folder.FileBasedState;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
 
 import static com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString;
 
@@ -16,8 +15,7 @@ import static com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFr
 public final class Job extends FileBased implements Sister, UnmodifiableJob {
     private final JobC cppProxy;
 
-    private Job(Platform platform, JobC jobC) {
-        super(platform);
+    private Job(JobC jobC) {
         this.cppProxy = jobC;
     }
 
@@ -58,7 +56,7 @@ public final class Job extends FileBased implements Sister, UnmodifiableJob {
 
     public static class Type implements SisterType<Job, JobC> {
         @Override public final Job sister(JobC proxy, Sister context) {
-            return new Job(Platform.of(context), proxy);
+            return new Job(proxy);
         }
     }
 }

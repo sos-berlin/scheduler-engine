@@ -1,16 +1,10 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
-import com.sos.scheduler.engine.kernel.scheduler.PlatformMock;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemCMock;
-import org.junit.*;
+import org.junit.Test;
 
-
-public class OrderSubsystemTest
-{
-    private final Platform platform = PlatformMock.newInstance();
-
+public class OrderSubsystemTest {
     private final Order_subsystemC order_subsystemC = new Order_subsystemCMock();
 
     @Test public void testDummy() {}

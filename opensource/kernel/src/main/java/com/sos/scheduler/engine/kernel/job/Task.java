@@ -6,15 +6,13 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.data.job.TaskId;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.TaskC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 
 public final class Task extends FileBased implements UnmodifiableTask {
     private final TaskC cppProxy;
 
-    protected Task(Platform p, TaskC cppProxy) {
-        super(p);
+    protected Task(TaskC cppProxy) {
         this.cppProxy = cppProxy;
     }
 
@@ -22,7 +20,7 @@ public final class Task extends FileBased implements UnmodifiableTask {
 
     public static class Type implements SisterType<Task, TaskC> {
         @Override public final Task sister(TaskC proxy, Sister context) {
-            return new Task(Platform.of(context), proxy);
+            return new Task(proxy);
         }
     }
 
@@ -34,14 +32,11 @@ public final class Task extends FileBased implements UnmodifiableTask {
         return Task.class.getSimpleName();
     }
 
-	@Override
-	@Nullable
-	public UnmodifiableOrder getOrderOrNull() {
+	@Override @Nullable public UnmodifiableOrder getOrderOrNull() {
 		return cppProxy.order().getSister();
 	}
 
-	@Override
-	public TaskId getId() {
+	@Override public TaskId getId() {
 		return new TaskId( cppProxy.id() );
 	}
 }

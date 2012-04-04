@@ -21,8 +21,6 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__scheduler__AbstractHasPlatform.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__scheduler__Platform.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.h"
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
@@ -37,7 +35,6 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler SchedulerJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::event::CppEventFactory CppEventFactoryJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest SchedulerHttpRequestJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
-typedef ::javaproxy::com::sos::scheduler::engine::kernel::scheduler::Platform PlatformJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixLogJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;

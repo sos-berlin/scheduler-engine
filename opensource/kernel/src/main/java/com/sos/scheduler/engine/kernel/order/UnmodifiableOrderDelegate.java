@@ -5,8 +5,6 @@ import com.sos.scheduler.engine.data.order.OrderKey;
 import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
-import com.sos.scheduler.engine.kernel.scheduler.Platform;
-import com.sos.scheduler.engine.kernel.log.SchedulerLogger;
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 
 public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
@@ -50,14 +48,6 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
 
     @Override public PrefixLog getLog() {
         return order.getLog();
-    }
-
-    @Override public Platform getPlatform() {
-        return order.getPlatform();
-    }
-
-    @Override public SchedulerLogger log() {
-        return order.log();
     }
 
     @Override public String toString() {
