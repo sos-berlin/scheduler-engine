@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.data.folder.FileBasedType;
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.data.order.OrderKey;
 import com.sos.scheduler.engine.data.order.OrderState;
@@ -61,6 +62,14 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
 
     @Override public String getTitle() {
         return cppProxy.title();
+    }
+
+    @Override public FileBasedType getFileBasedType() {
+        return FileBasedType.order;
+    }
+
+    @Override public AbsolutePath getPath() {
+        return new AbsolutePath(cppProxy.path());
     }
 
     public AbsolutePath getJobChainPath() {

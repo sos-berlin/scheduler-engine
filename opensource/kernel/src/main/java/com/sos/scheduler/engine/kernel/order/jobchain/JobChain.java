@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.data.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.FileBasedType;
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
@@ -20,6 +21,10 @@ public final class JobChain extends FileBased implements UnmodifiableJobchain {
 
     @Override public String getName() {
         return cppProxy.name();
+    }
+
+    @Override public FileBasedType getFileBasedType() {
+        return FileBasedType.jobChain;
     }
 
     @Override public AbsolutePath getPath() {

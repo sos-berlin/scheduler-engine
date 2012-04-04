@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 public interface OrderC extends CppProxyWithSister<Order> {
     Order.Type sisterType = new Order.Type();
 
+    String path();
     String file_path();
     String job_chain_path_string();
     Job_chainC job_chain();

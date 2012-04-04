@@ -1,3 +1,5 @@
 package com.sos.scheduler.engine.data.folder;
 
-public interface FileBasedEvent {}
+public interface FileBasedEvent {
+    TypedPath getTypedPath();
+}

@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
+import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.job.Task;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.data.event.Event;
@@ -20,10 +21,10 @@ public class CppEventFactory {
     static Event newInstance(CppEventCode cppEventCode, EventSource o) {
         switch (cppEventCode) {
             case fileBasedActivatedEvent:
-                return new FileBasedActivatedEvent();
+                return new FileBasedActivatedEvent(((FileBased)o).getTypedPath());
 
             case fileBasedRemovedEvent:
-                return new FileBasedRemovedEvent();
+                return new FileBasedRemovedEvent(((FileBased)o).getTypedPath());
 
             case taskStartedEvent: {
                 Task task = (Task)o;
