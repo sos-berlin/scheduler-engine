@@ -24,7 +24,7 @@ public abstract class StringValue {
         return string.hashCode();
     }
 
-    @Override public String toString() { 
+    @Override public String toString() {
         return asString();
     }
 }

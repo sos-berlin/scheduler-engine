@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.folder;
 
 import com.sos.scheduler.engine.data.base.StringValue;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class Path extends StringValue {
     public Path(String p) {
@@ -16,6 +17,7 @@ public class Path extends StringValue {
         if (!ok)  throw new RuntimeException("Absolute path expected: " + this);
     }
 
+    @JsonIgnore
     public final boolean isAbsolute() {
         return asString().startsWith("/");
     }

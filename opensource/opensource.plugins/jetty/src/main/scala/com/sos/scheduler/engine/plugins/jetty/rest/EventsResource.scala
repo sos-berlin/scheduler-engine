@@ -9,9 +9,11 @@ import java.util.concurrent.{TimeUnit, ArrayBlockingQueue}
 import javax.inject.{Inject, Singleton}
 import javax.ws.rs._
 import javax.ws.rs.core.{StreamingOutput, MediaType, Response}
-import org.codehaus.jackson.JsonGenerator
-import org.codehaus.jackson.map.ObjectMapper
 import org.slf4j.LoggerFactory
+import org.codehaus.jackson.map.ObjectMapper
+import org.codehaus.jackson.{Version, JsonGenerator}
+import com.sos.scheduler.engine.data.base.StringValueSerializer
+import org.codehaus.jackson.map.module.SimpleModule
 
 @Path("TESTONLY/events")
 @Singleton
@@ -21,6 +23,13 @@ class EventsResource @Inject()(eventBus: EventBus){
   private val objectMapper = {
     val result = new ObjectMapper()
     result.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false)
+    result.registerModule(newJacksonModule())
+    result
+  }
+
+  private def newJacksonModule() = {
+    val result = new SimpleModule(classOf[EventsResource].getName, new Version(0, 0, 0, ""))
+    result.addSerializer(StringValueSerializer.singleton)
     result
   }
 

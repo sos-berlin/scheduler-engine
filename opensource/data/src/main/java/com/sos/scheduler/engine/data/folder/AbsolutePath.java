@@ -1,11 +1,14 @@
 package com.sos.scheduler.engine.data.folder;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 public class AbsolutePath extends Path {
     public AbsolutePath(String p) {
         super(p);
         assertIsEmptyOrAbsolute();
     }
 
+    @JsonIgnore
     public final String getName() {
         return asString().substring(asString().lastIndexOf('/') + 1);
     }
