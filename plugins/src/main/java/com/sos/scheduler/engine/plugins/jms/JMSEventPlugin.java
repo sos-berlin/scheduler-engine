@@ -117,6 +117,6 @@ public class JMSEventPlugin extends AbstractPlugin {
 		m.setStringProperty("eventName", ev.getName()); // for filtering
 		m.setStringProperty("hostname", scheduler.getHostname());
 		m.setStringProperty("port", Integer.toString(scheduler.getTcpPort()) );
-		m.setStringProperty("id", schedulerConfiguration.schedulerId().getString());
+		m.setStringProperty("id", schedulerConfiguration.schedulerId().asString());
 	}
 }

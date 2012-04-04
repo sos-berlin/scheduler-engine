@@ -31,8 +31,8 @@ public class SimpleEventTest extends SchedulerTest {
 	
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder o) throws Exception {
-    	logger.debug("ORDERFINISHED: " + o.getId().getString());
-    	if (o.getId().getString().equals(jobChain))
+    	logger.debug("ORDERFINISHED: " + o.getId().asString());
+    	if (o.getId().asString().equals(jobChain))
     		controller().scheduler().terminate();
     }
 

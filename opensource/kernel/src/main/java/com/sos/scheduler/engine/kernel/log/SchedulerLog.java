@@ -12,7 +12,7 @@ public class SchedulerLog {
     public final void write(LogCategory logCategory, String text) {
         try {
             if (spoolerC.cppReferenceIsValid())
-                spoolerC.write_to_scheduler_log(logCategory.getString(), text);
+                spoolerC.write_to_scheduler_log(logCategory.asString(), text);
         }
         catch (Throwable x) {
             // Keine Log-Ausgabe, weil wir vielleicht schon von einem Logger aufgerufen worden sind.

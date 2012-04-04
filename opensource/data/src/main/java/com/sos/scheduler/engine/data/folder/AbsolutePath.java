@@ -7,11 +7,11 @@ public class AbsolutePath extends Path {
     }
 
     public final String getName() {
-        return getString().substring(getString().lastIndexOf('/') + 1);
+        return asString().substring(asString().lastIndexOf('/') + 1);
     }
 
     public final String withTrailingSlash() {
-        String result = getString();
+        String result = asString();
         return result.endsWith("/")? result : result +"/";
     }
 
@@ -22,7 +22,7 @@ public class AbsolutePath extends Path {
 
     public static AbsolutePath of(AbsolutePath parentPath, String subpath) {
         StringBuilder a = new StringBuilder();
-        a.append(stripTrailingSlash(parentPath.getString()));
+        a.append(stripTrailingSlash(parentPath.asString()));
         a.append('/');
         a.append(subpath);
         return of(a.toString());

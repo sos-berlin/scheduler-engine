@@ -77,7 +77,7 @@ public class JmsOrderEventsTest extends JMSConnection {
 	
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder o) throws Exception {
-    	logger.debug("ORDERFINISHED: " + o.getId().getString());
+    	logger.debug("ORDERFINISHED: " + o.getId().asString());
     	orderFinished++;
     	if (orderFinished == 2)
     		controller().scheduler().terminate();

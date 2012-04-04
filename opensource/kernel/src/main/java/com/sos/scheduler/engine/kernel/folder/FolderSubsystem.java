@@ -13,7 +13,7 @@ public final class FolderSubsystem implements FileBasedSubsystem {
 
     public ImmutableList<String> names(AbsolutePath path, String typeName) {
         String cppTypeName = typeName.replaceAll("([A-Z])", "_$1").toLowerCase();  // "jobChain" -> "job_chain"
-        return ImmutableList.copyOf(cppProxy.java_names(path.getString(), cppTypeName));
+        return ImmutableList.copyOf(cppProxy.java_names(path.asString(), cppTypeName));
     }
 
     /** @see {@link #updateFolders(double)}. */

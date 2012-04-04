@@ -76,7 +76,7 @@ public class JS628Test extends SchedulerTest {
 
     @HotEventHandler
     public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) throws InterruptedException {
-        String endState = order.getState().getString();
+        String endState = order.getState().asString();
         if (endState.equals("error")) errorCount++;
         if (endState.equals("success")) successCount++;
         finishedOrderCount++;

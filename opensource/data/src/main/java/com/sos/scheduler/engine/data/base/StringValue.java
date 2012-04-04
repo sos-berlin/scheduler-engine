@@ -8,7 +8,7 @@ public abstract class StringValue {
         string = x;
     }
 
-    public final String getString() {
+    public final String asString() {
         return string;
     }
 
@@ -25,6 +25,6 @@ public abstract class StringValue {
     }
 
     @Override public String toString() { 
-        return getString();
+        return asString();
     }
 }

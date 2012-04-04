@@ -26,7 +26,7 @@ public class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHi
         if (!e.getClusterMemberId().isEmpty())
             result.setAttribute("clusterMemberId", e.getClusterMemberId());
         if (!e.getSchedulerId().isEmpty())
-            result.setAttribute("schedulerId", e.getSchedulerId().getString());
+            result.setAttribute("schedulerId", e.getSchedulerId().asString());
         if (!e.getJobPath().isEmpty())
             result.setAttribute("job", e.getJobPath());
         if (e.getCause() != null)

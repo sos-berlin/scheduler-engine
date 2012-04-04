@@ -8,14 +8,14 @@ public class JMSOrderAdapter extends InfoOrder {
 	
 	private JMSOrderAdapter(UnmodifiableOrder kernelEventOrder) {
 		super();
-		setId(kernelEventOrder.getId().getString());
+		setId(kernelEventOrder.getId().asString());
 		setTitle(kernelEventOrder.getTitle());
 		setState(kernelEventOrder.getState().toString());
 	}
 
 	private JMSOrderAdapter(Order kernelEventOrder) {
 		super();
-		setId(kernelEventOrder.getId().getString());
+		setId(kernelEventOrder.getId().asString());
 		setTitle(kernelEventOrder.getTitle());
 		setState(kernelEventOrder.getState().toString());
 	}

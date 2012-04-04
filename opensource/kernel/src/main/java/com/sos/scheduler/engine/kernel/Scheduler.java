@@ -298,7 +298,7 @@ public final class Scheduler implements Sister,
 
     /** @param text Sollte auf \n enden */
     public void writeToSchedulerLog(LogCategory category, String text) {
-        cppProxy.write_to_scheduler_log(category.getString(), text);
+        cppProxy.write_to_scheduler_log(category.asString(), text);
     }
 
     public String getVersion() {

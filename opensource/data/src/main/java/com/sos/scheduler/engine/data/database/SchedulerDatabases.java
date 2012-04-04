@@ -6,7 +6,7 @@ public final class SchedulerDatabases {
     public static final String emptyIdInDatabase = "-";
 
     public static String idForDatabase(SchedulerId id) {
-        return id.isEmpty()? emptyIdInDatabase : id.getString();
+        return id.isEmpty()? emptyIdInDatabase : id.asString();
     }
 
     private SchedulerDatabases() {}

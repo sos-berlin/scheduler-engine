@@ -8,7 +8,7 @@ object FolderViewMarshaller extends Marshaller[FolderView] {
 
   def marshal(j: JsonGenerator, o: FolderView) {
     j.writeStartObject()
-    j.writeStringField("folder", o.folderPath.getString)
+    j.writeStringField("folder", o.folderPath.asString)
     j.writeStringField("type", o.typeName)
     j.writeArrayFieldStart("entries")
     for (e <- o.entries)  marshalEntry(j, e)

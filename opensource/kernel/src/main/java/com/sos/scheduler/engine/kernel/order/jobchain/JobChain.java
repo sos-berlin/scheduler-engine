@@ -41,7 +41,7 @@ public final class JobChain extends FileBased implements UnmodifiableJobchain {
     }
 
 	public Order order(OrderId id) {
-        return cppProxy.order(id.getString()).getSister();
+        return cppProxy.order(id.asString()).getSister();
     }
 
     @Override public String toString() {

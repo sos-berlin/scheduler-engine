@@ -9,7 +9,7 @@ import javax.ws.rs.core._
 
 @Path("")
 class RootResource @Inject()(schedulerInstanceId: SchedulerInstanceId) {
-  private lazy val tag = new EntityTag(schedulerInstanceId.getString)
+  private lazy val tag = new EntityTag(schedulerInstanceId.asString)
 
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))

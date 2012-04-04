@@ -17,11 +17,11 @@ public class Path extends StringValue {
     }
 
     public final boolean isAbsolute() {
-        return getString().startsWith("/");
+        return asString().startsWith("/");
     }
 
     public boolean equals(Object o) {
         // Path und AbsolutePath sind vergleichbar
-        return o instanceof Path && getString().equals(((Path)o).getString());
+        return o instanceof Path && asString().equals(((Path)o).asString());
     }
 }
