@@ -148,7 +148,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     @EventHandler public final void handleEvent(ErrorLogEvent e) {
         if (terminateOnError)
-            terminateAfterException(new RuntimeException("Test terminated after error log line: "+ e.getMessage()));
+            terminateAfterException(new RuntimeException("Test terminated after error log line: "+ e.getLine()));
     }
 
     @EventHandler @HotEventHandler  // Beide, weil das EventHandlerFailedEvent wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.

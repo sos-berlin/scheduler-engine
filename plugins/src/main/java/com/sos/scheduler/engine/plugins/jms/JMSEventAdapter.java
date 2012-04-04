@@ -107,7 +107,7 @@ public class JMSEventAdapter {
 			ev = objFactory.createEvent("EventLogError");
 			EventLogError oe = ev.getEventLogError();
 			ErrorLogEvent logEvent = (ErrorLogEvent)event;
-			oe.setInfoLog( JMSMessageAdapter.createInstance(new SimpleMessage(logEvent.getMessage())) );  //TODO SimpleMessage, damit es übersetzbar ist. Zschimmer 30.03.2012
+			oe.setInfoLog( JMSMessageAdapter.createInstance(new SimpleMessage(logEvent.getLine())) );  //TODO SimpleMessage, damit es übersetzbar ist. Zschimmer 30.03.2012
 			flgFound = true;
 		}
 			
