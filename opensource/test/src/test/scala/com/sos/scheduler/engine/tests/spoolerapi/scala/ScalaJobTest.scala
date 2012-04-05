@@ -24,7 +24,7 @@ final class ScalaJobTest extends ScalaSchedulerTest {
   List(SchedulerLogLevel.info, SchedulerLogLevel.error) foreach { logLevel =>
     test("Job with "+logLevel+" should call some methods") {
       scheduler.executeXml(startJobElem(logLevel))
-      eventPipe.expectEvent(shortTimeout) { e: TaskEndedEvent => e.getJobPath == jobPath}
+      eventPipe.nextWithCondition[TaskEndedEvent] {_.getJobPath == jobPath}
       checkMethodCallCounters(logLevel)
     }
   }

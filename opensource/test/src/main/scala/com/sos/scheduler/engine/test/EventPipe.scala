@@ -7,39 +7,35 @@ import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.data.event.Event
 
-class EventPipe extends EventHandlerAnnotated {
-    import EventPipe._
-    private final val queue = new LinkedBlockingQueue[Event]
-    @volatile private var lastEventAdded = false
+class EventPipe(defaultTimeout: Time) extends EventHandlerAnnotated {
+  private final val queue = new LinkedBlockingQueue[Event]
 
-    @EventHandler def add(e: Event) {
-        lastEventAdded |= lastEventClass isAssignableFrom e.getClass
-        queue.add(e)
+  @EventHandler def add(e: Event) {
+    queue.add(e)
+  }
+
+  def next[E <: Event](implicit m: ClassManifest[E]): E = nextEvent[E](defaultTimeout, {e: E => true}, m)
+
+  def nextWithCondition[E <: Event](condition: E => Boolean = {e: E => true})(implicit m: ClassManifest[E]) =
+    nextEvent[E](defaultTimeout, condition, m)
+
+  def nextWithTimeoutAndCondition[E <: Event](timeout: Time)(condition: E => Boolean = {e: E => true})(implicit m: ClassManifest[E]) =
+    nextEvent[E](timeout, condition, m)
+
+  private def nextEvent[E <: Event](t: Time, predicate: E => Boolean, manifest: ClassManifest[E]): E =
+    nextEvent[E](t, predicate, manifest.erasure.asInstanceOf[Class[E]])
+
+  private def nextEvent[E <: Event](t: Time, predicate: E => Boolean, expectedEventClass: Class[E]): E = {
+    def expectedName = expectedEventClass.getSimpleName
+    tryPoll(t) match {  // TODO besser until - now, jetzt verlängert sich die Frist mit jedem Event
+      case None => throw new RuntimeException("Expected Event '"+expectedName+"' has not arrived within "+t)
+      case Some(e: TerminatedEvent) => throw new RuntimeException("Expected event '"+expectedName+"' has not arrived before "+classOf[TerminatedEvent].getName+" has arrived")
+      case Some(e: E) if (expectedEventClass isAssignableFrom e.getClass) && predicate(e) => e
+      case _ => nextEvent[E](t, predicate, expectedEventClass)
     }
+  }
 
-    def expectEvent[E <: Event](t: Time)(predicate: E => Boolean)(implicit m: ClassManifest[E]): E = {
-        val eventClass = m.erasure
-        def className = eventClass.getSimpleName
-        while (true) {
-            val eventOption = tryPoll(t)
-            if (lastEventAdded) throw new RuntimeException("Expected Event '"+className+"' has not arrived before "+lastEventClass.getName+" has arrived")
-            eventOption match {
-                case None => throw new RuntimeException("Expected Event '"+className+"' has not arrived within "+t)
-                case Some(event: Event) if eventClass isAssignableFrom event.getClass =>
-                    val e = event.asInstanceOf[E]
-                    if (predicate(e)) return e
-                case _ =>
-            }
-        }
-        throw new RuntimeException()  // Für Intellij-Scala-Plugin 5.12.2011
-    }
+  def poll(t: Time): Event = tryPoll(t) getOrElse {throw new RuntimeException("Event has not arrived within "+t)}
 
-    def poll(t: Time): Event = tryPoll(t) getOrElse {throw new RuntimeException("Event has not arrived within "+t)}
-
-    def tryPoll(t: Time) = Option(queue.poll(t.getMillis, TimeUnit.MILLISECONDS))
+  def tryPoll(t: Time) = Option(queue.poll(t.getMillis, TimeUnit.MILLISECONDS))
 }
-
-object EventPipe {
-    private val lastEventClass = classOf[TerminatedEvent]
-}
-

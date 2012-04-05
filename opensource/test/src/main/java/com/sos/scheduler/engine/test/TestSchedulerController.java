@@ -169,7 +169,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
     public final EventPipe newEventPipe() {
-        final EventPipe result = new EventPipe();
+        final EventPipe result = new EventPipe(shortTimeout);
         registerEventHandler(result);
         return result;
     }
