@@ -55,7 +55,7 @@ object EventsResourceTest {
           val line = reader.readLine()
           if (line == null)  return
           result.append(line)
-          logger.info(line)
+          logger.debug(line)
         }
       }
       catch {
