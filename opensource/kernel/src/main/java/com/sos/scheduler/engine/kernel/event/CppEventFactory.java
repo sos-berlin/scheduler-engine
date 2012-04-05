@@ -48,8 +48,10 @@ public class CppEventFactory {
             case orderResumedEvent:
                 return new OrderResumedEvent(((Order)o).getKey());
 
-            case orderStepStartedEvent:
-                return new OrderStepStartedEvent(((Order)o).getKey());
+            case orderStepStartedEvent: {
+                Order order = (Order)o;
+                return new OrderStepStartedEvent(order.getKey(), order.getState());
+            }
         }
         throw new RuntimeException("Not implemented cppEventCode="+cppEventCode);
     }

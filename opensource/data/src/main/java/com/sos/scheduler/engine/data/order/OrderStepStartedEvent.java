@@ -23,7 +23,14 @@ import com.sos.scheduler.engine.data.event.ModifiableSourceEvent;
  * </div>
  */
 public class OrderStepStartedEvent extends OrderEvent implements ModifiableSourceEvent {
-    public OrderStepStartedEvent(OrderKey key) {
+    private final OrderState state;
+
+    public OrderStepStartedEvent(OrderKey key, OrderState state) {
         super(key);
+        this.state = state;
+    }
+
+    public OrderState getState() {
+        return state;
     }
 }

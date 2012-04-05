@@ -51,9 +51,13 @@ class OrderEventsTest extends ScalaSchedulerTest {
 
   private def expectOrderEventsAndResumeOrder(orderKey: OrderKey) {
     eventPipe.expectEvent(shortTimeout) { e: OrderTouchedEvent => e.getKey == orderKey }
+    eventPipe.expectEvent(shortTimeout) { e: OrderStepStartedEvent => e.getKey == orderKey }
+    eventPipe.expectEvent(shortTimeout) { e: OrderStepEndedEvent => e.getKey == orderKey }
     eventPipe.expectEvent(shortTimeout) { e: OrderSuspendedEvent => e.getKey == orderKey }
     scheduler.executeXml(<modify_order job_chain={jobChainPath.toString} order={orderKey.getId.toString} suspended="no"/>)
     eventPipe.expectEvent(shortTimeout) { e: OrderResumedEvent => e.getKey == orderKey }
+    eventPipe.expectEvent(shortTimeout) { e: OrderStepStartedEvent => e.getKey == orderKey }
+    eventPipe.expectEvent(shortTimeout) { e: OrderStepEndedEvent => e.getKey == orderKey }
     eventPipe.expectEvent(shortTimeout) { e: OrderFinishedEvent => e.getKey == orderKey }
   }
 
@@ -69,12 +73,12 @@ class OrderEventsTest extends ScalaSchedulerTest {
       "OrderTouched UnmodifiableOrder"            -> new OrderTouchedEvent(orderKey),
       "OrderTouched Order"                        -> new OrderTouchedEvent(orderKey),
       "OrderFinished UnmodifiableOrder"           -> new OrderFinishedEvent(orderKey),
-      "OrderStepStarted UnmodifiableOrder state1" -> new OrderStepStartedEvent(orderKey),
-      "OrderStepStarted Order state1"             -> new OrderStepStartedEvent(orderKey),
+      "OrderStepStarted UnmodifiableOrder state1" -> new OrderStepStartedEvent(orderKey, new OrderState("state1")),
+      "OrderStepStarted Order state1"             -> new OrderStepStartedEvent(orderKey, new OrderState("state1")),
       "OrderStepEnded UnmodifiableOrder state1"   -> new OrderStepEndedEvent(orderKey, true),
       "OrderStepEnded Order state1"               -> new OrderStepEndedEvent(orderKey, true),
-      "OrderStepStarted UnmodifiableOrder state2" -> new OrderStepStartedEvent(orderKey),
-      "OrderStepStarted Order state2"             -> new OrderStepStartedEvent(orderKey),
+      "OrderStepStarted UnmodifiableOrder state2" -> new OrderStepStartedEvent(orderKey, new OrderState("state2")),
+      "OrderStepStarted Order state2"             -> new OrderStepStartedEvent(orderKey, new OrderState("state2")),
       "OrderStepEnded UnmodifiableOrder state2"   -> new OrderStepEndedEvent(orderKey, true),
       "OrderStepEnded Order state2"               -> new OrderStepEndedEvent(orderKey, true),
       "OrderSuspended UnmodifiableOrder"          -> new OrderSuspendedEvent(orderKey),
