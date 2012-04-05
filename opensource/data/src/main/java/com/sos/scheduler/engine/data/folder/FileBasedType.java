@@ -7,8 +7,8 @@ public enum FileBasedType {
     lock("lock"),
     order("order"),
     processClass("process_class"),
-    scheduler("schedule"),
-    scheduler_script("scheduler_script");
+    schedule("schedule");
+    //scheduler_script("scheduler_script");
 
     private final String cppName;
 
