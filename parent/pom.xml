@@ -14,7 +14,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <scala.version>2.9.1</scala.version>
+        <scala.version>2.9.1-1</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <jersey.version>1.10</jersey.version>
         <jetty.version>8.1.0.RC5</jetty.version>
@@ -335,6 +335,11 @@
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml</groupId>
+                <artifactId>jackson-module-scala</artifactId>
+                <version>1.9.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
