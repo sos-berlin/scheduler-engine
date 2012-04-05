@@ -78,22 +78,6 @@ void read_ebcdic_string( Sos_binary_istream* s, char* string_buffer, uint field_
     s->skip_bytes( field_size );
 }
 
-//------------------------------------------------------------------------------write_ebcdic_string
-
-void write_ebcdic_string( Sos_binary_ostream* s, const char* string, uint field_size )
-/*
-    Schreibt den String im Code ISO 8859-1 (EBCDIC).
-    Der String wird im lolalen Code übergeben.
-    Der String wird auf die Länge field_size abgeschnitten oder mit Blanks aufgefüllt.
-    Beim Abschneiden kann eine Exception auftreten.
-*/
-{
-    int l = min( strlen( string ), field_size );
-
-    xlat( s->space( l ), string, l, iso2ebc );
-    s->write_byte_repeated( 0x40, field_size - l );
-}
-
 //-------------------------------------------------------------------------------read_ebcdic_string
 
 void read_ebcdic_string( Sos_binary_istream* s, Area* buffer_ptr, uint field_size )
@@ -107,23 +91,5 @@ void read_ebcdic_string( Sos_binary_istream* s, Area* buffer_ptr, uint field_siz
     read_ebcdic_string( s, buffer_ptr->char_ptr(), field_size );
     buffer_ptr->length( strlen( buffer_ptr->char_ptr() ));
 }
-
-//------------------------------------------------------------------------------write_ebcdic_string
-
-void write_ebcdic_string( Sos_binary_ostream* s, const Const_area& string, uint field_size )
-/*
-    Schreibt den String im Code ISO 8859-1 (EBCDIC).
-    Der String wird im lolalen Code übergeben.
-    Der String wird auf die Länge field_size abgeschnitten oder mit Blanks aufgefüllt.
-    Beim Abschneiden kann eine Exception auftreten.
-*/
-{
-    int l = min( length( string ), field_size );
-
-    xlat( s->space( l ), string.char_ptr(), l, iso2ebc );
-    s->write_byte_repeated( 0x40, field_size - l );
-}
-
-
 
 } //namespace sos

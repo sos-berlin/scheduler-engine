@@ -116,10 +116,8 @@ void read_iso_string ( Sos_binary_istream*,       char*      , uint field_size )
 void write_iso_string( Sos_binary_ostream*, const char*      , uint field_size );
 
 void read_ebcdic_string ( Sos_binary_istream*         ,       char*, uint field_size );
-void write_ebcdic_string( Sos_binary_ostream*         , const char*, uint field_size );
 
 void read_ebcdic_string ( Sos_binary_istream*,             Area*, uint field_size );
-void write_ebcdic_string( Sos_binary_ostream*, const Const_area&, uint field_size );
 
 void read_ebcdic_char   ( Sos_binary_istream*, char* );
 char read_ebcdic_char   ( Sos_binary_istream* );
@@ -145,14 +143,6 @@ inline void read_string_ebcdic ( Sos_binary_istream* s, char* string_buffer, uin
 {
     read_ebcdic_string( s, string_buffer, field_length );
 }
-
-inline void write_string_ebcdic( Sos_binary_ostream* s, const char* string , uint field_size   )
-{
-    write_ebcdic_string( s, string, field_size );
-}
-
-
-
 
 #define SOS_BINARY_STREAM( EXTERNAL_TYPE, VAR )                               \
     if( read_mode )  read##EXTERNAL_TYPE( s, &VAR );                          \
