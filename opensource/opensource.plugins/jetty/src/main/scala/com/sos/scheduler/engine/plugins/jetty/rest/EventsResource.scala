@@ -11,8 +11,7 @@ import javax.ws.rs._
 import javax.ws.rs.core.{StreamingOutput, MediaType, Response}
 import org.slf4j.LoggerFactory
 import org.codehaus.jackson.map.ObjectMapper
-import org.codehaus.jackson.{Version, JsonGenerator}
-import org.codehaus.jackson.map.module.SimpleModule
+import org.codehaus.jackson.JsonGenerator
 
 @Path("TESTONLY/events")
 @Singleton
@@ -22,11 +21,8 @@ class EventsResource @Inject()(eventBus: EventBus){
   private val objectMapper = {
     val result = new ObjectMapper()
     result.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false)
-    result.registerModule(newJacksonModule())
     result
   }
-
-  private def newJacksonModule() = new SimpleModule(classOf[EventsResource].getName, new Version(0, 0, 0, ""))
 
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))
