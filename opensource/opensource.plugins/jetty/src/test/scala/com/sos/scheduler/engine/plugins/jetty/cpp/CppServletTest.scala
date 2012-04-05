@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sun.jersey.api.client.{Client, ClientResponse}
+import com.sun.jersey.api.client.{Client, ClientResponse, UniformInterfaceException}
 import java.io.File
 import java.net.URI
 import java.util.zip.GZIPInputStream
@@ -42,7 +42,7 @@ final class CppServletTest extends ScalaSchedulerTest {
     }
 
     test("Kommando über POST ohne Authentifizierung "+testConf) {
-      val x = intercept[com.sun.jersey.api.client.UniformInterfaceException] {
+      val x = intercept[UniformInterfaceException] {
         cppResource(injector, Client.create()).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
       }
       x.getResponse.getStatus should equal(UNAUTHORIZED.getStatusCode)
