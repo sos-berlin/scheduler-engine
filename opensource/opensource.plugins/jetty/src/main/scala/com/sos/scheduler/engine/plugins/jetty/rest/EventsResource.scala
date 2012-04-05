@@ -12,7 +12,6 @@ import javax.ws.rs.core.{StreamingOutput, MediaType, Response}
 import org.slf4j.LoggerFactory
 import org.codehaus.jackson.map.ObjectMapper
 import org.codehaus.jackson.{Version, JsonGenerator}
-import com.sos.scheduler.engine.data.base.StringValueSerializer
 import org.codehaus.jackson.map.module.SimpleModule
 
 @Path("TESTONLY/events")
@@ -27,11 +26,7 @@ class EventsResource @Inject()(eventBus: EventBus){
     result
   }
 
-  private def newJacksonModule() = {
-    val result = new SimpleModule(classOf[EventsResource].getName, new Version(0, 0, 0, ""))
-    result.addSerializer(StringValueSerializer.singleton)
-    result
-  }
+  private def newJacksonModule() = new SimpleModule(classOf[EventsResource].getName, new Version(0, 0, 0, ""))
 
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))

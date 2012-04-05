@@ -15,7 +15,7 @@ class RootResource @Inject()(schedulerInstanceId: SchedulerInstanceId) {
   @Produces(Array(MediaType.APPLICATION_JSON))
   @HtmlXsltResource(path="com/sos/scheduler/engine/plugins/jetty/rest/RootResource.xsl")
   def get(@Context u: UriInfo) = {
-    val result = new RootView(u.getBaseUri)
+    val result = RootView(u.getBaseUri)
     Response.ok(result).tag(tag).build()
   }
 }

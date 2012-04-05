@@ -7,32 +7,6 @@
 		</layout>
 	</appender>
 
-	<appender class="org.apache.log4j.ConsoleAppender" name="console_simple">
-		<layout class="org.apache.log4j.PatternLayout">
-			<param value="%-5p %m%n" name="ConversionPattern"/>
-		</layout>
-	</appender>
-
-	<appender name="errorlog" class="org.apache.log4j.RollingFileAppender">
-		<param name="file" value="target/logs/errors.log"/>
-		<param name="MaxFileSize" value="100KB"/>
-		<!-- Keep one backup file -->
-		<param name="MaxBackupIndex" value="1"/>
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%p %t %c - %m%n"/>
-		</layout>
-	</appender>
-
-	<logger name="org.apache.activemq">
-		<level value="warn"/>
-	</logger>
-
-	<logger name="com.sos.scheduler.engine.plugins.errorlogger" additivity="false">
-		<level value="warn"/>
-		<appender-ref ref="console_simple"/>
-		<appender-ref ref="errorlog"/>
-	</logger>
-
     <logger name="com.sos.scheduler">
         <level value="info"/>
     </logger>

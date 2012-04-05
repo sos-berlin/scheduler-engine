@@ -24,7 +24,7 @@ final class EventsResourceTest extends ScalaSchedulerTest {
     val thread = new ResponsePrinter(eventsResource)
     thread.start()
     try {
-      Thread.sleep(100)  // Warten, bis Reader liest
+      Thread.sleep(500)  // Warten, bis Reader liest
       for (i <- range) {
         controller.scheduler.log.info(testString +" "+ i)
         controller.getEventBus.dispatchEvents()

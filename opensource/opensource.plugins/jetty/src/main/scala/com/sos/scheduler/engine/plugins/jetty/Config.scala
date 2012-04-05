@@ -4,14 +4,16 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.kernel.util.XmlUtils._
 import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet
 import com.sos.scheduler.engine.plugins.jetty.log.{MainLogServlet, OrderLogServlet, JobLogServlet}
-import com.sos.scheduler.engine.plugins.jetty.rest.RestResources
 import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.BodyWriters
-import com.sos.scheduler.engine.plugins.jetty.rest.marshal.MarshallerRegister
-import com.sos.scheduler.engine.plugins.jetty.rest.views.{RootViewMarshaller, JobViewMarshaller, FolderViewMarshaller}
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.io.File
 import org.w3c.dom.Element
+import rest.{ObjectMapperJacksonJsonProvider, RestResources}
+import org.codehaus.jackson.map.ObjectMapper
+import org.codehaus.jackson.map.module.SimpleModule
+import org.codehaus.jackson.Version
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 class Config(pluginElement: Element, conf: SchedulerConfiguration) {
   import Config._
@@ -33,11 +35,6 @@ object Config {
   val cppPrefixPath = "/engine-cpp"
   val resourceBaseURL = getClass.getResource("/com/sos/scheduler/engine/web")
 
-  val marshallerRegister = MarshallerRegister(
-    FolderViewMarshaller,
-    JobViewMarshaller,
-    RootViewMarshaller)
-
   def newServletModule() = new JerseyServletModule {
     override def configureServlets() {
       serve(enginePrefixPath+"/*").`with`(classOf[GuiceContainer]) // Route all requests through GuiceContainer
@@ -45,11 +42,20 @@ object Config {
       serveRegex(enginePrefixPath+"/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
       serveRegex(enginePrefixPath+"/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
       for (c <- BodyWriters.messageBodyWriters ++ RestResources.resources) bind(c)
-      bind(classOf[MarshallerRegister]).toInstance(marshallerRegister)
+      bind(classOf[ObjectMapperJacksonJsonProvider]).toInstance(new ObjectMapperJacksonJsonProvider(newObjectMapper()))
       serve(cppPrefixPath).`with`(classOf[CppServlet])
       serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])
     }
   }
+
+  private def newObjectMapper() = {
+    def newJacksonModule() = new SimpleModule(classOf[Config].getName, new Version(0, 0, 0, ""))
+    val result = new ObjectMapper
+    result.registerModule(newJacksonModule())
+    result.registerModule(DefaultScalaModule)
+    result
+  }
+
 
   //  val gzipContentTypes = List(
   //    "application/javascript",

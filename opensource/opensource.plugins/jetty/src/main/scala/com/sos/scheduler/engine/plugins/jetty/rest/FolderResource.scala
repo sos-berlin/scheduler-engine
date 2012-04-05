@@ -25,7 +25,7 @@ class FolderResource @Inject()(folderSubsystem: FolderSubsystem) {
   }
 
   private def view(folderPath: AbsolutePath, typeName: String, u: UriInfo) = {
-    try new FolderView(folderSubsystem.names(folderPath, typeName), folderPath, typeName, u.getBaseUri)
+    try FolderView(folderSubsystem.names(folderPath, typeName), folderPath, typeName, u.getBaseUri)
     catch {
       case x: CppException if x.getCode == "SCHEDULER-161" => throw new WebApplicationException(x, NOT_FOUND)
     }

@@ -28,7 +28,7 @@ class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: Sch
 
   @GET
   @Produces(Array(APPLICATION_JSON))
-  def get(@Context u: UriInfo) = new JobView(path, UriBuilder.fromUri(u.getBaseUri).path("job").queryParam("job", path).build())
+  def get(@Context u: UriInfo) = JobView(path, UriBuilder.fromUri(u.getBaseUri).path("job").queryParam("job", path).build())
 
   @GET @Path("configuration")
   @Produces(Array(TEXT_XML))

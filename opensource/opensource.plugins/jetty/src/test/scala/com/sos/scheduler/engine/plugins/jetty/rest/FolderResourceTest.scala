@@ -18,8 +18,8 @@ final class FolderResourceTest extends ScalaSchedulerTest {
   test("Read job list as JSON") {
     val reader = resource.queryParam("type", "job").queryParam("folder", "/").accept(APPLICATION_JSON_TYPE).get(classOf[Reader])
     val tree = objectMapper.readValue(reader, classOf[java.util.Map[String,Object]])
-    assert(tree.get("folder") == "/")
-    assert(tree.get("type") == "job")
+    assert(tree.get("folderPath") === "/")
+    assert(tree.get("typeName") === "job")
     val names = tree.get("entries").asInstanceOf[java.util.List[_]]
     assert(names.size > 0)
   }

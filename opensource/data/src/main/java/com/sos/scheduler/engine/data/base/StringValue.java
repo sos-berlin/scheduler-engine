@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.data.base;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+@JsonSerialize(using=StringValueSerializer.class)
 public abstract class StringValue {
     private final String string;
 
