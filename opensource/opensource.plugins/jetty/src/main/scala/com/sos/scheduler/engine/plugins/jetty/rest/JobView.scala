@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest.views
+package com.sos.scheduler.engine.plugins.jetty.rest
 
 import com.sos.scheduler.engine.data.folder.AbsolutePath
 import java.net.URI

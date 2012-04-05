@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.rest.WebServices._
 import javax.ws.rs.core.Response.Status.NOT_FOUND
-import com.sos.scheduler.engine.plugins.jetty.rest.views.JobView
 import javax.ws.rs.core._
 
 @Path("job")

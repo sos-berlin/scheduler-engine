@@ -4,7 +4,6 @@ import javax.inject.Inject
 import javax.ws.rs._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.rest.annotations.HtmlXsltResource
-import com.sos.scheduler.engine.plugins.jetty.rest.views.RootView
 import javax.ws.rs.core._
 
 @Path("")

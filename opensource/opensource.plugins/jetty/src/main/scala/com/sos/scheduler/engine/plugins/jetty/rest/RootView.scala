@@ -1,14 +1,14 @@
-package com.sos.scheduler.engine.plugins.jetty.rest.views
+package com.sos.scheduler.engine.plugins.jetty.rest
 
+import com.sos.scheduler.engine.data.folder.FileBasedType
+import org.codehaus.jackson.map.annotate.JsonSerialize
 import java.net.URI
 import javax.ws.rs.core.UriBuilder
-import org.codehaus.jackson.map.annotate.JsonSerialize
-import com.sos.scheduler.engine.data.folder.FileBasedType
 
 @JsonSerialize(using=classOf[RootViewSerializer])
 trait RootView {
   val logUri: URI
-  val folders: Iterable[(String,URI)]
+  val folders: Iterable[(String, URI)]
 }
 
 object RootView {
