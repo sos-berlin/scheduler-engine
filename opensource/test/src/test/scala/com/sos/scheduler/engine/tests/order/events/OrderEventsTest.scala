@@ -51,12 +51,12 @@ class OrderEventsTest extends ScalaSchedulerTest {
 
   private def expectOrderEventsAndResumeOrder(orderKey: OrderKey) {
     eventPipe.expectEvent(shortTimeout) { e: OrderTouchedEvent => e.getKey == orderKey }
-    eventPipe.expectEvent(shortTimeout) { e: OrderStepStartedEvent => e.getKey == orderKey }
+    eventPipe.expectEvent(shortTimeout) { e: OrderStepStartedEvent => e.getKey == orderKey && e.getState == new OrderState("state1") }
     eventPipe.expectEvent(shortTimeout) { e: OrderStepEndedEvent => e.getKey == orderKey }
     eventPipe.expectEvent(shortTimeout) { e: OrderSuspendedEvent => e.getKey == orderKey }
     scheduler.executeXml(<modify_order job_chain={jobChainPath.toString} order={orderKey.getId.toString} suspended="no"/>)
     eventPipe.expectEvent(shortTimeout) { e: OrderResumedEvent => e.getKey == orderKey }
-    eventPipe.expectEvent(shortTimeout) { e: OrderStepStartedEvent => e.getKey == orderKey }
+    eventPipe.expectEvent(shortTimeout) { e: OrderStepStartedEvent => e.getKey == orderKey && e.getState == new OrderState("state2") }
     eventPipe.expectEvent(shortTimeout) { e: OrderStepEndedEvent => e.getKey == orderKey }
     eventPipe.expectEvent(shortTimeout) { e: OrderFinishedEvent => e.getKey == orderKey }
   }
