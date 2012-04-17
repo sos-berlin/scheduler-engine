@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
+import com.google.common.collect.ImmutableList;
+
 import static com.sos.scheduler.engine.kernel.util.Util.sleepUntilInterrupted;
 import static java.lang.Math.random;
 
@@ -8,7 +10,7 @@ import java.io.File;
 final class FilesModifierRunnable implements Runnable {
     private final FilesModifier filesModifier;
 
-    FilesModifierRunnable(Iterable<File> files) {
+    FilesModifierRunnable(ImmutableList<File> files) {
         filesModifier = new FilesModifier(files);
     }
 

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.random;
 
 import java.io.File;
@@ -18,8 +19,8 @@ public final class FilesModifier {
 
     private final ImmutableList<File> files;
 
-    public FilesModifier(Iterable<File> files) {
-        this.files = ImmutableList.copyOf(files);
+    public FilesModifier(ImmutableList<File> files) {
+        this.files = files;
     }
 
     void modifyRandom() {
@@ -34,7 +35,7 @@ public final class FilesModifier {
 
     private void modifyFile(File f) {
         try {
-            assert f.exists() : "Datei fehlt: " + f;
+            checkArgument(f.exists(), "Datei fehlt: %s", f);
             Files.append(" ", f, encoding);
         } catch (IOException x) { throw new RuntimeException(x); }
     }
