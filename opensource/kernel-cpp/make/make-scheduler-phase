@@ -16,7 +16,13 @@ fi
 
 targets="$2 $3"
 
-inWindows=$(if [ `uname -o` == "Cygwin" ]; then echo 1; else echo ""; fi)
+os=$(if [ `uname` == "AIX" ]; then echo linux; else echo `uname -o`  || exit; fi)
+[ "$os" == 'Cygwin' ] && os="windows"
+[ "$os" == 'GNU/Linux' ] && os="linux"
+echo build for operating system $os
+
+inWindows=$(if [ "$os" == "windows" ]; then echo 1; else echo ""; fi)
+# inWindows=$(if [ `uname -o || uname` == "Cygwin" ]; then echo 1; else echo ""; fi)
 vcbuild=""
 msbuild=""
 
@@ -24,9 +30,13 @@ if [ "${PWD/ /_}" != "$PWD" ]; then echo "Der Verzeichnispfad darf kein Blank en
 
 
 if [ -z "$MAKE_JOBS" ]; then :
-    MAKE_JOBS=`cat /proc/cpuinfo | grep -w '^processor'|wc -l`
-    [ $MAKE_JOBS -le 0 ]  &&  MAKE_JOBS=1
-    [ $MAKE_JOBS -gt 8 ]  &&  MAKE_JOBS=8
+    MAKE_JOBS=1
+    if [ -s /proc/cpuinfo ]
+    then
+      MAKE_JOBS=`cat /proc/cpuinfo | grep -w '^processor'|wc -l`
+      [ $MAKE_JOBS -le 0 ]  &&  MAKE_JOBS=1
+      [ $MAKE_JOBS -gt 8 ]  &&  MAKE_JOBS=8
+    fi
     export MAKE_JOBS
 fi
 
@@ -59,9 +69,6 @@ fi
 #--------------------------------------------------------------------------------------------------
 
 function main() {
-    os=`uname -o`  || exit
-    [ "$os" == 'Cygwin' ] && os="windows"
-    [ "$os" == 'GNU/Linux' ] && os="linux"
     cmd_generic_${cmd}
     cmd_${os}_${cmd}   || exit
 }
