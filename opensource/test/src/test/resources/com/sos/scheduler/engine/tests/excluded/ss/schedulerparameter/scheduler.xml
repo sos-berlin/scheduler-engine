@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+	<config>
+        <params>
+            <param name="parameter_1" value="scheduler.xml"/>
+            <param name="parameter_2" value="in job, too"/>
+        </params>
+	</config>
+</spooler>
