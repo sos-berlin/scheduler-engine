@@ -131,7 +131,7 @@
         <dependency>
             <groupId>com.sos</groupId>
             <artifactId>com.sos.SOSJobSchedulerModel</artifactId>
-            <version>${sos.jsobjects.version}</version>
+            <version>${sos.jars.version}</version>
             <scope>compile</scope>
         </dependency>
 

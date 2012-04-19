@@ -16,8 +16,7 @@
     <inceptionYear>2010</inceptionYear>
 
     <properties>
-        <sos.jsobjects.version>2093</sos.jsobjects.version>  <!-- verwendete Version von com.sos.SOSJobSchedulerModel -->
-        <sos.jars.version>2093</sos.jars.version>            <!-- verwendete Version der jar Files der SOS, vorher mit setup/deploy-sos-jars deployen: ant -f deploy-sos-jars.xml -Djar.version=x.x.xx.xxxx -->
+        <sos.jars.version>2110</sos.jars.version>            <!-- verwendete Version der jar Files der SOS, vorher mit setup/deploy-sos-jars deployen: ant -f deploy-sos-jars.xml -Djar.version=x.x.xx.xxxx -->
     </properties>
 
     <modules>
