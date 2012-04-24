@@ -95,6 +95,10 @@ to run without maven integration.
   		<include name="geronimo*.jar"/>
   		<include name="activemq*.jar"/>
   		<include name="slf4j*.jar"/>
+  		<!-- additinal jars for jetty integration -->
+  		<include name="web-*.jar" />
+  		<include name="jetty-*.jar" />
+  		<include name="servlet-api-*.jar" />
   	</fileset>
 
   </target>
