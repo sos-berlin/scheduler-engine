@@ -1289,7 +1289,7 @@ bool Job::can_be_removed_now()
 { 
     if( job_folder()  &&  ( is_to_be_removed()  ||  _temporary ) )
     {
-        if( _temporary  &&  !is_to_be_removed()  &&  has_next_start_time() )  return false;
+        if( _temporary  &&  !is_to_be_removed() )  return false;
 
         if( _running_tasks.size() > 0 )  //2007-09-26 ||  _task_queue->size() > 0 )
         {
