@@ -2,9 +2,7 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
     order="yes" stop_on_error="no"
 >
-    <script language="shell">@echo off
-echo Hallo
-sleep 1
-exit 0
-    </script>
+    <script java_class="com.sos.scheduler.engine.tests.jira.js644.continuous.TestJob"/>
+    <delay_order_after_setback setback_count="1" delay="5"/>
+    <delay_order_after_setback setback_count="7" is_maximum="yes"/>
 </job>
