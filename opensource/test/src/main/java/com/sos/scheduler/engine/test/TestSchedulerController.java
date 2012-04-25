@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.test;
 
+import com.google.common.base.Predicate;
 import com.sos.scheduler.engine.data.log.ErrorLogEvent;
 import com.sos.scheduler.engine.eventbus.*;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -36,13 +37,15 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private final SchedulerEventBus eventBus = getEventBus();
     private final Thread thread = Thread.currentThread();
     private final Environment environment;
+    private final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate;
     private boolean terminateOnError = true;
     private String logCategories = "";
     private Scheduler _scheduler = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
-    public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath) {
+    public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath, Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
         File directory = workDirectory(testClass);
         environment = new Environment(configurationResourcePath, directory);
+        this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
     }
 
@@ -147,7 +150,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     @EventHandler public final void handleEvent(ErrorLogEvent e) {
-        if (terminateOnError)
+        if (!expectedErrorLogEventPredicate.apply(e) && terminateOnError)
             terminateAfterException(new RuntimeException("Test terminated after error log line: "+ e.getLine()));
     }
 
@@ -201,10 +204,11 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** @param testClass Test-Klasse, für Benennung des Scheduler-Arbeitsverzeichnisses und Ort der Konfigurationsresourcen. */
     public static TestSchedulerController of(Class<?> testClass) {
-        return of(testClass, testClass.getPackage());
+        return builder(testClass).build();
     }
 
-    public static TestSchedulerController of(Class<?> testClass, Package p) {
-        return new TestSchedulerController(testClass, new ResourcePath(p));
+    /** @param testClass Test-Klasse, für Benennung des Scheduler-Arbeitsverzeichnisses und Ort der Konfigurationsresourcen. */
+    public static TestSchedulerControllerBuilder builder(Class<?> testClass) {
+        return new TestSchedulerControllerBuilder(testClass);
     }
 }

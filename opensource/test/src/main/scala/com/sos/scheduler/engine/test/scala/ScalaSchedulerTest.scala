@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.test.scala.Utils._
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
   val configurationPackage = getClass.getPackage
-  lazy val controller = TestSchedulerController.of(getClass, configurationPackage)
+  lazy val controller = TestSchedulerController.builder(getClass).resourcesPackage(configurationPackage).build
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
   def injector = scheduler.getInjector

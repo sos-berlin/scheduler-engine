@@ -4,13 +4,22 @@ import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.util.Time;
 import org.junit.After;
+import org.junit.Before;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
     public static final Time shortTimeout = TestSchedulerController.shortTimeout;
 
-    private final TestSchedulerController controller = TestSchedulerController.of(getClass());
+    private final TestSchedulerController controller;
+
+    protected SchedulerTest(TestSchedulerController controller) {
+        this.controller = controller;
+    }
 
     protected SchedulerTest() {
+        controller = TestSchedulerController.builder(getClass()).build();
+    }
+
+    @Before public final void schedulerTestBefore() {
         controller.getEventBus().registerAnnotated(this);
     }
 
