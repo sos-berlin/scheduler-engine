@@ -1,19 +1,18 @@
 package com.sos.scheduler.engine.test;
 
-import static com.google.common.base.Strings.nullToEmpty;
-import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
-
-import java.io.File;
-
-import org.apache.log4j.Logger;
-
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.data.folder.Path;
+import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
+
+import java.io.File;
+
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
 /** Stellt eine Konfigurationsumgebung für den Scheduler bereit.
  * \file Environment.java
@@ -33,7 +32,6 @@ import com.sos.scheduler.engine.main.CppBinary;
  * </div>
  */
 public final class Environment {
-    private static final Logger logger = Logger.getLogger(Environment.class);
     private static final String configSubdir = "config";
     private static final String logSubdir = "log";
 
@@ -91,6 +89,11 @@ public final class Environment {
         return varName + "=" + OperatingSystem.concatFileAndPathChain(directory, previous);
     }
 
+    public File fileFromPath(TypedPath p) {
+        return p.file(configDirectory());
+    }
+
+    @Deprecated  // Nimm fileFromPath()
     public File fileFromPath(Path p, String suffix) {
         return new File(configDirectory(), p + suffix);
     }
