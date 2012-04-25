@@ -32,10 +32,11 @@ void Dependencies::add_requisite( Dependant* dependant, const string& missings_p
 void Dependencies::remove_requisite( Dependant* dependant, const string& missings_path )
 {
     Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " '" << missings_path << "'\n");
-    Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
-    
-    requestors_set.erase( dependant );
-    if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_path( missings_path ) );
+    Path_requestors_map::iterator it = _path_requestors_map.find(_subsystem->normalized_path(missings_path));
+    if (it != _path_requestors_map.end()) {
+        it->second.erase(dependant);
+        if (it->second.empty()) _path_requestors_map.erase(it);
+    }
 }
 
 //----------------------------------------------------------Dependencies::announce_requisite_loaded

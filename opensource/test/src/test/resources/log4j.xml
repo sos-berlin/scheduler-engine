@@ -32,10 +32,9 @@
 		<appender-ref ref="console_simple"/>
     </logger>
 
-    <logger name="com.sos.scheduler.engine.tests.jira.js644">
+    <!--logger name="com.sos.scheduler.engine.tests.jira.js644">
         <level value="debug"/>
-		<appender-ref ref="console_simple"/>
-    </logger>
+    </logger-->
 
     <logger name="com.sos.scheduler.engine.tests.excluded.ss">
         <level value="debug"/>

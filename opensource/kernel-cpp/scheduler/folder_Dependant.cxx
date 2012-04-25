@@ -64,7 +64,7 @@ bool Dependant::requisite_is_registered( const Requisite_path& r )
     const Requisite_sets::const_iterator it = _requisite_sets.find( r._subsystem );
     if( it != _requisite_sets.end() )  
     {
-        result = it->second.find( r._path ) != it->second.end();
+        result = it->second.find(r._subsystem->normalized_path(r._path)) != it->second.end();
     }
     
     return result;
