@@ -19,7 +19,6 @@ import com.sos.scheduler.engine.test.binary.TestCppBinaries;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -27,6 +26,7 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecursivly;
+import static java.util.Arrays.asList;
 
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
     //private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
@@ -104,7 +104,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     @Override public final void startScheduler(String... args) {
         registerEventHandler(this);
         prepare();
-        Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries(), logCategories), Arrays.asList(args));
+        Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries(), logCategories), asList(args));
         getDelegate().startScheduler(toArray(allArgs, String.class));
     }
 
