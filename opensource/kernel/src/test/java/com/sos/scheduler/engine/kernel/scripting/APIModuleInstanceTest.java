@@ -1,26 +1,37 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
+import com.google.common.io.Files;
+import com.sos.scheduler.engine.kernel.scheduler.LogMock;
 import org.apache.log4j.Logger;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sos.scheduler.engine.kernel.scheduler.LogMock;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
+
+import static org.junit.Assert.assertEquals;
 
 public class APIModuleInstanceTest {
 	
-	private final static String script_root = "./src/test/scripts/";
-
 	private static final Logger logger = Logger.getLogger(APIModuleInstanceTest.class);
+    private static final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        System.setOut(new PrintStream(outputStream));     // redirect stdout to the outputStream object
+    }
 
 	@Test
 	public void javascriptApi() throws Exception {
-		String script = "var cnt;\n"
+		final String script = "var cnt;\n"
 			+ "function spooler_init() {\n"
 			+ "   cnt = 0;\n"
 			+ "   return true;\n"
 			+ "}"
 			+ " "
-			+ "function scheduler_process() {\n"
+			+ "function spooler_process() {\n"
 			+ "  if (cnt < 5) {;\n"
 			+ "    cnt++;\n"
 			+ "    print('iteration no ' + cnt + '\\n');\n"
@@ -28,11 +39,11 @@ public class APIModuleInstanceTest {
 			+ "  }"
 			+ "  return false;\n"
 			+ "}";
-		logger.debug("START javascriptApi ---------------------------------------------------------------------");
+        outputStream.reset();
 		APIModuleInstance module = new APIModuleInstance("javascript",script);
-		module.call("scheduler_init");
-		while (module.callBoolean("scheduler_process")) {;}
-		logger.debug("END javascriptApi -----------------------------------------------------------------------");
+		module.call("spooler_init");
+		while (module.callBoolean("spooler_process")) {}
+        assertEquals(5,outputStream.toString().split("\n").length);
 	}
 
 	/**
@@ -41,13 +52,13 @@ public class APIModuleInstanceTest {
 	 */
 	@Test
 	public void javascriptWithoutFunctions() throws Exception {
-		logger.debug("START javascriptWithoutFunctions ---------------------------------------------------------------------");
-		String script =	"print('script ran successfully\\n');\n";
+        outputStream.reset();
+		String script =	"print('script ran successfully');";
 		APIModuleInstance module = new APIModuleInstance("javascript",script);
 		module.call("spooler_init");
 		module.call("spooler_process");
 		module.call("spooler_exit");
-		logger.debug("END javascriptWithoutFunctions -----------------------------------------------------------------------");
+        assertEquals("script ran successfully",outputStream.toString());
 	}
 
 	/**
@@ -64,70 +75,57 @@ public class APIModuleInstanceTest {
 	 */
 	@Test
 	public void javascriptWithObjects() throws Exception {
-		logger.debug("START javascriptWithObjects ---------------------------------------------------------------------");
-		String script =	"print('hello, my name ist ' + name + '\\n');\n" +
-				"log.debug('hello my name ist ' + name + '\\n')\n";
+        outputStream.reset();
+		String script =	"print('hello my name is ' + name + '\\n');\n" +
+				"log.debug('hello my name is ' + name)\n";
 		APIModuleInstance module = new APIModuleInstance("javascript",script);
-		module.addObject("walter", "name");
+		module.addObject("Walter", "name");
 		module.addObject(new LogMock(), "log");
 		module.call("scheduler_process");
-		logger.debug("END javascriptWithObjects -----------------------------------------------------------------------");
+        
+        String[] result = outputStream.toString().split("\n");
+        String expected = "hello my name is Walter";
+        assertEquals(2,result.length);      // expects 2 lines of output
+        assertEquals(expected,result[0].trim());
+        assertEquals(expected,result[1].trim());
 	}
 
-	/*
-	 * \brief Executes a simple jython script
-	 * \detail
-	 * Calls the jython script test.py and gives them some objects
-	 * via the addObject method.
-	 * The script contains some funtions called by the call method.
-	 * http://www.jython.org/
-	 * jar-file: jython.jar from the jython 2.5.2 RC 2 installation
-	 * jar-file: jython-engine.jar
-	 */
-//        @Ignore //TODO 2010-12-30 Zschimmer com.sos.scheduler.engine.kernel.scripting.UnsupportedScriptLanguageException: Scriptlanguage jython is not supported
-//	 @Test
-	//	maven dependencies not found for bean
-//	public void jythonScriptFromFile() {
-//		logger.debug("START jythonScriptFromFile ---------------------------------------------------------------------");
-//		APIModuleInstance module = new APIModuleInstance("jython","");
-//		module.setSourceFile(script_root + "test.py");
-//		module.addObject("jythonScriptFromFile", "name");
-//		module.addObject(new LogMock(), "log");
-//		module.call("scheduler_init");
-//		try {
-//			while ( module.callBoolean("scheduler_process")) {
-//				;
-//			}
-//		} catch (NoSuchMethodException e) {
-//			e.printStackTrace();
-//		}
-//		module.call("scheduler_exit");
-//		logger.debug("END jythonScriptFromFile -----------------------------------------------------------------------");
-//	}
-
-	/*
+	/**
 	 * \brief Executes a simple groovy script
 	 * \detail
-	 * Calls a grrovy script and gives them some objects via the addObject method.
-	 * The script contains some funtions called by the call method.
-	 * http://groovy.codehaus.org/
-	 * jar-file: groovy-all-1.5.6.jar
-	 * jar-file: groovy-engine.jar
+     * Calls a groovy script and gives them some objects via the addObject method.
+     * The script contains some funtions called by the call method.
 	 */
-//	 @Test
-	//	maven dependencies not found for groovy
-	@Ignore
-	public void groovyScriptFromFile() throws Exception {
-		logger.debug("START groovyScriptFromFile --------------------------------------------------------------------");
-		ScriptInstance module = new ScriptInstance("groovy");
-		module.setSourceFile(script_root + "test.groovy");
-		module.addObject("groovyScriptFromFile", "name");
-		module.call("scheduler_init");
-		while (module.callBoolean("scheduler_process")) {
-			;
-		}
-		module.call("scheduler_exit");
-		logger.debug("END groovyScriptFromFile -----------------------------------------------------------------------");
+    @Test
+	public void groovyScript() throws Exception {
+        File sourceFile = new File(getResourceFolder() + "/test.groovy");
+        doScript("groovy", Files.toString(sourceFile, Charset.defaultCharset()),"groovyScript");
 	}
+
+    private void doScript(String scriptLanguage, String script, String calledFrom) throws NoSuchMethodException {
+        outputStream.reset();
+        APIModuleInstance module = new APIModuleInstance(scriptLanguage,script);
+        module.addObject(calledFrom, "name");
+        module.call("spooler_init");
+        while (module.callBoolean("spooler_process")) {
+            ;
+        }
+        module.call("spooler_exit");
+
+        logger.info(outputStream.toString());
+        String[] result = outputStream.toString().split("\n");
+        assertEquals(7,result.length);      // expects 7 lines of output
+        assertEquals("spooler_init is called by " + calledFrom,result[0].trim());
+        for(int i=1; i < 6; i++) {
+            assertEquals("spooler_process is called by " + calledFrom,result[i].trim());
+        }
+        assertEquals("spooler_exit is called by " + calledFrom, result[6].trim());
+    }
+
+    private static String getResourceFolder() {
+        String resourceRoot = APIModuleInstanceTest.class.getResource("/").getPath();
+        return resourceRoot += APIModuleInstanceTest.class.getPackage().getName().replace(".","/");
+    }
+
 
 }

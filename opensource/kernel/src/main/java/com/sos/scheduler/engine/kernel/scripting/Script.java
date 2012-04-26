@@ -18,18 +18,17 @@ package com.sos.scheduler.engine.kernel.scripting;
  * </div>
  */
 public interface Script {
-    public Object call(String name) throws NoSuchMethodException;
-    public Object call(String rawfunctionname, Object[] params) throws NoSuchMethodException;
-    public Object call(String rawfunctionname, boolean param) throws NoSuchMethodException;
-    public Object call();
-    public boolean callBoolean(String name) throws NoSuchMethodException;
-    public boolean callBoolean(String name, Object[] params) throws NoSuchMethodException;
-    public String callString(String name) throws NoSuchMethodException;
-    public String callString(String name, Object[] params) throws NoSuchMethodException;
-    public double callDouble(String name) throws NoSuchMethodException;
-    public double callDouble(String name, Object[] params) throws NoSuchMethodException;
-    public void addObject(Object object, String name);
-    public String getLanguageId();
-	public String getSourcecode();
-	public ScriptFunction getLastFunction();
+    Object call(String name) throws NoSuchMethodException;
+    Object call(String rawfunctionname, Object[] params) throws NoSuchMethodException;
+    Object call(String rawfunctionname, boolean param) throws NoSuchMethodException;
+    Object call();
+    boolean callBoolean(String name) throws NoSuchMethodException;
+    boolean callBoolean(String name, Object[] params) throws NoSuchMethodException;
+    String callString(String name) throws NoSuchMethodException;
+    String callString(String name, Object[] params) throws NoSuchMethodException;
+    double callDouble(String name) throws NoSuchMethodException;
+    double callDouble(String name, Object[] params) throws NoSuchMethodException;
+    void addObject(Object object, String name);
+    String getLanguageId();
+	String getSourcecode();
 }

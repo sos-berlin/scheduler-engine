@@ -1,8 +1,16 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
-import org.apache.log4j.Logger;
-import org.junit.Test;
 import com.sos.scheduler.engine.kernel.scheduler.LogMock;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import org.apache.log4j.Logger;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+
+import static org.junit.Assert.assertEquals;
 
 /**
 * \class ModuleInstanceTest 
@@ -34,90 +42,76 @@ import com.sos.scheduler.engine.kernel.scheduler.LogMock;
 
 public class ScriptInstanceTest {
 	
-//	private final static Logger logger = Logger.getLogger(ScriptInstanceTest.class);
-	private final static Logger logger = Logger.getRootLogger();
-	
-	private final static String script_root = "./src/test/scripts/";    // FIXME Sollte eine Resource im Package sein. Pfad ist in IntelliJ-IDE nicht auffindbar. Zschimmer 20.10.2011
+    private static final Logger logger = Logger.getLogger(ScriptInstanceTest.class);
+    private static final String scriptRoot = getResourceFolder();
+//	private static final String script_root = "./src/test/scripts/";    // FIXME Sollte eine Resource im Package sein. Pfad ist in IntelliJ-IDE nicht auffindbar. Zschimmer 20.10.2011
+
+    private static final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        System.setOut(new PrintStream(outputStream));     // redirect stdout to the outputStream object
+    }
+
+    private static String getResourceFolder() {
+        String resourceRoot = ScriptInstanceTest.class.getResource("/").getPath();
+        return resourceRoot += ScriptInstanceTest.class.getPackage().getName().replace(".","/");
+    }
 
 	@Test
-	public void javaScript() throws UnsupportedScriptLanguageException {
-		logger.debug("===== javaScript: " + ScriptInstanceTest.class.getPackage().getName());
-		ScriptInstance module = new ScriptInstance("javascript");
-		module.setSourceCode("print('Hallo Welt\\n');");
+	public void javaScript()  {
+        outputStream.reset();
+		ScriptInstance module = new ScriptInstance("javascript","print('hello world');");
 		module.call();
+        assertEquals("hello world", outputStream.toString());
 	}
 
 	@Test
-	public void javaScriptWithParams() throws UnsupportedScriptLanguageException {
-		logger.debug("===== javaScriptWithParams");
-		ScriptInstance module = new ScriptInstance("javascript");
-		module.setSourceCode("print('Hallo ' + name + '\\n');");
+	public void javaScriptWithParams() {
+        outputStream.reset();
+		ScriptInstance module = new ScriptInstance("javascript","print('hello ' + name);");
 		module.addObject("Walter", "name");
 		module.call();
+        assertEquals("hello Walter", outputStream.toString());
 	}
 
 	@Test
-	public void javaScriptWithFunction() throws UnsupportedScriptLanguageException {
-		logger.debug("===== javaScriptWithFunction");
-		String script = "function show () {print('hallo welt\\n'); }\n";
-		ScriptInstance module = new ScriptInstance("javascript");
-		module.setSourceCode(script);
-		try {
-			module.call("show");
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		}
+	public void javaScriptWithFunction() throws NoSuchMethodException {
+        outputStream.reset();
+		String script = "function show () {print('hello world'); }\n";
+		ScriptInstance module = new ScriptInstance("javascript",script);
+		module.call("show");
+        assertEquals("hello world", outputStream.toString());
 	}
 
 	@Test
-	public void javaScriptWithFunctions() throws UnsupportedScriptLanguageException {
-		logger.debug("===== javaScriptWithFunctions");
-		String script = "function add (a, b) {c = a + b; param = 'abc';return c; }";
-		ScriptInstance module = new ScriptInstance("javascript");
-		module.setSourceCode(script);
+	public void javaScriptWithFunctions() throws NoSuchMethodException {
+		String script = "function add(a, b) {c = a + b; param = 'abc';return c; }";
+		ScriptInstance module = new ScriptInstance("javascript",script);
 		String param = "Hugo";
 		module.addObject(param, "param");
-		Object result;
-		try {
-			result = module.call("add", new Object[] { 5, 2 });
-			System.out.println("param: " + module.getObject("param"));
-			System.out.println("param: " + param);
-			System.out.println("result: " + result);
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		}
+		Double result = (Double)module.call("add", new Object[] { 5, 2 });
+        assertEquals("abc", module.getObject("param"));
+        assertEquals(7, result.intValue());
 	}
 
 	@Test
-	public void javaScriptDoubleFunction() throws UnsupportedScriptLanguageException {
-		logger.debug("===== javaScriptDoubleFunction");
+	public void javaScriptDoubleFunction() throws NoSuchMethodException {
 		String script = "function divide (a, b) {c = a / b; return c; }";
-		ScriptInstance module = new ScriptInstance("javascript");
-		module.setSourceCode(script);
-		Object result;
-		try {
-			result = module.callDouble("divide", new Object[] { 10, 3 });
-			System.out.println("result: " + result);
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		}
+		ScriptInstance module = new ScriptInstance("javascript",script);
+        Double result = module.callDouble("divide", new Object[]{12, 3});
+        assertEquals( 4, result.intValue() );
 	}
 
 	@Test
-	public void javaScriptFromFile() throws NoSuchMethodException, UnsupportedScriptLanguageException {
-		logger.debug("===== javaScriptFromFile");
-		ScriptInstance module = new ScriptInstance("javascript");
-		module.setSourceFile(script_root + "test.js");
-		module.addObject("hugo", "name");
-		try {
-			module.call("scheduler_init");
-			while (module.callBoolean("scheduler_process")) {
-				;
-			}
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-			throw e;
-		}
+	public void javaScriptFromFile() throws NoSuchMethodException {
+        outputStream.reset();
+        File sourceFile = new File(scriptRoot + "/test.js");
+		ScriptInstance module = new ScriptInstance("javascript",sourceFile);
+        module.addObject("Hugo","name");
+        module.call("scheduler_init");
+        while (module.callBoolean("scheduler_process")) {;}
+        assertEquals( 7, outputStream.toString().split("\n").length );
 	}
 
 	//	@Test
@@ -130,11 +124,10 @@ public class ScriptInstanceTest {
 
 	// @Test - maven dependencies not found for bean
 	// http://www.beanshell.org/
-	public void beanScript() throws UnsupportedScriptLanguageException {
+	public void beanScript() {
 		logger.debug("===== beanScript");
 		String script = "for (int i=0; i<5; i++)\n" + "print(i);\n" + "print(\"Hello \" + name);\n";
-		ScriptInstance module = new ScriptInstance("bsh");
-		module.setSourceCode(script);
+		ScriptInstance module = new ScriptInstance("bsh",script);
 		module.addObject("hugo", "name");
 		module.call();
 	}
@@ -154,11 +147,11 @@ public class ScriptInstanceTest {
 	 * java.lang.VerifyError: class com.sun.script.jython.JythonScope overrides final method __findattr__.(Ljava/lang/String;)Lorg/python/core/PyObject;
 	 */
 	// @Test
-	//	maven dependencies not found for bean
-	public void jythonScriptFromFile() throws NoSuchMethodException, UnsupportedScriptLanguageException {
+	//	maven dependencies not found for jython
+	public void jythonScriptFromFile() throws NoSuchMethodException {
 		logger.debug("===== jythonScriptFromFile");
-		ScriptInstance module = new ScriptInstance("jython");
-		module.setSourceFile(script_root + "test.py");
+        File sourceFile = new File(scriptRoot + "/test.py");
+		ScriptInstance module = new ScriptInstance("jython",sourceFile);
 		module.addObject("jythonScriptFromFile", "name");
 		module.addObject(new LogMock(), "log");
 		module.call("spooler_init");
@@ -177,36 +170,30 @@ public class ScriptInstanceTest {
 	 * jar-file: groovy-engine.jar
 	 */
 	// @Test
-	//	maven dependencies not found for bean
-	public void groovyScript() throws UnsupportedScriptLanguageException {
+	//	maven dependencies not found for groovy
+	public void groovyScript() {
 		logger.debug("===== groovyScript");
 		String script = "println 'hello, groovy world'\n";
-		ScriptInstance module = new ScriptInstance("groovy");
-		module.setSourceCode(script);
+		ScriptInstance module = new ScriptInstance("groovy",script);
 		module.call();
 	}
 
-	@Test(expected = UnsupportedScriptLanguageException.class)
-	public void unsupportedScriptLanguage() throws UnsupportedScriptLanguageException {
-		logger.debug("===== unsupportedScriptLanguage");
+	@Test(expected = SchedulerException.class)
+	public void ivalidLanguage() throws SchedulerException {
 		try {
-			ScriptInstance module = new ScriptInstance("tolami");
-			module.setSourceCode("print('Hallo Welt\\n');");
+			ScriptInstance module = new ScriptInstance("tolami","print('Hallo Welt\\n');");
 			module.call();
 		}
 		finally {
 		}
 	}
 
-	@Test(expected = InvalidScriptException.class)
-	public void missingScriptCode() throws UnsupportedScriptLanguageException {
+	//@Test(expected = SchedulerException.class)
+    @Test
+	public void missingScriptCode() {
 		logger.debug("===== missingScriptCode");
-		try {
-			ScriptInstance module = new ScriptInstance("javascript");
-			module.call();
-		}
-		finally {
-		}
+        ScriptInstance module = new ScriptInstance("javascript","");
+        module.call();
 	}
 
 	//	@Test

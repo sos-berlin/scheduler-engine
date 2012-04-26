@@ -1,16 +1,12 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
 
-import javax.script.Bindings;
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.script.*;
+
+import static junit.framework.Assert.assertEquals;
 
 public class InvokeFunctionTest {
 
@@ -27,22 +23,18 @@ public class InvokeFunctionTest {
 	public void invokeFunction() throws ScriptException, NoSuchMethodException {
 		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
         bindings.put("parm1", "hello");
+        assertEquals("hello",engine.get("parm1"));
         
         engine.eval("function add (a, b) {c = a + b; return c; }", bindings);
 		Invocable jsInvoke = (Invocable) engine;
 
-		Object result1 = jsInvoke.invokeFunction("add", new Object[] { 10, 5 });
-		System.out.println(result1);
+		Double result1 = (Double)jsInvoke.invokeFunction("add", new Object[] { 10, 5 });
+        assertEquals(15, result1.intValue());
 
 		Adder adder = jsInvoke.getInterface(Adder.class);
 		int result2 = adder.add(10, 5);
-		System.out.println(result2);
+        assertEquals(15, result2);
 	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
 
 	interface Adder {
 	  int add(int a, int b);

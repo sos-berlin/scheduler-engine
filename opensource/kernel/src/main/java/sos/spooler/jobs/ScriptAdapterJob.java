@@ -29,7 +29,7 @@ public class ScriptAdapterJob extends Job_impl {
     private final String code;
 
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
-    //TODO Was passiert, wenn der Scriptcode aus einer Datei geladen wird
+    //TODO Testen für standalone jobs
     //TODO was passiert bei gemischtem Sourceocode (z.B. shell_script, Monitore in javax);
     //TODO funktioniert das Scripting auch bei remote jobs?
     //TODO prüfen, ob die Scheduler Parameter mit SCHEDULER__ statt mit SCHEDULER_ anfangen sollten
@@ -38,8 +38,6 @@ public class ScriptAdapterJob extends Job_impl {
 
     public ScriptAdapterJob(String language, String code) {
 
-//        System.err.println("language=" + language);
-//        System.err.println("code=" + code);
         this.language = language;
         this.code = code;
         try {
@@ -113,17 +111,11 @@ public class ScriptAdapterJob extends Job_impl {
     }
 
     private void callMethod(String function) {
-        spooler_log.info("call function " + function);
         scriptModule.call(function);
     }
 
     private boolean callMethod(String function, boolean defaultResult) {
-        boolean result = defaultResult;
-        spooler_log.info("call function " + function);
-        Object resultValue = scriptModule.call(function);
-        if (resultValue != null)
-            result = (Boolean) resultValue;
-        return result;
+        return scriptModule.callBoolean(function,defaultResult);
     }
 
     private void setBindings() {
@@ -132,6 +124,7 @@ public class ScriptAdapterJob extends Job_impl {
             scriptModule.addObject(spooler_task, "spooler_task");
             scriptModule.addObject(spooler_job, "spooler_job");
             scriptModule.addObject(spooler_log, "spooler_log");
+            scriptModule.addObject(spooler_log, "logger");
             bindingsSet = true;
         }
     }

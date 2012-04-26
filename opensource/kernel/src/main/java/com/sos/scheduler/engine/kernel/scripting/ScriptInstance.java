@@ -19,140 +19,108 @@ package com.sos.scheduler.engine.kernel.scripting;
  *
  * \author ss
  * \version 17.12.2010 12:04:34
+ *
+ * \author ss
+ * \version 12.03.2012 10:22:17
  * <div class="sos_branding">
  *   <p>(c) 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
-import javax.script.Bindings;
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
+import com.google.common.io.Files;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.apache.log4j.Logger;
+
+import javax.script.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.List;
 
 public class ScriptInstance implements Script {
 
-	protected final Logger 		logger = Logger.getLogger(ScriptInstance.class.getPackage().getName());
+	private final Logger 		logger = Logger.getLogger(ScriptInstance.class);
 	
 	private final String		languageId;
 	private final ScriptEngine	scriptengine;
 	private final Bindings		scriptbindings;
+	private final String		sourceCode;
 
-	private String				sourceCode;
-	private ScriptFunction		lastFunction	= null;
+    private boolean isEvaluated = false;
+    private Object scriptResult = null;
 
-	public ScriptInstance(String scriptLanguage) throws UnsupportedScriptLanguageException {
-		languageId = scriptLanguage;
-		logger.info("the language id is " + scriptLanguage);
 
-		ScriptEngineManager sm;
-		ScriptEngine se;
-		Bindings sb;
-		try {
-			sm = new ScriptEngineManager();
-			se = sm.getEngineByName(getLanguageId());
-			sb = se.getBindings(ScriptContext.ENGINE_SCOPE);
-		}
-		catch (Exception e) {
-            String message = "Scriptlanguage " + languageId + " is not supported.";
-            logger.error(message);
-			throw new UnsupportedScriptLanguageException(e, message);
-		}
-		scriptengine = se;
-		scriptbindings = sb;
-	}
+    public ScriptInstance(String scriptLanguage, String sourceCode) {
+        this.languageId = scriptLanguage;
+        this.sourceCode = sourceCode;
+        this.scriptengine = getScriptEngine();
+        this.scriptbindings = this.scriptengine.getBindings(ScriptContext.ENGINE_SCOPE);
+        logger.debug("the language id is " + scriptLanguage);
+    }
 
-	public void setSourceCode(String sourcecode) {
-		this.sourceCode = sourcecode;
-	}
+    public ScriptInstance(String scriptLanguage, File sourceFile) {
+        try {
+            this.sourceCode = Files.toString(sourceFile, Charset.defaultCharset());
+        } catch (IOException e) {
+            throw new SchedulerException("error reading file " + sourceFile.getAbsolutePath(),e);
+        }
+        this.languageId = scriptLanguage;
+        this.scriptengine = getScriptEngine();
+        this.scriptbindings = this.scriptengine.getBindings(ScriptContext.ENGINE_SCOPE);
+        logger.debug("the language id is " + scriptLanguage);
+    }
 
-	public void setSourceFile(String filename) {
-		this.sourceCode = readFile(filename);
-	}
-	
-	private String readFile(String filename) {
-		StringBuffer sb = null;
-		FileReader fr = null;
-		logger.info("reading script from file " + filename);
-		try {
-			fr = new FileReader(filename);
-			BufferedReader br = new BufferedReader(fr);
-			String line;
-			sb = new StringBuffer();
-			while ((line = br.readLine()) != null) {
-				sb.append(line);
-				sb.append('\n');
-			}
-		}
-		catch (FileNotFoundException e) {
-			throw new InvalidScriptException(e, "the file " + filename + "does not exist.");
-		}
-		catch (IOException e) {
-			throw new InvalidScriptException(e, "error reading the file " + filename);
-		}
-		return (sb != null) ? sb.toString() : "";
-	}
+    private ScriptEngine getScriptEngine() {
+        ScriptEngineManager sm = new ScriptEngineManager();
+        ScriptEngine se = sm.getEngineByName(getLanguageId());
+        if (se == null) {
+            List<ScriptEngineFactory> factories = sm.getEngineFactories();
+            for(ScriptEngineFactory factory : factories) {
+                logger.info(factory.getEngineName() + " is available (" + factory.getNames().toString() + ")");
+            }
+            throw new SchedulerException("script language " + getLanguageId() + " not valid.");
+        }
+        return se;
+    }
+    
+    private Object evalScript() {
+        try {
+            if (!isEvaluated) {
+                scriptResult = scriptengine.eval(sourceCode, scriptbindings);
+                isEvaluated = true;
+            }
+        }
+        catch (ScriptException e) {
+            throw new SchedulerException(e + ": error in script code " + sourceCode, e);
+        }
+        return scriptResult;
+    }
 
-	public Object getObject(String name) {
+	public final Object getObject(String name) {
 		return scriptbindings.get(name); 		
 	}
 	
 	@Override
-	public void addObject(Object object, String name) {
-		String object_name = name;
-		if (object == null) {
-			logger.error("the object '" + name + "' is not set");
-		} else {
-			logger.debug("add object " + name + " to script");
-			scriptbindings.put(object_name, object);
-		}
+	public final void addObject(Object object, String name) {
+        logger.debug("add object " + name + " to script");
+        scriptbindings.put(name, object);
 	}
 	
 	public Object call() {
-		Object result = true;
-		String code = getSourcecode();
-		lastFunction = null;
-		if (code == null) {
-			throw new InvalidScriptException("scriptcode is missing - it seems neither setSourceCode nor SetSourceFile was called first.");
-		}
-
-		try {
-			result = scriptengine.eval(code, scriptbindings);
-		}
-		catch (ScriptException e) {
-			throw new InvalidScriptException(e, "error in script", code);
-		}
-		return result;
+        return evalScript();
 	}
 
 	@Override
-	public Object call(String rawfunctionname, Object[] params) throws NoSuchMethodException {
-		Object result = true;
-		lastFunction = new ScriptFunction(rawfunctionname);
-		String functionname = lastFunction.getNativeFunctionName();
-		String code = this.getSourcecode();
-		if (code == null) {
-			throw new InvalidScriptException("scriptcode is missing - it seems neither setSourceCode nor SetSourceFile was called first.");
-		}
-		
+	public Object call(String functionname, Object[] params) throws NoSuchMethodException {
+        evalScript();
 		try {
 			logger.debug("executing function " + functionname);
-			scriptengine.eval(code, scriptbindings);
 			Invocable invocableEngine = (Invocable) scriptengine;
-			result = invocableEngine.invokeFunction(functionname, params);
+			return invocableEngine.invokeFunction(functionname, params);
 		}
 		catch (ScriptException e) {
-			throw new InvalidScriptException(e, "error in script", code);
+			throw new SchedulerException("error in script code " + sourceCode + ": " + e, e);
 		}
-		return result;
 	}
 
 	@Override
@@ -162,14 +130,14 @@ public class ScriptInstance implements Script {
 
 	@Override
 	public Object call(String rawfunctionname, boolean param) throws NoSuchMethodException {
-		return call(rawfunctionname, new Object[] {Boolean.valueOf(param)});
+		return call(rawfunctionname, new Object[] {param});
 	}
 
 	@Override
 	public boolean callBoolean(String functionname, Object[] params) throws NoSuchMethodException {
 		Object obj = call(functionname, params);
 		if (obj instanceof Boolean) return (Boolean) obj; 
-		if (obj instanceof Integer) return ((Integer)obj == 1) ? true : false;
+		if (obj instanceof Integer) return (Integer)obj == 1;
 		throw new ClassCastException("the result of function " + functionname + " could not cast to " + Boolean.class.getName());
 	}
 
@@ -203,18 +171,13 @@ public class ScriptInstance implements Script {
 	}
 
 	@Override
-	public String getLanguageId() {
+	public final String getLanguageId() {
 		return this.languageId;
 	}
 
 	@Override
-	public String getSourcecode() {
+	public final String getSourcecode() {
 		return sourceCode;
-	}
-
-	@Override
-	public ScriptFunction getLastFunction() {
-		return lastFunction;
 	}
 
 }
