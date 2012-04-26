@@ -111,7 +111,7 @@ to run without maven integration.
 	        <exclude name="**/*.pdb"/>
 	    </patternset>
 	    <fileset dir="${source.dir}">
-	        <include name="*${setup.platform}.jar"/>
+	        <include name="*${setup.platform}*.jar"/>
 	    </fileset>
 		</unzip>
 		

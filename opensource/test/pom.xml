@@ -116,16 +116,16 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>kernel-cpp</artifactId>
+            <artifactId>kernel-cpp-${osArch}</artifactId>
             <version>${project.version}</version>
-            <classifier>${osArch}</classifier>
+            <!-- classifier>${osArch}</classifier -->
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>kernel-cpp</artifactId>
+            <artifactId>kernel-cpp-${osArch}</artifactId>
             <version>${project.version}</version>
-            <classifier>${osArch}-test</classifier>
+            <classifier>test</classifier>
         </dependency>
 
         <dependency>
@@ -152,6 +152,13 @@
         <dependency>
             <groupId>com.sos</groupId>
             <artifactId>com.sos.JobSchedulerLocalization</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.connection</artifactId>
             <version>${sos.jars.version}</version>
             <scope>test</scope>
         </dependency>
