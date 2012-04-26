@@ -35,6 +35,7 @@
               </executions>
               <configuration>
                 <timestampFormat>yyyyMMdd.HHmmss</timestampFormat>
+                <timestampPropertyName>build.timestamp</timestampPropertyName>
               </configuration>
             </plugin>
               
