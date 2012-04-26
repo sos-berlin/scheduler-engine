@@ -35,7 +35,6 @@
               </executions>
               <configuration>
                 <timestampFormat>yyyyMMdd.HHmmss</timestampFormat>
-                <timestampPropertyName>maven.build.timestamp</timestampPropertyName>
               </configuration>
             </plugin>
               

@@ -8,11 +8,12 @@
 */
 
 // Maven-Plugin build-helper-maven-plugin wird benötigt für die Maven-Variablen parsedVersion.xxx, siehe pom.xml.
+// Die property "timestamp" ist das Ergebnis aus dem buildnumber-maven-plugin
 
 // Die numerische Dateiversion einer Windows-Datei (bei uns VER_PRODUCTVERSION) hat vier Zahlen
 
 #define VER_PRODUCTVERSION       ${parsedVersion.majorVersion},${parsedVersion.minorVersion},${parsedVersion.incrementalVersion}
-#define VER_PRODUCTVERSION_STR  "${project.version}-${maven.build.timestamp}" VER_PRODUCTVERSION_TAIL
+#define VER_PRODUCTVERSION_STR  "${project.version}-${timestamp}" VER_PRODUCTVERSION_TAIL
 
 #ifdef _DEBUG
 #   define VER_PRODUCTVERSION_DEBUG " (Debug)"
