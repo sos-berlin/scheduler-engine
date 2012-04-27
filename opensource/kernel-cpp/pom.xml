@@ -29,13 +29,10 @@
                 <execution>
                   <phase>validate</phase>
                   <goals>
-                    <goal>create-timestamp</goal>
+                    <goal>create</goal>
                   </goals>
                 </execution>
               </executions>
-              <configuration>
-                <timestampFormat>yyyyMMdd.HHmmss</timestampFormat>
-              </configuration>
             </plugin>
               
             <plugin>
