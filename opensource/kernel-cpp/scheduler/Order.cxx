@@ -2101,6 +2101,8 @@ void Order::reset()
     clear_setback();
     set_state( _initial_state );
     set_next_start_time();
+    _is_virgin = true;
+    check_for_replacing_or_removing();
 }
 
 //-----------------------------------------------------------------------------Order::set_end_state
