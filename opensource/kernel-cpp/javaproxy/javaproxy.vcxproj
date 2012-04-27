@@ -112,10 +112,10 @@
         <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx" />
 
 
-        <ClCompile Include="com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.cxx" />
+        
 
         <ClCompile Include="com__sos__scheduler__engine__kernel__log__PrefixLog.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__scripting__ScriptInstance.cxx" />
+        
 
         <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.cxx" />
         <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.cxx" />

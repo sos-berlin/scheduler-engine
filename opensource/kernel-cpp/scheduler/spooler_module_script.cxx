@@ -28,7 +28,7 @@ void Java_module_script_instance::init()
 
     _java_class = env.find_class( java_adapter_job() );
     jmethodID method_id = java_method_id( "<init>(Ljava/lang/String;Ljava/lang/String;)V" );   // Konstruktor
-    if( !method_id )  env.throw_java( "GetMethodID" );
+    if( !method_id )  env.throw_java( "GetMethodID", java_adapter_job() );
 
     jstring language = env.jstring_from_string(_module->_language);
     jstring code = env.jstring_from_string(_module->read_source_script());
