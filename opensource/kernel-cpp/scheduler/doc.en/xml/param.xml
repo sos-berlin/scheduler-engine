@@ -95,6 +95,11 @@
           </p>
 
           <p>
+            <b style="color:red">CAREFUL!</b><br/>
+            It is not possible to use  <b>SCHEDULER_VARIABLE_NAME_PREFIX</b> if your working with agents before version 1.3.12.2068.
+          </p>
+
+          <p>
               Scheduler parameters can be called using the  
 							<scheduler_method class="Spooler" object="spooler" method="variables"/> method.
           <!--Scheduler-Parameter können mit der Methode 

@@ -378,7 +378,8 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                     _server->_module->_monitors->add_monitor( monitor );
                 }
                 else
-                    assert(0), throw_xc( "server::construct", as_string(i), key_word );
+                   Z_LOG2( "scheduler", Z_FUNCTION << " unknown parameter " << key_word << "=" << value << "\n" );;
+                   // assert(0), throw_xc( "server::construct", as_string(i), key_word );
             }
         }
 

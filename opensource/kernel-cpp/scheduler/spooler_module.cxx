@@ -267,8 +267,12 @@ void Module::init0()
     #endif
 
     string prefix = "";
-    if (_spooler && _spooler->variables())
+    _process_shell_variable_prefix_is_configured = false;
+    if (_spooler && _spooler->variables()) {
       prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
+      if (!prefix.empty())
+         _process_shell_variable_prefix_is_configured = true;     // this flag controls the transfer to remote process (see Remote_module_instance_proxy::continue_async_operation)
+    }
     _process_shell_variable_prefix = (prefix.empty()) ? shell_variable_prefix_default : (prefix == "*NONE") ? "" : prefix;
 
     _monitors = Z_NEW( Module_monitors( this ) );

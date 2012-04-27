@@ -157,6 +157,7 @@ struct Module : Object
     bool                       _process_ignore_signal;
     ptr<Com_variable_set>      _process_environment;
     string                     _process_shell_variable_prefix;
+    bool                       _process_shell_variable_prefix_is_configured;
     string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
 
 #ifdef Z_WINDOWS
