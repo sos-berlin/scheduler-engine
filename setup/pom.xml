@@ -51,7 +51,7 @@ call prepare-setup.sh <version> to use this pom
                     <phase>install</phase>
                     <goals>
                         <goal>copy</goal>
-                        <!-- goal>copy-dependencies</goal -->
+                        <goal>copy-dependencies</goal>
                     </goals>
                     <configuration>
                         <artifactItems>
