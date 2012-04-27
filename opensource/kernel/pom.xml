@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>opensource</artifactId>
-        <version>1.3.12.2117</version>
+        <version>1.3.12.2118-SNAPSHOT</version>
     </parent>
     
     <artifactId>kernel</artifactId>
