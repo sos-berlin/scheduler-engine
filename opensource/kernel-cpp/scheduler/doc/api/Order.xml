@@ -738,7 +738,7 @@ spooler_log.info( "For both order log and task log" );</pre>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="setback_count">
+    <property name="setback_count" access="read">
         <com>
             <com.result>
                 <com.type type="int"/>

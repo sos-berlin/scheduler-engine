@@ -914,6 +914,26 @@ spooler_log.info( "For both order log and task log" );</pre>
         </description>
     </property>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="setback_count" access="read">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+          How many times the order is setting back?
+        </title>
+
+        <description>
+            <p>
+                see also <scheduler_element name="delay_order_after_setback"/>.
+            </p>
+        </description>
+    </property>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <title>
