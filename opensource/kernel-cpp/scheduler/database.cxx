@@ -2038,6 +2038,7 @@ void Transaction::update_clob( const string& table_name, const string& column_na
 
     try
     {
+       _log->debug9( S() << "writing clob for field " << table_name << "." << column_name << " with len=" << value.size() << " (" << where << ")" );
         clob.put( value );
         clob.close();
     }
