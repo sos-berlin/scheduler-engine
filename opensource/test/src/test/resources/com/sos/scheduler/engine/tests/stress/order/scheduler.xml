@@ -5,24 +5,12 @@
     <config>
         <jobs>
             <job name="job.1" order="yes" stop_on_error="no">
-                <script language="javascript"><![CDATA[
-function spooler_process() {
-    return true
-}
-                ]]></script>
+                <script language="java" java_class="com.sos.scheduler.engine.test.jobs.EmptyOrderJob" />
                 <run_time once="no"/>
             </job>
 
             <job name="job.2" order="yes" stop_on_error="no">
-                <script language="javascript"><![CDATA[
-function spooler_process() {
-    var order = spooler_task.order
-    var newOrder = spooler.create_order()
-    newOrder.id = order.id
-    order.job_chain.add_or_replace_order(newOrder)
-    return true
-}
-                ]]></script>
+                <script language="java" java_class="com.sos.scheduler.engine.tests.stress.order.JobCreateAndStartOrder" />
                 <run_time once="no"/>
             </job>
         </jobs>

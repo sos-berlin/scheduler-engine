@@ -3,8 +3,12 @@
 	order="yes" stop_on_error="no">
     <script language="javax.script:javascript">
         <![CDATA[
+importClass(java.io.File);
+importClass(com.google.common.io.Files);
+importClass(java.nio.charset.Charset);
+
 function spooler_process() {
-	logger.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	logger.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
 	
 	spooler.variables().set_var("parm1","value1");
 	spooler.variables().set_var("parm2","value2");
@@ -22,14 +26,19 @@ function spooler_process() {
 }
 
 function log_object( varname, objectvalue ) {
-	spooler.variables().set_var(varname,objectvalue);
-	logger.info(varname + "=" + objectvalue);
+    filename = spooler.configuration_directory() + "/resultfile.txt";
+    msg = varname + "=" + objectvalue;
+    Files.append(msg + "\n", new File(filename), Charset.defaultCharset());
+	logger.info(msg);
 }
         ]]>
     </script>
     <monitor name="process0" ordering="0">
         <script language="javax.script:javascript">
             <![CDATA[
+importClass(java.io.File);
+importClass(com.google.common.io.Files);
+importClass(java.nio.charset.Charset);
 
 function spooler_process_after(spooler_process_result) {
 	logger.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
@@ -38,7 +47,9 @@ function spooler_process_after(spooler_process_result) {
 }
 
 function log_object( varname, objectvalue ) {
-	spooler.variables().set_var(varname,objectvalue);
+    filename = spooler.configuration_directory() + "/resultfile.txt";
+    msg = varname + "=" + objectvalue;
+    Files.append(msg + "\n", new File(filename), Charset.defaultCharset());
 	logger.info(varname + "=" + objectvalue);
 }
             ]]>

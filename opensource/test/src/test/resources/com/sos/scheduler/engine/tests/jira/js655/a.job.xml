@@ -2,15 +2,5 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/opensource/kernel-cpp/scheduler/scheduler.xsd"
      order="yes"
 >
-    <script language="javascript">
-        function spooler_process() {
-            var op = spooler_task.order.web_service_operation
-            //String request_string = new String( request.binary_content(), request.charset_name() );
-            var response = op.response
-            response.content_type = "text/plain"
-            response.charset_name = "ISO-8859-1"
-            response.string_content = "Bye!"
-            response.send()
-        }
-    </script>
+    <script language="java" java_class="com.sos.scheduler.engine.tests.jira.js655.JavaA" />
 </job>

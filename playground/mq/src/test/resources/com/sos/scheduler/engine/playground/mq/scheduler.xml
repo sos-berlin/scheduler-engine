@@ -22,11 +22,7 @@
 
         <jobs>
             <job name="job.1" order="yes" stop_on_error="no">
-                <script language="javascript"><![CDATA[
-function spooler_process() {
-    return true;
-}
-                ]]></script>
+                <script language="java" java_class="com.sos.scheduler.engine.test.jobs.EmptyOrderJob" />
                 <run_time once="no"/>
             </job>
         </jobs>

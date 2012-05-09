@@ -6,13 +6,6 @@
 		echo hallo welt
 	</script>
 	<monitor>
-		<script language="javascript">
-        <![CDATA[
-            function spooler_process_after (result) {
-			  spooler_task.order.state = "200";
-			  return result;
-			}
-        ]]>
-        </script>
+		<script language="java" java_class="com.sos.scheduler.engine.tests.jira.js817.MonitorChangeState" />
 	</monitor>
 </job>

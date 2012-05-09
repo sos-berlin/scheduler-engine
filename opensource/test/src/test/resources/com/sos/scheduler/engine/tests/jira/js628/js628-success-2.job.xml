@@ -5,28 +5,14 @@
   -->
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
      order="yes" title="failed for JS628 (process=false, process_before=true, process_after called=true)" stop_on_error="no" name="js628-success-2">
-    <script language="javascript">
-        <![CDATA[
-function spooler_process(){
-   spooler_log.info("spooler_process is called");
-   return false;
-}
-                ]]>
-    </script>
+    <script language="java" java_class="com.sos.scheduler.engine.tests.jira.js628.SpoolerProcessFalse" />
     <monitor name="process0" ordering="0">
-        <script language="javascript">
-            <![CDATA[
-<!-- if spooler_process_before results true, the jobchain should run normally and spooler_process() should called -->
-function spooler_process_before(){
-   spooler_log.info("spooler_process_before is called");
-   return true;
-}
-function spooler_process_after(result){
-   spooler_log.info("spooler_process_after is called");
-   return true;     // it overrides the result of spooler_process()
-}
-                    ]]>
-        </script>
+        <!-- if spooler_process_before results true, the jobchain should run normally and spooler_process() should called -->
+        <script language="java" java_class="com.sos.scheduler.engine.tests.jira.js628.SpoolerProcessBeforeTrue" />
+    </monitor>
+    <monitor name="process0" ordering="1">
+        <!-- it overrides the result of spooler_process() with true -->
+        <script language="java" java_class="com.sos.scheduler.engine.tests.jira.js628.SpoolerProcessAfterTrue" />
     </monitor>
     <run_time />
 </job>

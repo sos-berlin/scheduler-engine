@@ -14,18 +14,7 @@ echo ORDER_PARAM=$ORDER_PARAM >> $RESULT_FILE
 echo JOB_PARAM=$JOB_PARAM >> $RESULT_FILE
         ]]>
     </script>
-    <monitor name="process0"
-             ordering="0">
-        <script language="javascript"
-                java_class_path=""
-                java_class="">
-            <![CDATA[
-function spooler_task_before() {
-	spooler_log.info("spooler_task_before");
-	return true;
-}
-            ]]>
-        </script>
+    <monitor name="process0" ordering="0">
+        <script language="java" java_class="com.sos.scheduler.engine.tests.jira.js606.MonitorSpoolerTaskBefore" />
     </monitor>
-    <run_time/>
 </job>

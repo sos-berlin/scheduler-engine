@@ -3,11 +3,7 @@
     order="yes"
     min_tasks="1"
 >
-    <script language="javascript">
-        <![CDATA[
-//
-        ]]>
-    </script>
+    <script language="java" java_class="com.sos.scheduler.engine.test.jobs.EmptyOrderJob" />
     <run_time>
         <at at="2029-12-31 23:59"/>
     </run_time>
