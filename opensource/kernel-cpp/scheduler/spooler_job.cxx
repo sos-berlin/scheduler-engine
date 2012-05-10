@@ -396,7 +396,6 @@ void Combined_job_nodes::close()
 
 void Combined_job_nodes::connect_job_node( Job_node* job_node )
 {
-    Z_LOG2("JS-644", _job->obj_name() << "::" << Z_FUNCTION << " (" << job_node->obj_name() << ")\n");
     _job_node_set.insert( job_node );
 }
 
@@ -404,7 +403,6 @@ void Combined_job_nodes::connect_job_node( Job_node* job_node )
 
 void Combined_job_nodes::disconnect_job_node( Job_node* job_node )
 {
-    Z_LOG2("JS-644", _job->obj_name() << "::" << Z_FUNCTION << " (" << job_node->obj_name() << ")\n");
     //_job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
 
     _job_node_set.erase( job_node );
@@ -774,7 +772,6 @@ bool Job::on_activate()
                     }
                 }
 
-                Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " next_time=" << _next_time << " next_start_time=" << _next_start_time << "\n");
                 set_next_start_time( Time::now() );
 
                 //TODO
@@ -2647,7 +2644,6 @@ bool Job::connect_job_node( Job_node* job_node )
     {
         _combined_job_nodes->connect_job_node( job_node );
         calculate_next_time( Time::now() );     // Ruft request_order()
-        Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " calculate_next_time() next_time=" << _next_time << " state=" << state_name() << "\n");
         result = true;
     }
 

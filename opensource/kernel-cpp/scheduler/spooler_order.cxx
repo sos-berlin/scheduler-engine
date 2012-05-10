@@ -1526,7 +1526,6 @@ void Job_node::disconnect_job()
 
 bool Job_node::on_requisite_loaded( File_based* file_based )
 {
-    Z_LOG2("JS-644", Z_FUNCTION << " " << obj_name() << "::on_requisite_loaded()\n");
     assert( file_based->subsystem() == spooler()->job_subsystem() );
     assert( file_based->normalized_path() == normalized_job_path() );
 
@@ -1566,11 +1565,8 @@ void Job_node::set_action( const string& action_string )
 
 void Order_queue_node::wake_orders()
 {
-    if( Order* order = _order_queue->first_processable_order() ) {
-        Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << order->obj_name() << "\n");
+    if( Order* order = _order_queue->first_processable_order() )
         order->handle_changed_processable_state();
-    } else
-        Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " (no processable order)\n");
 }
 
 //----------------------------------------------------------------------------Job_node::dom_element

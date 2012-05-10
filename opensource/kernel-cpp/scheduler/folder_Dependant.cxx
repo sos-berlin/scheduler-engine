@@ -41,7 +41,6 @@ void Dependant::remove_requisites()
 
 void Dependant::add_requisite( const Requisite_path& r )
 {
-    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " '" << r.obj_name() << "'\n");
     _requisite_sets[ r._subsystem ].insert( r._subsystem->normalized_path( r._path ) );
     r._subsystem->dependencies()->add_requisite( this, r._path );
 }
@@ -50,7 +49,6 @@ void Dependant::add_requisite( const Requisite_path& r )
 
 void Dependant::remove_requisite( const Requisite_path& r )
 {
-    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " '" << r.obj_name() << "'\n");
     _requisite_sets[ r._subsystem ].erase( r._subsystem->normalized_path( r._path ) );
     r._subsystem->dependencies()->remove_requisite( this, r._path );
 }

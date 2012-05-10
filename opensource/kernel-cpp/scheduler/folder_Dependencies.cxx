@@ -23,7 +23,6 @@ Dependencies::~Dependencies()
 
 void Dependencies::add_requisite( Dependant* dependant, const string& missings_path )
 {
-    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << dependant->obj_name() << " '" << missings_path << "'\n");
     _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( dependant );
 }
 
@@ -31,7 +30,6 @@ void Dependencies::add_requisite( Dependant* dependant, const string& missings_p
 
 void Dependencies::remove_requisite( Dependant* dependant, const string& missings_path )
 {
-    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " '" << missings_path << "'\n");
     Path_requestors_map::iterator it = _path_requestors_map.find(_subsystem->normalized_path(missings_path));
     if (it != _path_requestors_map.end()) {
         it->second.erase(dependant);
@@ -43,7 +41,6 @@ void Dependencies::remove_requisite( Dependant* dependant, const string& missing
 
 void Dependencies::announce_requisite_loaded( File_based* found_missing )
 {
-    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << found_missing->obj_name() << "\n");
     assert( found_missing->subsystem() == _subsystem );
 
     Path_requestors_map::iterator it = _path_requestors_map.find( found_missing->normalized_path() );
@@ -56,12 +53,10 @@ void Dependencies::announce_requisite_loaded( File_based* found_missing )
             Dependant*              dependant = *it2;
         
             try {
-                Z_LOG2("JS-644", Z_FUNCTION << " " << dependant->obj_name() << "->on_requisite_loaded()\n");
                 dependant->on_requisite_loaded( found_missing );
             }
             catch( exception& x ) {
                 string m = message_string("SCHEDULER-459", found_missing->obj_name(), x.what());
-                Z_LOG2("JS-644", "ERROR " << Z_FUNCTION << " " << m << "\n");
                 dependant->log()->error(m);
                 found_missing->log()->error(m);
             }
@@ -74,7 +69,6 @@ void Dependencies::announce_requisite_loaded( File_based* found_missing )
 bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
 {
     assert( to_be_removed->subsystem() == _subsystem );
-    Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << to_be_removed->obj_name() << "\n");
 
     bool result = true;
 
@@ -87,7 +81,6 @@ bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Dependant*              dependant = *it2;
         
-            Z_DEBUG_ONLY(Z_LOG2("JS-644", Z_FUNCTION << " " << dependant->obj_name() << "->on_requisite_to_be_removed( " << to_be_removed->obj_name() << " )\n" ));
             result = dependant->on_requisite_to_be_removed( to_be_removed );
             if( !result )  break;
         }
@@ -113,7 +106,6 @@ void Dependencies::announce_requisite_removed( File_based* to_be_removed )
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Dependant*              dependant = *it2;
         
-            Z_DEBUG_ONLY(Z_LOG2("JS-644", obj_name() << "::" << Z_FUNCTION << " " << dependant->obj_name() << " on_requisite_to_be_removed( " << to_be_removed->obj_name() << " )\n"));
             dependant->on_requisite_removed( to_be_removed );
         }
     }
