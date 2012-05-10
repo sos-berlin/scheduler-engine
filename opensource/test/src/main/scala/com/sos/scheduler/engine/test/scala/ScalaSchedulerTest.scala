@@ -1,13 +1,21 @@
 package com.sos.scheduler.engine.test.scala
 
-import org.scalatest.{FunSuite, BeforeAndAfterAll}
-import com.sos.scheduler.engine.test.{TestSchedulerController, SchedulerTest}
+import com.google.common.collect.ImmutableMap
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.test.scala.Utils._
+import com.sos.scheduler.engine.test.{ResourceToFileTransformer, TestSchedulerController, SchedulerTest}
+import org.scalatest.{FunSuite, BeforeAndAfterAll}
+import scala.collection.JavaConversions._
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
   val configurationPackage = getClass.getPackage
-  lazy val controller = TestSchedulerController.builder(getClass).resourcesPackage(configurationPackage).build
+  val schedulerResourceToFileTransformer: ResourceToFileTransformer = null
+  val schedulerResourceNameMap: Iterable[(String,String)] = List()
+  lazy val controller = TestSchedulerController.builder(getClass)
+      .resourcesPackage(configurationPackage)
+      .nameMap(ImmutableMap.copyOf(mapAsJavaMap(schedulerResourceNameMap.toMap)))
+      .resourceToFileTransformer(schedulerResourceToFileTransformer)
+      .build
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
   def injector = scheduler.getInjector

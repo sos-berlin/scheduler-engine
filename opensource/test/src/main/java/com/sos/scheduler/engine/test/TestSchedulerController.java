@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.data.log.ErrorLogEvent;
 import com.sos.scheduler.engine.eventbus.*;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -42,9 +43,12 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private String logCategories = "";
     private Scheduler _scheduler = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
-    public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath, Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
+    public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath,
+            @Nullable ImmutableMap<String,String> nameMap,
+            @Nullable ResourceToFileTransformer fileTransformer,
+            Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
         File directory = workDirectory(testClass);
-        environment = new Environment(configurationResourcePath, directory);
+        environment = new Environment(configurationResourcePath, directory, nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
     }

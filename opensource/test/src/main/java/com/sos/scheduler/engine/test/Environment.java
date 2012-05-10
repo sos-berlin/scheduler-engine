@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.data.folder.Path;
 import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
@@ -8,6 +9,7 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
 
+import javax.annotation.Nullable;
 import java.io.File;
 
 import static com.google.common.base.Strings.nullToEmpty;
@@ -37,12 +39,18 @@ public final class Environment {
 
     private final ResourcePath resourcePath;
     private final File directory;
+    @Nullable private final ImmutableMap<String,String> nameMap;
+    @Nullable private final ResourceToFileTransformer fileTransformer;
     private final File configDirectory;
     private final File logDirectory;
 
-    Environment(ResourcePath resourcePath, File directory) {
+    Environment(ResourcePath resourcePath, File directory,
+            @Nullable ImmutableMap<String,String> nameMap,
+            @Nullable ResourceToFileTransformer fileTransformer) {
         this.resourcePath = resourcePath;
         this.directory = directory;
+        this.nameMap = nameMap;
+        this.fileTransformer = fileTransformer;
         configDirectory = new File(directory, configSubdir);
         logDirectory = new File(directory, logSubdir);
     }
@@ -55,7 +63,7 @@ public final class Environment {
         makeDirectories(directory);
         makeDirectories(configDirectory);
         makeDirectories(logDirectory);
-        EnvironmentFiles.copy(resourcePath, configDirectory);
+        EnvironmentFiles.copy(resourcePath, configDirectory, nameMap, fileTransformer);
     }
 
     ImmutableList<String> standardArgs(CppBinaries cppBinaries, String logCategories) {
