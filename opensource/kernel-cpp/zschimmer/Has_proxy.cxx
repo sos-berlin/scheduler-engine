@@ -106,6 +106,16 @@ jbyteArray java_byte_array_from_c(const string& s) {
     return result;
 }
 
+//----------------------------------------------------------------------string_from_java_byte_array
+
+string string_from_java_byte_array(jbyteArray a) {
+    Env jenv;
+    jbyte* jbytes = jenv->GetByteArrayElements(a, NULL);
+    string result ((const char*)jbytes, jenv->GetArrayLength(a));
+    jenv->ReleaseByteArrayElements(a, jbytes, 0);
+    return result;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace javabridge

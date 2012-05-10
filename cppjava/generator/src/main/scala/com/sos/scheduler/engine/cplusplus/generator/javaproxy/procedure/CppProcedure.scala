@@ -3,18 +3,19 @@ package com.sos.scheduler.engine.cplusplus.generator.javaproxy.procedure
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Cpp.quoted
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Jni.mangled
-import com.sos.scheduler.engine.cplusplus.generator.cpp.javabridge.JavaBridge
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas.CppClass
-import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
-import com.sos.scheduler.engine.cplusplus.generator.util.Parameter
-import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature
+import com.sos.scheduler.engine.cplusplus.generator.util.{ProcedureSignature, Parameter}
+import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
+import javabridge.JavaBridge
 
 class CppProcedure(cppClass: CppClass, m: ProcedureSignature) {
   val name = Cpp.normalizedName(m.name)
   private val javaBridgeCall = javabridge.MethodCall(m.returnType)
   private val returnTypeIsClass = !isVoid(m.returnType)  &&  isClass(m.returnType)
-  private val cppReturnType = if (returnTypeIsClass) CppName(m.returnType).fullName  else javaBridgeCall.returnType
+  private val cppReturnType = if (classIsByteArray(m.returnType)) "string"
+      else if (returnTypeIsClass) CppName(m.returnType).fullName
+      else javaBridgeCall.returnType
 
   protected val parameterListDeclaration =
     m.parameters map { p => cppParameterDeclaration(p.typ) + " " + p.name } mkString ("(", ", ", ")")
@@ -63,16 +64,26 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature) {
       def anyCall = m.returnType match {
         case t if isVoid(t) => voidCall
         case t if t.getName == "boolean" => booleanResultCall
+        case t if classIsByteArray(t) => byteArrayResultCall
         case t if isClass(t) => objectResultCall
         case _ => simpleResultCall
       }
 
       def voidCall = "    " + methodCall + ";\n"
+
       def booleanResultCall = "    return 0 != " + methodCall + ";\n"
+
+      def byteArrayResultCall =
+          "    jbyteArray resultJ = (jbyteArray)"+ methodCall +";\n"+
+          "    " + cppReturnType + " result = "+ JavaBridge.namespace +"::string_from_java_byte_array(resultJ);\n"+
+          "    "+ JavaBridge.namespace +"::Env()->DeleteLocalRef(resultJ);\n" +
+          "    return result;\n"
+
       def objectResultCall =
-        "    " + cppReturnType + " result;\n" +
-        "    result.steal_local_ref(" + methodCall + ");\n" +
-        "    return result;\n"
+          "    " + cppReturnType + " result;\n" +
+          "    result.steal_local_ref(" + methodCall + ");\n" +
+          "    return result;\n"
+
       def simpleResultCall = "    return " + methodCall + ";\n"
 
       parameterSetting + classSetting + anyCall
@@ -91,13 +102,13 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature) {
   }
 
   private def cppParameterDeclaration(t: Class[_]) = t match {
-    case _ if isByteArrayClass(t) => "const "+ JavaBridge.namespace +"::Local_java_byte_array&"
+    case _ if classIsByteArray(t) => "const "+ JavaBridge.namespace +"::Local_java_byte_array&"
     case _ if isClass(t) => "const "+ JavaBridge.hasProxyJobjectClassName(CppName(t).fullName) +"&"
     case _ => Jni.typeName(t)
   }
 
   private def cppParameterValue(p: Parameter) = p match {
-    case _ if isByteArrayClass(p.typ) => p.name +".get_jbyteArray()"
+    case _ if classIsByteArray(p.typ) => p.name +".get_jbyteArray()"
     case _ if isClass(p.typ) => p.name +".get_jobject()"
     case _ => p.name
   }

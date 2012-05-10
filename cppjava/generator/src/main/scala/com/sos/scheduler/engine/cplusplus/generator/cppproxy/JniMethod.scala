@@ -54,9 +54,9 @@ class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
     }
 
     private def jniExpressionStringOfCpp(t: Class[_], expr: String) = t match {
-      case _ if isByteArrayClass(t) => "java_byte_array_from_c("+ expr +")"
+      case _ if classIsByteArray(t) => "java_byte_array_from_c("+ expr +")"
       case _ if t.isArray => "java_array_from_c("+ expr +")"
-      case _ if isStringClass(t) => "env.jstring_from_string("+ expr +")"
+      case _ if classIsString(t) => "env.jstring_from_string("+ expr +")"
       case _ if classOf[CppProxy] isAssignableFrom t =>  "Has_proxy::jobject_of("+ expr +")"
       case _ if isClass(t) =>  // Method returns a real Java object, that means the method is used only for Java calls.
         "("+ expr +").local_ref()"  // Global reference is lost after call, therefore we make a local reference

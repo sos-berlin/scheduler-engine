@@ -32,9 +32,9 @@ class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends
 
   private def parameterTypesAreKnown(types: Seq[Class[_]]) = types forall parameterTypeIsKnown
 
-  private def parameterTypeIsKnown(t: Class[_]) = returnTypeIsKnown(t) || isByteArrayClass(t)
+  private def parameterTypeIsKnown(t: Class[_]) = returnTypeIsKnown(t)
 
-  private def returnTypeIsKnown(t: Class[_]) = t.isPrimitive  ||  typeIsValidClass(t) && knownClasses.contains(t)
+  private def returnTypeIsKnown(t: Class[_]) = t.isPrimitive || classIsByteArray(t) || typeIsValidClass(t) && knownClasses.contains(t)
 
   def headerPreprocessorMacro =
     ("_" + Configuration.generatedJavaProxyNamespace.simpleName + "_" + javaClass.getName.replace('.', '_') + "_H_").toUpperCase

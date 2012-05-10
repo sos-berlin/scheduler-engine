@@ -10,7 +10,7 @@ class JavaMethod(m: ProcedureSignature) {
     private val javaParameterDeclarations = m.parameters map { p => p.typ.getName + " " + p.name }
 
     private val returnTypeName = m.returnType match {
-      case c if isByteArrayClass(c) => "byte[]"
+      case c if classIsByteArray(c) => "byte[]"
       case c if c.isArray && c.getComponentType == classOf[java.lang.String] => "String[]"
       case c if c.isArray => "Object[]"
       case c => c.getName

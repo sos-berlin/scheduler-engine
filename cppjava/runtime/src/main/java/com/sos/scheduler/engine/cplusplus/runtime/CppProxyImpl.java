@@ -1,23 +1,30 @@
 package com.sos.scheduler.engine.cplusplus.runtime;
 
 
+import static java.lang.String.format;
+import static java.util.Locale.ROOT;
+
 public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<SISTER> {
+    private static final long nullCppReference = 0;
     /** cppReference wird über JNI gesetzt und gelöscht. Damit hat keine Java-Klasse Zugriff darauf. */
-    private volatile long cppReference = 0;
+    private volatile long cppReference = nullCppReference;
     private SISTER sister = null;
 
     protected final long cppReference() {
-        return cppReference;
+        long result = cppReference;
+        if (result == nullCppReference)
+            throw new CppProxyInvalidatedException("Using reference to destroyed C++ object: "+ this);
+        return result;
     }
 
     @Override public boolean cppReferenceIsValid() {
-        return cppReference != 0;
+        return cppReference != nullCppReference;
     }
 
     /** Nur für JNI zugänglich. Wird vom C++-Destruktor ~Has_proxy aufgerufen. */
     @SuppressWarnings("unused")
     private void invalidateCppReference() {
-        cppReference = 0;
+        cppReference = nullCppReference;
         if (sister != null)
             sister.onCppProxyInvalidated();
     }
@@ -44,6 +51,13 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
     protected final void requireContextIsNull(Sister context) {
         if (context != null)
             throw new RuntimeException("Sister context != null, but interface has no sisterType, in " + getClass().getName());
+    }
+
+    @Override public String toString() {
+        long ref = cppReference;
+        return getClass().getSimpleName() +
+                "("+ (ref == nullCppReference? "INVALIDATED" : format(ROOT, "%x", ref)) +")";
+
     }
 
     /* Wenn C++ ein temporäres Objekt liefert und also den C++-Proxy über JNI sofort wieder freigibt,
