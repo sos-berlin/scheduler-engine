@@ -265,6 +265,7 @@ struct Order : Com_order,
     void                        handle_end_state_repeat_order( const Time& );
 
     void                        on_carried_out          ();
+    void                        prepare_for_next_roundtrip();
 
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* );
     void                        set_identification_attributes( const xml::Element_ptr& );

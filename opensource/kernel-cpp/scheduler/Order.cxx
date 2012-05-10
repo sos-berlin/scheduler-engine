@@ -2103,7 +2103,7 @@ void Order::reset()
     set_state( _initial_state );
     set_next_start_time();
     _is_virgin = true;
-    check_for_replacing_or_removing();
+    prepare_for_next_roundtrip();
 }
 
 //-----------------------------------------------------------------------------Order::set_end_state
@@ -2731,7 +2731,17 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 void Order::on_carried_out()
 {
     order_subsystem()->count_finished_orders();
-    check_for_replacing_or_removing( act_now );     // Kann Auftrag aus der Jobkette nehmen
+    prepare_for_next_roundtrip();
+}
+
+//----------------------------------------------------------------Order::prepare_for_next_roundtrip
+
+void Order::prepare_for_next_roundtrip() {
+    if (is_in_folder()) {
+        if (!_spooler->settings()->_keep_order_content_on_reschedule)
+            replace_with_source();
+        check_for_replacing_or_removing( act_now );     // Kann Auftrag aus der Jobkette nehmen
+    }
 }
 
 //--------------------------------------------------------------------------Order::processing_error

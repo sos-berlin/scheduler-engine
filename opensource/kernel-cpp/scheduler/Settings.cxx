@@ -14,6 +14,12 @@ void Settings::set_defaults(Spooler* spooler) {
         _html_dir = spooler->home_directory() + "/operations_gui";
 }
 
+//---------------------------------------------------------------------------Settings::set_defaults
+
+void Settings::set_from_variables(const Com_variable_set& p) {
+    _keep_order_content_on_reschedule = p.get_bool("scheduler.order.keep_order_content_on_reschedule", true);
+}
+
 //------------------------------------------------------------------------------------Settings::set
 
 void Settings::set(int number, const string& value) {

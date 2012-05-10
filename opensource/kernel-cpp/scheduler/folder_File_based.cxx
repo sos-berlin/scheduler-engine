@@ -452,6 +452,13 @@ File_based* File_based::replace_now()
     return new_file_based;
 }
 
+//------------------------------------------------------------------File_based::replace_with_source
+
+void File_based::replace_with_source() {
+    set_force_file_reread();
+    _typed_folder->on_base_file_changed(this, &_base_file_info.directory_entry(_configuration_origin));
+}
+
 //----------------------------------------------------------------File_based::file_based_state_name
 
 string File_based::file_based_state_name( State state )

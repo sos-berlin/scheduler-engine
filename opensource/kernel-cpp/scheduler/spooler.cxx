@@ -1742,6 +1742,7 @@ void Spooler::load()
 
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
+    _modifiable_settings->set_from_variables(*_variables);
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();

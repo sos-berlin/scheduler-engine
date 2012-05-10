@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+>
+    <config>
+        <params>
+            <param name="scheduler.order.keep_order_content_on_reschedule" value="false"/>
+        </params>
+    </config>
+</spooler>

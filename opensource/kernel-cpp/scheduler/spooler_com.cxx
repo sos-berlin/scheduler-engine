@@ -558,23 +558,32 @@ void Com_variable_set::set_var( const string& name, const string& value )
 
 //---------------------------------------------------------------------Com_variable_set::get_string
 
-string Com_variable_set::get_string( const string& name )
+string Com_variable_set::get_string( const string& name ) const
 {
     Variant result;
-    
-    HRESULT hr = get_Var( Bstr(name), &result );
-    if( FAILED(hr) )  throw_com( hr, "Ivariable_set::get_Var" );
-
+    get_var( Bstr(name), &result );
     return string_from_variant( result );
 }
 
 //---------------------------------------------------------------------Com_variable_set::get_string
 
-int Com_variable_set::get_int(const string& name, int deflt) {
+int Com_variable_set::get_int(const string& name, int deflt) const {
     int result = deflt;
     string s = get_string(name);
     if (!s.empty()) 
         try { result = as_int(s); } 
+        catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
+        catch (Xc& x) { x.insert("parameter " + name); throw; }
+    return result;
+}
+
+//-----------------------------------------------------------------------Com_variable_set::get_bool
+
+bool Com_variable_set::get_bool(const string& name, bool deflt) const {
+    bool result = deflt;
+    string s = get_string(name);
+    if (!s.empty()) 
+        try { result = as_bool(s); } 
         catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
         catch (Xc& x) { x.insert("parameter " + name); throw; }
     return result;

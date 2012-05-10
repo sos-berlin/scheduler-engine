@@ -108,6 +108,7 @@ struct Base_file_info
                                                                                                              _last_write_time == f._last_write_time; }
     bool                        operator !=                 ( const Base_file_info& f ) const       { return !( *this == f ); }
 
+    directory_observer::Directory_entry directory_entry     (Configuration_origin) const;
     static bool                 less_dereferenced           ( const Base_file_info* a, const Base_file_info* b )  { return *a < *b; }
 
     string                     _filename;                   // == _path.name()
@@ -236,6 +237,8 @@ struct File_based : Scheduler_object,
     void                    set_typed_folder                ( Typed_folder* );                      // Nur f�r Typed_folder!
     void                    set_folder_path                 ( const Absolute_path& );
     Absolute_path               folder_path                 () const;
+
+    void                        replace_with_source         ();
 
     enum When_to_act { act_later, act_now };
     void                        check_for_replacing_or_removing( When_to_act = act_later );
