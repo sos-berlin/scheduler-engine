@@ -616,6 +616,33 @@ Jobject_debug_register::Class_object_counter_map Jobject_debug_register::class_o
     return result;
 }
 
+//-----------------------------------------------------Local_java_byte_array::Local_java_byte_array
+
+Local_java_byte_array::Local_java_byte_array(const string& s)
+    : _jbyteArray(NULL) 
+{
+    Env env;
+
+    _jbyteArray = env->NewByteArray(s.size());
+    if (!_jbyteArray)  env.throw_java("GetByteArrayElements", as_string(s.size()));
+
+    jboolean is_copy = false;
+    jbyte* b = env->GetByteArrayElements(_jbyteArray, &is_copy);
+    if (!b)  env.throw_java("GetByteArrayElements", as_string(s.size()));
+
+    memcpy(b, s.data(), s.size());
+    env->ReleaseByteArrayElements(_jbyteArray, b, 0);
+}
+
+//----------------------------------------------------Local_java_byte_array::~Local_java_byte_array
+
+Local_java_byte_array::~Local_java_byte_array() {
+    if (_jbyteArray) {
+        Env()->DeleteLocalRef(_jbyteArray);
+        _jbyteArray = NULL;
+    }
+}
+    
 //-------------------------------------------------------------------------------------------------
 
 } //namespace javabridge

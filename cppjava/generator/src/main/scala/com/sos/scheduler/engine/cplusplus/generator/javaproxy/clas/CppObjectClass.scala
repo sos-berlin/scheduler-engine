@@ -1,18 +1,14 @@
 package com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas
 
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
 import com.sos.scheduler.engine.cplusplus.generator.cpp.javabridge.JavaBridge
-import com.sos.scheduler.engine.cplusplus.generator.javaproxy._
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.procedure.CppConstructor
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature
 
-
 /** Liefert die Klasse, die das Objekt beschreibt. Das ist also die eigentliche Proxy-Klasse */
-class CppObjectClass(cppClass: CppClass) extends CppCode
-{
+class CppObjectClass(cppClass: CppClass) extends CppCode {
     val name = cppClass.javaClass.getSimpleName
     private val classClassName = cppClass.cppClassClass.name
 
@@ -58,12 +54,12 @@ class CppObjectClass(cppClass: CppClass) extends CppCode
         (codeSnippets map { _.headerCode }).mkString("\n") +
         "};\n\n"
 
-    def sourceCode = codeSnippets map { _.sourceCode + "\n" } mkString
+    def sourceCode = (codeSnippets map { _.sourceCode + "\n" }).mkString
 
     private def staticObjectInstantiators = new CppCode {
         def headerCode = if (cppClass.cppConstructors.isEmpty) hidingHeaderCode  else headerCode2
-        def headerCode2 = cppClass.cppConstructors map { "    " + _.objectInstantiator.headerCode + "\n" } mkString
-        def sourceCode  = cppClass.cppConstructors map {          _.objectInstantiator.sourceCode + "\n" } mkString
+        def headerCode2 = (cppClass.cppConstructors map { "    " + _.objectInstantiator.headerCode + "\n" }).mkString
+        def sourceCode  = (cppClass.cppConstructors map {          _.objectInstantiator.sourceCode + "\n" }).mkString
         def defaultConstructorSignature = ProcedureSignature.ofConstructor(Nil)
 
         /** Versteckt new_instance() der Oberklasse, wenn sonst kein new_instance definiert wird. */
@@ -131,8 +127,8 @@ class CppObjectClass(cppClass: CppClass) extends CppCode
     }
 
     private def methodsCode = new CppCode {
-        def headerCode = cppClass.cppMethods map { "    " + _.objectClassCode.headerCode + "\n" } mkString
-        def sourceCode = cppClass.cppMethods map { _.objectClassCode.sourceCode + "\n" } mkString
+        def headerCode = (cppClass.cppMethods map { "    " + _.objectClassCode.headerCode + "\n" }).mkString
+        def sourceCode = (cppClass.cppMethods map { _.objectClassCode.sourceCode + "\n" }).mkString
     }
 
     private def javaObjectClassMethodCode = new CppCode {
@@ -146,7 +142,7 @@ class CppObjectClass(cppClass: CppClass) extends CppCode
             "return " + classClassName + "::class_factory.clas(); }\n"
     }
 
-    private def objNameMethodCode = CppCode.empty       // Was ist mir obj_name()? Muss es const sein?
+    private def objNameMethodCode = CppCode.empty       // Was ist mit obj_name()? Muss es const sein?
 //    new CppCode {
 //        def headerCode = "    ::std::string obj_name() const;  // ruft toString()\n"
 //        def sourceCode = "::std::string " + name + "::obj_name() const { return toString(); }\n"

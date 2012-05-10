@@ -1,21 +1,16 @@
 package com.sos.scheduler.engine.cplusplus.generator.javaproxy.procedure
 
-import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Cpp.quoted
 import com.sos.scheduler.engine.cplusplus.generator.cpp.Jni.mangled
 import com.sos.scheduler.engine.cplusplus.generator.cpp.javabridge.JavaBridge
-import com.sos.scheduler.engine.cplusplus.generator.javaproxy._
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas.CppClass
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.generator.util.Parameter
 import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature
-import com.sos.scheduler.engine.cplusplus.scalautil.io.FileUtil._
 
-
-class CppProcedure(cppClass: CppClass, m: ProcedureSignature)
-{
+class CppProcedure(cppClass: CppClass, m: ProcedureSignature) {
     val name = Cpp.normalizedName(m.name)
     private val javaBridgeCall = javabridge.MethodCall(m.returnType)
     private val returnTypeIsClass = !isVoid(m.returnType)  &&  isClass(m.returnType)
@@ -24,8 +19,7 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature)
     protected val parameterListDeclaration =
         m.parameters map { p => cppParameterDeclaration(p.typ) + " " + p.name } mkString ("(", ", ", ")")
 
-    
-    val classClassCode = new CppCode {
+        val classClassCode = new CppCode {
         def headerCode = {
             val c = if (m.isStatic) "Static_method"  else "Method"
             JavaBridge.namespace + "::" + c + " const " + variableName + ";"
@@ -34,23 +28,24 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature)
             quoted(Jni.methodTypeSignatureString(m.parameterTypes, m.returnType)) + ")"
     }
 
-
     val objectClassCode = new CppCode {
         def headerCode = "static " ? m.isStatic + cppReturnType + " " + name + parameterListDeclaration + ";"
 
         def sourceCode = {
             val declaration = cppReturnType + " " + cppClass.name.simpleName + "::" + name + parameterListDeclaration
             val jclass = if (m.isStatic) cppClass.cppClassClass.name + "::class_factory.clas()"  else "_class.get()"
-            declaration + " {\n" + call(jclass, "get_jobject()") + "}\n"
+            //val localFrame = "    ::zschimmer::javabridge::Local_frame local_frame ("+ (m.parameters.size + 1) +");\n"  // Eigentlich nur für jbyte_array_from_string()
+            declaration +" {\n"+  // localFrame +
+            call(jclass, "get_jobject()") +
+            "}\n"
         }
 
         def call(jclass: String, jobject: String) = {
             val parameterSetting = {
                 val decl = "    " + JavaBridge.namespace + "::raw_parameter_list<" + m.parameterTypes.length + "> parameter_list;\n"
                 val assignments = {
-                    def paramValue(p: Parameter) = if (isClass(p.typ))  p.name + ".get_jobject()"  else p.name
                     (for ((p,i) <- m.parameters.zipWithIndex)
-                        yield "    parameter_list._jvalues[" + i + "]." + Jni.jvalueUnionMember(p.typ) + " = " + paramValue(p) + ";\n")
+                        yield "    parameter_list._jvalues[" + i + "]." + Jni.jvalueUnionMember(p.typ) + " = " + cppParameterValue(p) + ";\n")
                     .mkString
                 }
                 decl + assignments
@@ -82,7 +77,6 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature)
         }
     }
 
-                 
     private def variableName = {
         def variableNameOfJavaName(name: String) = name match {
             case "<init>" => "_constructor"
@@ -94,7 +88,15 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature)
         "__method"
     }
 
-    private def cppParameterDeclaration(t: Class[_]) = 
-        if (isClass(t)) "const " + JavaBridge.hasProxyJobjectClassName(CppName(t).fullName) + "&"
-        else Jni.typeName(t)
+    private def cppParameterDeclaration(t: Class[_]) = t match {
+      case _ if isByteArrayClass(t) => "const "+ JavaBridge.namespace +"::Local_java_byte_array&"
+      case _ if isClass(t) => "const "+ JavaBridge.hasProxyJobjectClassName(CppName(t).fullName) +"&"
+      case _ => Jni.typeName(t)
+    }
+
+    private def cppParameterValue(p: Parameter) = p match {
+      case _ if isByteArrayClass(p.typ) => p.name +".get_jbyteArray()"
+      case _ if isClass(p.typ) => p.name +".get_jobject()"
+      case _ => p.name
+    }
 }

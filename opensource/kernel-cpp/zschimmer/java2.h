@@ -471,6 +471,20 @@ private:
     Map                        _map;
 };
 
+//----------------------------------------------------------------------------Local_java_byte_array
+
+struct Local_java_byte_array {
+                                Local_java_byte_array       (const string& s);
+    virtual                    ~Local_java_byte_array       ();
+
+    jbyteArray                  get_jbyteArray              () const { return _jbyteArray; }
+
+private:
+                                Local_java_byte_array       (const Local_java_byte_array&);     // Nicht implementiert
+
+    jbyteArray                 _jbyteArray;
+};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace javabridge
