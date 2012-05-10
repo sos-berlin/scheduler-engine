@@ -43,12 +43,12 @@ Order_subsystemC::~Order_subsystemC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Order_subsystemC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Order_subsystemC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Order_subsystemC::java_class_() { return Order_subsystemC__class::class_factory.clas(); }
 
 
-void Order_subsystemC::Lazy_class::initialize() {
+void Order_subsystemC::Lazy_class::initialize() const {
     _value = Order_subsystemC__class::class_factory.clas();
 }
 

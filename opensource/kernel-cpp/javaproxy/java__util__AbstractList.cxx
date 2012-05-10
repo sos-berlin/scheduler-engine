@@ -61,7 +61,7 @@ AbstractList::~AbstractList() { assign_(NULL); }
 
 
 
-void AbstractList::add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) {
+void AbstractList::add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -69,27 +69,27 @@ void AbstractList::add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::
     cls->_add__ILjava_lang_Object_2__method.call(get_jobject(), parameter_list);
 }
 
-bool AbstractList::add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool AbstractList::add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     AbstractList__class* cls = _class.get();
     return 0 != cls->_add__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-void AbstractList::clear() {
+void AbstractList::clear() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractList__class* cls = _class.get();
     cls->_clear____method.call(get_jobject(), parameter_list);
 }
 
-bool AbstractList::equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool AbstractList::equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     AbstractList__class* cls = _class.get();
     return 0 != cls->_equals__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::Object AbstractList::get(jint p0) {
+::javaproxy::java::lang::Object AbstractList::get(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     AbstractList__class* cls = _class.get();
@@ -98,27 +98,27 @@ bool AbstractList::equals(const ::zschimmer::javabridge::proxy_jobject< ::javapr
     return result;
 }
 
-jint AbstractList::hashCode() {
+jint AbstractList::hashCode() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractList__class* cls = _class.get();
     return cls->_hashCode____method.int_call(get_jobject(), parameter_list);
 }
 
-jint AbstractList::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+jint AbstractList::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     AbstractList__class* cls = _class.get();
     return cls->_indexOf__Ljava_lang_Object_2__method.int_call(get_jobject(), parameter_list);
 }
 
-jint AbstractList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+jint AbstractList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     AbstractList__class* cls = _class.get();
     return cls->_lastIndexOf__Ljava_lang_Object_2__method.int_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::Object AbstractList::remove(jint p0) {
+::javaproxy::java::lang::Object AbstractList::remove(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     AbstractList__class* cls = _class.get();
@@ -127,7 +127,7 @@ jint AbstractList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::j
     return result;
 }
 
-::javaproxy::java::lang::Object AbstractList::set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) {
+::javaproxy::java::lang::Object AbstractList::set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -138,12 +138,12 @@ jint AbstractList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::j
 }
 
 
-::zschimmer::javabridge::Class* AbstractList::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* AbstractList::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* AbstractList::java_class_() { return AbstractList__class::class_factory.clas(); }
 
 
-void AbstractList::Lazy_class::initialize() {
+void AbstractList::Lazy_class::initialize() const {
     _value = AbstractList__class::class_factory.clas();
 }
 

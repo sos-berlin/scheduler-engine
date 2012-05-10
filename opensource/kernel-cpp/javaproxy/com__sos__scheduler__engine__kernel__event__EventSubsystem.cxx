@@ -49,21 +49,21 @@ EventSubsystem::~EventSubsystem() { assign_(NULL); }
 
 
 
-void EventSubsystem::checkNumberOfEventCodes(jint p0) {
+void EventSubsystem::checkNumberOfEventCodes(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     EventSubsystem__class* cls = _class.get();
     cls->_checkNumberOfEventCodes__I__method.call(get_jobject(), parameter_list);
 }
 
-void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0) {
+void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     EventSubsystem__class* cls = _class.get();
     cls->_report__Lcom_sos_scheduler_engine_data_event_AbstractEvent_2__method.call(get_jobject(), parameter_list);
 }
 
-void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) {
+void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -71,7 +71,7 @@ void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::java
     cls->_report__Lcom_sos_scheduler_engine_data_event_AbstractEvent_2Ljava_lang_Object_2__method.call(get_jobject(), parameter_list);
 }
 
-void EventSubsystem::reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) {
+void EventSubsystem::reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -80,12 +80,12 @@ void EventSubsystem::reportEventClass(jint p0, const ::zschimmer::javabridge::pr
 }
 
 
-::zschimmer::javabridge::Class* EventSubsystem::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* EventSubsystem::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* EventSubsystem::java_class_() { return EventSubsystem__class::class_factory.clas(); }
 
 
-void EventSubsystem::Lazy_class::initialize() {
+void EventSubsystem::Lazy_class::initialize() const {
     _value = EventSubsystem__class::class_factory.clas();
 }
 

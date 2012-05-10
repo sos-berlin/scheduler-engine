@@ -44,12 +44,12 @@ Order::~Order() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Order::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Order::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Order::java_class_() { return Order__class::class_factory.clas(); }
 
 
-void Order::Lazy_class::initialize() {
+void Order::Lazy_class::initialize() const {
     _value = Order__class::class_factory.clas();
 }
 

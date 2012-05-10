@@ -52,14 +52,14 @@ struct CppEventFactory : ::zschimmer::javabridge::proxy_jobject< CppEventFactory
     static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newOrderStateChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2);
     static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jboolean p2);
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<CppEventFactory__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

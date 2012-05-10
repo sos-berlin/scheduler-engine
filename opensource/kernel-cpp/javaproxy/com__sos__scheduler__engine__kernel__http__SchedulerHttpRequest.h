@@ -46,23 +46,23 @@ struct SchedulerHttpRequest : ::zschimmer::javabridge::proxy_jobject< SchedulerH
     }
   public:
 
-    ::javaproxy::java::lang::String body();
-    ::javaproxy::java::lang::String charsetName();
-    bool hasParameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    ::javaproxy::java::lang::String header(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    ::javaproxy::java::lang::String httpMethod();
-    ::javaproxy::java::lang::String parameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    ::javaproxy::java::lang::String protocol();
-    ::javaproxy::java::lang::String urlPath();
+    ::javaproxy::java::lang::String body() const;
+    ::javaproxy::java::lang::String charsetName() const;
+    bool hasParameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    ::javaproxy::java::lang::String header(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    ::javaproxy::java::lang::String httpMethod() const;
+    ::javaproxy::java::lang::String parameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    ::javaproxy::java::lang::String protocol() const;
+    ::javaproxy::java::lang::String urlPath() const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<SchedulerHttpRequest__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

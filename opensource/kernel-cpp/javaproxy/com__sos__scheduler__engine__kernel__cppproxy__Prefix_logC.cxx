@@ -42,12 +42,12 @@ Prefix_logC::~Prefix_logC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Prefix_logC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Prefix_logC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Prefix_logC::java_class_() { return Prefix_logC__class::class_factory.clas(); }
 
 
-void Prefix_logC::Lazy_class::initialize() {
+void Prefix_logC::Lazy_class::initialize() const {
     _value = Prefix_logC__class::class_factory.clas();
 }
 

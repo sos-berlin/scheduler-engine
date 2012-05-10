@@ -42,12 +42,12 @@ SettingsC::~SettingsC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* SettingsC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* SettingsC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* SettingsC::java_class_() { return SettingsC__class::class_factory.clas(); }
 
 
-void SettingsC::Lazy_class::initialize() {
+void SettingsC::Lazy_class::initialize() const {
     _value = SettingsC__class::class_factory.clas();
 }
 

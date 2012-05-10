@@ -47,31 +47,31 @@ PrefixLog::~PrefixLog() { assign_(NULL); }
 
 
 
-void PrefixLog::onClosed() {
+void PrefixLog::onClosed() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     PrefixLog__class* cls = _class.get();
     cls->_onClosed____method.call(get_jobject(), parameter_list);
 }
 
-void PrefixLog::onLogged() {
+void PrefixLog::onLogged() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     PrefixLog__class* cls = _class.get();
     cls->_onLogged____method.call(get_jobject(), parameter_list);
 }
 
-void PrefixLog::onStarted() {
+void PrefixLog::onStarted() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     PrefixLog__class* cls = _class.get();
     cls->_onStarted____method.call(get_jobject(), parameter_list);
 }
 
 
-::zschimmer::javabridge::Class* PrefixLog::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* PrefixLog::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* PrefixLog::java_class_() { return PrefixLog__class::class_factory.clas(); }
 
 
-void PrefixLog::Lazy_class::initialize() {
+void PrefixLog::Lazy_class::initialize() const {
     _value = PrefixLog__class::class_factory.clas();
 }
 

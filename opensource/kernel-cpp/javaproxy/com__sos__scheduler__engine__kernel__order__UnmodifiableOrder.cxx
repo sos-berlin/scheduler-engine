@@ -42,12 +42,12 @@ UnmodifiableOrder::~UnmodifiableOrder() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* UnmodifiableOrder::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* UnmodifiableOrder::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* UnmodifiableOrder::java_class_() { return UnmodifiableOrder__class::class_factory.clas(); }
 
 
-void UnmodifiableOrder::Lazy_class::initialize() {
+void UnmodifiableOrder::Lazy_class::initialize() const {
     _value = UnmodifiableOrder__class::class_factory.clas();
 }
 

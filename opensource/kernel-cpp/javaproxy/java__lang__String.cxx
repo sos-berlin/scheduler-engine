@@ -14,6 +14,12 @@ struct String__class : ::zschimmer::javabridge::Class
    ~String__class();
 
     ::zschimmer::javabridge::Method const __constructor____method;
+    ::zschimmer::javabridge::Method const __constructor___3B__method;
+    ::zschimmer::javabridge::Method const __constructor___3BI__method;
+    ::zschimmer::javabridge::Method const __constructor___3BII__method;
+    ::zschimmer::javabridge::Method const __constructor___3BIII__method;
+    ::zschimmer::javabridge::Method const __constructor___3BIILjava_lang_String_2__method;
+    ::zschimmer::javabridge::Method const __constructor___3BLjava_lang_String_2__method;
     ::zschimmer::javabridge::Method const __constructor__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _charAt__I__method;
     ::zschimmer::javabridge::Method const _codePointAt__I__method;
@@ -26,6 +32,9 @@ struct String__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _endsWith__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _equals__Ljava_lang_Object_2__method;
     ::zschimmer::javabridge::Method const _equalsIgnoreCase__Ljava_lang_String_2__method;
+    ::zschimmer::javabridge::Method const _getBytes____method;
+    ::zschimmer::javabridge::Method const _getBytes__II_3BI__method;
+    ::zschimmer::javabridge::Method const _getBytes__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _hashCode____method;
     ::zschimmer::javabridge::Method const _indexOf__I__method;
     ::zschimmer::javabridge::Method const _indexOf__II__method;
@@ -69,6 +78,12 @@ const ::zschimmer::javabridge::class_factory< String__class > String__class::cla
 String__class::String__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor____method(this, "<init>", "()V")
+    ,__constructor___3B__method(this, "<init>", "([B)V")
+    ,__constructor___3BI__method(this, "<init>", "([BI)V")
+    ,__constructor___3BII__method(this, "<init>", "([BII)V")
+    ,__constructor___3BIII__method(this, "<init>", "([BIII)V")
+    ,__constructor___3BIILjava_lang_String_2__method(this, "<init>", "([BIILjava/lang/String;)V")
+    ,__constructor___3BLjava_lang_String_2__method(this, "<init>", "([BLjava/lang/String;)V")
     ,__constructor__Ljava_lang_String_2__method(this, "<init>", "(Ljava/lang/String;)V")
     ,_charAt__I__method(this, "charAt", "(I)C")
     ,_codePointAt__I__method(this, "codePointAt", "(I)I")
@@ -81,6 +96,9 @@ String__class::String__class(const string& class_name) :
     ,_endsWith__Ljava_lang_String_2__method(this, "endsWith", "(Ljava/lang/String;)Z")
     ,_equals__Ljava_lang_Object_2__method(this, "equals", "(Ljava/lang/Object;)Z")
     ,_equalsIgnoreCase__Ljava_lang_String_2__method(this, "equalsIgnoreCase", "(Ljava/lang/String;)Z")
+    ,_getBytes____method(this, "getBytes", "()[B")
+    ,_getBytes__II_3BI__method(this, "getBytes", "(II[BI)V")
+    ,_getBytes__Ljava_lang_String_2__method(this, "getBytes", "(Ljava/lang/String;)[B")
     ,_hashCode____method(this, "hashCode", "()I")
     ,_indexOf__I__method(this, "indexOf", "(I)I")
     ,_indexOf__II__method(this, "indexOf", "(II)I")
@@ -129,6 +147,76 @@ String String::new_instance() {
     return result;
 }
 
+String String::new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0) {
+    String result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jbyteArray();
+    String__class* cls = result._class.get();
+    cls->__constructor___3B__method.call(result.get_jobject(), parameter_list);
+    return result;
+}
+
+String String::new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1) {
+    String result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jbyteArray();
+    parameter_list._jvalues[1].i = p1;
+    String__class* cls = result._class.get();
+    cls->__constructor___3BI__method.call(result.get_jobject(), parameter_list);
+    return result;
+}
+
+String String::new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1, jint p2) {
+    String result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jbyteArray();
+    parameter_list._jvalues[1].i = p1;
+    parameter_list._jvalues[2].i = p2;
+    String__class* cls = result._class.get();
+    cls->__constructor___3BII__method.call(result.get_jobject(), parameter_list);
+    return result;
+}
+
+String String::new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1, jint p2, jint p3) {
+    String result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<4> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jbyteArray();
+    parameter_list._jvalues[1].i = p1;
+    parameter_list._jvalues[2].i = p2;
+    parameter_list._jvalues[3].i = p3;
+    String__class* cls = result._class.get();
+    cls->__constructor___3BIII__method.call(result.get_jobject(), parameter_list);
+    return result;
+}
+
+String String::new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1, jint p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3) {
+    String result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<4> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jbyteArray();
+    parameter_list._jvalues[1].i = p1;
+    parameter_list._jvalues[2].i = p2;
+    parameter_list._jvalues[3].l = p3.get_jobject();
+    String__class* cls = result._class.get();
+    cls->__constructor___3BIILjava_lang_String_2__method.call(result.get_jobject(), parameter_list);
+    return result;
+}
+
+String String::new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) {
+    String result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jbyteArray();
+    parameter_list._jvalues[1].l = p1.get_jobject();
+    String__class* cls = result._class.get();
+    cls->__constructor___3BLjava_lang_String_2__method.call(result.get_jobject(), parameter_list);
+    return result;
+}
+
 String String::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
     String result;
     result.java_object_allocate_();
@@ -159,28 +247,28 @@ String::~String() { assign_(NULL); }
 
 
 
-wchar_t String::charAt(jint p0) {
+wchar_t String::charAt(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     String__class* cls = _class.get();
     return cls->_charAt__I__method.char_call(get_jobject(), parameter_list);
 }
 
-jint String::codePointAt(jint p0) {
+jint String::codePointAt(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     String__class* cls = _class.get();
     return cls->_codePointAt__I__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::codePointBefore(jint p0) {
+jint String::codePointBefore(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     String__class* cls = _class.get();
     return cls->_codePointBefore__I__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::codePointCount(jint p0, jint p1) {
+jint String::codePointCount(jint p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].i = p1;
@@ -188,28 +276,28 @@ jint String::codePointCount(jint p0, jint p1) {
     return cls->_codePointCount__II__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+jint String::compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return cls->_compareTo__Ljava_lang_Object_2__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+jint String::compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return cls->_compareTo__Ljava_lang_String_2__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::compareToIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+jint String::compareToIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return cls->_compareToIgnoreCase__Ljava_lang_String_2__method.int_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::String String::concat(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+::javaproxy::java::lang::String String::concat(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
@@ -218,41 +306,70 @@ jint String::compareToIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< :
     return result;
 }
 
-bool String::endsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+bool String::endsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return 0 != cls->_endsWith__Ljava_lang_String_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-bool String::equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool String::equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return 0 != cls->_equals__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-bool String::equalsIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+bool String::equalsIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return 0 != cls->_equalsIgnoreCase__Ljava_lang_String_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-jint String::hashCode() {
+string String::getBytes() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    String__class* cls = _class.get();
+    jbyteArray resultJ = (jbyteArray)cls->_getBytes____method.jobject_call(get_jobject(), parameter_list);
+    string result = ::zschimmer::javabridge::string_from_java_byte_array(resultJ);
+    ::zschimmer::javabridge::Env()->DeleteLocalRef(resultJ);
+    return result;
+}
+
+void String::getBytes(jint p0, jint p1, const ::zschimmer::javabridge::Local_java_byte_array& p2, jint p3) const {
+    ::zschimmer::javabridge::raw_parameter_list<4> parameter_list;
+    parameter_list._jvalues[0].i = p0;
+    parameter_list._jvalues[1].i = p1;
+    parameter_list._jvalues[2].l = p2.get_jbyteArray();
+    parameter_list._jvalues[3].i = p3;
+    String__class* cls = _class.get();
+    cls->_getBytes__II_3BI__method.call(get_jobject(), parameter_list);
+}
+
+string String::getBytes(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    String__class* cls = _class.get();
+    jbyteArray resultJ = (jbyteArray)cls->_getBytes__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list);
+    string result = ::zschimmer::javabridge::string_from_java_byte_array(resultJ);
+    ::zschimmer::javabridge::Env()->DeleteLocalRef(resultJ);
+    return result;
+}
+
+jint String::hashCode() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     return cls->_hashCode____method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::indexOf(jint p0) {
+jint String::indexOf(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     String__class* cls = _class.get();
     return cls->_indexOf__I__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::indexOf(jint p0, jint p1) {
+jint String::indexOf(jint p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].i = p1;
@@ -260,14 +377,14 @@ jint String::indexOf(jint p0, jint p1) {
     return cls->_indexOf__II__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+jint String::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return cls->_indexOf__Ljava_lang_String_2__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) {
+jint String::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].i = p1;
@@ -275,7 +392,7 @@ jint String::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::
     return cls->_indexOf__Ljava_lang_String_2I__method.int_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::String String::intern() {
+::javaproxy::java::lang::String String::intern() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -283,20 +400,20 @@ jint String::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::
     return result;
 }
 
-bool String::isEmpty() {
+bool String::isEmpty() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     return 0 != cls->_isEmpty____method.bool_call(get_jobject(), parameter_list);
 }
 
-jint String::lastIndexOf(jint p0) {
+jint String::lastIndexOf(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     String__class* cls = _class.get();
     return cls->_lastIndexOf__I__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::lastIndexOf(jint p0, jint p1) {
+jint String::lastIndexOf(jint p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].i = p1;
@@ -304,14 +421,14 @@ jint String::lastIndexOf(jint p0, jint p1) {
     return cls->_lastIndexOf__II__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+jint String::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return cls->_lastIndexOf__Ljava_lang_String_2__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) {
+jint String::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].i = p1;
@@ -319,20 +436,20 @@ jint String::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javapro
     return cls->_lastIndexOf__Ljava_lang_String_2I__method.int_call(get_jobject(), parameter_list);
 }
 
-jint String::length() {
+jint String::length() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     return cls->_length____method.int_call(get_jobject(), parameter_list);
 }
 
-bool String::matches(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+bool String::matches(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return 0 != cls->_matches__Ljava_lang_String_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-jint String::offsetByCodePoints(jint p0, jint p1) {
+jint String::offsetByCodePoints(jint p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].i = p1;
@@ -340,7 +457,7 @@ jint String::offsetByCodePoints(jint p0, jint p1) {
     return cls->_offsetByCodePoints__II__method.int_call(get_jobject(), parameter_list);
 }
 
-bool String::regionMatches(jboolean p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, jint p3, jint p4) {
+bool String::regionMatches(jboolean p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, jint p3, jint p4) const {
     ::zschimmer::javabridge::raw_parameter_list<5> parameter_list;
     parameter_list._jvalues[0].z = p0;
     parameter_list._jvalues[1].i = p1;
@@ -351,7 +468,7 @@ bool String::regionMatches(jboolean p0, jint p1, const ::zschimmer::javabridge::
     return 0 != cls->_regionMatches__ZILjava_lang_String_2II__method.bool_call(get_jobject(), parameter_list);
 }
 
-bool String::regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2, jint p3) {
+bool String::regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2, jint p3) const {
     ::zschimmer::javabridge::raw_parameter_list<4> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -361,7 +478,7 @@ bool String::regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject
     return 0 != cls->_regionMatches__ILjava_lang_String_2II__method.bool_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::String String::replace(jchar p0, jchar p1) {
+::javaproxy::java::lang::String String::replace(jchar p0, jchar p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].c = p0;
     parameter_list._jvalues[1].c = p1;
@@ -371,7 +488,7 @@ bool String::regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject
     return result;
 }
 
-::javaproxy::java::lang::String String::replaceAll(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) {
+::javaproxy::java::lang::String String::replaceAll(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -381,7 +498,7 @@ bool String::regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject
     return result;
 }
 
-::javaproxy::java::lang::String String::replaceFirst(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) {
+::javaproxy::java::lang::String String::replaceFirst(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -391,14 +508,14 @@ bool String::regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject
     return result;
 }
 
-bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     String__class* cls = _class.get();
     return 0 != cls->_startsWith__Ljava_lang_String_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) {
+bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].i = p1;
@@ -406,7 +523,7 @@ bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaprox
     return 0 != cls->_startsWith__Ljava_lang_String_2I__method.bool_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::String String::substring(jint p0) {
+::javaproxy::java::lang::String String::substring(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     String__class* cls = _class.get();
@@ -415,7 +532,7 @@ bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaprox
     return result;
 }
 
-::javaproxy::java::lang::String String::substring(jint p0, jint p1) {
+::javaproxy::java::lang::String String::substring(jint p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].i = p1;
@@ -425,7 +542,7 @@ bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaprox
     return result;
 }
 
-::javaproxy::java::lang::String String::toLowerCase() {
+::javaproxy::java::lang::String String::toLowerCase() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -433,7 +550,7 @@ bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaprox
     return result;
 }
 
-::javaproxy::java::lang::String String::toString() {
+::javaproxy::java::lang::String String::toString() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -441,7 +558,7 @@ bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaprox
     return result;
 }
 
-::javaproxy::java::lang::String String::toUpperCase() {
+::javaproxy::java::lang::String String::toUpperCase() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -449,7 +566,7 @@ bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaprox
     return result;
 }
 
-::javaproxy::java::lang::String String::trim() {
+::javaproxy::java::lang::String String::trim() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     String__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -521,12 +638,12 @@ bool String::startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaprox
 }
 
 
-::zschimmer::javabridge::Class* String::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* String::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* String::java_class_() { return String__class::class_factory.clas(); }
 
 
-void String::Lazy_class::initialize() {
+void String::Lazy_class::initialize() const {
     _value = String__class::class_factory.clas();
 }
 

@@ -66,32 +66,32 @@ Object::~Object() { assign_(NULL); }
 
 
 
-bool Object::equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool Object::equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     Object__class* cls = _class.get();
     return 0 != cls->_equals__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-jint Object::hashCode() {
+jint Object::hashCode() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Object__class* cls = _class.get();
     return cls->_hashCode____method.int_call(get_jobject(), parameter_list);
 }
 
-void Object::notify() {
+void Object::notify() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Object__class* cls = _class.get();
     cls->_notify____method.call(get_jobject(), parameter_list);
 }
 
-void Object::notifyAll() {
+void Object::notifyAll() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Object__class* cls = _class.get();
     cls->_notifyAll____method.call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::String Object::toString() {
+::javaproxy::java::lang::String Object::toString() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Object__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -99,20 +99,20 @@ void Object::notifyAll() {
     return result;
 }
 
-void Object::wait() {
+void Object::wait() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Object__class* cls = _class.get();
     cls->_wait____method.call(get_jobject(), parameter_list);
 }
 
-void Object::wait(jlong p0) {
+void Object::wait(jlong p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].j = p0;
     Object__class* cls = _class.get();
     cls->_wait__J__method.call(get_jobject(), parameter_list);
 }
 
-void Object::wait(jlong p0, jint p1) {
+void Object::wait(jlong p0, jint p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].j = p0;
     parameter_list._jvalues[1].i = p1;
@@ -121,12 +121,12 @@ void Object::wait(jlong p0, jint p1) {
 }
 
 
-::zschimmer::javabridge::Class* Object::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Object::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Object::java_class_() { return Object__class::class_factory.clas(); }
 
 
-void Object::Lazy_class::initialize() {
+void Object::Lazy_class::initialize() const {
     _value = Object__class::class_factory.clas();
 }
 

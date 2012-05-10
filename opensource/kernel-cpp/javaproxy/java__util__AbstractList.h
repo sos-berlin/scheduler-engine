@@ -48,25 +48,25 @@ struct AbstractList : ::zschimmer::javabridge::proxy_jobject< AbstractList >, ::
     }
   public:
 
-    void add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
-    bool add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    void clear();
-    bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    ::javaproxy::java::lang::Object get(jint p0);
-    jint hashCode();
-    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    ::javaproxy::java::lang::Object remove(jint p0);
-    ::javaproxy::java::lang::Object set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
+    void add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
+    bool add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    void clear() const;
+    bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    ::javaproxy::java::lang::Object get(jint p0) const;
+    jint hashCode() const;
+    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    ::javaproxy::java::lang::Object remove(jint p0) const;
+    ::javaproxy::java::lang::Object set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<AbstractList__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

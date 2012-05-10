@@ -56,7 +56,7 @@ SchedulerHttpRequest::~SchedulerHttpRequest() { assign_(NULL); }
 
 
 
-::javaproxy::java::lang::String SchedulerHttpRequest::body() {
+::javaproxy::java::lang::String SchedulerHttpRequest::body() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     SchedulerHttpRequest__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -64,7 +64,7 @@ SchedulerHttpRequest::~SchedulerHttpRequest() { assign_(NULL); }
     return result;
 }
 
-::javaproxy::java::lang::String SchedulerHttpRequest::charsetName() {
+::javaproxy::java::lang::String SchedulerHttpRequest::charsetName() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     SchedulerHttpRequest__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -72,14 +72,14 @@ SchedulerHttpRequest::~SchedulerHttpRequest() { assign_(NULL); }
     return result;
 }
 
-bool SchedulerHttpRequest::hasParameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+bool SchedulerHttpRequest::hasParameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     SchedulerHttpRequest__class* cls = _class.get();
     return 0 != cls->_hasParameter__Ljava_lang_String_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::String SchedulerHttpRequest::header(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+::javaproxy::java::lang::String SchedulerHttpRequest::header(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     SchedulerHttpRequest__class* cls = _class.get();
@@ -88,7 +88,7 @@ bool SchedulerHttpRequest::hasParameter(const ::zschimmer::javabridge::proxy_job
     return result;
 }
 
-::javaproxy::java::lang::String SchedulerHttpRequest::httpMethod() {
+::javaproxy::java::lang::String SchedulerHttpRequest::httpMethod() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     SchedulerHttpRequest__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -96,7 +96,7 @@ bool SchedulerHttpRequest::hasParameter(const ::zschimmer::javabridge::proxy_job
     return result;
 }
 
-::javaproxy::java::lang::String SchedulerHttpRequest::parameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+::javaproxy::java::lang::String SchedulerHttpRequest::parameter(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     SchedulerHttpRequest__class* cls = _class.get();
@@ -105,7 +105,7 @@ bool SchedulerHttpRequest::hasParameter(const ::zschimmer::javabridge::proxy_job
     return result;
 }
 
-::javaproxy::java::lang::String SchedulerHttpRequest::protocol() {
+::javaproxy::java::lang::String SchedulerHttpRequest::protocol() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     SchedulerHttpRequest__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -113,7 +113,7 @@ bool SchedulerHttpRequest::hasParameter(const ::zschimmer::javabridge::proxy_job
     return result;
 }
 
-::javaproxy::java::lang::String SchedulerHttpRequest::urlPath() {
+::javaproxy::java::lang::String SchedulerHttpRequest::urlPath() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     SchedulerHttpRequest__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -122,12 +122,12 @@ bool SchedulerHttpRequest::hasParameter(const ::zschimmer::javabridge::proxy_job
 }
 
 
-::zschimmer::javabridge::Class* SchedulerHttpRequest::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* SchedulerHttpRequest::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* SchedulerHttpRequest::java_class_() { return SchedulerHttpRequest__class::class_factory.clas(); }
 
 
-void SchedulerHttpRequest::Lazy_class::initialize() {
+void SchedulerHttpRequest::Lazy_class::initialize() const {
     _value = SchedulerHttpRequest__class::class_factory.clas();
 }
 

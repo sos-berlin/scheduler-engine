@@ -75,7 +75,7 @@ Scheduler::~Scheduler() { assign_(NULL); }
 
 
 
-::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem Scheduler::getEventSubsystem() {
+::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem Scheduler::getEventSubsystem() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem result;
@@ -83,7 +83,7 @@ Scheduler::~Scheduler() { assign_(NULL); }
     return result;
 }
 
-::javaproxy::java::lang::String Scheduler::javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+::javaproxy::java::lang::String Scheduler::javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     Scheduler__class* cls = _class.get();
@@ -92,56 +92,56 @@ Scheduler::~Scheduler() { assign_(NULL); }
     return result;
 }
 
-void Scheduler::onActivate() {
+void Scheduler::onActivate() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_onActivate____method.call(get_jobject(), parameter_list);
 }
 
-void Scheduler::onActivated() {
+void Scheduler::onActivated() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_onActivated____method.call(get_jobject(), parameter_list);
 }
 
-void Scheduler::onClose() {
+void Scheduler::onClose() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_onClose____method.call(get_jobject(), parameter_list);
 }
 
-void Scheduler::onEnteringSleepState() {
+void Scheduler::onEnteringSleepState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_onEnteringSleepState____method.call(get_jobject(), parameter_list);
 }
 
-void Scheduler::onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+void Scheduler::onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     Scheduler__class* cls = _class.get();
     cls->_onLoad__Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
 }
 
-void Scheduler::threadLock() {
+void Scheduler::threadLock() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_threadLock____method.call(get_jobject(), parameter_list);
 }
 
-void Scheduler::threadUnlock() {
+void Scheduler::threadUnlock() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_threadUnlock____method.call(get_jobject(), parameter_list);
 }
 
 
-::zschimmer::javabridge::Class* Scheduler::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Scheduler::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Scheduler::java_class_() { return Scheduler__class::class_factory.clas(); }
 
 
-void Scheduler::Lazy_class::initialize() {
+void Scheduler::Lazy_class::initialize() const {
     _value = Scheduler__class::class_factory.clas();
 }
 

@@ -43,12 +43,12 @@ Job_chainC::~Job_chainC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Job_chainC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Job_chainC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Job_chainC::java_class_() { return Job_chainC__class::class_factory.clas(); }
 
 
-void Job_chainC::Lazy_class::initialize() {
+void Job_chainC::Lazy_class::initialize() const {
     _value = Job_chainC__class::class_factory.clas();
 }
 

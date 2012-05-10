@@ -43,12 +43,12 @@ Job::~Job() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Job::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Job::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Job::java_class_() { return Job__class::class_factory.clas(); }
 
 
-void Job::Lazy_class::initialize() {
+void Job::Lazy_class::initialize() const {
     _value = Job__class::class_factory.clas();
 }
 

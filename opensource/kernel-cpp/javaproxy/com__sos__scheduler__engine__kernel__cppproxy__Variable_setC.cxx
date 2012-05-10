@@ -43,12 +43,12 @@ Variable_setC::~Variable_setC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Variable_setC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Variable_setC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Variable_setC::java_class_() { return Variable_setC__class::class_factory.clas(); }
 
 
-void Variable_setC::Lazy_class::initialize() {
+void Variable_setC::Lazy_class::initialize() const {
     _value = Variable_setC__class::class_factory.clas();
 }
 

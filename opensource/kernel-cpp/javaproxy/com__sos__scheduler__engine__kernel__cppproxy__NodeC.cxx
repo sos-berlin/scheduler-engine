@@ -42,12 +42,12 @@ NodeC::~NodeC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* NodeC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* NodeC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* NodeC::java_class_() { return NodeC__class::class_factory.clas(); }
 
 
-void NodeC::Lazy_class::initialize() {
+void NodeC::Lazy_class::initialize() const {
     _value = NodeC__class::class_factory.clas();
 }
 

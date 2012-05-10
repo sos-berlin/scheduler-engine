@@ -43,12 +43,12 @@ DatabaseC::~DatabaseC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* DatabaseC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* DatabaseC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* DatabaseC::java_class_() { return DatabaseC__class::class_factory.clas(); }
 
 
-void DatabaseC::Lazy_class::initialize() {
+void DatabaseC::Lazy_class::initialize() const {
     _value = DatabaseC__class::class_factory.clas();
 }
 

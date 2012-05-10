@@ -42,19 +42,19 @@ Sister::~Sister() { assign_(NULL); }
 
 
 
-void Sister::onCppProxyInvalidated() {
+void Sister::onCppProxyInvalidated() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Sister__class* cls = _class.get();
     cls->_onCppProxyInvalidated____method.call(get_jobject(), parameter_list);
 }
 
 
-::zschimmer::javabridge::Class* Sister::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Sister::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Sister::java_class_() { return Sister__class::class_factory.clas(); }
 
 
-void Sister::Lazy_class::initialize() {
+void Sister::Lazy_class::initialize() const {
     _value = Sister__class::class_factory.clas();
 }
 

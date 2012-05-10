@@ -43,12 +43,12 @@ FileBased::~FileBased() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* FileBased::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* FileBased::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* FileBased::java_class_() { return FileBased__class::class_factory.clas(); }
 
 
-void FileBased::Lazy_class::initialize() {
+void FileBased::Lazy_class::initialize() const {
     _value = FileBased__class::class_factory.clas();
 }
 

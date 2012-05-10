@@ -47,18 +47,18 @@ struct PrefixLog : ::zschimmer::javabridge::proxy_jobject< PrefixLog >, ::javapr
     }
   public:
 
-    void onClosed();
-    void onLogged();
-    void onStarted();
+    void onClosed() const;
+    void onLogged() const;
+    void onStarted() const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<PrefixLog__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

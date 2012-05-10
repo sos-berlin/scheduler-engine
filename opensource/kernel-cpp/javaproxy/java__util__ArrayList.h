@@ -48,30 +48,30 @@ struct ArrayList : ::zschimmer::javabridge::proxy_jobject< ArrayList >, ::javapr
     }
   public:
 
-    void add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
-    bool add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    void clear();
-    ::javaproxy::java::lang::Object clone();
-    bool contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    void ensureCapacity(jint p0);
-    ::javaproxy::java::lang::Object get(jint p0);
-    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    bool isEmpty();
-    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    ::javaproxy::java::lang::Object remove(jint p0);
-    bool remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    ::javaproxy::java::lang::Object set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
-    jint size();
-    void trimToSize();
+    void add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
+    bool add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    void clear() const;
+    ::javaproxy::java::lang::Object clone() const;
+    bool contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    void ensureCapacity(jint p0) const;
+    ::javaproxy::java::lang::Object get(jint p0) const;
+    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    bool isEmpty() const;
+    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    ::javaproxy::java::lang::Object remove(jint p0) const;
+    bool remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    ::javaproxy::java::lang::Object set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
+    jint size() const;
+    void trimToSize() const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<ArrayList__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

@@ -90,12 +90,12 @@ CppEventFactory::~CppEventFactory() { assign_(NULL); }
 }
 
 
-::zschimmer::javabridge::Class* CppEventFactory::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* CppEventFactory::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* CppEventFactory::java_class_() { return CppEventFactory__class::class_factory.clas(); }
 
 
-void CppEventFactory::Lazy_class::initialize() {
+void CppEventFactory::Lazy_class::initialize() const {
     _value = CppEventFactory__class::class_factory.clas();
 }
 

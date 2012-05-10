@@ -48,14 +48,14 @@ struct Order_subsystemC : ::zschimmer::javabridge::proxy_jobject< Order_subsyste
   public:
 
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<Order_subsystemC__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

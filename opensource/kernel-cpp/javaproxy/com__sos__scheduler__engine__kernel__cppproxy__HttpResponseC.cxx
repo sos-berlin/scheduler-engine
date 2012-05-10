@@ -43,12 +43,12 @@ HttpResponseC::~HttpResponseC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* HttpResponseC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* HttpResponseC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* HttpResponseC::java_class_() { return HttpResponseC__class::class_factory.clas(); }
 
 
-void HttpResponseC::Lazy_class::initialize() {
+void HttpResponseC::Lazy_class::initialize() const {
     _value = HttpResponseC__class::class_factory.clas();
 }
 

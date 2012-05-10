@@ -43,12 +43,12 @@ VariableSet::~VariableSet() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* VariableSet::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* VariableSet::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* VariableSet::java_class_() { return VariableSet__class::class_factory.clas(); }
 
 
-void VariableSet::Lazy_class::initialize() {
+void VariableSet::Lazy_class::initialize() const {
     _value = VariableSet__class::class_factory.clas();
 }
 

@@ -52,12 +52,12 @@ SpoolerC::~SpoolerC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* SpoolerC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* SpoolerC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* SpoolerC::java_class_() { return SpoolerC__class::class_factory.clas(); }
 
 
-void SpoolerC::Lazy_class::initialize() {
+void SpoolerC::Lazy_class::initialize() const {
     _value = SpoolerC__class::class_factory.clas();
 }
 

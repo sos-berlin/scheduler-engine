@@ -43,12 +43,12 @@ Job_subsystemC::~Job_subsystemC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Job_subsystemC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Job_subsystemC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Job_subsystemC::java_class_() { return Job_subsystemC__class::class_factory.clas(); }
 
 
-void Job_subsystemC::Lazy_class::initialize() {
+void Job_subsystemC::Lazy_class::initialize() const {
     _value = Job_subsystemC__class::class_factory.clas();
 }
 

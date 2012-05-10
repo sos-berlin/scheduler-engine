@@ -42,12 +42,12 @@ HttpChunkReaderC::~HttpChunkReaderC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* HttpChunkReaderC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* HttpChunkReaderC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* HttpChunkReaderC::java_class_() { return HttpChunkReaderC__class::class_factory.clas(); }
 
 
-void HttpChunkReaderC::Lazy_class::initialize() {
+void HttpChunkReaderC::Lazy_class::initialize() const {
     _value = HttpChunkReaderC__class::class_factory.clas();
 }
 

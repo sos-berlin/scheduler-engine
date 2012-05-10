@@ -48,24 +48,24 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     }
   public:
 
-    ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem();
-    ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void onActivate();
-    void onActivated();
-    void onClose();
-    void onEnteringSleepState();
-    void onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    void threadLock();
-    void threadUnlock();
+    ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem() const;
+    ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    void onActivate() const;
+    void onActivated() const;
+    void onClose() const;
+    void onEnteringSleepState() const;
+    void onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    void threadLock() const;
+    void threadUnlock() const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<Scheduler__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

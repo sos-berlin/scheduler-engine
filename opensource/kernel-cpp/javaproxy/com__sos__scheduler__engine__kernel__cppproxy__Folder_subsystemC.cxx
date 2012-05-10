@@ -42,12 +42,12 @@ Folder_subsystemC::~Folder_subsystemC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Folder_subsystemC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Folder_subsystemC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Folder_subsystemC::java_class_() { return Folder_subsystemC__class::class_factory.clas(); }
 
 
-void Folder_subsystemC::Lazy_class::initialize() {
+void Folder_subsystemC::Lazy_class::initialize() const {
     _value = Folder_subsystemC__class::class_factory.clas();
 }
 

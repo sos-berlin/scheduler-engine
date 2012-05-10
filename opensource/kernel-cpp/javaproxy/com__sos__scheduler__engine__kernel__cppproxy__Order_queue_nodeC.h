@@ -47,14 +47,14 @@ struct Order_queue_nodeC : ::zschimmer::javabridge::proxy_jobject< Order_queue_n
   public:
 
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<Order_queue_nodeC__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

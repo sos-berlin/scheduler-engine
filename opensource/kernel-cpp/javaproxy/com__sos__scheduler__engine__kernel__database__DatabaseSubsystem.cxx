@@ -42,12 +42,12 @@ DatabaseSubsystem::~DatabaseSubsystem() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* DatabaseSubsystem::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* DatabaseSubsystem::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* DatabaseSubsystem::java_class_() { return DatabaseSubsystem__class::class_factory.clas(); }
 
 
-void DatabaseSubsystem::Lazy_class::initialize() {
+void DatabaseSubsystem::Lazy_class::initialize() const {
     _value = DatabaseSubsystem__class::class_factory.clas();
 }
 

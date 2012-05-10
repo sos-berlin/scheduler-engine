@@ -47,19 +47,19 @@ struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >
     }
   public:
 
-    void checkNumberOfEventCodes(jint p0);
-    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0);
-    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
-    void reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1);
+    void checkNumberOfEventCodes(jint p0) const;
+    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0) const;
+    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
+    void reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<EventSubsystem__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

@@ -46,22 +46,22 @@ struct AbstractCollection : ::zschimmer::javabridge::proxy_jobject< AbstractColl
     }
   public:
 
-    bool add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    void clear();
-    bool contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    bool isEmpty();
-    bool remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    jint size();
-    ::javaproxy::java::lang::String toString();
+    bool add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    void clear() const;
+    bool contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    bool isEmpty() const;
+    bool remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    jint size() const;
+    ::javaproxy::java::lang::String toString() const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<AbstractCollection__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

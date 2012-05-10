@@ -53,7 +53,7 @@ AbstractEvent::~AbstractEvent() { assign_(NULL); }
 
 
 
-::javaproxy::java::lang::String AbstractEvent::toString() {
+::javaproxy::java::lang::String AbstractEvent::toString() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractEvent__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -62,12 +62,12 @@ AbstractEvent::~AbstractEvent() { assign_(NULL); }
 }
 
 
-::zschimmer::javabridge::Class* AbstractEvent::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* AbstractEvent::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* AbstractEvent::java_class_() { return AbstractEvent__class::class_factory.clas(); }
 
 
-void AbstractEvent::Lazy_class::initialize() {
+void AbstractEvent::Lazy_class::initialize() const {
     _value = AbstractEvent__class::class_factory.clas();
 }
 

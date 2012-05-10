@@ -94,7 +94,7 @@ ArrayList::~ArrayList() { assign_(NULL); }
 
 
 
-void ArrayList::add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) {
+void ArrayList::add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -102,20 +102,20 @@ void ArrayList::add(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::jav
     cls->_add__ILjava_lang_Object_2__method.call(get_jobject(), parameter_list);
 }
 
-bool ArrayList::add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool ArrayList::add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     ArrayList__class* cls = _class.get();
     return 0 != cls->_add__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-void ArrayList::clear() {
+void ArrayList::clear() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     ArrayList__class* cls = _class.get();
     cls->_clear____method.call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::Object ArrayList::clone() {
+::javaproxy::java::lang::Object ArrayList::clone() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     ArrayList__class* cls = _class.get();
     ::javaproxy::java::lang::Object result;
@@ -123,21 +123,21 @@ void ArrayList::clear() {
     return result;
 }
 
-bool ArrayList::contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool ArrayList::contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     ArrayList__class* cls = _class.get();
     return 0 != cls->_contains__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-void ArrayList::ensureCapacity(jint p0) {
+void ArrayList::ensureCapacity(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     ArrayList__class* cls = _class.get();
     cls->_ensureCapacity__I__method.call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::Object ArrayList::get(jint p0) {
+::javaproxy::java::lang::Object ArrayList::get(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     ArrayList__class* cls = _class.get();
@@ -146,27 +146,27 @@ void ArrayList::ensureCapacity(jint p0) {
     return result;
 }
 
-jint ArrayList::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+jint ArrayList::indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     ArrayList__class* cls = _class.get();
     return cls->_indexOf__Ljava_lang_Object_2__method.int_call(get_jobject(), parameter_list);
 }
 
-bool ArrayList::isEmpty() {
+bool ArrayList::isEmpty() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     ArrayList__class* cls = _class.get();
     return 0 != cls->_isEmpty____method.bool_call(get_jobject(), parameter_list);
 }
 
-jint ArrayList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+jint ArrayList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     ArrayList__class* cls = _class.get();
     return cls->_lastIndexOf__Ljava_lang_Object_2__method.int_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::Object ArrayList::remove(jint p0) {
+::javaproxy::java::lang::Object ArrayList::remove(jint p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     ArrayList__class* cls = _class.get();
@@ -175,14 +175,14 @@ jint ArrayList::lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::java
     return result;
 }
 
-bool ArrayList::remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool ArrayList::remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     ArrayList__class* cls = _class.get();
     return 0 != cls->_remove__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::Object ArrayList::set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) {
+::javaproxy::java::lang::Object ArrayList::set(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const {
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].l = p1.get_jobject();
@@ -192,25 +192,25 @@ bool ArrayList::remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy
     return result;
 }
 
-jint ArrayList::size() {
+jint ArrayList::size() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     ArrayList__class* cls = _class.get();
     return cls->_size____method.int_call(get_jobject(), parameter_list);
 }
 
-void ArrayList::trimToSize() {
+void ArrayList::trimToSize() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     ArrayList__class* cls = _class.get();
     cls->_trimToSize____method.call(get_jobject(), parameter_list);
 }
 
 
-::zschimmer::javabridge::Class* ArrayList::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* ArrayList::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* ArrayList::java_class_() { return ArrayList__class::class_factory.clas(); }
 
 
-void ArrayList::Lazy_class::initialize() {
+void ArrayList::Lazy_class::initialize() const {
     _value = ArrayList__class::class_factory.clas();
 }
 

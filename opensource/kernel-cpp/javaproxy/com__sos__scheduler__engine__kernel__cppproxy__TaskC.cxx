@@ -44,12 +44,12 @@ TaskC::~TaskC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* TaskC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* TaskC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* TaskC::java_class_() { return TaskC__class::class_factory.clas(); }
 
 
-void TaskC::Lazy_class::initialize() {
+void TaskC::Lazy_class::initialize() const {
     _value = TaskC__class::class_factory.clas();
 }
 

@@ -18,6 +18,12 @@ struct String__class;
 
 struct String : ::zschimmer::javabridge::proxy_jobject< String >, ::javaproxy::java::lang::Object {
     static String new_instance();
+    static String new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0);
+    static String new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1);
+    static String new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1, jint p2);
+    static String new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1, jint p2, jint p3);
+    static String new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, jint p1, jint p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3);
+    static String new_instance(const ::zschimmer::javabridge::Local_java_byte_array& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
     static String new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     String(jobject = NULL);
@@ -49,44 +55,47 @@ struct String : ::zschimmer::javabridge::proxy_jobject< String >, ::javaproxy::j
     }
   public:
 
-    wchar_t charAt(jint p0);
-    jint codePointAt(jint p0);
-    jint codePointBefore(jint p0);
-    jint codePointCount(jint p0, jint p1);
-    jint compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    jint compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    jint compareToIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    ::javaproxy::java::lang::String concat(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    bool endsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    bool equalsIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    jint hashCode();
-    jint indexOf(jint p0);
-    jint indexOf(jint p0, jint p1);
-    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1);
-    ::javaproxy::java::lang::String intern();
-    bool isEmpty();
-    jint lastIndexOf(jint p0);
-    jint lastIndexOf(jint p0, jint p1);
-    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1);
-    jint length();
-    bool matches(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    jint offsetByCodePoints(jint p0, jint p1);
-    bool regionMatches(jboolean p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, jint p3, jint p4);
-    bool regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2, jint p3);
-    ::javaproxy::java::lang::String replace(jchar p0, jchar p1);
-    ::javaproxy::java::lang::String replaceAll(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
-    ::javaproxy::java::lang::String replaceFirst(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
-    bool startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    bool startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1);
-    ::javaproxy::java::lang::String substring(jint p0);
-    ::javaproxy::java::lang::String substring(jint p0, jint p1);
-    ::javaproxy::java::lang::String toLowerCase();
-    ::javaproxy::java::lang::String toString();
-    ::javaproxy::java::lang::String toUpperCase();
-    ::javaproxy::java::lang::String trim();
+    wchar_t charAt(jint p0) const;
+    jint codePointAt(jint p0) const;
+    jint codePointBefore(jint p0) const;
+    jint codePointCount(jint p0, jint p1) const;
+    jint compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    jint compareTo(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    jint compareToIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    ::javaproxy::java::lang::String concat(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    bool endsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    bool equalsIgnoreCase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    string getBytes() const;
+    void getBytes(jint p0, jint p1, const ::zschimmer::javabridge::Local_java_byte_array& p2, jint p3) const;
+    string getBytes(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    jint hashCode() const;
+    jint indexOf(jint p0) const;
+    jint indexOf(jint p0, jint p1) const;
+    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    jint indexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) const;
+    ::javaproxy::java::lang::String intern() const;
+    bool isEmpty() const;
+    jint lastIndexOf(jint p0) const;
+    jint lastIndexOf(jint p0, jint p1) const;
+    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    jint lastIndexOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) const;
+    jint length() const;
+    bool matches(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    jint offsetByCodePoints(jint p0, jint p1) const;
+    bool regionMatches(jboolean p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, jint p3, jint p4) const;
+    bool regionMatches(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2, jint p3) const;
+    ::javaproxy::java::lang::String replace(jchar p0, jchar p1) const;
+    ::javaproxy::java::lang::String replaceAll(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) const;
+    ::javaproxy::java::lang::String replaceFirst(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) const;
+    bool startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    bool startsWith(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1) const;
+    ::javaproxy::java::lang::String substring(jint p0) const;
+    ::javaproxy::java::lang::String substring(jint p0, jint p1) const;
+    ::javaproxy::java::lang::String toLowerCase() const;
+    ::javaproxy::java::lang::String toString() const;
+    ::javaproxy::java::lang::String toUpperCase() const;
+    ::javaproxy::java::lang::String trim() const;
     static ::javaproxy::java::lang::String valueOf(jboolean p0);
     static ::javaproxy::java::lang::String valueOf(jchar p0);
     static ::javaproxy::java::lang::String valueOf(jdouble p0);
@@ -95,14 +104,14 @@ struct String : ::zschimmer::javabridge::proxy_jobject< String >, ::javaproxy::j
     static ::javaproxy::java::lang::String valueOf(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
     static ::javaproxy::java::lang::String valueOf(jlong p0);
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<String__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

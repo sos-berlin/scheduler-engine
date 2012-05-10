@@ -42,12 +42,12 @@ UnmodifiableTask::~UnmodifiableTask() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* UnmodifiableTask::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* UnmodifiableTask::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* UnmodifiableTask::java_class_() { return UnmodifiableTask__class::class_factory.clas(); }
 
 
-void UnmodifiableTask::Lazy_class::initialize() {
+void UnmodifiableTask::Lazy_class::initialize() const {
     _value = UnmodifiableTask__class::class_factory.clas();
 }
 

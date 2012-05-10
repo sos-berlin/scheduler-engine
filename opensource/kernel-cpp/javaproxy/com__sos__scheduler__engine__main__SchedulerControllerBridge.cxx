@@ -42,12 +42,12 @@ SchedulerControllerBridge::~SchedulerControllerBridge() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* SchedulerControllerBridge::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* SchedulerControllerBridge::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* SchedulerControllerBridge::java_class_() { return SchedulerControllerBridge__class::class_factory.clas(); }
 
 
-void SchedulerControllerBridge::Lazy_class::initialize() {
+void SchedulerControllerBridge::Lazy_class::initialize() const {
     _value = SchedulerControllerBridge__class::class_factory.clas();
 }
 

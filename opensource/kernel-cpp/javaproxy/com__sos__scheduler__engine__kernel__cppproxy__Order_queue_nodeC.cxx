@@ -42,12 +42,12 @@ Order_queue_nodeC::~Order_queue_nodeC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* Order_queue_nodeC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* Order_queue_nodeC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* Order_queue_nodeC::java_class_() { return Order_queue_nodeC__class::class_factory.clas(); }
 
 
-void Order_queue_nodeC::Lazy_class::initialize() {
+void Order_queue_nodeC::Lazy_class::initialize() const {
     _value = Order_queue_nodeC__class::class_factory.clas();
 }
 

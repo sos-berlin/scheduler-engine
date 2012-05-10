@@ -42,19 +42,19 @@ SchedulerHttpResponse::~SchedulerHttpResponse() { assign_(NULL); }
 
 
 
-void SchedulerHttpResponse::onNextChunkIsReady() {
+void SchedulerHttpResponse::onNextChunkIsReady() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     SchedulerHttpResponse__class* cls = _class.get();
     cls->_onNextChunkIsReady____method.call(get_jobject(), parameter_list);
 }
 
 
-::zschimmer::javabridge::Class* SchedulerHttpResponse::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* SchedulerHttpResponse::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* SchedulerHttpResponse::java_class_() { return SchedulerHttpResponse__class::class_factory.clas(); }
 
 
-void SchedulerHttpResponse::Lazy_class::initialize() {
+void SchedulerHttpResponse::Lazy_class::initialize() const {
     _value = SchedulerHttpResponse__class::class_factory.clas();
 }
 

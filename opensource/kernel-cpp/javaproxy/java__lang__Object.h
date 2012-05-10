@@ -41,23 +41,23 @@ struct Object : ::zschimmer::javabridge::proxy_jobject< Object >, ::zschimmer::j
     }
   public:
 
-    bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
-    jint hashCode();
-    void notify();
-    void notifyAll();
-    ::javaproxy::java::lang::String toString();
-    void wait();
-    void wait(jlong p0);
-    void wait(jlong p0, jint p1);
+    bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    jint hashCode() const;
+    void notify() const;
+    void notifyAll() const;
+    ::javaproxy::java::lang::String toString() const;
+    void wait() const;
+    void wait(jlong p0) const;
+    void wait(jlong p0, jint p1) const;
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<Object__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

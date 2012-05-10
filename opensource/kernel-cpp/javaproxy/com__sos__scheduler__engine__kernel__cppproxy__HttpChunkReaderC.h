@@ -47,14 +47,14 @@ struct HttpChunkReaderC : ::zschimmer::javabridge::proxy_jobject< HttpChunkReade
   public:
 
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<HttpChunkReaderC__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

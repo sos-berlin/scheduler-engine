@@ -50,14 +50,14 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
   public:
 
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<Order__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;

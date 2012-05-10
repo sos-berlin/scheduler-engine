@@ -54,46 +54,46 @@ AbstractCollection::~AbstractCollection() { assign_(NULL); }
 
 
 
-bool AbstractCollection::add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool AbstractCollection::add(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     AbstractCollection__class* cls = _class.get();
     return 0 != cls->_add__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-void AbstractCollection::clear() {
+void AbstractCollection::clear() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractCollection__class* cls = _class.get();
     cls->_clear____method.call(get_jobject(), parameter_list);
 }
 
-bool AbstractCollection::contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool AbstractCollection::contains(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     AbstractCollection__class* cls = _class.get();
     return 0 != cls->_contains__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-bool AbstractCollection::isEmpty() {
+bool AbstractCollection::isEmpty() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractCollection__class* cls = _class.get();
     return 0 != cls->_isEmpty____method.bool_call(get_jobject(), parameter_list);
 }
 
-bool AbstractCollection::remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) {
+bool AbstractCollection::remove(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     AbstractCollection__class* cls = _class.get();
     return 0 != cls->_remove__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
-jint AbstractCollection::size() {
+jint AbstractCollection::size() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractCollection__class* cls = _class.get();
     return cls->_size____method.int_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::java::lang::String AbstractCollection::toString() {
+::javaproxy::java::lang::String AbstractCollection::toString() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     AbstractCollection__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
@@ -102,12 +102,12 @@ jint AbstractCollection::size() {
 }
 
 
-::zschimmer::javabridge::Class* AbstractCollection::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* AbstractCollection::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* AbstractCollection::java_class_() { return AbstractCollection__class::class_factory.clas(); }
 
 
-void AbstractCollection::Lazy_class::initialize() {
+void AbstractCollection::Lazy_class::initialize() const {
     _value = AbstractCollection__class::class_factory.clas();
 }
 

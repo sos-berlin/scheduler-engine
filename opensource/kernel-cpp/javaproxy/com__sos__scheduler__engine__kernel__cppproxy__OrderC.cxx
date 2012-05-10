@@ -45,12 +45,12 @@ OrderC::~OrderC() { assign_(NULL); }
 
 
 
-::zschimmer::javabridge::Class* OrderC::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* OrderC::java_object_class_() const { return _class.get(); }
 
 ::zschimmer::javabridge::Class* OrderC::java_class_() { return OrderC__class::class_factory.clas(); }
 
 
-void OrderC::Lazy_class::initialize() {
+void OrderC::Lazy_class::initialize() const {
     _value = OrderC__class::class_factory.clas();
 }
 

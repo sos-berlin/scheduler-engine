@@ -49,14 +49,14 @@ struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::so
   public:
 
 
-    ::zschimmer::javabridge::Class* java_object_class_();
+    ::zschimmer::javabridge::Class* java_object_class_() const;
 
     static ::zschimmer::javabridge::Class* java_class_();
 
 
   private:
     struct Lazy_class : ::zschimmer::abstract_lazy<Job__class*> {
-        void initialize();
+        void initialize() const;
     };
 
     Lazy_class _class;
