@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job order="yes"
+     stop_on_error="no"
+     tasks="2">
+    <settings>
+        <log_level><![CDATA[debug9]]></log_level>
+    </settings>
+    <params>
+        <param name="jobnet"
+               value="reference"/>
+    </params>
+    <environment>
+        <variable name="SOS_LOCALE"
+                  value="en"/>
+    </environment>
+    <script language="shell">
+        <![CDATA[
+%scheduler_param_script_to_execute%
+        ]]>
+    </script>
+    <monitor name="multiple_inheritance"
+             ordering="0">
+        <script language="java"
+                java_class_path=""
+                java_class="com.sos.jobnet.jobs.JobNetWaitAndDispatch"/>
+    </monitor>
+    <run_time/>
+</job>

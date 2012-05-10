@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd HH:mm:ss,SSS} %-5p [%t] %c: %m%n"/>
+        </layout>
+    </appender>
+
+	<appender class="org.apache.log4j.ConsoleAppender" name="console_simple">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param value="%-5p %m%n" name="ConversionPattern"/>
+		</layout>
+	</appender>
+
+    <logger name="com.sos.jobnet" additivity="false">
+        <level value="info"/>
+		<appender-ref ref="console_simple"/>
+    </logger>
+
+
+	<root>
+        <!-- In general the debug level should be 'warn'. If you need 'debug' or 'info' level for special cases
+        please use a special logger defined above. -->
+		<level value="warn"/>
+		<appender-ref ref="console"/>
+	</root>
+</log4j:configuration>

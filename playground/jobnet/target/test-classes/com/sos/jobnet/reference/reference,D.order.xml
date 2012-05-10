@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<order>
+    <params>
+        <param name="successor"
+               value="G,F"/>
+
+
+        <param name="predecessor"
+               value="A"/>
+
+
+        <param name="script_to_execute"
+               value="sleep 50"/>
+    </params>
+    <run_time let_run="no">
+      <weekdays>
+         <day day="1 2 3 4 5 6 7"/>
+      </weekdays>
+    </run_time>
+</order>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>playground</artifactId>
+        <version>1.3.12.2118-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>playground.ss</artifactId>
+
+    <name>${project.artifactId}</name>
+    <inceptionYear>2012</inceptionYear>
+
+    <build>
+        <testResources>
+            <testResource>
+                <!-- Standard Wiederholen -->
+                <directory>${basedir}/src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
+                <directory>${project.build.testSourceDirectory}</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>test</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.jobnet</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.dailyschedule</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.settings</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.hibernate</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.JobSchedulerLocalization</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.JSHelper</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.scheduler</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.schedulerhistory</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.VirtualFileSystem</artifactId>
+            <version>${sos.jars.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>3.6.4.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- this artifact is not accesible in any opensource maven repository therefore it is deployed in the
+        internal repository of the sos -->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.1.0.7.0-Production</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+  </project>
