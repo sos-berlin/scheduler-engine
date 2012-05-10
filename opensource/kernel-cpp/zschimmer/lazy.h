@@ -11,19 +11,19 @@ template<class T>
 struct abstract_lazy {
     abstract_lazy() : _value(T()) {}
 
-    T& get() { 
+    T& get() const { 
         if (!_value)  
             initialize();  
         return _value; 
     }
 
-    T& operator->() { return get(); }
-    T& operator*() { return get(); }
+    T& operator->() const { return get(); }
+    T& operator*() const { return get(); }
 
   protected:
-    virtual void initialize() = 0;
+    virtual void initialize() const = 0;
 
-    T _value;
+    mutable T _value;
 };
 
 //-------------------------------------------------------------------------------------------lazy<>
@@ -31,7 +31,7 @@ struct abstract_lazy {
 template<class T> 
 struct lazy : abstract_lazy<T> {
   protected:
-    void initialize();    // Für jedes T eine Spezialisierung implementieren!
+    void initialize() const;    // Für jedes T eine Spezialisierung implementieren!
 };
 
 //-------------------------------------------------------------------------------------------------

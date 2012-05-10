@@ -364,7 +364,7 @@ struct Global_jobject2 : Abstract_global_jobject
 struct Class_based : Abstract_global_jobject
 {
     void                       java_object_allocate_        ();
-    virtual Class*             java_object_class_           ()                                      = 0;
+    virtual Class*             java_object_class_           () const                                = 0;
 
   protected:
     virtual void               assign_jobject               ( jobject );
