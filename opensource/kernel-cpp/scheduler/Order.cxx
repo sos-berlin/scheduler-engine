@@ -396,7 +396,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
                         string blob_filename = db()->db_name() + " -table=" + db()->_order_history_tablename + " -blob=log where `history_id`=" + as_string( _history_id );
                         if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                         Any_file blob_file( "-out -binary " + blob_filename );
-                        Z_LOG2("jdbc", S() << "writing blob for field " << db()->_order_history_tablename << ".log" << " with len=" << log_text.size() << " (where `history_id`=" << as_string( _history_id ) << ")" );
+                        Z_LOG2("jdbc", "writing blob for field " << db()->_order_history_tablename << ".log" << " with len=" << log_text.size() << " (where `history_id`=" << as_string( _history_id ) << ")" );
                         blob_file.put( log_text );
                         blob_file.close();
                     }
