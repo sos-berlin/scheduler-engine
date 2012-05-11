@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>parent</artifactId>
-        <version>1.3.12.2131</version>
+        <version>1.3.12.2132-SNAPSHOT</version>
         <relativePath>parent</relativePath>
     </parent>
 
@@ -48,9 +48,9 @@
         <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
         <url>http://subversion.sos/svn/sos/scheduler/engine</url>
         -->
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine/engine-1.3.12.2131</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine-releases/engine-1.3.12.2131</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine/engine-1.3.12.2131</url>
+        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
+        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
+        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
     </scm>
 
     <profiles>
