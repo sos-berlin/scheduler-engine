@@ -20,7 +20,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     string                     _db_name;
     string                     _job_java_class_path;
     string                     _html_dir;
-    boolean                    _keep_order_content_on_reschedule;
+    bool                       _keep_order_content_on_reschedule;
 };
 
 }} //namespace sos::scheduler
