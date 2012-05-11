@@ -2038,7 +2038,7 @@ void Transaction::update_clob( const string& table_name, const string& column_na
 
     try
     {
-       Z_LOG2("jdbc", "writing clob for field " << table_name << "." << column_name << " with len=" << value.size() << " (" << where << ")" );
+       Z_LOG2("jdbc", "writing clob for field " << table_name << "." << column_name << " with len=" << value.size() << " (" << where << ")\n" );
         clob.put( value );
         clob.close();
     }
