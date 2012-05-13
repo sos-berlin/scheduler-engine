@@ -27,7 +27,7 @@ public final class JS644StoppedJobTest extends SchedulerTest {
 
     @Test public void test() throws Exception {
         controller().setTerminateOnError(false);   // Wegen SCHEDULER-280  Process terminated with exit code 1 (0x1)
-        controller().startScheduler();
+        controller().activateScheduler();
         threadGate.expect(taskEnded, shortTimeout);
         modifyFile(controller().environment().fileFromPath(jobPath));
         expectEvents();
