@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.test.scala._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.slf4j.LoggerFactory
 
 /** Prüft, ob alle Methoden eines Scala-Jobs aufgerufen werden.
  * Der Scala-Job wird mit den Log-Levels info und error gerufen, um den Aufruf von spooler_on_success() und spooler_on_error()
@@ -18,8 +19,10 @@ final class ScalaJobTest extends ScalaSchedulerTest {
   import ScalaJobTest._
   private val eventPipe = controller.newEventPipe()
 
-  controller.setTerminateOnError(false)
-  controller.activateScheduler()
+  override def checkedBeforeAll() {
+    controller.setTerminateOnError(false)
+    controller.activateScheduler()
+  }
 
   List(SchedulerLogLevel.info, SchedulerLogLevel.error) foreach { logLevel =>
     test("Job with "+logLevel+" should call some methods") {
@@ -40,6 +43,7 @@ final class ScalaJobTest extends ScalaSchedulerTest {
 }
 
 object ScalaJobTest {
+  private val logger = LoggerFactory.getLogger(classOf[ScalaJobTest])
   private val jobPath = new AbsolutePath("/scala")
   private val VariableNamePattern = """test[.](\d+)[.]([a-z_]+)""".r  // "test.0.spooler_process"
 

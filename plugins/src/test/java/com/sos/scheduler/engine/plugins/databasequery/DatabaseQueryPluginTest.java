@@ -12,13 +12,10 @@ import static org.hamcrest.Matchers.containsString;
 public final class DatabaseQueryPluginTest extends SchedulerTest {
     private final Time timeout = Time.of(20);
 
-    public DatabaseQueryPluginTest() throws Exception {
+    @Test public void testShowTaskHistory() throws Exception {
         controller().useDatabase();
         controller().setLogCategories("java.stackTrace-");  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
         controller().activateScheduler();
-    }
-
-    @Test public void testShowTaskHistory() throws Exception {
         controller().waitForTermination(timeout);
     }
 

@@ -16,6 +16,7 @@ import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.test.SchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import scala.collection.mutable
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 
 /** Ticket JS-803.
  * @see <a href='http://www.sos-berlin.com/jira/browse/JS-803'>JS-803</a>
@@ -25,11 +26,12 @@ final class JS803Test extends SchedulerTest {
   private val expectedOrders = new mutable.HashSet[OrderId]
   private val terminatedOrders = new mutable.HashSet[OrderId]
 
-  controller.activateScheduler("-e")
-  private val startTime = secondNow() plusSeconds orderDelay
+  private var startTime: DateTime = null
 
   //@Ignore  //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht helfen uns die Logzeilen weiter.
   @Test def test() {
+    controller.activateScheduler("-e")
+    startTime = secondNow() plusSeconds orderDelay
     addOrder(new OrderKey(jobChainPath, new OrderId("dailyOrder")), addDailyOrderElem)
     addOrder(new OrderKey(jobChainPath, new OrderId("singleOrder")), addSingleOrderElem)
     addOrder(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), addSingleRuntimeOrderElem)
