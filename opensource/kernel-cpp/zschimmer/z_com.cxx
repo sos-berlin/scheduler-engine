@@ -1644,6 +1644,21 @@ Bstr::Bstr( const Bstr& s )
 {
 }
 
+//--------------------------------------------------------------------------------------Bstr::~Bstr
+
+Bstr::~Bstr()
+{ 
+    if (_bstr) {
+        // SysFreeString() setzt GetLastError() zurück (obwohl nicht bei Microsoft dokumentiert).
+        // Wir retten den Fehlercode für Aufrufe der Form: WindowsSystemCall(Bstr(name)). 
+        // ~Bstr belässt dann den Fehlercode von WindowsSystemCall.
+
+        DWORD e = GetLastError();
+        SysFreeString(_bstr); 
+        SetLastError(e);
+    }
+}
+
 //-------------------------------------------------------------------------------------Bstr::append
 
 void Bstr::append( const OLECHAR* s, size_t s_len )

@@ -249,6 +249,9 @@ inline HRESULT Implement_com_query_interface( Interface* iface, void** result )
 struct Bstr
 {
                                 Bstr                        ()                                      : _bstr( NULL ) {}
+#ifdef Z_HAS_MOVE_CONSTRUCTOR
+                                Bstr                        (Bstr&& o)                              : _bstr(o._bstr) { o._bstr = NULL; }
+#endif
                                 Bstr                        ( const Bstr& );
                                 Bstr                        ( const OLECHAR* s, size_t size )       : _bstr( NULL ) { alloc_string( s, size ); }
                                 Bstr                        ( const OLECHAR* s )                    : _bstr( NULL ) { alloc_string( s ); }
@@ -270,7 +273,7 @@ struct Bstr
     Bstr&                       operator =                  ( const std::wstring& s )               { ::SysFreeString(_bstr); _bstr = bstr_from_wstring(s); return *this; }
 #endif
 
-                               ~Bstr                        ()                                      { SysFreeString(_bstr); }
+                               ~Bstr                        ();
     
     Bstr&                       operator =                  ( const Bstr& s )                       { alloc_string( s );  return *this; }
     Bstr&                       operator =                  ( const OLECHAR* s )                    { alloc_string( s );  return *this; }
