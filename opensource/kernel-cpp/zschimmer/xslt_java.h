@@ -1,18 +1,17 @@
-// $Id: xslt_libxslt.h 13199 2007-12-06 14:15:42Z jz $
-
 #ifndef __ZSCHIMMER_XSLT_LIBXML2_H
 #define __ZSCHIMMER_XSLT_LIBXML2_H
 
-
-#include "xml_libxml2.h"
+#include "xml_java.h"
 #include "z_com_server.h"
-
-#if !defined Z_USE_JAVAXML
+#include "../javaproxy/com__sos__scheduler__engine__kernel__xml__CppXsltStylesheet.h"
+#include "../javaproxy/java__util__HashMap.h"
 
 namespace zschimmer {
 namespace xml {
 
 struct Xslt_stylesheet;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::xml::CppXsltStylesheet CppXsltStylesheetJ;
+typedef ::javaproxy::java::util::HashMap HashMapJ;
 
 //----------------------------------------------------------------------------------Xslt_parameters
 
@@ -21,7 +20,6 @@ struct Xslt_parameters : Non_cloneable
                                 Xslt_parameters             ( int count = 0 );
                                ~Xslt_parameters             ();
 
-    void                        close                       ();
     void                        allocate                    ( int size );
     void                        set_xpath                   ( int i, const string& name, const string& value );
     void                        set_string                  ( int i, const string& name, const string& value );
@@ -29,62 +27,37 @@ struct Xslt_parameters : Non_cloneable
   private:
     friend                      struct Xslt_stylesheet;
 
-    int                        _n;
-    const char**               _array;
+    struct Parameter {
+        string _name;
+        string _value;
+    };
+
+    std::vector<Parameter>      _parameters;
+    HashMapJ                    _hashMapJ;
 };
 
 //----------------------------------------------------------------------------------Xslt_stylesheet
 
-struct Xslt_stylesheet_ptr : Object, Non_cloneable
-{
-                                Xslt_stylesheet_ptr         ( _xsltStylesheet* );
-                               ~Xslt_stylesheet_ptr         ();
-
-                                operator _xsltStylesheet*   () const                                { return _ptr; }
-    bool                        operator !                  () const                                { return _ptr == NULL; }
-    Xslt_stylesheet_ptr&        operator =                  ( _xsltStylesheet* );
-
-    void                        assign                      ( _xsltStylesheet* );
-
-
-  private:
-    friend struct               Xslt_stylesheet;
-
-    _xsltStylesheet*           _ptr;
-};
-
-//----------------------------------------------------------------------------------Xslt_stylesheet
-
-struct Xslt_stylesheet : Libxml2_error_text
-{
-                                Xslt_stylesheet             ( Xslt_stylesheet_ptr* = NULL );
+struct Xslt_stylesheet {
+                                Xslt_stylesheet             ();
                                 Xslt_stylesheet             ( const string& xml_or_filename );
                                 Xslt_stylesheet             ( const BSTR xml_or_filename );
                                ~Xslt_stylesheet             ();
 
-
-    Xslt_stylesheet&            operator =                  ( Xslt_stylesheet_ptr* p )              { _stylesheet_ptr = p;  return *this; }
-
-                                operator _xsltStylesheet*   () const                                { return _stylesheet_ptr->_ptr; }
-
-    void                        release                     ();
+    void                        release                     ()                                      {}
     bool                        is_xml                      ( const string& );
     bool                        is_xml                      ( const BSTR );
     string                      path                        () const                                { return _path; }
     void                        load                        ( const Document_ptr& stylesheet );
-    bool                        loaded                      () const                                { return _stylesheet_ptr != NULL; }
+    bool                        loaded                      () const                                { return _stylesheetJ != NULL; }
     void                        load_file                   ( const string& filename );
     void                        set_parameter               ( const string& name, const string& value );
- //? Document_ptr                apply                       ( const Document_ptr&, const std::vector<string>& parameters = std::vector<string>() );
     Document_ptr                apply                       ( const Document_ptr& );
     Document_ptr                apply                       ( const Document_ptr&, const Xslt_parameters& );
     string                      xml_from_result             ( const Document_ptr& );
 
-
   private:
-    void                        prepare_parsing             ();
-
-    ptr<Xslt_stylesheet_ptr>   _stylesheet_ptr;
+    CppXsltStylesheetJ         _stylesheetJ;
     string                     _path;
 };
 
@@ -93,5 +66,4 @@ struct Xslt_stylesheet : Libxml2_error_text
 } //namespace xml
 } //namespace zschimmer
 
-#endif
 #endif

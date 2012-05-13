@@ -22,7 +22,9 @@ inline void insert_into_message( Message_string* m, int index, int    v ) throw(
 inline void insert_into_message( Message_string* m, int index, uint   v ) throw()                   { return insert_into_message( m, index, (int64)v ); }
 inline void insert_into_message( Message_string* m, int index, short  v ) throw()                   { return insert_into_message( m, index, (int64)v ); }
 inline void insert_into_message( Message_string* m, int index, unsigned short v ) throw()           { return insert_into_message( m, index, (int64)v ); }
-//inline void insert_into_message( Message_string* m, int index, size_t v ) throw()                   { return insert_into_message( m, index, (int64)v ); }
+#ifdef Z_64
+inline void insert_into_message( Message_string* m, int index, size_t v ) throw()                   { return insert_into_message( m, index, (int64)v ); }
+#endif
 
 void        insert_into_message( Message_string* m, int index, double               ) throw();
 void        insert_into_message( Message_string* m, int index, const exception&     ) throw();

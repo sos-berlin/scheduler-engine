@@ -199,7 +199,7 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
         if( xml::Element_ptr e = header_element.select_node( "subject" ) )  set_subject( e.trimmed_text() );
 
 
-        xml::Xpath_nodes field_elements = header_element.select_nodes( "field" );
+        xml::Node_list field_elements = header_element.select_nodes( "field" );
         for( int i = 0; i < field_elements.count(); i++ )
         {
             xml::Element_ptr field_element = field_elements[ i ];
@@ -212,7 +212,7 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 
     if( xml::Element_ptr e = mail_element.select_node( "body/text" ) )  set_body( e.trimmed_text() );
 
-    xml::Xpath_nodes file_elements = mail_element.select_nodes( "body/file" );
+    xml::Node_list file_elements = mail_element.select_nodes( "body/file" );
     for( int i = 0; i < file_elements.count(); i++ )
     {
         xml::Element_ptr file_element = file_elements[ i ];

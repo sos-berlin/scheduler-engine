@@ -194,6 +194,8 @@
     </ClCompile>
     <ClCompile Include="threads_base.cxx" />
     <ClCompile Include="xml.cxx" />
+    <ClCompile Include="xml_java.cxx" />
+    <ClCompile Include="xslt_java.cxx" />
     <ClCompile Include="z_gzip.cxx" />
     <ClCompile Include="z_io.cxx" />
     <ClCompile Include="z_mail.cxx" />
@@ -324,6 +326,8 @@
     <ClInclude Include="threads_base.h" />
     <ClInclude Include="utf8.h" />
     <ClInclude Include="xml.h" />
+    <ClInclude Include="xml_any.h" />
+    <ClInclude Include="xml_java.h" />
     <ClInclude Include="xml_libxml2.h" />
     <ClInclude Include="xslt_libxslt.h" />
     <ClInclude Include="z_com.h" />

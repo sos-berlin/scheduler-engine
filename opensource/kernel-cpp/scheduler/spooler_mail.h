@@ -104,7 +104,6 @@ struct Com_mail : spooler_com::Imail,
     STDMETHODIMP            get_Xslt_stylesheet_path        ( BSTR* result )                        { return String_to_bstr( _xslt_stylesheet_path, result ); }
     STDMETHODIMP            get_Xslt_stylesheet             ( spooler_com::Ixslt_stylesheet** );
 
-
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& dom );
     void                    set_dom                         ( const xml::Element_ptr& );
 

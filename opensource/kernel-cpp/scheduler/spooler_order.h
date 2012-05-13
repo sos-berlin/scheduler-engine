@@ -823,7 +823,7 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            add_job_node                ( const Path& job_path, const Order::State& input_state, 
                                                               const Order::State& next_state, 
                                                               const Order::State& error_state,
-                                                              const xml::Element_ptr& = NULL );
+                                                              const xml::Element_ptr& = xml::Element_ptr() );
     
     job_chain::Node*            add_end_node                ( const Order::State& input_state );
 

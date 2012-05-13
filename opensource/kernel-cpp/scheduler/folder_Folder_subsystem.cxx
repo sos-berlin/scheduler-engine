@@ -290,7 +290,7 @@ void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder
             // (Mit gel�schten Attributen kann die Datei umbenannt werden, ohne dass die Attribute angepasst werden m�ssten.)
             xml::Document_ptr clone;
             clone.create();
-            clone.appendChild( clone.clone( element ) );
+            clone.appendForeignChild(element);
 
             string name = subsystem->name_from_xml_attributes( clone.documentElement(), remove_attributes );
 

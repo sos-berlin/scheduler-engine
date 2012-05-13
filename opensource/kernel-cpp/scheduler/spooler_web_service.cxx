@@ -42,7 +42,7 @@ Web_service_operation::Class_descriptor   Web_service_operation::class_descripto
 Web_service_request  ::Class_descriptor   Web_service_request  ::class_descriptor ( &typelib, "Spooler.Web_service_request"  , Web_service_request  ::_methods );
 Web_service_response ::Class_descriptor   Web_service_response ::class_descriptor ( &typelib, "Spooler.Web_service_response" , Web_service_response ::_methods );
 
-//-----------------------------------------------------------------------------Subprocess::_methods
+//----------------------------------------------------------------------------Web_service::_methods
 
 const Com_method Web_service::_methods[] =
 { 
@@ -232,7 +232,6 @@ bool Web_services::subsystem_initialize()
         command_processor.execute_2( job_xml       );
         command_processor.execute_2( job_chain_xml );
     }
-
     
     _subsystem_state = subsys_initialized;
     return true;
@@ -766,7 +765,9 @@ void Web_service_operation::execute_stylesheets()
         bool ok = request_document.try_load_xml( http_request()->body(), http_request()->charset_name() );
         if( !ok )
         {
+#ifndef Z_USE_JAVAXML
             _log->error( request_document.error_text() );
+#endif
             throw http::Http_exception( http::status_404_bad_request );
         }
     }
@@ -1181,7 +1182,6 @@ string Web_service_response::obj_name() const
 { 
     return S() << Scheduler_object::obj_name() << " " << _web_service_operation->_web_service->obj_name() << ":" << _web_service_operation->_id; 
 }
-
 
 //-----------------------------------------------------Http_file_directory::file_path_from_url_path
 

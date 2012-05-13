@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.util;
 
 import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.util.xml.NamedChildElements;
 import com.sos.scheduler.engine.util.xml.SiblingElementIterator;
 import org.w3c.dom.Document;
@@ -23,22 +24,22 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import static javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION;
 import static org.w3c.dom.Node.DOCUMENT_NODE;
 
+@ForCpp
 public final class XmlUtils {
-    private XmlUtils() {}
-
-    public static Document newDocument() {
+    @ForCpp public static Document newDocument() {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         }
         catch (ParserConfigurationException x) { throw new XmlException(x); }
     }
 
-    public static Document loadXml(byte[] xml) {
+    @ForCpp public static Document loadXml(byte[] xml) {
         return loadXml(new ByteArrayInputStream(xml));
     }
 
@@ -60,16 +61,24 @@ public final class XmlUtils {
         catch (SAXException x) { throw new XmlException(x); }
     }
 
-    public static String toXml(Node n) {
+    @ForCpp public static byte[] toXmlBytes(Node n, String encoding, boolean indent) {
+        //TODO indent berücksichtigen
+        return toXml(n).getBytes(Charset.forName(encoding));
+    }
+
+    @ForCpp public static String toXml(Node n) {
         StringWriter w = new StringWriter();
         writeXmlTo(n, w);
         String result = w.toString();
-        return n.getNodeType() != DOCUMENT_NODE && result.startsWith("<?")?
-                result.replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "")   // Manche DOM-Implementierung liefert den XML-Prolog.
-                : result;
+        return n.getNodeType() == DOCUMENT_NODE? result : removeXmlProlog(result);  // Manche DOM-Implementierung liefert den XML-Prolog.
     }
 
-    public static void writeXmlTo(Node n, Writer w) {
+    private static String removeXmlProlog(String xml) {
+        // Prolog muss am Anfang stehen, ohne vorangehende Blanks oder Kommentare
+        return xml.startsWith("<?")? xml.replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "") : xml;
+    }
+
+    @ForCpp public static void writeXmlTo(Node n, Writer w) {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             if (n.getNodeType() == DOCUMENT_NODE)
@@ -78,7 +87,7 @@ public final class XmlUtils {
         } catch (TransformerException x) { throw new XmlException(x); }
     }
 
-    public static boolean booleanXmlAttribute(Element xmlElement, String attributeName, boolean defaultValue) {
+    @ForCpp public static boolean booleanXmlAttribute(Element xmlElement, String attributeName, boolean defaultValue) {
         String value = xmlElement.getAttribute(attributeName);
         Boolean result = booleanOrNullOf(value, defaultValue);
         if (result == null)
@@ -94,11 +103,11 @@ public final class XmlUtils {
                s.isEmpty()? deflt : null;
     }
 
-    public static int intXmlAttribute(Element xmlElement, String attributeName) {
+    @ForCpp public static int intXmlAttribute(Element xmlElement, String attributeName) {
         return intXmlAttribute(xmlElement, attributeName, (Integer)null);
     }
 
-    public static int intXmlAttribute(Element xmlElement, String attributeName, @Nullable Integer defaultValue) {
+    @ForCpp public static int intXmlAttribute(Element xmlElement, String attributeName, @Nullable Integer defaultValue) {
         String value = xmlAttribute(xmlElement, attributeName, "");
         if (!value.isEmpty()) {
             try {
@@ -113,7 +122,7 @@ public final class XmlUtils {
         }
     }
 
-    public static String xmlAttribute(Element xmlElement, String attributeName, @Nullable String defaultValue) {
+    @ForCpp public static String xmlAttribute(Element xmlElement, String attributeName, @Nullable String defaultValue) {
         String result = xmlElement.getAttribute(attributeName);
         if (!result.isEmpty())
             return result;
@@ -140,20 +149,17 @@ public final class XmlUtils {
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
-
     public static ImmutableList<Element> elementsXPath(Node baseNode, String xpathExpression) {
         try {
-            return listFromNodeList((NodeList)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.NODESET));
+            return elementListFromNodeList((NodeList)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.NODESET));
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
-
-    public static ImmutableList<Element> listFromNodeList(NodeList list) {
+    public static ImmutableList<Element> elementListFromNodeList(NodeList list) {
         ImmutableList.Builder<Element> result = ImmutableList.builder();
         for (int i = 0; i < list.getLength(); i++)  result.add((Element)list.item(i));
         return result.build();
     }
-
 
     public static String stringXPath(Node baseNode, String xpathExpression) {
         try {
@@ -162,7 +168,6 @@ public final class XmlUtils {
             return result;
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
-
 
     public static String stringXPath(Node baseNode, String xpathExpression, String deflt) {
         try {
@@ -184,14 +189,6 @@ public final class XmlUtils {
 
     public static ImmutableList<Element> childElements(Element element) {
         return ImmutableList.copyOf(new SiblingElementIterator(element.getFirstChild()));
-//        NodeList children = element.getChildNodes();
-//        ArrayList<Element> result = new ArrayList<Element>(children.getLength());
-//        for (int i = 0; i < children.getLength(); i++) {
-//            Node child = children.item(i);
-//            if (child.getNodeType() == Node.ELEMENT_NODE)
-//                result.add((Element)child);
-//        }
-//        return result;
     }
 
     @Nullable public static Element childElementOrNull(Element e, String name) {
@@ -199,10 +196,17 @@ public final class XmlUtils {
         return i.hasNext()? i.next() : null;
     }
 
-    public static NodeList nodeListXpath(Node baseNode, String xpathExpression) {
+    @ForCpp public static NodeList xpathNodeList(Node baseNode, String xpathExpression) {
         try {
             XPath xpath = XPathFactory.newInstance().newXPath();
             return (NodeList)xpath.evaluate( xpathExpression, baseNode, XPathConstants.NODESET );
+        } catch (XPathExpressionException x) { throw new XmlException( x ); }   // Programmfehler
+    }
+
+    @ForCpp public static Node xpathNode(Node baseNode, String xpathExpression) {
+        try {
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            return (Node)xpath.evaluate(xpathExpression, baseNode, XPathConstants.NODE);
         } catch (XPathExpressionException x) { throw new XmlException( x ); }   // Programmfehler
     }
 
@@ -231,4 +235,6 @@ public final class XmlUtils {
             super(s);
         }
     }
+
+    private XmlUtils() {}
 }

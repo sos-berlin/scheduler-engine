@@ -89,8 +89,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
     //config_element.ownerDocument().validate_dtd_string( dtd_string );  // Nur <spooler> <config> validieren, nicht die Kommandos. Deshalb hier (s. spooler_command.cxx)
 
 
-    _config_element  = NULL;
-    _config_document = NULL;
+    _config_element  = xml::Element_ptr();
+    _config_document = xml::Document_ptr();
 
     try
     {
@@ -235,7 +235,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
                 DOM_FOR_EACH_ELEMENT( e, command_element )
                 {
-                    _commands_document.documentElement().appendChild( command_element.cloneNode(true) );
+                    _commands_document.documentElement().appendForeignChild(command_element);
                 }
             }
         }

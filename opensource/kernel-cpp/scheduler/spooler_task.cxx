@@ -2415,7 +2415,6 @@ void Task::finish()
        _job->_error_steps = 0;
     }
 
-
     if( _web_service )
     {
         _web_service->forward_task( *this );

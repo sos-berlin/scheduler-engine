@@ -5,7 +5,6 @@
 #include "log_categories.h"
 #include "file.h"
 #include "z_io.h"
-#include "xml_libxml2.h"
 
 using namespace std;
 using namespace zschimmer::file;

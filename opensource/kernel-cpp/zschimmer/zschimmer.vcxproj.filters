@@ -218,6 +218,12 @@
     <ClCompile Include="z_windows_window.cxx">
       <Filter>Quellcodedateien\windows</Filter>
     </ClCompile>
+    <ClCompile Include="xml_java.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="xslt_java.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async.h">
@@ -374,6 +380,12 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="javaproxy.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="xml_any.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="xml_java.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
   </ItemGroup>

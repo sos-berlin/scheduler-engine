@@ -8,22 +8,17 @@
 
 #define DOM_FOR_EACH_ELEMENT( PARENT, ITERATOR )                                                \
                                                                                                 \
-    for( ::zschimmer::xml::libxml2::Simple_node_ptr ITERATOR##_node = (PARENT).firstChild();    \
+    for( ::zschimmer::xml::Simple_node_ptr ITERATOR##_node = (PARENT).firstChild();    \
          ITERATOR##_node;                                                                       \
          ITERATOR##_node = ITERATOR##_node.nextSibling() )                                      \
                                                                                                 \
-    if( ::zschimmer::xml::libxml2::Element_ptr ITERATOR = xml::Element_ptr( ITERATOR##_node, ::zschimmer::xml::libxml2::Element_ptr::no_xc ) )
+    if( ::zschimmer::xml::Element_ptr ITERATOR = xml::Element_ptr( ITERATOR##_node, ::zschimmer::xml::Element_ptr::no_xc ) )
 
 
 namespace zschimmer {
 namespace xml {
 
-
-namespace libxml2
-{
-    struct Element_ptr;
-}
-
+struct Element_ptr;
 
 //--------------------------------------------------------------------------------------------const
 
@@ -61,7 +56,7 @@ struct Xml_writer : io::Filter_writer
     void                        write_through               ( const io::Char_sequence& text );
     void                        flush                       ();
 
-    void                        write_element               ( const libxml2::Element_ptr& );
+    void                        write_element               ( const Element_ptr& );
 
   protected:
                                 Xml_writer                  ();

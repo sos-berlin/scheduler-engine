@@ -458,7 +458,7 @@ void Com_variable_set::register_include_and_set_dom( Scheduler* scheduler, File_
                 try
                 {
                     xml::Document_ptr included_doc   = include_command.register_include_and_read_content( source_file_based );  // Registrierung nur wenn source_file_based != NULL
-                    xml::Xpath_nodes  nodes          = included_doc.select_nodes( xpath );
+                    xml::Node_list    nodes          = included_doc.select_nodes( xpath );
 
                     for( int i = 0; i < nodes.count(); i++ )
                     {

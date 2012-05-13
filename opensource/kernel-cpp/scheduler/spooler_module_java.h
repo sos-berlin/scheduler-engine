@@ -14,6 +14,8 @@ namespace scheduler {
 
 struct Java_thread_data;
 
+void                            init_java_vm                ( javabridge::Vm* );
+
 //---------------------------------------------------------------------------------Java_thread_data
 
 struct Java_thread_data
@@ -40,9 +42,6 @@ struct Java_idispatch_stack_frame
 
 struct Java_module_instance : Module_instance
 {
-    static void                 init_java_vm                ( javabridge::Vm* );
-
-
                                 Java_module_instance        ( Module* );
                                ~Java_module_instance        ()                                      { close__end(); }
 

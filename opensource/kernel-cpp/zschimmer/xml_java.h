@@ -3,31 +3,31 @@
 #ifndef __ZSCHIMMER_XML_LIBXML2_H
 #define __ZSCHIMMER_XML_LIBXML2_H
 
-/*
-    Implementierung ähnlich http://www.w3.org/TR/2002/WD-DOM-Level-3-Core-20021022/core.html
-*/
-
 #include "xml.h"
-#include "z_com.h"
-#if !defined Z_USE_JAVAXML
-
-//--------------------------------------------------------------------------------Typen von libxml2
-
-struct _xsltStylesheet;
-struct _xmlDoc;
-struct _xmlDtd;
-struct _xmlSchema;
-struct _xmlElement;
-struct _xmlNode;
-struct _xmlAttr;
-struct _xmlXPathContext;
-struct _xmlXPathObject;
-typedef unsigned char    xmlChar;       // xmlChar* ist ein UTF-8-String
+#include "../javaproxy/org__w3c__dom__Attr.h"
+#include "../javaproxy/org__w3c__dom__CDATASection.h"
+#include "../javaproxy/org__w3c__dom__CharacterData.h"
+#include "../javaproxy/org__w3c__dom__Comment.h"
+#include "../javaproxy/org__w3c__dom__Document.h"
+#include "../javaproxy/org__w3c__dom__Element.h"
+#include "../javaproxy/org__w3c__dom__Node.h"
+#include "../javaproxy/org__w3c__dom__NodeList.h"
+#include "../javaproxy/org__w3c__dom__Text.h"
 
 //-------------------------------------------------------------------------------------------------
 
 namespace zschimmer {
 namespace xml {
+
+typedef ::javaproxy::org::w3c::dom::Attr AttrJ;
+typedef ::javaproxy::org::w3c::dom::CharacterData CharacterDataJ;
+typedef ::javaproxy::org::w3c::dom::CDATASection CDATASectionJ;
+typedef ::javaproxy::org::w3c::dom::Comment CommentJ;
+typedef ::javaproxy::org::w3c::dom::Document DocumentJ;
+typedef ::javaproxy::org::w3c::dom::Element ElementJ;
+typedef ::javaproxy::org::w3c::dom::Node NodeJ;
+typedef ::javaproxy::org::w3c::dom::NodeList NodeListJ;
+typedef ::javaproxy::org::w3c::dom::Text TextJ;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -35,8 +35,6 @@ const string                    default_character_encoding        = "ISO-8859-1"
 
 //-------------------------------------------------------------------------------------------------
 
-
-struct Attr_ptr;
 struct Implementation_ptr;
 struct ImplementationSource_ptr;
 struct DocumentType_ptr;
@@ -59,24 +57,6 @@ struct WriterFilter_ptr;
 struct XMLFormatTarget_ptr;
 struct Node_list;
 
-//-------------------------------------------------------------------------------Libxml2_error_text
-
-struct Libxml2_error_text
-{
-    const string&               error_text                  () const                                { return _error_text; }
-
-    string                     _error_code;
-    string                     _error_text;
-};
-
-//------------------------------------------------------------------------------Activate_error_text
-
-struct Activate_error_text
-{
-                                Activate_error_text         ( Libxml2_error_text* );
-                               ~Activate_error_text         ();
-};
-
 //-----------------------------------------------------------------------------------------NodeType
 
 enum NodeType
@@ -96,47 +76,29 @@ enum NodeType
     NOTATION_NODE                   = 12,   //XML_NOTATION_NODE
 };
 
-//--------------------------------------------------------------------------------------Utf8_string
-
-struct Utf8_string
-{
-                                Utf8_string                 ( const char* s   )                     { set_latin1( s, strlen( s )        ); }
-                                Utf8_string                 ( const string& s )                     { set_latin1( s.c_str(), s.length() ); }
-
-    void                        set_latin1                  ( const char*, size_t length );
-    xmlChar*                    utf8                        () const                                { return (xmlChar*)_utf8.c_str(); }
-    size_t                      byte_count                  () const                                { return _utf8.length(); }
-
-    string                     _utf8;
-};
-
-
-typedef xmlChar* DOMString;
-
 //-------------------------------------------------------------------------------------------------
 
 string                          name_of_node_type           ( const NodeType& );
-string                          sd                          ( const xmlChar* );
-string                          sd_free                     ( xmlChar* );
 
 //----------------------------------------------------------------------------------Simple_node_ptr
 
 struct Simple_node_ptr
 {
-                                Simple_node_ptr             ()                                      : _ptr(NULL) {}
-                                Simple_node_ptr             ( _xmlNode* ptr )                       : _ptr(ptr) {}
-                                Simple_node_ptr             ( const Simple_node_ptr& p )            : _ptr(p._ptr) {}
+                                Simple_node_ptr             ()                                       {}
+                                Simple_node_ptr             (const NodeJ& o)                        : _nodeJ(o) {}
+                                Simple_node_ptr             (const Simple_node_ptr& o)              : _nodeJ(o._nodeJ) {}
 
     virtual                    ~Simple_node_ptr             ()                                      {}              // Für gcc 3.2
 
 
-    virtual void                free                        ();
-    virtual void                assign                      ( _xmlNode* ptr )                       { _ptr = ptr; }
-    virtual void                assign                      ( _xmlNode*, NodeType );
+  //void                        free                        ();
+    virtual void                assign                      (const NodeJ& o)                        { _nodeJ = o; }
+    virtual void                assign                      (const NodeJ&, NodeType );
 
-    _xmlNode*                   ptr                         () const                                { return _ptr; }
+    const NodeJ&                ref                         () const                                { return _nodeJ; }
 
-                                operator _xmlNode*          () const                                { return ptr(); }
+                                //operator const NodeJ&     () const                                { return node(); }
+                                operator bool               () const                                { return !!_nodeJ; }
 
     virtual bool                is_type                     ( NodeType )                            { return false; }
     void                        assert_type                 ( NodeType );
@@ -163,9 +125,10 @@ struct Simple_node_ptr
     Simple_node_ptr             replaceChild                ( const Simple_node_ptr& newChild, const Simple_node_ptr& oldChild ) const;
     Simple_node_ptr             replace_with                ( const Simple_node_ptr& );
     void                        removeChild                 ( const Simple_node_ptr& child ) const;
-    Simple_node_ptr             appendForeignChild          (const Simple_node_ptr& newChild) const;
+    Simple_node_ptr             appendForeignChild          (const Simple_node_ptr&) const;
+    Simple_node_ptr             adoptAndAppendChild         (const Simple_node_ptr&) const;    
     Simple_node_ptr             appendChild                 ( const Simple_node_ptr& newChild ) const;
-    Simple_node_ptr             appendChild_if              ( const Simple_node_ptr& newChild ) const             { return newChild? appendChild( newChild ) : NULL; }
+    Simple_node_ptr             appendChild_if              ( const Simple_node_ptr& newChild ) const             { return newChild? appendChild( newChild ) : Simple_node_ptr(NULL); }
     bool                        hasChildNodes               () const;
     string                      getTextContent              () const;
     void                        setTexContent              ( const string& textContent ) const;
@@ -180,31 +143,29 @@ struct Simple_node_ptr
     Simple_node_ptr             select_node_strict          ( const string& xpath_expression ) const;
     Element_ptr                 select_element_strict       ( const string& xpath_expression ) const;
 
+private:
+    DocumentJ                   thisOrOwnerDocumentJ        () const;
 
-    _xmlNode*                   _ptr;
+    NodeJ                      _nodeJ;
 };
 
 //-------------------------------------------------------------------------------------Document_ptr
 
-struct Document_ptr : Simple_node_ptr, 
-                      Libxml2_error_text
+struct Document_ptr : Simple_node_ptr
 {
-                                Document_ptr                ( _xmlDoc* doc = NULL )                 { assign( doc ); }
-                                Document_ptr                ( const Document_ptr& doc )             { assign( doc.ptr() ); }
+                                Document_ptr                ( const DocumentJ& doc = NULL )         { assign( doc ); }
+                                Document_ptr                ( const Document_ptr& doc )             { assign( doc.ref() ); }
                                 Document_ptr                ( const string& xml, const string& encoding = "" ) { load_xml( xml, encoding ); }
                                 Document_ptr                ( const BSTR xml )                      { load_xml( xml ); }
-                               ~Document_ptr                ()                                      { release(); }
 
-    Document_ptr&               operator =                  ( const Document_ptr& doc )             { assign( doc.ptr() );  return *this; }
-    Document_ptr&               operator =                  ( _xmlDoc* doc )                        { assign( doc       );  return *this; }
+    Document_ptr&               operator =                  ( const Document_ptr& doc )             { assign( doc.ref() );  return *this; }
+    Document_ptr&               operator =                  (const DocumentJ& doc )                 { assign( doc       );  return *this; }
 
-    void                        assign                      ( _xmlDoc* doc );
+    void                        assign                      (const DocumentJ& doc );
 
-    void                        release                     ();
+    const DocumentJ&            ref                         () const                                { return _documentJ; }
 
-    _xmlDoc*                    ptr                         () const                                { return (_xmlDoc*)_ptr; }
-
-    _xmlDoc*                    detach                      ()                                      { _xmlDoc* result = ptr(); _ptr = NULL; return result; }
+    //const DocumentJ&            detach                      ()                                      { const DocumentJ& result = ref(); _nodeJ = NULL; return result; }
 
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == DOCUMENT_NODE || Simple_node_ptr::is_type( type ); }
 
@@ -217,10 +178,8 @@ struct Document_ptr : Simple_node_ptr,
     string                      xml                         () const                                { return xml( default_character_encoding ); }
 
     Element_ptr                 createElement               ( const string& tagName ) const;
-    Element_ptr                 createElement               ( const char* tagName ) const;
     Text_ptr                    createTextNode              ( const string& data ) const;
     Comment_ptr                 createComment               ( const string& data ) const;
-    Comment_ptr                 createComment               ( const char* data ) const;
     CDATASection_ptr            createCDATASection          ( const string& data ) const;
     ProcessingInstruction_ptr   createProcessingInstruction ( const string& target, const string& data ) const;
 
@@ -229,6 +188,9 @@ struct Document_ptr : Simple_node_ptr,
     Element_ptr                 documentElement             () const;
 
     Element_ptr                 create_root_element         ( const string& name );
+
+private:
+    DocumentJ                  _documentJ;
 };                                                          
 
 //-----------------------------------------------------------------------------------------Node_ptr
@@ -237,66 +199,52 @@ struct Document_ptr : Simple_node_ptr,
 struct Node_ptr : Simple_node_ptr
 {
                                 Node_ptr                    ()                                      {}
-                                Node_ptr                    ( _xmlNode* ptr )                       : Simple_node_ptr( ptr )   { set_document(); }
-                                Node_ptr                    ( const Simple_node_ptr& p )            : Simple_node_ptr( p._ptr) { set_document(); }
+                                Node_ptr                    ( const NodeJ& o )                      : Simple_node_ptr(o)   {}
+                                Node_ptr                    ( const Simple_node_ptr& o )            : Simple_node_ptr(o.ref())  {}
 
-                                operator _xmlNode*          () const                                { return ptr(); }
+                                operator const NodeJ&       () const                                { return ref(); }
 
-    void                        free                        ()                                      { Simple_node_ptr::free();  set_document(); }
-    void                        assign                      ( _xmlNode* ptr )                       { Simple_node_ptr::assign( ptr ); set_document(); }
-    void                        assign                      ( _xmlNode* ptr, NodeType nt )          { Simple_node_ptr::assign( ptr, nt ); set_document(); }
-    bool                        is_orphan                   () const;
-
-    void                    set_document                    ();
+  //void                        free                        ()                                      { Simple_node_ptr::free(); }
+    void                        assign                      (const NodeJ& o)                        { Simple_node_ptr::assign(o); }
+    void                        assign                      (const NodeJ& o, NodeType t )           { Simple_node_ptr::assign(o, t); }
 
     Document_ptr               _document;
 };
 
 //-------------------------------------------------------------------------------------NodeList_ptr
-
+/*
 struct NodeList_ptr : Node_ptr
 {
                                 NodeList_ptr                ( _xmlNode* p )                         :  Node_ptr( p ) {}
 
     _xmlNode*                   ptr                         ()                                      { return (_xmlNode*)_ptr; }
 };
-
+*/
 //--------------------------------------------------------------------------------CharacterData_ptr
 
 struct CharacterData_ptr : Node_ptr 
 {
-                                CharacterData_ptr           ( _xmlNode* p = NULL )                  : Node_ptr(p) {}
-                                CharacterData_ptr           ( const Simple_node_ptr& p )            : Node_ptr(p) {}
-                                CharacterData_ptr           ( const CharacterData_ptr& p )          : Node_ptr(p) {}
+                                CharacterData_ptr           (const CharacterDataJ& o)               : Node_ptr(NodeJ(o)), _characterDataJ(o) {}
+                                CharacterData_ptr           (const Simple_node_ptr& o)              : Node_ptr(o), _characterDataJ(o.ref()) {}
+                                CharacterData_ptr           (const CharacterData_ptr& o )           : Node_ptr(NodeJ(o.ref())), _characterDataJ(o.ref()) {}
+
+    string                      data                        () const;
+
+private:
+    const CharacterDataJ       _characterDataJ;
 };
 
 //-----------------------------------------------------------------------------------------Text_ptr
 
 struct Text_ptr : CharacterData_ptr
 {
-                                Text_ptr                    ( _xmlNode* p = NULL )                  : CharacterData_ptr(p) {}
+                                Text_ptr                    (const TextJ& o = NULL )                : CharacterData_ptr(CharacterDataJ(o)) {}
+                              //Text_ptr                    (const NodeJ& o = NULL )                : Node_ptr(o) {}
                                 Text_ptr                    ( const Simple_node_ptr& p )            : CharacterData_ptr(p) {}
 
-                                Text_ptr                    ( const Text_ptr& p )                   : CharacterData_ptr(p) {}
+                              //Text_ptr                    ( const Text_ptr& p )                   : Node_ptr(p) {}
 
-    virtual bool                is_type                     ( NodeType type )                       { return nodeType() == TEXT_NODE || CharacterData_ptr::is_type( type ); }
-
-    string                      data                        () const;
-};
-
-//-----------------------------------------------------------------------------------------Attr_ptr
-
-struct Attr_ptr : Node_ptr
-{
-                                Attr_ptr                    ( _xmlAttr* ptr )                       : Node_ptr( (_xmlNode*)ptr ) {} 
-
-    virtual bool                is_type                     ( NodeType type )                       { return nodeType() == ATTRIBUTE_NODE || Attr_ptr::is_type( type ); }
-
-    string                      name                        ();
-    bool                        specified                   ();
-    string                      value                       ();
-    void                    set_value                       ( const string& value );
-    Element_ptr                 ownerElement                ();
+    virtual bool                is_type                     ( NodeType type )                       { return nodeType() == TEXT_NODE || Node_ptr::is_type( type ); }
 };
 
 //--------------------------------------------------------------------------------------Element_ptr
@@ -305,15 +253,13 @@ struct Element_ptr : Node_ptr
 {
     enum No_xc { no_xc };
 
-                                Element_ptr                 ( _xmlElement* ptr = NULL )             : Node_ptr( (_xmlNode*)ptr ) {}
-    explicit                    Element_ptr                 ( _xmlNode* p )                         { assign( p ); }
-    explicit                    Element_ptr                 ( _xmlNode* p, No_xc )                  : Node_ptr( p ) { if( !is_type( ELEMENT_NODE ) )  _ptr = NULL; }
-                                Element_ptr                 ( const Simple_node_ptr& p )            { assign( p ); }
+                                Element_ptr                 ( const ElementJ& o = NULL )            : Node_ptr(NodeJ(o)), _elementJ(o) {}
+                                Element_ptr                 ( const Simple_node_ptr& p )            : Node_ptr(p.ref()), _elementJ(p.ref()) {}
+    explicit                    Element_ptr                 ( const Simple_node_ptr& p, No_xc )     : Node_ptr(p.ref()), _elementJ(NULL) { if (is_type( ELEMENT_NODE)) _elementJ = p.ref(); else assign(NULL); }
 
-    void                        assign                      ( _xmlElement* ptr )                    { Node_ptr::assign( (_xmlNode*)ptr ); }
-    void                        assign                      ( _xmlNode*    ptr )                    { Node_ptr::assign( ptr, ELEMENT_NODE ); }
+    void                        assign                      ( const ElementJ& o)                    { _elementJ = o; Node_ptr::assign(NodeJ(o)); }
 
-    _xmlElement*                ptr                         () const                                { return (_xmlElement*)_ptr; }
+  //_xmlElement*                ptr                         () const                                { return (_xmlElement*)_ptr; }
 
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == ELEMENT_NODE || Node_ptr::is_type( type ); }
 
@@ -324,8 +270,6 @@ struct Element_ptr : Node_ptr
     int                     int_getAttribute                ( const string& name ) const;
     int                     int_getAttribute                ( const string& name, int deflt ) const;
     int                    uint_getAttribute                ( const string& name, int deflt ) const;
-    Attr_ptr                    getAttributeNode            ( const string& name ) const            { return getAttributeNode( name.c_str() ); }
-    Attr_ptr                    getAttributeNode            ( const char*   name ) const;
     void                        setAttribute_optional       ( const string& name, const string& value ) const { if( value != "" )  setAttribute( name, value ); }
     void                        setAttribute                ( const string& name, const string& value ) const { setAttribute( name, value.c_str() ); }
     void                        setAttribute_optional       ( const string& name, const BSTR    value ) const { if( SysStringLen(value) > 0 )  setAttribute( name, value ); }
@@ -335,9 +279,8 @@ struct Element_ptr : Node_ptr
     void                        setAttribute                ( const string& name, int64 value ) const;
     void                        setAttribute                ( const string& name, int value ) const           { setAttribute( name, (int64)value ); }  // Für gcc 3.3
     void                        setAttribute                ( const string& name, long value ) const          { setAttribute( name, (int64)value ); }  // Für gcc 3.3
-    Attr_ptr                    setAttributeNode            ( _xmlAttr* newAttr ) const;
     bool                        hasAttributes               () const;
-    bool                        removeAttribute             ( const string& name ) const;
+    void                        removeAttribute             ( const string& name ) const;
     bool                        hasAttribute                ( const string& name ) const;
     Element_ptr                 first_child_element         () const;
     Element_ptr                 append_new_element          ( const string& element_name ) const;
@@ -355,58 +298,51 @@ struct Element_ptr : Node_ptr
 
     string                      text                        () const;
     string                      trimmed_text                () const;                               // Erste und letzte Leerzeile werden abgeschnitten (nach <tag> und vor </tag>)
+
+private:
+    ElementJ                   _elementJ;
 };
 
 //--------------------------------------------------------------------------------------Comment_ptr
 
 struct Comment_ptr : CharacterData_ptr
 {
-                                Comment_ptr                 ( _xmlNode* p = NULL )                  : CharacterData_ptr(p) {}
-                                Comment_ptr                 ( const Simple_node_ptr& p )            : CharacterData_ptr(p) {}
-
-                                Comment_ptr                 ( const Comment_ptr& p )                : CharacterData_ptr(p) {}
+                                Comment_ptr                 (const CommentJ& o)                     : CharacterData_ptr(CharacterDataJ(o)) {}
+                                Comment_ptr                 (const Simple_node_ptr& p)              : CharacterData_ptr(p) {}
+                                Comment_ptr                 (const Comment_ptr& o)                  : CharacterData_ptr(CharacterDataJ(o.ref())) {}
 
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == COMMENT_NODE || CharacterData_ptr::is_type( type ); }
-    string                      data                        () const;
 };
 
 //---------------------------------------------------------------------------------CDATASection_ptr
 
 struct CDATASection_ptr : Text_ptr
 {
-                                CDATASection_ptr            ( _xmlNode* p = NULL )                  : Text_ptr(p) {}
+                                CDATASection_ptr            (const CDATASectionJ& o)                : Text_ptr(TextJ(o)) {}
                                 CDATASection_ptr            ( const Simple_node_ptr& p )            : Text_ptr(p) {}
-
-                                CDATASection_ptr            ( const CDATASection_ptr& p )           : Text_ptr(p) {}
 
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == CDATA_SECTION_NODE || Text_ptr::is_type( type ); }
 };
 
-//-------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------Node_list
 
-struct Node_list
-{
-    struct Xpath_object : Object, Non_cloneable
-    {
-                                Xpath_object                ()                                      : _xpath_context(NULL), _xpath_object(NULL) {}
-                               ~Xpath_object                ();
-
-        _xmlXPathContext*      _xpath_context;
-        _xmlXPathObject*       _xpath_object;
-    };
+struct Node_list {
+                                Node_list                   ()                                      {}
+                                Node_list                   (const NodeListJ& o)                    : _nodeListJ(o) {}
 
     int                         count                       () const;
-    Simple_node_ptr             operator[]                  ( int index ) const                     { return get( index ); }
-    Simple_node_ptr             get                         ( int index ) const;
-
-    ptr<Xpath_object>          _xpath_object;
+    Simple_node_ptr             operator[]                  (int i) const                           { return get(i); }
+    Simple_node_ptr             get                         (int i) const;
+                                                                                                                                 
+private:
+    const NodeListJ            _nodeListJ;
 };
 
 //------------------------------------------------------------------------ProcessingInstruction_ptr
-
+/*
 struct ProcessingInstruction_ptr : Node_ptr 
 {
-                                ProcessingInstruction_ptr   ( _xmlNode* p = NULL )                  : Node_ptr(p) {}
+                                ProcessingInstruction_ptr   (const NodeJ& p = NULL )                  : Node_ptr(p) {}
                                 ProcessingInstruction_ptr   ( const Simple_node_ptr& p )            : Node_ptr(p) {}
                                 ProcessingInstruction_ptr   ( const ProcessingInstruction_ptr& p )  : Node_ptr(p) {}
 
@@ -416,23 +352,18 @@ struct ProcessingInstruction_ptr : Node_ptr
     string                      getData                     () const;
     void*                       setData                     ( const string& data );
 };
-
+*/
 //---------------------------------------------------------------------------------------Schema_ptr
 
 struct Schema_ptr : Non_cloneable
 {
-                                Schema_ptr                  ()                                      : _ptr( NULL ) {}
-                                Schema_ptr                  ( const Document_ptr& schema )          : _ptr( NULL ) { read( schema ); }
-                               ~Schema_ptr                  ()                                      { release(); }
+                                Schema_ptr                  ()                                      : _ptr(NULL) {}
+                                Schema_ptr                  ( const Document_ptr& schema )          : _ptr(NULL) { read(schema); }
 
     void                        read                        ( const Document_ptr& schema );
-    void                        release                     ();
-    _xmlSchema**                operator &                  ()                                      { release();  return &_ptr; }
-    bool                        operator !                  ()                                      { return _ptr == NULL; }
-                                operator _xmlSchema*        ()                                      { return _ptr; }
     void                        validate                    ( const Document_ptr& );
 
-    _xmlSchema*                _ptr;
+    int* _ptr;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -440,5 +371,4 @@ struct Schema_ptr : Non_cloneable
 } //namespace xml
 } //namespace zschimmer
 
-#endif
 #endif

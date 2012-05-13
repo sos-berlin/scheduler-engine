@@ -5,12 +5,11 @@
 #include "../zschimmer/log.h"
 #include "../zschimmer/argv.h"
 #include "../zschimmer/async_socket.h"
-#include "../zschimmer/xml_libxml2.h"
 #include "../zschimmer/file.h"
+#include "../zschimmer/xml_any.h"
 
 using namespace std;
 using namespace zschimmer;
-//using namespace zschimmer::xml_libxml2;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -284,11 +283,3 @@ int scheduler_client_main( int argc, char** argv )
 
 } //namespace scheduler
 } //namespace sos
-
-//---------------------------------------------------------------------------------------------main
-/*
-int main( int argc, char** argv )
-{
-    return sos::scheduler::scheduler_client_main( argc, argv );
-}
-*/

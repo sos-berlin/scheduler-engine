@@ -3,6 +3,8 @@
 // Dokumentation von libxml2 in http://xmlsoft.org/html/libxml-lib.html
 
 #include "zschimmer.h"
+#if !defined Z_USE_JAVAXML
+
 #include "xslt_libxslt.h"
 #include "log.h"
 
@@ -15,42 +17,12 @@
 #include "../3rd_party/libxslt/libxslt/transform.h"
 #include "../3rd_party/libxslt/libxslt/xsltutils.h"
 
-
-
 using namespace std;
 using namespace zschimmer::com;
 
-
 namespace zschimmer {
 namespace xml {
-namespace libxml2 {
 
-//-------------------------------------------------------------------------Libxml_output_buffer_ptr
-/*
-struct Libxml_output_buffer_ptr
-{
-    Libxml_output_buffer_ptr() 
-    : 
-        _ptr(NULL) 
-    {
-    }
-
-
-    ~Libxml_output_buffer_ptr()
-    {
-        if( _ptr )  xmlOutputBufferClose( _ptr );
-    }
-
-
-    operator xmlOutputBufferPtr () 
-    { 
-        return _ptr; 
-    }
-
-
-    xmlOutputBufferPtr         _ptr;
-};
-*/
 //--------------------------------------------------------------------------------------------const
 
 static Message_code_text error_codes[] =
@@ -63,12 +35,6 @@ static Message_code_text error_codes[] =
     { NULL         , NULL }
 };
 
-    /*
-    { "LIBXSLT-001", "Kein Stylesheet geladen" },
-    { "LIBXSLT-002", "Parametersyntax NAME=WERT nicht eingehalten: $1" },
-    { "LIBXSLT-003", "Stylesheet nicht ladbar" },
-    { "LIBXSLT-004", "Fehler bei der Anwendung des Stylesheets auf das XML-Dokument" },
-    */
 //-------------------------------------------------------------------------------------------Z_INIT
 
 Z_INIT( xml_libxslt )
@@ -76,23 +42,6 @@ Z_INIT( xml_libxslt )
     add_message_code_texts( error_codes );
 }
 
-//--------------------------------------------------------------------------Xslt_parameters::create
-/*
-Xslt_parameters Xslt_parameters::create( const std::vector<string>& parameters )
-{
-    Xslt_parameters result ( parameters.size() );
-
-    for( uint i = 0; i < parameters.size(); i++ )
-    {
-        const string& parameter = parameters[i];
-        size_t equal = parameter.find( '=' );
-        if( equal == string::npos )  throw_xc( "LIBXSLT-002", parameter );
-        result.set( i, parameter.substr( 0, equal ), parameter.substr( equal + 1 ) );
-    }
-
-    return result;
-}
-*/
 //-----------------------------------------------------------------Xslt_parameters::Xslt_parameters
 
 Xslt_parameters::Xslt_parameters( int count )
@@ -345,40 +294,12 @@ Document_ptr Xslt_stylesheet::apply( const Document_ptr& document, const Xslt_pa
     return result;
 }
 
-//------------------------------------------------------------Xslt_stylesheet::write_result_to_file
 
-void Xslt_stylesheet::write_result_to_file( const Document_ptr& result_document, const string& filename )
-{
-  //xmlIndentTreeOutput = 1;
-
-    int compression = 0;
-    xsltSaveResultToFilename( filename.c_str(), result_document.ptr(), _stylesheet_ptr->_ptr, compression );
-
-    /*
-    File file ( filename, "w" );
-    xsltSaveResultToFd( file, result_document._ptr, _ptr );
-    file.release();
-    */
-}
-
-//-----------------------------------------------------------------Xslt_stylesheet::xml_from_result
-/*
-string Xslt_stylesheet::xml_from_result( const Document_ptr& result_document )
-{
-    string                  result;
-    Libxml_output_buffer_ptr    buffer;
-
-
-    int byte_count = xsltSaveResultTo( buffer, result_document.ptr(), _ptr );
-    if( byte_count < 0 )  throw_xc( "LIBXSLT-xsltSaveResultToString" );
-
-    return sd( buffer );
-}
-*/
 //-------------------------------------------------------------------------------------------------
 
-} //namespace libxml2
 } //namespace xml
 } //namespace zschimmer
 
 //-------------------------------------------------------------------------------------------------
+
+#endif

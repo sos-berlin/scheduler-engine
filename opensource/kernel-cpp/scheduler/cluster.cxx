@@ -951,7 +951,7 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
     if( xml != "" )
     {
         xml::Document_ptr dom_document = xml;
-        if( dom_document.documentElement() )  result = dom_document.documentElement().cloneNode( true );
+        if( dom_document.documentElement() )  result = dom_document.importNode(dom_document.documentElement());
     }
 
     if( !result )  result = dom_document.createElement( "cluster_member" );

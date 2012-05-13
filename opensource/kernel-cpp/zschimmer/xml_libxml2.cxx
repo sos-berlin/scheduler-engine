@@ -3,6 +3,8 @@
 // Dokumentation von libxml2 in http://xmlsoft.org/html/libxml-lib.html
 
 #include "zschimmer.h"
+#if !defined Z_USE_JAVAXML
+
 #include "xml_libxml2.h"
 #include "mutex.h"
 #include "z_com.h"
@@ -25,7 +27,6 @@ using namespace zschimmer::com;
 
 namespace zschimmer {
 namespace xml {
-namespace libxml2 {
 
 //-------------------------------------------------------------------------------------------static
 
@@ -502,11 +503,12 @@ Element_ptr Document_ptr::create_root_element( const string& name )
     return appendChild( createElement( name ) ); 
 }
 
-//------------------------------------------------------------------------------Document_ptr::clone
+//-------------------------------------------------------------------------Document_ptr::importNode
 
-Simple_node_ptr Document_ptr::clone( const Simple_node_ptr& node, int extended ) const
+Simple_node_ptr Document_ptr::importNode(const Simple_node_ptr& node) const
 { 
     assert( _ptr );
+    int extended = 1;
     xmlNodePtr result = xmlDocCopyNode( node.ptr(), ptr(), extended );
 
     if( !result )  throw_xc( "LIBXML2-001", "xmlDocCopyNode" );
@@ -660,6 +662,13 @@ Simple_node_ptr Simple_node_ptr::insertBefore( const Simple_node_ptr& newChild, 
     }
     else
         return appendChild( newChild );
+}
+
+//--------------------------------------------------------------Simple_node_ptr::appendForeignChild
+
+Simple_node_ptr Simple_node_ptr::appendForeignChild(const Simple_node_ptr& newChild) const 
+{
+    return appendChild(ownerDocument().importNode(newChild));
 }
 
 //---------------------------------------------------------------------Simple_node_ptr::appendChild
@@ -823,13 +832,13 @@ string Simple_node_ptr::xml( const string& encoding, bool indented ) const
 
 //--------------------------------------------------------------------Simple_node_ptr::select_nodes
 
-Xpath_nodes Simple_node_ptr::select_nodes( const string& xpath_expression ) const
+Node_list Simple_node_ptr::select_nodes( const string& xpath_expression ) const
 {
-    Xpath_nodes result;
+    Node_list result;
     
     if( _ptr )
     {
-        result._xpath_object = Z_NEW( Xpath_nodes::Xpath_object );
+        result._xpath_object = Z_NEW( Node_list::Xpath_object );
 
         result._xpath_object->_xpath_context = xmlXPathNewContext( _ptr->doc );
         if( !result._xpath_object->_xpath_context )  throw_xc( "LIBXML2-001", "xmlXPathNewContext" );
@@ -847,7 +856,7 @@ Xpath_nodes Simple_node_ptr::select_nodes( const string& xpath_expression ) cons
 
 Simple_node_ptr Simple_node_ptr::select_node( const string& xpath_expression ) const
 {
-    Xpath_nodes nodes = select_nodes( xpath_expression );
+    Node_list nodes = select_nodes( xpath_expression );
     return nodes.count() > 0? nodes[0] : NULL;
 }
 
@@ -889,24 +898,24 @@ void Node_ptr::set_document()
     _document = _ptr? _ptr->doc : NULL; 
 }
 
-//---------------------------------------------------------Xpath_nodes::Xpath_object::~Xpath_object
+//---------------------------------------------------------Node_list::Xpath_object::~Xpath_object
 
-Xpath_nodes::Xpath_object::~Xpath_object()
+Node_list::Xpath_object::~Xpath_object()
 {
     xmlXPathFreeObject( _xpath_object );
     xmlXPathFreeContext( _xpath_context ); 
 }
 
-//-------------------------------------------------------------------------------Xpath_nodes::count
+//-------------------------------------------------------------------------------Node_list::count
 
-int Xpath_nodes::count() const
+int Node_list::count() const
 {
     return _xpath_object &&  _xpath_object->_xpath_object->nodesetval? _xpath_object->_xpath_object->nodesetval->nodeNr : 0;
 }
 
-//---------------------------------------------------------------------------------Xpath_nodes::get
+//---------------------------------------------------------------------------------Node_list::get
 
-Simple_node_ptr Xpath_nodes::get( int i ) const
+Simple_node_ptr Node_list::get( int i ) const
 {
     Simple_node_ptr result = _xpath_object->_xpath_object->nodesetval->nodeTab[ i ];
 
@@ -1285,8 +1294,7 @@ void Schema_ptr::validate( const Document_ptr& document )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace libxml2
 } //namespace xml
 } //namespace zschimmer
 
-//-------------------------------------------------------------------------------------------------
+#endif

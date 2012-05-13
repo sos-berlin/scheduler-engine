@@ -534,7 +534,7 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, co
         try
         {
             xml::Document_ptr source_dom ( _source_xml );
-            source_element.appendChild( source_element.ownerDocument().clone( source_dom.documentElement() ) );      // Ein "prune()" w�re effizienter als clone()
+            source_element.appendForeignChild(source_dom.documentElement());      // Ein "prune()" wäre effizienter als clone()
         }
         catch( exception& x )
         {

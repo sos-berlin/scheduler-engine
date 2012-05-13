@@ -1331,6 +1331,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_virgin = !element.bool_getAttribute( "touched" );
 
+
     if( element.hasAttribute( "suspended" ) )
         set_suspended( element.bool_getAttribute( "suspended" ) );
 
@@ -1560,7 +1561,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
             if( doc.documentElement() )
             {
-                xml_payload_element.appendChild( doc.documentElement().cloneNode( true ) );
+                xml_payload_element.appendForeignChild(doc.documentElement());
             }
         }
         catch( exception& x )   // Sollte nicht passieren
@@ -1658,7 +1659,7 @@ void Order::set_attributes_and_remove_duplicates(
                 e.getAttribute( "at" ) == setback_element.getAttribute( "at" ) )
             {
                 element.removeChild( setback_element );
-                setback_element = NULL;
+                setback_element = xml::Element_ptr();
             }
 
             if( _job_chain_path != "" )  e.setAttribute( "job_chain", _job_chain_path );
@@ -2772,7 +2773,6 @@ void Order::postprocessing2( Job* last_job )
     }
 
     _moved = false;
-
 
     if( finished() )
     {

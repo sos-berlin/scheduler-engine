@@ -1131,16 +1131,9 @@ xml::Document_ptr Schedule::dom_document( const Show_what& show_what )
 
 xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )           
 {
-    xml::Element_ptr result; 
+    xml::Element_ptr result = dom_document.importNode(_inlay->dom_element( dom_document, show_what )); 
 
-    if( show_what.is_set( show_for_database_only ) )
-    {
-        result = _inlay->dom_element( dom_document, show_what ); 
-    }
-    else
-    {
-        result = _inlay->dom_element( dom_document, show_what ); 
-        
+    if (!show_what.is_set( show_for_database_only)) {
         if( is_in_folder() )    // Benanntes <schedule>?
         {
             result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
@@ -1274,7 +1267,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 
 
     _dom.create();
-    _dom.appendChild( _dom.clone( element ) );
+    _dom.appendForeignChild(element);
 
 
     _title = element.getAttribute( "title ");
@@ -1383,9 +1376,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 
 xml::Element_ptr Schedule::Inlay::dom_element( const xml::Document_ptr& document, const Show_what& ) 
 {
-    xml::Element_ptr result = document.clone( _dom.documentElement() );
-
-    return result;
+    return document.importNode( _dom.documentElement() );
 }
 
 //-----------------------------------------------------------------------Schedule::Inlay::is_filled

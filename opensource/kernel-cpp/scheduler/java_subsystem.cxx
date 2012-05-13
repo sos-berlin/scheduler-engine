@@ -3,7 +3,6 @@
 #include "spooler.h"
 #include "../kram/sos_java.h"
 #include "javaproxy.h"
-#include "jni__register_native_classes.h"
 
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
@@ -15,7 +14,7 @@ namespace scheduler {
 
 struct Java_subsystem : Java_subsystem_interface
 {
-                                Java_subsystem              (Scheduler*, const string& java_options, const string& class_path);
+                                Java_subsystem              (Scheduler*);
                                ~Java_subsystem              ();
 
     // Subsystem:
@@ -42,30 +41,20 @@ struct Java_subsystem : Java_subsystem_interface
 
 //-------------------------------------------------------------------------------new_java_subsystem
 
-ptr<Java_subsystem_interface> new_java_subsystem(Scheduler* scheduler, const string& java_options, const string& class_path)
+ptr<Java_subsystem_interface> new_java_subsystem(Scheduler* scheduler)
 {
-    ptr<Java_subsystem> java_subsystem = Z_NEW(Java_subsystem(scheduler, java_options, class_path));
+    ptr<Java_subsystem> java_subsystem = Z_NEW(Java_subsystem(scheduler));
     return +java_subsystem;
 }
 
 //-------------------------------------------------------------------Java_subsystem::Java_subsystem
 
-Java_subsystem::Java_subsystem(Scheduler* scheduler, const string& java_options, const string& class_path)
+Java_subsystem::Java_subsystem(Scheduler* scheduler)
 : 
     Java_subsystem_interface( scheduler, type_java_subsystem )
 {
     _java_vm = get_java_vm( false );
-    _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
     _java_vm->set_log( _log );
-    _java_vm->set_options(java_options);
-    _java_vm->prepend_class_path(class_path);
-
-    if(_spooler->_ignore_process_classes)     // Die Java-Jobs laufen mit unserer JVM
-    {
-        string java_work_dir = _spooler->java_work_dir();
-        _java_vm->set_work_dir( java_work_dir );
-        _java_vm->prepend_class_path( java_work_dir );
-    }
 }
 
 //------------------------------------------------------------------Java_subsystem::~Java_subsystem
@@ -98,8 +87,6 @@ void Java_subsystem::close()
 
 bool Java_subsystem::subsystem_initialize()
 {
-    Java_module_instance::init_java_vm( _java_vm );
-    register_native_classes();
     _subsystem_state = subsys_initialized;
     return true;
 }

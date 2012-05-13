@@ -155,10 +155,9 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
 {
     xml::Document_ptr event_dom = event_dom_? event_dom_ : dom();
 
+    xml::Document_ptr    mail_dom;
 
     // STYLESHEET AUSFÜHREN
-
-    xml::Document_ptr    mail_dom;
     ptr<Xslt_stylesheet> stylesheet;
 
     if( _mail )
@@ -192,7 +191,7 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
         if( xml::Element_ptr mail_element = event_dom.select_node( mail_xpath ) )
         {
             mail_dom.create();
-            mail_dom.appendChild( mail_element.cloneNode(true) );
+            mail_dom.appendForeignChild(mail_element);
         }
     }
 
@@ -271,7 +270,7 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 
         ptr<Com_mail> mail;
 
-        if( xml::Element_ptr mail_element = mail_dom? mail_dom.select_node( mail_xpath ) : NULL )
+        if( xml::Element_ptr mail_element = mail_dom? mail_dom.select_node( mail_xpath ) : xml::Element_ptr() )
         {
             if( !mail_element.bool_getAttribute( "suppress" ) )         // suppress="true" im <mail>-Element unterbindet den Mailversand
             {

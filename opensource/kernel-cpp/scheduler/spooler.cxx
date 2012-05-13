@@ -23,11 +23,13 @@
 #include "../file/stdfile.h"    // make_path
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
+#include "../kram/sos_java.h"
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/xml_end_finder.h"
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/not_in_recursion.h"
 #include "../zschimmer/file_path.h"
+#include "jni__register_native_classes.h"
 
 using namespace std;
 using namespace zschimmer::file;
@@ -41,6 +43,7 @@ extern const Bool _dll = false;
     extern HINSTANCE _hinstance; 
 #endif
 
+static ptr<javabridge::Vm> start_java(const string& options, const string& class_path);
 
 namespace scheduler {
 
@@ -190,6 +193,8 @@ static void print_usage()
             "       -V\n"
             "       -show-xml-schema\n"
             "\n"
+            "       -java-classpath=...\n"
+            "       -java-options=...\n"
             "       -cd=PATH\n"
             "       -log=HOSTWARELOGFILE\n"
             "       -log-dir=DIRECTORY|*stderr\n"
@@ -700,7 +705,7 @@ Spooler::Spooler(jobject java_main_context)
 
     Z_DEBUG_ONLY( self_test() );
 
-    if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
+    if( spooler_ptr )  z::throw_xc( "spooler_ptr", "The JobScheduler Engine is already running in this process");
     spooler_ptr = this;
 
     check_licence();
@@ -712,6 +717,10 @@ Spooler::Spooler(jobject java_main_context)
     _com_log      = new Com_log( _log );
     _com_spooler  = new Com_spooler( this );
     _variables    = new Com_variable_set();
+
+    #if defined Z_USE_JAVAXML
+        initialize_java_subsystem();
+    #endif
 
     if( _validate_xml )  _schema.read( xml::Document_ptr( 
 
@@ -777,9 +786,9 @@ void Spooler::check_licence()
 
 void Spooler::close()
 {
+    spooler_ptr = NULL;
     if( _daylight_saving_time_transition_detector )  _daylight_saving_time_transition_detector->set_async_manager( NULL );
 
-    spooler_ptr = NULL;
     set_ctrl_c_handler( false );
 
     destroy_subsystems();
@@ -1338,14 +1347,12 @@ void Spooler::self_check()
 void Spooler::send_cmd()
 {
     xml::Document_ptr xml_doc;
-    int ok = xml_doc.try_load_xml( _send_cmd );      // Haben wir ein gültiges XML-Dokument?
-    if( !ok )
-    {
-        string text = xml_doc.error_text();
-        _log->error( text );       // Log ist möglicherweise noch nicht geöffnet
-        z::throw_xc( "XML-ERROR", text );
+    try {
+        xml_doc.load_xml( _send_cmd );      // Haben wir ein gültiges XML-Dokument?
+    } catch (exception& x) {
+        _spooler->log()->error(x.what());       // Log ist möglicherweise noch nicht geöffnet
+        throw;
     }
-
 
     SOCKET sock = socket( PF_INET, SOCK_STREAM, 0 );
     if( sock == SOCKET_ERROR )  z::throw_socket( socket_errno(), "socket" );
@@ -1625,6 +1632,10 @@ void Spooler::read_command_line_arguments()
             else
                 if(opt.with_value("configuration-directory")) _opt_configuration_directory = opt.value(); // JS-462
             else
+            if (opt.with_value("java-options")) { _java_options = opt.value(); }  // wird in sos::spooler_main vearbeitet
+            else
+            if (opt.with_value("java-classpath")) { _java_classpath = opt.value(); }   // wird in sos::spooler_main vearbeitet
+            else
                 throw_sos_option_error( opt );
         }
 
@@ -1734,7 +1745,9 @@ void Spooler::load()
     read_xml_configuration();
     _db = Z_NEW(Database(this));
 
-    initialize_java_subsystem();
+    #if !defined Z_USE_JAVAXML
+        initialize_java_subsystem();
+    #endif
     new_subsystems();
     _java_subsystem->initialize_java_sister();
     _modifiable_settings->set_defaults(this);
@@ -1799,11 +1812,17 @@ void Spooler::read_xml_configuration()
 
 void Spooler::initialize_java_subsystem()
 {
-    // Java-Optionen und classpath sind nicht in <base> möglich, siehe Meldung SCHEDULER-475.
-    const string& options = subst_env(_config_element_to_load.getAttribute("java_options"));
-    const string& class_path = subst_env(read_profile_string(_factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + 
-                               subst_env(_config_element_to_load.getAttribute("java_class_path" ));
-    _java_subsystem = new_java_subsystem(this, options, class_path);
+    #if !defined Z_USE_JAVAXML
+        if (_spooler->_ignore_process_classes) {    // Die Java-Jobs laufen mit unserer JVM
+            ptr<javabridge::Vm> java_vm = get_java_vm(false);
+            string java_work_dir = this->java_work_dir();
+            java_vm->set_work_dir(java_work_dir);
+            java_vm->prepend_class_path(java_work_dir);
+        }
+        start_java(_java_options, _java_classpath);
+    #endif
+
+    _java_subsystem = new_java_subsystem(this);
     _java_subsystem->switch_subsystem_state( subsys_initialized );
 }
 
@@ -2032,7 +2051,7 @@ string Spooler::configuration_for_single_job_script()
 void Spooler::start()
 {
     static_log_categories.save_to( &_original_log_categories );
-    _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.as_time_t());
+    _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", (int)_max_micro_step_time.as_time_t());
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -2128,8 +2147,8 @@ void Spooler::execute_config_commands()
 
 
     // Jetzt brauchen wir die Konfiguration nicht mehr
-    _config_element_to_load = NULL;
-    _config_document_to_load = NULL;
+    _config_element_to_load = xml::Element_ptr();
+    _config_document_to_load = xml::Document_ptr();
 }
 
 //----------------------------------------------------------------------Spooler::initialize_cluster
@@ -3691,7 +3710,7 @@ void __cdecl delete_new_spooler( void* )
 }
 
 #endif
-//------------------------------------------------------------------------------------- sos::spooler_main
+//---------------------------------------------------------------------sos::scheduler::spooler_main
 
 int spooler_main( int argc, char** argv, const string& parameter_line, jobject java_main_context )
 {
@@ -3829,6 +3848,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         string  send_cmd;
         string  log_filename;
         string  factory_ini = scheduler::default_factory_ini;
+        string  java_options;
+        string  java_classpath;
         string  dependencies;
 
 
@@ -3937,6 +3958,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 else
                   if(opt.with_value("configuration-directory")); // JS-462
                 else
+                if (opt.with_value("java-options")) java_options = opt.value();
+                else
+                if (opt.with_value("java-classpath")) java_classpath = opt.value();
+                else
                   call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 
                 if( !command_line.empty() )  command_line += " ";
@@ -3946,6 +3971,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
         if( send_cmd != "" )  is_service = false;
 
+        #if defined Z_USE_JAVAXML
+            start_java(subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options,
+                subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath);
+        #endif
 
         // scheduler.log
 
@@ -4058,7 +4087,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
                     if( is_service )
                     {
-                        ret = scheduler::spooler_service( service_name, argc, argv );   
+                        ret = scheduler::spooler_service( service_name, argc, argv );
                     }
                     else
                     {
@@ -4114,6 +4143,18 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
     }
 
     return ret;
+}
+
+//---------------------------------------------------------------------------------------start_java
+
+static ptr<javabridge::Vm> start_java(const string& options, const string& class_path) {
+    ptr<javabridge::Vm> java_vm = get_java_vm(false);
+    java_vm->set_destroy_vm(false);   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
+    java_vm->set_options(options);
+    java_vm->prepend_class_path(class_path);
+    ::sos::scheduler::init_java_vm(java_vm);
+    register_native_classes();
+    return java_vm;
 }
 
 //-----------------------------------------------------------------------------------------sos_main

@@ -89,10 +89,8 @@ struct Scheduler_object
 
     static string               name_of_type_code           ( Type_code );
 
-
                                 Scheduler_object            ( Spooler*, IUnknown* me, Type_code );
     virtual                    ~Scheduler_object            ();
-
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
     void                    set_mail_xslt_stylesheet_path   ( const string& path )                  { _mail_xslt_stylesheet.release();  _mail_xslt_stylesheet_path = path; }

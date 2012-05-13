@@ -431,6 +431,9 @@ void Process::start_local_process()
     if( !_spooler->_factory_ini.empty() )
     parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
 
+    parameters.push_back(object_server::Parameter("param", "-java-options="+ spooler()->java_subsystem()->java_vm()->options()));
+    parameters.push_back(object_server::Parameter("param", "-java-classpath="+ spooler()->settings()->_job_java_class_path + Z_PATH_SEPARATOR +
+            _spooler->java_subsystem()->java_vm()->class_path()));
     parameters.push_back( object_server::Parameter( "param", "-O" ) );
 
     if( !_job_name.empty() )
@@ -443,7 +446,6 @@ void Process::start_local_process()
     parameters.push_back( object_server::Parameter( "param", "-log=" + log_categories_as_string() + " >+" + log_filename() ) );
 
     parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
-
 
     connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
     fill_connection( connection );

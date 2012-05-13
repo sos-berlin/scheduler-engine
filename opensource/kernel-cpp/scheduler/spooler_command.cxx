@@ -1682,9 +1682,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
         result = execute_command_in_java(element);
 
-    if( result )  _answer.documentElement().firstChild().appendChild( result );
-
-    return result;
+    return result? _answer.documentElement().firstChild().appendChild(result)
+        : result;
 }
 
 //-------------------------------------------------------Command_processor::execute_command_in_java
@@ -1692,7 +1691,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 xml::Element_ptr Command_processor::execute_command_in_java(const xml::Element_ptr& element) {
     string result = _spooler->schedulerJ().javaExecuteXml(element.xml());;
     if (result == "UNKNOWN_COMMAND")  z::throw_xc("SCHEDULER-105", element.nodeName());   //Provisorisch, bis Java ordentliche Scheduler-Exceptions liefert
-    return result == ""? NULL : _answer.clone(xml::Document_ptr(result).documentElement());
+    return result == ""? xml::Element_ptr() : _answer.importNode(xml::Document_ptr(result).documentElement());
 }
 
 //------------------------------------------------------------------------------------xml_as_string
@@ -2064,12 +2063,11 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
     xml::Document_ptr command_doc;
     command_doc.create();
 
-    int ok = command_doc.try_load_xml( xml_text );
-    if( !ok )
-    {
-        string text = command_doc.error_text();
-        _spooler->log()->error( text );       // Log ist möglicherweise noch nicht geöffnet
-        z::throw_xc( "XML-ERROR", text );
+    try {
+        command_doc.load_xml( xml_text );
+    } catch (exception& x) {
+        _spooler->log()->error(x.what());       // Log ist möglicherweise noch nicht geöffnet
+        throw;
     }
 
     Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
@@ -2165,7 +2163,10 @@ void Command_processor::begin_answer()
     if( !_answer )
     {
         _answer.create();
+
+#ifndef Z_USE_JAVAXML
         _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"" + scheduler_character_encoding + "\"" ) );
+#endif
         _answer.appendChild( _answer.createElement( "spooler" ) );
 
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );

@@ -1101,8 +1101,7 @@ void Job::add_on_exit_commands_element( const xml::Element_ptr& commands_element
         _commands_document.create_root_element( "all_commands" );       // Name ist egal
     }
 
-    xml::Element_ptr my_commands_element = _commands_document.clone( commands_element );
-    _commands_document.documentElement().appendChild( my_commands_element );
+    _commands_document.documentElement().appendForeignChild(commands_element);
 }
 
 //--------------------------------------------------------------------Job::prepare_on_exit_commands
@@ -3514,7 +3513,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
             for( xml::Node_ptr n = _commands_document.documentElement().firstChild(); n; n = n.nextSibling() )
             {
                 if( n.nodeType() == xml::ELEMENT_NODE ) 
-                    result.appendChild( document.clone( n ) );;
+                    result.appendForeignChild(n);
             }
         }
 

@@ -3,7 +3,6 @@
 #ifndef __SPOOLER_WEB_SERVICE_H
 #define __SPOOLER_WEB_SERVICE_H
 
-
 namespace sos {
 namespace scheduler {
 
@@ -11,12 +10,6 @@ namespace scheduler {
 
 struct Web_service_operation;
 
-//struct Web_service_base : Scheduler_object
-//{
-//                                Web_service_base            ( Scheduler* scheduler, IUnknown* iunknown, Type_code type ) : Scheduler_object( scheduler, iunknown, type ) {}
-//    virtual void                activate                    ()                                      = 0;
-//};
-//
 //------------------------------------------------------------------------------Http_file_directory
 
 struct Http_file_directory : Object, Scheduler_object
@@ -36,7 +29,7 @@ struct Http_file_directory : Object, Scheduler_object
 
 //--------------------------------------------------------------------------------------Web_service
 
-struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_service >,
+struct Web_service : idispatch_implementation< Web_service, spooler_com::Iweb_service >,
                     Scheduler_object
 {
     static Class_descriptor     class_descriptor;
@@ -84,7 +77,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     void                        forward_order               ( Order*, Job* last_job );
     void                        forward_task                ( const Task& );
     void                        forward                     ( const xml::Document_ptr& payload );
-    
+
   private:
     Fill_zero                  _zero_;
     friend struct               Web_service_operation;
@@ -290,5 +283,4 @@ struct Web_service_response : idispatch_implementation< Web_service_response, sp
 
 } //namespace scheduler
 } //namespace sos
-
 #endif

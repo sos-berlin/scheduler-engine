@@ -131,7 +131,7 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
     xml::Document_ptr result;
 
     result.create();
-    result.appendChild( result.clone( _dom_document.documentElement() ) );
+    result.appendForeignChild(_dom_document.documentElement());
 
     DOM_FOR_EACH_ELEMENT( result.documentElement(), element )
     {
@@ -513,7 +513,7 @@ ptr<Module_instance> Module::create_instance_impl()
 
             if( !_java_vm->running() )
             {
-                Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
+                init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
             }
             
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
@@ -531,7 +531,7 @@ ptr<Module_instance> Module::create_instance_impl()
 
             if( !_java_vm->running() )
             {
-                Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
+                init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
             }
             
             ptr<Java_module_script_instance> p = Z_NEW( Java_module_script_instance( this ) );

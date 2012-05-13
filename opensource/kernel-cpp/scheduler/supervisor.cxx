@@ -638,7 +638,7 @@ void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, const Director
         xml_writer->begin_element( "configuration.directory" );
         xml_writer->set_attribute( "name", directory_entry._file_info->path().name() );
 
-        write_updated_files_to_xml( xml_writer, directory_entry._subdirectory, reference? reference->_element : NULL );
+        write_updated_files_to_xml( xml_writer, directory_entry._subdirectory, reference? reference->_element : xml::Element_ptr() );
 
         xml_writer->end_element( "configuration.directory" );
     }

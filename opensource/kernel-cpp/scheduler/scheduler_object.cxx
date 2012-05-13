@@ -168,7 +168,7 @@ void Scheduler_object::assert_empty_attribute( const xml::Element_ptr& element, 
 }
 
 //-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet
-    
+
 ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()
 { 
     if( !_mail_xslt_stylesheet )

@@ -319,14 +319,16 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "filename"         )  _server->_module->_filename        = value;
                 else
                 if( key_word == "java_class"       )  _server->_module->_java_class_name = value;
+#if !defined Z_USE_JAVAXML
                 else
                 if( key_word == "java_class_path"   )  _server->_module->_java_class_path = value;  // JS-540
+                else
+                if( key_word == "java_options"     )  java_options                     += " " + value;
+#endif
                 else
                 if( key_word == "recompile"        )  _server->_module->_recompile       = value[0] == '1';
                 else
                 if( key_word == "script"           )  _server->_module->set_xml_text_with_includes( value );    // 2008-02-25 JS-215: <include> sind schon vom Client aufgelöst worden
-                else
-                if( key_word == "java_options"     )  java_options                     += " " + value;
                 else
                 if( key_word == "job"              )  job_name                          = value;
                 else
@@ -395,6 +397,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
         _server->_module->_java_vm = java_vm;
 
+#if !defined Z_USE_JAVAXML
         if( !_server->_module->_java_vm->running() )
         {
             set_vm_class_path (java_vm, java_class_path);  // JS-540
@@ -416,7 +419,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             Z_LOG2( "java", "Com_remote_module_instance_server::Construct: Die Java Virtual Machine läuft bereits.\n" );
             // Parameter für Java können nicht übernommen werden.
         }
-
+#endif
         _server->_module_instance = _server->_module->create_instance();
        
         if( _server->_module_instance )

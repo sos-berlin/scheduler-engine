@@ -27,7 +27,7 @@ struct Java_subsystem_interface : Object, Subsystem
 
 //-------------------------------------------------------------------------------------------------
 
-ptr<Java_subsystem_interface>   new_java_subsystem          (Scheduler*, const string& java_options, const string& class_path);
+ptr<Java_subsystem_interface>   new_java_subsystem          (Scheduler*);
 
 //-------------------------------------------------------------------------------------------------
 

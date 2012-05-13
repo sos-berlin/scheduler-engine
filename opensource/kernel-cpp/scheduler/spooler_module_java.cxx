@@ -158,9 +158,9 @@ bool Module::make_java_class( bool )
     return true;
 }
 
-//---------------------------------------------------------------Java_module_instance::init_java_vm
+//-------------------------------------------------------------------------------------init_java_vm
 
-void Java_module_instance::init_java_vm( javabridge::Vm* java_vm )
+void init_java_vm( javabridge::Vm* java_vm )
 {
     string work_dir = java_vm->work_dir();
     if( !work_dir.empty() )

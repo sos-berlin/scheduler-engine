@@ -3,7 +3,7 @@
 #ifndef __SPOOLER_XSLT_STYLESHEET_H
 #define __SPOOLER_XSLT_STYLESHEET_H
 
-#include "../zschimmer/xslt_libxslt.h"
+#include "../zschimmer/xslt_java.h"
 
 
 namespace sos {
@@ -20,8 +20,6 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
 
 
                                 Xslt_stylesheet             ();
-                              //Xslt_stylesheet             ( const string& xml_or_filename );
-                              //Xslt_stylesheet             ( const BSTR xml_or_filename );
                                ~Xslt_stylesheet             ();
 
     static HRESULT              Create_instance             ( zschimmer::com::object_server::Session*, ptr<Object>*, const IID&, ptr<IUnknown>* result );  // Für Proxy
@@ -41,7 +39,6 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
     STDMETHODIMP                Load_xml                    ( BSTR, spooler_com::Ixslt_stylesheet** );
     STDMETHODIMP                Load_file                   ( BSTR, Ixslt_stylesheet** );
     STDMETHODIMP                Apply_xml                   ( BSTR, BSTR* );
-  //STDMETHODIMP                Transform_xml_to_file       ( BSTR, BSTR );
 
   private:
     Fill_zero                  _zero_;

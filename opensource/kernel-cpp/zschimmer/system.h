@@ -91,6 +91,11 @@
 #   define Z_DEPRECATED                 __declspec( deprecated )
 #   define __declspec_uuid(UUID)        __declspec( uuid(UUID) )
 
+#   ifdef _WIN64
+#		define Z_WIN64		// Zusätzlich zu Z_WIN32
+#       define Z_64
+#	endif
+
 
 #elif defined __GNUC__
 
@@ -267,6 +272,12 @@ using std::exception;
 #else
 #   define Z_PRINTF_INT64  "I64i"
 #   define Z_PRINTF_UINT64 "I64u"
+#endif
+
+//------------------------------------------------------------------------------------Z_USE_JAVAXML
+
+#if defined Z_64
+#   define Z_USE_JAVAXML
 #endif
 
 //----------------------------------------------------------------------------------------uint etc.

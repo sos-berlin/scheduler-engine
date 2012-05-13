@@ -3,8 +3,7 @@
 #include "zschimmer.h"
 #include "xml.h"
 #include "z_io.h"
-#include "xml_libxml2.h"
-
+#include "xml_any.h"
 
 namespace zschimmer {
 namespace xml {
@@ -149,7 +148,7 @@ Xml_writer::Xml_writer( Writer* writer )
 {
     assert( writer );
 
-    set_encoding( xml::libxml2::default_character_encoding );
+    set_encoding( xml::default_character_encoding );
 }
 
 //-------------------------------------------------------------------------Xml_writer::write_prolog
@@ -289,12 +288,12 @@ void Xml_writer::write_through( const io::Char_sequence& seq )
 
 //------------------------------------------------------------------------Xml_writer::write_element
 
-void Xml_writer::write_element( const libxml2::Element_ptr& element )
+void Xml_writer::write_element( const Element_ptr& element )
 {
     if( !element )  z::throw_xc( Z_FUNCTION );
 
     close_tag();
-    write_through( element.xml_without_prolog( libxml2::default_character_encoding ) );
+    write_through( element.xml_without_prolog( default_character_encoding ) );
 }
 
 //--------------------------------------------------------------------------------Xml_writer::flush

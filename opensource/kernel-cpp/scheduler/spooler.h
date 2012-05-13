@@ -5,6 +5,7 @@
 
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/string_list.h"
+#include "../zschimmer/xml_any.h"
 #include "../kram/sos.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosopt.h"
@@ -13,22 +14,11 @@
 #   define SCHEDULER_WITH_HOSTJAVA
 #endif
 
-#ifdef Z_WINDOWS
+#if defined Z_WINDOWS && !defined Z_64
 #   import <msxml.tlb> rename_namespace("msxml")    // Wir brauchen IXMLDOMDocument (wird von spooler.odl in Variable_set::get_dom() verlangt)
 #else
     namespace msxml { struct IXMLDOMDocument; }     // Dummy
 #endif
-
-#include "../zschimmer/xml_libxml2.h"
-#include "../zschimmer/xslt_libxslt.h"
-
-namespace zschimmer
-{
-    namespace xml
-    {
-        using namespace libxml2;
-    }
-}
 
 #ifndef Z_WINDOWS
     const int _dstbias = -3600;
@@ -160,7 +150,6 @@ struct Web_service_request;
 struct Web_service_response;
 struct Xml_client_connection;
 struct Xslt_stylesheet;
-
 
 namespace database
 {
@@ -804,6 +793,9 @@ struct Spooler : Object,
     bool                       _check_memory_leak;
     Process_id                 _next_process_id;
     Time                       _max_micro_step_time;
+
+    string                     _java_options;
+    string                     _java_classpath;
 };
 
 //------------------------------------------------------------------------------------Object_server 
