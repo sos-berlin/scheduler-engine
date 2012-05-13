@@ -378,18 +378,11 @@ void Combined_job_nodes::close()
 {
     withdraw_order_requests();
 
-    for( Job_node_set::iterator it = _job_node_set.begin(); it != _job_node_set.end(); )
-    {
-        Job_node*              job_node = *it;
-        Job_node_set::iterator next_it  = it;  next_it++;
-
-        job_node->disconnect_job();     // Ruft disconnect_job_node()
-        // it ist ungültig!  Job_node ist aus _job_node_set gelöscht.
-
-        it = next_it;
+    while (!_job_node_set.empty()) {
+		Job_node_set::iterator it = _job_node_set.begin();
+        Job_node* job_node = *_job_node_set.begin();
+        job_node->disconnect_job();     // Ruft disconnect_job_node() und der löscht den Eintrag
     }
-
-    _job_node_set.clear();
 }
 
 //-------------------------------------------------------------Combined_job_nodes::connect_job_node
