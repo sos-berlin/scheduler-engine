@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <spooler
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
 >
     <config>
         <plugins>
@@ -8,9 +8,7 @@
         </plugins>
         <jobs>
             <job name="test">
-                <script language="javascript">
-                    //
-                </script>
+                <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
                 <run_time once="yes"/>
             </job>
         </jobs>
