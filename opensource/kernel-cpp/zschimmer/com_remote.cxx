@@ -1336,7 +1336,7 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
 
         BOOL                ok;
         PROCESS_INFORMATION process_info; 
-        STARTUPINFO         startup_info; 
+        STARTUPINFOW        startup_info; 
         string              command_line;
 
         command_line = quoted_windows_process_parameter( object_server_filename );
@@ -1363,23 +1363,59 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         startup_info.hStdError   = _stderr_file.handle();
         startup_info.wShowWindow = SW_MINIMIZE;            // Als Dienst mit Zugriff auf Desktop wird ein leeres Konsol-Fenster gezeigt. Das minimieren wir.
 
-        DWORD creation_flags = CREATE_NO_WINDOW;
+        DWORD creation_flags = CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT;
         if( _priority != "" )  creation_flags |= windows::priority_class_from_string( _priority );        // Liefert 0 bei Fehler
+        Bstr environment_bstr = _has_environment? Bstr(_environment_string) : Bstr((BSTR)NULL);
 
-        Z_LOG( "CreateProcess(\"" << object_server_filename << "\",\"" << command_line << "\")\n" );
+        if (_login) {
+            string user_name = _login->user_name();
+            //
+            //ok = CreateProcessWithLogonW(
+            //                    Bstr(user_name), 
+            //                    NULL,                           // Domain
+            //                    Bstr(_login->password()), 
+            //                    0,                              // dwLogonFlags
+            //                    Bstr(object_server_filename),   // application name
+            //                    Bstr(command_line),             // command line. API kann String ändern! 
+            //                    creation_flags, 
+            //                    environment_bstr,               // NULL: use parent's environment 
+            //                    NULL,                           // use parent's current directory 
+            //                    &startup_info,                  // STARTUPINFO pointer 
+            //                    &process_info );                // receives PROCESS_INFORMATION 
+            //if (!ok) throw_mswin( "CreateProcessWithLogonW", user_name, object_server_filename );
+            windows::Handle login_handle;
 
-        ok = CreateProcess( object_server_filename.c_str(), // application name
-                            (char*)command_line.c_str(),    // command line 
-                            NULL,                           // process security attributes 
-                            NULL,                           // primary thread security attributes 
-                            TRUE,                           // handles are inherited?
-                            creation_flags, 
-                            _has_environment? (void*)_environment_string.c_str() : NULL,  // NULL: use parent's environment 
-                            NULL,                           // use parent's current directory 
-                            &startup_info,                  // STARTUPINFO pointer 
-                            &process_info );                // receives PROCESS_INFORMATION 
-
-        if( !ok )  throw_mswin( "CreateProcess", object_server_filename );
+            // Das anzumeldende Konto muss das Recht "Anmelden als Stapelverarbeitung" haben (Gruppenrichtlinien -> Computerkonfiguration -> Windows-Einstellungen -> Sicherheitseinstellungen -> Lokale Richtlinien -> Zuweisen von Benutzerrechten)
+            BOOL ok = LogonUserW(Bstr(user_name), NULL, Bstr(_login->password()), LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, login_handle.addr_of());
+            if (!ok) throw_mswin("LogonUser", user_name);
+            
+            Z_LOG( "CreateProcessAsUser(\"" << user_name << "\", \"" << object_server_filename << "\",\"" << command_line << "\")\n" );
+            ok = CreateProcessAsUserW(login_handle,
+                                Bstr(object_server_filename),   // application name
+                                Bstr(command_line),             // command line. API kann String ändern! 
+                                NULL,                           // process security attributes 
+                                NULL,                           // primary thread security attributes 
+                                TRUE,                           // handles are inherited?
+                                creation_flags, 
+                                environment_bstr,               // NULL: use parent's environment 
+                                NULL,                           // use parent's current directory 
+                                &startup_info,                  // STARTUPINFO pointer 
+                                &process_info );                // receives PROCESS_INFORMATION 
+            if (!ok) throw_mswin( "CreateProcessAsUser", user_name, object_server_filename );
+        } else {
+            Z_LOG( "CreateProcess(\"" << object_server_filename << "\",\"" << command_line << "\")\n" );
+            ok = CreateProcessW(Bstr(object_server_filename),   // application name
+                                Bstr(command_line),             // command line. API kann String ändern!
+                                NULL,                           // process security attributes 
+                                NULL,                           // primary thread security attributes 
+                                TRUE,                           // handles are inherited?
+                                creation_flags, 
+                                environment_bstr,               // NULL: use parent's environment 
+                                NULL,                           // use parent's current directory 
+                                &startup_info,                  // STARTUPINFO pointer 
+                                &process_info );                // receives PROCESS_INFORMATION 
+            if( !ok )  throw_mswin( "CreateProcess", object_server_filename );
+        }
 
         Z_LOG( "pid=" << process_info.dwProcessId << "\n" );
 

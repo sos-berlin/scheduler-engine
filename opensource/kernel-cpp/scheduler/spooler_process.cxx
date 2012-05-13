@@ -455,6 +455,7 @@ void Process::start_local_process()
     #endif
 
     connection->set_priority( _priority );
+    connection->set_login(_module_instance->_module->_login);
     connection->start_process( parameters );
 
     _connection = +connection;

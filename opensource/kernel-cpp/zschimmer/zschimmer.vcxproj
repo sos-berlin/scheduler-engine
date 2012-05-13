@@ -517,6 +517,7 @@
     <ClInclude Include="Has_java_proxy.h" />
     <ClInclude Include="javaproxy.h" />
     <ClInclude Include="lazy.h" />
+    <ClInclude Include="Login.h" />
     <ClInclude Include="rtf\headers.h" />
     <ClInclude Include="immutable_string.h" />
     <ClInclude Include="java.h" />

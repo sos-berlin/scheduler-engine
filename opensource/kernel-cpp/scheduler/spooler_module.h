@@ -166,6 +166,7 @@ struct Module : Object
 
     bool                       _dont_remote;
     ptr<Module_monitors>       _monitors;
+    ptr<Login>                 _login;
 
     Fill_end                   _end_;
 };

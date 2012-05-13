@@ -385,6 +385,9 @@
     <ClInclude Include="xml_java.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
+    <ClInclude Include="Login.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="java.odl">

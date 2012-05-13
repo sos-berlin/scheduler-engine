@@ -318,6 +318,18 @@
                 </xsd:element>
                 <xsd:element ref="params" minOccurs="0"/>
                 <xsd:element name="environment" type="environment" minOccurs="0"/>
+                <xsd:element name="login" minOccurs="0">
+                    <xsd:complexType>
+                        <xsd:choice>
+                            <xsd:element name="password.plain">
+                                <xsd:complexType>
+                                    <xsd:attribute name="password" type="String" use="required"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                        <xsd:attribute name="user" type="String" use="required"/>
+                    </xsd:complexType>
+                </xsd:element>
                 <xsd:choice minOccurs="0">
                     <xsd:element ref="script"/>
                     <xsd:element name="process">
