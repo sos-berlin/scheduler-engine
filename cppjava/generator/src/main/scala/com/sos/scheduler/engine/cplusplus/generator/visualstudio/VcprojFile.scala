@@ -38,11 +38,11 @@ class VcprojFile(file: File, newPaths: List[String]) {
   private def normalizedPath(path: String) = """^[.][\/]""".r.replaceFirstIn(path, "")
 
   private def newFilterElement(paths: Seq[String]) =
-    <Filter Name={visualStudioFilterName}>{
+    <Filter Name={visualStudioGeneratedFilesFilterName}>{
       NodeSeq.fromSeq(paths map { p => <File RelativePath={p}/>})
     }</Filter>
 
-  def elementIsCppproxyFilter(e: Node) = e.label == "Filter"  &&  (e \ "@Name").text == visualStudioFilterName
+  def elementIsCppproxyFilter(e: Node) = e.label == "Filter"  &&  (e \ "@Name").text == visualStudioGeneratedFilesFilterName
 }
 
 

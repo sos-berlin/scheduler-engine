@@ -21,7 +21,7 @@ object Configuration {
     val cppAndJavaComment = "// " + commentLine
     val cppStandardUsingNamespaces = List(Namespace("zschimmer"), JavaBridge.namespace)
     val precompiledModuleName = "_precompiled"
-    val visualStudioFilterName = "Generated C++/Java-Proxies"     // Keine XML-Metazeichen verwenden!
+    val visualStudioGeneratedFilesFilterName = "Generated C++/Java-Proxies"     // Keine XML-Metazeichen verwenden!
     
     val cppStandardIncludes = List(
         "../zschimmer/java.h",
