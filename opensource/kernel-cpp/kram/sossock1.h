@@ -8,7 +8,6 @@
 
 #   include <winsock.h>
 
-    typedef unsigned int SOCKET;
     typedef int          socklen_t;
 
 #else

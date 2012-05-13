@@ -550,28 +550,6 @@ namespace sos
 
     void xlat( void* d, const void* s, unsigned int l, const Byte* t );
 
-#elif defined SYSTEM_WIN32
-
-    inline void xlat( void* d, const void* s, unsigned int l, const Byte* t )
-    {
-
-        if( l == 0 )  return;
-
-        __asm mov esi, s
-        __asm mov edi, d
-        __asm mov ecx, l
-        __asm mov ebx, t
-        __asm sub eax, eax
-
-              schleife:
-        __asm     mov al, [esi]
-        __asm     inc esi
-        __asm     mov al, [ebx+eax]
-        __asm     inc edi
-        __asm     dec ecx
-        __asm     mov [edi-1], al
-        __asm     jnz schleife
-    }
 #else
 
     inline void xlat( void* d, const void* s, unsigned int l, const Byte* t )
