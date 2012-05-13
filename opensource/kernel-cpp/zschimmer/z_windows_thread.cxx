@@ -33,13 +33,9 @@ static void SetThreadName( DWORD dwThreadID, LPCSTR szThreadName )
         info.dwThreadID = dwThreadID;
         info.dwFlags    = 0;
 
-        __try
-        {
-            RaiseException( 0x406D1388, 0, sizeof(info)/sizeof(DWORD), (DWORD*)&info );     // Übergibt den Namen an den Debugger
-        }
-        __except(EXCEPTION_CONTINUE_EXECUTION)
-        {
-        }
+        __try {
+            RaiseException( 0x406D1388, 0, sizeof(info)/sizeof(DWORD), (ULONG_PTR*)&info );     // Übergibt den Namen an den Debugger
+        } __except(EXCEPTION_CONTINUE_EXECUTION) { }
 #   endif
 }
 

@@ -8,9 +8,11 @@ import org.apache.log4j.Logger;
 
 import static com.google.common.base.Strings.*;
 import static com.google.common.collect.ObjectArrays.*;
+import static com.sos.scheduler.engine.kernel.util.CpuArchitecture.x64;
 
 public abstract class OperatingSystem {
     public static final String name = System.getProperty("os.name");
+    public static final CpuArchitecture cpuArchitecture = CpuArchitecture.cpuArchitecture();
     public static final boolean isWindows = name.startsWith("Windows");
     public static final boolean isUnix = !isWindows;
     public static final Unix unix = new Unix();
