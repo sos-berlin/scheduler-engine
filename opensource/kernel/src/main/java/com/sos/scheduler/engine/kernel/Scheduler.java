@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.*;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -34,6 +35,8 @@ import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import com.sos.scheduler.engine.util.xml.NamedChildElements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -53,7 +56,7 @@ import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggi
 @ForCpp
 public final class Scheduler implements Sister,
         SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
-    //private static final Logger logger = Logger.getLogger(Scheduler.class);
+    private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
     private final SpoolerC cppProxy;
@@ -203,10 +206,11 @@ public final class Scheduler implements Sister,
     }
 
     public void terminate() {
-        if (!cppProxy.cppReferenceIsValid())
-            _log.debug("Scheduler.terminate() ignored because C++ object has already been destroyed");
-        else
+        try {
             cppProxy.cmd_terminate();
+        } catch (CppProxyInvalidatedException x) {
+            logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed", x);
+        }
     }
 
     private void initializeThreadLock() {
