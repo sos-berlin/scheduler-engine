@@ -23,7 +23,15 @@ public class TypedPath {
         return path;
     }
 
+    public final String name() {
+        return path.getName();
+    }
+
     public String toString() {
         return typ+" "+path;
+    }
+
+    public static TypedPath of(FileBasedType t, String absolutePath) {
+        return new TypedPath(t, new AbsolutePath(absolutePath));
     }
 }
