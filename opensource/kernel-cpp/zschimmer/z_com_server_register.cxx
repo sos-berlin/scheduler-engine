@@ -20,7 +20,7 @@ const bool dll = true;
 
 static string major_version( const string& version )
 {
-    uint point = version.find( '.' );
+    size_t point = version.find( '.' );
     if( point == string::npos )  point = version.length();
 
     return string( version.data(), point );

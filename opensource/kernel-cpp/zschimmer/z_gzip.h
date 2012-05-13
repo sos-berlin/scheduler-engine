@@ -7,8 +7,8 @@ namespace zschimmer {
 
 //-------------------------------------------------------------------------------------------------
 
-string                          string_gzip_deflate     ( const Byte*, int length );
-inline string                   string_gzip_deflate     ( const char* p, int length )               { return string_gzip_deflate( reinterpret_cast<const unsigned char*>( p ), length ); }
+string                          string_gzip_deflate     ( const Byte*, size_t length );
+inline string                   string_gzip_deflate     ( const char* p, size_t length )            { return string_gzip_deflate( reinterpret_cast<const unsigned char*>( p ), length ); }
 inline string                   string_gzip_deflate     ( const string& s )                         { return string_gzip_deflate( s.data(), s.length() ); }
 
 //-------------------------------------------------------------------------------------------------

@@ -557,7 +557,7 @@ void Mswin_debug_streambuf::get_app_name()
                 while( p > path  &&  p[-1] != '/'  &&  p[-1] != '\\'  &&  p[-1] != ':' )  p--;
                 while( q > p  &&  q[-1] != '.' )  q--;
                 if( q > p  &&  q[-1] == '.' ) q--;
-                int l = min( sizeof _app_name - 1, uint( q - p ) );
+                int l = min( sizeof _app_name - 1, size_t( q - p ) );
                 memcpy( _app_name, p, l );
                 _app_name[ l ] = '\0';
                 //sprintf( _app_name, "%04X ", (uint)htask );

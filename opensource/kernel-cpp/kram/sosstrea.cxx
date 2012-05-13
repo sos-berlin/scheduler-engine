@@ -26,7 +26,7 @@ void write_iso_string( Sos_binary_ostream* s, const char* string, uint field_siz
     Beim Abschneiden kann eine Exception auftreten.
 */
 {
-    int l = min( strlen( string ), field_size );
+    int l = min( strlen( string ), (size_t)field_size );
 
     s->write_fixed( string, l );
     s->write_byte_repeated( 0x40, field_size - l );

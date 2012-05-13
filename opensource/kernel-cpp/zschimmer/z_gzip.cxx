@@ -50,7 +50,7 @@ struct Gzip : Object
 
     void                        write                   ( const Byte*, int length );
     void                        close                   ();
-    int                         read_header             ( const Byte*, int length );
+    size_t                      read_header             ( const Byte*, int length );
     void                        write_header            ();
 
   private:
@@ -332,7 +332,7 @@ void Gzip::write_gzip_header()
 
 //--------------------------------------------------------------------------------Gzip::read_header
 
-int Gzip::read_header( const Byte* p0, int length )
+size_t Gzip::read_header( const Byte* p0, int length )
 {
     const Byte* p     = p0;
     const Byte* p_end = p + length;
@@ -402,7 +402,7 @@ void Gzip::write( const Byte* p, int length )
 {
     if( !_is_gzip_header_read )
     {
-        int l = read_header( p, length );
+        size_t l = read_header( p, length );
         _is_gzip_header_read = true;
         p += l;
         length -= l;
