@@ -7,7 +7,11 @@ import com.sos.scheduler.engine.main.SchedulerController;
 import com.sos.scheduler.engine.main.SchedulerThreadController;
 
 abstract class DelegatingSchedulerController implements SchedulerController {
-    private final SchedulerThreadController delegate = new SchedulerThreadController();
+    private final SchedulerThreadController delegate;
+
+    protected DelegatingSchedulerController(String name) {
+        delegate =  new SchedulerThreadController(name);
+    }
 
     @Override public final void setSettings(Settings o) {
         delegate.setSettings(o);

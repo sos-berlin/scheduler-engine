@@ -33,6 +33,10 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
         eventBus.unregisterAnnotated(this);
     }
 
+    @Override public String getName() {
+        return schedulerThreadController.getName();
+    }
+
     @Override public Settings getSettings() {
         return schedulerThreadController.getSettings();
     }

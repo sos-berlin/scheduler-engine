@@ -18,12 +18,17 @@ public class SchedulerThreadController implements SchedulerController {
     private static final Logger logger = Logger.getLogger(SchedulerThreadController.class);
     private static final Time terminationTimeout = Time.of(5);
 
+    private final String name;
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
     private final Settings settings = new Settings();
     private boolean isStarted = false;
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
     private final SchedulerThreadControllerBridge controllerBridge = new SchedulerThreadControllerBridge(this, eventBus);
     private final SchedulerThread thread = new SchedulerThread(controllerBridge);
+
+    public SchedulerThreadController(String name) {
+        this.name = name;
+    }
 
     @Override public final void setSettings(Settings o) {
         checkIsNotStarted();
@@ -119,5 +124,9 @@ public class SchedulerThreadController implements SchedulerController {
 
     public final Settings getSettings() {
         return settings;
+    }
+
+    public String getName() {
+        return name;
     }
 }

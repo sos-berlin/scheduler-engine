@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.data.log.ErrorLogEvent;
 import com.sos.scheduler.engine.eventbus.*;
@@ -16,6 +17,8 @@ import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.main.SchedulerState;
 import com.sos.scheduler.engine.test.binary.TestCppBinaries;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
@@ -30,7 +34,7 @@ import static com.sos.scheduler.engine.kernel.util.Files.tryRemoveDirectoryRecur
 import static java.util.Arrays.asList;
 
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
-    //private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestSchedulerController.class);
     private static final String workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory";
     public static final Time shortTimeout = Time.of(15);
 
@@ -47,6 +51,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             @Nullable ImmutableMap<String,String> nameMap,
             @Nullable ResourceToFileTransformer fileTransformer,
             Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
+        super(testClass.getName());
+        logger.debug(testClass.getName());
         File directory = workDirectory(testClass);
         environment = new Environment(configurationResourcePath, directory, nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
@@ -106,9 +112,13 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     @Override public final void startScheduler(String... args) {
+        String extraOptions = nullToEmpty(System.getProperty(TestSchedulerController.class.getName() +".options"));
         registerEventHandler(this);
         prepare();
-        Iterable<String> allArgs = concat(environment.standardArgs(cppBinaries(), logCategories), asList(args));
+        Iterable<String> allArgs = concat(
+                environment.standardArgs(cppBinaries(), logCategories),
+                Splitter.on(",").omitEmptyStrings().split(extraOptions),
+                asList(args));
         getDelegate().startScheduler(toArray(allArgs, String.class));
     }
 

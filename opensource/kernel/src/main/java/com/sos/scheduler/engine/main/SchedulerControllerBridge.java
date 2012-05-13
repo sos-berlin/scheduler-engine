@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.kernel.settings.Settings;
  * {@link Scheduler} durchreicht. */
 @ForCpp
 public interface SchedulerControllerBridge {
+    String getName();
     Settings getSettings();
     void onSchedulerStarted(Scheduler scheduler);
     void onSchedulerActivated();
