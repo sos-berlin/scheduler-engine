@@ -1,152 +1,213 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DefaultTargets="Build" ToolsVersion="4.0" xsi:schemaLocation="http://schemas.microsoft.com/developer/msbuild/2003 ">
-    <ItemGroup Label="ProjectConfigurations">
-        <ProjectConfiguration Include="Debug|Win32">
-            <Configuration>Debug</Configuration>
-            <Platform>Win32</Platform>
-        </ProjectConfiguration>
-        <ProjectConfiguration Include="Release|Win32">
-            <Configuration>Release</Configuration>
-            <Platform>Win32</Platform>
-        </ProjectConfiguration>
-    </ItemGroup>
-    <PropertyGroup Label="Globals">
-        <RootNamespace>javaproxy</RootNamespace>
-        <ProjectGuid>{A17661D7-20A6-47A8-B629-F31828D5A046}</ProjectGuid>
-    </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-        <ConfigurationType>StaticLibrary</ConfigurationType>
-        <WholeProgramOptimization>true</WholeProgramOptimization>
-        <CharacterSet>MultiByte</CharacterSet>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-        <ConfigurationType>StaticLibrary</ConfigurationType>
-        <CharacterSet>MultiByte</CharacterSet>
-    </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-    <ImportGroup Label="ExtensionSettings">
-    </ImportGroup>
-    <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    </ImportGroup>
-    <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    </ImportGroup>
-    <PropertyGroup Label="UserMacros" />
-    <PropertyGroup>
-        <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-        <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-        <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-        <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
-        <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    </PropertyGroup>
-    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-        <ClCompile>
-            <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-            <WarningLevel>Level3</WarningLevel>
-            <PrecompiledHeaderFile>_precompiled.h</PrecompiledHeaderFile>
-            <PrecompiledHeader>Use</PrecompiledHeader>
-            <FunctionLevelLinking>true</FunctionLevelLinking>
-            <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-            <MinimalRebuild>true</MinimalRebuild>
-            <StringPooling>true</StringPooling>
-            <AdditionalIncludeDirectories>$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;%(AdditionalIncludeDirectories)
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <RootNamespace>javaproxy</RootNamespace>
+    <ProjectGuid>{A17661D7-20A6-47A8-B629-F31828D5A046}</ProjectGuid>
+    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and $(VisualStudioVersion) == ''">$(VCTargetsPath11)</VCTargetsPath>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeaderFile>_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <MinimalRebuild>true</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <AdditionalIncludeDirectories>$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;%(AdditionalIncludeDirectories)
             </AdditionalIncludeDirectories>
-            <Optimization>Disabled</Optimization>
-            <AssemblerOutput>All</AssemblerOutput>
-        </ClCompile>
-        <Lib>
-            <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
-        </Lib>
-    </ItemDefinitionGroup>
-    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-        <ClCompile>
-            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-            <WarningLevel>Level3</WarningLevel>
-            <PrecompiledHeaderFile>_precompiled.h</PrecompiledHeaderFile>
-            <PrecompiledHeader>Use</PrecompiledHeader>
-            <FunctionLevelLinking>true</FunctionLevelLinking>
-            <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-            <StringPooling>true</StringPooling>
-            <AdditionalIncludeDirectories>$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;%(AdditionalIncludeDirectories)
+      <Optimization>Disabled</Optimization>
+      <AssemblerOutput>All</AssemblerOutput>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeaderFile>_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <StringPooling>true</StringPooling>
+      <AdditionalIncludeDirectories>$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;%(AdditionalIncludeDirectories)
             </AdditionalIncludeDirectories>
-            <IntrinsicFunctions>true</IntrinsicFunctions>
-            <Optimization>MaxSpeed</Optimization>
-            <AssemblerOutput>All</AssemblerOutput>
-        </ClCompile>
-        <Lib>
-            <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
-        </Lib>
-    </ItemDefinitionGroup>
-    <ItemGroup>
-        <ClCompile Include="_precompiled.cxx">
-            <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-            </PrecompiledHeaderFile>
-            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-            <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-            </PrecompiledHeaderFile>
-            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-        </ClCompile>
-        <ClCompile Include="java__lang__Object.cxx" />
-        <ClCompile Include="java__lang__String.cxx" />
-        <ClCompile Include="java__util__AbstractCollection.cxx" />
-        <ClCompile Include="java__util__AbstractList.cxx" />
-        <ClCompile Include="java__util__ArrayList.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__cplusplus__runtime__Sister.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__JobC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx" />
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx" />
-
-
-        
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__log__PrefixLog.cxx" />
-        
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.cxx" />
-
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.cxx" />
-
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__order__Order.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Folder_subsystemC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SettingsC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__TaskC.cxx" />
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__job__UnmodifiableTask.cxx" />
-
-
-        
-        
-        <ClCompile Include="com__sos__scheduler__engine__main__SchedulerControllerBridge.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__variable__VariableSet.cxx" />
-
-
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpResponseC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpChunkReaderC.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__data__event__AbstractEvent.cxx" />
-        <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory.cxx" />
+      <Optimization>Disabled</Optimization>
+      <AssemblerOutput>All</AssemblerOutput>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeaderFile>_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <AdditionalIncludeDirectories>$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;%(AdditionalIncludeDirectories)
+            </AdditionalIncludeDirectories>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <Optimization>MaxSpeed</Optimization>
+      <AssemblerOutput>All</AssemblerOutput>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeaderFile>_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <AdditionalIncludeDirectories>$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;%(AdditionalIncludeDirectories)
+            </AdditionalIncludeDirectories>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <Optimization>MaxSpeed</Optimization>
+      <AssemblerOutput>All</AssemblerOutput>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="_precompiled.cxx">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__cplusplus__runtime__Sister.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__data__event__AbstractEvent.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Folder_subsystemC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpChunkReaderC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__HttpResponseC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__JobC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SettingsC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__TaskC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__job__UnmodifiableTask.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__log__PrefixLog.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__Order.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__util__XmlUtils.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__variable__VariableSet.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__main__SchedulerControllerBridge.cxx" />
+    <ClCompile Include="java__lang__Object.cxx" />
+    <ClCompile Include="java__lang__String.cxx" />
+    <ClCompile Include="java__util__AbstractCollection.cxx" />
+    <ClCompile Include="java__util__AbstractList.cxx" />
+    <ClCompile Include="java__util__ArrayList.cxx" />
     <ClCompile Include="org__w3c__dom__Attr.cxx" />
     <ClCompile Include="org__w3c__dom__CDATASection.cxx" />
     <ClCompile Include="org__w3c__dom__CharacterData.cxx" />
@@ -156,12 +217,14 @@
     <ClCompile Include="org__w3c__dom__Node.cxx" />
     <ClCompile Include="org__w3c__dom__NodeList.cxx" />
     <ClCompile Include="org__w3c__dom__Text.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__xml__XsltStylesheet.cxx" />
-    </ItemGroup>
-    <ItemGroup>
-        <ClInclude Include="_precompiled.h" />
-    </ItemGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-    <ImportGroup Label="ExtensionTargets">
-    </ImportGroup>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__xml__CppXsltStylesheet.cxx" />
+    <ClCompile Include="java__util__AbstractMap.cxx" />
+    <ClCompile Include="java__util__HashMap.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="_precompiled.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
 </Project>

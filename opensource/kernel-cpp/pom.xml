@@ -70,6 +70,7 @@
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                                 <argument>com.sos.scheduler.engine.kernel.util</argument>
                                 <argument>java.util.ArrayList</argument>
+                                <argument>java.util.HashMap</argument>
                                 <argument>com.sos.scheduler.engine.data.event.AbstractEvent</argument>
                                 <argument>org.w3c.dom.Attr</argument>
                                 <argument>org.w3c.dom.Comment</argument>
@@ -93,7 +94,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase clean ${cppConf}</arguments>
+                                <arguments>make/make-scheduler-phase clean ${visualStudioPlatform} ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>
@@ -107,7 +108,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase compile ${cppConf}</arguments>
+                                <arguments>make/make-scheduler-phase compile ${visualStudioPlatform} ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>
@@ -208,7 +209,7 @@
 		                    <target>
 		                        <ant antfile="prepare_build.xml" target="all">
 		                           <property name="settings.localRepository" value="${settings.localRepository}" />
-		                           <property name="platform" value="${osArch}" />
+		                           <property name="operatingSystem" value="${operatingSystem}" />
 		                        </ant>
 		                    </target>
 		                </configuration>

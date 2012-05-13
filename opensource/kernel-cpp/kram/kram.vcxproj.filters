@@ -278,13 +278,13 @@
     <ClInclude Include="sosmsg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sossock1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="kram.hrc">
       <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\..\engine-svn\opensource\kernel-cpp\kram\sosset.inl">
-      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

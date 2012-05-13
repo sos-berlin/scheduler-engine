@@ -1,9 +1,17 @@
 // $Id: spooler.rc 13512 2008-04-23 13:41:10Z jz $
 
-#ifdef _DEBUG
-1                       TYPELIB MOVEABLE PURE   "debug\\spooler.tlb"
+#ifdef _WIN64
+#   ifdef _DEBUG
+1                       TYPELIB MOVEABLE PURE   "x64\\Debug\\spooler.tlb"
+#    else
+1                       TYPELIB MOVEABLE PURE   "x64\\Release\\spooler.tlb"
+#   endif
 #else
-1                       TYPELIB MOVEABLE PURE   "release\\spooler.tlb"
+#   ifdef _DEBUG
+1                       TYPELIB MOVEABLE PURE   "Win32\\Debug\\spooler.tlb"
+#    else
+1                       TYPELIB MOVEABLE PURE   "Win32\\Release\\spooler.tlb"
+#   endif
 #endif
 
 #include "version.h"

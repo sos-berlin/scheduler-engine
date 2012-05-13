@@ -40,6 +40,8 @@
                 <operatingSystem>windows</operatingSystem>
                 <osArch>windows-x86</osArch>
                 <osFamily>windows</osFamily>
+                <cpuArchitecture>x86</cpuArchitecture>
+                <visualStudioPlatform>Win32</visualStudioPlatform>
             </properties>
         </profile>
         <profile>
@@ -54,6 +56,8 @@
                 <operatingSystem>windows</operatingSystem>
                 <osArch>windows-x64</osArch>
                 <osFamily>windows</osFamily>
+                <cpuArchitecture>x64</cpuArchitecture>
+                <visualStudioPlatform>x64</visualStudioPlatform>
             </properties>
         </profile>
         <profile>

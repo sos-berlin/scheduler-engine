@@ -13,10 +13,18 @@
 #include "../kram/com_server.h"
 
 #ifdef Z_WINDOWS
-#   if defined _DEBUG
-#       import "debug/spooler.tlb"   rename_namespace("spooler_com") raw_interfaces_only named_guids
+#   if defined Z_64
+#       if defined _DEBUG
+#           import "x64/Debug/spooler.tlb"   rename_namespace("spooler_com") raw_interfaces_only named_guids
+#        else
+#           import "x64/Release/spooler.tlb" rename_namespace("spooler_com") raw_interfaces_only named_guids
+#       endif
 #    else
-#       import "release/spooler.tlb" rename_namespace("spooler_com") raw_interfaces_only named_guids
+#       if defined _DEBUG
+#           import "Win32/Debug/spooler.tlb"   rename_namespace("spooler_com") raw_interfaces_only named_guids
+#        else
+#           import "Win32/Release/spooler.tlb" rename_namespace("spooler_com") raw_interfaces_only named_guids
+#       endif
 #   endif
 #else
 #   include "spooler_idl.h"     // namespace spooler_com

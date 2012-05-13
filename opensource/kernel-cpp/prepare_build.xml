@@ -87,7 +87,7 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
     </exec>
 -->    
     <if>
-     <equals arg1="${platform}" arg2="windows-x86" />
+     <equals arg1="${operatingSystem}" arg2="windows" />
      <then>
         <exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.r}">
           <arg value="-c" />

@@ -17,9 +17,6 @@
     <Filter Include="Quellcodedateien\windows">
       <UniqueIdentifier>{c8f437f2-45cf-4c0e-820a-0aaad110a51e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Quellcodedateien\posix">
-      <UniqueIdentifier>{e88dbc47-1a86-45a9-9621-9c720f3ecacf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header-Dateien">
       <UniqueIdentifier>{a2bf5192-28f3-4d21-a22f-1f32ebe6f2f3}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>

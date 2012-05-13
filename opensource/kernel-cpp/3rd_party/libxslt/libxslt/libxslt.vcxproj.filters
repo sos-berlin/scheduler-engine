@@ -65,5 +65,8 @@
     <ClCompile Include="xsltutils.c">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
+    <ClCompile Include="aa_empty.c">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

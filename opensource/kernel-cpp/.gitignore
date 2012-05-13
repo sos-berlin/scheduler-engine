@@ -2,6 +2,7 @@ Debug/
 Release/
 *.vcproj.*.user
 *.vcxproj.user
+/*.v11.suo
 /.classpath
 /.project
 /.settings
@@ -12,6 +13,7 @@ Release/
 /scheduler-vs2010.opensdf
 /scheduler-vs2010.sdf
 /scheduler-vs2010.suo
+/scheduler-vs2010.x11.suo
 /scheduler/scheduler.exp
 /scheduler/scheduler.lib
 /scripting_engine/spidermonkey_h.h

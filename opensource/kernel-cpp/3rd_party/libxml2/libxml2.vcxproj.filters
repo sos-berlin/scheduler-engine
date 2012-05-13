@@ -134,6 +134,9 @@
     <ClCompile Include="xpointer.c">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
+    <ClCompile Include="aa_dummy.c">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\libxml\xmlexports.h">

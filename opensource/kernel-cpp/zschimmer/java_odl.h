@@ -15,9 +15,9 @@
 #ifdef Z_WINDOWS
 
 #   if defined _DEBUG
-#       import "debug/java.tlb"   rename_namespace("odl") raw_interfaces_only named_guids
+#       import "Win32/Debug/java.tlb"   rename_namespace("odl") raw_interfaces_only named_guids
 #    else
-#       import "release/java.tlb" rename_namespace("odl") raw_interfaces_only named_guids
+#       import "Win32/Release/java.tlb" rename_namespace("odl") raw_interfaces_only named_guids
 #   endif
 
 #else

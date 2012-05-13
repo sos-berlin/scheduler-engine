@@ -1,38 +1,38 @@
 #! /bin/bash
 
-# Die Umgebungsvariable VISUAL_STUDIO_2008_HOME muss den Installationpfad von Visual Studio 2008 enthalten.
-# set VISUAL_STUDIO_2008_HOME=c:\Program Files (x86)\Microsoft\Visual Studio 9.0
-#
-# Wenn Visual Studio 2010 verwendet werden soll (bis Ende 2011 nicht für offizielle Freigaben, weil Windows 2000 noch unterstützt werden soll),
-# dann SCHEDULER_VISUAL_STUDIO_VERSION=10 und WINDOWS_NET_SDK_HOME auf das Installationsverzeichnis vom Windows-SDK (.Net-SDK) setzen, z.B.:
-# set SCHEDULER_VISUAL_STUDIO_VERSION=10
-# set WINDOWS_NET_SDK_HOME=%windir%\Microsoft.NET\Framework\v4.0.30319
+# Unter Windows muss Umgebungsvariable WINDOWS_NET_SDK_HOME den Installationpfad des Micosoft Windows SDK (.Net-SDK) enthalten,
+# zum Beispiel: set WINDOWS_NET_SDK_HOME=%windir%\Microsoft.NET\Framework\v4.0.30319
+
+function fail() {
+    echo $*
+    exit 1
+}
+
+set -o errexit
 
 cmd="$1"
-if [ -z "$cmd" ]; then
-    echo Missing command argument: clean or compile
-    exit 1
-fi
+[ -n "$cmd" ] || fail "Missing first command argument: clean or compile"
 
-targets="$2 $3"
+platform="$2"
+[ -n "$platform" ] || fail "Missing second command argument: Win32 or x64"
 
-os=$(if [ `uname` == "AIX" ]; then echo linux; else echo `uname -o`  || exit; fi)
+configurations="$3 $4"
+[ -n "$3" ] || fail "Missing third command argument: Debug or Release"
+
+os=$(if [ `uname` == "AIX" ]; then echo linux; else echo `uname -o`; fi)
 [ "$os" == 'Cygwin' ] && os="windows"
 [ "$os" == 'GNU/Linux' ] && os="linux"
-echo build for operating system $os
+echo Build for operating system $os
 
 inWindows=$(if [ "$os" == "windows" ]; then echo 1; else echo ""; fi)
-# inWindows=$(if [ `uname -o || uname` == "Cygwin" ]; then echo 1; else echo ""; fi)
 vcbuild=""
 msbuild=""
 
-if [ "${PWD/ /_}" != "$PWD" ]; then echo "Der Verzeichnispfad darf kein Blank enthalten (vielleicht ist es ein Jenkins-Job mit Blank im Namen?)"; exit 1; fi
-
+[ "${PWD/ /_}" == "$PWD" ] || fail "Der Verzeichnispfad darf kein Blank enthalten (vielleicht ist es ein Jenkins-Job mit Blank im Namen?)"
 
 if [ -z "$MAKE_JOBS" ]; then :
     MAKE_JOBS=1
-    if [ -s /proc/cpuinfo ]
-    then
+    if [ -s /proc/cpuinfo ]; then :
       MAKE_JOBS=`cat /proc/cpuinfo | grep -w '^processor'|wc -l`
       [ $MAKE_JOBS -le 0 ]  &&  MAKE_JOBS=1
       [ $MAKE_JOBS -gt 8 ]  &&  MAKE_JOBS=8
@@ -41,36 +41,16 @@ if [ -z "$MAKE_JOBS" ]; then :
 fi
 
 if [ $inWindows ]; then \
-    if [ "$SCHEDULER_VISUAL_STUDIO_VERSION" == "9" ]; then :
-        # Veraltet, für Windows 2000.
-        if test -z "${VISUAL_STUDIO_2008_HOME}"; then :
-            echo 'ERROR: Missing environment variable VISUAL_STUDIO_2008_HOME with installation directory of Visual Studio 2008 (for example "c:\Program Files\Microsoft\Visual Studio 9.0")'
-            exit 1
-        fi
-        vcbuild=$(cygpath "${VISUAL_STUDIO_2008_HOME}")/VC/vcpackages/vcbuild.exe
-        echo Using Visual Studio 2008
-        if [ ! -f "$vcbuild" ]; then 
-            echo "Missing vcbuild.exe: $vcbuild"
-            exit 1
-        fi
-    else :
-        if [ -z "${WINDOWS_NET_SDK_HOME}" ]; then :
-            echo 'ERROR: Missing environment variable WINDOWS_NET_SDK_HOME with installation directory of Windows SDK and msbuild.exe (for example "%windir%\Microsoft.NET\Framework\v4.0.30319")'
-            exit 1
-        fi
-        msbuild=$(cygpath "${WINDOWS_NET_SDK_HOME}")/msbuild.exe
-        if [ ! -f "$msbuild" ]; then 
-            echo "Missing msbuild.exe: $msbuild"
-            exit 1
-        fi
-    fi
+    [ -n "${WINDOWS_NET_SDK_HOME}" ] || fail 'ERROR: Missing environment variable WINDOWS_NET_SDK_HOME with installation directory of Windows SDK and msbuild.exe (for example "%windir%\Microsoft.NET\Framework\v4.0.30319")'
+    msbuild=$(cygpath "${WINDOWS_NET_SDK_HOME}")/msbuild.exe
+    [ -f "$msbuild" ] || fail "Missing msbuild.exe: $msbuild"
 fi
 
 #--------------------------------------------------------------------------------------------------
 
 function main() {
     cmd_generic_${cmd}
-    cmd_${os}_${cmd}   || exit
+    cmd_${os}_${cmd}
 }
 
 #-------------------------------------------------------------------------------------------Generic
@@ -86,62 +66,55 @@ function cmd_generic_compile() {
 #-------------------------------------------------------------------------------------------Windows
 
 function cmd_windows_clean() {
-    cmd_windows_cleanWithRm  || exit
-    visualStudio_clean scheduler  || exit
-    visualStudio_clean spidermonkey  || exit
+    cmd_windows_cleanWithRm
+    visualStudio_clean scheduler
+	if [ "$platform" == "Win32" ]; then :
+		visualStudio_clean spidermonkey
+	fi
+    cmd_windows_cleanWithRm
 }
 
 function cmd_windows_cleanWithRm() {
     # Weil "vcbuild.exe /clean" nicht immer löschen kann (Fehlermeldung PRJ0008), siehe http://msdn.microsoft.com/en-us/library/hk8k8k4h%28v=vs.80%29.aspx
-    for target in $targets; do :
-        searchAndDestroySubDirectory $target  || exit
+    for c in $configurations; do :
+        PATH=/bin find -type d -ipath "*/$platform/$c" -execdir sh -c "rm -rf {}" \; -prune
     done
-    rm -rf {bin,bind,ipch}/*  || exit
+    rm -rf {bin,bind,ipch}/*
 }
 
 function cmd_windows_compile() {
-    visualStudio_compile scheduler  || exit
-    visualStudio_compile spidermonkey  || exit
+    visualStudio_compile scheduler
+	if [ "$platform" == "Win32" ]; then :
+		visualStudio_compile spidermonkey
+	fi
 }
-
-#function cmd_windows_generateSources() {
-#    mkdir -p target/cpp  || exit
-#    cat mavenSettings.h | sed /'${project.version}'/
-#}
 
 function visualStudio_clean() {
     package=$1
-    if [ -n "$vcbuild" ]; then vcbuild /clean $package.sln  || exit; fi
-    if [ -n "$msbuild" ]; then msbuild /target:clean $package-vs2010.sln  || exit; fi
+    msbuild /target:clean $package-vs2010.sln /verbosity:minimal
 }
 
 function visualStudio_compile() {
     package=$1
-    if [ -n "$vcbuild" ]; then  vcbuild $package.sln  || exit; fi
-    if [ -n "$msbuild" ]; then  msbuild $package-vs2010.sln  || exit; fi
+    msbuild $package-vs2010.sln /verbosity:minimal
 }
 
 function msbuild() {
-    for c in $targets; do :
-        "$msbuild" /m:$NUMBER_OF_PROCESSORS /property:Configuration=$c $* || exit
-    done
-}
-
-function vcbuild() {
-    for c in $targets; do :
-        "$vcbuild" /M$NUMBER_OF_PROCESSORS $* "$c|Win32" || exit
+    for c in $configurations; do :
+        echo $msbuild /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$platform" $*
+        "$msbuild" /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$platform" $*
     done
 }
 
 #---------------------------------------------------------------------------------------------Linux
 
 function cmd_linux_clean() {
-    make clean  || exit
+    make clean
 }
 
 function cmd_linux_compile() {
-    make scheduler spidermonkey  || exit
-    provide_binaries_as_resources  || exit
+    make scheduler spidermonkey
+    provide_binaries_as_resources
 }
 
 function provide_binaries_as_resources() {
@@ -153,7 +126,7 @@ function provide_binaries_as_resources() {
 
 function searchAndDestroySubDirectory() {
     subDirName="$1"
-    PATH=/bin find -type d -and -name "$subDirName" -execdir sh -c "rm -rf {}/*" \;
+    PATH=/bin find -type d -and -name "$subDirName" -execdir sh -c "rm -rf {}" \;
 }
 
 #--------------------------------------------------------------------------------------------------
