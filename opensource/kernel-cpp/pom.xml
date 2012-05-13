@@ -54,10 +54,9 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.1</version>
-
                 <executions>
                     <execution>
-                        <id>generate-sources</id>
+                        <id>Generate Java proxies</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
