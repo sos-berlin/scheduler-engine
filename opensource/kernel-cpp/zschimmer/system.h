@@ -35,7 +35,6 @@
 #   pragma warning( disable:4010 )   // warning C4010: single-line comment contains line-continuation character
 #   pragma warning( disable:4065 )   // warning C4065: switch statement contains 'default' but no 'case' labels
 #   pragma warning( disable:4097 )   // warning C4097: typedef-name 'Base_class' used as synonym for class-name 'Field_descr::Sos_self_deleting'
-//# pragma warning( 3      :4100 )   // Unreferenzierter formaler Parameter (--> zschimmer.h)
 #   pragma warning( disable:4127 )   // warning C4127: Bedingter Ausdruck ist konstant.   while(1)
 #   pragma warning( error  :4150 )   // warning C4150: deletion of pointer to incomplete type 'Soscopy_dialog'; no destructor called
 #   pragma warning( error  :4172 )   // warning C4172: Adresse einer lokalen Variablen oder eines temporären Werts wird zurückgegeben
@@ -43,6 +42,7 @@
 #   pragma warning( disable:4237 )   // warning C4237: nonstandard extension used : 'false' keyword is reserved for future use
 #   pragma warning( disable:4355 )   // warning C4355: 'this' : used in base member initializer list
 #   pragma warning( error  :4307 )   // warning C4307: '*' : integral constant overflow
+#   pragma warning( disable:4503 )   // warning C4503: 'std::vector<_Ty,_Ax>::_Insert_n': Die Länge des ergänzten Namens wurde überschritten. Der Name wurde gekürzt.
 #   pragma warning( 3      :4505 )   // Nichtreferenzierte lokale Funktion wurde entfernt
 //# pragma warning( disable:4510 )   // warning C4510: 'Store_msg' : default constructor could not be generated
 #   pragma warning( disable:4511 )   // warning C4511: Kopierkonstruktor konnte nicht generiert werden
@@ -57,6 +57,7 @@
 #   pragma warning( error  :4717 )   // warning C4717: Rekursiv für alle Steuerelementpfade. Die Funktion verursacht einen Stapelüberlauf zur Laufzeit.
 #   pragma warning( error  :4800 )   // warning C4800: Variable wird auf booleschen Wert ('True' oder 'False') gesetzt (Auswirkungen auf Leistungsverhalten moeglich)
 #   pragma warning( error  :4927 )   // warning C4927: Unzulässige Konvertierung. Mehrere benutzerdefinierte Konvertierungen wurden implizit übernommen.
+
 #endif
 
 //-------------------------------------------------------------------------------------------------
