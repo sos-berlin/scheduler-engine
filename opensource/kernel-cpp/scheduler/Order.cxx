@@ -1183,6 +1183,11 @@ bool Order::on_initialize()
         }
         else
             result = false;
+
+        if (!_spooler->settings()->_keep_order_content_on_reschedule) {
+            if (ptr<Com_variable_set> p = params_or_null())
+                _original_params = p->clone();     // Auf persistente Aufträge beschränkt, um nicht zuviel Speicher zu belegen. Besser direkt aus order.xml lesen.
+        }
     }
 
     return result;
@@ -2733,15 +2738,24 @@ void Order::on_carried_out()
 {
     order_subsystem()->count_finished_orders();
     prepare_for_next_roundtrip();
+    check_for_replacing_or_removing( act_now );     // Kann Auftrag aus der Jobkette nehmen
 }
 
 //----------------------------------------------------------------Order::prepare_for_next_roundtrip
 
 void Order::prepare_for_next_roundtrip() {
     if (is_in_folder()) {
-        if (!_spooler->settings()->_keep_order_content_on_reschedule)
-            replace_with_source();
-        check_for_replacing_or_removing( act_now );     // Kann Auftrag aus der Jobkette nehmen
+        if (!_spooler->settings()->_keep_order_content_on_reschedule) {
+            restore_initial_settings();
+        }
+    }
+}
+
+//------------------------------------------------------------------Order::restore_initial_settings
+
+void Order::restore_initial_settings() {
+    if (is_in_folder() && !_spooler->settings()->_keep_order_content_on_reschedule) {  // Paranoid
+        _payload = _original_params? _original_params->clone() : NULL;
     }
 }
 
@@ -2806,6 +2820,7 @@ void Order::postprocessing2( Job* last_job )
         close();
     }
 
+    //check_for_replacing_or_removing(act_now);     // Kann Auftrag aus der Jobkette nehmen
     if( _job_chain )  _job_chain->check_for_replacing_or_removing();
 }
 

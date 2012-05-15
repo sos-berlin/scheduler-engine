@@ -1,15 +1,13 @@
-package com.sos.scheduler.engine
-package tests.jira.js856
+package com.sos.scheduler.engine.tests.jira.js856
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import JS856Test.originalParameters
 
 /** JS-856 */
 @RunWith(classOf[JUnitRunner])
-class NewBehaviourJS856Test extends JS856Test {
+class NewBehaviourJS856Test extends JS856Test("New behaviour: restore original order state") {
   override val schedulerResourceNameMap = List("new-behaviour-scheduler.xml" -> "scheduler.xml")
-
-  test("New behaviour: restore original order state") {
-    expectFinishedParameters(List("a" -> "a-original"))
-  }
+  val finallyExpectedParameters = originalParameters
+  val whenSuspendedExpectedParameters = Map("a" -> "a-job", "b" -> "b-job")
 }

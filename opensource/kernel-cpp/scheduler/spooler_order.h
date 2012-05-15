@@ -266,6 +266,7 @@ struct Order : Com_order,
 
     void                        on_carried_out          ();
     void                        prepare_for_next_roundtrip();
+    void                        restore_initial_settings();
 
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* );
     void                        set_identification_attributes( const xml::Element_ptr& );
@@ -347,6 +348,7 @@ struct Order : Com_order,
     Absolute_path              _outer_job_chain_path;
     State                      _outer_job_chain_state;
     Payload                    _payload;
+    ptr<Com_variable_set>      _original_params;
     string                     _xml_payload;
     State                      _initial_state;          // Für Wiederholung mit <run_time> oder <schedule>. Bei verschachtelten Jobkette in der übergeordneten Jobkette
     ptr<Web_service>           _web_service;
