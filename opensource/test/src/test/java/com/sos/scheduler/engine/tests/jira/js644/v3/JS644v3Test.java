@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js644.v3;
 
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
+import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
@@ -16,16 +18,14 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.sos.scheduler.engine.data.folder.FileBasedType.job;
-import static com.sos.scheduler.engine.data.folder.FileBasedType.jobChain;
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.fail;
 
 public final class JS644v3Test extends SchedulerTest {
     private static final Logger logger = LoggerFactory.getLogger(JS644v3Test.class);
-    private static final TypedPath lowerCaseJobChainPath = jobChain.typedPath("/lowerCase");
-    private static final TypedPath upperCaseJobChainPath = jobChain.typedPath("/upperCase");
-    private static final TypedPath jobPath = job.typedPath("/a");
+    private static final JobChainPath lowerCaseJobChainPath = JobChainPath.of("/lowerCase");
+    private static final JobChainPath upperCaseJobChainPath = JobChainPath.of("/upperCase");
+    private static final JobPath jobPath = JobPath.of("/a");
     private static final Time orderTimeout = Time.of(10);
 
     private final Gate<Boolean> lowerCaseGate = new Gate<Boolean>(lowerCaseJobChainPath.toString());
@@ -72,7 +72,7 @@ public final class JS644v3Test extends SchedulerTest {
     }
 
     @EventHandler public void handleEvent(OrderFinishedEvent e) throws InterruptedException {
-        (e.getKey().getJobChainPath().equals(lowerCaseJobChainPath.getPath())? lowerCaseGate : upperCaseGate).put(true);
+        (e.getKey().getJobChainPath().equals(lowerCaseJobChainPath)? lowerCaseGate : upperCaseGate).put(true);
     }
 
     @EventHandler public void handleEvent(TerminatedEvent e) throws InterruptedException {

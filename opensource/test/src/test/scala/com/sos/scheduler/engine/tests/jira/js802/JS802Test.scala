@@ -64,7 +64,7 @@ object JS802Test {
     }
 
     private def orderElem(orderKey: OrderKey, startTime: DateTime) =
-        <order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}>
+        <order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>
             <run_time>
                 <at at={yyyymmddhhmmssFormatter.print(startTime)}/>
             </run_time>

@@ -2,25 +2,38 @@ package com.sos.scheduler.engine.data.order;
 
 import com.google.common.base.Objects;
 import com.sos.scheduler.engine.data.folder.AbsolutePath;
-import com.sos.scheduler.engine.data.folder.Path;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
 
 import static com.google.common.base.Objects.equal;
 
 public class OrderKey {
-    private final Path jobChainPath;
+    private final JobChainPath jobChainPath;
     private final OrderId id;
 
-    public OrderKey(Path jobChainPath, OrderId id) {
+    public OrderKey(JobChainPath jobChainPath, OrderId id) {
         this.id = id;
         this.jobChainPath = jobChainPath;
     }
 
-    public final Path getJobChainPath() {
+    public OrderKey(AbsolutePath jobChainPath, OrderId id) {
+        this.id = id;
+        this.jobChainPath = new JobChainPath(jobChainPath);
+    }
+
+    public final JobChainPath getJobChainPath() {
         return jobChainPath;
+    }
+
+    public final String jobChainPathString() {
+        return jobChainPath.getPath().asString();
     }
 
     public final OrderId getId() {
         return id;
+    }
+
+    public final String idString() {
+        return id.asString();
     }
 
     @Override public int hashCode() {
