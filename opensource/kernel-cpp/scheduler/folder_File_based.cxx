@@ -454,10 +454,11 @@ File_based* File_based::replace_now()
 
 //------------------------------------------------------------------File_based::replace_with_source
 
-void File_based::replace_with_source() {
-    set_force_file_reread();
-    _typed_folder->on_base_file_changed(this, &_base_file_info.directory_entry(_configuration_origin));
-}
+//void File_based::replace_with_source() {
+//    set_force_file_reread();
+//    directory_observer::Directory_entry e = _base_file_info.directory_entry(_configuration_origin);
+//    _typed_folder->on_base_file_changed(this, &e);
+//}
 
 //----------------------------------------------------------------File_based::file_based_state_name
 

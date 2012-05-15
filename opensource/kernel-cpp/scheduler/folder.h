@@ -238,8 +238,6 @@ struct File_based : Scheduler_object,
     void                    set_folder_path                 ( const Absolute_path& );
     Absolute_path               folder_path                 () const;
 
-    void                        replace_with_source         ();
-
     enum When_to_act { act_later, act_now };
     void                        check_for_replacing_or_removing( When_to_act = act_later );
 
