@@ -79,18 +79,18 @@ object JS803Test {
   }
 
   private def addDailyOrderElem(orderKey: OrderKey, startTime: DateTime) =
-    <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}>
+    <add_order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>
       <run_time>
         <period single_start={hhmmssFormatter.print(startTime)}/>
       </run_time>
     </add_order>
 
   private def addSingleOrderElem(orderKey: OrderKey, startTime: DateTime) =
-    <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}
+    <add_order job_chain={orderKey.jobChainPathString} id={orderKey.idString}
                at={yyyymmddhhmmssFormatter.print(startTime)}/>
 
   private def addSingleRuntimeOrderElem(orderKey: OrderKey, startTime: DateTime) =
-    <add_order job_chain={orderKey.getJobChainPath.toString} id={orderKey.getId.toString}>
+    <add_order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>
       <run_time>
         <at at={yyyymmddhhmmssFormatter.print(startTime)}/>
       </run_time>

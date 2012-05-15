@@ -23,7 +23,26 @@ public class TypedPath {
         return path;
     }
 
+    public final String name() {
+        return path.getName();
+    }
+
+    public int hashCode() {
+        return 31*typ.hashCode() + path.hashCode();
+    }
+    public boolean equals(Object o) {
+        return o instanceof TypedPath && eq((TypedPath)o);
+    }
+
+    private boolean eq(TypedPath o) {
+        return typ == o.typ && path.equals(o.path);
+    }
+
     public String toString() {
         return typ+" "+path;
+    }
+
+    public static TypedPath of(FileBasedType t, String absolutePath) {
+        return new TypedPath(t, new AbsolutePath(absolutePath));
     }
 }
