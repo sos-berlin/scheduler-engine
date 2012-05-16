@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js606.individual;
 
-import java.io.IOException;
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
+import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
-import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
+
+import java.io.IOException;
 
 /**
  * This class tests the prefix "MYPARAM_" (see scheduler.xml)
@@ -30,7 +31,7 @@ public class JS606IndividualTest extends JS606Base {
 	}
 	
 	@Test
-	public void Test() throws InterruptedException, IOException {
+	public void test() throws InterruptedException, IOException {
 		controller().activateScheduler();
 		prepareTest(jobchain);
 		startOrder();

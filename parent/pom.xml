@@ -601,16 +601,24 @@
         </site-->
     </distributionManagement>
 
+<!--
+    <issueManagement>
+      <system>jira</system>
+      <url>http://www.sos-berlin.com/jira</url>
+    </issueManagement>
+-->
+    
     <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>${scala.plugin.version}</version>
-                <configuration>
-                    <scalaVersion>${scala.version}</scalaVersion>
-                </configuration>
-            </plugin>
+      <plugins>
+          <plugin>
+              <groupId>org.scala-tools</groupId>
+              <artifactId>maven-scala-plugin</artifactId>
+              <version>${scala.plugin.version}</version>
+              <configuration>
+                  <scalaVersion>${scala.version}</scalaVersion>
+              </configuration>
+          </plugin>
         </plugins>
     </reporting>
+    
 </project>

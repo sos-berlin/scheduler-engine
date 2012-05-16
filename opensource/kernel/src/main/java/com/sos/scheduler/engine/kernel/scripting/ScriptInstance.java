@@ -28,18 +28,18 @@ package com.sos.scheduler.engine.kernel.scripting;
  */
 
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.apache.log4j.Logger;
 
 import javax.script.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
 public class ScriptInstance implements Script {
 
-	private final Logger 		logger = Logger.getLogger(ScriptInstance.class);
+	private static final Logger 		logger = Logger.getLogger(ScriptInstance.class);
 	
 	private final String		languageId;
 	private final ScriptEngine	scriptengine;
@@ -55,32 +55,43 @@ public class ScriptInstance implements Script {
         this.sourceCode = sourceCode;
         this.scriptengine = getScriptEngine();
         this.scriptbindings = this.scriptengine.getBindings(ScriptContext.ENGINE_SCOPE);
-        logger.debug("the language id is " + scriptLanguage);
+        logger.debug("The language id is " + scriptLanguage);
     }
 
     public ScriptInstance(String scriptLanguage, File sourceFile) {
-        try {
-            this.sourceCode = Files.toString(sourceFile, Charset.defaultCharset());
-        } catch (IOException e) {
-            throw new SchedulerException("error reading file " + sourceFile.getAbsolutePath(),e);
-        }
+        this.sourceCode = readSourceFromFile(sourceFile);
         this.languageId = scriptLanguage;
         this.scriptengine = getScriptEngine();
         this.scriptbindings = this.scriptengine.getBindings(ScriptContext.ENGINE_SCOPE);
         logger.debug("the language id is " + scriptLanguage);
+    }
+    
+    private String readSourceFromFile(File sourceFile) {
+        String result = "";
+        try {
+            result = Files.toString(sourceFile, SchedulerConstants.defaultEncoding);
+        } catch (IOException e) {
+            throw new SchedulerException("Error reading file " + sourceFile.getAbsolutePath() + ": " + e,e);
+        }
+        return result;
     }
 
     private ScriptEngine getScriptEngine() {
         ScriptEngineManager sm = new ScriptEngineManager();
         ScriptEngine se = sm.getEngineByName(getLanguageId());
         if (se == null) {
-            List<ScriptEngineFactory> factories = sm.getEngineFactories();
-            for(ScriptEngineFactory factory : factories) {
-                logger.info(factory.getEngineName() + " is available (" + factory.getNames().toString() + ")");
-            }
+            logAvailableLanguages();
             throw new SchedulerException("script language " + getLanguageId() + " not valid.");
         }
         return se;
+    }
+
+    public static void logAvailableLanguages() {
+        ScriptEngineManager sm = new ScriptEngineManager();
+        List<ScriptEngineFactory> factories = sm.getEngineFactories();
+        for(ScriptEngineFactory factory : factories) {
+            logger.info(factory.getEngineName() + " is available (" + factory.getNames().toString() + ")");
+        }
     }
     
     private Object evalScript() {

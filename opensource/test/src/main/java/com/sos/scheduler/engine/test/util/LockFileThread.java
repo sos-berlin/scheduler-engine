@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.test.util;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.*;
-
-import org.apache.log4j.Logger;
+import java.util.Observable;
 
 public class LockFileThread extends Observable implements Runnable  {
 

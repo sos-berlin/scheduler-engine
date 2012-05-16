@@ -1,73 +1,42 @@
 package com.sos.scheduler.engine.test.util;
 
-import static org.junit.Assert.assertTrue;
-import java.io.File;
-
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
 public class FileUtilsTest {
 	
 	private static final Logger logger = Logger.getLogger(FileUtilsTest.class);
 
+    /*
 	@Test
-	public void testGetLocalResourceFile() {
+	public void testGetResourceDir() {
 		
-		File file = FileUtils.getResourceFile(FileUtilsTest.class, "myFile.txt");
-		String givenFile = file.getAbsolutePath().replace("\\", "/");
+		File resourceDir = FileUtils.getResourceDir(FileUtilsTest.class);
+		String resourcePath = resourceDir.getAbsolutePath().replace("\\", "/");
 
-        String resourcePath = FileUtils.class.getResource("/").getPath();
-		File estimated = new File(resourcePath + this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
-		String estimatedFile = estimated.getAbsolutePath().replace("\\", "/");
+		File expectedDir = new File(FileUtils.getResourceBaseDir() + "/" + this.getClass().getPackage().getName().replace(".", "/"));
+		String expectedPath = expectedDir.getAbsolutePath().replace("\\", "/");
 		
-		logger.debug("result ....: " + givenFile);
-		logger.debug("estimated .: " + estimatedFile);
-		assertTrue("estimated value is '" + estimatedFile + "'",estimatedFile.equals(givenFile));
+		logger.debug("resource path ....: " + resourcePath);
+		logger.debug("expected path ....: " + expectedPath);
+		assertTrue("estimated value is '" + expectedPath + "'", expectedPath.equals(resourcePath));
+		assertTrue("folder '" + resourcePath + "' does not exist",resourceDir.isDirectory());
 	}
+	*/
 
+    /*
 	@Test
-	public void testGetTestResultPath() {
+	public void testGetResourceFile() {
 		
-		File path = FileUtils.getResourceDir(FileUtilsTest.class);
-		String givenPath = path.getAbsolutePath().replace("\\", "/");
+		File resourceFile = FileUtils.getTempFile(FileUtilsTest.class, "myFile.txt");
+		String resourceName = resourceFile.getAbsolutePath().replace("\\", "/");
 
-		File estimated = new File(FileUtils.getResourceBaseDir() + "/" + this.getClass().getPackage().getName().replace(".", "/"));
-		String estimatedPath = estimated.getAbsolutePath().replace("\\", "/");
+		File expectedFile = new File(FileUtils.getResourceBaseDir() + "/"+ this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
+		String expectedName = expectedFile.getAbsolutePath().replace("\\", "/");
 		
-		logger.debug("result ....: " + givenPath);
-		logger.debug("estimated .: " + estimatedPath);
-		assertTrue("estimated value is '" + estimatedPath + "'",estimatedPath.equals(givenPath));
-		assertTrue("folder '" + givenPath + "' does not exist",path.isDirectory());
+		logger.debug("resourcename ....: " + resourceName);
+		logger.debug("expected name ...: " + expectedName);
+		assertTrue("expected name value is '" + expectedName + "'",expectedName.equals(resourceName));
 	}
-
-	@Test
-	public void testGetTestResultFile() {
-		
-		File path = FileUtils.getResourceFile(FileUtilsTest.class, "myFile.txt");
-		String givenFile = path.getAbsolutePath().replace("\\", "/");
-
-		File estimated = new File(FileUtils.getResourceBaseDir() + "/"+ this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
-		String estimatedFile = estimated.getAbsolutePath().replace("\\", "/");
-		
-		logger.debug("result ....: " + givenFile);
-		logger.debug("estimated .: " + estimatedFile);
-		assertTrue("estimated value is '" + estimatedFile + "'",estimatedFile.equals(givenFile));
-	}
-
-	@Test
-	public void testGetEmptyTestResultFile() {
-		
-		File file = FileUtils.alwaysCreateEmptyResourceFile(FileUtilsTest.class, "myFile.txt");
-		String givenFile = file.getAbsolutePath().replace("\\", "/");
-
-		File estimated = new File(FileUtils.getResourceBaseDir() + "/" + this.getClass().getPackage().getName().replace(".", "/") + "/myFile.txt");
-		String estimatedFile = estimated.getAbsolutePath().replace("\\", "/");
-		
-		logger.debug("result ....: " + givenFile);
-		logger.debug("estimated .: " + estimatedFile);
-		assertTrue("estimated value is '" + estimatedFile + "'",estimatedFile.equals(givenFile));
-		assertTrue("file '" + givenFile + "' does not exist",file.isFile());
-		assertTrue("file '" + givenFile + "' is not empty",file.length() == 0);
-	}
+	*/
 
 }

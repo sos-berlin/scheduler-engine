@@ -1,45 +1,53 @@
 package com.sos.scheduler.engine.test.util;
 
+import com.google.common.io.Resources;
+import com.sos.JSHelper.Exceptions.JobSchedulerException;
+
 import java.io.File;
-import java.io.IOException;
-import com.google.common.io.Files;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public class FileUtils {
 	
-    private final static String resourcePath = FileUtils.class.getResource("/").getPath();
+    private static final String testResultDir = "test-results";
+    
+    private FileUtils() {}
 
-	public static File getResourceBaseDir() {
-		return new File(resourcePath);
-	}
+    public static File getTempFile(Class<?> classInstance, String fileWithoutPath) {
+        return new File( getTempDir(classInstance) + "/" + fileWithoutPath );
+    }
 
-	public static File getResourceDir(Class<?> ClassInstance) {
-		String path = resourcePath + "/" + ClassInstance.getPackage().getName().replace(".", "/");
-		return createFolderIfNecessary(path);
-	}
-	
-	public static File getResourceFile(Class<?> ClassInstance, String fileWithoutPath) {
-		return new File( getResourceDir(ClassInstance).getAbsolutePath() + "/" + fileWithoutPath );
-	}
-	
-	public static File alwaysCreateEmptyResourceFile(Class<?> ClassInstance, String fileWithoutPath) {
-		File f = getResourceFile(ClassInstance, fileWithoutPath);
-		if (f.exists()) 
-			f.delete();
-		try {
-			Files.touch(f);
-		} catch (IOException e) {
-            throw new SchedulerException("file " + f.getAbsolutePath() + "could not created.",e);
-		}
-		return f;
-	}
+	private static String getTempDirRoot() {
+        URL url = Resources.getResource("");
+        File result = null;
+        try {
+            result = new File(url.toURI());
+            String base = (result.getParent() == null) ? result.getAbsolutePath() : result.getParent();
+            result = new File(base + "/" + testResultDir);
+            if (!result.exists()) result.mkdir();
+        } catch (URISyntaxException e) {
+            throw new JobSchedulerException("invalid URI '" + url + "': " + e,e);
+        }
+        return result.getAbsolutePath();
+    }
 
-	private static File createFolderIfNecessary(String folderName) {
-		File f = new File(folderName);
-		boolean result = true;
-		if (!f.exists()) result = f.mkdirs();
-		if (!result) throw new RuntimeException("error creating folder " + folderName);
-		return f;
-	}
+    private static String getTempDir(Class<?> classInstance) {
+        String root = getTempDirRoot();
+        File result = new File(root + "/" + classInstance.getPackage().getName().replace(".","/"));
+        if (!result.exists()) result.mkdirs();
+        return result.getAbsolutePath();
+    }
+
+    public static File getResourceFile(String resourceName) {
+        URL url = Resources.getResource(resourceName);
+        File result = null;
+        try {
+            result = new File( url.toURI() );
+        } catch (URISyntaxException e) {
+            throw new JobSchedulerException("invalid URI '" + url + "' :" + e,e);
+        }
+        return result;
+    }
+
 
 }

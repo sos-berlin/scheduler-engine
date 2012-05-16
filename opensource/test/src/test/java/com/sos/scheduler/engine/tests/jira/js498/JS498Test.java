@@ -45,7 +45,7 @@ public class JS498Test extends SchedulerTest {
 
     @Test
 	public void testFunctions() throws InterruptedException, IOException {
-        File logFile = FileUtils.getResourceFile(this.getClass(), "scheduler.log");
+        String logFile = FileUtils.getTempFile(JS498Test.class, "scheduler.log").getAbsolutePath();
         logger.info("logfile=" + logFile);
         //controller().activateScheduler("-e","-ignore-process-classes","-log-level=info","-log=" + logFile);
         controller().activateScheduler("-e","-log-level=info","-log=" + logFile);

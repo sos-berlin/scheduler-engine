@@ -1,7 +1,10 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
 import com.google.common.io.Files;
+import com.google.common.io.Resources;
+import com.sos.JSHelper.Exceptions.JobSchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.LogMock;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -9,7 +12,8 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 
@@ -97,10 +101,21 @@ public class APIModuleInstanceTest {
      * The script contains some funtions called by the call method.
 	 */
     @Test
-	public void groovyScript() throws Exception {
-        File sourceFile = new File(getResourceFolder() + "/test.groovy");
-        doScript("groovy", Files.toString(sourceFile, Charset.defaultCharset()),"groovyScript");
+	public void groovyScriptFromFile() throws Exception {
+        File sourceFile = getResourceFile("com/sos/scheduler/engine/kernel/scripting/test.groovy");
+        doScript("groovy", Files.toString(sourceFile, SchedulerConstants.defaultEncoding),"groovyScript");
 	}
+
+    /**
+     * \brief Executes a simple java script
+     * \detail
+     * Calls a java script and gives them some objects via the addObject method.
+     */
+    @Test
+    public void javaScriptFromFile() throws Exception {
+        File sourceFile = getResourceFile("com/sos/scheduler/engine/kernel/scripting/test.js");
+        doScript("javascript", Files.toString(sourceFile, SchedulerConstants.defaultEncoding),"javaScript");
+    }
 
     private void doScript(String scriptLanguage, String script, String calledFrom) throws NoSuchMethodException {
         outputStream.reset();
@@ -125,6 +140,17 @@ public class APIModuleInstanceTest {
     private static String getResourceFolder() {
         String resourceRoot = APIModuleInstanceTest.class.getResource("/").getPath();
         return resourceRoot += APIModuleInstanceTest.class.getPackage().getName().replace(".","/");
+    }
+    
+    private File getResourceFile(String resourceName) {
+        URL url = Resources.getResource(resourceName);
+        File result = null;
+        try {
+            result = new File( url.toURI() );
+        } catch (URISyntaxException e) {
+            throw new JobSchedulerException("invalid URI '" + url + "' :" + e,e);
+        }
+        return result;
     }
 
 

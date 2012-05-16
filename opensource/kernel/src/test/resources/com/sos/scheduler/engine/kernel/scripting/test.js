@@ -1,16 +1,20 @@
 var cnt;
 
-function scheduler_init() {
+function spooler_init() {
   cnt = 0;
-  print("hello " + name + "!\n");
-  print("spooler_init is called.\n");
+  print("spooler_init is called by " + name + "\n");
 }
 
-function scheduler_process() {
+function spooler_process() {
   if (cnt < 5) {
     cnt++;
-    print("scheduler_process: iteration no " +  cnt + "\n");
+    print("spooler_process is called by " + name + "\n");
     return true;
   }
   return false;
+}
+
+function spooler_exit() {
+   print("spooler_exit is called by " + name + "\n");
+  return true;
 }

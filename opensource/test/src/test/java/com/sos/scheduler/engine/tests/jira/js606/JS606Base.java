@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js606;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import com.sos.scheduler.engine.test.util.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -14,7 +13,7 @@ import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertTrue;
 
-public class JS606Base extends SchedulerTest {
+public abstract class JS606Base extends SchedulerTest {
 
 	private static final Logger logger = Logger.getLogger(JS606Base.class);
 	
@@ -23,11 +22,11 @@ public class JS606Base extends SchedulerTest {
 	private final CommandBuilder util = new CommandBuilder();
 	
 	
-	protected void prepareTest(String jobchain) {
+	protected void prepareTest(String jobchain) throws IOException {
 		
 		this.jobchainName = jobchain;
 
-		resultfile = FileUtils.alwaysCreateEmptyResourceFile(this.getClass(), "result_" + jobchainName + ".txt");
+		resultfile = File.createTempFile("result_" + jobchainName, ".txt");
 		logger.debug("results of the jobs will be written in file " + resultfile.getAbsolutePath());
 	}
 	

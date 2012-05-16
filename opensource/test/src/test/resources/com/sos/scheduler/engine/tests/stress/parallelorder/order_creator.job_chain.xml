@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
+<job_chain>
+    <job_chain_node state="100" job="order_creator" />
+</job_chain>

@@ -18,10 +18,10 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- * \file SchedulerParameterTest.java
+ * \file ProcessListTest.java
  * \brief test functions for the JobScheduler Object Model
  * 
- * \class SchedulerParameterTest
+ * \class ProcessListTest
  * \brief test functions for the JobScheduler Object Model
  * 
  * \details

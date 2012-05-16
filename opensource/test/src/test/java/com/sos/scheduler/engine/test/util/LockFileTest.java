@@ -1,31 +1,29 @@
 package com.sos.scheduler.engine.test.util;
 
+import com.google.common.io.Resources;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.io.File;
+import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.log4j.Logger;
-import org.junit.Test;
-import org.junit.Ignore;
-
 public class LockFileTest implements Observer {
 	
-	@SuppressWarnings("unused")
-	private static final Logger logger = Logger.getLogger(LockFileTest.class);
-	
-	private final static String lockfile = "fileToLock.txt";
+	private final static String lockfile = "com/sos/scheduler/engine/test/util/fileToLock.txt";
 	private RuntimeException result = null;
 
 	/**
 	 * Locks the same file twice. The second try to lock the file will cause a FileAlreadyLockedException.
 	 * It will be notified in method update and thrown in method postprocessing. 
-	 * @throws Exception
+	 * @throws FileAlreadyLockedException
 	 */
 	@Test (expected=FileAlreadyLockedException.class)
 	public void testLockFileTwice() throws Exception {
 		preprocessing();
-		File lock = FileUtils.getResourceFile(CommandBuilderTest.class, lockfile);
-		LockFile l = new LockFile(lock, 2);
+        URL url = Resources.getResource(lockfile);
+		LockFile l = new LockFile( new File(url.toURI()), 2);
 		l.addObserver(this);
 		l.lock();
 		l.lock();
@@ -37,8 +35,9 @@ public class LockFileTest implements Observer {
 	@Ignore
 	public void testLockFileSingle() throws Exception {
 		preprocessing();
-		File lock = FileUtils.getResourceFile(CommandBuilderTest.class, lockfile);
-		LockFile l = new LockFile(lock, 2);		// lock the file for 2 seconds
+        URL url = Resources.getResource(lockfile);
+		// File lock = FileUtils.getTempFile(CommandBuilderTest.class, lockfile);
+		LockFile l = new LockFile( new File(url.toURI()), 2);		// lock the file for 2 seconds
 		l.addObserver(this);
 		l.lock();
 		Thread.sleep(3000);						// wait until the file is released

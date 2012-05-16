@@ -1,9 +1,7 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
-import com.sos.scheduler.engine.kernel.scheduler.LogMock;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -42,25 +40,24 @@ import static org.junit.Assert.assertEquals;
 
 public class ScriptInstanceTest {
 	
-    private static final Logger logger = Logger.getLogger(ScriptInstanceTest.class);
     private static final String scriptRoot = getResourceFolder();
-//	private static final String script_root = "./src/test/scripts/";    // FIXME Sollte eine Resource im Package sein. Pfad ist in IntelliJ-IDE nicht auffindbar. Zschimmer 20.10.2011
 
-    private static final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    private ByteArrayOutputStream outputStream;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    @Before
+    public void initTest() throws Exception {
+        outputStream = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputStream));     // redirect stdout to the outputStream object
     }
 
     private static String getResourceFolder() {
         String resourceRoot = ScriptInstanceTest.class.getResource("/").getPath();
-        return resourceRoot += ScriptInstanceTest.class.getPackage().getName().replace(".","/");
+        String resourcePackage = ScriptInstanceTest.class.getPackage().getName().replace(".","/");
+        return resourceRoot + resourcePackage;
     }
 
 	@Test
 	public void javaScript()  {
-        outputStream.reset();
 		ScriptInstance module = new ScriptInstance("javascript","print('hello world');");
 		module.call();
         assertEquals("hello world", outputStream.toString());
@@ -68,7 +65,6 @@ public class ScriptInstanceTest {
 
 	@Test
 	public void javaScriptWithParams() {
-        outputStream.reset();
 		ScriptInstance module = new ScriptInstance("javascript","print('hello ' + name);");
 		module.addObject("Walter", "name");
 		module.call();
@@ -77,7 +73,6 @@ public class ScriptInstanceTest {
 
 	@Test
 	public void javaScriptWithFunction() throws NoSuchMethodException {
-        outputStream.reset();
 		String script = "function show () {print('hello world'); }\n";
 		ScriptInstance module = new ScriptInstance("javascript",script);
 		module.call("show");
@@ -105,104 +100,26 @@ public class ScriptInstanceTest {
 
 	@Test
 	public void javaScriptFromFile() throws NoSuchMethodException {
-        outputStream.reset();
         File sourceFile = new File(scriptRoot + "/test.js");
 		ScriptInstance module = new ScriptInstance("javascript",sourceFile);
         module.addObject("Hugo","name");
-        module.call("scheduler_init");
-        while (module.callBoolean("scheduler_process")) {;}
+        module.call("spooler_init");
+        while (module.callBoolean("spooler_process")) {}
+        module.call("spooler_exit");
         assertEquals( 7, outputStream.toString().split("\n").length );
 	}
 
-	//	@Test
-	//	public void javascriptJavaObject() {
-	//		String code = "importPackage(javax.swing);" + "var optionPane = " + "  JOptionPane.showMessageDialog(null, 'Hello, world!');";
-	//		ModuleInstance module = new ModuleInstance("javascript");
-	//		module.setSourceCode(code);
-	//		module.call();
-	//	}
-
-	// @Test - maven dependencies not found for bean
-	// http://www.beanshell.org/
-	public void beanScript() {
-		logger.debug("===== beanScript");
-		String script = "for (int i=0; i<5; i++)\n" + "print(i);\n" + "print(\"Hello \" + name);\n";
-		ScriptInstance module = new ScriptInstance("bsh",script);
-		module.addObject("hugo", "name");
-		module.call();
-	}
-
-	/*
-	 * \brief Executes a simple jython script
-	 * \detail
-	 * Calls the jython script test.py and gives them some objects
-	 * via the addObject method.
-	 * The script contains some funtions called by the call method
-	 * and the callBoolean method.
-	 * http://www.jython.org/
-	 * jar-file: jython.jar from the jython 2.2.1 installation
-	 * jar-file: jython-engine.jar
-	 * 
-	 * the use of a jython version above 2.2.1 will cause a pathon error:
-	 * java.lang.VerifyError: class com.sun.script.jython.JythonScope overrides final method __findattr__.(Ljava/lang/String;)Lorg/python/core/PyObject;
-	 */
-	// @Test
-	//	maven dependencies not found for jython
-	public void jythonScriptFromFile() throws NoSuchMethodException {
-		logger.debug("===== jythonScriptFromFile");
-        File sourceFile = new File(scriptRoot + "/test.py");
-		ScriptInstance module = new ScriptInstance("jython",sourceFile);
-		module.addObject("jythonScriptFromFile", "name");
-		module.addObject(new LogMock(), "log");
-		module.call("spooler_init");
-		while (module.callBoolean("spooler_process")) {
-			;
-		}
-		module.call("spooler_exit");
-	}
-
-	/*
-	 * \brief Executes a simple groovy script
-	 * \detail
-	 * Calls a grrovy script and gives them some objects via the addObject method.
-	 * http://groovy.codehaus.org/
-	 * jar-file: groovy-all-1.5.6.jar
-	 * jar-file: groovy-engine.jar
-	 */
-	// @Test
-	//	maven dependencies not found for groovy
-	public void groovyScript() {
-		logger.debug("===== groovyScript");
-		String script = "println 'hello, groovy world'\n";
-		ScriptInstance module = new ScriptInstance("groovy",script);
-		module.call();
-	}
-
 	@Test(expected = SchedulerException.class)
-	public void ivalidLanguage() throws SchedulerException {
-		try {
-			ScriptInstance module = new ScriptInstance("tolami","print('Hallo Welt\\n');");
-			module.call();
-		}
-		finally {
-		}
-	}
-
-	//@Test(expected = SchedulerException.class)
-    @Test
-	public void missingScriptCode() {
-		logger.debug("===== missingScriptCode");
-        ScriptInstance module = new ScriptInstance("javascript","");
+	public void invalidLanguage() throws SchedulerException {
+        ScriptInstance.logAvailableLanguages();
+        ScriptInstance module = new ScriptInstance("tolami","print('Hallo Welt\\n');");
         module.call();
 	}
 
-	//	@Test
-	//	public void awkScript() {
-	//		String script = "# BEGIN {printf(\"hello world\");} END {}";
-	//		ModuleInstance module = new ModuleInstance("awk");
-	//		module.setSourceCode(script);
-	//		module.call();
-	//		System.out.println("fertig !");
-	//	}
+    @Test
+	public void missingScriptCode() {
+        ScriptInstance module = new ScriptInstance("javascript","");
+        module.call();
+	}
 
 }
