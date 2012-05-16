@@ -11,7 +11,7 @@
 
 
         <param name="script_to_execute"
-               value="sleep 10"/>
+               value="sleep 5"/>
     </params>
     <run_time let_run="no">
       <weekdays>

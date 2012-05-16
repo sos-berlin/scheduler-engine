@@ -38,16 +38,17 @@ public class ReferenceNetTest extends SchedulerTest {
     private static final int totalNumberOfOrders = 8;    // 1 for JobNetPlanExecutor, 7 for Jobnet
     private int numberOfFinishedOrders = 0;
     private static final Time timeout = Time.of(300);
-    private CommandBuilder cmd = new CommandBuilder();
 
     @Test
     public void test() throws Exception {
+//        controller().activateScheduler("-e","-log-level=debug");
         controller().activateScheduler();
 
         // This file connects with Oracle DB at 8of9
         String hibernateConfig = controller().scheduler().getConfiguration().localConfigurationDirectory() + "/hibernate.cfg.xml";
         scheduler().getVariables().put("hibernate_connection_config_file",hibernateConfig);
 
+        CommandBuilder cmd = new CommandBuilder();
         String command = cmd.addOrder("jobnet_plan_creator", "reference").
                 addParam("JobChainName", "reference").
                 addParam("OrderId", "A").
