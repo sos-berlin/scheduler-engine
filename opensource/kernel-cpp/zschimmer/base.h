@@ -763,6 +763,10 @@ struct Set_locale
         for( ::zschimmer::Set_locale __set_locale__ ( CATEGORY, LOCALE ); __set_locale__; __set_locale__.close() )
 
 #endif
+
+
+void set_c_locale();
+
 //-------------------------------------------------------------------------------------Rotating_bar
 
 struct Rotating_bar

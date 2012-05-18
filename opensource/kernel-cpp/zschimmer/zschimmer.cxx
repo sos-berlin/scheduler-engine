@@ -154,7 +154,7 @@ Zschimmer_static::Zschimmer_static()
         getenv( "MALLOC_CHECK_" )  ||  putenv( "MALLOC_CHECK_=2" );
 #   endif
 */
-    add_message_code_texts( error_codes ); 
+    add_message_code_texts( error_codes );
 };
 
 //--------------------------------------------------------------Zschimmer_static::~Zschimmer_static
@@ -274,14 +274,14 @@ void _assert_ptr( const void* p, uint length, const char* info )
 
 //STDMETHODIMP_( ULONG ) AddRef_Release_implementation::Release()
 //{
-//    long i = InterlockedDecrement( &_reference_count ); 
-//    if( i == 0 ) 
-//    { 
+//    long i = InterlockedDecrement( &_reference_count );
+//    if( i == 0 )
+//    {
 //        AddRef();       // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete führt. 10.6.04
-//        delete this; 
-//    }  
-//    
-//    return i; 
+//        delete this;
+//    }
+//
+//    return i;
 //}
 
 //-------------------------------------------------AddRef_Release_implementation_base::call_Release
@@ -302,15 +302,15 @@ ULONG AddRef_Release_counter::call_Release()
 //---------------------------------------------------------------------------Object::obj_remove_ref
 /*
 long Object::obj_remove_ref()
-{ 
-    long i = InterlockedDecrement( &_obj_ref_count ); 
-    if( i == 0 ) 
-    { 
+{
+    long i = InterlockedDecrement( &_obj_ref_count );
+    if( i == 0 )
+    {
         obj_add_ref();    // Damit AddRef-Release-Zyklus im Destruktur nicht zum rekursiven delete führt. 10.6.04
-        delete this; 
-    }  
-    
-    return i; 
+        delete this;
+    }
+
+    return i;
 }
 */
 //---------------------------------------------------------------------------Object::QueryInterface
@@ -335,33 +335,33 @@ STDMETHODIMP Object::QueryInterface( const IID& iid, void** result )
 //-------------------------------------------------------------------------Object::GetTypeInfoCount
 /*
 STDMETHODIMP Object::GetTypeInfoCount( UINT* result )
-{ 
+{
     if( !result )              return E_INVALIDARG;
     if( (size_t)result == 1 )  return E_NOTIMPL;    //??? VBScript übergibt im separaten Prozess eine 1 als Pointer, in Verbindung mit einem Iterator (NewEnum spooler_task.params)!
 
-    *result = 0;  
-    return S_OK; 
+    *result = 0;
+    return S_OK;
 }
 
 //------------------------------------------------------------------------------Object::GetTypeInfo
 
 STDMETHODIMP Object::GetTypeInfo( UINT, LCID, ITypeInfo** )
-{ 
-    return E_NOTIMPL; 
+{
+    return E_NOTIMPL;
 }
 
 //----------------------------------------------------------------------------Object::GetIDsOfNames
 
 STDMETHODIMP Object::GetIDsOfNames( REFIID, OLECHAR**, UINT, LCID, DISPID* )
-{ 
-    return DISP_E_UNKNOWNNAME; 
+{
+    return DISP_E_UNKNOWNNAME;
 }
 
 //-----------------------------------------------------------------------------------Object::Invoke
 
 STDMETHODIMP Object::Invoke( DISPID, REFIID, LCID, WORD, DISPPARAMS*, VARIANT*, EXCEPINFO*, UINT* )
-{ 
-    return DISP_E_MEMBERNOTFOUND; 
+{
+    return DISP_E_MEMBERNOTFOUND;
 }
 */
 //-----------------------------------------------------------------------------Smart_ptr::Smart_ptr
@@ -686,18 +686,18 @@ size_t length_without_trailing_char( const char* text, size_t len, char c )
     // Dabei werden bis drei Bytes vor dem String gelesen, die müssen aber zugreifbar sein, weil sie im selben Speicherwort liegen.
 
     int32 cccc;
-    
+
     cccc = ( (int32) c << 8 ) | c;
     cccc |= cccc << 16;
-    
+
     const char* p  = text + len;
     const char* p0 = (const char*)( (size_t)p & (size_t)~3 );   // Auf int32-Grenze abrunden
     if( p0 < text )  p0 = text;
-    while( p > p0  &&  p[-1] == c )  p--;  
+    while( p > p0  &&  p[-1] == c )  p--;
 
-    if( p > text  &&  p[-1] == c ) 
+    if( p > text  &&  p[-1] == c )
     {
-        if( p == p0 ) 
+        if( p == p0 )
         {
             // p ist ausgerichtet, p >= text
             const char* text0 = (const char*)( (size_t)text & (size_t)~3 );  // Auf int32-Grenze abrunden
@@ -706,8 +706,8 @@ size_t length_without_trailing_char( const char* text, size_t len, char c )
                 p -= 4;
                 while( p > text  &&  *(int32*)p == cccc )  p -= 4;
                 p += 4;
-            } 
-            else 
+            }
+            else
             {
                 p -= 4;
                 if( p >= text0 )  while( *(int32*)p == cccc )  p -= 4;
@@ -715,7 +715,7 @@ size_t length_without_trailing_char( const char* text, size_t len, char c )
             }
         }
 
-        while( p > text  &&  p[-1] == c )  p--;  
+        while( p > text  &&  p[-1] == c )  p--;
     }
 
     return p - text;
@@ -922,6 +922,13 @@ void Set_locale::restore()
         setlocale( _category, _saved_locale );
         _saved_locale = NULL; 
     }
+}
+
+//-------------------------------------------------------------------------------------set_c_locale
+
+void set_c_locale() {
+    const char* old_locale = setlocale(LC_ALL, "C");
+    if (strcmp(old_locale, "C") != 0)  Z_LOG("setlocale(LC_ALL, \"C\"), previous locale was " << old_locale << "\n");
 }
 
 //-----------------------------------------------------------------------Rotating_bar::Rotating_bar

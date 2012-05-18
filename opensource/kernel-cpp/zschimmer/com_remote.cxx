@@ -3199,8 +3199,9 @@ double Input_message::read_double()
 
     char* end = NULL;
 
+    set_c_locale();
     result = strtod( buffer, &end );
-    if( end != buffer + length )  throw_xc( Z_FUNCTION, buffer );
+    if( end != buffer + length )  throw_xc( Z_FUNCTION, buffer, (int)(end - (buffer+length)) );
 
     return result;
 }
