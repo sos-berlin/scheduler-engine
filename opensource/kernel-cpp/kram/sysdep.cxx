@@ -630,63 +630,6 @@ time_t sos_time( time_t *timer )
     return tim;
 }
 
-//---------------------------------------------------------------------------------get_cpu_time
-
-double get_cpu_time()
-{
-#   ifdef SYSTEM_WIN    
-
-        int64 CreationTime; // process creation time
-        int64 ExitTime;     // process exit time
-        int64 KernelTime;   // process kernel-mode time
-        int64 UserTime;     // process user-mode time
-
-        BOOL ok = GetProcessTimes( GetCurrentProcess(), (LPFILETIME)&CreationTime, (LPFILETIME)&ExitTime, 
-                                                        (LPFILETIME)&KernelTime, (LPFILETIME)&UserTime );
-        if( !ok )  return 0;
-        return ( KernelTime + UserTime ) / 1e7;
-
-#    else
-
-/*
-        struct tms  
-        {
-            clock_t tms_utime;  // user time 
-            clock_t tms_stime;  // system time 
-            clock_t tms_cutime; // user time of children
-            clock_t tms_cstime; // system time of children
-        };
-*/
-
-        // Note that the time can wrap around.   On  a  32bit  system
-        // where  CLOCKS_PER_SEC  equals  1000000  this function will
-        // return the same value approximately every 72 minutes.
-
-        static double last_times   [4] = { 0.0, 0.0, 0.0, 0.0 };
-        static double missing_times[4] = { 0.0, 0.0, 0.0, 0.0 };
-        double        tm           [4];
-        int           i;
-        double        result = 0.0;
-
-        struct tms t;
-        times( &t );
-        
-        tm[0] = t.tms_utime;
-        tm[1] = t.tms_stime;
-        tm[2] = t.tms_cutime;
-        tm[3] = t.tms_cstime;
-
-        for( i = 0; i < 4; i++ )
-        {
-            if( tm[i] < last_times[4] )  missing_times[i] += ( ((double)UINT_MAX) + 1 ) / (double)CLOCKS_PER_SEC;
-            last_times[i] = tm[i];
-            result += tm[i] + missing_times[i];
-        }
-
-        return result;
-
-#   endif
-}
 //-----------------------------------------------------------------------------operator << int64
 #if defined SYSTEM_INT64
 

@@ -931,15 +931,6 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
         state_element.setAttribute( "waiting_errno_filename", _waiting_errno_filename );
     }
 
-    double cpu_time = get_cpu_time();
-    char buffer [30];
-    sprintf( buffer, "%-.3lf", cpu_time ); 
-#   ifdef Z_WINDOWS
-        state_element.setAttribute( "cpu_time"             , buffer );
-#   else
-        Z_LOG2( "scheduler", "Command_processor::execute_show_state() cpu_time=" << cpu_time << "\n" );
-#   endif
-
     state_element.setAttribute( "loop"                 , _loop_counter );
     state_element.setAttribute( "waits"                , _wait_counter );
 
