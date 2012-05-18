@@ -10,9 +10,9 @@
             <directory>${visualStudioPlatform}/Debug</directory>
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin-test</outputDirectory>
             <includes>
-                <include>scheduler.dll</include>
-                <include>scheduler.dll.map</include>
-                <include>scheduler.dll.pdb</include>
+                <include>jobscheduler-engine.dll</include>
+                <include>jobscheduler-engine.dll.map</include>
+                <include>jobscheduler-engine.dll.pdb</include>
                 <include>scheduler.exe</include>
                 <include>spidermonkey.dll</include>
             </includes>

@@ -20,6 +20,7 @@
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
             <includes>
                 <include>scheduler.exe</include>
+                <include>jobscheduler-engine.dll</include>
                 <include>spidermonkey.dll</include>
             </includes>
         </fileSet>

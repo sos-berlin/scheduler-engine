@@ -74,9 +74,6 @@ $(BIN_DIR):
 
 # Abkürzungen:
 
-scheduler:: $(BIN_DIR)/scheduler 
-scheduler:: $(BIN_DIR)/libscheduler.so
-
 setuid:    $(BIN_DIR)/setuid
 
 perl:      $(BIN_DIR)/libsosperlscript.so
@@ -90,10 +87,10 @@ spidermonkey: $(XML_LIB) $(XSLT_LIB) libzschimmer.a
 	mkdir -p scripting_engine/Release
 	$(MAKE)  -C scripting_engine/Release  -f ../Makefile
 
-$(BIN_DIR)/scheduler: javaproxy libs $(XSLT_LIB) $(SCHEDULER_DEPENDENTS)
-	@make/make scheduler $@
+scheduler: javaproxy libs $(XSLT_LIB) $(SCHEDULER_DEPENDENTS)
+	@make/make scheduler
 
-$(BIN_DIR)/libscheduler.so: javaproxy libs $(XSLT_LIB) $(SCHEDULER_DEPENDENTS)
+$(BIN_DIR)/libjobscheduler-engine.so: javaproxy libs $(XSLT_LIB) $(SCHEDULER_DEPENDENTS)
 	@make/make scheduler $@
 
 $(BIN_DIR)/setuid:

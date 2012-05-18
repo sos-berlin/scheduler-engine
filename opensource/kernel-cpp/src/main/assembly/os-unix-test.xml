@@ -15,7 +15,7 @@
                 <include>javascript.debug-info</include>
                 <include>libspidermonkey.so.debug-info</include>
                 <!-- die folgendes includes sind die release Versionen aus dem Artifakt os-unix.xml, da unter unix derzeit keine debug Version kompiliert wird -->
-                <include>libscheduler.so</include>
+                <include>libjobscheduler-engine.so</include>
                 <include>scheduler</include>
                 <include>libspidermonkey.so</include>
                 <include>javascript</include>

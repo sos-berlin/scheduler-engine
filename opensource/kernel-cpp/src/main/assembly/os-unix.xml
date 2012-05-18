@@ -10,7 +10,7 @@
 		<directory>${cpuArchitecture}/Release</directory>
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
             <includes>
-                <include>libscheduler.so</include>
+                <include>libjobscheduler-engine.so</include>
                 <include>scheduler</include>
                 <include>libspidermonkey.so</include>
                 <include>javascript</include>

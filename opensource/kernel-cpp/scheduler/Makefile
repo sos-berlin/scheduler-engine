@@ -87,9 +87,8 @@ include $(PROD_DIR)/make/standard.makefile
 
 all:: spooler.h.gch
 all:: $(BIN_DIR)/scheduler
-all:: $(BIN_DIR)/libscheduler.so
+all:: $(BIN_DIR)/libjobscheduler-engine.so
 all:: $(BIN_DIR)/setuid
-all:: documentation
 
 
 ifeq ($(OS),HP-UX)
@@ -114,14 +113,14 @@ $(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/sosmain0.o ../kram/$
 	$(PROD_DIR)/make/separate-debug-info "$@"
 endif
 
-$(BIN_DIR)/libscheduler.so: spooler_dll_java.o $(objects) ../kram/$(O_DIR)/sosmain0.o ../kram/$(O_DIR)/soswnmai.o  $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(XML_LIBS)
+$(BIN_DIR)/libjobscheduler-engine.so: spooler_dll_java.o $(objects) ../kram/$(O_DIR)/sosmain0.o ../kram/$(O_DIR)/soswnmai.o  $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(XML_LIBS)
 	-$(CCPP) $(DEBUG) -shared $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@ $(shell $(PROD_DIR)/make/linker-export-symbols spooler_program JNI_OnLoad JNI_OnUnload Java_com_sos_scheduler_engine_kernel_CppScheduler_runNative)
 	chmod a+rx $@
 	$(PROD_DIR)/make/separate-debug-info "$@"
 
 ifeq ($(cpuArchitecture),x64)
-$(BIN_DIR)/scheduler: spooler_start_dll.o $(BIN_DIR)/libscheduler.so
-	-$(CCPP) $(DEBUG) $(LINK_FLAGS) spooler_start_dll.o -L$(BIN_DIR) -lscheduler $(LIBPATH) $(LIBS) -o $@
+$(BIN_DIR)/scheduler: spooler_start_dll.o $(BIN_DIR)/libjobscheduler-engine.so
+	-$(CCPP) $(DEBUG) $(LINK_FLAGS) spooler_start_dll.o -L$(BIN_DIR) -ljobscheduler-engine $(LIBPATH) $(LIBS) -o $@
 	chmod a+rx $@
 	$(PROD_DIR)/make/separate-debug-info "$@"
 endif
