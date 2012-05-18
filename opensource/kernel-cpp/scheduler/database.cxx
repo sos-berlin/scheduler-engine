@@ -2039,7 +2039,7 @@ void Transaction::update_clob( const string& table_name, const string& column_na
     try
     {
        Z_LOG2("jdbc", "writing clob for field " << table_name << "." << column_name << " with len=" << value.size() << " (" << where << ")\n" );
-        clob.put( value );
+       clob.put( value, _spooler->settings()->_max_length_of_blob_entry );
         clob.close();
     }
     catch( exception& x )

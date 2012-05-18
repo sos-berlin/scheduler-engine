@@ -148,6 +148,21 @@ void Any_file::open( const Sos_string& filename, Open_mode open_mode, const File
     _file->open( filename, open_mode, file_spec );
 }
 
+//-------------------------------------------------------------------------------Any_file::put
+
+void Any_file::put( const string& str, const int max_length )
+{
+   if( str.length() > max_length ) {
+      string msg = zschimmer::message_string( "SCHEDULER-722", max_length );
+      int start = str.length() - max_length - msg.length() - 1;
+      int x = str.substr(start).find_first_of("\n");
+      Z_LOG2("jdbc", msg );
+      put( msg + str.substr(start + x));
+   } else {
+      put(str);
+   }
+}
+
 //-------------------------------------------------------------Any_file::identifier_quote_begin
 
 Sos_string Any_file::identifier_quote_begin()

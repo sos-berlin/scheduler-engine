@@ -397,7 +397,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
                         if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                         Any_file blob_file( "-out -binary " + blob_filename );
                         Z_LOG2("jdbc", "writing blob for field " << db()->_order_history_tablename << ".log" << " with len=" << log_text.size() << " (where `history_id`=" << as_string( _history_id ) << ")\n" );
-                        blob_file.put( log_text );
+                        blob_file.put( log_text, _spooler->settings()->_max_length_of_blob_entry );
                         blob_file.close();
                     }
                     catch( exception& x ) 
