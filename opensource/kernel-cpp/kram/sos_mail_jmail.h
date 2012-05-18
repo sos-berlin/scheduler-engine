@@ -2,7 +2,7 @@
 
 #ifndef __SOS_MAIL_JMAIL_H
 #define __SOS_MAIL_JMAIL_H
-#ifdef SYSTEM_WIN
+#if defined _WIN32 && !defined _WIN64
 
 #include <map>
 #include "sysxcept.h"

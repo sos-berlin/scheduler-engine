@@ -22,7 +22,7 @@
 #include "../zschimmer/file.h"
 #include "../zschimmer/z_mail.h"
 
-#ifdef SYSTEM_WIN
+#if defined _WIN32 && !defined _WIN64
 #   include "sos_mail_jmail.h"
 #endif
 
@@ -58,7 +58,7 @@ Sos_ptr<Message> create_message( z::javabridge::Vm* java_vm, const string& type 
 
     if( t == "" )
     {
-#       ifdef SYSTEM_WIN
+#       if defined _WIN32 && !defined _WIN64
         {
             Sos_ptr<Jmail_message> message = SOS_NEW( Jmail_message( false ) );
             if( message->is_installed() )
@@ -73,7 +73,7 @@ Sos_ptr<Message> create_message( z::javabridge::Vm* java_vm, const string& type 
     }
 
 
-#   ifdef SYSTEM_WIN
+#   if defined _WIN32 && !defined _WIN64
     if( t == "jmail" || t == "dimac" )
     {
         Sos_ptr<Jmail_message> message = SOS_NEW( Jmail_message );
@@ -98,56 +98,6 @@ Sos_ptr<Message> create_message( z::javabridge::Vm* java_vm, const string& type 
     return NULL;
 }
 
-//----------------------------------------------------------------------------------------make_addr
-/*
-string make_addr( const string& addr, const string& name )
-{
-    if( name.empty()  ||  addr == name ) 
-    {
-        return addr;
-    }
-    else
-    {
-        return name + " <" + addr + ">";
-    }
-}
-*/
-//---------------------------------------------------------------------------Email_addr::Email_addr
-/*
-Email_addr::Email_addr( const string& addr )
-{
-    const char* t = parse( addr.c_str() );
-    if( *t )  throw_xc( "SOS-1442", addr );
-}
-
-//--------------------------------------------------------------------------------Email_addr::parse
-
-const char* Email_addr::parse( const char* t )
-{
-    _name = "";
-    _addr = "";
-
-    if( !t )  return "";
-
-    while( *t  &&   *t != '<' )  _name += *t++;
-
-    if( *t == '<' )
-    {
-        t++;
-        while( *t  &&  *t != '>' )  _addr += *t++;
-        if( *t == '>' )  t++;
-    }
-    else
-        _addr = _name;   // eMail-Adresse in _name, weil jmail sonst leeren Namen "" <x@x.xx> erzeugt
-
-    trim( &_name );
-    trim( &_addr );
-
-    while( *t == ' ' )  t++;
-
-    return t;
-}
-*/
 //----------------------------------------------------------------------------Mail_static::instance
 
 Mail_static* Mail_static::instance()
@@ -205,12 +155,6 @@ Message::Message()
     _queue_only = _static->_queue_only;
 }
 
-//--------------------------------------------------------------------------------Message::~Message
-/*
-Message::~Message()
-{
-}
-*/
 //------------------------------------------------------------------------------------Message::init
 
 void Message::init()
@@ -232,14 +176,6 @@ void Message::set_from_name( const string& name )
     
     a.set_name( name );
     set_from( a );
-/*
-    string old_from = this->from();
-
-    if( old_from.find( '<' ) == string::npos  &&  old_from.find( '@' ) != string::npos )
-    {
-        set_from( '"' + name + "\" <" + old_from + ">" );
-    }
-*/
 }
 
 //-----------------------------------------------------------------------------Message::set_subject
@@ -342,9 +278,6 @@ void Message::enqueue()
     }
 
     LOG( "eMail wird gespeichert in " << email_filename << "\n" );
-
-    //string to = "To: " + this->to() + "\r\n";
-    //write( file, to.c_str(), to.length() );
 
     int ret = write( file, text.c_str(), text.length() );
     if( ret != text.length() )  close(file), throw_errno( errno, email_filename.c_str() );
