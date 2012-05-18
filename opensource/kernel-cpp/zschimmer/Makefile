@@ -120,8 +120,8 @@ PERL_LIBS += -lcrypt
 endif
 
 
+all:: zschimmer.h.gch
 all:: libzschimmer.a 
-all:: $(BIN_DIR)/libsosperlscript.so
 
 
 libzschimmer.a: $(libzschimmer_objects)

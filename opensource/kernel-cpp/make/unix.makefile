@@ -47,15 +47,15 @@ endif
 	@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CC) -c $(HIDDEN_CFLAGS) $(CFLAGS) $(INCLUDES) -o $@  $<
 
 cxxEchoLine=@echo $(dispatch) $(CCPP) ... -c $(CFLAGS) $(CCPPFLAGS) $<
-cxxCommandLine=@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CCPP) -c $(HIDDEN_CFLAGS) $(HIDDEN_CCPPWARNINGS) $(CFLAGS) $(CCPPFLAGS) -I. $(INCLUDES) -o $@  $<
+cxxCommandLine=@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CCPP) -c $(CFLAGS) $(CCPPFLAGS) $(HIDDEN_CFLAGS) $(HIDDEN_CCPPWARNINGS) $(INCLUDES)
 
-%.gch: %.h
+%.h.gch: %.h
 	$(cxxEchoLine)
-	$(cxxCommandLine)
+	$(cxxCommandLine) $<
 
 %.o: %.cxx
 	$(cxxEchoLine)
-	$(cxxCommandLine)
+	$(cxxCommandLine) -o $@  $<
 
 %.a: %.o
 	$(dispatch) $(AR) $(ARFLAGS) $@ $^

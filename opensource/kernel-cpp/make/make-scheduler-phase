@@ -110,16 +110,41 @@ function msbuild() {
 #---------------------------------------------------------------------------------------------Linux
 
 function cmd_linux_clean() {
-    cpuArchitecture=$cpuArchitecture make clean
+    rm -f */*.h.gch */*.h.d
+    rm -fr */{Debug,Release} */*/{Debug,Release} */*/{Debug,Release} */*/*/{Debug,Release}
+    rm -fr `find .  -name "*.class"  -o -name "*.o"  -o -name "lib*.a"  -o -name "*.d"  -print`
+    BUILD_OPT=1 JS_LIVECONNECT=1 make -C js/src  -f Makefile.ref  clean || true
+    make  -C spidermonkey/Release  -f ../Makefile  clean || true
 }
 
-function cmd_linux_compile() {
-    cpuArchitecture=$cpuArchitecture make scheduler
-    if [ "$cpuArchitecture" == "x86" ]; then :
-        cpuArchitecture=$cpuArchitecture make spidermonkey
+function cmd_linux_compile() {(
+    export O_DIR=Release
+    export BIN_DIR="`pwd`/$cpuArchitecture/$O_DIR"
+    if [ ! -d "$BIN_DIR" ]; then mkdir -p "$BIN_DIR"; fi
+    export CDPATH=
+    export WITH_PERL=1
+    export WITH_JAVA=1
+    export SCHEDULER_DEPENDENTS=
+    export cpuArchitecture
+
+    make/make zschimmer
+    make/make kram
+    make/make file
+    make/make javaproxy
+
+    if [ "$cpuArchitecture" == "x86" ]; then
+        make/make 3rd_party/libxml2 libxml2.a
+        make/make 3rd_party/libxslt/libxslt libxslt.a
+	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK="$JAVA_HOME" make -C js/src/fdlibm  -f Makefile.ref
+        CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK="$JAVA_HOME" make -C js/src         -f Makefile.ref
+        mkdir -p scripting_engine/Release
+        make -C scripting_engine/Release -f ../Makefile
     fi
+
+    make/make scheduler
+
     provide_binaries_as_resources
-}
+)}
 
 function provide_binaries_as_resources() {
     rm -rf generated-java-resources/*

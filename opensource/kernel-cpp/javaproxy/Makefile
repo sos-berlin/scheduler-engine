@@ -9,7 +9,7 @@ objects = $(javaproxy_objects)
  
 include $(PROD_DIR)/make/standard.makefile
 
-
+all:: _precompiled.h.gch
 all:: libjavaproxy.a 
 
 libjavaproxy.a: $(objects)

@@ -8,7 +8,7 @@
     <fileSets>
         <fileSet>
             <!-- hier sind die debug-Informationen für die Produktionsversionen aus dem assembly os-unix.xml enthalten -->
-            <directory>bin</directory>
+	    <directory>${cpuArchitecture}/Release</directory>
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin-test</outputDirectory>
             <includes>
                 <include>scheduler.debug-info</include>

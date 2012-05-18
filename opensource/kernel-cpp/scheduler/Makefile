@@ -85,6 +85,7 @@ objects = \
 
 include $(PROD_DIR)/make/standard.makefile
 
+all:: spooler.h.gch
 all:: $(BIN_DIR)/scheduler
 all:: $(BIN_DIR)/libscheduler.so
 all:: $(BIN_DIR)/setuid
@@ -92,25 +93,11 @@ all:: documentation
 
 
 ifeq ($(OS),HP-UX)
-
 ifeq "$(shell uname -m)" "ia64"
 LIBS += -Wl,+b,/opt/java1.4/jre/lib/IA64N/server:/opt/java1.4/jre/lib/IA64N
 LINK_FLAGS += -Wl,+e,main
 LINK_FLAGS += -Wl,-B -Wl,immediate 
-#LINK_FLAGS += -Wl,-B -Wl,direct 
-#LINK_FLAGS += -Wl,-B -Wl,verbose 
-#LINK_FLAGS += -ldld
-#LINK_FLAGS += -luca
-#LINK_FLAGS += -l/usr/lib/hpux32/libuca.so.1
-else
-# Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
-#LIBS += -Wl,+b,/opt/java1.4/jre/lib/PA_RISC2.0:/opt/java1.4/jre/lib/PA_RISC2.0/server
 endif
-
-#ifeq ($(NO_PERL),)
-## HP-UX: Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
-#SOS_LIBS += $(PROD_DIR)/zschimmer/$(O_DIR)/libsosperlscript.a
-#endif
 endif
 
 ifeq ($(cpuArchitecture),x64)
@@ -118,9 +105,6 @@ XML_LIBS=
 else
 XML_LIBS=$(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a  $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
 endif
-
-# Precompiled header spooler.h:
-spooler.gch:
 
 ifeq ($(cpuArchitecture),x64)
 else	

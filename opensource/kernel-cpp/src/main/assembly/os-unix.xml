@@ -7,7 +7,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>bin</directory>
+		<directory>${cpuArchitecture}/Release</directory>
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin</outputDirectory>
             <includes>
                 <include>libscheduler.so</include>

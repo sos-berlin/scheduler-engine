@@ -25,6 +25,7 @@ include $(PROD_DIR)/make/standard.makefile
 CFLAGS += -fno-strict-aliasing
 CPPFLAGS += -Wno-deprecated -Wno-reorder -Wno-long-long -Wno-sign-compare
 
+all:: precomp.h.gch
 all:: libfile.a
 
 libfile.a: $(objects)
