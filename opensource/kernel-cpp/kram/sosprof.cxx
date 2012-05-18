@@ -584,7 +584,7 @@ void Sos_profile_file::get_record( Area& buffer )
     const char* e = _ptr + strlen( _ptr );
     if( e == _ptr )  throw_eof_error();
 
-    if( (int)buffer.ptr() % sizeof (int) )  throw_xc( "SOS-1261", "Sos_profile_file" );
+    if( (long)buffer.ptr() % sizeof (long) )  throw_xc( "SOS-1261", "Sos_profile_file" );
     buffer.allocate_length( _record_type->field_size() ); //sizeof (Sos_profile_record) );
     buffer.fill( '\0' );
     Sos_profile_record* r = (Sos_profile_record*) buffer.ptr();
@@ -622,7 +622,7 @@ void Sos_profile_file::get_record_key( Area& buffer, const Key& key )
 {
     Sos_limited_text<max_entry_length> entry_name;
 
-    if( (int)buffer.ptr() % sizeof (int) )  throw_xc( "SOS-1261", "Sos_profile_file" );
+    if( (long)buffer.ptr() % sizeof (long) )  throw_xc( "SOS-1261", "Sos_profile_file" );
 
 	 buffer.allocate_length( sizeof (Sos_profile_record) );
 	 buffer.fill( '\0' );
@@ -690,7 +690,7 @@ void Sos_profile_file::update( const Const_area& record )
     _update_allowed = false;
 
     Sos_profile_record* r = (Sos_profile_record*) record.ptr();
-    if( (int)r % sizeof (int) )  throw_xc( "SOS-1261", "Sos_profile_file" );
+    if( (long)r % sizeof (long) )  throw_xc( "SOS-1261", "Sos_profile_file" );
 
     //if( r->_entry != _current_key )  throw_xc( "SOS-1229", "profile" );
     if( stricmp( r->_entry, c_str( _current_key ) ) != 0 )

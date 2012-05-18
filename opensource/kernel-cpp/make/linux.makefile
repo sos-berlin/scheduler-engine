@@ -3,25 +3,19 @@
 
 include $(PROD_DIR)/make/gnu.makefile
 
-
-#CFLAGS += -march=pentium
-#CFLAGS += -mtune=pentium4
-#CFLAGS += -mcpu=pentium4
-# -mcpu=pentium4 optimiert f|r Pentium 4, Code lLuft aber auch auf anderen Prozessoren (im Gegensatz zu -march=pentium4).
-
+ifeq ($(cpuArchitecture),x86)
+CFLAGS += -m32
+LINK_FLAGS += -m32
+else
+CFLAGS += -m64
+LINK_FLAGS += -m64
+endif	
 
 COPTIMIZE += -O2
-#COPTIMIZE += -Wuninitialized
 
-CFLAGS += -m32
-#CFLAGS += -fPIC
 
 # MAKE_UBUNTU setzen
 CFLAGS += $(if $(shell test -e /usr/include/ansidecl.h && echo 1),,-DMAKE_UBUNTU)
-
-
-LINK_FLAGS += -m32
-
 
 INCLUDES += -I$(JAVA_HOME)/include/linux
 

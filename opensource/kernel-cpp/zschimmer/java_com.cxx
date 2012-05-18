@@ -370,7 +370,7 @@ com::Variant Com_env::jobject_to_variant(jobject jparam)
     else
     if( env->IsInstanceOf( jparam, stdcls->_java_lang_long_class ) )
     {
-        result = env->CallLongMethod( jparam, env->GetMethodID( stdcls->_java_lang_long_class, "longValue", "()J" ) );
+        result = (int64)env->CallLongMethod( jparam, env->GetMethodID( stdcls->_java_lang_long_class, "longValue", "()J" ) );
         if( env->ExceptionCheck() )  env.throw_java( "CallLongMethod", "longValue" );
     }
     else

@@ -1022,7 +1022,7 @@ void Double_type::write_text( const Byte* p, Area* buffer, const Text_format& fo
 
     //char* old_locale = setlocale( LC_NUMERIC, "C" );
 
-    if( (int)p & ( double_alignment-1 ) )  throw_xc( "SOS-1356", this );  // Ausgerichtet?
+    if( (long)p & ( double_alignment-1 ) )  throw_xc( "SOS-1356", this );  // Ausgerichtet?
   //if( *(double*)p == NAN )  return;   // Not A Number
 
     if( _scale_null  &&  abs( *(double*)p ) < 1e14 ) 
@@ -1053,7 +1053,7 @@ void Double_type::write_text( const Byte* p, Area* buffer, const Text_format& fo
 
 void Double_type::read_text( Byte* p, const char* t, const Text_format& ) const
 {
-    if( (int)p & ( double_alignment-1 ) )  throw_xc( "SOS-1356", this );   // Ausgerichtet?
+    if( (long)p & ( double_alignment-1 ) )  throw_xc( "SOS-1356", this );   // Ausgerichtet?
     *(double*)p = sos::as_double( t );
 }
 

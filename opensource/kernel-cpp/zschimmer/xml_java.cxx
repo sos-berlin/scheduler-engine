@@ -17,6 +17,21 @@ using namespace std;
 namespace zschimmer {
 namespace xml {
 
+#if !defined Z_WINDOWS
+    const int NODE_ELEMENT = 1;
+    const int NODE_ATTRIBUTE = 2;
+    const int NODE_TEXT	= 3;
+    const int NODE_CDATA_SECTION = 4;
+    const int NODE_ENTITY_REFERENCE = 5;
+    const int NODE_ENTITY = 6;
+    const int NODE_PROCESSING_INSTRUCTION = 7;
+    const int NODE_COMMENT = 8;
+    const int NODE_DOCUMENT = 9;
+    const int NODE_DOCUMENT_TYPE = 10;
+    const int NODE_DOCUMENT_FRAGMENT = 11;
+    const int NODE_NOTATION = 12;
+#endif	
+
 //--------------------------------------------------------------------------------name_of_node_type
 
 string name_of_node_type( const NodeType& n )
@@ -394,7 +409,7 @@ Simple_node_ptr Simple_node_ptr::select_node( const string& xpath_expression ) c
 
 bool Simple_node_ptr::has_node( const string& xpath_expression ) const
 {
-    return select_node( xpath_expression ) != NULL;
+    return select_node( xpath_expression );
 }
 
 //--------------------------------------------------------------Simple_node_ptr::select_node_strict
@@ -445,7 +460,7 @@ string Element_ptr::getAttribute( const char* name, const char* deflt ) const
 
 string Element_ptr::getAttribute( const string& name, const string& deflt ) const  
 { 
-    return name == "" || _elementJ.hasAttribute(name)? _elementJ.getAttribute(name) : deflt;
+    return name == "" || _elementJ.hasAttribute(name)? (string)_elementJ.getAttribute(name) : deflt;
 }
 
 //-----------------------------------------------------------------------Element_ptr::hasAttributes

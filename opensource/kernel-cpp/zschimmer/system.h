@@ -93,9 +93,9 @@
 #   define __declspec_uuid(UUID)        __declspec( uuid(UUID) )
 
 #   ifdef _WIN64
-#		define Z_WIN64		// Zusätzlich zu Z_WIN32
+#       define Z_WIN64      // Zusätzlich zu Z_WIN32
 #       define Z_64
-#	endif
+#   endif
 
 
 #elif defined __GNUC__
@@ -103,6 +103,9 @@
 #   define __GNUC_VERSION__             ( __GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__ )       // 3.2.1 => 30201
 
 #   define Z_UNIX
+#   if defined __LP64__	
+#       define Z_64
+#   endif
 #   define Z_GNU_ONLY( statement )      statement
 #   define Z_NORETURN                   __attribute__(( noreturn ))           
 #   if __GNUC_VERSION_ >= 30300
@@ -117,7 +120,7 @@
 
 #endif
 
-#if defined linux
+#if defined linux || defined __linux  // linux nicht mehr in C++0x
 #   define Z_LINUX
 #endif
 
@@ -410,9 +413,9 @@ inline const void*              memrchr                     ( const void* s, cha
 #endif
 
 #ifdef __GNUC__
-#   if __GNUC_VERSION__ >= 40500  // gcc 4.5.0
-//Testen: #       define Z_HAS_MOVE_CONSTRUCTOR
-#   endif	
+#   if __GNUC_VERSION__ >= 40500  // gcc 4.5.0, setzt -std=c++0x oder -std=c++11 voraus. Sonst ältere gcc-Version verwenden!
+#       define Z_HAS_MOVE_CONSTRUCTOR
+#   endif
 #   if __GNUC_VERSION__ >= 40700  // gcc 4.7 soll override kennen
 #       define override
 #   endif

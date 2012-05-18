@@ -1035,7 +1035,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 //    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !_spooler->_remote_commands_allowed_for_licence ) {
         if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
-        return NULL;
+        return xml::Element_ptr();
     }
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
@@ -1073,7 +1073,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
 //    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !_spooler->_remote_commands_allowed_for_licence ) {
         if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
-        return NULL;
+        return xml::Element_ptr();
     }
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
@@ -1090,7 +1090,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     response->async_continue();
     _response = response;
 
-    return NULL;
+    return xml::Element_ptr();
 }
 
 //---------------------------------------------------------Command_processor::execute_signal_object
@@ -1506,7 +1506,7 @@ xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& 
 
     _response->write( "<events>\n" );
 
-    return NULL;    // Antwort wird asynchron �bergeben
+    return xml::Element_ptr();    // Antwort wird asynchron �bergeben
 }
 
 //-----------------------------------------et_events_command_response::~Get_events_command_response

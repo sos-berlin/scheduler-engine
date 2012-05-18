@@ -1,6 +1,7 @@
 // $Id: spooler_dll.cxx 14110 2010-10-27 12:58:32Z jz $
 
 #include "spooler.h"
+#include "spooler_dll.h"
 
 #if defined Z_WIN64 || defined _DEBUG       // Win32: Nur die Debug-Variante wird als DLL erzeugt
 
@@ -39,6 +40,7 @@ extern "C" BOOL WINAPI DllMain( HANDLE hinstance, DWORD ul_reason_being_called, 
     return TRUE;
 }
 
+#endif
 //-------------------------------------------------------------------------------------------------
 
 namespace sos 
@@ -46,9 +48,9 @@ namespace sos
     extern int sos_main0( int argc, char** argv );
 }
 
-extern "C" int __declspec(dllexport) spooler_program( int argc, char** argv )
+//----------------------------------------------------------------------------------spooler_program
+
+extern "C" int SCHEDULER_EXPORT spooler_program( int argc, char** argv )
 {
     return sos::sos_main0( argc, argv );
 }
-
-#endif

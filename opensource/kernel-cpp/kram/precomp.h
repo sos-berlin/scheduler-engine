@@ -1,19 +1,12 @@
 // precompiled headers
 
 #if defined _MSC_VER  /* Führt hin und wieder zum Compilerabsturz */
-//#   pragma option /Yc /Yu           // create and use precompiled headers
-#   if defined SYSTEM_STD_CPP_LIBRARY           
-//#       include <cctype>                        // isdigit() wird von den neuen Include-Dateien verlangt
-#   endif
 #   include <stdio.h>               // Wird von afx.h eingezogen. Besser hier damit sysdep.h stdin etc. neutralisieren kann
 #   include <stdexcpt.h>            // xmsg bzw. exception
 #   define SYSTEM_PRECOMPILED_HEADERS
 #endif
 
-#if defined __BORLANDC__
-//#   define SYSTEM_PRECOMPILED_HEADERS       // "cannot, initialized data in header", bei vorbesetzen Parametern
-#endif
-
+#include <string.h>
 
 #if defined SYSTEM_PRECOMPILED_HEADERS
 #   include <stdlib.h>

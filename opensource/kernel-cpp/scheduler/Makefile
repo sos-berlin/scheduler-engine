@@ -49,6 +49,7 @@ objects = \
  spooler_command.o\
  spooler_communication.o\
  spooler_config.o\
+ spooler_dll.o\
  spooler_event.o\
  spooler_embedded_files.o\
  spooler_http.o\
@@ -112,16 +113,34 @@ endif
 #endif
 endif
 
+ifeq ($(cpuArchitecture),x64)
+XML_LIBS=	
+else
+XML_LIBS=$(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a  $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
+endif
 
-$(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/sosmain0.o ../kram/$(O_DIR)/soswnmai.o  $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)  $(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a  $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
+# Precompiled header spooler.h:
+spooler.gch:
+
+ifeq ($(cpuArchitecture),x64)
+else	
+$(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/sosmain0.o ../kram/$(O_DIR)/soswnmai.o  $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(XML_LIBS)
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
 	chmod a+rx $@
 	$(PROD_DIR)/make/separate-debug-info "$@"
+endif
 
-$(BIN_DIR)/libscheduler.so: spooler_dll_java.o $(objects) ../kram/$(O_DIR)/sosmain0.o ../kram/$(O_DIR)/soswnmai.o  $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)  $(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a  $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
-	-$(CCPP) $(DEBUG) -shared $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@ $(shell $(PROD_DIR)/make/linker-export-symbols JNI_OnLoad JNI_OnUnload Java_com_sos_scheduler_engine_kernel_CppScheduler_runNative)
+$(BIN_DIR)/libscheduler.so: spooler_dll_java.o $(objects) ../kram/$(O_DIR)/sosmain0.o ../kram/$(O_DIR)/soswnmai.o  $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(XML_LIBS)
+	-$(CCPP) $(DEBUG) -shared $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@ $(shell $(PROD_DIR)/make/linker-export-symbols spooler_program JNI_OnLoad JNI_OnUnload Java_com_sos_scheduler_engine_kernel_CppScheduler_runNative)
 	chmod a+rx $@
 	$(PROD_DIR)/make/separate-debug-info "$@"
+
+ifeq ($(cpuArchitecture),x64)
+$(BIN_DIR)/scheduler: spooler_start_dll.o $(BIN_DIR)/libscheduler.so
+	-$(CCPP) $(DEBUG) $(LINK_FLAGS) spooler_start_dll.o -L$(BIN_DIR) -lscheduler $(LIBPATH) $(LIBS) -o $@
+	chmod a+rx $@
+	$(PROD_DIR)/make/separate-debug-info "$@"
+endif
 
 $(BIN_DIR)/setuid: setuid.o 
 	-$(CC) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH)  -o $@  -s

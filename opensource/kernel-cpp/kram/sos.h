@@ -285,6 +285,8 @@ inline Bool negative( uint4 )  { return false; }
 //-------------------------------------------------------------------------------------round_up
 
 inline int round_up( int a, int r )  { int d = a % r; return d? a + r - d : a; }
+inline int round_up( uint a, int r )  { uint d = a % r; return d? a + r - d : a; }
+inline long round_up( long a, int r )  { long d = a % r; return d? a + r - d : a; }
 
 //------------------------------------------------------------------------------min max MIN MAX
 

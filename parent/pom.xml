@@ -72,7 +72,7 @@
             </properties>
         </profile>
         <profile>
-            <id>linux</id>
+            <id>linux-x86</id>
             <activation>
                 <os>
                     <family>unix</family>
@@ -83,6 +83,22 @@
             <properties>
                 <operatingSystem>linux</operatingSystem>
                 <osArch>linux-${os.arch}</osArch>
+                <cpuArchitecture>x86</cpuArchitecture>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-x64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>linux</operatingSystem>
+                <osArch>linux-x64</osArch>
+                <cpuArchitecture>x64</cpuArchitecture>
             </properties>
         </profile>
         <profile>
@@ -96,6 +112,7 @@
             <properties>
                 <operatingSystem>hpux</operatingSystem>
                 <osArch>hpux-itanium</osArch>
+                <cpuArchitecture>itantium</cpuArchitecture>
             </properties>
         </profile>
         <profile>
@@ -109,6 +126,7 @@
             <properties>
                 <operatingSystem>solaris</operatingSystem>
                 <osArch>solaris-${os.arch}</osArch>
+		<cpuArchitecture>${os.arch}</cpuArchitecture>
             </properties>
         </profile>
     </profiles>

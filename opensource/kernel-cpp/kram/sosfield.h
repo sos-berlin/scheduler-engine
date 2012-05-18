@@ -256,8 +256,8 @@ struct Field_type : Sos_self_deleting                   // Beschreibt einen Feld
     virtual void                clear                   ( Byte* ) const;
     virtual Bool                field_equal             ( const Byte*, const Byte* ) const;
     virtual int                 alignment               () const;
-    Byte*                       align                   ( Byte* p       ) const { return       (Byte*)round_up( (int)p, alignment() ); }
-    const Byte*                 align                   ( const Byte* p ) const { return (const Byte*)round_up( (int)p, alignment() ); }
+    Byte*                       align                   ( Byte* p       ) const { return       (Byte*)round_up( (long)p, alignment() ); }
+    const Byte*                 align                   ( const Byte* p ) const { return (const Byte*)round_up( (long)p, alignment() ); }
 
   //void                        print_selected          ( const Byte* p, ostream* s, const Text_format& f,
   //                                                      const Sos_array<int>& field_numbers ) const;

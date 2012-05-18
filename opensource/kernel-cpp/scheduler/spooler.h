@@ -818,8 +818,4 @@ int                             spooler_main                ( int argc, char** a
 
 } //namespace sos
 
-#ifdef Z_WINDOWS
-extern "C" int  __declspec(dllexport) spooler_program       ( int argc, char** argv );
-#endif
-
 #endif

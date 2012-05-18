@@ -20,7 +20,7 @@
 #   include <dl.h>
 #endif
 
-#ifdef Z_AIX
+#if defined Z_AIX || defined _CLASSPATH_JNI_H
 #   define JVALUES_CAST(JVALUE) const_cast<jvalue*>(JVALUE)
 #else
 #   define JVALUES_CAST(JVALUE) (JVALUE)
@@ -1121,13 +1121,9 @@ Z_NORETURN void throw_java_ret( int return_value, const string& text1, const str
         case JNI_ERR:       ret_text = "ret=JNI_ERR";                                           break;
         case JNI_EDETACHED: ret_text = "ret=JNI_EDETACHED \"thread detached from the VM\"";     break;
         case JNI_EVERSION:  ret_text = "ret=JNI_EVERSION \"JNI version error\"";                break;
-
-#     ifdef JNI_VERSION_1_4
-        case JNI_ENOMEM:    ret_text = "ret=JNI_ENOMEM \"not enough memory\"";                  break;
-        case JNI_EEXIST:    ret_text = "ret=JNI_EEXIST \"VM already created\"";                 break;
-        case JNI_EINVAL:    ret_text = "ret=JNI_EINVAL \"invalid arguments\"";                  break;
-#     endif
-
+        case -4:            ret_text = "ret=JNI_ENOMEM \"not enough memory\"";                  break;
+        case -5:            ret_text = "ret=JNI_EEXIST \"VM already created\"";                 break;
+        case -6:            ret_text = "ret=JNI_EINVAL \"invalid arguments\"";                  break;
         default:            ret_text = "ret=" + as_string(return_value);
     }
 

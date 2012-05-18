@@ -94,7 +94,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase clean ${visualStudioPlatform} ${cppConf}</arguments>
+                                <arguments>make/make-scheduler-phase clean "${cpuArchitecture}" ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>
@@ -108,7 +108,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <arguments>-c</arguments>
-                                <arguments>make/make-scheduler-phase compile ${visualStudioPlatform} ${cppConf}</arguments>
+                                <arguments>make/make-scheduler-phase compile "${cpuArchitecture}" ${cppConf}</arguments>
                             </arguments>
                         </configuration>
                     </execution>

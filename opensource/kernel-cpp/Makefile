@@ -25,6 +25,13 @@ ifeq ($(shell uname),HP-UX)
 #SCHEDULER_DEPENDENTS:=libhostole.a libhostjava.a $(BIN_DIR)/sos.hostware.jar
 endif
 
+ifeq ($(cpuArchitecture),x64)
+XML_LIB=
+XSLT_LIB=
+else
+XML_LIB=libxml.a
+XSLT_LIB=libxslt.a
+endif
 
 .PHONY: fs
 .PHONY: kram
@@ -45,7 +52,12 @@ endif
 
 all:: scheduler
 all:: setuid
+
+ifeq ($(cpuArchitecture),x64)
+else
 all:: spidermonkey
+endif
+
 all:: $(BIN_DIR)/libsosperlscript.so
 	
 clean:
@@ -72,16 +84,16 @@ perl:      $(BIN_DIR)/libsosperlscript.so
 perlscript: $(BIN_DIR)/libsosperlscript.so
 
 
-spidermonkey: libxml2.a libxslt.a libzschimmer.a
+spidermonkey: $(XML_LIB) $(XSLT_LIB) libzschimmer.a
 	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK=$(JDK)  $(MAKE)  -C js/src/fdlibm  -f Makefile.ref
 	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK=$(JDK)  $(MAKE)  -C js/src         -f Makefile.ref
 	mkdir -p scripting_engine/Release
 	$(MAKE)  -C scripting_engine/Release  -f ../Makefile
 
-$(BIN_DIR)/scheduler: javaproxy libs libxslt.a $(SCHEDULER_DEPENDENTS)
+$(BIN_DIR)/scheduler: javaproxy libs $(XSLT_LIB) $(SCHEDULER_DEPENDENTS)
 	@make/make scheduler $@
 
-$(BIN_DIR)/libscheduler.so: javaproxy libs libxslt.a $(SCHEDULER_DEPENDENTS)
+$(BIN_DIR)/libscheduler.so: javaproxy libs $(XSLT_LIB) $(SCHEDULER_DEPENDENTS)
 	@make/make scheduler $@
 
 $(BIN_DIR)/setuid:
@@ -94,7 +106,10 @@ $(BIN_DIR)/libsosperlscript.so:
 	@make/make zschimmer $@
 
 
+ifeq ($(cpuArchitecture),x64)
+else
 libs:: libxml2.a
+endif
 libs:: libzschimmer.a
 libs:: libkram.a
 libs:: libfile.a

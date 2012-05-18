@@ -11,7 +11,6 @@ using zschimmer::ptr;
 #ifdef SYSTEM_WIN
 #   include <ios>           // ios_base::failure
 #else
-#   include <streambuf.h>   // ios::failure
 #   include <typeinfo>
 #endif
 

@@ -47,7 +47,7 @@ void* thread_function( void* param )
 
     thread->thread_call_main();
 
-    return (void*)thread->_thread_exit_code;
+    return (void*)(long)thread->_thread_exit_code;
 }
 
 //----------------------------------------------------------------------------------Thread::~Thread
@@ -135,7 +135,7 @@ void Thread::thread_wait_for_termination()
         _pthread_handle = 0;
         _thread_id = 0;
 
-        _thread_exit_code = (int)exit_code;
+        _thread_exit_code = (int)(long)exit_code;
     }
 }
 

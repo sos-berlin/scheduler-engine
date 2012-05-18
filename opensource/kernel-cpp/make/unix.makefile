@@ -13,10 +13,6 @@ OBJSUFFIX = o
 LINKER    = $(CCPP)
 
 INCLUDES  += $(SOS_INCLUDES)
-#INCLUDES  += $(SV_INCLUDES)
-#INCLUDES  += $(ORACLE_INCLUDES)
-#INCLUDES  += -I$(PROD_DIR)/LINKS/java/include
-#INCLUDES  += -I$(PROD_DIR)/LINKS/java/include/linux
 INCLUDES  += $(foreach p,$(wildcard $(PROD_DIR)/LINKS/include.*),-I$p)
 
 LIBPATH   = $(SOS_LIBPATH) $(SV_LIBPATH) $(INGRES_LIBPATH) $(ORACLE_LIBPATH)
@@ -24,7 +20,6 @@ LIBPATH   = $(SOS_LIBPATH) $(SV_LIBPATH) $(INGRES_LIBPATH) $(ORACLE_LIBPATH)
 SOS_LIBS     = $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(notdir $p).a)
 LIBS         = $(C_LIBS)
 
-#PERL_DIR = /usr/local/lib/perl5/5.6.1/i686-linux/CORE
 PERL_DIR = $(PROD_DIR)/LINKS/perl/CORE
 
 #-----------------------------------------------------------------------Regeln
@@ -51,9 +46,16 @@ endif
 	@echo $(dispatch) $(CC) ... -c $(CFLAGS) $<
 	@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CC) -c $(HIDDEN_CFLAGS) $(CFLAGS) $(INCLUDES) -o $@  $<
 
+cxxEchoLine=@echo $(dispatch) $(CCPP) ... -c $(CFLAGS) $(CCPPFLAGS) $<
+cxxCommandLine=@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CCPP) -c $(HIDDEN_CFLAGS) $(HIDDEN_CCPPWARNINGS) $(CFLAGS) $(CCPPFLAGS) -I. $(INCLUDES) -o $@  $<
+
+%.gch: %.h
+	$(cxxEchoLine)
+	$(cxxCommandLine)
+
 %.o: %.cxx
-	@echo $(dispatch) $(CCPP) ... -c $(CFLAGS) $(CCPPFLAGS) $<
-	@C_INCLUDE_PATH="$(C_INCLUDE_PATH)" $(dispatch) $(CCPP) -c $(HIDDEN_CFLAGS) $(CFLAGS) $(CCPPFLAGS) $(INCLUDES) -o $@  $<
+	$(cxxEchoLine)
+	$(cxxCommandLine)
 
 %.a: %.o
 	$(dispatch) $(AR) $(ARFLAGS) $@ $^

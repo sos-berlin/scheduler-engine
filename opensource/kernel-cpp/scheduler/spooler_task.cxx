@@ -2453,7 +2453,7 @@ void Task::process_on_exit_commands()
 {
     if( _job->_commands_document )
     {
-        xml::Element_ptr commands_element = NULL;
+        xml::Element_ptr commands_element = xml::Element_ptr();
 
         Job::Exit_code_commands_map::iterator it = _job->_exit_code_commands_map.find( _exit_code );
         if( it != _job->_exit_code_commands_map.end() )
