@@ -98,7 +98,7 @@ STDMETHODIMP Script_site::OnScriptError( IActiveScriptError* script_error )
     if( excepinfo.scode )
     {
         char code[20]; 
-        z_snprintf( code, sizeof code, "COM-%08lX", (long)excepinfo.scode );
+        z_snprintf( code, sizeof code, "COM-%08X", excepinfo.scode );
         _script_exception = new Xc( code, descr, source_pos );
     }
     else
@@ -111,7 +111,7 @@ STDMETHODIMP Script_site::OnScriptError( IActiveScriptError* script_error )
     return E_FAIL;
 }
 
-//-------------------------------------------------------------------------cript_site::~Script_site
+//------------------------------------------------------------------------Script_site::~Script_site
 
 Script_site::~Script_site()
 {

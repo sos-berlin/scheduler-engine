@@ -316,14 +316,14 @@ Com_exception::Com_exception( HRESULT hresult, const string& function, const cha
     string source;
     string description;
 
-   
+
     if( hresult == DISP_E_EXCEPTION )
     {
         ptr<IErrorInfo> error_info;
         HRESULT my_hr = GetErrorInfo( 0, error_info.pp() );
         if( my_hr == S_OK )
         {
-            Bstr source_bstr;        
+            Bstr source_bstr;
             error_info->GetSource( &source_bstr._bstr );
             source = string_from_bstr( source_bstr );
 
@@ -364,7 +364,7 @@ Com_exception::Com_exception( HRESULT hresult, const string& function, const cha
     }
 
     if( source != "" )  set_name( source );
-    set_code( printf_string( "COM-%08lX", hresult ) );
+    set_code( printf_string( "COM-%08X", hresult ) );
     insert( 1, function );
 }
 
@@ -681,7 +681,7 @@ HRESULT Olechar_to_string( const OLECHAR* olechar, int len, string* result )  th
     }
     else
     {
-        int flags = WC_NO_BEST_FIT_CHARS;       // Das wirkt nicht wie gewünscht. Man muss user_default_char setzen und eine eigene Fehlermeldung erzeugen, 
+        int flags = WC_NO_BEST_FIT_CHARS;       // Das wirkt nicht wie gewünscht. Man muss user_default_char setzen und eine eigene Fehlermeldung erzeugen,
                                                 // um auf nicht erlaubte Zeichen zu prüfen.
 
 #       ifdef Z_WINDOWS
@@ -1650,7 +1650,7 @@ Bstr::~Bstr()
 { 
     if (_bstr) {
         // SysFreeString() setzt GetLastError() zurück (obwohl nicht bei Microsoft dokumentiert).
-        // Wir retten den Fehlercode für Aufrufe der Form: WindowsSystemCall(Bstr(name)). 
+        // Wir retten den Fehlercode für Aufrufe der Form: WindowsSystemCall(Bstr(name)).
         // ~Bstr belässt dann den Fehlercode von WindowsSystemCall.
 
         DWORD e = GetLastError();

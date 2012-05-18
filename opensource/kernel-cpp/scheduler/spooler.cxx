@@ -3106,7 +3106,7 @@ void Spooler::suspend_machine()
             int error = GetLastError();
         }
 
-        Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) => " << (ok? "ok" : message_string( printf_string( "MSWIN-%08lX", error ) ) ) << "\n" );
+        Z_LOG2( "scheduler", "SetSystemPowerState(TRUE,FALSE) => " << (ok? "ok" : message_string( printf_string( "MSWIN-%08X", error ) ) ) << "\n" );
 
 #   endif
 }

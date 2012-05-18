@@ -885,7 +885,7 @@ Ole_error::Ole_error( const _com_error& x )
 
     char code  [ 20 ];
 
-    sprintf( code, "COM-%08lX", (long)x.Error() );
+    sprintf( code, "COM-%08X", (long)x.Error() );
     set_code( code );
 }
 
@@ -901,7 +901,7 @@ void throw_ole( HRESULT hr, const char* function, const char* ins1, const char* 
 {
     char code  [ 20 ];
 
-    sprintf( code, "COM-%08lX", (long)hr );
+    sprintf( code, "COM-%08X", hr );
     throw Ole_error( code, hr, function, ins1, ins2 );
 }
 
@@ -911,7 +911,7 @@ void throw_ole( HRESULT hr, const char* function, const char* ins1, const char* 
 {
     char code  [ 20 ];
 
-    sprintf( code, "COM-%08lX", (long)hr );
+    sprintf( code, "COM-%08X", hr );
     throw Ole_error( code, hr, function, ins1, ins2 );
 }
 
@@ -921,7 +921,7 @@ void throw_ole( HRESULT hr, const char* function, const OLECHAR* ins1_w )
 {
     char code  [ 20 ];
 
-    sprintf( code, "COM-%08lX", (long)hr );
+    sprintf( code, "COM-%08X", hr );
 
     string ins1 = w_as_string( ins1_w );
 

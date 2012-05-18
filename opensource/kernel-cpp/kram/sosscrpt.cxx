@@ -131,7 +131,7 @@ STDMETHODIMP_( HRESULT ) Script_site::OnScriptError( IActiveScriptError *pscript
         if( !empty( _source ) )  source = _source + " " + source;
 
         char code[20]; 
-        if( excepinfo.scode )  sprintf( code, "COM-%08lX", (long)excepinfo.scode );
+        if( excepinfo.scode )  sprintf( code, "COM-%08X", excepinfo.scode );
                          else  strcpy( code, "SOS-1425" );
 
         _script_exception = new Xc( code, descr.c_str(), Source_pos( c_str(source), line_no, column_no ) );

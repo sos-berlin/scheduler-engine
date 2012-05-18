@@ -263,7 +263,7 @@ string signal_name_from_code( int code )
         }
     }
 
-    return printf_string( "SIG%ld", code );
+    return printf_string( "SIG%d", code );
 }
 
 //---------------------------------------------------------------------------signal_title_from_code
