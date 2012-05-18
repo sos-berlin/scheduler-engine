@@ -1804,13 +1804,19 @@ void Spooler::read_xml_configuration()
 void Spooler::initialize_java_subsystem()
 {
     #if !defined Z_USE_JAVAXML
+        // Java-Optionen und classpath sind nicht in <base> möglich, siehe Meldung SCHEDULER-475.
+        const string& options = _java_options +" "+ subst_env(_config_element_to_load.getAttribute("java_options"));
+        const string& classpath = _java_classpath + Z_PATH_SEPARATOR + 
+                                  subst_env(read_profile_string(_factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + 
+                                  subst_env(_config_element_to_load.getAttribute("java_class_path" ));
+        _java_subsystem = new_java_subsystem(this);        
         if (_spooler->_ignore_process_classes) {    // Die Java-Jobs laufen mit unserer JVM
             ptr<javabridge::Vm> java_vm = get_java_vm(false);
             string java_work_dir = this->java_work_dir();
             java_vm->set_work_dir(java_work_dir);
             java_vm->prepend_class_path(java_work_dir);
         }
-        start_java(_java_options, _java_classpath);
+        start_java(options, classpath);
     #endif
 
     _java_subsystem = new_java_subsystem(this);
