@@ -101,14 +101,9 @@ struct Log_categories : Log_categories_content
     void                        toggle_all                  ()                                          { _really_all = !_really_all;  _modified_counter++; }   // Für asynchrone Aufrufe (Signal-Handler)
 
     int                         modified_counter            () const                                    { return _modified_counter; }
-  //bool                        is_modified_since           ( int* last_modified_counter ) const        { bool result = *last_modified_counter != _modified_counter; 
-  //                                                                                                      *last_modified_counter = _modified_counter; return result; }
     bool                        is_set                      ( Cached_log_category* c )                  { if( c->_last_modified_counter != _modified_counter )  is_set_cached( c );  
                                                                                                           return c->_is_set; }
     
-  //bool                        update_flag_if_modified     ( const char*   name, bool* flag, int* last_modified_counter ) { if( is_modified_since( last_modified_counter ) )  *flag = is_set( name );  return *flag; }
-  //bool                        update_flag_if_modified     ( const string& name, bool* flag, int* last_modified_counter ) { if( is_modified_since( last_modified_counter ) )  *flag = is_set( name );  return *flag; }
-
     bool                        category_is_relevant        ( const string& name ) const;
     Map                         map_copy                    () const;
     string                      to_string                   () const;
@@ -118,7 +113,7 @@ struct Log_categories : Log_categories_content
     friend struct               Log_categories_content;
 
     bool                        is_set2                     ( const string& name, bool is_derived );
-    void                        modify                      ( const Map::iterator&, bool value, bool children_too );
+    void                        modify_children             ( const string& prefix, bool value, bool children_too );
     void                        generate_missing_anchestors_of( const string& );
 
     Fill_zero                  _zero_;

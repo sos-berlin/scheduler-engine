@@ -306,7 +306,6 @@ bool Log_categories::is_set2( const string& name, bool is_derived )
                 .first;    
 
             e->second._default_value = value;
-            //e->second._children_too = parents_children_too;
             e->second._children_too_derived = parents_children_too;
         }
 
@@ -354,7 +353,6 @@ string Log_categories::set( const string& name_, bool value, Entry::Type type )
         if( e == _map.end() ) 
         {
             e = _map.insert( Map::value_type( name, Entry( type, value ) ) ) .first;
-            //e = _map[ name ] = Entry( type, value );
             e->second._children_too = children_too;
         }
         
@@ -364,15 +362,11 @@ string Log_categories::set( const string& name_, bool value, Entry::Type type )
         if( children_too )  entry._children_too = value;
         entry._children_too_derived = entry._children_too;  //children_too & value;
 
-        //if( e == _map.end()  ||  entry._type == Entry::e_derived )  
-        //entry._children_too = children_too & value;
-        //entry._children_too_derived = children_too & value;
-
         if( entry._type == Entry::e_derived   ||
             type        == Entry::e_implicit  ||  
             type        == Entry::e_explicit    )  entry._type = type;
 
-        modify( e, value, children_too );
+        modify_children( e->first, value, children_too );
 
         _modified_counter++;
     }
@@ -384,69 +378,28 @@ string Log_categories::set( const string& name_, bool value, Entry::Type type )
 
 //---------------------------------------------------------------------------Log_categories::modify
 
-void Log_categories::modify( const Map::iterator& e, bool value, bool children_too )
+void Log_categories::modify_children( const string& parent, bool value, bool children_too )
 {
     //Z_DEBUG_ONLY( Z_LOGI( Z_FUNCTION << "(\"" << name << "\"," << value << ")\n" ) );
-    assert( e != _map.end() );
 
-    Entry& entry = e->second;
-    
     // Für Kinder übernehmen
 
-    string prefix = e->first;
-    if( prefix != "" )  prefix += ".";
+    string prefix = parent == ""? "" : parent +".";
 
     Z_FOR_EACH( Map, _map, c )          // Quadratischer Aufwand
     {
         Entry& child = c->second;
 
-        if( string_begins_with( c->first, prefix )                 &&   // Ist ein Kind "a." ?
-            c->first != prefix                                      &&  //Falls prefix == ""
-            ( !value ||    // Abschalten? Immer alle Kinder abschalten
+        if( string_begins_with( c->first, prefix ) &&  // Ist ein Kind "a." ?
+            c->first != prefix                     &&  // Falls prefix == ""
               ( children_too? child._type != Entry::e_explicit
-                          : child._type == Entry::e_implicit )  ) )
-            //( !value  ||                                                    // Abschalten? Gilt auch für alle Kinder
-            //  ( entry._children_too | entry._children_too_derived? child._type != Entry::e_explicit
-            //                                                     : child._type == Entry::e_implicit ) )  &&
-            //c->first.find( '.', prefix.length() ) == string::npos  )  // Kein weiterer Punkt, nur a.b, nicht a.b.c ?
-            //c->first != "" )
+                            : child._type == Entry::e_implicit ) )
         {
             child._value                = value;
-          //child._children_too         &= value;
             child._children_too_derived = children_too & value;
-            //child._children_too_derived = value  &&  ( entry._children_too || entry._children_too_derived );
-            //modify( c, value, children_too );
         }
     }
 }
-
-//------------------------------------------------------------------Log_categories::reset_derived
-
-//void Log_categories::reset_derived()
-//{
-//    for( Map::iterator e = _map.begin(); e != _map.end(); )
-//    {
-//        Map::iterator next_e = e;
-//        ++next_e;
-//
-//        e->second._children_too_derived = false;
-//
-//        //if( e->second._type == Entry::e_derived )  
-//        //{
-//        //    if( e->second._has_default )
-//        //    {
-//        //        e->second._type  = Entry::e_standard;
-//        //        e->second._value = e->second._default_value;
-//        //    }
-//        //    else
-//        //    {
-//        //        _map.erase( e );
-//        //    }
-//        //}
-//        
-//        e = next_e;
-//    }
-//}
 
 //---------------------------------------------------Log_categories::generate_missing_anchestors_of
 
@@ -464,35 +417,6 @@ void Log_categories::generate_missing_anchestors_of( const string& child_name )
         is_set2( name, true );  // Legt einen abgeleiteten Eintrag (e_derived) an
     }
 }
-
-//---------------------------------------------------------Log_categories::generate_missing_parents
-
-//void Log_categories::generate_missing_parents()
-//{
-//    stdext::hash_set<string> missing_parent_names;
-//
-//    Z_FOR_EACH_CONST( Map, _map, e )
-//    {
-//        string name = e->first;
-//
-//        while( name != "" )
-//        {
-//            size_t point = name.rfind( '.' );  
-//            name.erase( point == string::npos? 0 : point );
-//
-//            Map::iterator p = _map.find( name );
-//            if( p == _map.end() )  
-//            {
-//                missing_parent_names.insert( name );
-//            }
-//        }
-//    }
-//
-//    Z_FOR_EACH( stdext::hash_set<string>, missing_parent_names, p )
-//    {
-//        is_set2( *p, true );  // Legt einen abgeleiteten Eintrag (e_derived) an
-//    }
-//}
 
 //--------------------------------------------------------------------Log_categories::is_set_cached
 
@@ -660,8 +584,6 @@ string Log_categories::to_string() const
 
     Z_MUTEX( _mutex )
     {
-        //if( _really_all )  result << "really_all";
-
         Z_FOR_EACH_CONST( Map, _map, it )
         {
             const Entry& e    = it->second;
