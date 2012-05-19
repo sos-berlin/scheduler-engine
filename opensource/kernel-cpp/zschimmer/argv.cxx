@@ -3,6 +3,7 @@
 
 // §1693
 
+#include "zschimmer.h"
 #include "argv.h"
 
 using namespace std;

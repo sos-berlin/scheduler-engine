@@ -3,8 +3,6 @@
 #ifndef ZSCHIMMER_THREADS_BASE_H
 #define ZSCHIMMER_THREADS_BASE_H
 
-#include "zschimmer.h"
-
 namespace zschimmer {
 
 

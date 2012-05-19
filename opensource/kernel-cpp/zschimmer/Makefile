@@ -120,7 +120,9 @@ PERL_LIBS += -lcrypt
 endif
 
 
+ifeq ($(GCC_HAS_PRECOMPILED_HEADERS),1)
 all:: zschimmer.h.gch
+endif
 all:: libzschimmer.a 
 
 

@@ -6,19 +6,19 @@ import com.sos.scheduler.engine.cplusplus.generator.module.CppModule
 import JavaProxyCppModule._
 
 /** Generator für C++-Code eines Java-Proxys, also der in C++ zu nutzenden Java-Klassen. */
-class JavaProxyCppModule(cppClass: CppClass, knownClasses: Set[Class[_]], includeHeader: String) extends CppModule {
+class JavaProxyCppModule(cppClass: CppClass, knownClasses: Set[Class[_]], pch: PrecompiledHeaderModule) extends CppModule {
   val name = fileBasenameOfClass(cppClass.javaClass)
 
   lazy val headerCodeOption = Some(headerOnce(cppClass.headerPreprocessorMacro)(
-    includeHeader +
-      knownClassHeaderIncludes(cppClass.javaSuperclasses) +
+    pch.headerCodeOption.get +
+    knownClassHeaderIncludes(cppClass.javaSuperclasses) +
     "\n" +
     cppClass.neededForwardDeclarations +
     "\n\n" +
     cppClass.headerCode))
 
   lazy val sourceCodeOption = Some(
-    includeHeader +
+    pch.includeHeader +
     includeQuoted(headerCodeFile.path) +
     knownClassHeaderIncludes(cppClass.directlyUsedJavaClasses) +
     "\n" +

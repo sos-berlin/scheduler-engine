@@ -17,7 +17,7 @@
 
 
 #include "sos_simple.h"
-#include "../zschimmer/base.h"
+#include "../zschimmer/zschimmer.h"
 
 
 #include <new>

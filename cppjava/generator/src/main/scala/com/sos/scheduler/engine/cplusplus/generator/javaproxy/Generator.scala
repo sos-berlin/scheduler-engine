@@ -24,7 +24,7 @@ private class Generator(outputDirectory: File, classes: Set[Class[_]], deep: Boo
 
     private val cppModules = {
         val cppClasses = knownClasses.toList sortBy { _.getName } map { new CppClass(_, knownClasses) }
-        cppClasses map { c => new JavaProxyCppModule(c, knownClasses, pch.includeHeader) }
+        cppClasses map { c => new JavaProxyCppModule(c, knownClasses, pch) }
     }
     
     def apply() {

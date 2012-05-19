@@ -9,9 +9,6 @@
 #ifndef __ZSCHIMMER_JAVA_ODL_H
 #define __ZSCHIMMER_JAVA_ODL_H
 
-#include "zschimmer.h"
-
-
 #ifdef Z_WINDOWS
 
 #if defined Z_64

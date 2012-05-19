@@ -1,9 +1,9 @@
 // $Id: directory_lister.cxx 13238 2007-12-31 10:03:46Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
+#include "zschimmer.h"
 #include <stdio.h>
 #include <fcntl.h>
 
-#include "zschimmer.h"
 #include "log.h"
 #include "directory_lister.h"
 

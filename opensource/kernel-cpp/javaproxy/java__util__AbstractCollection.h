@@ -3,8 +3,11 @@
 #ifndef _JAVAPROXY_JAVA_UTIL_ABSTRACTCOLLECTION_H_
 #define _JAVAPROXY_JAVA_UTIL_ABSTRACTCOLLECTION_H_
 
-#include "_precompiled.h"
-
+#include "../zschimmer/zschimmer.h"
+#include "../zschimmer/java.h"
+#include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}

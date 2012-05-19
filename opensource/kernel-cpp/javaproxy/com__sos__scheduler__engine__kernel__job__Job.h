@@ -3,8 +3,11 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_JOB_JOB_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_JOB_JOB_H_
 
-#include "_precompiled.h"
-
+#include "../zschimmer/zschimmer.h"
+#include "../zschimmer/java.h"
+#include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__Object.h"
 

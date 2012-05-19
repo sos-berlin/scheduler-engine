@@ -4,8 +4,6 @@
 #ifndef __ZSCHIMMER_ARGV_H
 #define __ZSCHIMMER_ARGV_H
 
-#include "zschimmer.h"
-
 namespace zschimmer {
 
 //-------------------------------------------------------------------------------------------------

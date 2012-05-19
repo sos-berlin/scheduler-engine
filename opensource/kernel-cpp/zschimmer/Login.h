@@ -1,8 +1,6 @@
 #ifndef __ZSCHIMMER_LOGIN_H__
 #define __ZSCHIMMER_LOGIN_H__
 
-#include "zschimmer.h"
-
 namespace zschimmer {
 
 struct Login : Object {

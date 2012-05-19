@@ -1,5 +1,4 @@
-// $Id$
-
+#include "zschimmer.h"
 #include "java.h"
 #include "Has_proxy.h"
 #include "Proxy_class.h"

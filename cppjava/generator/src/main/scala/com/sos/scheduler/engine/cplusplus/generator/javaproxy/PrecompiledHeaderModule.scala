@@ -7,7 +7,7 @@ import java.io.File
 
 class PrecompiledHeaderModule(outputDirectory: File) extends CppModule {
   val name = precompiledModuleName
-  lazy val headerCodeOption = Some((cppStandardIncludes map includeQuoted).mkString)
+  lazy val headerCodeOption = Some((("../zschimmer/zschimmer.h" :: cppStandardIncludes) map includeQuoted).mkString)
   lazy val includeHeader = includeQuoted(headerCodeFile.path) + "\n"
   lazy val sourceCodeOption = Some(includeHeader)
 }

@@ -3,8 +3,6 @@
 #ifndef __ZSCHIMMER_REGEX_CLASS_H
 #define __ZSCHIMMER_REGEX_CLASS_H
 
-#include "zschimmer.h"
-
 #ifdef Z_WINDOWS
 #   include "../3rd_party/regexp/regex.h"
 #else

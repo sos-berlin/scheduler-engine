@@ -3,8 +3,11 @@
 #ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_CPPEVENTFACTORY_H_
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_EVENT_CPPEVENTFACTORY_H_
 
-#include "_precompiled.h"
-
+#include "../zschimmer/zschimmer.h"
+#include "../zschimmer/java.h"
+#include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace event { struct AbstractEvent; }}}}}}}

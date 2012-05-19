@@ -1,5 +1,6 @@
 // $Id$
 
+#include "zschimmer.h"
 #include "java.h"
 #include "Proxy_class.h"
 

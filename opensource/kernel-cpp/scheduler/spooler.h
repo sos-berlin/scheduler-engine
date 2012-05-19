@@ -44,7 +44,6 @@
 #include "../kram/com_simple_standards.h"
 #include "../kram/log.h"
 
-#include "../zschimmer/zschimmer.h"
 #include "../zschimmer/file.h"
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/threads.h"

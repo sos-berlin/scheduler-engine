@@ -85,7 +85,9 @@ objects = \
 
 include $(PROD_DIR)/make/standard.makefile
 
+ifeq ($(GCC_HAS_PRECOMPILED_HEADERS),1)
 all:: spooler.h.gch
+endif
 all:: $(BIN_DIR)/scheduler
 all:: $(BIN_DIR)/libjobscheduler-engine.so
 all:: $(BIN_DIR)/setuid

@@ -3,7 +3,6 @@
 #ifndef ZSCHIMMER_THREADS_H
 #define ZSCHIMMER_THREADS_H
 
-#include "zschimmer.h"
 #include "mutex.h"
 
 //-------------------------------------------------------------------------------------------------

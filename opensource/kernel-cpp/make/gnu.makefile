@@ -6,6 +6,11 @@ include $(PROD_DIR)/make/unix.makefile
 CCPP       = g++
 CC         = gcc
 
+GCC_VERSION_MAJOR := $(shell gcc -dumpversion | cut -f1 -d.)
+GCC_VERSION_MINOR := $(shell gcc -dumpversion | cut -f2 -d.)
+GCC_VERSION_PATCH := $(shell gcc -dumpversion | cut -f3 -d.)
+GCC_HAS_PRECOMPILED_HEADERS := $(shell expr $(GCC_VERSION_MAJOR) '>=' 4 '&' $(GCC_VERSION_MINOR) '>=' 4)
+
 CWARNINGS += -Wall
 CWARNINGS += -Wno-sign-compare
 CCPPWARNINGS += -Wno-deprecated
@@ -25,7 +30,7 @@ CFLAGS    += -MD
 CFLAGS    += -fPIC
 CFLAGS    += $(CWARNINGS)
 
-ifeq ($(cpuArchitecture),x64)
+ifeq ($(shell expr $(GCC_VERSION_MAJOR) '>=' 4 '&' $(GCC_VERSION_MINOR) '>=' 6),1)
 CCPPFLAGS += -std=c++0x
 endif
 CCPPFLAGS += $(CCPPWARNINGS)

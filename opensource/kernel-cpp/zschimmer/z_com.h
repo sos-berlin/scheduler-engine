@@ -6,7 +6,6 @@
 #define __Z_COM_H
 
 #include "com.h"
-#include "zschimmer.h"
 #include "mutex.h"
 #include <jni.h>
 

@@ -65,6 +65,9 @@
     <ClCompile Include="file_path.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
+    <ClCompile Include="immutable_string.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
     <ClCompile Include="loaded_module.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
