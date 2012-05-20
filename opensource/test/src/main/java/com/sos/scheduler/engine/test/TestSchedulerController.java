@@ -144,7 +144,6 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final void waitForTermination(Time timeout) {
-        automaticStart();
         boolean ok = tryWaitForTermination(timeout);
         if (!ok) throw new SchedulerRunningAfterTimeoutException(timeout);
     }
