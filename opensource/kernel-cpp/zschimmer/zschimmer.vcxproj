@@ -270,7 +270,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">zschimmer.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">zschimmer.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="immutable_string.cxx" />
     <ClCompile Include="loaded_module.cxx" />
     <ClCompile Include="log.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
