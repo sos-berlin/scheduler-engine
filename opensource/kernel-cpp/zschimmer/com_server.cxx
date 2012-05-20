@@ -10,17 +10,11 @@
 #include "com_server.h"
 #include "z_com_server.h"
 
-//#ifdef Z_HPUX_IA64
-//#   define HAS_SEPARATE_DOUBLE_STACK
-//#endif
-
 
 using namespace std;
 
 namespace zschimmer { 
 namespace com { 
-
-//const double zeros[ sizeof (Variant) / sizeof (double) ] = {0,};
 
 #define DEBUG_PRINTF( FORMAT, ... )  //fprintf( stderr, FORMAT, ##__VA_ARGS__ )
 
@@ -47,46 +41,6 @@ HRESULT Apply_com_module_params( Com_module_params* params )
     return hr;
 }
 
-//----------------------------------------------------------------Com_class_factory::QueryInterface
-/*
-STDMETHODIMP Com_class_factory::QueryInterface( const IID& iid, void** result )
-{ 
-    IUnknown* p;
-
-    if( iid == IID_IUnknown           )  p = (IUnknown*)this;
-    else
-    if( iid == IID_IClassFactory      )  p = (IClassFactory*)this;
-    else
-        return E_NOINTERFACE;    
-
-    p->AddRef();
-    *result = p;
-
-    return S_OK;
-}
-
-//----------------------------------------------------------------Com_class_factory::CreateInstance
-
-HRESULT Com_class_factory::CreateInstance( IUnknown* outer, const IID& iid, void** result )
-{
-    HRESULT hr;
-
-    *result = NULL;
-
-    if( outer )  return CLASS_E_NOAGGREGATION;
-
-    IUnknown* object = NULL;
-    
-    hr = _creator( _clsid, &object );    if( FAILED(hr) )  return hr;
-    object->AddRef();
-    
-    hr = object->QueryInterface( iid, result );
-
-    object->Release();
-
-    return hr;
-}
-*/
 //-----------------------------------------------------------------------------Com_get_class_object
 
 HRESULT Com_get_class_object( const Com_class_descriptor* class_descriptor, const CLSID& clsid, const IID& iid, void** result )
@@ -123,32 +77,6 @@ HRESULT Com_get_class_object( const Com_class_descriptor* class_descriptor, cons
     return hr;
 }
 
-//-----------------------------------------------------------------------------Com_get_class_object
-/*
-HRESULT Com_get_class_object( Com_class_factory_creator creator, const CLSID& clsid, const IID& iid, void** result )
-{
-    HRESULT hr = NOERROR;
-
-    try
-    {
-        if( !creator )
-        {
-            string name = string_from_clsid( clsid );
-            Z_LOG2( "com", Z_FUNCTION << " CLASS_E_CLASSNOTAVAILABLE  Klasse " << name  << " ist nicht eingebunden\n" );
-            fprintf( stderr, "Klasse %s ist nicht eingebunden\n", name.c_str() );
-            return CLASS_E_CLASSNOTAVAILABLE;
-        }
-
-        Com_class_descriptor class_descriptor ( creator, clsid, iid );
-        Com_class_factory class_factory ( &class_descriptor );
-        return factory.QueryInterface( iid, result );
-    }
-    catch( const exception&  x ) { hr = Com_set_error( x, "com_get_class_object" ); }
-    catch( const _com_error& x ) { hr = Com_set_error( x, "com_get_class_object" ); }
-
-    return hr;
-}
-*/
 //-----------------------------------------------------------------------------------Get_error_info
 
 HRESULT Get_error_info( HRESULT error_code, EXCEPINFO* excepinfo )
@@ -176,22 +104,6 @@ HRESULT Get_error_info( HRESULT error_code, EXCEPINFO* excepinfo )
     return hr;
 }
 
-//----------------------------------------------------------------------------------xc_to_excepinfo
-/*
-void xc_to_excepinfo( const Xc& x, EXCEPINFO* excepinfo )
-{
-    if( !excepinfo )  return;
-
-    memset( excepinfo, 0, sizeof excepinfo );
-
-  //excepinfo->bstrSource       = 
-    excepinfo->bstrDescription  = bstr_from_string( x.what() );
-  //excepinfo->bstrHelpFile     = SysAllocString( _ole_class_descr->_helpfilename );
-  //excepinfo->dwHelpContext    = ...;
-  //excepinfo->pvReserved;
-  //excepinfo->pfnDeferredFillIn = ...;                                         // Pointer to function that fills in Help and description info.
-}
-*/
 //-----------------------------------------------------------------------------------Com_get_dispid
 
 HRESULT Com_get_dispid( const Com_method* methods, REFIID, LPOLESTR* rgszNames, UINT cNames, LCID, DISPID* rgDispId )
@@ -205,10 +117,6 @@ HRESULT Com_get_dispid( const Com_method* methods, REFIID, LPOLESTR* rgszNames, 
     if( cNames != 1 )  return DISP_E_UNKNOWNNAME;
 
     string name = string_from_ole( rgszNames[ 0 ] );
-    //char name [ 100+2 ];
-    //int len = 0;
-    //while( len < sizeof name )  { name[len] = char_from_wchar( rgszNames[0][len] ); if( name[len++] == '\0' )  break; }
-    //if( len == sizeof name )  return DISP_E_UNKNOWNNAME;
 
     HRESULT hr = DISP_E_UNKNOWNNAME;
     *rgDispId = DISPID_UNKNOWN;
@@ -256,22 +164,12 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
     Variant             dummy_result;
     const char*         method_name = "";
 
-//#   ifdef HAS_SEPARATE_DOUBLE_STACK
-//        double              double_args [ max_com_method_params + 1 ];                              // Einer mehr für die Rückgabe
-//        double*             d = double_args;
-//        memset( double_args  , 0, sizeof double_args  );   // Vorsichtshalber, falls zu wenige Parameter in _methods deklariert sind.
-//#   endif
-
     if( !result )  result = &dummy_result;
 
 
     if( excepinfo )  memset( excepinfo, 0, sizeof *excepinfo );
     memset( result       , 0, sizeof *result      );
     memset( args         , 0, sizeof args         );   // Vorsichtshalber, falls zu wenige Parameter in _methods deklariert sind.
-  //memset( &return_value, 0, sizeof return_value );
-
-    //if( dispid < z_dispid_base  ||  dispid > z_dispid_base+1000 )  return DISP_E_MEMBERNOTFOUND;
-    //const Com_method* m = &methods[ dispid ];
 
 
     // METHODE SUCHEN mit passenden flags (DISPATCH_METHOD, DISPATCH_PROPERTYGET oder DISPATCH_PROPERTYPUT)
@@ -401,10 +299,6 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
                 case VT_I2:         *a++ = (void*)(int)V_I2      ( p );      break;
                 case VT_I4:         *a++ = (void*)     V_I4      ( p );      break;
 
-//#             ifdef HAS_SEPARATE_DOUBLE_STACK
-//             //?case VT_R4:         *d++ = V_R4( p );                        break;
-//                case VT_R8:         *d++ = V_R8( p );                        break;
-//#             else
                 case VT_BYREF|VT_R4: *a++ = r;
                                      memcpy( r, &V_R4( p ), 4 );  r += 4;       break;
 
@@ -420,16 +314,9 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
                                     *a++ = ((void**)&V_R8(p))[1];
                                     *a++ = ((void**)&V_R8(p))[0];
                                     break;
-//#              elif defined Z_SOLARIS
-//                case VT_R8:         *a++ = ((void**)&V_R8(p))[0];
-//                                    *a++ = ((void**)&V_R8(p))[1];
-//                                    break;
 #              else
                 case VT_R4:         memcpy( a, &V_R4( p ), 4 );  a += 1;     break;
                 case VT_R8:         memcpy( a, &V_R8( p ), 8 );  a += 2;     break;
-              //case VT_R4:         *a++ =*(void**)   &V_R4      ( p );      break;
-              //case VT_R8:         *a++ = ((void**)  &V_R8      ( p ))[0];
-              //                    *a++ = ((void**)  &V_R8      ( p ))[1];  break;
 #             endif
 
               //case VT_CY:
@@ -531,36 +418,14 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
     }
 
 
-    typedef HRESULT (WINAPI IDispatch::* F)(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*,void*
-//#       ifdef HAS_SEPARATE_DOUBLE_STACK
-//            , double, double, double, double, double, double
-//#       endif
-        );
+    typedef HRESULT (WINAPI IDispatch::* F)(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
     F f = (F)m->_method;
 
 
     // AUFRUF DER METHODE
 
-    hr = (idispatch->*f)( args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]
-//#       ifdef HAS_SEPARATE_DOUBLE_STACK
-//            , double_args[0], double_args[1], double_args[2], double_args[3], double_args[4], double_args[5] 
-//#       endif
-        );
+    hr = (idispatch->*f)( args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]);
 
-
-/*
-    if( m->_result_type != VT_EMPTY )
-    {
-        if( m->_result_type == VT_VARIANT )  memcpy( result, &return_value, sizeof return_value );
-        else
-        if( m->_result_type == VT_DECIMAL )  memcpy( result, &return_value, sizeof return_value ),  result->vt = VT_DECIMAL;
-        else
-        {
-            result->vt = m->_result_type;
-            memcpy( &result->intVal, &return_value, (Byte*)( result + 1 ) - (Byte*)&result->intVal );  // Alles von &intVal bis Ende von VARIANT kopieren
-        }
-    }
-*/
     /* SAFEARRAY Vartype prüfen, noch nicht fertig. Auf Null-Rückgabe und Null-Result-Parameter achten
     if( m->_result_type & VT_ARRAY )
     {
