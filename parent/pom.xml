@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.9.1-1</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
+        <scalatest.scala.version>2.9.1</scalatest.scala.version>
         <jersey.version>1.10</jersey.version>
         <jetty.version>8.1.0.RC5</jetty.version>
         <slf4j.version>1.6.4</slf4j.version>
@@ -212,7 +213,7 @@
 
             <dependency>
                 <groupId>org.scalatest</groupId>
-                <artifactId>scalatest_2.9.0</artifactId>
+                <artifactId>scalatest_${scalatest.scala.version}</artifactId>
                 <version>1.6.1</version>
             </dependency>
 
