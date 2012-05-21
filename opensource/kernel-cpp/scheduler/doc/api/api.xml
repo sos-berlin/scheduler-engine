@@ -33,6 +33,15 @@
         </p>
         <p/>
         <hr/>
+        <p style="color:red">
+            Um die API in Powershell nutzen zu können, muss der JobScheduler Powershell Adapter separat
+            heruntergeladen und installiert werden. Siehe 
+            <a href="http://sourceforge.net/apps/mediawiki/jobscheduler/index.php?title=JSApi_Powershell">
+            http://sourceforge.net/apps/mediawiki/jobscheduler/index.php?title=JSApi_Powershell
+            </a> 
+        </p>
+        <p/>
+        <hr/>
         <p>
             Ein Job wird gemäß der Schnittstelle <scheduler_method class="Job_impl"/> implementiert.
             Die Objekte des Schedulers sind direkt oder indirekt über diese Schnittstelle zugreifbar.
