@@ -35,10 +35,14 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.o\
  com__sos__scheduler__engine__kernel__util__XmlUtils.o\
  com__sos__scheduler__engine__kernel__variable__VariableSet.o\
+ com__sos__scheduler__engine__kernel__xml__CppXmlSchemaValidator.o\
  com__sos__scheduler__engine__kernel__xml__CppXsltStylesheet.o\
  com__sos__scheduler__engine__main__SchedulerControllerBridge.o\
+ java__io__File.o\
  java__lang__Object.o\
  java__lang__String.o\
+ java__net__URI.o\
+ java__net__URL.o\
  java__util__AbstractCollection.o\
  java__util__AbstractList.o\
  java__util__AbstractMap.o\

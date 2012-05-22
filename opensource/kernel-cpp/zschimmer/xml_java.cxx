@@ -690,18 +690,18 @@ string CharacterData_ptr::data() const
     return _characterDataJ.getData();
 }
 
-//---------------------------------------------------------------------------------Schema_ptr::read
+//---------------------------------------------------------------------------Schema_ptr::Schema_ptr
 
-void Schema_ptr::read( const Document_ptr& schema_document )
-{
-    // TODO
-}
+Schema_ptr::Schema_ptr(const string& url)
+:
+    _validatorJ(CppXmlSchemaValidatorJ::new_instance(url))
+{}
 
 //-----------------------------------------------------------------------------Schema_ptr::validate
 
 void Schema_ptr::validate( const Document_ptr& document )
 {
-    // TODO
+    _validatorJ.validate(document.ref());
 }
 
 //-------------------------------------------------------------------------------------------------

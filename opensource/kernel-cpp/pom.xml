@@ -69,6 +69,9 @@
                                 <argument>-c++-output-directory=${basedir}</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                                 <argument>com.sos.scheduler.engine.kernel.util</argument>
+                                <argument>java.net.URI</argument>
+                                <argument>java.net.URL</argument>
+                                <argument>java.io.File</argument>
                                 <argument>java.util.ArrayList</argument>
                                 <argument>java.util.HashMap</argument>
                                 <argument>com.sos.scheduler.engine.data.event.AbstractEvent</argument>

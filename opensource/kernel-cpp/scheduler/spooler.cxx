@@ -30,6 +30,9 @@
 #include "../zschimmer/not_in_recursion.h"
 #include "../zschimmer/file_path.h"
 #include "jni__register_native_classes.h"
+#include "../javaproxy/java__io__File.h"
+#include "../javaproxy/java__net__URI.h"
+#include "../javaproxy/java__net__URL.h"
 
 using namespace std;
 using namespace zschimmer::file;
@@ -706,7 +709,6 @@ Spooler::Spooler(jobject java_main_context)
     Z_DEBUG_ONLY( self_test() );
 
     if( spooler_ptr )  z::throw_xc( "spooler_ptr", "The JobScheduler Engine is already running in this process");
-    spooler_ptr = this;
 
     check_licence();
 
@@ -717,29 +719,6 @@ Spooler::Spooler(jobject java_main_context)
     _com_log      = new Com_log( _log );
     _com_spooler  = new Com_spooler( this );
     _variables    = new Com_variable_set();
-
-    #if defined Z_USE_JAVAXML
-        initialize_java_subsystem();
-    #endif
-
-    if( _validate_xml )  _schema.read( xml::Document_ptr( 
-
-        /**
-        * \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden, falls geladen
-        * \detail
-        */
-//        embedded_files.string_from_embedded_file( xml_schema_path ) 
-        sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path)
-        ) );
-
-    _variable_set_map[ variable_set_name_for_substitution ] = _environment;
-
-
-#   ifndef Z_WINDOWS
-        ::signal( SIGPIPE, SIG_IGN );    // Fuer Linux eigentlich nicht erforderlich, weil com_remote.cxx() SIGPIPE selbst unterdrueckt
-#   endif
-    
-    set_ctrl_c_handler( true );
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -1614,8 +1593,11 @@ void Spooler::read_command_line_arguments()
                 else if( opt.flag( "debug-break"        ) )  ;   // Bereits von spooler_main() verarbeitet
 #           endif
             else
-            //! \newoption Neue Option 'use-xml-schema' auf Gültigkeit prüfen
-            if( opt.with_value( "use-xml-schema"        ) )  ;   // wird in sos::spooler_main vearbeitet
+            if( opt.with_value( "use-xml-schema"        ) ) {
+#ifdef Z_USE_JAVAXML
+                _xml_schema_url = javaproxy::java::io::File::new_instance(opt.value()).toURI().toURL().toExternalForm();
+#endif
+            }
             else
             if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
             else
@@ -3399,9 +3381,40 @@ void Spooler::log_show_state( Prefix_log* log )
 
 int Spooler::launch( int argc, char** argv, const string& parameter_line)
 {
+    spooler_ptr = this;
+
     _argc = argc;
     _argv = argv;
     _parameter_line = parameter_line;
+
+    #if defined Z_USE_JAVAXML
+        initialize_java_subsystem();
+    #endif
+
+    if( _validate_xml ) {
+#ifdef Z_USE_JAVAXML
+        _schema = xml::Schema_ptr(_xml_schema_url);
+#else
+        _schema.read( xml::Document_ptr( 
+
+            /**
+            * \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden, falls geladen
+            * \detail
+            */
+    //        embedded_files.string_from_embedded_file( xml_schema_path ) 
+            sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path)
+            ) );
+#endif
+    }
+
+    _variable_set_map[ variable_set_name_for_substitution ] = _environment;
+
+
+#   ifndef Z_WINDOWS
+        ::signal( SIGPIPE, SIG_IGN );    // Fuer Linux eigentlich nicht erforderlich, weil com_remote.cxx() SIGPIPE selbst unterdrueckt
+#   endif
+    
+    set_ctrl_c_handler( true );
 
     tzset();    // Timezone
 

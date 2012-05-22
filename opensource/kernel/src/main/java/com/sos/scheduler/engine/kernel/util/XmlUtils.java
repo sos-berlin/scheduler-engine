@@ -12,6 +12,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.annotation.Nullable;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -33,10 +34,7 @@ import static org.w3c.dom.Node.DOCUMENT_NODE;
 @ForCpp
 public final class XmlUtils {
     @ForCpp public static Document newDocument() {
-        try {
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-        }
-        catch (ParserConfigurationException x) { throw new XmlException(x); }
+        return newDocumentBuilder().newDocument();
     }
 
     @ForCpp public static Document loadXml(byte[] xml) {
@@ -45,21 +43,28 @@ public final class XmlUtils {
 
     public static Document loadXml(InputStream in) {
         try {
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+            return newDocumentBuilder().parse(in);
         }
         catch (IOException x) { throw new XmlException(x); }
-        catch (ParserConfigurationException x) { throw new XmlException(x); }
         catch (SAXException x) { throw new XmlException(x); }
     }
 
     public static Document loadXml(String xml) {
         try {
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+            return newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
         }
         catch (IOException x) { throw new XmlException(x); }
-        catch (ParserConfigurationException x) { throw new XmlException(x); }
         catch (SAXException x) { throw new XmlException(x); }
     }
+
+    private static DocumentBuilder newDocumentBuilder() {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            return factory.newDocumentBuilder();
+        }
+        catch (ParserConfigurationException x) { throw new XmlException(x); }
+     }
 
     @ForCpp public static byte[] toXmlBytes(Node n, String encoding, boolean indent) {
         //TODO indent berücksichtigen

@@ -584,6 +584,7 @@ struct Spooler : Object,
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
+    string                     _xml_schema_url;
     ptr<Settings> const        _modifiable_settings;
     Settings*                  _settings;
 

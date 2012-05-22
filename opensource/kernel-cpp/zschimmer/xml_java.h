@@ -13,6 +13,9 @@
 #include "../javaproxy/org__w3c__dom__Node.h"
 #include "../javaproxy/org__w3c__dom__NodeList.h"
 #include "../javaproxy/org__w3c__dom__Text.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__xml__CppXmlSchemaValidator.h"
+
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::xml::CppXmlSchemaValidator CppXmlSchemaValidatorJ;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -355,15 +358,13 @@ struct ProcessingInstruction_ptr : Node_ptr
 */
 //---------------------------------------------------------------------------------------Schema_ptr
 
-struct Schema_ptr : Non_cloneable
+struct Schema_ptr
 {
-                                Schema_ptr                  ()                                      : _ptr(NULL) {}
-                                Schema_ptr                  ( const Document_ptr& schema )          : _ptr(NULL) { read(schema); }
-
-    void                        read                        ( const Document_ptr& schema );
+                                Schema_ptr                  ()                                      {}
+                                Schema_ptr                  (const string& url);
     void                        validate                    ( const Document_ptr& );
 
-    int* _ptr;
+    CppXmlSchemaValidatorJ     _validatorJ;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DefaultTargets="Build" ToolsVersion="4.0" xsi:schemaLocation="http://schemas.microsoft.com/developer/msbuild/2003 ">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -220,7 +220,11 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__xml__CppXsltStylesheet.cxx" />
     <ClCompile Include="java__util__AbstractMap.cxx" />
     <ClCompile Include="java__util__HashMap.cxx" />
-  </ItemGroup>
+  <ClCompile Include="com__sos__scheduler__engine__kernel__xml__CppXmlSchemaValidator.cxx" />
+    <ClCompile Include="java__io__File.cxx" />
+    <ClCompile Include="java__net__URI.cxx" />
+    <ClCompile Include="java__net__URL.cxx" />
+    </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />
   </ItemGroup>

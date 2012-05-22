@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" >
+    <element name="test">
+        <complexType>
+            <choice>
+                <element name="config">
+                    <complexType>
+                        <attribute name="valid" type="string"/>
+                    </complexType>
+                </element>
+            </choice>
+        </complexType>
+    </element>
+</schema>
