@@ -1723,12 +1723,12 @@ void Spooler::load()
     #endif
     new_subsystems();
     _java_subsystem->initialize_java_sister();
-    _modifiable_settings->set_defaults(this);
-    _settings = _modifiable_settings;   // Von Scheduler.java befüllt
+    modifiable_settings()->set_defaults(this);
 
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
-    _modifiable_settings->set_from_variables(*_variables);
+    modifiable_settings()->set_from_variables(*_variables);
+    _settings = _modifiable_settings;   // Von Scheduler.java befüllt
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
@@ -1894,6 +1894,7 @@ void Spooler::load_subsystems()
     _order_subsystem           ->switch_subsystem_state( subsys_loaded );
     _standing_order_subsystem  ->switch_subsystem_state( subsys_loaded );
     _scheduler_script_subsystem->switch_subsystem_state( subsys_loaded );
+    _http_server               ->switch_subsystem_state( subsys_loaded );
 }
 
 //---------------------------------------------------------------------Spooler::activate_subsystems

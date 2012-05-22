@@ -101,21 +101,16 @@ struct Http_server : Http_server_interface
     // Subsystem
     void                        close                       ()                                      {}
     bool                        subsystem_initialize        ();
-  //bool                        subsystem_load              ();
+    bool                        subsystem_load              ();
   //bool                        subsystem_activate          ();
     string                      name                        () const                                { return "http_server"; }
 
     // Http_server_interface
-  //void                        set_dom                     ( const xml::Element_ptr& );
-    void                    set_directory                   ( const File_path& path )               { _base_directory = File_path( path, "" ); }
     File_path                   directory                   () const                                { return _base_directory; }
-  //File_path                   file_path_from_url_path     ( const string& url_path );
 
     Fill_zero                  _zero_;
 
     File_path                  _base_directory;
-    //typedef stdext::hash_map< string, File_path >   Alias_map;
-    //Alias_map                  _alias_map;
 };
 
 //-------------------------------------------------------------------------------------------Z_INIT
@@ -187,47 +182,17 @@ string get_content_type_parameter( const string& content_type, const string& par
 
 bool Http_server::subsystem_initialize()
 {
-    _base_directory = _spooler->settings()->_html_dir;
     _subsystem_state = subsys_initialized;
     return true;
 }
 
-//-----------------------------------------------------------------------------Http_server::set_dom
+//--------------------------------------------------------------------------------Http_server::load
 
-//void Http_server::set_dom( const xml::Element_ptr& http_server_element )
-//{
-//    assert( http_server_element.is_node_name( "http_server" ) );
-//
-//    DOM_FOR_EACH_ELEMENT( http_server_element, element )
-//    {
-//        if( element.is_node_name( "alias" ) )
-//        {
-//            _alias_map[ element.getAttribute( "alias" ) ] = subst_env( element.getAttribute( "path" ) );
-//        }
-//    }
-//}
-
-//-------------------------------------------------------------Http_server::file_path_from_url_path
-
-//File_path Http_server::file_path_from_url_path( const string& url_path )
-//{
-//    string result;
-//
-//    if( _base_directory.empty() )  z::throw_xc( "SCHEDULER-212" );
-//    
-//    if( !string_begins_with( url_path, "/" ) )  z::throw_xc( Z_FUNCTION );
-//    size_t slash = url_path.find( '/', 1 );
-//    
-//    if( slash != string::npos )
-//    {
-//        result = url_path;
-//    }
-//    else
-//    {
-//        string directory = url_path.substr( );
-//        Alias_map::iterator it = _alias_map.find( 
-//    }
-//}
+bool Http_server::subsystem_load()
+{
+    _base_directory = _spooler->settings()->_html_dir;
+    return true;
+}
 
 //-------------------------------------------------------------------------------------Headers::get
 
