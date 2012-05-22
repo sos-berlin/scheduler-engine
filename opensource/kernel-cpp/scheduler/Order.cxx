@@ -397,7 +397,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
                         if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                         Any_file blob_file( "-out -binary " + blob_filename );
                         Z_LOG2("jdbc", "writing blob for field " << db()->_order_history_tablename << ".log" << " with len=" << log_text.size() << " (where `history_id`=" << as_string( _history_id ) << ")\n" );
-                        blob_file.put( log_text, _spooler->settings()->_max_length_of_blob_entry );
+                        blob_file.put( db()->truncate_head(log_text) );
                         blob_file.close();
                     }
                     catch( exception& x ) 
@@ -1551,7 +1551,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         Show_what log_show_what = show_what;
         if( show_what.is_set( show_for_database_only ) )  log_show_what |= show_log;
 
-        if( log  &&  show_what.is_set( show_log ) ) result.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
+        if( log  &&  show_what.is_set( show_log ) ) result.append_new_text_element( "log", db()->truncate_head(*log) );     // Protokoll aus der Datenbank
         else
         if( _log )  result.appendChild( _log->dom_element( dom_document, log_show_what ) );
     }

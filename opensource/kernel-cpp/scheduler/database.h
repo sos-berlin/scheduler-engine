@@ -158,6 +158,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
 
   public:
     static const int            seconds_before_reopen;
+    string                      truncate_head           ( const string& str );
   //static const int            lock_timeout;
 };
 

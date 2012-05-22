@@ -95,7 +95,6 @@ struct Any_file : Sos_self_deleting, File_base
     Sos_ptr<Record_type>        record_type             ()                                                { return spec()._field_type_ptr; }
 
             void                put                     ( const Const_area& );
-            void                put                     ( const string& str, const int max_length );
             void                put                     ( const string& str )                             { put( Const_area( str.c_str(), str.length() ) ); }
             void                put                     ( const char* str )                               { put( Const_area( str ) ); }
             void                put                     ( const Record& record )                          { put( record.const_area() ); }

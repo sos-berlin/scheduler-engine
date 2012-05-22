@@ -5,7 +5,7 @@ namespace scheduler {
 
 //---------------------------------------------------------------------------------------------const
 
-const int    default_kbyte_of_db_lob_entry           = 2000000L;
+   const int    default_kbyte_of_db_lob_entry           = INT_MAX;
 
 //------------------------------------------------------------------------------Settings::~Settings
 
