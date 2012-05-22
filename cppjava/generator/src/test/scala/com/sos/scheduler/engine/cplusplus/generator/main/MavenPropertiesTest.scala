@@ -11,7 +11,7 @@ final class MavenPropertiesTest {
         assertThat(mavenProperties.groupId, equalTo("com.sos.scheduler.engine"))
     }
 
-    @Test def testArtefactId() {
+    @Test def testArtifactId() {
         assertThat(mavenProperties.artifactId, equalTo("cppjava.generator"))
     }
     
