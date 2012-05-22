@@ -6,7 +6,7 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<xsl:variable name="selected_programming_language" select="'Powershell'"/>
+<xsl:variable name="selected_programming_language" select="'powershell'"/>
 <xsl:variable name="language_has_properties"       select="true()"/>
 
 <xsl:include href="api.xsl" />
