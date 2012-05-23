@@ -1375,6 +1375,10 @@ bool Task::do_something()
         // Periode endet?
         if( !_operation )
         {
+
+            something_done |= check_timeout( now );
+            something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running prüfen?
+
             if( _state == s_running
              || _state == s_running_process
              || _state == s_running_delayed
