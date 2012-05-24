@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test.util;
 
 import com.google.common.io.Resources;
-import com.sos.JSHelper.Exceptions.JobSchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -26,7 +26,7 @@ public class FileUtils {
             result = new File(base + "/" + testResultDir);
             if (!result.exists()) result.mkdir();
         } catch (URISyntaxException e) {
-            throw new JobSchedulerException("invalid URI '" + url + "': " + e,e);
+            throw new SchedulerException("invalid URI '" + url + "': " + e,e);
         }
         return result.getAbsolutePath();
     }
@@ -44,7 +44,7 @@ public class FileUtils {
         try {
             result = new File( url.toURI() );
         } catch (URISyntaxException e) {
-            throw new JobSchedulerException("invalid URI '" + url + "' :" + e,e);
+            throw new SchedulerException("invalid URI '" + url + "' :" + e,e);
         }
         return result;
     }

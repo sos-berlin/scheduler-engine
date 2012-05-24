@@ -129,47 +129,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.SOSJobSchedulerModel</artifactId>
-            <version>${sos.jars.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.scheduler</artifactId>
-            <version>${sos.jars.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.settings</artifactId>
-            <version>${sos.jars.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.JobSchedulerLocalization</artifactId>
-            <version>${sos.jars.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.connection</artifactId>
-            <version>${sos.jars.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.VirtualFileSystem</artifactId>
-            <version>${sos.jars.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>cppjava.scalautil.io</artifactId>
         </dependency>

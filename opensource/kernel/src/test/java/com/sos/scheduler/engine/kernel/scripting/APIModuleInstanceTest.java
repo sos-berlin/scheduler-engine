@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.kernel.scripting;
 
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import com.sos.JSHelper.Exceptions.JobSchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.LogMock;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -148,7 +148,7 @@ public class APIModuleInstanceTest {
         try {
             result = new File( url.toURI() );
         } catch (URISyntaxException e) {
-            throw new JobSchedulerException("invalid URI '" + url + "' :" + e,e);
+            throw new SchedulerException("invalid URI '" + url + "' :" + e,e);
         }
         return result;
     }

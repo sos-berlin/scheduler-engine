@@ -52,17 +52,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>data</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.util</artifactId>
-            <version>${sos.jars.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sos</groupId>
-            <artifactId>com.sos.JSHelper</artifactId>
-            <version>${sos.jars.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>

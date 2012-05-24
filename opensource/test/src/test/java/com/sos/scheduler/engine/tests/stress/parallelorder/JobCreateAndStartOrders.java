@@ -6,7 +6,7 @@
 
 package com.sos.scheduler.engine.tests.stress.parallelorder;
 
-import com.sos.JSHelper.Exceptions.JobSchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import sos.spooler.Job_chain;
 import sos.spooler.Job_impl;
 import sos.spooler.Order;
@@ -27,7 +27,7 @@ public class JobCreateAndStartOrders extends Job_impl {
         spooler_log.info(spooler_task.order().params().names());
 
         if (paramNumber.equals(blank))
-            throw new JobSchedulerException("parameter '" + parameterNameNumber + "' is not set.");
+            throw new SchedulerException("parameter '" + parameterNameNumber + "' is not set.");
 
         int runtime = (paramRuntime.equals(blank)) ?  defaultRuntime : Integer.parseInt(paramRuntime);
         int max = Integer.parseInt(paramNumber);

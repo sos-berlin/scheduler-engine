@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.tests.jira.js498;
 
 
 import com.google.common.io.Files;
-import com.sos.JSHelper.Exceptions.JobSchedulerException;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
  * @version 1.0 - 16.12.2011 13:39:41
  *
  */
+//TODO Test nur mit Script aber ohne Funktionen (also ohne spooler_process). Da scheint der default nicht zu greifen.
 public class JS498Test extends SchedulerTest {
     
     private static final Logger logger = Logger.getLogger(JS498Test.class);
@@ -63,7 +64,7 @@ public class JS498Test extends SchedulerTest {
         for(String line : lines) {
             String[] arr = line.split("=");
             if (arr.length != 2)
-                throw new JobSchedulerException("line in resultfile '" + resultFile + "' is not valid: " + line);
+                throw new SchedulerException("line in resultfile '" + resultFile + "' is not valid: " + line);
             result.put(arr[0],arr[1]);
         }
         return result;
