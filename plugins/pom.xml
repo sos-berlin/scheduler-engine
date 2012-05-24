@@ -55,6 +55,11 @@
         </dependency>
         <dependency>
             <groupId>com.sos</groupId>
+            <artifactId>com.sos.JSHelper</artifactId>
+            <version>${sos.jars.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sos</groupId>
             <artifactId>com.sos.VirtualFileSystem</artifactId>
             <version>${sos.jars.version}</version>
         </dependency>
