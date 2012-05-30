@@ -425,16 +425,16 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
         Period                      next_period                 ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
-        Period                      next_period_of_same_day     ( const Time&, With_single_start single_start );
-        int                         month_index_by_name         ( const string& );
-        list<int>                   month_indices_by_names      ( const string& );
-        void                        check                       ();                              
-        bool                        is_filled                   () const;
         Prefix_log*                 log                         ()                                  { return _schedule->log(); }
 
       private:
         friend struct               Schedule;
 
+        static int                  month_index_by_name         ( const string& );
+        static list<int>            month_indices_by_names      ( const string& );
+        Period                      next_period_of_same_day     ( const Time&, With_single_start single_start );
+        void                        check                       ();                              
+        bool                        is_filled                   () const;
         Period                      call_function               ( Schedule_use*, const Time& beginning_time );
         Time                        next_time                   ( const Time& );
 

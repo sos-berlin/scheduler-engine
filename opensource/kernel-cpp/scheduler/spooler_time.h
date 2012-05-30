@@ -109,18 +109,10 @@ struct Time
     void                        set                         ( double );
     void                        set                         ( const string& );
     Time&                       set_utc                     ( double );
-//  Time&                       set_utc                     ( time_t t )                    { set( (double)t );  return *this; } // JS-457
     Time&                       set_utc                     ( time_t t )                    { set_utc( (double)t );  return *this; } // JS-457
     double                      as_double                   () const;
     double                      as_double_or_never          () const;
     double                      as_utc_double               () const;
-
-#ifdef Z_WINDOWS
-    //void                        set                         ( const FILETIME& ); 
-    //void                        set                         ( const SYSTEMTIME& );
-    //FILETIME                    filetime                    () const;
-#endif
-
     Time&                       set_datetime                ( const string& );
     void                        set_datetime_utc            ( const string& );
     Time                        time_of_day                 () const                        { return as_double() - midnight(); }
@@ -130,7 +122,6 @@ struct Time
     time_t                      as_time_t                   () const                        { return (time_t)( as_double    () + 0.0001 ); }
     time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
-  //int64                       int64_filetime              () const;
     double                      cut_fraction                ( string* datetime_string );
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
@@ -139,8 +130,6 @@ struct Time
     friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }
 
     static Time                 now                         ();
-
-
 
 #   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen führt mit gcc 3.3 zum Absturz in string::string
         string                 _time_as_string;
@@ -177,9 +166,11 @@ void                            test_summertime             ( const string& date
 xml::Element_ptr                new_calendar_dom_element    ( const xml::Document_ptr&, const Time& );
 
 //-------------------------------------------------------------------------------------------------
+
 inline string xml_of_time_t(time_t t) {
     return Time( t, Time::is_utc ).xml_value();
 }
+
 inline string string_of_time_t(time_t t) {
     return Time( t, Time::is_utc ).as_string();
 }

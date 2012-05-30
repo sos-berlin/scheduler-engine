@@ -748,24 +748,6 @@ Schedule* Schedule::on_replace_now()
     return this;    // Der alte Schedule ist der neue Schedule
 }
 
-//--------------------------------------------------------------------Schedule::on_requisite_loaded
-// Könnte nach Dependant verallgemeinert werden.
-
-//bool Schedule::on_requisite_loaded( File_based* file_based )
-//{
-//    Schedule* schedule = dynamic_cast<Schedule*>( file_based );
-//    assert( schedule );
-//    assert( schedule->normalized_path() == spooler()->schedule_subsystem()->normalized_path( _inlay->_covered_schedule_path ) );
-//
-//
-//    //try_connect_covered_schedule();
-//    //assert( _covered_schedule );
-//
-//    if( file_based_state() == s_incomplete )  activate();
-//
-//    return true;
-//}
-
 //-------------------------------------------------------------Schedule::on_requisite_to_be_removed
 
 bool Schedule::on_requisite_to_be_removed( File_based* file_based )
@@ -1516,7 +1498,6 @@ Period Schedule::Inlay::next_period_of_same_day( const Time& t, With_single_star
 Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_beginning )
 {
     // Die Funktion sollte keine Zeit in der wiederholten Stunde nach Ende der Sommerzeit liefern.
-
 
     Period result;
 
@@ -2348,9 +2329,7 @@ int Day_set::get_day_number( const string& day_string )
     else
     {
         result = as_int( day_string );
-
         if( result < _minimum  ||  result > _maximum )  z::throw_xc( "SCHEDULER-221", day_string, as_string( _minimum ), as_string( _maximum ) );
-        //if( (uint)result >= NO_OF(_days) )  z::throw_xc( "SCHEDULER-INVALID-DAY", result );
     }
 
     return result;
@@ -2416,17 +2395,9 @@ void Month::set_dom( const xml::Element_ptr& element )
 Period Month::next_period_of_same_day( const Time& tim, With_single_start single_start )
 {
     Period result;
-    //int    current_month = tim.month_nr();
-
-    //if( tim.month_nr() == current_month )  
-    {
-        if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( tim, single_start ) );
-        if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( tim, single_start ) );
-        if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( tim, single_start ) );
-    }
-
-    //if( !result.begin().is_never()  &&  result.begin().month_nr() != current_month )  result = Period();
-
+    if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( tim, single_start ) );
+    if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( tim, single_start ) );
+    if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( tim, single_start ) );
     return result;
 }
 

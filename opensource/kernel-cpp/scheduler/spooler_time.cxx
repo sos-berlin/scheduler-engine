@@ -71,10 +71,6 @@ static const char                      never_name[]                = "never";
 static const char                      immediately_name[]          = "now";
 static const int64                     base_filetime               = 116444736000000000LL;
 
-//-------------------------------------------------------------------------------------------------
-
-//Run_time::Class_descriptor              Run_time::class_descriptor ( &typelib, "sos.spooler.Run_time", Run_time::_methods );
-
 //---------------------------------------------------------Daylight_saving_time_transition_detector
 
 struct Daylight_saving_time_transition_detector : Daylight_saving_time_transition_detector_interface
@@ -380,47 +376,6 @@ void Time::set( double t )
 #   endif
 }
 
-//----------------------------------------------------------------------------------------Time::set
-#ifdef Z_WINDOWS
-
-//void Time::set( const SYSTEMTIME& systemtime )
-//{
-//    set( windows::filetime_from_systemtime( systemtime ) );
-//}
-
-#endif
-//----------------------------------------------------------------------------------------Time::set
-#ifdef Z_WINDOWS
-
-//void Time::set( const FILETIME& filetime )
-//{
-//    set( windows::double_time_t_from_filetime( filetime ) );
-//    //set( (double)( *(int64*)&filetime - base_filetime ) / 10000000.0 );
-//}
-
-#endif
-
-//-----------------------------------------------------------------------------------Time::filetime
-#ifdef Z_WINDOWS
-
-//FILETIME Time::filetime() const
-//{
-//    return windows::filetime_from_time_t( as_double() );
-//    //FILETIME result;
-//
-//    //*(int64*)&result = int64_filetime();
-//    //return result;
-//}
-
-//-----------------------------------------------------------------------------------Time::filetime
-
-//int64 Time::int64_filetime() const
-//{
-//    return (int64)( as_double() * 10000000.0 + 0.5 ) + base_filetime;
-//}
-
-#endif
-
 //-----------------------------------------------------------------------------------Time::month_nr
 
 int Time::month_nr() const
@@ -445,7 +400,7 @@ double Time::as_double_or_never() const
     //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( Z_FUNCTION << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
 
     return _is_utc? _time - current_difference_to_utc()
-                  : _time;    
+                  : _time;
 }
 
 //------------------------------------------------------------------------------Time::as_utc_double
@@ -834,10 +789,6 @@ string Daylight_saving_time_transition_detector::async_state_text_() const
 {
     S result;
     result << obj_name() << ", " << _next_transition_name;
- 
-    //if( _was_in_daylight_saving_time )  result << ", waiting for end of daylight saving_time";
-    //                              else  result << ", waiting for begin of daylight saving time";
-
     return result;
 }
 
@@ -845,111 +796,6 @@ string Daylight_saving_time_transition_detector::async_state_text_() const
 
 } //namespace time
 
-
-//--------------------------------------------------------------------------------------Gmtime::set
-/*
-void Gmtime::set( double t )
-{
-    _time = round(t);
-
-    if( _time > double_time_max )  _time = double_time_max;
-
-
-#   if defined Z_DEBUG && defined Z_WINDOWS
-        if( _time <= 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == double_time_max? time::never_name
-                                                                    : as_string();
-#   endif
-}
-
-//---------------------------------------------------------------------------Gmtime::set_local_time
-
-void Gmtime::set_local_time( const Time& t )
-{
-#   if defined Z_DEBUG
-        assert( t == 0  ||  t > 30*365*3600 );
-#   endif
-
-    set( t == Time::never? double_time_max 
-                        : gmtime_from_localtime( t ) );
-}
-
-//-------------------------------------------------------------------------------Gmtime::local_time
-
-Time Gmtime::local_time() const
-{
-#   if defined Z_DEBUG
-        assert( _time == 0  ||  _time > 30*365*3600 );
-#   endif
-
-    return _time == double_time_max? Time::never
-                                   : Time( localtime_from_gmtime( _time ) );
-}
-
-//--------------------------------------------------------------------------------Gmtime::as_string
-
-string Gmtime::as_string( With_ms with ) const
-{
-    string result;
-
-    if( _time == double_time_max )
-    {
-        return time::never_name;
-    }
-    else
-    if( _time == 0 )
-    {
-        return time::immediately_name;
-    }
-    else
-    if( _time < 0 )
-    {
-        result = "-" + zschimmer::as_string( (int64)-_time );
-    }
-    else
-    {
-        char        buff [30];
-        const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
-                                           : "";
-
-        if( _time < 100*(24*60*60) )
-        {
-            char hhmmss [30];
-            sprintf( hhmmss, "%02d:%02d:%02d%s", (int)(_time/(60*60)), abs( (int)(_time/60) ) % 60, (int)abs( (int64)_time % 60 ), bruch );
-            return hhmmss;
-        }
-        else
-        {
-            return string_gmt_from_time_t( (time_t)_time ) + bruch + " GMT";
-        }
-    }
-
-    return result;
-}
-
-//--------------------------------------------------------------------------Gmtime::as_local_string
-
-string Gmtime::as_local_string( With_ms w ) const
-{
-    return local_time().as_string( w == with_ms? time::Time::with_ms : time::Time::without_ms );
-}
-
-//------------------------------------------------------------------------------------Gmtime::round
-
-double Gmtime::round( double t )
-{ 
-    return floor( t * 1000.0 + 0.5 ) / 1000.0; 
-}
-
-//--------------------------------------------------------------------------------Gmtime::normalize
-
-double Gmtime::normalize( double t )
-{ 
-    return t < 0?                0 :
-           t > Time::never._time? Time::never._time 
-                               : t;
-}
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler
