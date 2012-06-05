@@ -102,7 +102,7 @@ volatile int                    ctrl_c_pressed_handled              = 0;
     string                      static_ld_preload                   = "";               // Inhalt der Umgebungsvariablen LD_PRELOAD
 #endif
 
-Spooler*                        spooler_ptr                         = NULL;
+static Spooler*                 spooler_ptr                         = NULL;
 
 const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
 

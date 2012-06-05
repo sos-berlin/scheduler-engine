@@ -34,6 +34,8 @@ static const int                terminate_timeout           = 30;
 static const int                stop_timeout                = terminate_timeout + 5;        // Zeit lassen, um Datenbank zu schließen, dann abort_now() per Thread
 static const int                pending_timeout             = 60;
 
+static Spooler* static_service_spooler = NULL;
+
 //-----------------------------------------------------------------------------------Service_handle
 
 struct Service_handle
@@ -312,14 +314,14 @@ static void set_service_status( int spooler_error, int state = 0 )
         service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
         service_status.dwCurrentState               = state                                              ? state
-                                                    : !spooler_ptr                                       ? SERVICE_STOPPED 
-                                                    : spooler_ptr->state() == Spooler::s_stopped         ? SERVICE_STOPPED       //SetServiceStatus() ruft exit()!
-                                                    : spooler_ptr->state() == Spooler::s_starting        ? SERVICE_START_PENDING
-                                                    : spooler_ptr->state() == Spooler::s_waiting_for_activation? SERVICE_RUNNING       // START_PENDING blockiert Bedienknöpfe der Dienstesteuerung (Windows XP)
-                                                    : spooler_ptr->state() == Spooler::s_stopping        ? stop_pending
-                                                    : spooler_ptr->state() == Spooler::s_stopping_let_run? stop_pending
-                                                    : spooler_ptr->state() == Spooler::s_running         ? SERVICE_RUNNING
-                                                    : spooler_ptr->state() == Spooler::s_paused          ? SERVICE_PAUSED
+                                                    : !static_service_spooler                                       ? SERVICE_STOPPED 
+                                                    : static_service_spooler->state() == Spooler::s_stopped         ? SERVICE_STOPPED       //SetServiceStatus() ruft exit()!
+                                                    : static_service_spooler->state() == Spooler::s_starting        ? SERVICE_START_PENDING
+                                                    : static_service_spooler->state() == Spooler::s_waiting_for_activation? SERVICE_RUNNING       // START_PENDING blockiert Bedienknöpfe der Dienstesteuerung (Windows XP)
+                                                    : static_service_spooler->state() == Spooler::s_stopping        ? stop_pending
+                                                    : static_service_spooler->state() == Spooler::s_stopping_let_run? stop_pending
+                                                    : static_service_spooler->state() == Spooler::s_running         ? SERVICE_RUNNING
+                                                    : static_service_spooler->state() == Spooler::s_paused          ? SERVICE_PAUSED
                                                                                                          : SERVICE_START_PENDING; 
         service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 
                                                     | SERVICE_ACCEPT_PAUSE_CONTINUE 
@@ -438,7 +440,7 @@ static uint __stdcall self_destruction_thread( void* )
 */
         try
         {
-            if( spooler_ptr )  spooler_ptr->abort_now();
+            if( static_service_spooler )  static_service_spooler->abort_now();
         }
         catch( ... ) {}
 
@@ -516,7 +518,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
 
     DWORD result = ERROR_CALL_NOT_IMPLEMENTED;
 
-    if( spooler_ptr )
+    if( static_service_spooler )
     {
         if( dwControl == SERVICE_CONTROL_STOP 
          || dwControl == SERVICE_CONTROL_SHUTDOWN )  start_self_destruction();      // Vorsichtshalber vor info()!
@@ -524,7 +526,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
         Message_string m ( "SCHEDULER-960", string_from_handler_control(dwControl),
                            ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) );
 
-        if( dwControl != SERVICE_CONTROL_INTERROGATE )  spooler_ptr->log()->log( log_info, m );
+        if( dwControl != SERVICE_CONTROL_INTERROGATE )  static_service_spooler->log()->log( log_info, m );
                                                   else  Z_LOG2( "scheduler.service", m.as_string() << "\n" );
 
         switch( dwControl )
@@ -533,7 +535,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             {
                 pending_timed_out = false;
                 service_stop = true;
-                spooler_ptr->cmd_terminate( false, terminate_timeout );    // Shutdown des Clusters
+                static_service_spooler->cmd_terminate( false, terminate_timeout );    // Shutdown des Clusters
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
                 break;
@@ -542,14 +544,14 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             case SERVICE_CONTROL_PAUSE:             // Requests the service to pause.  
                 pending_timed_out = false;
                 service_stop = false;
-                spooler_ptr->cmd_pause();
+                static_service_spooler->cmd_pause();
                 result = NO_ERROR;  
                 break;
 
             case SERVICE_CONTROL_CONTINUE:          // Requests the paused service to resume.  
                 pending_timed_out = false;
                 service_stop = false;
-                spooler_ptr->cmd_continue();
+                static_service_spooler->cmd_continue();
                 result = NO_ERROR;  
                 break;
 
@@ -560,13 +562,13 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
                 // Wir haben nicht mehr als 20s: Das ist eigentlich zu kurz. STOP_PENDING gibt eine kleine Gnadenfrist. 2006-06-19
                 pending_timed_out = false;
-                spooler_ptr->cmd_terminate( false, terminate_timeout );   // Shutdown des Clusters  (nicht mehr: // Kein shutdown des Clusters, ein anderer Rechner soll übernehmen.)
+                static_service_spooler->cmd_terminate( false, terminate_timeout );   // Shutdown des Clusters  (nicht mehr: // Kein shutdown des Clusters, ein anderer Rechner soll übernehmen.)
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
                 break;
 
             case SERVICE_CONTROL_PARAMCHANGE:       // Windows 2000: Notifies the service that service-specific startup parameters have changed. The service should reread its startup parameters. 
-                //spooler_ptr->cmd_reload();
+                //static_service_spooler->cmd_reload();
                 //result = NO_ERROR;  
                 break;
 /*
@@ -586,14 +588,14 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
                 // 3) suspended
                 // 4) PBT_APMRESUMESUSPEND und PBT_APMRESUMEAUTOMATIC (Reihenfolge vertauschbar)
 
-                if( spooler_ptr )
+                if( static_service_spooler )
                 {
                     switch( event )
                     {
                         case PBT_APMQUERYSUSPEND:
                         {
                             // Das verhindert das Schlafenlegen durch den Benutzer (ist das gut? Ein Kennzeichen im System Tray wäre gut)
-                            result = spooler_ptr->is_machine_suspendable()? NO_ERROR : BROADCAST_QUERY_DENY;
+                            result = static_service_spooler->is_machine_suspendable()? NO_ERROR : BROADCAST_QUERY_DENY;
                             break;
                         }
 
@@ -653,6 +655,7 @@ static uint __stdcall service_thread( void* param )
     while(1)
     {
         Spooler spooler;
+        static_service_spooler = &spooler;
 
         spooler._is_service = true;
         spooler.set_state_changed_handler( spooler_state_changed );
@@ -662,7 +665,7 @@ static uint __stdcall service_thread( void* param )
         {
             Z_LOG2( "scheduler.service", "Scheduler launch\n" );
 
-            ret = spooler_ptr->launch( p->_argc, p->_argv, "" );
+            ret = spooler.launch( p->_argc, p->_argv, "" );
 
             if( spooler._shutdown_cmd == Spooler::sc_reload 
              || spooler._shutdown_cmd == Spooler::sc_load_config )  continue;        // Dasselbe in spooler.cxx, spooler_main()!
@@ -678,11 +681,11 @@ static uint __stdcall service_thread( void* param )
             ret = 99;
         }
 
-        spooler_ptr = NULL;
+        static_service_spooler = NULL;
         break;
     }
 
-    set_service_status( 0 );       // Das beendet den Prozess wegen spooler_ptr == NULL  ==>  SERVICE_STOPPED
+    set_service_status( 0 );       // Das beendet den Prozess wegen static_service_spooler == NULL  ==>  SERVICE_STOPPED
     Z_LOG2( "scheduler.service", "service_thread ok\n" );
 
     return ret;
