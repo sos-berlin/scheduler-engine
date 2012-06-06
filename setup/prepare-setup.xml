@@ -89,6 +89,9 @@ to run without maven integration.
   	<fileset dir="${source.dir}" id="files.lib">
   		<include name="jar-${version.number}*.jar"/>
   	</fileset>
+  	<fileset dir="${source.dir}" id="plugins.lib">
+  		<include name="jetty-${version.number}*.jar"/>
+  	</fileset>
   	
   	<fileset dir="${source.dir}" id="files.jar">
   		<include name="guava*.jar"/>
@@ -97,10 +100,14 @@ to run without maven integration.
   		<include name="geronimo*.jar"/>
   		<include name="activemq*.jar"/>
   		<include name="slf4j*.jar"/>
+  		<include name="jackson-*.jar"/>
+  		<include name="jersey-*.jar"/>
+  		<include name="scala-library-*.jar"/>
   		<!-- additional jars for jetty integration -->
   		<include name="web-*.jar" />
   		<include name="jetty-*.jar" />
   		<include name="servlet-api-*.jar" />
+  		<include name="aopalliance-*.jar"/>
   	</fileset>
 
   </target>
@@ -128,6 +135,10 @@ to run without maven integration.
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="files.lib" />
 		  <mapper type="regexp" from="^jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
+		</copy>
+		<copy todir="${target.dir}/scheduler/lib">
+			<fileset refid="plugins.lib" />
+		  <mapper type="regexp" from="^(.*)\.jar$" to="com.sos.scheduler.engine.plugins.\1.jar"/>
 		</copy>
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="files.jar" />
