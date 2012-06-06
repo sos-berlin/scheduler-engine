@@ -106,6 +106,27 @@ echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
         <p>
           <i>Für Unix gelten $MYPREFIX_ORDER_PARAM und $MYPREFIX_JOB_PARAM.</i>
         </p>
+        <br/><br/>
+
+        <li><b>scheduler.max_kbyte_of_db_log_entry</b></li>
+        <p>
+          Mit diesem Parameter kann die maximale Größe von Auftragsprotokollen in der Datenbank bestimmt werden. Die Angabe erfolgt in kByte und bezieht sich auf die
+          Felder LOG der Tabelle SCHEDUELR_ORDER_HISTORY und XML_PAYLOAD der Tabelle SCHEDULER_ORDERS. Die Angabe sollte immer kleiner als die zugelassene Größe des 
+          Datenbankfeldes XML_PAYLOAD sein, da dieses Feld neben den Log-Ausgaben des Auftrages eine Reihe von Konfigurationseinstellungen des Auftrages enthält.
+        </p>
+        <p>
+          Wird die angegebene Größe überschritten, wir der Anfang des Auftragsprotokolls abgeschnitten.
+          Im Protokoll wird dann die Meldung <i>SCHEDULER-722 Preceding content truncated (field length is limited to 2048 bytes)</i> ausgegeben.
+        </p>
+
+        <br/>
+        <b>Beispiel:</b>
+        <p>Die maximale Größe von Auftragsprotokollen in der Datenbank ist 8 kByte :</p>
+<pre>&lt;params>
+   &lt;param name="scheduler.max_kbyte_of_db_log_entry" value="8" />
+&lt;/params>
+</pre>
+
         </ul>
                 
         <a name="param_job" />
