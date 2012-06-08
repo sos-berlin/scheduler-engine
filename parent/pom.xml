@@ -639,6 +639,8 @@
           <id>snapshots</id>
           <url>http://archiva.sos:8080/archiva/repository/snapshots/</url>
         </snapshotRepository>
+        <!--
+        -->
         <!--site>
             <id>sos-http</id>
             <url>scp://www.yourcompany.com/www/docs/project/</url>
