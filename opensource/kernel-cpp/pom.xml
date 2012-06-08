@@ -259,12 +259,12 @@
         </profile>
     </profiles>
 
-    <!--distributionManagement>
-        <repository>
-            <id>sos-os-${osArch}</id>
-            <name>SOS Windows Repository (${osArch})</name>
-            <url>http://archiva.sos:8080/archiva/repository/os-${osArch}</url>
-        </repository>
-    </distributionManagement!-->
+  <!-- the snapshots of the c++ kernel are deployed to separated repositories each os -->
+  <distributionManagement>
+    <snapshotRepository>
+      <id>sos-os-windows-x86</id>
+      <url>http://archiva.sos:8080/archiva/repository/sos-os-windows-x86/</url>
+    </snapshotRepository>
+  </distributionManagement>
 
 </project>
