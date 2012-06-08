@@ -22,7 +22,7 @@ struct Request_impl : Request {
 
     public: ~Request_impl() {
         _log->close_file();
-        _log->set_append(true);   // Damit nach erneutem Öffnen die Datei fortgesetzt wird.
+        _log->set_append_for_cache(_log->is_active());   // Damit nach erneutem Öffnen die Datei fortgesetzt wird.
     }
 
     public: Prefix_log* log() const {  return _log; }
