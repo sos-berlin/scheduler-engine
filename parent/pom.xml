@@ -613,18 +613,18 @@
             <id>sos</id>
             <name>SOS Internal Repository</name>
             <url>http://archiva.sos:8080/archiva/repository/sos</url>
-            <updatePolicy>always</updatePolicy>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
         <repository>
             <id>sos-os-${osArch}</id>
             <name>SOS snapshot Repository (${osArch})</name>
             <url>http://archiva.sos:8080/archiva/repository/os-${osArch}</url>
-            <updatePolicy>always</updatePolicy>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
     </repositories>
