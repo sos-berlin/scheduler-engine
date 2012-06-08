@@ -116,16 +116,16 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>kernel-cpp-${osArch}</artifactId>
+            <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
-            <!-- classifier>${osArch}</classifier -->
+            <classifier>${osArch}</classifier>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>kernel-cpp-${osArch}</artifactId>
+            <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
-            <classifier>test</classifier>
+            <classifier>${osArch}-test</classifier>
         </dependency>
 
         <dependency>
