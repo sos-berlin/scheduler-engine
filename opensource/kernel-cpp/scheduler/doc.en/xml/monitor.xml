@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2007-10-10 21:09:50 +0200 (Mi, 10 Okt 2007) $">
+             date     = "$Date$">
 
     <xml_parent_elements>
         <xml_parent_element name="job"/>
@@ -20,13 +20,14 @@
         <xml_attribute name="name" type="Name">
             <description>
                 <p>
-                    More than one monitor can be set, as long as they have unique names.
+                The name of a monitor is an unique identifier for a monitor.
+                    More than one monitor can be specified, as long as they have unique names.
                 <!--Mehrere Monitor können angegeben werden, wenn sie unterschiedliche Namen erhalten.-->
                 </p>
                 <p>
-                    The monitors are started in the order specified in the <code>ordering</code> attribute.
-                    <code>spooler_process_after()</code> and <code>spooler_task_after()</code> 
-                    are called in reverse order.
+                    The monitors are started in ascending sequence as specified using the <code>ordering</code> attribute.
+                    The monitor-methods <code>spooler_process_after()</code> and <code>spooler_task_after()</code> 
+                    are called in descending sequence.
                 <!--Die Monitor werden in der Reihenfolge des Attributes <code>ordering</code> aufgerufen.
                     <code>spooler_process_after()</code> und <code>spooler_task_after()</code> 
                     in der rückwärtigen Reihenfolge.-->
@@ -36,9 +37,15 @@
 
         <xml_attribute name="ordering" type="Number" intial="1">
             <description>
+            <p>
+            Several monitors, if required implemented using different languages, can be specified.</p>
                 <p>
-                    Specifies the ordering of the monitors - i.e. their .
-                <!--Gibt die Rangfolge der Monitore an.-->
+                    The monitors are started in the order specified in the <code>ordering</code> attribute.
+                    <code>spooler_process_after()</code> and <code>spooler_task_after()</code> 
+                    are called in reverse order.
+                <!--Die Monitor werden in der Reihenfolge des Attributes <code>ordering</code> aufgerufen.
+                    <code>spooler_process_after()</code> und <code>spooler_task_after()</code> 
+                    in der rückwärtigen Reihenfolge.-->
                 </p>
             </description>
         </xml_attribute>

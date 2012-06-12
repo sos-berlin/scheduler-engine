@@ -11,7 +11,7 @@
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2008-07-08 10:14:29 +0200 (Di, 08 Jul 2008) $">
+             date          = "$Date$">
 
     <xml_parent_elements>
         <xml_parent_element name="answer"/>

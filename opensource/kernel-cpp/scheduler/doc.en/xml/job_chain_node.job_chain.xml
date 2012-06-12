@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2008-09-03 10:29:47 +0200 (Mi, 03 Sep 2008) $">
+             date     = "$Date$">
 
     <scheduler_keyword keyword="Job Chain Node"/>
 <!--<scheduler_keyword keyword="Jobkettenknoten"/>-->

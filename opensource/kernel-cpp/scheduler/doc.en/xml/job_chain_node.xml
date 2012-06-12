@@ -8,7 +8,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2008-09-11 08:35:58 +0200 (Do, 11 Sep 2008) $">
+             date     = "$Date$">
 
          <!--title    = "Jobkettenknoten"-->
 

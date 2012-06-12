@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2006-05-26 13:54:56 +0200 (Fr, 26 Mai 2006) $">
+             date     = "$Date$">
 
     <xml_parent_elements>
         <xml_parent_element name="config">

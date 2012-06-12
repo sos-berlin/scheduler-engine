@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2007-12-19 10:26:05 +0100 (Mi, 19 Dez 2007) $">
+             date     = "$Date$">
 
 
     <description>
