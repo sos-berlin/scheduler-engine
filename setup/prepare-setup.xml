@@ -86,8 +86,12 @@ to run without maven integration.
   	<!-- it points to the jar built in the artifact jar -->
   	<propertyregex property="version.number" input="${setup.version}" regexp="-SNAPSHOT" replace="" defaultValue="${setup.version}" />
   	<echo>version is ${version.number}</echo>
-  	<fileset dir="${source.dir}" id="files.lib">
+  	<fileset dir="${source.dir}" id="spooler.lib">
   		<include name="jar-${version.number}*.jar"/>
+  	</fileset>
+  	<fileset dir="${source.dir}" id="files.lib">
+  		<include name="web-${version.number}*.jar"/>
+  		<include name="data-${version.number}*.jar"/>
   	</fileset>
   	<fileset dir="${source.dir}" id="plugins.lib">
   		<include name="jetty-${version.number}*.jar"/>
@@ -104,7 +108,7 @@ to run without maven integration.
   		<include name="jersey-*.jar"/>
   		<include name="scala-library-*.jar"/>
   		<!-- additional jars for jetty integration -->
-  		<include name="web-*.jar" />
+  		<include name="javax*.jar" />
   		<include name="jetty-*.jar" />
   		<include name="servlet-api-*.jar" />
   		<include name="aopalliance-*.jar"/>
@@ -133,8 +137,12 @@ to run without maven integration.
 			<fileset refid="files.config" />
 		</copy>
 		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="files.lib" />
+			<fileset refid="spooler.lib" />
 		  <mapper type="regexp" from="^jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
+		</copy>
+		<copy todir="${target.dir}/scheduler/lib">
+			<fileset refid="files.lib" />
+		  <mapper type="regexp" from="^(.*)\.jar$" to="com.sos.scheduler.engine.\1.jar"/>
 		</copy>
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="plugins.lib" />
