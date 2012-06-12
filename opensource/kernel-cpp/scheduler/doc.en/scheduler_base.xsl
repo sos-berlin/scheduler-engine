@@ -3375,7 +3375,7 @@
             <xsl:variable name="name" select="substring-before( substring-after( @author, 'Author: ' ), ' $' )"/>
             <xsl:choose>
                 <xsl:when test="$name = 'jz'">
-                    <a href="http://www.zschimmer.com">Joacim Zschimmer</a>
+                    <a href="http://www.sos-berlin.com">JobScheduler Team</a>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="$name"/>

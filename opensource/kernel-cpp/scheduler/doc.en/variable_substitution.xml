@@ -11,7 +11,7 @@
     title    = "Settings which Allow Environment Variables with ${…} to be Called"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2008-10-02 16:21:03 +0200 (Do, 02 Okt 2008) $"
+    date     = "$Date$"
 >
 
     <description>

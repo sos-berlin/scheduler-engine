@@ -8,7 +8,7 @@
     base_dir    = ""
     parent_page = "job.xml"
     author      = "$Author: jz $"
-    date        = "$Date: 2007-11-09 10:28:17 +0100 (Fr, 09 Nov 2007) $"
+    date        = "$Date$"
 >
 	<p>
         A job which processes files laid up in a directory can be used for directory monitoring.

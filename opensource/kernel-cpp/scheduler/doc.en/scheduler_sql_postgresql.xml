@@ -10,7 +10,7 @@
     base_dir            = ""
     parent_page         = "scheduler_sql.xml"
     author              = "$Author: ap $"
-    date                = "$Date: 2008-02-21 23:41:44 +0100 (Do, 21 Feb 2008) $"
+    date                = "$Date$"
 >
 
     <scheduler_keyword keyword="PostgresQL"/>

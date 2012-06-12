@@ -9,7 +9,7 @@
     object_name = "x"
     base_dir    = "../"
     author      = "$Author: jz $"
-    date        = "$Date: 2007-05-18 12:08:33 +0200 (Fr, 18 Mai 2007) $"
+    date        = "$Date$"
 >
 
     <method name="close">

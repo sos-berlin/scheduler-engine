@@ -7,7 +7,7 @@
      title    = "sos.ini"
      base_dir = ""
      author   = "$Author: ts $"
-     date     = "$Date: 2007-06-28 12:02:06 +0200 (Do, 28 Jun 2007) $">
+     date     = "$Date$">
 
     <ini_sections>
         <ini_section name="java"/>

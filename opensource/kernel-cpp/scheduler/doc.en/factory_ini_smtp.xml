@@ -12,7 +12,7 @@
     title    = "factory.ini file, section [smtp]"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2007-10-29 12:17:09 +0100 (Mo, 29 Okt 2007) $">
+    date     = "$Date$">
 
     <ini_entries>
         <ini_entry name="mail.smtp.user" type="name" title="Name for Authentification on an SMTP Server">

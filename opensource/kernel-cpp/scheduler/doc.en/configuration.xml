@@ -9,7 +9,7 @@
     title    = "Configuration"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2007-04-19 17:37:57 +0200 (Do, 19 Apr 2007) $"
+    date     = "$Date$"
 >
 
     <scheduler_keyword keyword="Configuration"/>

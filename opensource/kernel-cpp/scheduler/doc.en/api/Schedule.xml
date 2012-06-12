@@ -9,7 +9,7 @@
     object_name = "schedule"
     base_dir    = "../"
     author      = "$Author: jz $"
-    date        = "$Date: 2008-08-14 10:22:14 +0200 (Do, 14 Aug 2008) $"
+    date        = "$Date$"
 >
 
 

@@ -9,7 +9,7 @@
     title    = "XML Configuration" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2008-05-30 15:31:00 +0200 (Fr, 30 Mai 2008) $"
+    date     = "$Date$"
 >
 
 		<scheduler_keyword keyword="Configuration"/>

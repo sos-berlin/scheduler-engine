@@ -28,7 +28,7 @@
     suppress_browse_bar = "yes"
   xxsuppress_logo       = "yes" 
     author              = "$Author: ap $"
-    date                = "$Date: 2008-02-10 10:59:02 +0100 (So, 10 Feb 2008) $"
+    date                = "$Date$"
 >
 
     <scheduler_ignore>

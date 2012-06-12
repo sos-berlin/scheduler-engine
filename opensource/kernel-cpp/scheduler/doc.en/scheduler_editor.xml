@@ -4,7 +4,7 @@
     title               = "Job Scheduler Editor"
     base_dir            = ""
     author              = "$Author: ts $"
-    date                = "$Date: 2007-03-29 11:45:00 +0200 (Do, 05 Okt 2006) $"
+    date                = "$Date$"
 >
 
 

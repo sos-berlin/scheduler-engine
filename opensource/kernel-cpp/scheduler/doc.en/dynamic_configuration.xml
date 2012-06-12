@@ -10,7 +10,7 @@
     base_dir            = ""
     parent_page         = "index.xml"
     author              = "$Author: jz $"
-    date                = "$Date: 2008-08-14 10:22:14 +0200 (Do, 14 Aug 2008) $"
+    date                = "$Date$"
 >
     <p>
         Jobs, job chains, permanent orders, process classes and locks (referred to as objects in the following section)

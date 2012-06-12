@@ -9,7 +9,7 @@
     title               = "SQL Instructions Used by the Job Scheduler"
     base_dir            = ""
     author              = "$Author: ap $"
-    date                = "$Date: 2008-02-21 23:41:44 +0100 (Do, 21 Feb 2008) $"
+    date                = "$Date$"
 >
 
     <scheduler_keyword keyword="Database tables"/>

@@ -6,7 +6,7 @@
 <events title    = "Events"
         base_dir = ""
         author   = "$Author: jz $"
-        date     = "$Date: 2005-05-06 13:55:52 +0200 (Fr, 06 Mai 2005) $">
+        date     = "$Date$">
 
     <description>
         <scheduler_keyword keyword="Events"/>

@@ -9,7 +9,7 @@
     title    = ""
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+    date     = "$Date$">
 
     <ini_entries>
         <ini_entry setting="key1" type="licence_key" title="Licence Key">

@@ -9,7 +9,7 @@
     object_name = "logger"
     base_dir    = "../"
     author      = "$Author: ss $"
-    date        = "$Date: 2011-11-30 10:02:35 +0200 (Di, 30 Nov 2011) $"
+    date        = "$Date$"
 >
 
 <title>

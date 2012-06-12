@@ -10,7 +10,7 @@
     base_dir            = ""
     parent_page         = "index.xml"
     author              = "$Author: ur $"
-    date                = "$Date: 2008-01-15 17:28:03 +0200 (Mi, 17 Okt 2007) $"
+    date                = "$Date$"
 >
     <p>
       In the centralised administration of the configuration of objects such as jobs, job chains, orders and locks,

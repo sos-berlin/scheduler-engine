@@ -9,7 +9,7 @@
     object_name = "job_chain"
     base_dir    = "../"
     author      = "$Author: jz $"
-    date        = "$Date: 2008-04-29 06:58:05 +0200 (Di, 29 Apr 2008) $"
+    date        = "$Date$"
 >
 
 

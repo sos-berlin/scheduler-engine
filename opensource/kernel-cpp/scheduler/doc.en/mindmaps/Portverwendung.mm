@@ -1,0 +1,118 @@
+<map version="0.9.0">
+<!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
+<node BACKGROUND_COLOR="#ffff00" COLOR="#000000" CREATED="1328016311427" ID="ID_1483609353" MODIFIED="1328018796605" TEXT="JobScheduler Portverwendung">
+<edge COLOR="#000000" WIDTH="8"/>
+<node COLOR="#0033ff" CREATED="1328016329642" ID="ID_1833929978" MODIFIED="1328018796607" POSITION="right" STYLE="bubble" TEXT="JOC - Operations Center">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328016342095" ID="ID_945491176" MODIFIED="1328020416747" STYLE="fork" TEXT="genau ein Port">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016359279" ID="ID_1556449686" MODIFIED="1328020416747" STYLE="fork" TEXT="bidirectional">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328017938912" ID="ID_1480519160" MODIFIED="1328020416747" STYLE="fork" TEXT="Scheduler Konfiguration">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+</node>
+<node COLOR="#0033ff" CREATED="1328016379048" ID="ID_666224167" MODIFIED="1328018796612" POSITION="right" STYLE="bubble" TEXT="Protocol">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328016386752" ID="ID_1761775159" MODIFIED="1328020416748" STYLE="fork" TEXT="http">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016389295" ID="ID_333393454" MODIFIED="1328020416748" STYLE="fork" TEXT="telnet">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016398248" ID="ID_1661454337" MODIFIED="1328020416749" STYLE="fork" TEXT="tcp/ip">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016349960" ID="ID_16348425" MODIFIED="1328020416749" STYLE="fork" TEXT="configuriert in der Scheduler.xml">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016479663" ID="ID_1321694975" MODIFIED="1328020416749" STYLE="fork" TEXT="als Aufrufparameter konfigurierbar">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+</node>
+<node COLOR="#0033ff" CREATED="1328016507736" ID="ID_421093106" MODIFIED="1328018796617" POSITION="left" STYLE="bubble" TEXT="Datenbankverbindung">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328016526352" ID="ID_870275274" MODIFIED="1328020416750" STYLE="fork" TEXT="Port im connection-string">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016533391" ID="ID_941538453" MODIFIED="1328020416750" STYLE="fork" TEXT="standard-port der db">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+</node>
+<node COLOR="#0033ff" CREATED="1328016586119" ID="ID_1983895646" MODIFIED="1328018796620" POSITION="left" STYLE="bubble" TEXT="Shell-Jobs">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328016670951" ID="ID_1384853651" MODIFIED="1328020416751" STYLE="fork" TEXT="reine shell jobs">
+<edge COLOR="#00b439" WIDTH="2"/>
+<node COLOR="#990000" CREATED="1328016592728" ID="ID_1828595434" MODIFIED="1328020416751" STYLE="fork" TEXT="keine Ports werden verwendet">
+<edge COLOR="#990000" WIDTH="1"/>
+<icon BUILTIN="help"/>
+</node>
+</node>
+<node COLOR="#00b439" CREATED="1328016681200" ID="ID_1454522839" MODIFIED="1328020416751" STYLE="fork" TEXT="mit pre-/Post-Processing">
+<edge COLOR="#00b439" WIDTH="2"/>
+<node COLOR="#990000" CREATED="1328016694288" ID="ID_890318277" MODIFIED="1328020416752" STYLE="fork" TEXT="Port wg. Zugriff auf int. API">
+<edge COLOR="#990000" WIDTH="1"/>
+<icon BUILTIN="help"/>
+</node>
+</node>
+</node>
+<node COLOR="#0033ff" CREATED="1328016754240" ID="ID_459020752" MODIFIED="1328018796625" POSITION="right" STYLE="bubble" TEXT="API-Jobs">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328016764112" ID="ID_628105049" MODIFIED="1328020416752" STYLE="fork" TEXT="Port wg. Zugriff auf API">
+<edge COLOR="#00b439" WIDTH="2"/>
+<icon BUILTIN="help"/>
+</node>
+</node>
+<node COLOR="#0033ff" CREATED="1328016815760" ID="ID_1620764166" MODIFIED="1328018796628" POSITION="left" STYLE="bubble" TEXT="Remote Scheduling">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328016823472" ID="ID_1032149770" MODIFIED="1328020416753" STYLE="fork" TEXT="Agenten">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016825999" ID="ID_1724291371" MODIFIED="1328020416753" STYLE="fork" TEXT="JobScheduler">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016845007" ID="ID_1054980562" MODIFIED="1328020416754" STYLE="fork" TEXT="Nummernkreis 59999 abw&#xe4;rts f&#xfc;r Kommunikation zum MainScheduler">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016903328" ID="ID_1991424927" MODIFIED="1328020416754" STYLE="fork" TEXT="Vergeben vom MainScheduler">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016974288" ID="ID_1537967827" MODIFIED="1328020416754" STYLE="fork" TEXT="MainScheduler &quot;kennt&quot; RS &#xfc;ber Prozessklasse">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328016919288" ID="ID_1053833629" MODIFIED="1328020416754" STYLE="fork" TEXT="Agent hat &quot;eigenen&quot; Port">
+<edge COLOR="#00b439" WIDTH="2"/>
+<node COLOR="#990000" CREATED="1328016935431" ID="ID_153476765" MODIFIED="1328020416755" STYLE="fork" TEXT="Port-Nr in der Scheduler.xml des Agenten">
+<edge COLOR="#990000" WIDTH="1"/>
+</node>
+<node COLOR="#990000" CREATED="1328016943792" ID="ID_1810708207" MODIFIED="1328020416755" STYLE="fork" TEXT="Port-Nummer beim Aufruf">
+<edge COLOR="#990000" WIDTH="1"/>
+</node>
+<node COLOR="#990000" CREATED="1328017830104" ID="ID_1396038879" MODIFIED="1328020416756" STYLE="fork" TEXT="Mu&#xdf; in der Prozessklasse beim MainScheduler angegeben werden">
+<edge COLOR="#990000" WIDTH="1"/>
+</node>
+</node>
+</node>
+<node COLOR="#0033ff" CREATED="1328017636512" ID="ID_466690249" MODIFIED="1328018796635" POSITION="right" STYLE="bubble" TEXT="Remote Configuration">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328017662488" ID="ID_1856145087" MODIFIED="1328020416756" STYLE="fork" TEXT="zus&#xe4;tzlicher Port f&#xfc;r den Austausch der Objekte">
+<edge COLOR="#00b439" WIDTH="2"/>
+<icon BUILTIN="help"/>
+</node>
+</node>
+<node COLOR="#0033ff" CREATED="1328020377096" ID="ID_34209929" MODIFIED="1328020416758" POSITION="left" STYLE="bubble" TEXT="WebService">
+<edge COLOR="#0033ff" WIDTH="4"/>
+<node COLOR="#00b439" CREATED="1328020381592" ID="ID_1359004638" MODIFIED="1328020416759" STYLE="fork" TEXT="Port aus der Scheduler.xml">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328020388704" ID="ID_1391849157" MODIFIED="1328020416759" STYLE="fork" TEXT="syncron">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+<node COLOR="#00b439" CREATED="1328020398448" ID="ID_891186246" MODIFIED="1328020416760" STYLE="fork" TEXT="asyncron">
+<edge COLOR="#00b439" WIDTH="2"/>
+</node>
+</node>
+</node>
+</map>

@@ -8,7 +8,7 @@
 <register
     title  = "Index" 
     author = "$Author: scheduler_keyword_to_xml.pl $"
-    date   = "$Date: 2006/10/5 12:10:43 $"
+    date   = "$Date$"
 >
 
     <description>

@@ -7,7 +7,7 @@
 							title    ="Command Line Options" 
 							base_dir ="" 
               author   = "$Author: ur $"
-              date     = "$Date: 2008-03-03 15:49:18 +0100 (Mo, 03 Mrz 2008) $">
+              date     = "$Date$">
 
     <command_options name="run" title="Starting the Job Scheduler">
 <!--<command_options name="run" title="Start des Job Schedulers">-->

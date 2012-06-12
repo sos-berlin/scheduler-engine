@@ -9,7 +9,7 @@
     object_name = "run_time"
     base_dir    = "../"
     author      = "$Author: jz $"
-    date        = "$Date: 2008-08-19 16:24:54 +0200 (Di, 19 Aug 2008) $"
+    date        = "$Date$"
 >
 
 

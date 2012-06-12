@@ -8,7 +8,7 @@
     name        = "Spooler_program"
     base_dir    = "../"
     author      = "$Author: jz $"
-    date        = "$Date: 2006-01-31 12:42:37 +0100 (Di, 31 Jan 2006) $"
+    date        = "$Date$"
 >
 
 <method name="Spooler_program">

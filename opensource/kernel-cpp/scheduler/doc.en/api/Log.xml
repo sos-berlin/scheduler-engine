@@ -9,7 +9,7 @@
     object_name = "spooler_log"
     base_dir    = "../"
     author      = "$Author: jz $"
-    date        = "$Date: 2008-05-26 10:04:35 +0200 (Mo, 26 Mai 2008) $"
+    date        = "$Date$"
 >
 
 

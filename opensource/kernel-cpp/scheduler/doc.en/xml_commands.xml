@@ -10,7 +10,7 @@
     title    = "XML Commands"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2008-07-08 10:14:29 +0200 (Di, 08 Jul 2008) $"
+    date     = "$Date$"
 >
     <description>
         <p>

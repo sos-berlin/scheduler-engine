@@ -8,7 +8,7 @@
     title    = "Replacement of Environment Variables" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2006-06-03 20:10:01 +0200 (Sa, 03 Jun 2006) $"
+    date     = "$Date$"
 >
 
 		<scheduler_keyword keyword="Environment Variables"/>

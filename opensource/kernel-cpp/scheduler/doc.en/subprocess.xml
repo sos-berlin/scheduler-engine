@@ -7,7 +7,7 @@
     title               = "Subprocesses" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2005-01-12 00:22:22 +0100 (Mi, 12 Jan 2005) $"
+    date                = "$Date$"
 >
 
 <scheduler_keyword keyword="Subprocess"/>

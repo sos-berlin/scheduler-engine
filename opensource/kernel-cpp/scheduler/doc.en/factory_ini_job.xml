@@ -11,7 +11,7 @@
     title    = ""
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2008-06-30 11:30:32 +0200 (Mo, 30 Jun 2008) $">
+    date     = "$Date$">
 
     <ini_entries>
         <ini_entry setting="history_file"/> 

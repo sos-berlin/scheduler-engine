@@ -9,7 +9,7 @@
     base_dir    = "../"
     title       = "Application Programming Interface (API)" 
     author      = "$Author: jz $"
-    date        = "$Date: 2006-09-21 11:42:42 +0200 (Do, 21 Sep 2006) $"
+    date        = "$Date$"
 >
 
     <title>Overview<!--Übersicht--></title>
