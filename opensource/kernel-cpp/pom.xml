@@ -179,7 +179,6 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
                                 <descriptor>src/main/assembly/os-${osFamily}.xml</descriptor>
                             </descriptors>
