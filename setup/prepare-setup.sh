@@ -15,4 +15,4 @@ fi
 version=$1
 mvn clean
 mvn install -Pprepare -Dengine.version=$version -Dengine.platform=windows-x86
-mvn install -Pprepare -Dengine.version=$version -Dengine.platform=linux-i386
+mvn install -Pprepare -Dengine.version=$version -Dengine.platform=linux-x86

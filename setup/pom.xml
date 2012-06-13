@@ -19,7 +19,7 @@ call prepare-setup.sh <version> to use this pom
     <artifactId>setup</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-
+    
     <profiles>
     
       <!-- this profile is for preparing the setup for a given version on a given platform, e.g.
@@ -37,6 +37,22 @@ call prepare-setup.sh <version> to use this pom
         <properties>
           <setup.platform>${engine.platform}</setup.platform>
         </properties>
+        <repositories>
+            <repository>
+                <id>sos-os</id>
+                <name>SOS snapshot Repository (${setup.platform})</name>
+                <url>http://archiva.sos:8080/archiva/repository/sos-os-${setup.platform}</url>
+                <snapshots>
+                    <enabled>true</enabled>
+                    <!-- updatePolicy>always</updatePolicy -->
+                </snapshots>
+                <releases>
+                  <enabled>false</enabled>
+                </releases>
+            </repository>
+        </repositories>
+        <!--
+        -->
       </profile>
     </profiles>
 
@@ -47,11 +63,11 @@ call prepare-setup.sh <version> to use this pom
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
                 <execution>
-                    <id>kernel</id>
+                    <id>copy</id>
                     <phase>install</phase>
                     <goals>
-                        <goal>copy</goal>
                         <goal>copy-dependencies</goal>
+                        <goal>copy</goal>
                     </goals>
                     <configuration>
                         <artifactItems>
@@ -117,13 +133,19 @@ call prepare-setup.sh <version> to use this pom
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jetty</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>kernel-cpp</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
-        
     </dependencies>
+
 </project>

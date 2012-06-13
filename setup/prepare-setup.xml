@@ -31,10 +31,12 @@ to run without maven integration.
 
     <echo message="${settings.localRepository}" />
 
+    <property name="folder.name" value="${setup.platform}" />
+    <echo message="the folder name is ${folder.name}" />
+  	<propertyregex property="os.architecture" input="${setup.platform}" regexp="^([^-]*)-.*" replace="\1" />
     <if>
-     <equals arg1="${setup.platform}" arg2="windows-x86" />
+     <equals arg1="${os.architecture}" arg2="windows" />
      <then>
-        <property name="folder.name" value="windows" />
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
       		<include name="scheduler.exe"/>
       		<include name="spidermonkey.dll"/>
@@ -43,41 +45,15 @@ to run without maven integration.
       		<include name="scheduler.dll"/>
       	</fileset>
      </then>
-    </if>
-
-    <if>
-     <equals arg1="${setup.platform}" arg2="linux-i386" />
-     <then>
-        <property name="folder.name" value="linux32" />
+     <else>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
       		<include name="scheduler"/>
       	</fileset>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
       		<include name="libspidermonkey.so"/>
       	</fileset>
-     </then>
+     </else>
     </if>
-
-    <if>
-     <equals arg1="${setup.platform}" arg2="hpux-itanium" />
-     <then>
-    		<echo message="HP-UX" />
-    		<!--
-        <property name="folder.name" value="hpux-ia64-32" />
-    		-->
-     </then>
-    </if>
-
-    <if>
-     <equals arg1="${setup.platform}" arg2="solaris-" />
-     <then>
-    		<echo message="SOLARIS" />
-    		<!--
-        <property name="folder.name" value="solarisx86" />
-    		-->
-     </then>
-    </if>
-    <echo message="the folder name is ${folder.name}" />
   	
   	<fileset dir="${source.dir}/${folder.name}/${archive.root}" id="files.config">
   		<include name="scheduler.xsd"/>

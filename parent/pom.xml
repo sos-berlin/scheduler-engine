@@ -609,22 +609,24 @@
     </issueManagement-->
 
     <repositories>
+       <repository>
+            <id>sos-os</id>
+            <name>SOS snapshot Repository (${osArch})</name>
+            <url>http://archiva.sos:8080/archiva/repository/sos-os-${osArch}</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <!-- updatePolicy>always</updatePolicy -->
+            </snapshots>
+        </repository>
+        <!--
+        -->
         <repository>
             <id>sos</id>
             <name>SOS Internal Repository</name>
             <url>http://archiva.sos:8080/archiva/repository/sos</url>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>sos-os-${osArch}</id>
-            <name>SOS snapshot Repository (${osArch})</name>
-            <url>http://archiva.sos:8080/archiva/repository/sos-os-${osArch}</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
+                <!-- updatePolicy>always</updatePolicy -->
             </snapshots>
         </repository>
     </repositories>
