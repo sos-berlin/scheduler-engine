@@ -108,6 +108,7 @@ to run without maven integration.
   		<include name="jersey-*.jar"/>
   		<include name="scala-library-*.jar"/>
   		<!-- additional jars for jetty integration -->
+  		<include name="jul-to-slf4j-*.jar" />
   		<include name="javax*.jar" />
   		<include name="jetty-*.jar" />
   		<include name="servlet-api-*.jar" />
