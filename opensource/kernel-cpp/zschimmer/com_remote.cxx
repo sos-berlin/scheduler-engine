@@ -1334,7 +1334,6 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
 
 #   ifdef Z_WINDOWS
 
-        BOOL                ok;
         PROCESS_INFORMATION process_info; 
         STARTUPINFOW        startup_info; 
         string              command_line;
@@ -1367,58 +1366,7 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         if( _priority != "" )  creation_flags |= windows::priority_class_from_string( _priority );        // Liefert 0 bei Fehler
         Bstr environment_bstr = _has_environment? Bstr(_environment_string) : Bstr((BSTR)NULL);
 
-        if (_login) {
-            string user_name = _login->user_name();
-            //
-            //ok = CreateProcessWithLogonW(
-            //                    Bstr(user_name), 
-            //                    NULL,                           // Domain
-            //                    Bstr(_login->password()), 
-            //                    0,                              // dwLogonFlags
-            //                    Bstr(object_server_filename),   // application name
-            //                    Bstr(command_line),             // command line. API kann String ändern! 
-            //                    creation_flags, 
-            //                    environment_bstr,               // NULL: use parent's environment 
-            //                    NULL,                           // use parent's current directory 
-            //                    &startup_info,                  // STARTUPINFO pointer 
-            //                    &process_info );                // receives PROCESS_INFORMATION 
-            //if (!ok) throw_mswin( "CreateProcessWithLogonW", user_name, object_server_filename );
-            windows::Handle login_handle;
-
-            // Das anzumeldende Konto muss das Recht "Anmelden als Stapelverarbeitung" haben (Gruppenrichtlinien -> Computerkonfiguration -> Windows-Einstellungen -> Sicherheitseinstellungen -> Lokale Richtlinien -> Zuweisen von Benutzerrechten)
-            BOOL ok = LogonUserW(Bstr(user_name), NULL, Bstr(_login->password()), LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, login_handle.addr_of());
-            if (!ok) throw_mswin("LogonUser", user_name);
-            
-            Z_LOG( "CreateProcessAsUser(\"" << user_name << "\", \"" << object_server_filename << "\",\"" << command_line << "\")\n" );
-            ok = CreateProcessAsUserW(login_handle,
-                                Bstr(object_server_filename),   // application name
-                                Bstr(command_line),             // command line. API kann String ändern! 
-                                NULL,                           // process security attributes 
-                                NULL,                           // primary thread security attributes 
-                                TRUE,                           // handles are inherited?
-                                creation_flags, 
-                                environment_bstr,               // NULL: use parent's environment 
-                                NULL,                           // use parent's current directory 
-                                &startup_info,                  // STARTUPINFO pointer 
-                                &process_info );                // receives PROCESS_INFORMATION 
-            if (!ok) throw_mswin( "CreateProcessAsUser", user_name, object_server_filename );
-        } else {
-            Z_LOG( "CreateProcess(\"" << object_server_filename << "\",\"" << command_line << "\")\n" );
-            ok = CreateProcessW(Bstr(object_server_filename),   // application name
-                                Bstr(command_line),             // command line. API kann String ändern!
-                                NULL,                           // process security attributes 
-                                NULL,                           // primary thread security attributes 
-                                TRUE,                           // handles are inherited?
-                                creation_flags, 
-                                environment_bstr,               // NULL: use parent's environment 
-                                NULL,                           // use parent's current directory 
-                                &startup_info,                  // STARTUPINFO pointer 
-                                &process_info );                // receives PROCESS_INFORMATION 
-            if( !ok )  throw_mswin( "CreateProcess", object_server_filename );
-        }
-
-        Z_LOG( "pid=" << process_info.dwProcessId << "\n" );
-
+        Process::create_process(_login, object_server_filename, command_line, creation_flags, environment_bstr, &startup_info, &process_info);
         _pid = process_info.dwProcessId;
 
         CloseHandle( process_info.hThread );
