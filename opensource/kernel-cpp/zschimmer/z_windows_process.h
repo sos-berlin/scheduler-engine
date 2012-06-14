@@ -3,8 +3,9 @@
 #ifndef __ZSCHIMMER_WINDOWS_PROCESS_H
 #define __ZSCHIMMER_WINDOWS_PROCESS_H
 
+
 #include "z_windows.h"
-#include "Login.h"
+
 
 namespace zschimmer {
 namespace windows {
@@ -50,8 +51,7 @@ struct Process : Process_base, Handle
     bool                        try_kill                    ( int signal = 99 );
     HANDLE                      take_handle                 ()                                      { HANDLE result = _handle;  _handle = NULL, _pid = 0;  return result; }
     bool                        opened                      () const                                { return _handle != 0; }
-    static void                 create_process              (const Login*, const string& application_name, const string& command_line, 
-                                                             DWORD creationFlags, BSTR environment, STARTUPINFOW*, PROCESS_INFORMATION*);
+
 
     Fill_zero                  _zero_;
     STARTUPINFO                _startup_info;

@@ -6,7 +6,6 @@
 #include "log.h"
 #include "z_process.h"
 #include "file.h"
-#include "z_com.h"
 
 #include <tlhelp32.h>
 
@@ -315,69 +314,6 @@ void Process::start( const string& cmd_line )
 
     // Ein Versuch, einem abstürzenden Programm die Messagebox auszutreiben:
     //if( creation_flags & DEBUG_PROCESS )  debug();
-}
-
-//--------------------------------------------------------------------------Process::create_process
-
-void Process::create_process(const Login* login, const string& application_name, const string& command_line, 
-    DWORD creation_flags, BSTR environment_bstr, STARTUPINFOW* startup_info, PROCESS_INFORMATION* process_information) 
-{
-    using com::Bstr;
-
-    if (login) {
-        string user_name = login->user_name();
-        //
-        //ok = CreateProcessWithLogonW(
-        //                    Bstr(user_name), 
-        //                    NULL,                           // Domain
-        //                    Bstr(_login->password()), 
-        //                    0,                              // dwLogonFlags
-        //                    Bstr(object_server_filename),   // application name
-        //                    Bstr(command_line),             // command line. API kann String ändern! 
-        //                    creation_flags, 
-        //                    environment_bstr,               // NULL: use parent's environment 
-        //                    NULL,                           // use parent's current directory 
-        //                    &startup_info,                  // STARTUPINFO pointer 
-        //                    &process_info );                // receives PROCESS_INFORMATION 
-        //if (!ok) throw_mswin( "CreateProcessWithLogonW", user_name, object_server_filename );
-        windows::Handle login_handle;
-
-        // Das anzumeldende Konto muss das Recht "Anmelden als Stapelverarbeitung" haben (Gruppenrichtlinien -> Computerkonfiguration -> Windows-Einstellungen -> Sicherheitseinstellungen -> Lokale Richtlinien -> Zuweisen von Benutzerrechten)
-        Z_LOG("LogonUserW(\""<< user_name << "\")\n");
-        BOOL ok = LogonUserW(Bstr(user_name), NULL, Bstr(login->password()), LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, login_handle.addr_of());
-        if (!ok) throw_mswin("LogonUser", user_name);
-            
-        Z_LOG( "CreateProcessAsUser(\"" << user_name << "\", \"" << application_name << "\",\"" << command_line << "\")\n" );
-        ok = CreateProcessAsUserW(
-            login_handle,
-            Bstr(application_name),         // application name
-            Bstr(command_line),             // command line. API kann String ändern! 
-            NULL,                           // process security attributes 
-            NULL,                           // primary thread security attributes 
-            TRUE,                           // handles are inherited?
-            creation_flags, 
-            environment_bstr,               // NULL: use parent's environment 
-            NULL,                           // use parent's current directory 
-            startup_info,                   // STARTUPINFO pointer 
-            process_information );          // receives PROCESS_INFORMATION 
-        if (!ok) throw_mswin( "CreateProcessAsUser", user_name, application_name);
-    } else {
-        Z_LOG( "CreateProcess(\"" << application_name << "\",\"" << command_line << "\")\n" );
-        BOOL ok = CreateProcessW(
-            Bstr(application_name),         // application name
-            Bstr(command_line),             // command line. API kann String ändern!
-            NULL,                           // process security attributes 
-            NULL,                           // primary thread security attributes 
-            TRUE,                           // handles are inherited?
-            creation_flags, 
-            environment_bstr,               // NULL: use parent's environment 
-            NULL,                           // use parent's current directory 
-            startup_info,                   // STARTUPINFO pointer 
-            process_information );          // receives PROCESS_INFORMATION 
-        if( !ok )  throw_mswin( "CreateProcess", application_name );
-    }
-
-    Z_LOG( "pid=" << process_information->dwProcessId << "\n" );
 }
 
 //-----------------------------------------------------------------------------------Process::debug

@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.tests.job.login
+package com.sos.scheduler.engine.tests.scheduler.job.login
 
-import com.sos.scheduler.engine.tests.job.login.JobLoginTest.propertyNames
+import com.sos.scheduler.engine.tests.scheduler.job.login.JobLoginTest.propertyNames
 import sos.spooler.Job_impl
 
 class TestAJob extends Job_impl {

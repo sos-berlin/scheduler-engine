@@ -284,7 +284,7 @@ bool Process_module_instance::begin__end()
 
     File stdin_file ("nul", "rI");
     PROCESS_INFORMATION process_info;
-    STARTUPINFOW        startup_info;
+    STARTUPINFO         startup_info;
     BOOL                ok;
 
     memset( &process_info, 0, sizeof process_info );
@@ -337,7 +337,7 @@ bool Process_module_instance::begin__end()
         env << '\0';
     }
 
-    DWORD creation_flags = CREATE_UNICODE_ENVIRONMENT;
+    DWORD creation_flags = 0;
     if( _module->_priority != "" )  creation_flags |= windows::priority_class_from_string( _module->_priority );        // Liefert 0 bei Fehler
 
     Message_string m ( "SCHEDULER-987" );
@@ -347,7 +347,18 @@ bool Process_module_instance::begin__end()
 
     Z_LOG2( "scheduler", "CreateProcess(" << command_line << ")\n" );
     
-    windows::Process::create_process(_module->_login, "", command_line, creation_flags, Bstr(env), &startup_info, &process_info);
+    ok = CreateProcess( NULL, //executable_path.c_str(),    // application name
+                        (char*)command_line.c_str(),    // command line
+                        NULL,                           // process security attributes
+                        NULL,                           // primary thread security attributes
+                        TRUE,                           // handles are inherited?
+                        creation_flags,
+                        (char*)((string)env).c_str(),
+                        NULL,                           // use parent's current directory
+                        &startup_info,                  // STARTUPINFO pointer
+                        &process_info );                // receives PROCESS_INFORMATION
+    if( !ok )  throw_mswin_error( "CreateProcess", executable_path );
+
     CloseHandle( process_info.hThread );
 
     _pid = process_info.dwProcessId;

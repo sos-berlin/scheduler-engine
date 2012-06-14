@@ -919,8 +919,8 @@ void Job::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "params"     ) )  _default_params->register_include_and_set_dom( _spooler, this, e, &_spooler->_variable_set_map, "param" );    // Kann <include> registrieren
             else
-            if (e.nodeName_is("login")) {
-                _module->_login = Z_NEW(Login(e.getAttribute("user"), e.first_child_element().getAttribute("password")));  // <password.plain password=".."/>
+            if (e.nodeName_is( "login")) {
+                _module->_login = Z_NEW(Login(e.getAttribute("user"), e.first_child_element().getAttribute("password")));
             }
             else
             if( e.nodeName_is( "script"     ) )  

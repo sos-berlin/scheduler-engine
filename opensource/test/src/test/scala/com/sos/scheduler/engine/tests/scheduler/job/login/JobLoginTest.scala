@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.job.login
+package com.sos.scheduler.engine.tests.scheduler.job.login
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
