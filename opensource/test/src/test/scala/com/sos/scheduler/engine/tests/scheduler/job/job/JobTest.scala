@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.scheduler.job
+package com.sos.scheduler.engine.tests.scheduler.job.job
 
 import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers._
