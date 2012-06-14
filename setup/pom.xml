@@ -83,6 +83,7 @@ call prepare-setup.sh <version> to use this pom
                                 <version>${setup.version}</version>
                                 <type>pom</type>
                             </artifactItem>
+                            <!--
                             <artifactItem>
                                 <groupId>${project.groupId}</groupId>
                                 <artifactId>kernel-cpp</artifactId>
@@ -90,6 +91,7 @@ call prepare-setup.sh <version> to use this pom
                                 <classifier>${setup.platform}</classifier>
                                 <type>jar</type>
                             </artifactItem>
+                            -->
                         </artifactItems>
                     </configuration>
                 </execution>
@@ -123,21 +125,21 @@ call prepare-setup.sh <version> to use this pom
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>kernel</artifactId>
-            <version>${project.version}</version>
+            <version>${setup.version}</version>
             <scope>runtime</scope>
         </dependency>
         
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>cppjava.runtime</artifactId>
-            <version>${project.version}</version>
+            <version>${setup.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jetty</artifactId>
-            <version>${project.version}</version>
+            <version>${setup.version}</version>
             <scope>runtime</scope>
             <exclusions>
               <exclusion>
@@ -146,6 +148,15 @@ call prepare-setup.sh <version> to use this pom
               </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>kernel-cpp</artifactId>
+            <version>${setup.version}</version>
+            <classifier>${setup.platform}</classifier>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 
 </project>
