@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job order="yes" stop_on_error="no" name="job1">
+   <script language="shell">
+        <![CDATA[
+ping -n 3 localhost
+        ]]>
+   </script>
+    <run_time />
+</job>
