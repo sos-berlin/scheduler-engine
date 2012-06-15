@@ -3,6 +3,8 @@ package com.sos.scheduler.engine.data.order;
 import com.google.common.base.Objects;
 import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import static com.google.common.base.Objects.equal;
 
@@ -10,7 +12,8 @@ public class OrderKey {
     private final JobChainPath jobChainPath;
     private final OrderId id;
 
-    public OrderKey(JobChainPath jobChainPath, OrderId id) {
+    @JsonCreator
+    public OrderKey(@JsonProperty("jobChainPath") JobChainPath jobChainPath, @JsonProperty("id") OrderId id) {
         this.id = id;
         this.jobChainPath = jobChainPath;
     }

@@ -1,18 +1,19 @@
 package com.sos.scheduler.engine.plugins.jms;
 
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.Event;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -32,20 +33,19 @@ public class JmsEventFilterTest extends JMSConnection {
     
     private final CommandBuilder util = new CommandBuilder();
 
-    private static final List<String> eventsToListen = asList("EventOrderTouched");
+    private static final List<String> eventsToListen = asList("OrderTouchedEvent");
     private final static String jobchain = "jmstest";
     private int orderFinished = 0;
     
     // Queue for collecting the fired eventsToListen in the listener thread
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
     
-    private SchedulerObjectFactory objFactory;
-    
+    // This object is needed for serializing and deserializing of the event objects
+    private final ObjectMapper mapper = new ObjectMapper();
+
     public JmsEventFilterTest() throws Exception {
-    	
     	super(providerUrl,eventsToListen);
     	setMessageListener( new MyListener() );
-
     }
 
     @Test
@@ -53,8 +53,6 @@ public class JmsEventFilterTest extends JMSConnection {
     	try {
 //	        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
 	        controller().activateScheduler();
-			objFactory = new SchedulerObjectFactory(scheduler().getHostname(), scheduler().getTcpPort());
-			objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order1").getCommand() );
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order2").getCommand() );
 	        controller().waitForTermination(shortTimeout);
@@ -65,37 +63,42 @@ public class JmsEventFilterTest extends JMSConnection {
 			close();
 		}
     }
-	
+
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder o) throws Exception {
-    	logger.debug("ORDERFINISHED: " + o.getId().asString());
-    	orderFinished++;
-    	if (orderFinished == 2)
-    		controller().scheduler().terminate();
+        logger.debug("ORDERFINISHED: " + o.getId().asString());
+        orderFinished++;
+        if (orderFinished == 2)
+            controller().scheduler().terminate();
     }
-    
+
     private class MyListener implements javax.jms.MessageListener {
 
         // runs in an own thread
     	@Override
         public void onMessage(Message message) {
             String result = "<unknown event>";
+            String jsonContent = null;
+            
+            // deserialize the event from JSON into the TaskStartEvent object
             try {
                 TextMessage textMessage = (TextMessage) message;
                 showMessageHeader(textMessage);
-                String xmlContent = textMessage.getText();
-                Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
-            	logger.info("subscribe " + ev.getName());
-            	logger.debug(xmlContent);
-                if (ev.getEventOrderTouched() == null) {
-                	throw new SchedulerException(ev.getName() + " not expected - expected");
-                }
+                jsonContent = textMessage.getText();
                 textMessage.acknowledge();
+                mapper.registerSubtypes(OrderTouchedEvent.class);
+                OrderTouchedEvent ev = mapper.readValue(jsonContent, OrderTouchedEvent.class);
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                result = ev.getEventOrderTouched().getInfoOrder().getId();
-            }
-            catch (JMSException x) { throw new RuntimeException(x); }
-            finally {
+                result = ev.getKey().getId().toString();
+            } catch (IOException e1) {
+                String msg = "could not deserialize " + jsonContent;
+                logger.error(msg);
+                throw new SchedulerException(msg,e1);
+            } catch (JMSException e2) {
+                String msg = "error getting content from JMS.";
+                logger.error(msg);
+                throw new SchedulerException(msg,e2);
+            } finally {
                 try {
 					resultQueue.put(result);
 				} catch (InterruptedException e) {

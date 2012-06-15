@@ -1,22 +1,13 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import javax.jms.*;
 import java.io.Closeable;
 import java.io.File;
-import javax.jms.DeliveryMode;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
 
 public class Connector implements Closeable {
 	
 	//TODO
-	// if the transport protocol "vm" is using allows clients to connect to each other inside the java VM.
+	// using the transport protocol "vm" it allows clients to connect to each other inside the java VM.
 	// The first client to use the VM connection will boot an embedded broker. Currently the database
 	// of the broker will be installed in a subfolder called activemq-data. This behaviour should be
 	// configured. 

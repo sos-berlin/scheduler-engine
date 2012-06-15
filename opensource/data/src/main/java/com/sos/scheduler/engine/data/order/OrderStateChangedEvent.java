@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.data.order;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+
 /**
  * \file OrderStateChangeEvent.java
  * \brief This event fired if the order of a job chain changed the state (next state starts) 
@@ -24,7 +27,8 @@ package com.sos.scheduler.engine.data.order;
 public class OrderStateChangedEvent extends OrderEvent {
     private final OrderState previousState;
 
-    public OrderStateChangedEvent(OrderKey key, OrderState previousState) {
+    @JsonCreator
+    public OrderStateChangedEvent(@JsonProperty("key") OrderKey key, @JsonProperty("previousState") OrderState previousState) {
         super(key);
         this.previousState = previousState;
     }

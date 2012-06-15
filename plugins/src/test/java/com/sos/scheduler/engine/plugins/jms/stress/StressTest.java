@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import com.sos.scheduler.engine.test.util.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,9 +43,9 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 
     private int taskFinished = 0;
 	
-	private static final int ESTIMATED_TASKS = 10;
+	private static final int ESTIMATED_TASKS = 100;
 	private static final int JOB_RUNTIME_IN_SECONDS = 1;
-	private static final Time MAX_RUNTIME = Time.of(30);
+	private static final Time MAX_RUNTIME = Time.of(60);
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -55,7 +56,9 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	public void eventTest() throws Exception {
 //        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
         controller().activateScheduler();
-        File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
+        // File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
+        File resultFile = new File(FileUtils.getResourceFile("").getAbsolutePath() + "/result.csv");
+        logger.info("resultfile is " + resultFile);
         JMSTaskObserver l = JMSTaskObserver.getInstance(providerUrl,ESTIMATED_TASKS, resultFile);
         l.addListener(this);
         l.start(1000L,1000L);

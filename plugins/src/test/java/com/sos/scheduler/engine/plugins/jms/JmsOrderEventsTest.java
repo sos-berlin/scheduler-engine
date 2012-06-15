@@ -1,22 +1,27 @@
 package com.sos.scheduler.engine.plugins.jms;
 
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
+import com.sos.scheduler.engine.kernel.event.CppEventFactory;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.Event;
 import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 
@@ -33,33 +38,26 @@ public class JmsOrderEventsTest extends JMSConnection {
     
     // Queue for collecting the fired events in the listener thread
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
-    
-    private SchedulerObjectFactory objFactory;    
+
+    private static final List<String> eventsToListen = asList("OrderTouchedEvent","OrderStateChangedEvent","OrderFinishedEvent");
+
     private int orderFinished = 0;
     
-    @BeforeClass
-    public static void setUpBeforeClass () throws Exception {
-    	logger.debug("test started for class " + JmsOrderEventsTest.class.getSimpleName());
-	}
-    
-    
     public JmsOrderEventsTest() throws Exception {
-    	super(providerUrl);
-    	setMessageListener( new MyListener() );
+    	super(providerUrl, eventsToListen);
+    	setMessageListener( new JmsListener() );
     }
 
     @Test
     public void test() throws Exception {
     	try {
     		controller().activateScheduler();
-    		objFactory = new SchedulerObjectFactory(scheduler().getHostname(), scheduler().getTcpPort());
-    		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order1").getCommand() );
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order2").getCommand() );
     		controller().waitForTermination(shortTimeout);
-	        assertEvent("EventOrderTouched",2);
-	        assertEvent("EventOrderStateChanged",4);
-	        assertEvent("EventOrderFinished",2);
+	        assertEvent("OrderTouchedEvent",2);
+	        assertEvent("OrderStateChangedEvent",4);
+	        assertEvent("OrderFinishedEvent",2);
     	} finally {
     		close();
     	}
@@ -85,34 +83,45 @@ public class JmsOrderEventsTest extends JMSConnection {
 
 
     
-    private class MyListener implements javax.jms.MessageListener {
+    private class JmsListener implements javax.jms.MessageListener {
+
+        // This object is needed for serializing and deserializing of the event objects
+        private final ObjectMapper mapper;
+
+        public JmsListener() {
+            mapper = new ObjectMapper();
+            // mapper.registerSubtypes(OrderTouchedEvent.class, OrderStateChangedEvent.class, OrderFinishedEvent.class);
+            mapper.registerSubtypes( CppEventFactory.eventClassList );
+        }
 
         // runs in an own thread
     	@Override
         public void onMessage(Message message) {
             String result = "<unknown event>";
+            String jsonContent = null;
             try {
                 TextMessage textMessage = (TextMessage) message;
                 showMessageHeader(textMessage);
-                String xmlContent = textMessage.getText();
-            	logger.debug("XML-Content=" + xmlContent);
-                Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
-            	logger.info("subscribe " + ev.getName());
-                if (ev.getEventOrderTouched() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderTouched().getInfoOrder().getId() + " touched");
+                jsonContent = textMessage.getText();
+            	// logger.info("JSON-Content=" + jsonContent);
+                Event ev = mapper.readValue(jsonContent, Event.class);
+                logger.debug(jsonContent);
+                if (ev instanceof OrderStateChangedEvent) {
+                    OrderStateChangedEvent ose = (OrderStateChangedEvent)ev;
                 }
-                if (ev.getEventOrderStateChanged() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getInfoOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getInfoOrder().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
-                }
-                if (ev.getEventOrderFinished() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderFinished().getInfoOrder().getId() + " finished.");
+                if (ev instanceof OrderFinishedEvent) {
                 }
                 textMessage.acknowledge();
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                result = ev.getName();
-            }
-            catch (JMSException x) { throw new RuntimeException(x); }
-            finally {
+                result = ev.getClass().getSimpleName();
+            } catch (IOException e1) {
+                String msg = "could not deserialize " + jsonContent;
+                logger.warn(msg);
+            } catch (JMSException e2) {
+                String msg = "error getting content from JMS.";
+                logger.error(msg);
+                throw new SchedulerException(msg,e2);
+            } finally {
                 try {
 					resultQueue.put(result);
 				} catch (InterruptedException e) {

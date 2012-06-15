@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.util.TimerTask;
-
-import org.apache.log4j.Logger;
 
 public class TaskObserver extends TimerTask {
 
@@ -32,5 +32,4 @@ public class TaskObserver extends TimerTask {
 	}
 	
 	public void close() {;}
-	
 }

@@ -2,21 +2,37 @@ package com.sos.scheduler.engine.kernel.event;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.data.event.AbstractEvent;
-import com.sos.scheduler.engine.data.log.ErrorLogEvent;
-import com.sos.scheduler.engine.data.log.InfoLogEvent;
-import com.sos.scheduler.engine.data.order.*;
-import com.sos.scheduler.engine.eventbus.EventSource;
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
+import com.sos.scheduler.engine.data.log.ErrorLogEvent;
+import com.sos.scheduler.engine.data.log.InfoLogEvent;
+import com.sos.scheduler.engine.data.order.*;
+import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.job.Task;
 import com.sos.scheduler.engine.kernel.order.Order;
-import com.sos.scheduler.engine.data.event.Event;
 
 @ForCpp
 public class CppEventFactory {
+    
+    public static final Class<? extends Event>[] eventClassList = new Class[]
+            {
+                FileBasedActivatedEvent.class,
+                FileBasedRemovedEvent.class,
+                TaskStartedEvent.class,
+                TaskEndedEvent.class,
+                OrderTouchedEvent.class,
+                OrderFinishedEvent.class,
+                OrderSuspendedEvent.class,
+                OrderResumedEvent.class,
+                OrderStepStartedEvent.class,
+                OrderStepEndedEvent.class,
+                OrderStateChangedEvent.class
+            };
+
     /** Der C++-Code benennt das Event durch CppEventCode. */
     static Event newInstance(CppEventCode cppEventCode, EventSource o) {
         switch (cppEventCode) {

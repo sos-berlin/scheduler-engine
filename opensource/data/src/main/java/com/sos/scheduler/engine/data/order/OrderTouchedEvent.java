@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.data.order;
 
 import com.sos.scheduler.engine.data.event.ModifiableSourceEvent;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * \file OrderTouchedEvent.java
@@ -23,7 +25,8 @@ import com.sos.scheduler.engine.data.event.ModifiableSourceEvent;
  * </div>
  */
 public class OrderTouchedEvent extends OrderEvent implements ModifiableSourceEvent {
-    public OrderTouchedEvent(OrderKey key) {
+    @JsonCreator
+    public OrderTouchedEvent(@JsonProperty("key") OrderKey key) {
         super(key);
     }
 }

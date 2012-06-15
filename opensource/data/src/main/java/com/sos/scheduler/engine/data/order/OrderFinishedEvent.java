@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.data.order;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+
 /**
  * \file OrderFinishedEvent.java
  * \brief This event fired if an order reach the end state 
@@ -21,7 +24,8 @@ package com.sos.scheduler.engine.data.order;
  * </div>
  */
 public class OrderFinishedEvent extends OrderEvent {
-    public OrderFinishedEvent(OrderKey key) {
+    @JsonCreator
+    public OrderFinishedEvent(@JsonProperty("key") OrderKey key) {
         super(key);
     }
 }
