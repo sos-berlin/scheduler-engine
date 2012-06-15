@@ -483,7 +483,7 @@ void Vm::start()
 
 #   ifdef Z_WINDOWS
     {    
-        Z_LOG2( Vm::java_log_category, "LoadLibrary " << module_filename << '\n' );
+        Z_LOG2( "scheduler", "LoadLibrary " << module_filename << '\n' );
         HINSTANCE vm_module = LoadLibrary( module_filename.c_str() );
         if( !vm_module )  throw_mswin( "LoadLibrary", "Java Virtual Machine " + module_filename );
 
@@ -495,7 +495,7 @@ void Vm::start()
     }
 #   else
     {
-        Z_LOG2( Vm::java_log_category, "LD_LIBRARY_PATH=" << get_environment_variable( "LD_LIBRARY_PATH" ) << "\n" 
+        Z_LOG2( "scheduler", "LD_LIBRARY_PATH=" << get_environment_variable( "LD_LIBRARY_PATH" ) << "\n" 
 #           ifdef Z_HPUX
                "SHLIB_PATH="      << get_environment_variable( "SHLIB_PATH" ) << "\n" 
                "LD_PRELOAD="      << get_environment_variable( "LD_PRELOAD" ) << "\n" 
