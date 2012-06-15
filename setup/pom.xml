@@ -12,45 +12,38 @@ call prepare-setup.sh <version> to use this pom
     </parent>
     
     <properties>
-      <setup.version>${project.version}</setup.version>
       <setup.platform>${osArch}</setup.platform>
     </properties>
     
     <artifactId>setup</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
+
+    <repositories>
+        <repository>
+            <id>sos-os</id>
+            <name>SOS snapshot Repository (${setup.platform})</name>
+            <url>http://archiva.sos:8080/archiva/repository/sos-os-${setup.platform}</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <!-- updatePolicy>always</updatePolicy -->
+            </snapshots>
+            <releases>
+              <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
     
     <profiles>
     
       <!-- this profile is for preparing the setup for a given version on a given platform, e.g.
-            mvn install -Pprepare -Dversion=1.3.11 -Dplatform=windows-x86
+            mvn install -Pprepare-platform -Dengine.platform=windows-x86
       -->
       <profile>
-        <id>prepare</id>
-        <properties>
-          <setup.version>${engine.version}</setup.version>
-          <setup.platform>${engine.platform}</setup.platform>
-        </properties>
-      </profile>
-      <profile>
-        <id>prepare-snapshot</id>
+        <id>prepare-platform</id>
         <properties>
           <setup.platform>${engine.platform}</setup.platform>
         </properties>
-        <repositories>
-            <repository>
-                <id>sos-os</id>
-                <name>SOS snapshot Repository (${setup.platform})</name>
-                <url>http://archiva.sos:8080/archiva/repository/sos-os-${setup.platform}</url>
-                <snapshots>
-                    <enabled>true</enabled>
-                    <!-- updatePolicy>always</updatePolicy -->
-                </snapshots>
-                <releases>
-                  <enabled>false</enabled>
-                </releases>
-            </repository>
-        </repositories>
         <!--
         -->
       </profile>
@@ -74,20 +67,20 @@ call prepare-setup.sh <version> to use this pom
                             <artifactItem>
                                 <groupId>${project.groupId}</groupId>
                                 <artifactId>jar</artifactId>
-                                <version>${setup.version}</version>
+                                <version>${project.version}</version>
                                 <type>jar</type>
                             </artifactItem>
                             <artifactItem>
                                 <groupId>${project.groupId}</groupId>
                                 <artifactId>jar</artifactId>
-                                <version>${setup.version}</version>
+                                <version>${project.version}</version>
                                 <type>pom</type>
                             </artifactItem>
                             <!--
                             <artifactItem>
                                 <groupId>${project.groupId}</groupId>
                                 <artifactId>kernel-cpp</artifactId>
-                                <version>${setup.version}</version>
+                                <version>${project.version}</version>
                                 <classifier>${setup.platform}</classifier>
                                 <type>jar</type>
                             </artifactItem>
@@ -103,7 +96,7 @@ call prepare-setup.sh <version> to use this pom
                 <target>
                     <ant antfile="prepare-setup.xml" target="setup.platform">
                        <property name="setup.platform" value="${setup.platform}" />
-                       <property name="setup.version" value="${setup.version}" />
+                       <property name="setup.version" value="${project.version}" />
                        <property name="settings.localRepository" value="${settings.localRepository}" />
                     </ant>
                 </target>
@@ -125,21 +118,21 @@ call prepare-setup.sh <version> to use this pom
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>kernel</artifactId>
-            <version>${setup.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>cppjava.runtime</artifactId>
-            <version>${setup.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jetty</artifactId>
-            <version>${setup.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
               <exclusion>
@@ -152,7 +145,7 @@ call prepare-setup.sh <version> to use this pom
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>kernel-cpp</artifactId>
-            <version>${setup.version}</version>
+            <version>${project.version}</version>
             <classifier>${setup.platform}</classifier>
             <scope>runtime</scope>
         </dependency>
