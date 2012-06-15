@@ -142,6 +142,33 @@ to run without maven integration.
 			<fileset refid="files.bin.platform" />
 		</copy>
 
+    <!-- for compatibility reasons the old output directories scheduler.linux32 and scheduler.windows will be
+    created anymore. The code below should be deleted appr. 1/2013.
+    --> 
+    <if>
+     <equals arg1="${setup.platform}" arg2="linux-x86" />
+     <then>
+    		<copy todir="${target.dir}/scheduler.linux32/lib">
+    			<fileset refid="files.lib.platform" />
+    		</copy>
+    		<copy todir="${target.dir}/scheduler.linux32/bin">
+    			<fileset refid="files.bin.platform" />
+    		</copy>
+     </then>
+    </if>
+
+    <if>
+     <equals arg1="${setup.platform}" arg2="windows-x86" />
+     <then>
+    		<copy todir="${target.dir}/scheduler.windows/lib">
+    			<fileset refid="files.lib.platform" />
+    		</copy>
+    		<copy todir="${target.dir}/scheduler.windows/bin">
+    			<fileset refid="files.bin.platform" />
+    		</copy>
+     </then>
+    </if>
+
   </target>
 	
 	<target name="-versioninfo" description="creates a file with version information">
