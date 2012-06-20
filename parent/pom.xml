@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>parent</artifactId>
-    <version>2.0.0.2170-BETA</version>
+    <version>2.0.0.2171-SNAPSHOT</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
 
@@ -151,27 +151,27 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.generator</artifactId>
-                <version>2.0.0.2170-BETA</version>
+                <version>2.0.0.2171-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.scalautil.io</artifactId>
-                <version>2.0.0.2170-BETA</version>
+                <version>2.0.0.2171-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.runtime</artifactId>
-                <version>2.0.0.2170-BETA</version>
+                <version>2.0.0.2171-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>data</artifactId>
-                <version>2.0.0.2170-BETA</version>
+                <version>2.0.0.2171-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>web</artifactId>
-                <version>2.0.0.2170-BETA</version>
+                <version>2.0.0.2171-SNAPSHOT</version>
             </dependency>
 
             <dependency>

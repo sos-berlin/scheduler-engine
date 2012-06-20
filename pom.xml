@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>parent</artifactId>
-        <version>2.0.0.2170-BETA</version>
+        <version>2.0.0.2171-SNAPSHOT</version>
         <relativePath>parent</relativePath>
     </parent>
 
@@ -48,9 +48,9 @@
         <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
         <url>http://subversion.sos/svn/sos/scheduler/engine</url>
         -->
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine/engine-2.0.0.2170-BETA</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine-releases/engine-2.0.0.2170-BETA</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine/engine-2.0.0.2170-BETA</url>
+        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
+        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
+        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
     </scm>
 
     <profiles>

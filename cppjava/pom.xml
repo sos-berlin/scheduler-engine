@@ -6,12 +6,12 @@
         <!-- Der Generator funktioniert nur für den Scheduler, weil dessen C++-Klassen vorausgesetzt werden. -->
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>2.0.0.2170-BETA</version>
+        <version>2.0.0.2171-SNAPSHOT</version>
     </parent>
     
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>cppjava</artifactId>
-    <version>2.0.0.2170-BETA</version>
+    <version>2.0.0.2171-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
