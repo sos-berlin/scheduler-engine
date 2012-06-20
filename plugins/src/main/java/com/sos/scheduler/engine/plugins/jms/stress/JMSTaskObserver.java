@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 import static java.util.Arrays.asList;
 
@@ -28,48 +27,31 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
     private static final List<String> eventsToListen = asList("TaskStartedEvent","TaskEndedEvent");
     private List<TaskInfoListener> listener = new ArrayList<TaskInfoListener>();
 
-	private static int estimatedTasks = 0;
 	private int endedTasks = 0;
 	private int runningTasks = 0;
 	private int maxParallelTasks = 0;
 
-	private static TaskObserverWriter loggerTask = null;
-	private static Timer timer;
-
     // This object is needed for serializing and deserializing of the event objects
     private final ObjectMapper mapper;
 
-	private JMSTaskObserver(String providerUrl, int estimated, File resultFile) throws Exception {
+	private JMSTaskObserver(String providerUrl) throws Exception {
 		super(providerUrl, eventsToListen);
 		setMessageListener(this);
-		estimatedTasks = estimated;
 
         mapper = new ObjectMapper();
         mapper.registerSubtypes( CppEventFactory.eventClassList );
 
-		timer = new Timer();
 		listener.clear();
-		loggerTask = new TaskObserverWriter(resultFile.getAbsolutePath(), this);
 	}
 
 	public static JMSTaskObserver getInstance(String providerUrl, int estimated, File resultFile) throws Exception {
 		if (instance == null)
-			instance = new JMSTaskObserver(providerUrl, estimated, resultFile);
+			instance = new JMSTaskObserver(providerUrl);
 		return instance;
 	}
 	
 	public void addListener(TaskInfoListener addListener) {
 		listener.add(addListener);
-	}
-
-	public void start(long delay, long period) {
-		timer.schedule(loggerTask, delay, period); // schedule the timer task
-	}
-
-	public void stop() {
-		loggerTask.close();
-		timer.cancel();
-		timer.purge();
 	}
 
 	// runs in an own thread
@@ -117,15 +99,9 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
 	}
 
 	@Override
-	public int estimatedTasks() {
-		return estimatedTasks;
-	}
-
-	@Override
 	public void onInterval(TaskInfo info) {
 		for (TaskInfoListener l : listener) 
 			l.onInterval(info);
-        loggerTask.onInterval(info);
 	}
 
 }

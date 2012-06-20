@@ -22,8 +22,6 @@ import static org.junit.Assert.assertEquals;
  * a test with more parallel processes you you to change max_processes in spooler.h or use the binaries 
  * of version 1.3.12.1346-BT.
  * 
- *  @see JS-721
- *  
  * <div class="sos_branding">
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
@@ -60,8 +58,10 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
         File resultFile = new File(FileUtils.getResourceFile("").getAbsolutePath() + "/result.csv");
         logger.info("resultfile is " + resultFile);
         JMSTaskObserver l = JMSTaskObserver.getInstance(providerUrl,ESTIMATED_TASKS, resultFile);
+        TaskObserverWriter w = new TaskObserverWriter(resultFile.getAbsolutePath(),l,ESTIMATED_TASKS);
         l.addListener(this);
-        l.start(1000L,1000L);
+        l.addListener(w);
+        w.start(1000L,1000L);
 		for (int i=0; i < ESTIMATED_TASKS; i++) {
 			controller().scheduler().executeXml(
 					util.startJobImmediately(jobName)
@@ -70,7 +70,7 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 		}
         controller().waitForTermination(MAX_RUNTIME);
         assertEquals("only " + l.endedTasks() + " are finished - " + ESTIMATED_TASKS + " estimated.",ESTIMATED_TASKS,l.endedTasks());
-        l.stop();
+        w.stop();
 	}
 	
     @EventHandler

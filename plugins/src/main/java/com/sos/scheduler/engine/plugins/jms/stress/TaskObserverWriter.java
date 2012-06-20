@@ -9,8 +9,8 @@ public class TaskObserverWriter extends TaskObserver implements TaskInfoListener
 	private final String filename;
 	private final PrintWriter out;
 
-	public TaskObserverWriter(String filename, TaskInfo classInTest) throws IOException {
-		super(classInTest);
+	public TaskObserverWriter(String filename, TaskInfo classInTest, int estimatedTasks) throws IOException {
+		super(classInTest, estimatedTasks);
 		this.filename = filename;
 		FileWriter outFile = new FileWriter(this.filename);
 		out = new PrintWriter(outFile);
@@ -23,7 +23,7 @@ public class TaskObserverWriter extends TaskObserver implements TaskInfoListener
 
 	@Override
 	public void onInterval(TaskInfo info) {
-		out.println(runningSince() + ";" + info.currentlyRunningTasks() + ";" + info.highwaterTasks() + ";" + info.endedTasks() + ";" + info.estimatedTasks());
+		out.println(runningSince() + ";" + info.currentlyRunningTasks() + ";" + info.highwaterTasks() + ";" + info.endedTasks() + ";" + getEstimatedTasks());
 	}
 	
 }
