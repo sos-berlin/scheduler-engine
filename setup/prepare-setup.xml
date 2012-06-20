@@ -89,6 +89,7 @@ to run without maven integration.
   		<include name="jetty-*.jar" />
   		<include name="servlet-api-*.jar" />
   		<include name="aopalliance-*.jar"/>
+  		<exclude name="jetty-${version.number}*.jar" />
   	</fileset>
 
   </target>
