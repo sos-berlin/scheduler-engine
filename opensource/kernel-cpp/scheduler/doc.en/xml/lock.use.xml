@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: web_service.xml 4858 2007-02-19 17:32:03Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 <!--         title    = "Deklaration einer Sperre"-->
 
 <xml_element name     = "lock.use"
@@ -10,7 +10,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
     <xml_parent_elements>
         <xml_parent_element name="job"/>

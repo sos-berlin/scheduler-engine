@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: params.xml,v 1.4 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id$-->
 
 <!--         title    = "Parameter"-->
 
@@ -10,7 +10,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
     <xml_parent_elements>
         <xml_parent_element name="job" />

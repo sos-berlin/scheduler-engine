@@ -2,7 +2,7 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: supervisor_proxy.xml 4594 2006-11-21 12:55:07Z jz $-->
+<!--$Id$-->
 
          <!--title    = "Stellvertreter des Supervisors benennen"-->
 
@@ -12,7 +12,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
 
     <description>

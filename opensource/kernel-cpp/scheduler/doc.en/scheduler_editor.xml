@@ -1,39 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 <description
-    title               = "Job Scheduler Editor"
+    title               = "JOE - JobScheduler Object Editor"
     base_dir            = ""
     author              = "$Author: ts $"
-    date                = "$Date$"
+    date                = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
 
 
 
-		<h2>GUI for Configuration and Documentation</h2>
+		<h2>Configuration and Documentation of JobScheduler objects</h2>
 <!--<h2>GUI für Konfiguration und Dokumentation</h2>-->
 		
 		<p>
-			The Job Scheduler reads its configuration from XML files, 
-			which can be created and edited using a text editor.
-	<!--Der Job Scheduler liest seine Konfiguration aus XML-Dateien, 
+			The JobScheduler reads its configuration from XML files, 
+			which can be created and edited using JOE.
+            JOE provides a graphical user interface with forms for all elements of the JobScheduler configuration.
+            Further user assistance in the form of tool-tips and wizards is provided.
+	<!--Der JobScheduler liest seine Konfiguration aus XML-Dateien, 
 			die mit einem Text-Editor erstellt und bearbeitet werden können.-->
 		</p>
 		<p>
-			Alternatively, the XML configuration can be maintained using the Job Scheduler Editor. 
-			This editor provides a graphical user interface with forms for all elements of the Job Scheduler configuration.
-			Further user support in the form of tool-tips and wizards is provided.
-	<!--Alternativ kann die XML-Konfiguration mit dem Job Scheduler Editor gepflegt werden. Der Editor stellt eine grafische Benutzeroberfläche
+			Alternatively, the XML configuration can be maintained using any text editor. 
+	<!--Alternativ kann die XML-Konfiguration mit dem JOE gepflegt werden. Der Editor stellt eine grafische Benutzeroberfläche
 			mit Formularen für alle Elemente der Scheduler-Konfiguration zur Verfügung. 
 			Anwender werden durch Tooltips und Wizards unterstützt.-->
 		</p>
 		<p>
-			The Editor creates or modifies the XML elements in the Job Scheduler configuration,
+			JOE creates or modifies the XML elements in the JobScheduler configuration,
 			in accordance with the entries made in its forms. 
-			When the changes made are saved, the Job Scheduler configuration file - 
+			When the changes made are saved, the JobScheduler configuration file - 
 			which is usually called <em>scheduler.xml</em>, is rewritten. 
-			The Editor validates all entries made with the current Job Scheduler XML schema -
+			JOE validates all entries made with the current JobScheduler XML schema -
 			errors in entries will be detected immediately.
-	<!--Der Scheduler Editor erzeugt für jeden Eintrag in eines seiner Formulare 
+	<!--JOE erzeugt für jeden Eintrag in eines seiner Formulare 
 			das entsprechende XML-Element der Scheduler-Konfiguration. 
 			Beim Speichern wird jeweils die Konfigurationsdatei des Schedulers, 
 			in der Regel die Datei <em>scheduler.xml</em>, neu geschrieben. 
@@ -42,7 +42,7 @@
 		</p>
 		
 		<p>
-			The Editor can also be  used to document jobs for the Job Scheduler - 
+			JOE can also be  used to document jobs for the JobScheduler - 
 			it generates the documentation in an XML format,
 			which can be shown with navigations elements in a web browser in HTML format, using an appropriate style sheet.
 	<!--Scheduler Jobs können mit dem Editor dokumentiert werden - der Editor generiert die Dokumentation in einem XML-Format, 
@@ -51,22 +51,22 @@
 		
 		
 		
-		<h5>Starting the Scheduler Editor</h5>
+		<h5>Starting JOE</h5>
 <!--<h5>Aufruf Scheduler Editor</h5>-->
 		
 		<p>
-			The Job Scheduler Editor belongs to the standard Job Scheduler installation. 
-			The Job Scheduler installation directory contains the <em>bin/jobeditor.cmd</em> file, 
-			which is used to start the Editor. 
-			Here, the INSTALL_PATH parameter should be set to the Job Scheduler installation directory path.
-	<!--Der Scheduler Editor gehört zur Standard-Auslieferung des Job Schedulers. 
+			JOE belongs to the JobScheduler installation. 
+			The JobScheduler installation directory contains the <em>bin/jobeditor.cmd</em> file, 
+			which is used to start JOE. 
+			Here, the INSTALL_PATH parameter should be set to the JobScheduler installation directory path.
+	<!--JOE gehört zur Standard-Auslieferung des JobSchedulers. 
 			Das Installationsverzeichnis des Schedulers enthält die Datei <em>bin/jobeditor.cmd</em> zum Aufruf des Editors. 
 			In dieser Datei ist für INSTALL_PATH das Scheduler-Installationsverzeichnis einzutragen.-->
 		</p>
 		
 		
 		
-		<h5>Creating the Job Scheduler Configuration</h5>
+		<h5>Creating the JobScheduler Configuration</h5>
 <!--<h5>Scheduler Konfiguration erstellen </h5>-->
 		
 		<p>
@@ -79,8 +79,8 @@
 		</p>
 		
 		<p>
-			The Editor then opens its main window containing a tree view showing a series of elements 
-			such as <em>Config</em>, <em>Jobs</em>, <em>Job Chains</em> etc.
+			JOE then opens its main window containing a tree view showing a series of elements 
+			such as <em>Process Classes</em>, <em>Jobs</em>, <em>Job Chains</em> etc.
 			<br/>
 	<!--Der Editor öffnet sein Hauptfenster mit einer Baumansicht für einzelne Elemente, 
 			z.B. <em>Config</em>, <em>Jobs</em>, <em>Job Chains</em> etc.-->
@@ -88,9 +88,9 @@
 			<img src="images/editor_config.jpg" width="958" height="614" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
-			Tool-tips are available for all form fields and control elements of the Editor. 
-			In addition, the <strong>F1</strong> button can be used to start the Job Scheduler XML documentation, 
-			which is contextual and will open at the relevant XML element that is currently being worked on.
+			Tool-tips are available for all form fields and control elements of JOE. 
+			In addition, the <strong>F1</strong> button can be used to start the JobScheduler documentation, 
+			which is contextual and will open at the relevant object that is currently being worked on.
 	<!--Für alle Formularfelder und Steuerelemente sind Tooltips verfügbar. 
 			Mit der Taste <strong>F1</strong> wird als Hilfe die XML-Dokumentation des 
 			Schedulers angezeigt, die Hilfe ist auf den Kontext bezogen und steuert das XML-Element an, 
@@ -118,13 +118,13 @@
 <!--<h3>Vorhandene Konfigurationsdatei öffnen</h3>-->
 		
 		<p>
-			Existing Job Scheduler configuration files are opened using the <em>File/Open</em> menu items:
+			Existing JobScheduler configuration files are opened using the <em>File/Open</em> menu items:
 	<!--Existierende Konfigurationsdateien öffnen Sie mit dem Menüpunkt <em>File/Open</em>:-->
 			<br/>
 			<img src="images/editor_menu_file_open.jpg" width="150" height="155" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
-			Example - the <em>scheduler.xml</em> file from the Job Scheduler installation, showing the base file configuration:
+			Example - the <em>scheduler.xml</em> file from the JobScheduler installation, showing the base file configuration:
 	<!--Beispiel - Öffnen der Datei <em>scheduler.xml</em> aus der Auslieferung, Ansicht der Base-File Konfiguration:-->
 			<br/>
 			<img src="images/editor_menu_file_open_scheduler_xml.jpg" width="887" height="320" style="margin: 20px 0px ; border:1px solid gray;"/>
@@ -138,7 +138,7 @@
 		<p>
 			<ul>
 				<li>
-					Open the <em>scheduler.xml</em> file in the Job Scheduler installation.
+					Open the <em>scheduler.xml</em> file in the JobScheduler installation.
 			<!--Öffnen Sie die Konfigurationsdatei <em>scheduler.xml</em> der Auslieferung.-->
 				</li>
 				<li>
@@ -149,10 +149,10 @@
 				</li>
 				<li>
 					<p>
-						Enter the jobs the Job Scheduler should execute, together with the relevant job parameters in the <em>Jobs</em> form. 
+						Enter the jobs the JobScheduler should execute, together with the relevant job parameters in the <em>Jobs</em> form. 
 				<!--Tragen Sie im Formular <em>Jobs</em> die Jobs mit den Job-Parametern ein, die der Scheduler ausführen soll.-->
 						
-						For each job entered, the Editor creates a new branch in the job tree view.
+						For each job entered, JOE creates a new branch in the job tree view.
 						Each job has additional forms, 
 						in which further properties such as executable program code and start times are entered.
 				<!--Der Editor erstellt für jeden Job einen Zweig in der Baumansicht aller Jobs.
@@ -163,7 +163,7 @@
 				<!--Sie können zum Erstellen eines Jobs auf Basis eines Standard-Jobs auch den Job Wizard verwenden.-->
 						<br/>
 						Note: when jobs are defined in XML files which themselves are included using &lt;base&gt; 
-						then the included XML file will be opened in the Editor together with the job definition.
+						then the included XML file will be opened in JOE together with the job definition.
 				<!--Hinweis: wenn Jobs in XML-Dateien definiert werden sollen, die mit &lt;base&gt; inkludiert werden,
 						ist die inkludierte XML-Datei mit den Job-Definitionen im Editor zu öffnen.-->
 					</p>
@@ -178,7 +178,8 @@
 						tragen Sie die Job-Kette im Formular <em>Job Chains</em> ein. 
 						Für jede Job-Kette sind die einzelnen Job-Ketten-Knoten zu definieren. 
 						Jedem Job-Ketten-Knoten ist ein Job zuzuordnen.-->
-						<br/>
+                    </p>
+                    <p>
 						Note: when job chains are to be defined in XML files, which are included using &lt;base&gt;, 
 						then the XML file with the job chain definitions is to be opened.
 				<!--Hinweis: wenn Job-Ketten in XML-Dateien definiert werden sollen, 
@@ -191,17 +192,17 @@
 						Note that when order controlled jobs are to be used in job chains, 
 						then the way in which the orders are created must be specified:
 				<!--Wenn Sie auftragsgesteuerte Jobs in Job-Ketten verwenden, muss festgelegt werden, wie die Aufträge entstehen:-->
+                    </p>
 					<p>
-					</p>
 						Orders can be created using directory monitoring - 
 						this is done by specifying file orders in the <em>Job Chains</em> form.
 				<!--Aufträge können durch Verzeichnisüberwachung erzeugt werden - 
 						definieren Sie hierfür Dateiaufträge im Formualar <em>Job Chains</em>.-->
-					<p>
 					</p>
+                    <p>
 						Orders can also be directly created using the &lt;add_order&gt; command - 
 						this type of order is defined in the <em>Orders</em> form.
-						Using the information entered in this form, the Editor generates an &lt;add_order&gt; element, 
+						Using the information entered in this form, JOE generates an &lt;add_order&gt; element, 
 						which can be shown using the <em>Commands</em> form.
 				<!--Sie können Aufträge direkt mit einem &lt;add_order&gt;-Kommando erstellen - 
 						definieren Sie solche Aufträge im Formular <em>Orders</em>.
@@ -218,21 +219,21 @@
 <!--<h3>Job Wizard</h3>-->
 		
 		<p> 
-			The Job Wizard is used to create a new job on the basis of an already documented Standard Job.
+			The Job Wizard is used to create a new job on the basis of an already documented Template Job.
 	<!--Mit dem Job Wizard kann ein neuer Job auf Basis eines bereits dokumentierten Standards-Jobs erstellt werden.-->
 		</p>
 		<p>
-			Existing job are available from a selection of documented standard jobs that are delivered with the Job Scheduler.
-			These jobs can be found in the <em>/jobs</em> directory in the standard Job Scheduler installation directory.
+			Existing job are available from a selection of documented template jobs that are delivered with the JobScheduler.
+			These jobs can be found in the <em>/jobs</em> directory in the JobScheduler installation directory.
 	<!--Vorhandene Job-Dokumentationen liegen als XML-Dateien im Unterverzeichnis <em>/jobs</em> 
 			des Scheduler-Installationsverzeichnisses.
 			Mit der Scheduler-Auslieferung steht bereits eine Reihe von dokumentierten Standard-Jobs zur Verfügung.-->
 		</p>
 		<p>
 			The Job Wizard reads out this <em>/jobs</em> directory and makes all the jobs found there available for import.
-			An imported job has all the features of the original, in particular the language. 
-			Job parameters are also be taken over but can be modified in the Editor. 
-			Further settings  such as the number of tasks, the start times, time-out settings, can then be changed one after another.
+			An imported job has all the features of the original, in particular the job-language. 
+			Job parameters are also be taken over but can be modified in JOE. 
+			Further settings such as the number of tasks, the start times, time-out settings, can then be changed one after the other.
 			Each step in the Wizard is supported by explanatory text 
 	<!--Der Job Wizard liest das <em>/jobs</em>-Verzeichnis und bietet alle Jobs zum Import an. 
 			Ein importierter Job hat die gleichen Eigenschaften wie 
@@ -260,26 +261,26 @@
 <!--<h3>Scheduler Job Dokumentation erstellen </h3>-->
 		
 		<p>
-			The Editor can be used to create a documentation for Job Scheduler jobs in a predefined format. 
+			JOE can be used to create a documentation for JobScheduler jobs in a predefined format. 
 	<!--Für jeden Scheduler-Job kann eine Dokumentation in einem festgelegten XML-Format erstellt werden.-->
 		</p>
 		<p>
-			The documentation is generally written by the job developer and serves users/deployers 
+			The documentation is generally written by the job developer and serves users/deployers or other developers
 			configuring jobs for particular job implementations.
 	<!--Die Dokumentation wird in der Regel vom Entwickler eines Jobs erstellt und dient dem Anwender/ Deployer, 
 			die Job-Konfiguration für konkrete Job-Implementierungen vorzunehmen.-->
 		</p>
 		<p>
-			The Editor allows the XML job documentation file to be created using forms, 
+			JOE allows the job documentation file to be created using forms, 
 			without knowledge of the XML format.
-			The <em>scheduler_job_documentation.xsl</em> XML style sheet allows users to view the documentation 
-			in HTML format using a standard web browser.
+			The <em>scheduler_job_documentation.xsl</em> style sheet allows users to view the documentation 
+			in HTML format using a web browser.
 	<!--Mit dem Editor können Sie die XML-Datei zur Job-Dokumentation formularbasiert erstellen, ohne das XML-Format zu kennen. 
 			Mit Hilfe eines Stylesheets <em>scheduler_job_documentation.xsl</em> 
 			kann die Dokumentation für den Anwender im Browser als HTML-Seite angezeigt werden.-->
 		</p>
 		<p>
-			A documented job is saved in the Job Scheduler <em>/jobs</em> directory,
+			A documented job is saved in the JobScheduler <em>/jobs</em> directory,
 			and it can thereby be used by the Job Wizard as a prototype for further jobs.
 	<!--Ein dokumentierter Job wird im <em>/jobs</em>-Verzeichnis des Schedulers gespeichert und 
 	ist damit als Vorbild für neue Jobs mit Hilfe des Job Wizards verfügbar.-->
@@ -291,7 +292,7 @@
 			<img src="images/editor_menu_file_new.jpg" width="317" height="156" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
-			A contextual help is available for each form of the Editor and can be opened using <strong>F1</strong>:
+			A contextual help is available for each form of JOE and can be opened using <strong>F1</strong>:
 	<!--Zu jedem Formular ist eine kontextbezogene Hilfe mit <strong>F1</strong> erreichbar:-->
 			<br/>
 			<img src="images/editor_help_documentation.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
@@ -311,11 +312,11 @@
 		<h4>FTP/SFTP</h4>
 		
 		<p>
-			The Job Scheduler can open and save XML configuration files per FTP (File Transfer Protocol) and 
-			SFTP (Secure FTP). 
+			The JobScheduler can open and save XML configuration files per FTP (File Transfer Protocol) and 
+			SFTP (FTP over SSH). 
 			The FTP dialog can either be opened by way of the File -> FTP menu entries or 
 			by clicking on the FTP toolbar icon:
-	<!--Der Job Scheduler kann eine XML-Konfigurationsdateien per FTP (File Transfer Protocol) bzw. 
+	<!--Der JobScheduler kann eine XML-Konfigurationsdateien per FTP (File Transfer Protocol) bzw. 
 			SFTP (Secure FTP) öffnen bzw.eine offene Datei per FTP/SFTP speichern. 
 			Sie können über den Menüpunkt File -> FTP oder über den Toolbar den FTP Dialog öffnen:-->
 		</p>
@@ -345,7 +346,7 @@
 		
 		<p>
 			FTP connections that have already been configured can be selected from the drop-down list.
-	<!--In diesem Auswahllisten können Sie einen bereits konfigurierten FTP Zugang auswählen-->
+	<!--In dieser Auswahlliste können Sie einen bereits konfigurierten FTP Zugang auswählen-->
 		</p>
 		
 		
@@ -403,7 +404,7 @@
 		<p>
 			If the FTP dialog has been opened using the "Open by FTP" menu entry, 
 			then the "Open" button will cause the XML configuration file selected to be downloaded 
-			from the FTP server and opened in the Job Scheduler Editor.
+			from the FTP server and opened in JOE.
 	<!--Wurde der FTP Dialog unter der Menüpunkt "Open by FTP" ausgewählt, 
 			dann wird beim Betätigen des Buttons "Open" die 
 			XML-Datei vom FTP Server heruntergeladen und im Editor geöffnet.-->
@@ -412,7 +413,7 @@
 			If the FTP dialog has been opened using the "Open Hot Folder by FTP" menu entry, 
 			then only directories will be shown in the dialog.
 			Selection of a hot folder will then cause all the XML configuration files  within that folder to be downloaded 
-			from the FTP server and opened in the Scheduler Editor.
+			from the FTP server and opened in JOE.
 	<!--Wurde der FTP Dialog unter der Menüpunkt "Open Hot Folder by FTP" ausgewählt, 
 			dann sind nur Verzeichnisse zu sehen. 
 			Dateien werden nicht in der Dateiliste angezeigt. 
@@ -497,9 +498,9 @@
 		<h4>WebDAV</h4>
 		
 		<p>
-			The Job Scheduler can open and save XML configuration files per WebDAV. 
+			JOE can open and save XML configuration files per WebDAV. 
 			The WebDAV dialog can  be opened using the File -> WebDAV menu entries 
-	<!--Der Job Scheduler kann eine XML-Konfigurationsdateien per WebDAV öffnen bzw.
+	<!--Der JobScheduler kann eine XML-Konfigurationsdateien per WebDAV öffnen bzw.
 			eine offene Datei per WebDAV speichern. 
 			Sie können über den Menüpunkt File -> WebDAV  den WebDAV Dialog öffnen:-->
 		</p>
@@ -509,12 +510,12 @@
 		<p>
 			The WebDAV menu entry is only active, 
 			when the libraries necessary to make WebDAV connections are available.
-			These libraries are not part of the Job Scheduler distribution because of licensing reasons but 
+			These libraries are not part of the JobScheduler distribution because of licensing reasons but 
 			can be downloaded from the Sourceforge <code>webdavclient4j</code> project under 
 			<a href="https://sourceforge.net/projects/webdavclient4j/">https://sourceforge.net/projects/webdavclient4j/</a>. 
 	<!--Der Menüpunkt WebDAV ist nur aktiv, 
 			wenn die notwendigen Bibliotheken für die WebDAV-Verbindungen vorhanden sind.
-			Diese Bibliotheken sind aus Lizenzgründen nicht Teil der Job Scheduler Distribution. Sie können z.B. 
+			Diese Bibliotheken sind aus Lizenzgründen nicht Teil der JobScheduler Distribution. Sie können z.B. 
 			vom Sourceforge Projekt <code>webdavclient4j</code> unter
 			<a href="https://sourceforge.net/projects/webdavclient4j/">https://sourceforge.net/projects/webdavclient4j/</a> 
 			heruntergeladen werden.-->
@@ -534,15 +535,15 @@
 			<li>commons-httpclient-3.0.1.jar</li>
 		</ul>
 		<p>
-			The Job Scheduler Editor is activated by a command file, 
+			JOE is started by a command file, 
 			which is found under <code><i>scheduler_installation_directory</i>/bin</code>. 
 			The <code>CLASSPATH</code> in this file must be extended to include the above mentioned libraries. 
-	<!--Der Job Scheduler Editor wird über eine Kommandodatei aufgerufen, 
+	<!--Der JOE wird über eine Kommandodatei aufgerufen, 
 			die sich unter <code><i>scheduler_installation_directory</i>/bin</code> befindet. 
 			Hier muss der <code>CLASSPATH</code> um die oben genannten Bibliotheken erweitert werden. -->
 		</p>
 		<p>
-			The Editor command file opens a dialog in which the profile (i.e. WebDAV connection) to be opened is selected,
+			JOE opens a dialog in which the profile (i.e. WebDAV connection) to be opened is selected,
 			followed by the file to be opened.
 	<!--Es erscheint ein Dialog, indem Sie das zu öffnenden Profil (WebDAV-Verbindung) und anschließend 
 			die zu öffnenden Dateien auswählen können. -->
@@ -617,7 +618,7 @@
 		<p>
 			If the WebDAV dialog has been opened using the "Open by WebDAV" menu entry, 
 			then the "Open" button will cause the XML configuration file selected to be downloaded 
-			from the WebDAV server and opened in the Job Scheduler Editor.
+			from the WebDAV server and opened in JOE.
 	<!--Wurde der WebDAV Dialog unter dem Menüpunkt "Open by WebDAV" ausgewählt, 
 			dann wird beim Betätigen des Button "Open" die 
 			XML-Datei vom WebDAV Server heruntergeladen und im Editor geöffnet.-->
@@ -626,7 +627,7 @@
 			If the WebDAV dialog has been opened using the "Open Hot Folder by WebDAV" menu entry, 
 			then only directories will be shown in the dialog.
 			Selection of a hot folder will then cause all the XML configuration files within the folder to be downloaded 
-			from the WebDAV server and opened in the Scheduler Editor.
+			from the WebDAV server and opened in JOE.
 	<!--Wurde der WebDAV Dialog unter dem Menüpunkt "Open Hot Folder by WebDAV" ausgewählt, 
 			dann sind nur Verzeichnisse zu sehen. Dateien werden nicht in der Dateiliste angezeigt. 
 			Beim Auswählen eines Verzeichnisses werden vom WebDAV Server alle Dateien des Hot Folders heruntergeladen 

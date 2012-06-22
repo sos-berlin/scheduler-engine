@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<!-- $Id: api-default_language.xsl 4286 2006-05-23 09:22:04Z jz $ -->
+<!-- $Id$ -->
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">

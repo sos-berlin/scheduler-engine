@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: scheduler_log.log_categories.reset.xml 5907 2008-09-30 14:33:31Z jz $-->
+<!--$Id$-->
 
          <!--title    = "Setzt eine Log-Kategorien fürs interne scheduler.log"-->
 
@@ -12,7 +12,7 @@
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
 
     <description>

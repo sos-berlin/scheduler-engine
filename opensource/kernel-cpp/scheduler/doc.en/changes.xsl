@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<!-- $Id: changes.xsl 5593 2008-02-04 05:41:19Z jz $ -->
+<!-- $Id$ -->
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">

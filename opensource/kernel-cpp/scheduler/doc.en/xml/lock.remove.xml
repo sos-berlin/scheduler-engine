@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: add_jobs.xml 4336 2006-06-06 18:03:24Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 <!--         title    = "Löscht eine Sperre" -->
 
 <xml_element name     = "lock.remove"
@@ -10,7 +10,7 @@
              title    = "Remove a Lock" 
              base_dir = "../"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
 
     <description>

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: at.xml 4214 2006-03-24 11:12:09Z jz $-->
+<!--$Id$-->
 
 <!--         title    = "Startzeitpunkt"
  -->
@@ -12,7 +12,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
     <xml_parent_elements>
         <xml_parent_element name="run_time"/>

@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler_base.xsl 5913 2008-10-02 14:15:45Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!-- $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <!--
     Änderungswünsche:

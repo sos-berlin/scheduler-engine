@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: file_orders.xml 4532 2006-09-20 05:16:06Z jz $-->
+<!--$Id$-->
 <!--title               = "Verzeichnisüberwachung mit Dateiaufträgen"-->
 
 <description
     title               = "Directory Monitoring with File Orders"
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date$"
+    date                = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
     <scheduler_keyword keyword="Directory"/>
     <scheduler_keyword keyword="File"/>

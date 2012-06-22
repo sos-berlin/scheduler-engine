@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- $Id: api-perl.xml 12325 2006-09-21 09:42:42Z jz $ -->
+<!-- $Id$ -->
 <?xml-stylesheet href="api-powershell.xsl" type="text/xsl"?>
 <api.class name="api" base_dir="../" title="Programmschnittstelle (API) für Powershell">
 

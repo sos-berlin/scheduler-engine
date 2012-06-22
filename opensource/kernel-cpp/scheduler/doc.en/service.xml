@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: service.xml 3303 2005-01-11 23:22:22Z jz $-->
+<!--$Id$-->
 
 <description 
     title               = "Running the Job Scheduler as a Service or Daemon" 
     base_dir            = ""
     author              = "$Author: ap $"
-    date                = "$Date$"
+    date                = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
 
 		<scheduler_keyword keyword="Dienst"/>

@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: command_line.xml 4235 2006-04-04 09:58:06Z jz $-->
+<!--$Id$-->
 
 <command_line	program  ="scheduler"
 							title    ="Command Line Options" 
 							base_dir ="" 
               author   = "$Author: ur $"
-              date     = "$Date$">
+              date     = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $">
 
     <command_options name="run" title="Starting the Job Scheduler">
 <!--<command_options name="run" title="Start des Job Schedulers">-->

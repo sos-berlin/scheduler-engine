@@ -4,7 +4,7 @@
          <!--title    = "Auftrag, Dauerauftrag in einer Konfigurationsdatei"-->
 
 
-<!--$Id: order.xml 5267 2007-09-27 16:27:00Z jz $-->
+<!--$Id$-->
 
 <xml_element name     = "order"
              parent_page = "../konfiguration.xml"
@@ -12,7 +12,7 @@
              title    = "Orders, Permanent Orders in a Configuration File"
              base_dir = "../"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
 
     <description>

@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: command_line.xml 3649 2005-05-06 11:55:52Z jz $-->
+<!--$Id$-->
 
 <events title    = "Events"
         base_dir = ""
         author   = "$Author: jz $"
-        date     = "$Date$">
+        date     = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $">
 
     <description>
         <scheduler_keyword keyword="Events"/>

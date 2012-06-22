@@ -2,7 +2,7 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: show_jobs.xml,v 1.4 2004/09/07 06:25:36 jz Exp $-->
+<!--$Id$-->
 
 <xml_element name     = "show_jobs" 
              title    = ""
@@ -10,7 +10,7 @@
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date$">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
 
     <description>

@@ -8,7 +8,7 @@
     base_dir = "../" 
     package  = "Charset"
     author   = "$Author: jz $"
-    date     = "$Date$"
+    date     = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
     <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
     <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->

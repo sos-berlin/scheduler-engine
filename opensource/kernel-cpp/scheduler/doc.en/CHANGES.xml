@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0"?>
 <?xml-stylesheet href="changes.xsl" type="text/xsl"?>
 
-<!--$Id: CHANGES.xml 4985 2007-04-19 14:54:41Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 <!--     title    = "Änderungsprotokoll"-->
 
 <changes title    = "Change Log"
          author   = "$Author: jz $"
-         date     = "$Date$">
+         date     = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $">
 
 <!--<scheduler_keyword keyword="Änderungsprotokoll"/>-->
     <scheduler_keyword keyword="Change log"/>

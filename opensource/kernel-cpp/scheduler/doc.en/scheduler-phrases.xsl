@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<!-- $Id: scheduler-phrases.xsl 5178 2007-08-27 09:27:39Z jz $ -->
+<!-- $Id$ -->
 <!-- Texte für XSLT-Stylesheets der Dokumentation: scheduler.xsl, scheduler_base.xsl, api/api.xsl -->
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"

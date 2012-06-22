@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: ERROR.xml,v 1.3 2004/09/07 19:16:49 jz Exp $-->
+<!--$Id$-->
 
 <!--         title         = "Fehlermeldung"-->
 
@@ -12,7 +12,7 @@
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date$">
+             date          = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
     <xml_parent_elements>
         <xml_parent_element name="answer">

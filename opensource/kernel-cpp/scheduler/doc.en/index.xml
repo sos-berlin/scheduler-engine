@@ -20,7 +20,7 @@
       Möglicherweise steht auch die Seite index.xml.html bereit.
       *************************************************************  -->
 
-<!--$Id: index.xml 4944 2007-04-02 10:16:49Z al $-->
+<!--$Id$-->
 
 <description 
     head_title          = "Documentation" 
@@ -28,7 +28,7 @@
     suppress_browse_bar = "yes"
   xxsuppress_logo       = "yes" 
     author              = "$Author: ap $"
-    date                = "$Date$"
+    date                = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
 
     <scheduler_ignore>
@@ -47,21 +47,17 @@
     <!--div style="float: right; width: 133px; margin-left: 3em; margin-right: 0em;">
         <img alt="logo" width="133" height="93" src="images/logo/job_scheduler_rabbit_circle_typo_colour_web_133x93.jpg"/>
     </div-->
-    <!--verschmuddelt div style="float: right; width: 165px; height: 114px; position: relative; top: -5px; margin-left: 3em; margin-right: 1em;">
-        <img alt="logo" width="165" height="114" src="images/logo/job_scheduler_rabbit_circle_typo_colour_165x114.jpg"/>
-    </div-->
 
-    <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">The Job Scheduler</h1>
-<!--<h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Job Scheduler</h1>-->
+    <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">The JobScheduler</h1>
 
     <p style="max-width: none">
-      The Job Scheduler starts and monitors jobs.
+      The JobScheduler starts and monitors jobs.
       A job may be started using a time-based trigger; by changes to a directory; by an order or using command line input.
-      The Job Scheduler recognizes orders that are processed in job chains.
-      It runs on Windows, Linux, Solaris, HP-UX and AIX.
-  <!--Der Job Scheduler startet Jobs und überwacht sie.
+      The JobScheduler recognizes orders that are processed in job chains.
+      It runs on many different operating system platforms.
+  <!--Der JobScheduler startet Jobs und überwacht sie.
       Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
-      Der Job Scheduler kennt Aufträge, die durch Jobketten geschleust werden.
+      Der JobScheduler kennt Aufträge, die durch Jobketten geschleust werden.
         Er wird unter Windows, Linux, Solaris und HP-UX betrieben.-->
     </p>
 
@@ -88,24 +84,24 @@
                         </dt>
                         <dd>
                             <p>
-                                The Job Scheduler can be configured using 
+                                The JobScheduler can be configured using 
                                 <scheduler_a href="konfiguration.xml">XML-</scheduler_a> and .ini files
                                 and recognises <scheduler_a href="command_line.xml">command line options</scheduler_a>.
                                 Jobs, job chains and other objects can be <scheduler_a href="dynamic_configuration.xml">dynamically configured</scheduler_a>
                                 using <em>Hot Folders</em>. 
                                 Jobs, job chains, etc. can also be 
                                 <scheduler_a href="central_configuration.xml"> centrally configured</scheduler_a> 
-                                by a <em>Supervisor</em> Job Scheduler 
-                                and replicated for other Job Scheduler instances.
-                            <!--Der Job Scheduler wird mit <scheduler_a href="konfiguration.xml">XML-Dateien</scheduler_a> und .ini-Dateien konfiguriert
+                                by a <em>Supervisor</em> JobScheduler 
+                                and replicated for other JobScheduler instances.
+                            <!--Der JobScheduler wird mit <scheduler_a href="konfiguration.xml">XML-Dateien</scheduler_a> und .ini-Dateien konfiguriert
                                 und kennt <scheduler_a href="command_line.xml">Kommandozeilenoptionen</scheduler_a>. Jobs und Job-Ketten etc. können
                                 aus <em>Hot Folders</em> <scheduler_a href="dynamic_configuration.xml"> dynamisch konfiguriert</scheduler_a> werden.
-                                Jobs und Job-Ketten etc. können bei einem <em>Supervisor</em> Job Scheduler <scheduler_a href="central_configuration.xml"> zentral konfiguriert</scheduler_a> 
+                                Jobs und Job-Ketten etc. können bei einem <em>Supervisor</em> JobScheduler <scheduler_a href="central_configuration.xml"> zentral konfiguriert</scheduler_a> 
                                 und an andere Instanzen repliziert werden.-->
                             </p>
                             <p>
                                 Jobs, job chains etc. can be <scheduler_a href="central_configuration.xml"> centrally configured</scheduler_a> 
-                                by a <em>Supervisor</em> Job Scheduler for remote Job Scheduler instances.
+                                by a <em>Supervisor</em> JobScheduler for remote JobScheduler instances.
                             <!--Jobs und Job-Ketten etc. können bei einem <em>Supervisor</em> <scheduler_a href="central_configuration.xml"> zentral konfiguriert</scheduler_a> werden.-->
                             </p>
                         </dd>
@@ -114,7 +110,7 @@
                             <scheduler_a href="scheduler_editor.xml"/>
                         </dt>
                         <dd>
-                            A GUI for configuration and documentation is provided with the Job Scheduler.
+                            A UI for configuration and documentation is provided with the JobScheduler.
                         <!--GUI for Configuration and Documentation-->
                         <!--GUI für Konfiguration und Dokumentation-->
                         </dd>
@@ -132,12 +128,12 @@
                             <p>
                                 Settings made in the <code>factory.ini</code> file overwrite those 
                                 specified in the XML Configuration.-->
-                            <!--(Note that the Job Scheduler ignores unspecified settings such as 
+                            <!--(Note that the JobScheduler ignores unspecified settings such as 
                                 "<code>entry=</code>".)-->
                             <!--The <scheduler_a href="sos_ini.xml"/> file is used for 
                                 settings which also apply to other products from the SOS GmbH and 
                                 therefore it contains license keys that are applicable to all products.
-                                The <code>factory.ini</code> file is used for Job Scheduler specific settings. -->
+                                The <code>factory.ini</code> file is used for JobScheduler specific settings. -->
                             <!--Die Einstellungen in der
                                 <scheduler_a href="factory_ini.xml"/>
                                 haben Vorrang vor den Einstellungen in der XML-Konfiguration.
@@ -154,7 +150,7 @@
                         </dt>
                         <dd>
                             <p>
-                                <scheduler_a href="command_line.xml">Options specified on starting the Job Scheduler</scheduler_a>
+                                <scheduler_a href="command_line.xml">Options specified on starting the JobScheduler</scheduler_a>
                                 overwrite those made using the <code>factory.ini</code> file 
                                 and the <scheduler_a href="konfiguration.xml"/>.-->
                             <!--Die <scheduler_a href="command_line.xml">Optionen beim Start des Schedulers</scheduler_a>
@@ -171,12 +167,12 @@
                         </dt>
                         <dd>
                             <p>
-                                The Job Scheduler can save its task and order queue information in a 
+                                The JobScheduler can save its task and order queue information in a 
                                 <scheduler_a href="datenbank.xml">database</scheduler_a>,
                                 which is used to record a
                                 <scheduler_a href="history.xml">history</scheduler_a> containing individual 
                                 <scheduler_a href="protokolle.xml">log files</scheduler_a>.
-                            <!--Der Job Scheduler kann seine Task- und Auftragswarteschlangen in einer 
+                            <!--Der JobScheduler kann seine Task- und Auftragswarteschlangen in einer 
                                 <scheduler_a href="datenbank.xml">Datenbank</scheduler_a> 
                                 halten.
                                 Und er führt darin eine <scheduler_a href="history.xml">Historie</scheduler_a>,
@@ -195,10 +191,10 @@
                         </dt>
                         <dd>
                             <p>
-                                The Job Scheduler can be installed as a <scheduler_a href="service.xml">service</scheduler_a>
+                                The JobScheduler can be installed as a <scheduler_a href="service.xml">service</scheduler_a>
                                 on Windows systems and started as a 
                                 <scheduler_option name="service">daemon</scheduler_option> on Unix.
-                            <!--Der Job Scheduler wird unter Windows als <scheduler_a href="service.xml">Dienst</scheduler_a>
+                            <!--Der JobScheduler wird unter Windows als <scheduler_a href="service.xml">Dienst</scheduler_a>
                                 installiert
                                 und unter Unix als 
                                 <scheduler_option name="service">Daemon</scheduler_option> gestartet.-->
@@ -244,7 +240,7 @@
                             <scheduler_a href="api/api-javascript.xml">JavaScript</scheduler_a>,
                             <scheduler_a href="api/api-vbscript.xml">VBScript</scheduler_a> and
                             <scheduler_a href="api/api-perl.xml">Perl</scheduler_a>.
-                        <!--Die Klassen und Methoden des Job Schedulers, die Jobs in
+                        <!--Die Klassen und Methoden des JobSchedulers, die Jobs in
                             <scheduler_a href="api/api-java.xml">Java</scheduler_a>,
                             <scheduler_a href="api/api-javascript.xml">JavaScript</scheduler_a>,
                             <scheduler_a href="api/api-vbscript.xml">VBScript</scheduler_a> und
@@ -265,8 +261,8 @@
                             <scheduler_a href="remote_execution.xml"/>
                         </dt>
                         <dd>
-                            Jobs can be executed on remote Job Schedulers.
-                        <!--Jobs lassen sich auf einen fernen Job Scheduler ausführen.-->
+                            Jobs can be executed on remote JobSchedulers.
+                        <!--Jobs lassen sich auf einen fernen JobScheduler ausführen.-->
                         </dd>
                     </dl>
                 </div>
@@ -298,7 +294,7 @@
                         <!--<scheduler_a href="order.xml">Aufträge und Job-Ketten</scheduler_a>-->
                         </dt>
                         <dd>
-                            The Job Scheduler can process orders through job chains.
+                            The JobScheduler can process orders through job chains.
                             Job chains define the order in which jobs are to be executed and can be restarted if required.
                         <!--Der Scheduler kann Aufträge durch Job-Ketten schleusen.
                             Job-Ketten definieren die Reihenfolge, in der Jobs ausgeführt werden,
@@ -309,7 +305,7 @@
                             <scheduler_a href="file_orders.xml"/>
                         </dt>
                         <dd>
-                            Files added to a directory are can be used by the Job Scheduler to create and start orders.
+                            Files added to a directory are can be used by the JobScheduler to create and start orders.
                             These can then be processed by a job chain.
                         <!--Einem Verzeichnis hinzugefügte Dateien führen zu Aufträgen,
                             die von einer Job-Kette ausgeführt werden.-->
@@ -320,18 +316,18 @@
                         <!--<scheduler_a href="directory_watch.xml">Einfache Verzeichnisüberwachung</scheduler_a>-->
                         </dt>
                         <dd>
-                            The Job Scheduler can monitor directories and start jobs when files are added to these directories.
-                        <!--The Job Scheduler starts a job, once a file has been added to a directory.-->
-                        <!--Der Job Scheduler startet einen Job, wenn eine Datei einem Verzeichnis hinzugefügt wird.-->
+                            The JobScheduler can monitor directories and start jobs when files are added to these directories.
+                        <!--The JobScheduler starts a job, once a file has been added to a directory.-->
+                        <!--Der JobScheduler startet einen Job, wenn eine Datei einem Verzeichnis hinzugefügt wird.-->
                         </dd>
                         <dt>
                             <scheduler_a href="distributed_orders.xml">Distributed Orders</scheduler_a>
                         <!--<scheduler_a href="distributed_orders.xml">Verteilte Aufträge</scheduler_a>-->
                         </dt>
                         <dd>
-                            Orders can be processed by clusters of several Job Schedulers running on different servers.
-                        <!--Orders which are processed by clusters consisting of several Job Schedulers running on different servers.-->
-                        <!--Aufträge werden von einem Cluster bestehend aus mehreren Job Scheduler auf unterschiedlichen Servern verarbeitet.-->
+                            Orders can be processed by clusters of several JobSchedulers running on different servers.
+                        <!--Orders which are processed by clusters consisting of several JobSchedulers running on different servers.-->
+                        <!--Aufträge werden von einem Cluster bestehend aus mehreren JobScheduler auf unterschiedlichen Servern verarbeitet.-->
                         </dd>
 
                     </dl>
@@ -345,7 +341,7 @@
                             <scheduler_a href="protokolle.xml"/>
                         </dt>
                         <dd>
-                            The Job Scheduler maintains various protocols for jobs, tasks and orders as well as a common protocol, 
+                            The JobScheduler maintains various protocols for jobs, tasks and orders as well as a common protocol, 
                             the <code>scheduler.log</code>.
                         <!--Es gibt ein Hauptprotokoll und Job-, Task- und Auftragsprotokolle. Und das <code>scheduler.log</code>.-->
                         </dd>
@@ -354,8 +350,8 @@
                             <scheduler_a href="email.xml"/>
                         </dt>
                         <dd>
-                            The Job Scheduler can be configured to send task protocols and messages by E-mail.
-                        <!--Task-Protokolle und besondere Meldungen kann der Job Scheduler per eMail verschicken.-->
+                            The JobScheduler can be configured to send task protocols and messages by E-mail.
+                        <!--Task-Protokolle und besondere Meldungen kann der JobScheduler per eMail verschicken.-->
                         </dd>
                     </dl>
                 </div>
@@ -373,10 +369,10 @@
                         </dt>
                         <dd>
                             <p>
-                                The Job Scheduler has its own 
+                                The JobScheduler has its own 
                                 <scheduler_a href="http.xml">HTTP server</scheduler_a>
                                 and can be operated using a HTML interface.
-                            <!--Der Job Scheduler verfügt über einen
+                            <!--Der JobScheduler verfügt über einen
                                 <scheduler_a href="http.xml">HTTP-Server</scheduler_a>
                                 und stellt HTML-Seiten zu seiner Bedienung bereit.-->
                             </p>
@@ -400,7 +396,7 @@
                             <scheduler_a href="xml_commands.xml"/>
                         </dt>
                         <dd>
-                            The Job Scheduler can process 
+                            The JobScheduler can process 
                             <scheduler_a href="xml_commands.xml">commands in XML</scheduler_a> 
                             as well as in 
                             <scheduler_a href="http.xml">HTTP</scheduler_a>, 
@@ -410,7 +406,7 @@
                             <scheduler_a href="http.xml">HTTP</scheduler_a>, 
                             <scheduler_element name="config" attribute="tcp_port">TCP</scheduler_element> und
                             <scheduler_element name="config" attribute="tcp_port">UDP</scheduler_element>
-                            nimmt der Job Scheduler
+                            nimmt der JobScheduler
                             <scheduler_a href="xml_commands.xml">Kommandos in XML</scheduler_a> entgegen.-->
                         </dd>
                     </dl>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<!-- $Id: Xslt_stylesheet.xml 3921 2005-09-20 18:30:46Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -9,7 +9,7 @@
     object_name = "x"
     base_dir    = "../"
     author      = "$Author: jz $"
-    date        = "$Date$"
+    date        = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
 
     <method name="close">

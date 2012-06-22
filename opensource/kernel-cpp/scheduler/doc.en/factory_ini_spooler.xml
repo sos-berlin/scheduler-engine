@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: factory_ini_spooler.xml 3623 2005-04-20 06:53:16Z jz $-->
+<!--$Id$-->
 
 <ini_section
     name     = "spooler"
@@ -9,7 +9,7 @@
     weight   = "20"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date$"
+    date     = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
 
     <ini_entries>

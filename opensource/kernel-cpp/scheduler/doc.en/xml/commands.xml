@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: commands.xml 4340 2006-06-06 19:46:51Z jz $-->
+<!--$Id$-->
 
 <xml_element name          = "commands"
              title         = "XML Commands"
              base_dir      = "../"
              parent_page   = "../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date$">
+             date          = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
     <xml_parent_elements>
         <xml_parent_element directory="xml/" name="config">

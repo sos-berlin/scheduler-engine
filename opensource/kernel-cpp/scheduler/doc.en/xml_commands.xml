@@ -2,7 +2,7 @@
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 
-<!--$Id: xml_commands.xml 4977 2007-04-16 06:11:54Z jz $-->
+<!--$Id$-->
 
 <!--title    = "XML-Kommandos"-->
 
@@ -10,7 +10,7 @@
     title    = "XML Commands"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date$"
+    date     = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
     <description>
         <p>

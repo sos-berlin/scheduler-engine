@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Andreas Pueschel (APL Software GmbH) -->
-<!-- $Id: Task.xml 3946 2005-09-26 08:52:01Z jz $ -->
+<!-- $Id$ -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -10,7 +10,7 @@
     object_name ="spooler_task" 
     base_dir    ="../" 
     author      ="$Author: jz $" 
-    date        = "$Date$"
+    date        = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

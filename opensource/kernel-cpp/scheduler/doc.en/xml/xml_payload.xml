@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: xml_payload.xml 4127 2006-03-01 11:03:12Z jz $-->
+<!--$Id$-->
 
 <xml_element name          = "xml_payload"
              title         = "XML Payload"
              base_dir      = "../"
              parent_page   = "../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date$">
+             date          = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
           <!--title         = "XML-Nutzlast"-->
 

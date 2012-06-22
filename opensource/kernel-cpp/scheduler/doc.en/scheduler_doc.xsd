@@ -6,7 +6,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="en">
-            $Id: scheduler_doc.xsd 4131 2006-03-02 09:37:33Z jz $
+            $Id$
             Job Scheduler Documentation Schema
         <!--Schema für die Scheduler-Dokumentation-->
         </xsd:documentation>

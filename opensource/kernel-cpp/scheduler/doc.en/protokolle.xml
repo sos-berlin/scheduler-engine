@@ -2,13 +2,13 @@
 <!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Andreas Pueschel (APL Software GmbH) -->
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: protokolle.xml 3639 2005-04-25 10:30:08Z jz $-->
+<!--$Id$-->
 
 <description 
     title    = "Logs" 
     base_dir = ""
     author   = "$Author: ap $"
-    date     = "$Date$"
+    date     = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
 >
 
 	<scheduler_keyword keyword="Log"/>

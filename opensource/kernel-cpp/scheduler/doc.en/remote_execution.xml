@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Andreas Pueschel (APL Software GmbH) -->
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
-<!--$Id: job.xml 4950 2007-04-12 06:39:59Z fs $-->
+<!--$Id$-->
 <!--					title			="Externe Jobverarbeitung" -->
-<description title="External Job Processing with Agents" base_dir="" author="$Author: fs,ur $" date="$Date$">
+<description title="External Job Processing with Agents" base_dir="" author="$Author: fs,ur $" date="$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $">
 	<scheduler_keyword keyword="Remote Execution"/>
 	<scheduler_keyword keyword="Remote"/>
 	<scheduler_keyword keyword="remote_scheduler"/>

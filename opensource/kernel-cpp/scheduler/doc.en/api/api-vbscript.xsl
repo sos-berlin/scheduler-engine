@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<!-- $Id: api-vbscript.xsl 4345 2006-06-14 12:00:39Z jz $ -->
+<!-- $Id$ -->
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
                 version   = "1.0">

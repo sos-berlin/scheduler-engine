@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<!-- $Id: messages_to_c++.xslt 4187 2006-03-10 10:19:49Z jz $ -->
+<!-- $Id$ -->
 
 <!-- xsl:document scheint eine Besonderheit von Daniel Veillards xsltproc zu sein. -->
 
