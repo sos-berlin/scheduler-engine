@@ -6,13 +6,11 @@ import java.io.PrintWriter;
 
 public class TaskObserverWriter extends TaskObserver implements TaskInfoListener {
 
-	private final String filename;
 	private final PrintWriter out;
 
 	public TaskObserverWriter(String filename, TaskInfo classInTest, int estimatedTasks) throws IOException {
 		super(classInTest, estimatedTasks);
-		this.filename = filename;
-		FileWriter outFile = new FileWriter(this.filename);
+		FileWriter outFile = new FileWriter(filename);
 		out = new PrintWriter(outFile);
 		out.println("duration;running;highwater;ended;estimated");
 	}

@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.plugins.jms.stress;
 
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,7 +16,7 @@ public class TaskObserver extends TimerTask {
     private long runningSince;
 
 
-	public TaskObserver(TaskInfo classInTest, int estimatedTasks) throws IOException {
+	public TaskObserver(TaskInfo classInTest, int estimatedTasks) {
 		this.testClass = classInTest;
 		this.start = System.currentTimeMillis();
 		this.runningSince = 0;

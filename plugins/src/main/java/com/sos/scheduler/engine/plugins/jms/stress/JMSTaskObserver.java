@@ -12,7 +12,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +22,8 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
 
 	private static final Logger logger = Logger.getLogger(JMSTaskObserver.class);
 
-	private static JMSTaskObserver instance = null;
     private static final List<String> eventsToListen = asList("TaskStartedEvent","TaskEndedEvent");
-    private List<TaskInfoListener> listener = new ArrayList<TaskInfoListener>();
+    private final List<TaskInfoListener> listener = new ArrayList<TaskInfoListener>();
 
 	private int endedTasks = 0;
 	private int runningTasks = 0;
@@ -34,7 +32,7 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
     // This object is needed for serializing and deserializing of the event objects
     private final ObjectMapper mapper;
 
-	private JMSTaskObserver(String providerUrl) throws Exception {
+	public JMSTaskObserver(String providerUrl) throws Exception {
 		super(providerUrl, eventsToListen);
 		setMessageListener(this);
 
@@ -44,12 +42,6 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
 		listener.clear();
 	}
 
-	public static JMSTaskObserver getInstance(String providerUrl, int estimated, File resultFile) throws Exception {
-		if (instance == null)
-			instance = new JMSTaskObserver(providerUrl);
-		return instance;
-	}
-	
 	public void addListener(TaskInfoListener addListener) {
 		listener.add(addListener);
 	}
