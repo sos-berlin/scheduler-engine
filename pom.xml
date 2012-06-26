@@ -58,8 +58,8 @@
             <id>release</id>
             <properties>
                 <!-- Versionsbezeichnungen für die nächste Freigabe und die darauffolgende Entwicklungsversion hier einstellen -->
-                <releaseVersion>2.0.0.2170-BETA</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
-                <developmentVersion>2.0.0.2171-SNAPSHOT</developmentVersion>
+                <releaseVersion>1.5.0.2177</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
+                <developmentVersion>1.5.0.2178-SNAPSHOT</developmentVersion>
                 <tag>engine-${releaseVersion}</tag>
             </properties>
         </profile>
