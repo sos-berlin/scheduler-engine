@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.Ignore;
 
 import java.io.File;
 
@@ -49,7 +49,7 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
         logger.debug("starting test for " + StressTest.class.getName());
 	}
 	
-	@Test
+	@Ignore
 	public void eventTest() throws Exception {
 //        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
         controller().activateScheduler();
