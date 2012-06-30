@@ -405,7 +405,7 @@ void Time::set_datetime_utc( const string& t )
 
 Time Time::utc_from_time_zone(const string& time_zone) 
 {
-    return is_never() || _is_utc? Time(*this) 
+    return _is_utc || is_null() || is_never()? Time(*this) 
         : Time((double)TimeZonesJ::localToUtc(time_zone, ms()), is_utc);
 }
 
@@ -437,7 +437,7 @@ string Time::as_string( With_ms with ) const
 {
     string result;
 
-    result.reserve( 27 );  // yyyy-mm-dd hh:mm:ss.mmm UTC
+    result.reserve( 23 );  // yyyy-mm-dd hh:mm:ss.mmm
 
     if( is_never() )
     {
@@ -463,7 +463,7 @@ string Time::as_string( With_ms with ) const
         else
         {
             result = Sos_optional_date_time( uint(_time) ).as_string() + bruch;
-            if( _is_utc )  result += " UTC";    // xml_value() macht hieraus "Z"
+            //if( _is_utc )  result += " UTC";    // xml_value() macht hieraus "Z"
         }
     }
 
@@ -474,14 +474,14 @@ string Time::as_string( With_ms with ) const
 
 string Time::xml_value( With_ms with ) const
 {
-    string str = as_string( with );
+    string str = as_string( with ) + "Z";   // Z: UTC-Zeit
 
     if( str.length() > 10  &&  isdigit( (unsigned char)str[0] )  &&  str[10] == ' ' )
     {
         str[10] = 'T';                      // yyyy-mm-ddThh:mm:ss.mmm
     }
 
-    if( string_ends_with( str, " UTC" ) )  str.replace( 23, 4, "Z" );
+    //if( string_ends_with( str, " UTC" ) )  str.replace( 23, 4, "Z" );
 
     return str;
 }
