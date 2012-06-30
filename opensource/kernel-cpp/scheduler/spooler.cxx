@@ -2026,7 +2026,7 @@ string Spooler::configuration_for_single_job_script()
 void Spooler::start()
 {
     static_log_categories.save_to( &_original_log_categories );
-    _max_micro_step_time = Duration(_variables->get_int("scheduler.message.SCHEDULER-721.timeout", (int)_max_micro_step_time.seconds()));
+    _max_micro_step_time = Duration(_variables->get_int64("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.seconds()));
 
     _state_cmd = sc_none;
     set_state( s_starting );

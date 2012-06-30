@@ -184,6 +184,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     void                        get_var                     ( BSTR name, VARIANT* value ) const;
     string                      get_string                  ( const string& name ) const;
     int                         get_int                     ( const string& name, int deflt ) const;
+    int64                       get_int64                   ( const string& name, int64 deflt ) const;
     bool                        get_bool                    ( const string& name, bool deflt ) const;
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
     javaproxy::java::util::ArrayList java_names             () const; 

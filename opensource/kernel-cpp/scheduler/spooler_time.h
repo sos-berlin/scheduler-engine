@@ -49,7 +49,7 @@ struct Duration {
     friend ostream&             operator <<                 ( ostream& s, const Duration& o )       { o.print(s); return s; }
     void                        print                       ( ostream& s ) const                    { s << as_string(); }
     string                      as_string                   ( With_ms = with_ms ) const;                        
-    long                        seconds                     () const                                { return (long)(_seconds + 0.0005); }
+    int64                       seconds                     () const                                { return (int64)(_seconds + 0.0005); }
 
     static const Duration       eternal;
     static const Duration       epsilon;
@@ -151,7 +151,7 @@ public:
     time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
     double                      cut_fraction                ( string* datetime_string );
-    long                        ms                          () const                        { return (long)(_time * 1000 + 0.5); }
+    int64                       ms                          () const                        { return (int64)(_time * 1000 + 0.5); }
     Time                        utc_from_time_zone          (const string&);
 
     string                      as_string                   ( With_ms = with_ms ) const;                        

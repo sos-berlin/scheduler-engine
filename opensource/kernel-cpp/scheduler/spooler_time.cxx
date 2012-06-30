@@ -385,8 +385,8 @@ void Time::set_datetime_utc( const string& t )
 
 Time Time::utc_from_time_zone(const string& time_zone) 
 {
-    return _is_utc || is_zero() || is_never()? Time(*this) 
-        : Time((double)TimeZonesJ::localToUtc(time_zone, ms()), is_utc);
+    return is_zero() || is_never()? Time(*this) 
+        : Time((double)TimeZonesJ::localToUtc(time_zone, ms()) / 1000.0, is_utc);
 }
 
 //-------------------------------------------------------------------------------Time::cut_fraction
