@@ -58,7 +58,7 @@ struct Period
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
 
-    bool                        empty                       () const                                { return _begin == Time::never; }
+    bool                        empty                       () const                                { return _begin.is_never(); }
     bool                        has_start                   () const                                { return is_single_start() || !repeat().is_eternal(); }
     Time                        next_try                    ( const Time& );
     Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p += t; return p; }

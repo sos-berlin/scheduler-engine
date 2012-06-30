@@ -102,7 +102,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     Duration                    collect_within              ()                                  { return _collect_within; }
     void                    set_collect_max                 ( const Duration& d )               { _collect_max = d; }
     Duration                    collect_max                 ()                                  { return _collect_max; }
-    Time                        collect_end                 ()                                  { return !_first_send.is_null()? _first_send + _collect_max : Time(0); }
+    Time                        collect_end                 ()                                  { return _first_send.not_zero()? _first_send + _collect_max : Time(0); }
 
     void                        inherit_settings            ( const Prefix_log& );
     void                    set_job_name                    ( const string& job_name )          { _job_name = job_name; }

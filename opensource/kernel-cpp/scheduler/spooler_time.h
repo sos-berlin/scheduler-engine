@@ -36,13 +36,15 @@ struct Duration {
     bool                        operator !=                 (const Duration& o) const               { return _seconds != o._seconds; }
     bool                        operator >=                 (const Duration& o) const               { return _seconds >= o._seconds; }
     bool                        operator >                  (const Duration& o) const               { return _seconds > o._seconds; }
-    bool                        operator !                  () const                                { return is_null(); }
-
+    bool                        operator !                  () const                                { return is_zero(); }
+    Duration                    operator -                  () const                                { return Duration(-_seconds); }
+    Duration&                   operator +=                 (const Duration& o)                     { _seconds += o._seconds; return *this; }
+    Duration&                   operator -=                 (const Duration& o)                     { _seconds -= o._seconds; return *this; }
 
     double                      as_double                   () const                                { return _seconds; }
     Duration                    rounded_to_next_second      () const                                { return Duration( floor( _seconds + 0.9995 ) ); }
-    bool                        is_defined                  () const                                { return _seconds != 0.0; }
-    bool                        is_null                     () const                                { return _seconds == 0.0; }
+    bool                        not_zero                    () const                                { return _seconds != 0.0; }
+    bool                        is_zero                     () const                                { return _seconds == 0.0; }
     bool                        is_eternal                  () const                                { return _seconds == never_double; } 
     friend ostream&             operator <<                 ( ostream& s, const Duration& o )       { o.print(s); return s; }
     void                        print                       ( ostream& s ) const                    { s << as_string(); }
@@ -115,15 +117,12 @@ private:
     bool                        operator >                  ( int t ) const;
 public:
 
-                                operator bool               () const                        { return is_defined(); }
-    bool                        operator !                  () const                        { return is_null(); }
-    int                         compare                        (const Time& t) const;
+    bool                        operator !                  () const                        { return is_zero(); }
+    int                         compare                     (const Time& t) const;
 
     void                        set_date_time               (const Sos_optional_date_time&);
-    void                    set_null                        ()                              { set( 0 ); }
-    bool                     is_null                        () const                        { return _time == 0; }
-    bool                        is_defined                  () const                        { return _time != 0; }
-    void                    set_never                       ()                              { set( never_int ); } 
+    bool                     is_zero                        () const                        { return _time == 0; }
+    bool                        not_zero                    () const                        { return _time != 0; }
     bool                     is_never                       () const                        { return _time == never_double; } 
     bool                        has_date                    () const                        { return _time > 366*24*60*60; }   // Eigentlich nur bis ein Tag
     Time                        rounded_to_next_second      () const                        { return Time( floor( _time + 0.9995 ) ); }

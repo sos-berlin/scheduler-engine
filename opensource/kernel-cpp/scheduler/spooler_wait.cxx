@@ -266,7 +266,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
     if( now < until  &&  _spooler->_waitable_timer )
     {
-        if( resume_until < Time::never )
+        if( !resume_until.is_never() )
         {
             LARGE_INTEGER gmtime;
 
@@ -346,7 +346,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 S console_line;
                 console_line << Time::now().as_string( time::without_ms );
                 
-                if( until < Time::never  ||  wait_for_object )
+                if( !until.is_never() ||  wait_for_object )
                 {
                     console_line << " (";
                     if (!until.is_never()) {

@@ -363,8 +363,8 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
     Time t = order_queue->next_announced_distributed_order_time();
     assert( t );
 
-    string before = t < Time::never? t.as_string( time::without_ms ) 
-                                   : never_database_distributed_next_time;
+    string before = !t.is_never()? t.as_string( time::without_ms ) 
+                                  : never_database_distributed_next_time;
     result << " and " << db_text_distributed_next_time() << " < " << sql::quoted( before );
 
     return result;
@@ -386,8 +386,8 @@ int Database_order_detector::read_result_set( Read_transaction* ta, const string
         Order_queue_node* node = Order_queue_node::cast( job_chain->node_from_state( record.as_string( "state" ) ) );
 
         distributed_next_time.set_datetime( record.as_string( "distributed_next_time" ) );
-        if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time.set_null();
-        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time.set_never();
+        if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time = Time(0);
+        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time = Time::never;
         
         bool is_now = distributed_next_time <= _now;
         node->order_queue()->set_next_announced_distributed_order_time( distributed_next_time, is_now );
@@ -553,7 +553,7 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
                    << order_select_database_columns << ", `job_chain`"
                       "  from " << db()->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db());
-        if(  options->_from              )  select_sql << " and " << db_text_distributed_next_time() << " >= " << sql::quoted( options->_from  .as_string(time::without_ms) );
+        if(  options->_from.not_zero()   )  select_sql << " and " << db_text_distributed_next_time() << " >= " << sql::quoted( options->_from  .as_string(time::without_ms) );
         if( !options->_before.is_never() )  select_sql << " and " << db_text_distributed_next_time() << " < "  << sql::quoted( options->_before.as_string(time::without_ms) );
         else
         if( !options->_from              )  select_sql << " and `distributed_next_time` is not null ";
@@ -2985,7 +2985,7 @@ bool Job_chain::tip_for_new_distributed_order( const Order::State& state, const 
         if( node->order_queue()->is_distributed_order_requested( time_max - 1 ) 
          && at < node->order_queue()->next_announced_distributed_order_time() )
         {
-            node->order_queue()->set_next_announced_distributed_order_time( at, at.is_null() || at <= Time::now() );
+            node->order_queue()->set_next_announced_distributed_order_time( at, at.is_zero() || at <= Time::now() );
             result = true;
         }
 
@@ -4110,13 +4110,13 @@ void Order_queue::add_order( Order* order, Do_log do_log )
     Time next_time = order->next_time();
 
 
-    if( next_time )
+    if( next_time.not_zero() )
     {
         if( !order->_suspended )
         {
-            if( order->_setback < Time::never )  
+            if( !order->_setback.is_never() )  
             {
-                if( order->_setback )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
+                if( order->_setback.not_zero() )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
             }
             //else  JS-474
             //    order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" ); JS-474

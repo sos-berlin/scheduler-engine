@@ -263,7 +263,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     Time                        next_time                   ()                                      { return _next_time; }
     Time                        next_start_time             ();
-    bool                        has_next_start_time         ()                                      { return next_start_time() < Time::never; }
+    bool                        has_next_start_time         ()                                      { return !next_start_time().is_never(); }
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 

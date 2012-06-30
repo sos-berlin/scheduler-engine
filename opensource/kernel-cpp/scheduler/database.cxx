@@ -2527,7 +2527,7 @@ void Task_history::write( bool start )
     if( start | _job_history->_use_file )  parameters = _task->has_parameters()? xml_as_string( _task->parameters_as_dom() )
                                                                                : "";
 
-    string start_time = !start || !_task->_running_since.is_null()? _task->_running_since.as_string(time::without_ms)
+    string start_time = !start || !_task->_running_since.is_zero()? _task->_running_since.as_string(time::without_ms)
                                                                   : Time::now().as_string(time::without_ms);
 
     while(1)

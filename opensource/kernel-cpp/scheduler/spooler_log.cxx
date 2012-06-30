@@ -996,8 +996,8 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
     {
         Time now = Time::now();
 
-        if( _last_send.is_null()  ||  _last_send  > now )  _last_send  = now;
-        if( _first_send.is_null()  ||  _first_send > now )  _first_send = now;
+        if( _last_send.is_zero()  ||  _last_send  > now )  _last_send  = now;
+        if( _first_send.is_zero()  ||  _first_send > now )  _first_send = now;
 
 
         // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 

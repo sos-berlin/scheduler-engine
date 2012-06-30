@@ -558,7 +558,7 @@ void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element
         while( options->_count < options->_limit )
         {
             Period period = next_period( t, wss_next_any_start, options->_before );  
-            if( period.begin() >= options->_before  ||  period.begin() == Time::never )  break;
+            if( period.begin() >= options->_before  ||  period.begin().is_never() )  break;
 
             //if( period._start_once  ||
             //    period._single_start  ||     
@@ -1261,7 +1261,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 
     if( _covered_schedule_path == "" )
     {
-        if( !_covered_schedule_begin.is_null() )  z::throw_xc( "SCHEDULER-467", "valid_from", "substitute" );
+        if( !_covered_schedule_begin.is_zero() )  z::throw_xc( "SCHEDULER-467", "valid_from", "substitute" );
         if( !_covered_schedule_end.is_never()  )  z::throw_xc( "SCHEDULER-467", "valid_to"  , "substitute" );
     }
 
@@ -1461,24 +1461,25 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
 
 
                 // Gestern war Feiertag? Periode mit when_holiday="next_non_holiday" suchen
+                Duration foresee_duration = Duration(foresee_years*24*60*60);
 
-                for( int before = -24*60*60;
-                     before >= -foresee_years*24*60*60  &&  _holidays.is_included( Time(t + before) ); 
-                     before -= 24*60*60 )
+                for (Duration before = -Duration::day;
+                     before >= -foresee_duration  &&  _holidays.is_included(t + before); 
+                     before -= Duration::day)
                 {
-                    Period p = next_period_of_same_day( t + Duration(before), single_start | wss_when_holiday_next_non_holiday );
-                    if( !p.empty() )  result = min( result, p - Duration(before));   // Vergangene Periode auf heute verschieben
+                    Period p = next_period_of_same_day( t + before, single_start | wss_when_holiday_next_non_holiday );
+                    if( !p.empty() )  result = min( result, p - before);   // Vergangene Periode auf heute verschieben
                 }
 
 
                 // Morgen ist Feiertag? Periode mit when_holiday="previous_non_holiday" suchen
 
-                for( int after = +24*60*60;
-                     after <= foresee_years*24*60*60  &&  !Duration(t + after).is_eternal()  &&  _holidays.is_included(Time(t + after)); 
-                     after += 24*60*60 )
+                for (Duration after = Duration::day;
+                     after <= foresee_duration  &&  !(t + after).is_never()  &&  _holidays.is_included(t + after); 
+                     after += Duration::day)
                 {
-                    Period p = next_period_of_same_day( t + Duration(after), single_start | wss_when_holiday_previous_non_holiday );
-                    if( !p.empty() )  result = min( result, p - Duration(after) );    // Zukünftige Periode auf heute verschieben
+                    Period p = next_period_of_same_day(t + after, single_start | wss_when_holiday_previous_non_holiday);
+                    if( !p.empty() )  result = min(result, p - after);    // Zukünftige Periode auf heute verschieben
                 }
             }
         }
@@ -1670,7 +1671,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
                 _repeat = Duration(as_double(repeat));
         }
 
-        if( _repeat.is_null() )  _repeat = Duration::eternal;
+        if( _repeat.is_zero() )  _repeat = Duration::eternal;
 
 
         string absolute_repeat = element.getAttribute( "absolute_repeat" );
@@ -1685,7 +1686,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
             else
                 _absolute_repeat = Duration(as_double(absolute_repeat));
 
-            if( _absolute_repeat.is_null() )  z::throw_xc( "SCHEDULER-441", element.nodeName(), "absolute_repeat", "0" );
+            if( _absolute_repeat.is_zero() )  z::throw_xc( "SCHEDULER-441", element.nodeName(), "absolute_repeat", "0" );
             if( !_absolute_repeat.is_eternal() )  _repeat = Duration::eternal;
           //if( !_repeat.is_never()   )  z::throw_xc( "SCHEDULER-442", "absolute_repeat", "repeat" );
         }
@@ -2136,7 +2137,7 @@ Period Ultimo_set::next_period_of_same_day( const Time& tim, With_single_start s
     {
         Time     time_of_day = tim.time_of_day();
         int      day_nr      = tim.day_nr();
-        Sos_date date        = Sos_optional_date_time( (time_t)tim );
+        Sos_date date        = Sos_optional_date_time(tim.as_time_t());
 
         if( const Day* day = _days[ last_day_of_month( date ) - date.day() ] )
         {

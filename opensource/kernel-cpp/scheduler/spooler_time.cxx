@@ -149,10 +149,7 @@ void Time::set_date_time(const Sos_optional_date_time& dt)
 void Time::operator += (const Duration& d)
 { 
     if (!is_never()) {
-        if (d.is_eternal()) 
-            set(Time::never);
-        else 
-            set( as_double() + d.as_double() );
+        set(d.is_eternal()? never_double : as_double() + d.as_double());
     }
 }
 
@@ -161,10 +158,7 @@ void Time::operator += (const Duration& d)
 void Time::operator -= (const Duration& d)
 { 
     if (!is_never()) {
-        if (d.is_eternal()) 
-            set(Time::never);
-        else 
-            set(as_double() - d.as_double());
+        set(d.is_eternal()? never_double : as_double() - d.as_double());
     }
 }
 
@@ -309,9 +303,9 @@ int Time::month_nr() const
 int Time::compare(const Time& o) const 
 {
     if (_is_utc == o._is_utc || 
-        is_null() || 
+        is_zero() || 
         is_never() ||
-        o.is_null() || 
+        o.is_zero() || 
         o.is_never()) {
             return _time < o._time? -1 : _time > o._time? +1 : 0;
     } else {
@@ -331,7 +325,7 @@ double Time::as_double() const
 
 double Time::as_double_or_never() const
 {
-    if (!_is_utc && !is_null() && !is_never()) throw_xc("NO-UTC-TIME", as_string());
+    if (!_is_utc && !is_zero() && !is_never()) throw_xc("NO-UTC-TIME", as_string());
     return _time;
 }
 
@@ -339,7 +333,7 @@ double Time::as_double_or_never() const
 
 double Time::as_utc_double() const
 {
-    if (!_is_utc && !is_null() && !is_never()) throw_xc("NO-UTC-TIME", as_string());
+    if (!_is_utc && !is_zero() && !is_never()) throw_xc("NO-UTC-TIME", as_string());
     return _time;
 }
 
@@ -348,7 +342,7 @@ double Time::as_utc_double() const
 Time& Time::set_utc( double t )
 {
     set( t );
-    //if( !is_null()  &&  !is_never() )  
+    //if( !is_zero()  &&  !is_never() )  
     _is_utc = true;
     return *this;
 }
@@ -359,7 +353,7 @@ Time& Time::set_datetime( const string& t )
 {
     if( t == never_name )
     {
-        set_never();
+        set(never_double);
     }
     else
     {
@@ -384,14 +378,14 @@ Time& Time::set_datetime( const string& t )
 void Time::set_datetime_utc( const string& t )
 {
     set_datetime( t );
-    if( !is_null()  &&  !is_never() )  _is_utc = true;
+    if( !is_zero()  &&  !is_never() )  _is_utc = true;
 }
 
 //-------------------------------------------------------------------------Time::utc_from_time_zone
 
 Time Time::utc_from_time_zone(const string& time_zone) 
 {
-    return _is_utc || is_null() || is_never()? Time(*this) 
+    return _is_utc || is_zero() || is_never()? Time(*this) 
         : Time((double)TimeZonesJ::localToUtc(time_zone, ms()), is_utc);
 }
 
@@ -430,7 +424,7 @@ string Time::as_string( With_ms with ) const
         result = never_name;
     }
     else
-    if( is_null() )
+    if( is_zero() )
     {
         result = immediately_name;
     }

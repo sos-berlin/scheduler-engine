@@ -379,7 +379,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
             update[ "state"      ] = state().as_string();
             update[ "state_text" ] = state_text();
             update[ "title"      ] = title();
-            update.set_datetime( "end_time"  , ( end_time().is_defined()? end_time() : Time::now() ).as_string(time::without_ms) );
+            update.set_datetime( "end_time"  , ( end_time().not_zero()? end_time() : Time::now() ).as_string(time::without_ms) );
 
             ta.execute( update, Z_FUNCTION );
 
@@ -992,7 +992,7 @@ string Order::calculate_db_distributed_next_time()
         {
             Time next_time = this->next_time().rounded_to_next_second();
 
-            result = next_time.is_null ()? now_database_distributed_next_time :
+            result = next_time.is_zero ()? now_database_distributed_next_time :
                      next_time.is_never()? never_database_distributed_next_time 
                                          : next_time.as_string( time::without_ms );
         }
@@ -1460,7 +1460,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     if( !show_what.is_set( show_for_database_only ) ) // &&  !show_what.is_set( show_id_only ) )
     {
-        if( _setback.is_defined() )
+        if( _setback.not_zero() )
             result.setAttribute( "next_start_time", _setback.as_string() );
 
         if( _schedule_use->is_defined() )   // Wie in Job::dom_element(), besser nach Schedule_use::dom_element()  <schedule.use covering_schedule="..."/>
@@ -1505,7 +1505,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
         result.setAttribute( "priority"  , _priority );
 
-        if( _created.is_defined() )
+        if( _created.not_zero() )
             result.setAttribute( "created"   , _created.as_string() );
 
         if( _log->is_active() )
@@ -1579,7 +1579,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     // Wenn die folgenden Werte sich ändern, _order_xml_modified = true setzen!
 
-    if( _setback.is_defined() )
+    if( _setback.not_zero() )
     result.setAttribute( _setback_count == 0? "at" : "setback", _setback.as_string() );
 
     if( _setback_count > 0 )
@@ -1602,8 +1602,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
                             result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
     if( !_is_virgin      )  result.setAttribute( "touched"     , "yes" );
 
-    if( start_time().is_defined() )  result.setAttribute( "start_time", start_time().as_string() );
-    if( end_time().is_defined()   )  result.setAttribute( "end_time"  , end_time  ().as_string() );
+    if( start_time().not_zero() )  result.setAttribute( "start_time", start_time().as_string() );
+    if( end_time().not_zero()   )  result.setAttribute( "end_time"  , end_time  ().as_string() );
 
     if( _outer_job_chain_path != "" )
     {
@@ -2077,7 +2077,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
             if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) ) log_line += ", Job " + job_node->job_path();
             if( is_error_state )  log_line += ", error state";
 
-            if( _setback.is_defined() )  log_line += ", at=" + _setback.as_string();
+            if( _setback.not_zero() )  log_line += ", at=" + _setback.as_string();
 
             if( _suspended )  log_line += ", suspended";
 
@@ -2134,7 +2134,7 @@ void Order::set_job_chain_node( Node* node, bool is_error_state )
     if( node )
     {
         if( node->is_suspending_order() )  set_suspended();
-        if( node->delay().is_defined()  &&  !at().is_defined() )  set_at_after_delay( Time::now() + node->delay() );
+        if( node->delay().not_zero()  &&  !at().not_zero() )  set_at_after_delay( Time::now() + node->delay() );
     }
 
     set_state2( node? node->order_state() : empty_variant, is_error_state );
@@ -2417,7 +2417,7 @@ void Order::activate_schedule()
     bool ok = _schedule_use->try_load();
     if( ok )  
     {
-        if( _setback.is_defined() )  set_setback( _setback );
+        if( _setback.not_zero() )  set_setback( _setback );
                   else  set_next_start_time();
     }
 }
@@ -2502,7 +2502,7 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
 
     if( !_setback_called )  _setback_count = 0;
 
-    if( !_suspended  &&  _setback == Time::never  &&  _setback_count > _task->job()->max_order_setbacks() )
+    if( !_suspended  &&  _setback.is_never()  &&  _setback_count > _task->job()->max_order_setbacks() )
     {
         _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
         _is_success_state = false;
@@ -2593,7 +2593,7 @@ void Order::handle_end_state()
 
         report_event_code(orderFinishedEvent, java_sister());
 
-        if( ( has_base_file()  ||  next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
+        if( ( has_base_file()  ||  !next_start.is_never()  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
            (s != _initial_state || _initial_state == _end_state) )   // JS-730  
         {
             _is_virgin = true;
@@ -2877,7 +2877,7 @@ bool Order::setback()
     if( _setback_count <= maximum )
     {
         Duration delay = _task->job()->get_delay_order_after_setback( _setback_count );
-        _setback = delay.is_defined()? Time::now() + delay : Time(0);
+        _setback = delay.not_zero()? Time::now() + delay : Time(0);
         _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurückgestellt, bis $2"
         result = true;
     }
@@ -2899,7 +2899,7 @@ bool Order::setback()
 
 void Order::set_setback( const Time& start_time_, bool keep_setback_count )
 {
-    Time start_time = start_time_.is_null() ||  start_time_ > Time::now()? start_time_ 
+    Time start_time = start_time_.is_zero() ||  start_time_ > Time::now()? start_time_ 
                                                                          : Time(0);
 
     if( _setback != start_time )

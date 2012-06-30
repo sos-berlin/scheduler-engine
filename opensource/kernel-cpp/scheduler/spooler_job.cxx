@@ -477,7 +477,7 @@ Time Combined_job_nodes::next_time()
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
-        if( result.is_null() )  break;
+        if( result.is_zero() )  break;
 
         Order_queue* order_queue = (*it)->order_queue();
         result = min( result, order_queue->next_time() );
@@ -1425,7 +1425,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     task->_id          = id;
     task->_obj_name    = S() << "Task " << path().without_slash() << ":" << task->_id;
     task->_name        = task_name;
-    task->_force_start = start_at? force : false;
+    task->_force_start = start_at.not_zero()? force : false;
     task->_start_at    = start_at;     // 0: Bei nächster Periode starten
 
     if( const Com_variable_set* p = dynamic_cast<const Com_variable_set*>( +params ) )  task->merge_params( p );
@@ -1470,7 +1470,7 @@ void Job::load_tasks_from_db( Read_transaction* ta )
             bool                    force_start = force_start_default;
 
             start_at.set_datetime( record.as_string( "start_at_time" ) );
-            _log->info( message_string( "SCHEDULER-917", task_id, start_at? start_at.as_string() : "period" ) );
+            _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
 
             string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
                                                                                        " where \"TASK_ID\"=" + as_string( task_id ), 
@@ -1539,7 +1539,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 
                 insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
 
-                if( task->_start_at )
+                if( task->_start_at.not_zero() )
                 insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
 
                 ta.execute( insert, Z_FUNCTION );
@@ -2377,7 +2377,7 @@ void Job::select_period( const Time& now )
 
             _period = _schedule_use->next_period( now );  
 
-            if( _period.begin() != Time::never )
+            if( !_period.begin().is_never() )
             {
                 _log->debug( message_string( "SCHEDULER-921", _period.to_xml(), _period.schedule_path().name() == ""? Absolute_path() : _period.schedule_path() ) );
             }
@@ -2412,7 +2412,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
     {
         string msg;
 
-        if( _delay_until )
+        if( _delay_until.not_zero() )
         {
             next_start_time = _period.next_try( _delay_until );
             //if( next_start_time.is_never() )  next_start_time = _schedule_use->next_period( _delay_until, time::wss_next_period_or_single_start ).begin();   // Jira JS-137
@@ -2447,7 +2447,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                 else
                 if( repeat )
                 {
-                    if( !_repeat.is_null() )       // spooler_task.repeat
+                    if( !_repeat.is_zero() )       // spooler_task.repeat
                     {
                         next_start_time = _period.next_try( now + _repeat );
                         if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
@@ -2459,7 +2459,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     {
                         next_start_time = _period.next_repeated( now );
 
-                        if( _spooler->_debug && next_start_time != Time::never )  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
+                        if( _spooler->_debug && !next_start_time.is_never())  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
 
                         if( next_start_time >= _period.end() )
                         {
@@ -2520,7 +2520,7 @@ Time Job::next_start_time()
     if( _state == s_pending  ||  _state == s_running )
     {
         result = min( _next_start_time, _next_single_start );
-        if( !result.is_null() &&  is_order_controlled() ) 
+        if( !result.is_zero() &&  is_order_controlled() ) 
             result = min( result, max( _combined_job_nodes->next_time(), _period.begin() ) );
 
         //if( _order_queue )  result = min( result, _order_queue->next_time() );
@@ -2611,7 +2611,7 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
     {
         Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << obj_name() << "  " << order_name << " " << next_time.as_string() << "\n" );
 
-        if( !_next_time.is_null()  &&  _next_time > next_time )
+        if( !_next_time.is_zero()  &&  _next_time > next_time )
         {
             Time now = Time::now();
             calculate_next_time( now );
@@ -2752,7 +2752,7 @@ ptr<Task> Job::task_to_start()
 
     
     task = get_task_from_queue( now );
-    if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
+    if( task )  cause = task->_start_at.not_zero()? cause_queue_at : cause_queue;
         
     if( _state == s_pending  &&  _max_tasks > 0  &&  now >= _next_single_start )  
     {
@@ -2766,7 +2766,7 @@ ptr<Task> Job::task_to_start()
             if( _start_once )              cause = cause_period_once,                           log_line += "Task starts due to <run_time once=\"yes\">\n";
             else
             if( now >= _next_start_time )  
-                if( _delay_until && now >= _delay_until )
+                if( _delay_until.not_zero() && now >= _delay_until )
                                            cause = cause_delay_after_error,                     log_line += "Task starts due to delay_after_error\n";
                                       else cause = cause_period_repeat,                         log_line += "Task starts, because start time is reached: " + _next_start_time.as_string();
 
@@ -3445,10 +3445,10 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( _state_cmd         )  result.setAttribute( "cmd"    , state_cmd_name()  );
 
         Time next = next_start_time();
-        if( next < Time::never )
+        if( !next.is_never() )
         result.setAttribute( "next_start_time", next.as_string() );
 
-        if( _delay_until )
+        if( _delay_until.not_zero() )
         result.setAttribute( "delay_until", _delay_until.as_string() );
 
         result.setAttribute( "in_period", is_in_period( now )? "yes" : "no" );
@@ -3538,7 +3538,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
                 queued_task_element.setAttribute( "name"       , task->_name );
                 queued_task_element.setAttribute( "force_start", task->_force_start? "yes" : "no" );
 
-                if( task->_start_at )
+                if( task->_start_at.not_zero() )
                     queued_task_element.setAttribute( "start_at", task->_start_at.as_string() );
                 
                 if( task->has_parameters() )  queued_task_element.appendChild( task->_params->dom_element( document, "params", "param" ) );
@@ -3652,7 +3652,7 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
         if (_state != s_pending)  append_obstacle_element(e, "state", state_name());
     }
 
-    if (_delay_until) { // cause_delay_after_error
+    if (_delay_until.not_zero()) { // cause_delay_after_error
         xml::Element_ptr e = result.append_new_element(reason_start_element_name);
         e.setAttribute("delay_until", _delay_until.xml_value());
         if (now >= _delay_until)

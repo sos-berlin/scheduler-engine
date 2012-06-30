@@ -168,7 +168,7 @@ Task::Task( Job* job )
     _zero_(this+1),
     _job(job),
     _history(&job->_history,this),
-    _timeout(Time::never),
+    _timeout(Duration::eternal),
     _lock_requestors( 1+lock_level__max ),
     _warn_if_longer_than( Duration::eternal )
 {
@@ -354,22 +354,22 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
         task_element.setAttribute( "name"            , _name );
 
-        if( _running_since )
+        if( _running_since.not_zero() )
         task_element.setAttribute( "running_since"   , _running_since.as_string() );
 
-        if( _enqueue_time )
+        if( _enqueue_time.not_zero() )
         task_element.setAttribute( "enqueued"        , _enqueue_time.as_string() );
 
-        if( _start_at )
+        if( _start_at.not_zero() )
         task_element.setAttribute( "start_at"        , _start_at.as_string() );
 
-        if( _idle_since )
+        if( _idle_since.not_zero() )
         task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
 
         if( _cause )
         task_element.setAttribute( "cause"           , start_cause_name( _cause ) );
 
-        if( _state == s_running  &&  _last_process_start_time )
+        if( _state == s_running  &&  _last_process_start_time.not_zero() )
         task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
 
         task_element.setAttribute( "steps"           , _step_count );
@@ -827,7 +827,7 @@ void Task::set_state_direct( State new_state )
     }
 
 
-    if( _next_time && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
+    if( _next_time.not_zero() && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
     if( _end )  _next_time = Time(0);   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
 
@@ -852,8 +852,8 @@ void Task::set_state_direct( State new_state )
         if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
         {
             S details;
-            if( _next_time )  details << " (" << _next_time << ")";
-            if( new_state == s_starting  &&  _start_at )  details << " (at=" << _start_at << ")";
+            if( _next_time.not_zero() )  details << " (" << _next_time << ")";
+            if( new_state == s_starting  &&  _start_at.not_zero() )  details << " (at=" << _start_at << ")";
             if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
 
             _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
@@ -1088,7 +1088,7 @@ bool Task::check_timeout( const Time& now )
 
 void Task::check_if_shorter_than( const Time& now )
 {
-    if( _warn_if_shorter_than.is_defined() ) 
+    if( _warn_if_shorter_than.not_zero() ) 
     {
         Duration step_time = now - _last_operation_time;
 
@@ -1293,7 +1293,7 @@ void Task::set_subprocess_timeout()
     _subprocess_timeout = Time::never;
     FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout_at )  _subprocess_timeout = p->second->_timeout_at;
 
-    if( _subprocess_timeout != Time::never )  signal( "subprocess_timeout" );
+    if( !_subprocess_timeout.is_never() )  signal( "subprocess_timeout" );
     //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
 }
 
@@ -1592,7 +1592,7 @@ bool Task::do_something()
                         {
                             if( !_operation )
                             {
-                                if( _next_spooler_process )
+                                if( _next_spooler_process.not_zero() )
                                 {
                                     set_state_direct( s_running_delayed );
                                     something_done = true;
@@ -1917,7 +1917,7 @@ bool Task::do_something()
                                     ok = _module_instance->try_delete_files( my_log );
                                     if( ok )
                                     {
-                                        if( _trying_deleting_files_until )  
+                                        if( _trying_deleting_files_until.not_zero() )  
                                         {
                                             _log->debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
                                         }
@@ -1931,7 +1931,7 @@ bool Task::do_something()
                                         }
 
                                         //if( _end == end_kill_immediately  &&  // Bei kill_immediately nur einmal warten (1/10s, das ist zu kurz!)
-                                        if( _trying_deleting_files_until  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
+                                        if( _trying_deleting_files_until.not_zero()  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
                                         {
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->info( message_string( "SCHEDULER-878", paths ) );
@@ -2155,7 +2155,7 @@ bool Task::step__end()
                                                            : Order::post_error        );
         }
 
-        if( _next_spooler_process )  continue_task = true;
+        if( _next_spooler_process.not_zero() )  continue_task = true;
     }
     catch( const exception& x ) 
     { 
@@ -2362,12 +2362,12 @@ void Task::finish()
         remove_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
-    if( has_error()  &&  _job->repeat().is_null()  &&  _job->_delay_after_error.empty() )
+    if( has_error()  &&  _job->repeat().is_zero()  &&  _job->_delay_after_error.empty() )
     {
         _job->stop_after_task_error( _error.what() );
     }
     else
-    if( _job->_temporary  &&  _job->repeat().is_null() )
+    if( _job->_temporary  &&  _job->repeat().is_zero() )
     {
         _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
     }

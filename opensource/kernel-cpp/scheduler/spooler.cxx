@@ -866,7 +866,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "time"                 , Sos_optional_date_time::now().as_string() );   // Veraltet (<answer> hat time).
     state_element.setAttribute( "id"                   , id() );
     state_element.setAttribute( "spooler_id"           , id() );
-    state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( (time_t)start_time() ).as_string() );
+    state_element.setAttribute( "spooler_running_since", start_time().as_string(time::without_ms));
     state_element.setAttribute( "state"                , state_name() );
     state_element.setAttribute( "log_file"             , _base_log.filename() );
     state_element.setAttribute( "version"              , version_string );
@@ -912,10 +912,10 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "loop"                 , _loop_counter );
     state_element.setAttribute( "waits"                , _wait_counter );
 
-    if( _last_wait_until )
+    if( _last_wait_until.not_zero() )
     state_element.setAttribute( "wait_until", _last_wait_until.as_string() );
 
-    if( _last_resume_at  &&  _last_resume_at != Time::never )
+    if( _last_resume_at.not_zero()  &&  !_last_resume_at.is_never() )
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
 //#   ifdef Z_UNIX
@@ -2289,7 +2289,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
                 if( tasks.length() > 0 )  tasks << ", ";
                 tasks << task->obj_name() << " " << task->state_name();
                 Time next_time = task->next_time();
-                if( next_time < Time::never )  tasks << " until " << next_time;
+                if( !next_time.is_never() )  tasks << " until " << next_time;
             }
         }
         if( tasks.length() == 0 )  tasks << "no tasks";
@@ -2300,7 +2300,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
             if( jobs.length() > 0 )  jobs << ", ";
             jobs << job->obj_name() << " " << job->state_name();
             Time next_time = job->next_time();
-            if( next_time < Time::never )  jobs << " until " << next_time; 
+            if( !next_time.is_never() )  jobs << " until " << next_time; 
             if( !job->is_in_period( Time::now() ) )  jobs << " (not in period)";
             if( job->_waiting_for_process )  jobs << " (waiting for process)";
         }
@@ -2498,7 +2498,7 @@ void Spooler::run()
 
         if( _task_subsystem  &&  _task_subsystem->is_ready_for_termination() )  break;
 
-        if( something_done )  wait_until.set_null();   // Nicht warten, wir drehen noch eine Runde
+        if( something_done )  wait_until = Time(0);   // Nicht warten, wir drehen noch eine Runde
 
         //----------------------------------------------------------------------------NICHTS GETAN?
 
@@ -2513,7 +2513,7 @@ void Spooler::run()
             if( ++nothing_done_count > nothing_done_max )
             {
                 nichts_getan( ++nichts_getan_zaehler, catched_event_string );
-                if( wait_until.is_null() )  wait_until = Time::now() + Duration(1);
+                if( wait_until.is_zero() )  wait_until = Time::now() + Duration(1);
             }
 
             if( nothing_done_count > 1 )
@@ -2528,7 +2528,7 @@ void Spooler::run()
         {
             // NÄCHSTE (JETZT NOCH WARTENDE) TASK ERMITTELN
 
-            if( !wait_until.is_null() )
+            if( !wait_until.is_zero() )
             {
                 FOR_EACH( Task_list, _task_subsystem->_task_list, t )
                 {
@@ -2541,7 +2541,7 @@ void Spooler::run()
                     {
                         wait_until = task_next_time; 
                         wait_until_object = task;
-                        if( wait_until.is_null() )  break;
+                        if( wait_until.is_zero() )  break;
                     }
                 }
             }
@@ -2549,7 +2549,7 @@ void Spooler::run()
 
             // NÄCHSTEN JOB ERMITTELN, ALSO DEN NÄCHSTEN TASK-START ODER PERIODEN-ENDE
 
-            if( !wait_until.is_null() )
+            if( !wait_until.is_zero() )
             {
                 FOR_EACH_JOB( job )
                 {
@@ -2562,7 +2562,7 @@ void Spooler::run()
                     {
                         wait_until = next_job_time;
                         wait_until_object = job;
-                        if( wait_until.is_null() )  break;
+                        if( wait_until.is_zero() )  break;
                     }
                 }
             }
@@ -2621,7 +2621,7 @@ void Spooler::run()
 #                       endif
                     }
  
-                    if( wait_until.is_null() )  break;
+                    if( wait_until.is_zero() )  break;
                 }
             }
 
@@ -2658,7 +2658,7 @@ void Spooler::run()
 
             if( nothing_done_count > 0  ||  !wait_handles.signaled() )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {
-                if( wait_until.is_null() )
+                if( wait_until.is_zero() )
                 {
                     wait_handles.wait_until( Time(), wait_until_object, Time(), NULL );   // Signale checken
                 }
@@ -2739,7 +2739,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
 
     // Termination_async_operation etc.
 
-    if( !wait_until.is_null() )
+    if( !wait_until.is_zero() )
     {
         if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
         {
@@ -2819,7 +2819,7 @@ bool Spooler::run_continue( const Time& now )
         if( _task_subsystem )  something_done |= _task_subsystem->process( now );    
     }
 
-    if( something_done )  _last_wait_until.set_null(), _last_resume_at.set_null();
+    if( something_done )  _last_wait_until = Time(0), _last_resume_at = Time(0);
 
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
