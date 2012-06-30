@@ -69,32 +69,6 @@ static const char                      never_name[]                = "never";
 static const char                      immediately_name[]          = "now";
 static const int64                     base_filetime               = 116444736000000000LL;
 
-//-----------------------------------------------------------------------------duration_from_string
-
-Duration duration_from_string( const string& str )
-{
-    return Duration(time_from_string(str).as_double());
-}
-
-//---------------------------------------------------------------------------------time_from_string
-
-Time time_from_string( const string& str )
-{
-    if( str.find( ':' ) != string::npos )
-    {
-        Sos_optional_date_time dt;
-        dt.set_time( str );
-        return Time(dt.time_as_double());
-    }
-    else
-    if( str == never_name )
-    {
-        return Time::never;
-    }
-    else
-        return Time(as_double(str));
-}
-
 //-------------------------------------------------------------------------new_calendar_dom_element
 
 xml::Element_ptr new_calendar_dom_element( const xml::Document_ptr& dom_document, const Time& t )
@@ -124,7 +98,19 @@ void insert_into_message( Message_string* m, int index, const Duration& o) throw
 
 Duration Duration::of(const string& s) 
 {
-    return Duration(Time(s).as_double());
+    if (s.find( ':' ) != string::npos)
+    {
+        Sos_optional_date_time dt;
+        dt.set_time(s);
+        return Duration(dt.time_as_double());
+    }
+    else
+    if (s == never_name)
+    {
+        return Duration::eternal;
+    }
+    else
+        return Duration(::zschimmer::as_double(s));
 }
 
 //------------------------------------------------------------------------------Duration::as_string

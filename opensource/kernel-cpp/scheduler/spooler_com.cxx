@@ -69,7 +69,7 @@ Com_task_proxy   ::Class_descriptor Com_task_proxy   ::class_descriptor ( &typel
 
 Duration duration_from_variant( const VARIANT& vt )
 {
-    return time::duration_from_string( variant_as_string( vt ) );
+    return Duration::of( variant_as_string( vt ) );
 }
 
 //----------------------------------------------------------------------order_from_order_or_payload

@@ -831,14 +831,13 @@ void Job::set_dom( const xml::Element_ptr& element )
         string t    = element.     getAttribute( "timeout"      );
         if( t != "" )  
         {
-            _task_timeout = time::duration_from_string( t );
-            if( _task_timeout > max_task_time_out )  _task_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
+            _task_timeout = Duration::of(t);
         }
 
         t           = element.     getAttribute( "idle_timeout"    );
         if( t != "" )  
         {
-            set_idle_timeout( time::duration_from_string( t ) );
+            set_idle_timeout(Duration::of(t));
         }
 
         {
@@ -3371,14 +3370,14 @@ string Job::state_cmd_name( Job::State_cmd cmd )
 void Job::set_delay_after_error( int error_steps, const string& delay )
 { 
     if( lcase( delay ) == "stop" )  set_stop_after_error( error_steps );
-                              else  set_delay_after_error( error_steps, time::duration_from_string( delay ) );
+                              else  set_delay_after_error( error_steps, Duration::of( delay ) );
 }
 
 //---------------------------------------------------------------Job::set_delay_order_after_setback
 
 void Job::set_delay_order_after_setback( int setback_count, const string& delay )
 {
-    set_delay_order_after_setback( setback_count, time::duration_from_string( delay ) );
+    set_delay_order_after_setback( setback_count, Duration::of( delay ) );
 }
 
 //---------------------------------------------------------------Job::get_delay_order_after_setback

@@ -179,8 +179,6 @@ void                            insert_into_message         ( Message_string*, i
 
 //-------------------------------------------------------------------------------------------------
 
-Duration                        duration_from_string        ( const string& );
-Time                            time_from_string            ( const string& );
 xml::Element_ptr                new_calendar_dom_element    ( const xml::Document_ptr&, const Time& );
 
 //-------------------------------------------------------------------------------------------------
