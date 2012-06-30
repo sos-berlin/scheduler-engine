@@ -372,7 +372,7 @@ struct Active_schedulers_watchdog : Async_operation, Scheduler_object, Has_alarm
 
 static string my_string_from_time_t( time_t time )
 {
-    return string_gmt_from_time_t( time ) + " UTC";
+    return string_gmt_from_time_t( time ); // + " UTC";
 }
 
 //---------------------------------------------------------------------------is_heartbeat_operation

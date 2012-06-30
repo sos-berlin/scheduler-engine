@@ -640,7 +640,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task,
                     order->set_file_path( path );
                     order->set_state( _next_state );
 
-                    string date = Time( new_file->last_write_time() ).as_string( time::without_ms ) + " UTC";   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string( time::without_ms );   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
 
 
                     bool ok = true;
