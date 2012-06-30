@@ -244,8 +244,6 @@ string Database_order_detector::async_state_text_() const
                 if( seconds > 0 )  text << "+";
                 text << seconds;    // Normalerweise negativ (noch verbleibende Zeit)
             }
-            //if( t )  text << string_gmt_from_time_t( t ) << " UTC";
-            //   else  text << "now";
             text << "s";
         }
     }
