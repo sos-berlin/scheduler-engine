@@ -73,7 +73,9 @@ struct Time
 
 
 
-    static Time                 time_with_now               ( const string& );              // Datum mit Zeit oder "now+zeit"
+    static Time                 of_date_time_with_now       (const string&);                // Datum mit Zeit oder "now+zeit"
+    static Time                 of_date_time_utc            (const string& s)               { return of_date_time(s, true); }
+    static Time                 of_date_time                (const string&, bool utc_is_default = false);
 
 
     explicit                    Time                        ( double t = 0.0 )              { set(t); }
@@ -141,8 +143,6 @@ public:
     double                      as_double                   () const;
     double                      as_double_or_never          () const;
     double                      as_utc_double               () const;
-    Time&                       set_datetime                ( const string& );
-    void                        set_datetime_utc            ( const string& );
     Time                        time_of_day                 () const                        { return Time((*this - midnight()).as_double()); }
     Time                        midnight                    () const                        { return Time(day_nr() * 24*60*60); }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
@@ -150,7 +150,7 @@ public:
     time_t                      as_time_t                   () const                        { return (time_t)( as_double    () + 0.0001 ); }
     time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
-    double                      cut_fraction                ( string* datetime_string );
+    static double               cut_fraction                ( string* datetime_string );
     int64                       ms                          () const                        { return (int64)(_time * 1000 + 0.5); }
     Time                        utc_from_time_zone          (const string&) const;
     Time                        local_time                  (const string& time_zone) const;

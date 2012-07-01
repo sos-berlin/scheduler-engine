@@ -43,7 +43,7 @@ struct Xml_file_info : Base_file_info
     Xml_file_info( const xml::Element_ptr& element )
     :
         Base_file_info( element.getAttribute( "name" ), 
-                        (time_t)Time().set_datetime( element.getAttribute( "last_write_time" ) ).as_utc_double(), 
+                        (time_t)Time::of_date_time( element.getAttribute( "last_write_time" ) ).as_utc_double(), 
                         element.getAttribute( "name" ) ),
         _element( element )
     {

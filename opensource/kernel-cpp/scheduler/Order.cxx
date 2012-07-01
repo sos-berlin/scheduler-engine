@@ -123,9 +123,9 @@ void Order::load_record( const Absolute_path& job_chain_path, const Record& reco
         _initial_state_set = true;
     }
 
-    _created.set_datetime( record.as_string( "created_time" ) );
+    _created = Time::of_date_time_utc( record.as_string( "created_time" ) );
 
-    if( record.has_field( "distributed_next_time" ) )  _setback.set_datetime( record.as_string( "distributed_next_time" ) );
+    if( record.has_field( "distributed_next_time" ) )  _setback = Time::of_date_time_utc( record.as_string( "distributed_next_time" ) );
 
     _log->set_prefix( obj_name() );
 
@@ -1340,10 +1340,10 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( element.hasAttribute( "suspended" ) )
         set_suspended( element.bool_getAttribute( "suspended" ) );
 
-    if( element.hasAttribute( "start_time" ) )  _start_time.set_datetime( element.getAttribute( "start_time" ) );
-    if( element.hasAttribute( "end_time"   ) )  _end_time  .set_datetime( element.getAttribute( "end_time"   ) );
+    if( element.hasAttribute( "start_time" ) )  _start_time = Time::of_date_time( element.getAttribute( "start_time" ) );
+    if( element.hasAttribute( "end_time"   ) )  _end_time   = Time::of_date_time( element.getAttribute( "end_time"   ) );
 
-    if( setback != "" )  _setback.set_datetime( setback );
+    if( setback != "" )  _setback = Time::of_date_time( setback );
 
 
     DOM_FOR_EACH_ELEMENT( element, e )  
@@ -1418,7 +1418,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         }
     }
 
-    if( at_string != "" )  set_at( Time::time_with_now( at_string ) );
+    if( at_string != "" )  set_at( Time::of_date_time_with_now( at_string ) );
 }
 
 //-------------------------------------------------------------Order::set_identification_attributes

@@ -94,6 +94,18 @@ void insert_into_message( Message_string* m, int index, const Duration& o) throw
     m->insert( index, o.as_string() ); 
 }
 
+//---------------------------------------------------------------------------------------localToUtc
+
+static double localToUtc(const string& timeZone, double t) {
+    return TimeZonesJ::localToUtc(timeZone, (int64)(t * 1000.0 + 0.5)) / 1000.0;
+}
+
+//---------------------------------------------------------------------------------------utcToLocal
+
+static double utcToLocal(const string& timeZone, double t) {
+    return TimeZonesJ::utcToLocal(timeZone, (int64)(t * 1000.0 + 0.5)) / 1000.0;
+}
+
 //-------------------------------------------------------------------------------------Duration::of
 
 Duration Duration::of(const string& s) 
@@ -201,7 +213,7 @@ Duration Time::operator - ( const Time& t ) const
 //    return Time( as_double() - t );
 //}
 
-//------------------------------------------------------------------------------Time::time_with_now
+//----------------------------------------------------------------------Time::of_date_time_with_now
 
 /*!
 * \brief Jobstartzeit ermitteln
@@ -214,7 +226,7 @@ Duration Time::operator - ( const Time& t ) const
 * \version 2.0.224
 * \return Time-Objekt
 */
-Time Time::time_with_now( const string& time_string )
+Time Time::of_date_time_with_now( const string& time_string )
 {
     Time result;
 
@@ -246,7 +258,7 @@ Time Time::time_with_now( const string& time_string )
     else
     {
         // nimmt eine Datumsangabe im ISO-Format entgegen
-        result.set_datetime( time_string );
+        result = of_date_time( time_string );
     }
 
     return result;
@@ -347,38 +359,27 @@ Time& Time::set_utc( double t )
     return *this;
 }
 
-//-------------------------------------------------------------------------------Time::set_datetime
+//-------------------------------------------------------------------------------Time::of_date_time
 
-Time& Time::set_datetime( const string& t )
+Time Time::of_date_time( const string& t, bool utc_is_default)
 {
     if( t == never_name )
     {
-        set(never_double);
+        return Time::never;
     }
     else
     {
-        bool   is_utc = false;
+        bool   utc = utc_is_default;
         string my_t   = t;
 
-        if( string_ends_with( my_t, "Z"     ) )  my_t.erase( my_t.length() - 1 ),  is_utc = true;
+        if( string_ends_with( my_t, "Z"     ) )  my_t.erase( my_t.length() - 1 ),  utc = true;
         else
-        if( string_ends_with( my_t, "+0000" ) )  my_t.erase( my_t.length() - 5 ),  is_utc = true;
+        if( string_ends_with( my_t, "+0000" ) )  my_t.erase( my_t.length() - 5 ),  utc = true;
 
         double fraction = cut_fraction( &my_t );
-
-        if( is_utc )  set_utc( Sos_optional_date_time( my_t ).as_time_t() + fraction );
-                else  set    ( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+        double dt = Sos_optional_date_time( my_t ).as_time_t() + fraction;
+        return utc? Time(dt, is_utc) : Time(localToUtc("", dt), is_utc);
     }
-
-    return *this;
-}
-
-//---------------------------------------------------------------------------Time::set_datetime_utc
-
-void Time::set_datetime_utc( const string& t )
-{
-    set_datetime( t );
-    if( !is_zero()  &&  !is_never() )  _is_utc = true;
 }
 
 //-------------------------------------------------------------------------Time::utc_from_time_zone
@@ -386,7 +387,7 @@ void Time::set_datetime_utc( const string& t )
 Time Time::utc_from_time_zone(const string& time_zone) const
 {
     return is_zero() || is_never()? Time(*this) 
-        : Time((double)TimeZonesJ::localToUtc(time_zone, ms()) / 1000.0, is_utc);
+        : Time(localToUtc(time_zone, as_double()), is_utc);
 }
 
 //-------------------------------------------------------------------------Time::utc_from_time_zone
@@ -394,7 +395,7 @@ Time Time::utc_from_time_zone(const string& time_zone) const
 Time Time::local_time(const string& time_zone) const
 {
     return is_zero() || is_never()? Time(*this) 
-        : Time((double)TimeZonesJ::utcToLocal(time_zone, ms()) / 1000.0, is_utc);
+        : Time(utcToLocal(time_zone, as_double()), is_utc);
 }
 
 //-------------------------------------------------------------------------------Time::cut_fraction

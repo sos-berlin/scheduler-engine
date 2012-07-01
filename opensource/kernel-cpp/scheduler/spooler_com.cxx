@@ -5700,7 +5700,7 @@ STDMETHODIMP Com_order::put_At( VARIANT* datetime )
         if( !_order )  return E_POINTER;
         if( !datetime )  return E_POINTER;
 
-        _order->set_at( Time::time_with_now( string_from_variant( *datetime ) ) );
+        _order->set_at( Time::of_date_time_with_now( string_from_variant( *datetime ) ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }

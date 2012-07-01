@@ -1255,8 +1255,8 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _title = element.getAttribute( "title ");
 
     _covered_schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "substitute" ) );
-    _covered_schedule_begin.set_datetime( element.getAttribute( "valid_from"          ) );
-    _covered_schedule_end  .set_datetime( element.getAttribute( "valid_to"  , "never" ) );
+    _covered_schedule_begin = Time::of_date_time( element.getAttribute( "valid_from"          ) );
+    _covered_schedule_end   = Time::of_date_time( element.getAttribute( "valid_to"  , "never" ) );
     if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.as_string(), _covered_schedule_end.as_string() );
 
     if( _covered_schedule_path == "" )
@@ -1291,8 +1291,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
             a_day_set = true;
             string at = e.getAttribute( "at" );
             if( at == "now" )  _once = true;   // "now" wirkt nicht in _at_set, weil der Zeitpunkt gleich verstrichen sein wird
-            Time at_time;
-            at_time.set_datetime( at );
+            Time at_time = Time::of_date_time( at );
             _at_set.add( at_time );
         }
         else
@@ -1540,7 +1539,7 @@ Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_
                 else
                 if( v.vt == VT_DATE         )  t = Time(seconds_since_1970_from_com_date( V_DATE( &v ) ));
                 else                           
-                                               t.set_datetime( v.as_string() );
+                                               t = Time::of_date_time( v.as_string() );
 
                 if( t < requested_beginning )
                 {
