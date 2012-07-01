@@ -152,7 +152,8 @@ public:
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
     double                      cut_fraction                ( string* datetime_string );
     int64                       ms                          () const                        { return (int64)(_time * 1000 + 0.5); }
-    Time                        utc_from_time_zone          (const string&);
+    Time                        utc_from_time_zone          (const string&) const;
+    Time                        local_time                  (const string& time_zone) const;
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
     string                      xml_value                   ( With_ms = with_ms ) const;                        

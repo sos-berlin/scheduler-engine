@@ -218,7 +218,7 @@ Time Time::time_with_now( const string& time_string )
 {
     Time result;
 
-    // Startzeit mit "now+HH:MM:SS" oder "now+MM:SS" oder "now+SS" vorgegeben
+    // Startzeit mit "now+HH:MM:SS" oder "now+MM:SS" oder "now+SS" vorgegeben?
     if( Regex_submatches matches = Regex( "^ *now *(\\+ *([^ ].*))?$" ).match_subresults( time_string ) )    // " now + HH:MM"
     {
         result = now();
@@ -244,8 +244,8 @@ Time Time::time_with_now( const string& time_string )
         }
     }
     else
-    // nimmt eine Datumsangabe im ISO-Format entgegen
     {
+        // nimmt eine Datumsangabe im ISO-Format entgegen
         result.set_datetime( time_string );
     }
 
@@ -383,10 +383,18 @@ void Time::set_datetime_utc( const string& t )
 
 //-------------------------------------------------------------------------Time::utc_from_time_zone
 
-Time Time::utc_from_time_zone(const string& time_zone) 
+Time Time::utc_from_time_zone(const string& time_zone) const
 {
     return is_zero() || is_never()? Time(*this) 
         : Time((double)TimeZonesJ::localToUtc(time_zone, ms()) / 1000.0, is_utc);
+}
+
+//-------------------------------------------------------------------------Time::utc_from_time_zone
+
+Time Time::local_time(const string& time_zone) const
+{
+    return is_zero() || is_never()? Time(*this) 
+        : Time((double)TimeZonesJ::utcToLocal(time_zone, ms()) / 1000.0, is_utc);
 }
 
 //-------------------------------------------------------------------------------Time::cut_fraction
