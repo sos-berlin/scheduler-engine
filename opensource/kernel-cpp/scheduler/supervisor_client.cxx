@@ -523,7 +523,7 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
                 const xml::Element_ptr& content_element = e.select_node_strict( "content" );
                 string content;
 
-                Time last_write_time = Time::of_date_time( e.getAttribute( "last_write_time" ) );
+                Time last_write_time = Time::of_utc_date_time( e.getAttribute( "last_write_time" ) );
 
                 if( content_element.getAttribute( "encoding" ) == "base64" )  content = base64_decoded( content_element.text() );
                 else

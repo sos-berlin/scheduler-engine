@@ -263,7 +263,8 @@ Schedule_use::Schedule_use( File_based* using_object )
     Scheduler_object( using_object->spooler(), static_cast<spooler_com::Irun_time*>( this ), type_schedule_use ),
     _zero_(this+1),
     _using_object(using_object),
-    _scheduler_holidays_usage(with_scheduler_holidays)
+    _scheduler_holidays_usage(with_scheduler_holidays),
+    _time_zone_name(using_object->spooler()->_time_zone_name)
 {
     _log = using_object->log();
     assert( _log );
@@ -378,6 +379,7 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
     }
 
     _active_schedule_path = _schedule_path.without_slash();
+    _time_zone_name = element.getAttribute("time_zone", _time_zone_name);
 
     on_schedule_modified();
 }
@@ -526,9 +528,9 @@ Time Schedule_use::next_any_start( const Time& time )
 
 Period Schedule_use::next_period( const Time& t, With_single_start single_start, const Time& before ) 
 { 
-    Period result = schedule()->next_local_period( this, t.local_time(_time_zone), single_start, before.local_time(_time_zone) ); 
-    result._begin = result._begin.utc_from_time_zone(_time_zone);
-    result._end = result._end.utc_from_time_zone(_time_zone);
+    Period result = schedule()->next_local_period( this, t.local_time(_time_zone_name), single_start, before.local_time(_time_zone_name) ); 
+    result._begin = result._begin.utc_from_time_zone(_time_zone_name);
+    result._end = result._end.utc_from_time_zone(_time_zone_name);
     return result;
 }
 
@@ -1258,8 +1260,8 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _title = element.getAttribute( "title ");
 
     _covered_schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "substitute" ) );
-    _covered_schedule_begin = Time::of_date_time( element.getAttribute( "valid_from"          ) );
-    _covered_schedule_end   = Time::of_date_time( element.getAttribute( "valid_to"  , "never" ) );
+    _covered_schedule_begin = Time::of_date_time( element.getAttribute( "valid_from"          ), "(NO-TIME-ZONE)" );
+    _covered_schedule_end   = Time::of_date_time( element.getAttribute( "valid_to"  , "never" ), "(NO-TIME-ZONE)" );
     if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.as_string(), _covered_schedule_end.as_string() );
 
     if( _covered_schedule_path == "" )
@@ -1268,10 +1270,13 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
         if( !_covered_schedule_end.is_never()  )  z::throw_xc( "SCHEDULER-467", "valid_to"  , "substitute" );
     }
 
-
     _once = element.bool_getAttribute( "once", _once );
     //if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
     _start_time_function = element.getAttribute( "start_time_function" );
+
+    if (element.hasAttribute("name")) {
+        require_not_attribute(element, "time_zone");
+    }
 
 
     default_period.set_dom( element );
@@ -1524,7 +1529,7 @@ Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_
                 else
                 if( v.vt == VT_DATE         )  t = Time(seconds_since_1970_from_com_date( V_DATE( &v ) ));
                 else                           
-                                               t = Time::of_date_time( v.as_string() );
+                                               t = Time::of_date_time( v.as_string(), "(NO-TIME-ZONE)" );
 
                 if( t < requested_beginning )
                 {

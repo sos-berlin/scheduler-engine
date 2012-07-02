@@ -82,6 +82,7 @@
                         <xsd:attribute name="configuration_modify_event" type="Path"/>
                         <xsd:attribute name="configuration_delete_event" type="Path"/>
                         <!-- veraltet -->
+                        <xsd:attribute name="time_zone" type="String"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element ref="commands"/>
@@ -1370,6 +1371,7 @@
         <!-- Nur zum Abruf ("<schedule.use>") -->
         <!-- Nur zur Definition eines benannten <schedule> -->
         <!-- Für überdeckendes <schedule> -->
+        <xsd:attribute name="time_zone" type="String"/>
     </xsd:complexType>
     <xsd:complexType name="schedule.remove">
         <xsd:attribute name="schedule" type="Path"/>

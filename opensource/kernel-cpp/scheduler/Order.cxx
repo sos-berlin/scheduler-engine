@@ -1340,10 +1340,10 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( element.hasAttribute( "suspended" ) )
         set_suspended( element.bool_getAttribute( "suspended" ) );
 
-    if( element.hasAttribute( "start_time" ) )  _start_time = Time::of_date_time( element.getAttribute( "start_time" ) );
-    if( element.hasAttribute( "end_time"   ) )  _end_time   = Time::of_date_time( element.getAttribute( "end_time"   ) );
+    if( element.hasAttribute( "start_time" ) )  _start_time = Time::of_utc_date_time( element.getAttribute( "start_time" ) );
+    if( element.hasAttribute( "end_time"   ) )  _end_time   = Time::of_utc_date_time( element.getAttribute( "end_time"   ) );
 
-    if( setback != "" )  _setback = Time::of_date_time( setback );
+    if( setback != "" )  _setback = Time::of_utc_date_time( setback );
 
 
     DOM_FOR_EACH_ELEMENT( element, e )  
@@ -1418,7 +1418,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         }
     }
 
-    if( at_string != "" )  set_at( Time::of_date_time_with_now( at_string ) );
+    if( at_string != "" )  set_at( Time::of_date_time_with_now( at_string, spooler()->_time_zone_name));
 }
 
 //-------------------------------------------------------------Order::set_identification_attributes

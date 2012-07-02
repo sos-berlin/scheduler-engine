@@ -800,6 +800,7 @@ struct Spooler : Object,
 
     string                     _java_options;
     string                     _java_classpath;
+    string                     _time_zone_name;
 };
 
 //------------------------------------------------------------------------------------Object_server 

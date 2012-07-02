@@ -205,9 +205,9 @@ Database_order_detector::Database_order_detector( Spooler* spooler )
     _zero_(this+1),
     Scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
 {
-    _now_database_distributed_next_time   = Time::of_date_time( now_database_distributed_next_time   );
-    _never_database_distributed_next_time = Time::of_date_time( never_database_distributed_next_time );
-    _blacklist_database_distributed_next_time = Time::of_date_time( blacklist_database_distributed_next_time );
+    _now_database_distributed_next_time   = Time::of_utc_date_time( now_database_distributed_next_time   );
+    _never_database_distributed_next_time = Time::of_utc_date_time( never_database_distributed_next_time );
+    _blacklist_database_distributed_next_time = Time::of_utc_date_time( blacklist_database_distributed_next_time );
 }
 
 //---------------------------------------------------------Database_order_detector::async_finished_

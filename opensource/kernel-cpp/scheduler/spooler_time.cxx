@@ -228,7 +228,7 @@ Duration Time::operator - ( const Time& t ) const
 * \version 2.0.224
 * \return Time-Objekt
 */
-Time Time::of_date_time_with_now( const string& time_string )
+Time Time::of_date_time_with_now( const string& time_string, const string& time_zone_name )
 {
     Time result;
 
@@ -260,7 +260,7 @@ Time Time::of_date_time_with_now( const string& time_string )
     else
     {
         // nimmt eine Datumsangabe im ISO-Format entgegen
-        result = of_date_time( time_string );
+        result = of_date_time( time_string, time_zone_name );
     }
 
     return result;
@@ -363,7 +363,7 @@ Time& Time::set_utc( double t )
 
 //-------------------------------------------------------------------------------Time::of_date_time
 
-Time Time::of_date_time( const string& t, bool utc_is_default)
+Time Time::of_date_time( const string& t, const string& time_zone_name)
 {
     if( t == never_name )
     {
@@ -371,7 +371,7 @@ Time Time::of_date_time( const string& t, bool utc_is_default)
     }
     else
     {
-        bool   utc = utc_is_default;
+        bool   utc = false;
         string my_t   = t;
 
         if( string_ends_with( my_t, "Z"     ) )  my_t.erase( my_t.length() - 1 ),  utc = true;
@@ -380,7 +380,7 @@ Time Time::of_date_time( const string& t, bool utc_is_default)
 
         double fraction = cut_fraction( &my_t );
         double dt = Sos_optional_date_time( my_t ).as_time_t() + fraction;
-        return utc? Time(dt, is_utc) : Time(localToUtc("", dt), is_utc);
+        return utc? Time(dt, is_utc) : Time(localToUtc(time_zone_name, dt), is_utc);
     }
 }
 

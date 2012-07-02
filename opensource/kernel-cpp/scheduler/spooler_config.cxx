@@ -154,6 +154,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         if( host_and_port != "" )  _supervisor_client = supervisor::new_supervisor_client( this, host_and_port );
 
         set_mail_xslt_stylesheet_path( subst_env( config_element.getAttribute( "mail_xslt_stylesheet" ) ) );
+        _time_zone_name = config_element.getAttribute("time_zone", _time_zone_name);
 
         DOM_FOR_EACH_ELEMENT( config_element, e )
         {

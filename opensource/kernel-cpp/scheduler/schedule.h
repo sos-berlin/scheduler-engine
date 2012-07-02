@@ -398,7 +398,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     File_based*                _using_object;
     Scheduler_holidays_usage   _scheduler_holidays_usage;
     string                     _active_schedule_path;       // == schedule()->active_schedule_path_at(now)
-    string                     _time_zone;
+    string                     _time_zone_name;
 };
 
 //-----------------------------------------------------------------------------------------Schedule
@@ -538,7 +538,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     Schedule*                   active_schedule_at          ( const Time& );
     Absolute_path               active_schedule_path_at     ( const Time& );
     bool                        once                        ()                                      { return _inlay->_once; }
-    Period                      next_local_period           ( Schedule_use*, const Time&, With_single_start, const Time& before );
+    Period                      next_local_period          ( Schedule_use*, const Time&, With_single_start, const Time& before );
 
 
     void                        print                       ( ostream& ) const;
