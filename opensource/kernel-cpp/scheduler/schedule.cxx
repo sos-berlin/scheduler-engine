@@ -577,7 +577,7 @@ void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element
                 }
             }
 
-            Time new_t = period._single_start? period.begin() + 1 : period.end();
+            Time new_t = period._single_start? period.begin() + Duration(1) : period.end();
             assert( t < new_t );
             if( new_t <= t )  break;
             t = new_t;
@@ -951,7 +951,7 @@ void Schedule::disconnect_covering_schedules()
 Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
 { 
     Period result;
-    Time   interval_begin = 0;            // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
+    Time   interval_begin = Time(0);      // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
     Time   interval_end   = Time::never;  // Standard-Schedule endet. Gilt, falls kein überdeckendes Schedule >= t
     Time   t              = tim;
 
@@ -963,7 +963,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
 
         if( next_schedule == _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
         { 
-            interval_begin = 0;
+            interval_begin = Time(0);
         }
         else
         {
@@ -1420,12 +1420,12 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
         bool   is_no_function_warning_logged = false; 
         Period last_function_result;
         
-        last_function_result.set_single_start( 0 );
+        last_function_result.set_single_start(Time(0));
 
-        Time limited_before = min( before, beginning_time + foresee_years*366*24*60*60 );     // Längstens soviele Jahre ab beginning_time voraussehen
+        Time limited_before = min( before, beginning_time + Duration(foresee_years*366*24*60*60));     // Längstens soviele Jahre ab beginning_time voraussehen
 
 
-        for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + 24*60*60 )     
+        for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + Duration::day)     
         {
             if( _holidays.is_included( t ) )  
             {
@@ -1463,22 +1463,22 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
                 // Gestern war Feiertag? Periode mit when_holiday="next_non_holiday" suchen
 
                 for( int before = -24*60*60;
-                     before >= -foresee_years*24*60*60  &&  _holidays.is_included( t + before ); 
+                     before >= -foresee_years*24*60*60  &&  _holidays.is_included( Time(t + before) ); 
                      before -= 24*60*60 )
                 {
-                    Period p = next_period_of_same_day( t + before, single_start | wss_when_holiday_next_non_holiday );
-                    if( !p.empty() )  result = min( result, p - before );   // Vergangene Periode auf heute verschieben
+                    Period p = next_period_of_same_day( t + Duration(before), single_start | wss_when_holiday_next_non_holiday );
+                    if( !p.empty() )  result = min( result, p - Duration(before));   // Vergangene Periode auf heute verschieben
                 }
 
 
                 // Morgen ist Feiertag? Periode mit when_holiday="previous_non_holiday" suchen
 
                 for( int after = +24*60*60;
-                     after <= foresee_years*24*60*60  &&  !(t + after).is_never()  &&  _holidays.is_included( t + after ); 
+                     after <= foresee_years*24*60*60  &&  !Duration(t + after).is_eternal()  &&  _holidays.is_included(Time(t + after)); 
                      after += 24*60*60 )
                 {
-                    Period p = next_period_of_same_day( t + after, single_start | wss_when_holiday_previous_non_holiday );
-                    if( !p.empty() )  result = min( result, p - after );    // Zukünftige Periode auf heute verschieben
+                    Period p = next_period_of_same_day( t + Duration(after), single_start | wss_when_holiday_previous_non_holiday );
+                    if( !p.empty() )  result = min( result, p - Duration(after) );    // Zukünftige Periode auf heute verschieben
                 }
             }
         }
@@ -1535,9 +1535,9 @@ Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_
             if( !v.is_null_or_empty_string() )
             {
                 Time t;
-                if( variant_is_numeric( v ) )  t = (time_t)v.as_int64();
+                if( variant_is_numeric( v ) )  t = Time((time_t)v.as_int64());
                 else
-                if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
+                if( v.vt == VT_DATE         )  t = Time(seconds_since_1970_from_com_date( V_DATE( &v ) ));
                 else                           
                                                t.set_datetime( v.as_string() );
 
@@ -1607,6 +1607,16 @@ bool Period::operator==( const Period& o ) const
            _single_start          == o._single_start;
 }
 
+//-------------------------------------------------------------------------------Period::operator+=
+
+Period& Period::operator+=(const Time& t)
+{ 
+    assert(!_begin.has_date() && !_end.has_date());
+    _begin += Duration(t.as_double()); 
+    _end += Duration(t.as_double()); 
+    return *this; 
+}
+
 //-------------------------------------------------------------------------Period::set_single_start
 
 void Period::set_single_start( const Time& t )
@@ -1645,7 +1655,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
         {
             if( w == with_date )  dt = begin;
                             else  dt.set_time( begin );
-            _begin = dt;
+            _begin = Time(dt);
         }
         string repeat = element.getAttribute( "repeat" );
         if( !repeat.empty() )
@@ -1654,10 +1664,10 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
             {
                 Sos_optional_date_time dt;
                 dt.set_time( repeat );
-                _repeat = dt.time_as_double();
+                _repeat = Duration(dt.time_as_double());
             }
             else
-                _repeat = as_double( repeat );
+                _repeat = Duration(as_double(repeat));
         }
 
         if( _repeat.is_null() )  _repeat = Duration::eternal;
@@ -1670,10 +1680,10 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
             {
                 Sos_optional_date_time dt;
                 dt.set_time( absolute_repeat );
-                _absolute_repeat = dt.time_as_double();
+                _absolute_repeat = Duration(dt.time_as_double());
             }
             else
-                _absolute_repeat = as_double( absolute_repeat );
+                _absolute_repeat = Duration(as_double(absolute_repeat));
 
             if( _absolute_repeat.is_null() )  z::throw_xc( "SCHEDULER-441", element.nodeName(), "absolute_repeat", "0" );
             if( !_absolute_repeat.is_eternal() )  _repeat = Duration::eternal;
@@ -1686,7 +1696,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
     {
         if( w == with_date )  dt = end;
                         else  dt.set_time( end );
-        _end = dt;
+        _end = Time(dt);
     }
 
     _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
@@ -1803,7 +1813,7 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
     if( t < _begin )  t = _begin;
 
     int n = (int)( ( t - _absolute_repeat_begin ).as_double() / _absolute_repeat.as_double() );
-    result = (_absolute_repeat_begin + ( n + 1 )).as_double() * _absolute_repeat.as_double();
+    result = Time((_absolute_repeat_begin.as_double() + n + 1) * _absolute_repeat.as_double());
     if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
 
     assert( next == 0? result >= t : result > t );
@@ -1998,7 +2008,7 @@ Period Weekday_set::next_period_of_same_day( const Time& tim, With_single_start 
         if( const Day* day = _days[ weekday % 7 ] )
         {
             Period period = day->next_period( time_of_day, single_start );
-            if( !period.empty() )  result = day_nr*(24*60*60) + period;
+            if( !period.empty() )  result = Time(day_nr*(24*60*60)) + period;
         }
     }
 
@@ -2097,7 +2107,7 @@ Period Monthday_set::next_period_of_same_day( const Time& tim, With_single_start
 
         if( !period.empty() )
         {
-            result = day_nr*(24*60*60) + period;
+            result = Time(day_nr*(24*60*60)) + period;
         }
     }
 
@@ -2131,7 +2141,7 @@ Period Ultimo_set::next_period_of_same_day( const Time& tim, With_single_start s
         if( const Day* day = _days[ last_day_of_month( date ) - date.day() ] )
         {
             Period period = day->next_period( time_of_day, single_start );
-            if( !period.empty() )  result = day_nr*(24*60*60) + period;
+            if( !period.empty() )  result = Time(day_nr*(24*60*60)) + period;
         }
     }
 
@@ -2239,7 +2249,7 @@ Period Date_set::next_period_of_same_day( const Time& tim, With_single_start sin
             if( date._day_nr == day_nr )
             {
                 const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : Time(0), single_start );
-                if( !period.empty() )  result = date._day_nr*(24*60*60) + period;
+                if( !period.empty() )  result = Time(date._day_nr*(24*60*60)) + period;
             }
 
             break;

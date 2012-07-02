@@ -65,6 +65,12 @@ using namespace zschimmer::com;
 namespace sos {
 namespace scheduler {
 
+namespace time {
+    struct Duration;
+}
+
+using time::Duration;
+
 //--------------------------------------------------------------------------------------------const
     
 extern const char               version_string[];
@@ -76,8 +82,8 @@ extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;
 const int                       max_memory_file_size          = 10*1024*1024;   // Für Dateien, die komplett in den Speicher geladen werden
 extern const int                max_open_log_files;
-extern const double             delete_temporary_files_delay;
-extern const double             delete_temporary_files_retry;
+extern const Duration           delete_temporary_files_delay;
+extern const Duration           delete_temporary_files_retry;
 
 #ifdef Z_WINDOWS
 /**
@@ -626,8 +632,8 @@ struct Spooler : Object,
 
     Mail_defaults              _mail_defaults;
 
-    int                        _log_collect_within;
-    int                        _log_collect_max;
+    Duration                   _log_collect_within;
+    Duration                   _log_collect_max;
 
     Time                       _last_mail_timestamp;
 

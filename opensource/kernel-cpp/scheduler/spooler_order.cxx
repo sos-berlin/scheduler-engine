@@ -2005,7 +2005,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             if( node )
             {
                 node->set_suspending_order( e.bool_getAttribute( "suspend", node->is_suspending_order() ) );
-                node->set_delay           ( e. int_getAttribute( "delay"  , node->delay()               ) );
+                node->set_delay(Duration(e.int_getAttribute( "delay", node->delay().seconds())));
                 //node->set_action( e.getAttribute( "action", node->string_action() ) );      // Hiernach _is_distributed nicht mehr setzen!
             }
         }
@@ -4384,7 +4384,7 @@ Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin
         if( order->is_immediately_processable( now )  &&  (virgin_is_allowed  ||  !order->is_virgin()))
         {
             result = order;
-            result->_setback = 0;
+            result->_setback = Time(0);
             break;
         }
 

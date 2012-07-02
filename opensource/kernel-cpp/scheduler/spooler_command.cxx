@@ -168,8 +168,8 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
                 }
                 else
                 {
-                    if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay;
-                    set_async_next_gmtime( min( now + delete_temporary_files_retry, _trying_deleting_files_until ) );
+                    if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay.as_double();
+                    set_async_next_gmtime( min( now + delete_temporary_files_retry.as_double(), _trying_deleting_files_until ) );
                 }
             }
             
@@ -732,7 +732,7 @@ xml::Element_ptr Command_processor::execute_show_calendar( const xml::Element_pt
 
     if( element.hasAttribute( "from"   ) )  options._from  .set_datetime( element.getAttribute( "from"  ) );
     if( element.hasAttribute( "before" ) )  options._before.set_datetime( element.getAttribute( "before" ) );
-                                      else  options._before = options._from.midnight() + 7*24*3600 + 1;                 // Default: eine Woche
+                                      else  options._before = options._from.midnight() + Duration(7*24*3600 + 1);   // Default: eine Woche
 
 
 
@@ -1000,7 +1000,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     Time start_at;
 
     if( at_str == ""       )  at_str = "now";
-    if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zul�sst)
+    if( at_str == "period" )  start_at = Time(0);                               // start="period" => start_at = 0 (sobald eine Periode es zul�sst)
                         else  start_at = Time::time_with_now( at_str );         // "now+..." m�glich
 
     if( !after_str.empty() )  start_at = Time::now() + Duration( as_int( after_str ) );     // Entweder at= oder after=

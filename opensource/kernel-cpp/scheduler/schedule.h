@@ -61,11 +61,11 @@ struct Period
     bool                        empty                       () const                                { return _begin == Time::never; }
     bool                        has_start                   () const                                { return is_single_start() || !repeat().is_eternal(); }
     Time                        next_try                    ( const Time& );
-    Period                      operator +                  ( const Duration& t ) const             { Period p = *this; p += t; return p; }
+    Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p += t; return p; }
     Period                      operator -                  ( const Duration& t ) const             { Period p = *this; p -= t; return p; }
-    friend Period               operator +                  ( const Duration& t, const Period& p )  { return p + t; }
-    Period&                     operator +=                 ( const Duration& t )                   { _begin += t; _end += t; return *this; }
-    Period&                     operator -=                 ( const Duration& t )                   { _begin -= t.as_double(); _end -= t.as_double(); return *this; }
+    friend Period               operator +                  ( const Time& t, const Period& p )      { return p + t; }
+    Period&                     operator +=                 ( const Time& );
+    Period&                     operator -=                 ( const Duration& t )                   { _begin -= t; _end -= t; return *this; }
 
     void                        set_single_start            ( const Time& );
 
@@ -275,7 +275,7 @@ struct Date
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Date& o )           { o.print(s); return s; }
 
-    uint                       _day_nr;
+    int                        _day_nr;
     Day                        _day;
 };
 

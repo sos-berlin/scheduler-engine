@@ -315,7 +315,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
 
     if( _moved )  assert(0), z::throw_xc( "SCHEDULER-0", obj_name() + " _moved=true?" );
 
-    _setback        = 0;
+    _setback        = Time(0);
     _setback_called = false;
     _moved          = false;
     _task           = task;
@@ -2134,7 +2134,7 @@ void Order::set_job_chain_node( Node* node, bool is_error_state )
     if( node )
     {
         if( node->is_suspending_order() )  set_suspended();
-        if( node->delay()  &&  !at() )  set_at_after_delay( Time::now() + node->delay() );
+        if( node->delay().is_defined()  &&  !at().is_defined() )  set_at_after_delay( Time::now() + node->delay() );
     }
 
     set_state2( node? node->order_state() : empty_variant, is_error_state );
@@ -2661,8 +2661,8 @@ bool Order::handle_end_state_of_nested_job_chain()
                 _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
 
                 close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
-                _start_time = 0;
-                _end_time = 0;
+                _start_time = Time(0);
+                _end_time = Time(0);
                 open_log();
 
                 _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
@@ -2710,8 +2710,8 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
     _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
     
     close_log_and_write_history();  // Historie schreiben, aber Auftrag beibehalten
-    _start_time = 0;
-    _end_time   = 0;
+    _start_time = Time(0);
+    _end_time   = Time(0);
 
     try
     {
@@ -2856,7 +2856,7 @@ void Order::set_suspended( bool suspended )
 
 void Order::start_now()
 {
-    set_at( 0 );
+    set_at(Time(0));
 }
 
 //-----------------------------------------------------------------------------------Order::setback
@@ -2921,7 +2921,7 @@ void Order::clear_setback( bool keep_setback_count )
 {
     if( _setback_count > 0 )
     {
-        set_setback( 0, keep_setback_count );
+        set_setback(Time(0), keep_setback_count );
     }
 }
 
@@ -3022,7 +3022,7 @@ Time Order::next_start_time( bool first_call )
             }
         }
 
-        if( result < now )  result = 0;
+        if( result < now )  result = Time(0);
     }
 
     return result;

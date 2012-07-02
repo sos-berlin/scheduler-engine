@@ -350,7 +350,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 {
                     console_line << " (";
                     if (!until.is_never()) {
-                        Time r = rest.as_double();
+                        Time r = Time(rest.as_double());
                         int days = r.day_nr();
                         if( days > 0 )  console_line << days << "d+";
                         console_line << r.time_of_day().as_string( time::without_ms ) << "s";
@@ -535,7 +535,7 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
     Time    now               = Time::now();
 
     int     max_sleep_time_ms = INT_MAX-1;    // max. Wartezeit in Millisekunden
-    Time    until             = now + (dTimeout/1000.0);
+    Time    until             = now + Duration(dTimeout/1000.0);
     bool    isWaiting         = true;
     int     timeoutCounter    = 0;
 

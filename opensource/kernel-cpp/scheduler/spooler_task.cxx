@@ -184,7 +184,7 @@ Task::Task( Job* job )
     _idle_timeout_at = Time::never;
 
     set_subprocess_timeout();
-         = _job->get_step_duration_or_percentage( _job->_warn_if_shorter_than_string, Duration(0) );
+    _warn_if_shorter_than = _job->get_step_duration_or_percentage( _job->_warn_if_shorter_than_string, Duration(0) );
     _warn_if_longer_than  = _job->get_step_duration_or_percentage( _job->_warn_if_longer_than_string , Duration::eternal );
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
@@ -766,7 +766,7 @@ void Task::set_state_direct( State new_state )
         _enqueued_state = s_none;
     }
 
-    if( new_state != s_running_waiting_for_order )  _idle_since = 0;
+    if( new_state != s_running_waiting_for_order )  _idle_since = Time(0);
 
     if( new_state != _state )
     {
@@ -823,13 +823,13 @@ void Task::set_state_direct( State new_state )
         }
 
         default:
-            _next_time = 0;
+            _next_time = Time(0);
     }
 
 
     if( _next_time && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
-    if( _end )  _next_time = 0;   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
+    if( _end )  _next_time = Time(0);   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
 
     if( new_state != _state )
     {
@@ -839,7 +839,7 @@ void Task::set_state_direct( State new_state )
             if( _state    == s_starting ||  _state    == s_opening  ||  _state    == s_running )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
         }
 
-        if( new_state != s_running_delayed )  _next_spooler_process = 0;
+        if( new_state != s_running_delayed )  _next_spooler_process = Time(0);
 
         State old_state = _state;
         _state = new_state;
@@ -902,7 +902,7 @@ string Task::state_name( State state )
 void Task::signal( const string& signal_name )
 {
         _signaled = true;
-        set_next_time( 0 );
+        set_next_time(Time(0));
 
         if( _spooler->_task_subsystem )  _spooler->_task_subsystem->signal( signal_name );
                //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
@@ -1044,7 +1044,7 @@ Time Task::next_time()
     if( _operation )
     {
         if( _operation->async_finished() ) {
-            result = 0;   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
+            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
         } else {
             Duration t = _timeout;
             if( _state == s_running ||
@@ -1088,13 +1088,13 @@ bool Task::check_timeout( const Time& now )
 
 void Task::check_if_shorter_than( const Time& now )
 {
-    if(     .is_defined() ) 
+    if( _warn_if_shorter_than.is_defined() ) 
     {
         Duration step_time = now - _last_operation_time;
 
-        if( step_time <      ) 
+        if( step_time < _warn_if_shorter_than ) 
         {
-            string msg = message_string( "SCHEDULER-711",     .as_string( time::without_ms ), step_time.as_string( time::without_ms ) );
+            string msg = message_string( "SCHEDULER-711", _warn_if_shorter_than.as_string( time::without_ms ), step_time.as_string( time::without_ms ) );
             _log->warn( msg );
 
             Scheduler_event scheduler_event ( evt_task_step_too_short, log_error, _spooler );
@@ -1102,7 +1102,7 @@ void Task::check_if_shorter_than( const Time& now )
             mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
             mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                           "Step time: " << step_time << "\n" <<
-                                          "warn_if_shorter_than=" <<     .as_string( time::without_ms ) );
+                                          "warn_if_shorter_than=" << _warn_if_shorter_than.as_string( time::without_ms ) );
             scheduler_event.send_mail( mail_defaults );
         }
     }
@@ -1188,7 +1188,7 @@ void Task::remove_pid( int pid )
 
 //-----------------------------------------------------------------------------Task::add_subprocess
 
-void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
+void Task::add_subprocess( int pid, const Duration& timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
 {
     Z_LOG2( "scheduler", Z_FUNCTION << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
     Z_LOG2( "scheduler", Z_FUNCTION << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
@@ -1200,8 +1200,7 @@ void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool i
     }
     else
     {
-        Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
-                                               : Time::never;
+        Time timeout_at = timeout.is_eternal()? Time::never : Time::now() + timeout;
 
         _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
 
@@ -1704,7 +1703,7 @@ bool Task::do_something()
                         {
                             if( now >= _next_spooler_process )
                             {
-                                _next_spooler_process = 0;
+                                _next_spooler_process = Time(0);
                                 set_state_direct( s_running ), loop = true;
                             }
 
@@ -1839,7 +1838,7 @@ bool Task::do_something()
                         {
                             if( _module_instance  &&  _module_instance->is_kill_thread_running() )
                             {
-                                _next_time = Time::now() + 0.1;
+                                _next_time = Time::now() + Duration(0.1);
                             }
                             else
                             {
@@ -2053,7 +2052,7 @@ bool Task::do_something()
             if( _next_time <= now )
             {
                 Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time << ", delayed\n" );
-                _next_time = Time::now() + 0.1;
+                _next_time = Time::now() + Duration(0.1);
             }
             else
             {
@@ -2407,7 +2406,7 @@ void Task::finish()
                     catch( exception& x )
                     {
                         _log->error( x.what() );
-                        _job->_delay_until = 0;
+                        _job->_delay_until = Time(0);
                         _job->stop_after_task_error( x.what() );
                     }
                 }

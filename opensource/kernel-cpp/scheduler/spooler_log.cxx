@@ -623,8 +623,8 @@ void Prefix_log::set_profile_section( const string& section )
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
         _mail_on_delay_after_error = read_profile_yes_no_last_both( _spooler->_factory_ini, _section, "mail_on_delay_after_error", _mail_on_delay_after_error );
-        _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within.as_double() );
-        _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max.as_double() );
+        _collect_within  = Duration(read_profile_uint( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within.as_double() ));
+        _collect_max     = Duration(read_profile_uint( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max.as_double() ));
     }
 }
 
@@ -989,7 +989,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
 {
     if( !is_active()  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
-        _first_send = 0;
+        _first_send = Time(0);
         _mail = NULL;
     }
     else
@@ -1007,7 +1007,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
         // Datei kann offen bleiben   //finish_log();
         send_really( scheduler_event );
 
-        _first_send = 0;
+        _first_send = Time(0);
     }
  
     _last_send = Time::now();

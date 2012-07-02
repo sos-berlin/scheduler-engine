@@ -86,10 +86,10 @@ void Remote_module_instance_server::try_delete_files()
             string paths = join( ", ", _module_instance->undeleted_files() );
             _log.debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
 
-            double until = double_from_gmtime() + delete_temporary_files_delay;
+            double until = double_from_gmtime() + delete_temporary_files_delay.as_double();
             while(1)
             {
-                sleep( delete_temporary_files_retry );
+                sleep( delete_temporary_files_retry.as_double() );
                 deleted = _module_instance->try_delete_files( NULL );
                 if( deleted )  break;
                 if( double_from_gmtime() >= until )  break;

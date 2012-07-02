@@ -22,8 +22,8 @@ using job_chain::Job_node;
 
 //--------------------------------------------------------------------------------------------const
 
-const int    max_task_time_out             = 365*24*3600;
-const double directory_watcher_intervall   = 10.0;          // Nur für Unix (Windows gibt ein asynchrones Signal)
+const Duration max_task_time_out           = Duration(365*24*3600);
+const Duration directory_watcher_intervall = Duration(10.0);          // Nur für Unix (Windows gibt ein asynchrones Signal)
 const bool   Job::force_start_default      = true;
 
 //-------------------------------------------------------------------------------Job_subsystem_impl
@@ -554,7 +554,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _directory_watcher_next_time = Time::never;
     _default_params = new Com_variable_set;
     _task_timeout   = Duration::eternal;
-    _idle_timeout   = 5;
+    _idle_timeout   = Duration(5);
     _max_tasks      = 1;
 
     _combined_job_nodes = Z_NEW( Combined_job_nodes( this ) );
@@ -748,7 +748,7 @@ bool Job::on_activate()
             {
                 set_state( _is_permanently_stopped? s_stopped : s_pending );
                 
-                _delay_until = 0;
+                _delay_until = Time(0);
                 reset_scheduling();
                 init_start_when_directory_changed();
                 check_min_tasks( Z_FUNCTION );
@@ -1028,7 +1028,7 @@ Duration Job::get_step_duration_or_percentage( const string& value, const Durati
         {
             Sos_optional_date_time dt;
             dt.set_time( value );
-            result = dt.time_as_double();
+            result = Duration(dt.time_as_double());
         }
         else
         if( string_ends_with( value, "%" ) ) 
@@ -1040,7 +1040,7 @@ Duration Job::get_step_duration_or_percentage( const string& value, const Durati
         }
         else
         {
-            result = as_double( value );
+            result = Duration(as_double(value));
         }
     }
 
@@ -1071,7 +1071,7 @@ Duration Job::average_step_duration( const Duration& deflt )
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_history_tablename, x ), Z_FUNCTION ); }
 
         if( !record.null(0) && record.as_string(0) != "" ) {
-            result = floor( record.as_double( 0 ) );
+            result = Duration(floor( record.as_double( 0 ) ));
         }
     }
 
@@ -1362,7 +1362,7 @@ string Job::profile_section()
 void Job::set_error_xc_only( const Xc& x )
 {
     _error = x;
-    _repeat = 0;
+    _repeat = Duration(0);
 }
 
 //--------------------------------------------------------------------------------Job::set_error_xc
@@ -1400,7 +1400,7 @@ void Job::signal( const string& signal_name )
 { 
     //Z_DEBUG_ONLY( assert( _state != s_stopped ) );
 
-    _next_time = 0;
+    _next_time = Time(0);
     
     Z_LOG2( "zschimmer", obj_name() << "  " << Z_FUNCTION << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
@@ -2115,7 +2115,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         *it = new_dw;       // Alte durch neue Überwachung ersetzen
     }
 
-    _directory_watcher_next_time = 0;
+    _directory_watcher_next_time = Time(0);
     calculate_next_time( Time::now() );
 }
 
@@ -2452,7 +2452,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     {
                         next_start_time = _period.next_try( now + _repeat );
                         if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
-                        _repeat = 0;
+                        _repeat = Duration(0);
                     }
                     else
                     //JS-436  if( now >= _period.begin()  &&  !_period.repeat().is_never() )
@@ -2546,12 +2546,12 @@ void Job::calculate_next_time( const Time& now )
         if( _lock_requestor  &&  
             ( _lock_requestor->is_enqueued()  ||  !_lock_requestor->locks_are_known() ) )
         {
-            if( _lock_requestor->locks_are_available() )  next_time = 0;    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
+            if( _lock_requestor->locks_are_available() )  next_time = Time(0);    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
         }
         else
         if( _waiting_for_process )
         {
-            if( _waiting_for_process_try_again )  next_time = 0;            // task_to_start() ruft remove_waiting_job_from_process_list()
+            if( _waiting_for_process_try_again )  next_time = Time(0);            // task_to_start() ruft remove_waiting_job_from_process_list()
         }
         else
         {
@@ -2561,7 +2561,7 @@ void Job::calculate_next_time( const Time& now )
                 bool in_period = is_in_period(now);
 
                 if( in_period  &&  ( _start_once || _start_once_for_directory ) )
-                    next_time = 0;
+                    next_time = Time(0);
                 else {
                     next_time = min(next_time, _task_queue->next_start_time() );
                     next_time = min(next_time, _next_start_time);
@@ -2571,7 +2571,7 @@ void Job::calculate_next_time( const Time& now )
                 if( next_time > now  &&  is_order_controlled() ) {
                     if (in_period) {
                         bool has_order = request_order( now, Z_FUNCTION );
-                        if( has_order )  next_time = 0;
+                        if( has_order )  next_time = Time(0);
                         else next_time = min(next_time, _combined_job_nodes->next_time() );
                     }
                     else
@@ -2999,8 +2999,8 @@ bool Job::do_something()
                             _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
                             reset_error();
-                            _repeat = 0;
-                            _delay_until = 0;
+                            _repeat = Duration(0);
+                            _delay_until = Time(0);
 
                             _running_tasks.push_back( task );
                             set_state( s_running );
@@ -3043,7 +3043,7 @@ bool Job::do_something()
 
                 if( _next_time <= now )
                 {
-                    _next_time = Time::now() + 1;
+                    _next_time = Time::now() + Duration(1);
                 }
             }
         }
@@ -3385,7 +3385,7 @@ void Job::set_delay_order_after_setback( int setback_count, const string& delay 
 
 Duration Job::get_delay_order_after_setback( int setback_count )
 {
-    Duration delay = 0;
+    Duration delay = Duration(0);
 
     FOR_EACH( Delay_order_after_setback, _delay_order_after_setback, it )  
     {

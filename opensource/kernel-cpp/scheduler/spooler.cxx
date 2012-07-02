@@ -60,10 +60,10 @@ const string                    new_suffix                          = "~new";   
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 
-const int                       before_suspend_wait_time            = 5;                // Diese Zeit vor Suspend auf Ereignis warten (eigentlich so kurz wie möglich)
-const int                       inhibit_suspend_wait_time           = 10*60;            // Nur Suspend, wenn Wartezeit länger ist
-const int                       show_message_after_seconds          = 15*60;            // Nach dieser Wartezeit eine Meldung ausgeben
-const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
+const Duration                  before_suspend_wait_time            = Duration(5);      // Diese Zeit vor Suspend auf Ereignis warten (eigentlich so kurz wie möglich)
+const Duration                  inhibit_suspend_wait_time           = Duration(10*60);  // Nur Suspend, wenn Wartezeit länger ist
+const Duration                  show_message_after_seconds          = Duration(15*60);  // Nach dieser Wartezeit eine Meldung ausgeben
+const Duration                  show_message_after_seconds_debug    = Duration(60);     // Nach dieser Wartezeit eine Meldung ausgeben
 
 const int                       nothing_done_max                    = 10;  //2+1;        // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
                                                                                         // +1 für Job::start_when_directory_changed() unter Windows
@@ -86,8 +86,8 @@ const int                       tcp_restart_close_delay             = 3;        
 
 const int                       const_order_id_length_max           = 250;              // Die Datenbankspalte _muss_ so groß sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
 
-const double                    delete_temporary_files_delay        = 2;                                
-const double                    delete_temporary_files_retry        = 0.1;                              
+const Duration                  delete_temporary_files_delay        = Duration(2);                                
+const Duration                  delete_temporary_files_retry        = Duration(0.1);                              
 
 const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;
@@ -1472,8 +1472,8 @@ void Spooler::read_ini_file()
     _mail_defaults.set( "subject"  ,            read_profile_string( _factory_ini, "spooler", "log_mail_subject" ) );
 
     _subprocess_own_process_group_default = read_profile_bool( _factory_ini, "spooler", "subprocess.own_process_group", _subprocess_own_process_group_default );
-    _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
-    _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
+    _log_collect_within = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 ));
+    _log_collect_max    = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 ));
   //_zschimmer_mode     = read_profile_bool  ( _factory_ini, "spooler", "zschimmer", _zschimmer_mode );
 }
 
@@ -2026,7 +2026,7 @@ string Spooler::configuration_for_single_job_script()
 void Spooler::start()
 {
     static_log_categories.save_to( &_original_log_categories );
-    _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", (int)_max_micro_step_time.seconds());
+    _max_micro_step_time = Duration(_variables->get_int("scheduler.message.SCHEDULER-721.timeout", (int)_max_micro_step_time.seconds()));
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -2513,7 +2513,7 @@ void Spooler::run()
             if( ++nothing_done_count > nothing_done_max )
             {
                 nichts_getan( ++nichts_getan_zaehler, catched_event_string );
-                if( wait_until.is_null() )  wait_until = Time::now() + 1;
+                if( wait_until.is_null() )  wait_until = Time::now() + Duration(1);
             }
 
             if( nothing_done_count > 1 )

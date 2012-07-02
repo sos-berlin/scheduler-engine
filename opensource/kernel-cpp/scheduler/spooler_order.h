@@ -554,8 +554,8 @@ struct Node : Com_job_chain_node,
     
     void                    set_suspending_order            ( bool b )                              { _is_suspending_order = b; }
     bool                     is_suspending_order            () const                                { return _is_suspending_order; }
-    void                    set_delay                       ( int delay )                           { _delay = delay; }
-    int                         delay                       () const                                { return _delay; }
+    void                    set_delay                       (const Duration& d)                     { _delay = d; }
+    Duration                    delay                       () const                                { return _delay; }
     Action                      action                      () const                                { return _action; }
     string                      action_name                 () const                                { return string_from_action( _action ); }
     int                         priority                    () const                                { return _priority; }
@@ -589,7 +589,7 @@ struct Node : Com_job_chain_node,
     Type                       _type;
     State                      _state;
     bool                       _is_suspending_order;        // <job_chain_node suspend="yes"/>
-    int                        _delay;                      // <job_chain_node delay="..."/>  Verzögerung des Auftrags
+    Duration                   _delay;                      // <job_chain_node delay="..."/>  Verzögerung des Auftrags
     Action                     _action;
     int                        _node_index;
     int                        _priority;                   // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)

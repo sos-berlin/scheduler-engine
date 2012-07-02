@@ -27,7 +27,7 @@ using namespace job_chain;
 const string                    scheduler_file_path_variable_name         = "scheduler_file_path";
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
-const int                       file_order_sink_job_idle_timeout_default  = 60;
+const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
 const int                       directory_file_order_source_max_default   = 100;      // Nicht zuviele Auftr‰ge, sonst wird der Scheduler langsam (in remove_order?)
 const int                       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
 
@@ -81,7 +81,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     bool                        read_new_files          ();
     bool                        clean_up_blacklisted_files();
   //bool                        clean_up_virgin_orders  ();
-    int                         delay_after_error       ();
+    Duration                    delay_after_error       ();
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
 
@@ -89,8 +89,8 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     File_path                  _path;
     string                     _regex_string;
     Regex                      _regex;
-    int                        _delay_after_error;
-    int                        _repeat;
+    Duration                   _delay_after_error;
+    Duration                   _repeat;
     bool                       _expecting_request_order;
     Xc_copy                    _directory_error;
     bool                       _send_recovered_mail;
@@ -265,10 +265,10 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
         _regex.compile( _regex_string );
     }
 
-    _delay_after_error = element.int_getAttribute( "delay_after_error", _delay_after_error );
+    _delay_after_error = Duration(element.int_getAttribute( "delay_after_error", _delay_after_error.seconds()));
 
-    if( element.getAttribute( "repeat" ) == "no" )  _repeat = INT_MAX;
-                                              else  _repeat = element.int_getAttribute( "repeat", _repeat );
+    if( element.getAttribute( "repeat" ) == "no" )  _repeat = Duration::eternal;
+                                              else  _repeat = Duration(element.int_getAttribute( "repeat", _repeat.seconds()));
 
     _max_orders = element.int_getAttribute( "max", _max_orders );
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
@@ -310,8 +310,8 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         if( _max_orders < INT_MAX )          element.setAttribute         ( "max"       , _max_orders );
         if( !_next_state.is_missing() )      element.setAttribute         ( "next_state", debug_string_from_variant( _next_state ) );
 
-        if( delay_after_error() < INT_MAX )  element.setAttribute( "delay_after_error", delay_after_error() );
-        if( _repeat             < INT_MAX )  element.setAttribute( "repeat"           , _repeat);
+        if (!delay_after_error().is_eternal())  element.setAttribute( "delay_after_error", delay_after_error().seconds() );
+        if (!_repeat.is_eternal())              element.setAttribute( "repeat"           , _repeat.seconds());
         
         if( _directory_error )  append_error_element( element, _directory_error );
 
@@ -1000,7 +1000,7 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
                 body << x->what() << "\n";
                 body << "\n";
 
-                if( delay_after_error() < INT_MAX )
+                if( !delay_after_error().is_eternal() )
                 {
                     body << "Retrying every " << delay_after_error() << " seconds.\n";
                     body << "You will be notified when the directory is accessible again\n";
@@ -1077,9 +1077,9 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_distributed_order();
 
 
-    int delay = _directory_error        ? delay_after_error() :
+    int delay = _directory_error        ? delay_after_error().seconds() :
                 _expecting_request_order? INT_MAX                // N‰chstes request_order() abwarten
-                                        : _repeat;               // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
+                                        : _repeat.seconds();     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
     set_async_delay( max( 1, delay ) );     // Falls ein Spaﬂvogel es geschafft hat, repeat="0" anzugeben
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
@@ -1089,10 +1089,9 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
 //---------------------------------------------------Directory_file_order_source::delay_after_error
 
-int Directory_file_order_source::delay_after_error()
+Duration Directory_file_order_source::delay_after_error()
 {
-    return _delay_after_error < INT_MAX? _delay_after_error 
-                              : _repeat;
+    return !_delay_after_error.is_eternal()? _delay_after_error : _repeat;
 }
 
 //------------------------------------------------------------Directory_file_order_source::obj_name

@@ -225,7 +225,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     void                        close                       ();
 
-    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = 0 );
+    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) );
     void                        enqueue_task                ( Task* );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
@@ -274,7 +274,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     ptr<Task>                   task_to_start               ();
     bool                        do_something                ();
 
-    void                    set_repeat                      ( double seconds )                      { _log->debug( "repeat=" + as_string(seconds) ),  _repeat = seconds; }
+    void                    set_repeat                      (const Duration& d)                     { _log->debug( "repeat=" + d.as_string() ),  _repeat = d; }
     Duration                    repeat                      ()                                      { return _repeat; }
 
     void                        set_state                   ( State );

@@ -2076,7 +2076,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         ptr<Task>           task;
 
         ptr<Ivariable_set>  pars;
-        Time                start_at = 0; 
+        Time                start_at = Time(0); 
 
         if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
         {
@@ -2094,7 +2094,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         if( start_after_vt.vt != VT_EMPTY )
         {
             hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
-            start_at = Time::now() + start_after_vt.dblVal;
+            start_at = Time::now() + Duration(start_after_vt.dblVal);
         }
 
         //THREAD_LOCK( _job->_lock )
@@ -2775,7 +2775,7 @@ STDMETHODIMP Com_task::put_Repeat( double* seconds )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
-        _task->_job->set_repeat( *seconds );
+        _task->_job->set_repeat(Duration(*seconds));
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
@@ -3156,7 +3156,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double* timeout, VARIANT_BOOL ig
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
         _task->add_subprocess( pid, 
-                               *timeout, 
+                               Duration(*timeout), 
                                ignore_error? true : false, 
                                ignore_signal? true : false, 
                                is_process_group != 0,

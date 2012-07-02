@@ -49,8 +49,9 @@ struct Duration {
     string                      as_string                   ( With_ms = with_ms ) const;                        
     long                        seconds                     () const                                { return (long)(_seconds + 0.0005); }
 
-    static const Duration       epsilon;
     static const Duration       eternal;
+    static const Duration       epsilon;
+    static const Duration       day;
 
 private:
     double                     _seconds;
@@ -79,30 +80,17 @@ struct Time
     explicit                    Time                        ( time_t t )                    { set((double)t); }
 #endif
                                 Time                        ( time_t t, Is_utc )            { set_utc((double)t); }
-                              //Time                        ( int t )                       { set((double)t); }
+    explicit                    Time                        ( int t )                       { set((double)t); }
                               //Time                        ( uint t )                      { set((double)t); }
     explicit                    Time                        ( const string& t )             { set(t); }
     explicit                    Time                        ( const char* t   )             { set(t); }
-    explicit                    Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
-
-  //void                        operator =                  ( double t )                    { set(t); }
-  //void                        operator =                  ( time_t t )                    { set((double)t); }
-#if !defined Z_AIX
-  //void                        operator =                  ( int t )                       { set((double)t); }
-#endif
-  //void                        operator =                  ( const string& t )             { set(t); }
-  //void                        operator =                  ( const char* t )               { set(t); }
-  //void                        operator =                  ( const Sos_optional_date_time& );
+    explicit                    Time                        ( const Sos_optional_date_time& dt ) { set_date_time(dt); }
 
     void                        operator +=                 (const Duration&);
     void                        operator -=                 (const Duration&);
 
     Time                        operator +                  ( const Duration& ) const;
-  //Time                        operator +                  ( double ) const;
-  //Time                        operator +                  ( int t ) const                 { return *this + (double)t; }
     Duration                    operator -                  ( const Time& ) const;
-  //Time                        operator -                  ( double ) const;
-  //Time                        operator -                  ( int t ) const                 { return *this - (double)t; }
 
     bool                        operator <                  ( const Time& t ) const         { return compare(t) < 0; }
     bool                        operator <=                 ( const Time& t ) const         { return compare(t) <= 0; }
@@ -127,16 +115,17 @@ private:
     bool                        operator >                  ( int t ) const;
 public:
 
-                              //operator double             () const                        { return as_double_or_never(); }
                                 operator bool               () const                        { return is_defined(); }
     bool                        operator !                  () const                        { return is_null(); }
     int                         compare                        (const Time& t) const;
 
+    void                        set_date_time               (const Sos_optional_date_time&);
     void                    set_null                        ()                              { set( 0 ); }
     bool                     is_null                        () const                        { return _time == 0; }
     bool                        is_defined                  () const                        { return _time != 0; }
     void                    set_never                       ()                              { set( never_int ); } 
     bool                     is_never                       () const                        { return _time == never_double; } 
+    bool                        has_date                    () const                        { return _time > 366*24*60*60; }   // Eigentlich nur bis ein Tag
     Time                        rounded_to_next_second      () const                        { return Time( floor( _time + 0.9995 ) ); }
 
 
@@ -156,7 +145,7 @@ public:
     Time&                       set_datetime                ( const string& );
     void                        set_datetime_utc            ( const string& );
     Time                        time_of_day                 () const                        { return Time((*this - midnight()).as_double()); }
-    Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
+    Time                        midnight                    () const                        { return Time(day_nr() * 24*60*60); }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
     int                         month_nr                    () const;
     time_t                      as_time_t                   () const                        { return (time_t)( as_double    () + 0.0001 ); }
