@@ -3,19 +3,21 @@ package com.sos.scheduler.engine.data.folder;
 import java.io.File;
 
 public enum FileBasedType {
-    folder("folder"),
-    job("job"),
-    jobChain("job_chain"),
-    lock("lock"),
-    order("order"),
-    processClass("process_class"),
-    schedule("schedule");
+    folder("folder", "Folder"),
+    job("job", "Job"),
+    jobChain("job_chain", "JobChain"),
+    lock("lock", "Lock"),
+    order("order", "Order"),
+    processClass("process_class", "ProcessClass"),
+    schedule("schedule", "Schedule");
     //scheduler_script("scheduler_script");
 
     private final String cppName;
+    private final String printName;
 
-    FileBasedType(String cppName) {
+    FileBasedType(String cppName, String printName) {
         this.cppName = cppName;
+        this.printName = printName;
     }
 
     public String cppName() {
@@ -36,6 +38,10 @@ public enum FileBasedType {
 
     public String filename(String name) {
         return this == folder? name +"/" : name +"."+ cppName +".xml";
+    }
+
+    @Override public String toString() {
+        return printName;
     }
 
     public static FileBasedType fromCppName(String name) {
