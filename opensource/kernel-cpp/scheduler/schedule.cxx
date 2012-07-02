@@ -526,7 +526,10 @@ Time Schedule_use::next_any_start( const Time& time )
 
 Period Schedule_use::next_period( const Time& t, With_single_start single_start, const Time& before ) 
 { 
-    return schedule()->next_period( this, t, single_start, before ); 
+    Period result = schedule()->next_local_period( this, t.local_time(_time_zone), single_start, before.local_time(_time_zone) ); 
+    result._begin = result._begin.utc_from_time_zone(_time_zone);
+    result._end = result._end.utc_from_time_zone(_time_zone);
+    return result;
 }
 
 //-----------------------------------------------------------------Schedule_use::next_allowed_start
@@ -946,9 +949,9 @@ void Schedule::disconnect_covering_schedules()
     assert( _covering_schedules.empty() );
 }
 
-//----------------------------------------------------------------------------Schedule::next_period
+//----------------------------------------------------------------------Schedule::next_local_period
 
-Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
+Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
 { 
     Period result;
     Time   interval_begin = Time(0);      // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
@@ -980,7 +983,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
                 interval_end   = covering_schedule->_inlay->_covered_schedule_end;
                 assert( t >= interval_begin  &&  t < interval_end );
 
-                Period period = covering_schedule->_inlay->next_period( use, t, single_start, before );
+                Period period = covering_schedule->_inlay->next_local_period( use, t, single_start, before );
                 if( period._begin < interval_end )  
                 {
                     result = period;
@@ -1002,7 +1005,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
         if( interval_begin < interval_end )     // Die Lücke nach dem überdeckenden Schedule ist länger als 0?
         {
             assert( !covering_schedule_at( t ) );
-            Period period = _inlay->next_period( use, t, single_start, before );       // Unser Standard-Schedule
+            Period period = _inlay->next_local_period( use, t, single_start, before );       // Unser Standard-Schedule
             if( period.begin() < interval_end )  
             {
                 result = period;
@@ -1269,7 +1272,6 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _once = element.bool_getAttribute( "once", _once );
     //if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
     _start_time_function = element.getAttribute( "start_time_function" );
-    _time_zone = element.getAttribute("time_zone");
 
 
     default_period.set_dom( element );
@@ -1380,23 +1382,6 @@ bool Schedule::Inlay::is_filled() const
         }
     }
 
-    return result;
-}
-
-//---------------------------------------------------------------------Schedule::Inlay::next_period
-
-Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
-{
-    return next_utc_period(use, beginning_time, single_start, before);
-}
-
-//-----------------------------------------------------------------Schedule::Inlay::next_utc_period
-
-Period Schedule::Inlay::next_utc_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
-{
-    Period result = next_local_period(use, beginning_time.local_time(_time_zone), single_start, before.local_time(_time_zone));
-    result._begin = result._begin.utc_from_time_zone(_time_zone);
-    result._end = result._end.utc_from_time_zone(_time_zone);
     return result;
 }
 

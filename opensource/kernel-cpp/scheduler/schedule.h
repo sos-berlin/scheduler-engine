@@ -398,6 +398,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     File_based*                _using_object;
     Scheduler_holidays_usage   _scheduler_holidays_usage;
     string                     _active_schedule_path;       // == schedule()->active_schedule_path_at(now)
+    string                     _time_zone;
 };
 
 //-----------------------------------------------------------------------------------------Schedule
@@ -423,8 +424,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
         void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
         xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-        Period                      next_period                 ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
-        Period                      next_utc_period             ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
+        Period                      next_local_period           ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
 
         Prefix_log*                 log                         ()                                  { return _schedule->log(); }
 
@@ -434,7 +434,6 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         static int                  month_index_by_name         ( const string& );
         static list<int>            month_indices_by_names      ( const string& );
 
-        Period                      next_local_period           ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
         Period                      next_period_of_same_day     ( const Time&, With_single_start single_start );
         void                        check                       ();                              
         bool                        is_filled                   () const;
@@ -454,7 +453,6 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         xml::Document_ptr          _dom;
         string                     _start_time_function;
         bool                       _start_time_function_error;
-        string                     _time_zone;
         Absolute_path              _covered_schedule_path;
         Time                       _covered_schedule_begin;
         Time                       _covered_schedule_end;
@@ -540,7 +538,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     Schedule*                   active_schedule_at          ( const Time& );
     Absolute_path               active_schedule_path_at     ( const Time& );
     bool                        once                        ()                                      { return _inlay->_once; }
-    Period                      next_period                 ( Schedule_use*, const Time&, With_single_start, const Time& before );
+    Period                      next_local_period           ( Schedule_use*, const Time&, With_single_start, const Time& before );
 
 
     void                        print                       ( ostream& ) const;
