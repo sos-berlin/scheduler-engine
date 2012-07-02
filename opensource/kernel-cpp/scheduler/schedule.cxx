@@ -1813,7 +1813,7 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
     if( t < _begin )  t = _begin;
 
     int n = (int)( ( t - _absolute_repeat_begin ).as_double() / _absolute_repeat.as_double() );
-    result = Time((_absolute_repeat_begin.as_double() + n + 1) * _absolute_repeat.as_double());
+    result = Time(_absolute_repeat_begin.as_double() + (n + 1) * _absolute_repeat.as_double());
     if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
 
     assert( next == 0? result >= t : result > t );
