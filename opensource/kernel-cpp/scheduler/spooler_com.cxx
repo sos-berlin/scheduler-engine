@@ -65,11 +65,11 @@ Com_task_proxy   ::Class_descriptor Com_task_proxy   ::class_descriptor ( &typel
     DEFINE_GUID( IID_Ihostware_dynobj, 0x9F716A02, 0xD1F0, 0x11CF, 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 );
 #endif
 
-//--------------------------------------------------------------------------------time_from_variant
+//----------------------------------------------------------------------------duration_from_variant
 
-Time time_from_variant( const VARIANT& vt )
+Duration duration_from_variant( const VARIANT& vt )
 {
-    return time::time_from_string( variant_as_string( vt ) );
+    return time::duration_from_string( variant_as_string( vt ) );
 }
 
 //----------------------------------------------------------------------order_from_order_or_payload
@@ -1627,7 +1627,7 @@ STDMETHODIMP Com_log::put_Collect_within( VARIANT* time )
     {
         if( !_log )  return E_POINTER;
 
-        _log->set_collect_within( time_from_variant(*time) );
+        _log->set_collect_within( duration_from_variant(*time) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
@@ -1646,7 +1646,7 @@ STDMETHODIMP Com_log::get_Collect_within( double* result )
     {
         if( !_log )  return E_POINTER;
 
-        *result = _log->collect_within();
+        *result = _log->collect_within().as_double();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
@@ -1665,7 +1665,7 @@ STDMETHODIMP Com_log::put_Collect_max( VARIANT* time )
     {
         if( !_log )  return E_POINTER;
 
-        _log->set_collect_max( time_from_variant(*time) );
+        _log->set_collect_max( duration_from_variant(*time) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
@@ -1684,7 +1684,7 @@ STDMETHODIMP Com_log::get_Collect_max( double* result )
     {
         if( !_log )  return E_POINTER;
 
-        *result = _log->collect_max();
+        *result = _log->collect_max().as_double();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
@@ -2831,7 +2831,7 @@ STDMETHODIMP Com_task::put_Delay_spooler_process( VARIANT* time )
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
-        _task->set_delay_spooler_process( time_from_variant( *time ) );
+        _task->set_delay_spooler_process( duration_from_variant( *time ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
@@ -3039,8 +3039,8 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
-        Time t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? Time::never 
-                                                                                : time_from_variant( *timeout );
+        Duration t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? Duration::eternal
+                                                                                    : duration_from_variant( *timeout );
         _task->add_pid( pid, t );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }

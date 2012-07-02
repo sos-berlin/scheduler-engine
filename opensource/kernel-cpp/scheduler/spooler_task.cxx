@@ -170,7 +170,7 @@ Task::Task( Job* job )
     _history(&job->_history,this),
     _timeout(Time::never),
     _lock_requestors( 1+lock_level__max ),
-    _warn_if_longer_than( Time::never )
+    _warn_if_longer_than( Duration::eternal )
 {
     _log = Z_NEW( Prefix_log( this ) );
 
@@ -184,8 +184,8 @@ Task::Task( Job* job )
     _idle_timeout_at = Time::never;
 
     set_subprocess_timeout();
-    _warn_if_shorter_than = _job->get_step_duration_or_percentage( _job->_warn_if_shorter_than_string, Time(0) );
-    _warn_if_longer_than  = _job->get_step_duration_or_percentage( _job->_warn_if_longer_than_string , Time::never );
+         = _job->get_step_duration_or_percentage( _job->_warn_if_shorter_than_string, Duration(0) );
+    _warn_if_longer_than  = _job->get_step_duration_or_percentage( _job->_warn_if_longer_than_string , Duration::eternal );
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
 
@@ -935,10 +935,10 @@ void Task::set_history_field( const string& name, const Variant& value )
 
 //------------------------------------------------------------------Task::set_delay_spooler_process
 
-void Task::set_delay_spooler_process( Time t )
+void Task::set_delay_spooler_process(const Duration& d)
 { 
-    _log->debug("delay_spooler_process=" + t.as_string() ); 
-    _next_spooler_process = Time::now() + t; 
+    _log->debug("delay_spooler_process=" + d.as_string() ); 
+    _next_spooler_process = Time::now() + d; 
 }
 
 //------------------------------------------------------------------------------Task::try_hold_lock
@@ -1046,17 +1046,17 @@ Time Task::next_time()
         if( _operation->async_finished() ) {
             result = 0;   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l‰uft)
         } else {
-            Time t = _timeout;
+            Duration t = _timeout;
             if( _state == s_running ||
                 _state == s_running_process ||
                 _state == s_running_remote_process )  t = min( t, _warn_if_longer_than );
 
-            result = t.is_never()? Time::never 
-                                 : _last_operation_time + t;     // _timeout sollte nicht zu groﬂ sein
+            result = t.is_eternal()? Time::never 
+                                   : _last_operation_time + t;     // _timeout sollte nicht zu groﬂ sein
         }                 
     }
     else
-    if( _state == s_running_process  &&  !_timeout.is_never() )
+    if( _state == s_running_process  &&  !_timeout.is_eternal() )
     {
         result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groﬂ sein
     }
@@ -1075,9 +1075,9 @@ Time Task::next_time()
 
 bool Task::check_timeout( const Time& now )
 {
-    if( _timeout < Time::never  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
+    if( !_timeout.is_eternal()  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
-        _log->error( message_string( "SCHEDULER-272", _timeout.as_time_t() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
+        _log->error( message_string( "SCHEDULER-272", _timeout.seconds() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
     }
 
@@ -1088,13 +1088,13 @@ bool Task::check_timeout( const Time& now )
 
 void Task::check_if_shorter_than( const Time& now )
 {
-    if( _warn_if_shorter_than ) 
+    if(     .is_defined() ) 
     {
-        Time step_time = now - _last_operation_time;
+        Duration step_time = now - _last_operation_time;
 
-        if( step_time < _warn_if_shorter_than ) 
+        if( step_time <      ) 
         {
-            string msg = message_string( "SCHEDULER-711", _warn_if_shorter_than.as_string( Time::without_ms ), step_time.as_string( Time::without_ms ) );
+            string msg = message_string( "SCHEDULER-711",     .as_string( time::without_ms ), step_time.as_string( time::without_ms ) );
             _log->warn( msg );
 
             Scheduler_event scheduler_event ( evt_task_step_too_short, log_error, _spooler );
@@ -1102,7 +1102,7 @@ void Task::check_if_shorter_than( const Time& now )
             mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
             mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                           "Step time: " << step_time << "\n" <<
-                                          "warn_if_shorter_than=" << _warn_if_shorter_than.as_string( Time::without_ms ) );
+                                          "warn_if_shorter_than=" <<     .as_string( time::without_ms ) );
             scheduler_event.send_mail( mail_defaults );
         }
     }
@@ -1114,9 +1114,9 @@ bool Task::check_if_longer_than( const Time& now )
 {
     bool something_done = false;
 
-    if( !_warn_if_longer_than.is_never() ) 
+    if( !_warn_if_longer_than.is_eternal() ) 
     {
-        double step_time = now - _last_operation_time;   // JS-448
+        Duration step_time = now - _last_operation_time;   // JS-448
         // double task_duration = now - _running_since;  
         
         //S s;
@@ -1132,7 +1132,7 @@ bool Task::check_if_longer_than( const Time& now )
 
                 _last_warn_if_longer_operation_time = _last_operation_time;       
 
-                string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( Time::without_ms ) );
+                string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( time::without_ms ) );
                 _log->warn( msg );
 
                 Scheduler_event scheduler_event ( evt_task_step_too_long, log_error, _spooler );
@@ -1140,7 +1140,7 @@ bool Task::check_if_longer_than( const Time& now )
                 mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
                 mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                               "Task step time: " << step_time << "\n" <<
-                                              "warn_if_longer_than=" << _warn_if_longer_than.as_string( Time::without_ms ) );
+                                              "warn_if_longer_than=" << _warn_if_longer_than.as_string( time::without_ms ) );
                 scheduler_event.send_mail( mail_defaults );
             }     
         }
@@ -1151,7 +1151,7 @@ bool Task::check_if_longer_than( const Time& now )
 
 //------------------------------------------------------------------------------------Task::add_pid
 
-void Task::add_pid( int pid, const Time& timeout_period )
+void Task::add_pid( int pid, const Duration& timeout )
 {
     if( _module_instance->is_remote_host() )
     {
@@ -1162,9 +1162,9 @@ void Task::add_pid( int pid, const Time& timeout_period )
     {
         Time timeout_at = Time::never;
 
-        if( timeout_period != Time::never )
+        if(!timeout.is_eternal())
         {
-            timeout_at = Time::now() + timeout_period;
+            timeout_at = Time::now() + timeout;
             _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
         }
 
@@ -1604,7 +1604,7 @@ bool Task::do_something()
                                     {
                                         if( !fetch_and_occupy_order( now, state_name() ) )
                                         {
-                                            _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
+                                            _idle_timeout_at = now + _job->_idle_timeout;
                                             set_state_direct( s_running_waiting_for_order );
                                             break;
                                         }
@@ -1686,7 +1686,7 @@ bool Task::do_something()
                                 }
                                 else
                                 {
-                                    _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
+                                    _idle_timeout_at = now + _job->_idle_timeout;
                                     set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
                                     Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
@@ -2363,12 +2363,12 @@ void Task::finish()
         remove_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzˆgert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
-    if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )
+    if( has_error()  &&  _job->repeat().is_null()  &&  _job->_delay_after_error.empty() )
     {
         _job->stop_after_task_error( _error.what() );
     }
     else
-    if( _job->_temporary  &&  _job->repeat() == 0 )
+    if( _job->_temporary  &&  _job->repeat().is_null() )
     {
         _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
     }
@@ -2383,12 +2383,12 @@ void Task::finish()
 
         if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
         {
-            Time delay = _job->_delay_after_error.empty()? Time::never : Time(0);
+            Duration delay = _job->_delay_after_error.empty()? Duration::eternal : Duration(0);
 
             FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )
                 if( _job->_error_steps >= it->first )  delay = it->second;
 
-            if( delay == Time::never )
+            if(delay.is_eternal())
             {
                 _is_last_job_delay_after_error = true;
                 _job->stop( false );

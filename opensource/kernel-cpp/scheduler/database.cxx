@@ -670,7 +670,7 @@ void Database::check_database()
 {
     try
     {
-        string temporary_name = "SCHEDULER.TEST.CHECK_DATABASE." + Time::now().as_string( Time::with_ms ) + "." + as_string( rand() );
+        string temporary_name = "SCHEDULER.TEST.CHECK_DATABASE." + Time::now().as_string( time::with_ms ) + "." + as_string( rand() );
         string check_value;
         
         check_value.reserve( 300 );
@@ -960,7 +960,7 @@ void Database::create_tables_when_needed()
                 insert[ "order_id"   ] = "TEST";
                 insert[ "state"      ] = "TEST";
                 insert[ "spooler_id" ] = _spooler->id_for_db();
-                insert.set_datetime( "start_time", Time::now().as_string(Time::without_ms) );
+                insert.set_datetime( "start_time", Time::now().as_string(time::without_ms) );
 
                 ta.execute( insert, Z_FUNCTION );
 
@@ -1966,7 +1966,7 @@ void Database::spooler_start()
                     insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
 
                     insert[ "job_name"          ] = "(Spooler)";
-                    insert[ "start_time"        ].set_datetime( Time::now().as_string(Time::without_ms) );
+                    insert[ "start_time"        ].set_datetime( Time::now().as_string(time::without_ms) );
                     insert[ "pid"               ] = getpid();
 
                     ta.execute( insert, Z_FUNCTION );
@@ -1994,7 +1994,7 @@ void Database::spooler_stop()
             {
                 sql::Update_stmt update ( database_descriptor() );
                 update.set_table_name( _job_history_tablename  );
-                update[ "end_time" ].set_datetime( Time::now().as_string(Time::without_ms) );
+                update[ "end_time" ].set_datetime( Time::now().as_string(time::without_ms) );
                 update.and_where_condition( "id", _id );
                 ta.execute( update, Z_FUNCTION );
 
@@ -2527,8 +2527,8 @@ void Task_history::write( bool start )
     if( start | _job_history->_use_file )  parameters = _task->has_parameters()? xml_as_string( _task->parameters_as_dom() )
                                                                                : "";
 
-    string start_time = !start || _task->_running_since? _task->_running_since.as_string(Time::without_ms)
-                                                       : Time::now().as_string(Time::without_ms);
+    string start_time = !start || !_task->_running_since.is_null()? _task->_running_since.as_string(time::without_ms)
+                                                                  : Time::now().as_string(time::without_ms);
 
     while(1)
     {
@@ -2587,7 +2587,7 @@ void Task_history::write( bool start )
                         
                         update.and_where_condition( "id", _task->_id );
                         update[ "start_time" ].set_datetime( start_time );
-                        update[ "end_time"   ].set_datetime( Time::now().as_string(Time::without_ms) );
+                        update[ "end_time"   ].set_datetime( Time::now().as_string(time::without_ms) );
                         update[ "steps"      ] = _task->_step_count;
                         update[ "exit_code"  ] = _task->_exit_code;
                         update[ "error"      ] = _task->has_error();
@@ -2646,7 +2646,7 @@ void Task_history::write( bool start )
         append_tabbed( _spooler->id_for_db() );
         append_tabbed( _task->_job->name() );
         append_tabbed( start_time );
-        append_tabbed( start? "" : Time::now().as_string(Time::without_ms) );
+        append_tabbed( start? "" : Time::now().as_string(time::without_ms) );
         append_tabbed( start_cause_name( _task->_cause ) );
         append_tabbed( _task->_step_count );
         append_tabbed( _task->has_error()? 1 : 0 );

@@ -379,7 +379,7 @@ void Combined_job_nodes::close()
     withdraw_order_requests();
 
     while (!_job_node_set.empty()) {
-		Job_node_set::iterator it = _job_node_set.begin();
+        Job_node_set::iterator it = _job_node_set.begin();
         Job_node* job_node = *_job_node_set.begin();
         job_node->disconnect_job();     // Ruft disconnect_job_node() und der löscht den Eintrag
     }
@@ -477,7 +477,7 @@ Time Combined_job_nodes::next_time()
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
-        if( result == 0 )  break;
+        if( result.is_null() )  break;
 
         Order_queue* order_queue = (*it)->order_queue();
         result = min( result, order_queue->next_time() );
@@ -553,7 +553,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;
     _default_params = new Com_variable_set;
-    _task_timeout   = Time::never;
+    _task_timeout   = Duration::eternal;
     _idle_timeout   = 5;
     _max_tasks      = 1;
 
@@ -831,14 +831,14 @@ void Job::set_dom( const xml::Element_ptr& element )
         string t    = element.     getAttribute( "timeout"      );
         if( t != "" )  
         {
-            _task_timeout = time::time_from_string( t );
+            _task_timeout = time::duration_from_string( t );
             if( _task_timeout > max_task_time_out )  _task_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
 
         t           = element.     getAttribute( "idle_timeout"    );
         if( t != "" )  
         {
-            set_idle_timeout( time::time_from_string( t ) );
+            set_idle_timeout( time::duration_from_string( t ) );
         }
 
         {
@@ -1018,9 +1018,9 @@ void Job::set_dom( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------Job::get_step_duration_or_percentage
 
-Time Job::get_step_duration_or_percentage( const string& value, const Time& deflt )
+Duration Job::get_step_duration_or_percentage( const string& value, const Duration& deflt )
 {
-    Time result = deflt;
+    Duration result = deflt;
 
     if( value != "" )
     {
@@ -1034,9 +1034,9 @@ Time Job::get_step_duration_or_percentage( const string& value, const Time& defl
         if( string_ends_with( value, "%" ) ) 
         {
             int percentage = as_int( value.substr( 0, value.length() - 1 ) );
-            Time avg = average_step_duration( deflt );
-            result = avg.is_never()? Time::never 
-                                   : Time( percentage/100.0 * avg );
+            Duration avg = average_step_duration( deflt );
+            result = avg.is_eternal()? Duration::eternal 
+                : Duration( percentage/100.0 * avg.as_double() );
         }
         else
         {
@@ -1049,9 +1049,9 @@ Time Job::get_step_duration_or_percentage( const string& value, const Time& defl
 
 //-----------------------------------------------------------------------Job::average_step_duration
 
-Time Job::average_step_duration( const Time& deflt )
+Duration Job::average_step_duration( const Duration& deflt )
 {
-    Time result = deflt;
+    Duration result = deflt;
 
     if( _spooler->_db->opened() )
     {
@@ -1089,9 +1089,9 @@ void Job::set_order_controlled()
 
 //----------------------------------------------------------------------------Job::set_idle_timeout
 
-void Job::set_idle_timeout( const Time& t )
+void Job::set_idle_timeout( const Duration& d )
 { 
-    _idle_timeout = t; 
+    _idle_timeout = d; 
     if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
 }
 
@@ -1538,10 +1538,10 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
                 insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
 
-                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( Time::without_ms ) );
+                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
 
                 if( task->_start_at )
-                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( Time::without_ms ) );
+                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
 
                 ta.execute( insert, Z_FUNCTION );
 
@@ -2448,7 +2448,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                 else
                 if( repeat )
                 {
-                    if( _repeat > 0 )       // spooler_task.repeat
+                    if( !_repeat.is_null() )       // spooler_task.repeat
                     {
                         next_start_time = _period.next_try( now + _repeat );
                         if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
@@ -2456,7 +2456,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     }
                     else
                     //JS-436  if( now >= _period.begin()  &&  !_period.repeat().is_never() )
-                    if( !_period.repeat().is_never() )
+                    if( !_period.repeat().is_eternal() )
                     {
                         next_start_time = _period.next_repeated( now );
 
@@ -2468,7 +2468,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
 
                             if( _period.end()    == next_period.begin()  &&  
                                 _period.repeat() == next_period.repeat()  &&  
-                                _period.absolute_repeat().is_never() )
+                                _period.absolute_repeat().is_eternal() )
                             {
                                 if( _spooler->_debug )  msg += " (in the following period)";
                             }
@@ -2521,7 +2521,7 @@ Time Job::next_start_time()
     if( _state == s_pending  ||  _state == s_running )
     {
         result = min( _next_start_time, _next_single_start );
-        if( result > 0  &&  is_order_controlled() ) 
+        if( !result.is_null() &&  is_order_controlled() ) 
             result = min( result, max( _combined_job_nodes->next_time(), _period.begin() ) );
 
         //if( _order_queue )  result = min( result, _order_queue->next_time() );
@@ -2612,7 +2612,7 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
     {
         Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << obj_name() << "  " << order_name << " " << next_time.as_string() << "\n" );
 
-        if( _next_time > 0   &&  _next_time > next_time )
+        if( !_next_time.is_null()  &&  _next_time > next_time )
         {
             Time now = Time::now();
             calculate_next_time( now );
@@ -3371,21 +3371,21 @@ string Job::state_cmd_name( Job::State_cmd cmd )
 void Job::set_delay_after_error( int error_steps, const string& delay )
 { 
     if( lcase( delay ) == "stop" )  set_stop_after_error( error_steps );
-                              else  set_delay_after_error( error_steps, time::time_from_string( delay ) );
+                              else  set_delay_after_error( error_steps, time::duration_from_string( delay ) );
 }
 
 //---------------------------------------------------------------Job::set_delay_order_after_setback
 
 void Job::set_delay_order_after_setback( int setback_count, const string& delay )
 {
-    set_delay_order_after_setback( setback_count, time::time_from_string( delay ) );
+    set_delay_order_after_setback( setback_count, time::duration_from_string( delay ) );
 }
 
 //---------------------------------------------------------------Job::get_delay_order_after_setback
 
-Time Job::get_delay_order_after_setback( int setback_count )
+Duration Job::get_delay_order_after_setback( int setback_count )
 {
-    Time delay = 0;
+    Duration delay = 0;
 
     FOR_EACH( Delay_order_after_setback, _delay_order_after_setback, it )  
     {

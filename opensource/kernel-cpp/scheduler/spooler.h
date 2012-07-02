@@ -776,7 +776,6 @@ struct Spooler : Object,
     bool                       _suspend_after_resume;
     bool                       _should_suspend_machine;
 
-    ptr<time::Daylight_saving_time_transition_detector_interface> _daylight_saving_time_transition_detector;
     Event                      _waitable_timer;
     bool                       _is_waitable_timer_set;
 
@@ -791,7 +790,7 @@ struct Spooler : Object,
     bool                       _has_windows_console;
     bool                       _check_memory_leak;
     Process_id                 _next_process_id;
-    Time                       _max_micro_step_time;
+    Duration                   _max_micro_step_time;
 
     string                     _java_options;
     string                     _java_classpath;

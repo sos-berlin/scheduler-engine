@@ -11,18 +11,57 @@ namespace time {
 
 //-------------------------------------------------------------------------------------------------
 
-extern const int                never_int;
+extern const time_t             never_int;
+extern const double             never_double;
+
+//------------------------------------------------------------------------------------------With_ms
+
+enum With_ms {
+    without_ms,
+    with_ms
+};
+
+//-----------------------------------------------------------------------------------------Duration
+
+struct Duration {
+    static Duration             of                          (const string& s);
+
+    explicit                    Duration                    (double o = 0.0)                        : _seconds(o) {}
+
+    Duration&                   operator =                  (const Duration& o)                     { _seconds = o._seconds; return *this; }
+
+    bool                        operator <                  (const Duration& o) const               { return _seconds < o._seconds; }
+    bool                        operator <=                 (const Duration& o) const               { return _seconds <= o._seconds; }
+    bool                        operator ==                 (const Duration& o) const               { return _seconds == o._seconds; }
+    bool                        operator !=                 (const Duration& o) const               { return _seconds != o._seconds; }
+    bool                        operator >=                 (const Duration& o) const               { return _seconds >= o._seconds; }
+    bool                        operator >                  (const Duration& o) const               { return _seconds > o._seconds; }
+    bool                        operator !                  () const                                { return is_null(); }
+
+
+    double                      as_double                   () const                                { return _seconds; }
+    Duration                    rounded_to_next_second      () const                                { return Duration( floor( _seconds + 0.9995 ) ); }
+    bool                        is_defined                  () const                                { return _seconds != 0.0; }
+    bool                        is_null                     () const                                { return _seconds == 0.0; }
+    bool                        is_eternal                  () const                                { return _seconds == never_double; } 
+    friend ostream&             operator <<                 ( ostream& s, const Duration& o )       { o.print(s); return s; }
+    void                        print                       ( ostream& s ) const                    { s << as_string(); }
+    string                      as_string                   ( With_ms = with_ms ) const;                        
+    long                        seconds                     () const                                { return (long)(_seconds + 0.0005); }
+
+    static const Duration       epsilon;
+    static const Duration       eternal;
+
+private:
+    double                     _seconds;
+};
+
+void                            insert_into_message         ( Message_string*, int index, const Duration&) throw();
 
 //---------------------------------------------------------------------------------------------Time
 
 struct Time
 {
-    enum With_ms
-    {
-        without_ms,
-        with_ms
-    };
-
 
     enum Is_utc
     {
@@ -32,71 +71,72 @@ struct Time
 
 
     static Time                 time_with_now               ( const string& );              // Datum mit Zeit oder "now+zeit"
-    static void             set_current_difference_to_utc   ( time_t now );
-    static int                  current_difference_to_utc   ()                              { return static_current_difference_to_utc; }
 
 
-                                Time                        ( double t = 0.0 )              { set(t); }
+    explicit                    Time                        ( double t = 0.0 )              { set(t); }
                                 Time                        ( double t, Is_utc )            { set_utc( t ); }
 #if !defined Z_AIX
-                                Time                        ( time_t t )                    { set((double)t); }
+    explicit                    Time                        ( time_t t )                    { set((double)t); }
 #endif
                                 Time                        ( time_t t, Is_utc )            { set_utc((double)t); }
-                                Time                        ( int t )                       { set((double)t); }
-                                Time                        ( uint t )                      { set((double)t); }
-                                Time                        ( const string& t )             { set(t); }
-                                Time                        ( const char* t   )             { set(t); }
-                                Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
-  //Z_WINDOWS_ONLY(             Time                        ( const FILETIME& t )           { set(t); } )
-  //Z_WINDOWS_ONLY(             Time                        ( const SYSTEMTIME& t )         { set(t); } )
+                              //Time                        ( int t )                       { set((double)t); }
+                              //Time                        ( uint t )                      { set((double)t); }
+    explicit                    Time                        ( const string& t )             { set(t); }
+    explicit                    Time                        ( const char* t   )             { set(t); }
+    explicit                    Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
 
-    void                        operator =                  ( double t )                    { set(t); }
-    void                        operator =                  ( time_t t )                    { set((double)t); }
+  //void                        operator =                  ( double t )                    { set(t); }
+  //void                        operator =                  ( time_t t )                    { set((double)t); }
 #if !defined Z_AIX
-    void                        operator =                  ( int t )                       { set((double)t); }
+  //void                        operator =                  ( int t )                       { set((double)t); }
 #endif
-    void                        operator =                  ( const string& t )             { set(t); }
-    void                        operator =                  ( const char* t )               { set(t); }
-    void                        operator =                  ( const Sos_optional_date_time& );
+  //void                        operator =                  ( const string& t )             { set(t); }
+  //void                        operator =                  ( const char* t )               { set(t); }
+  //void                        operator =                  ( const Sos_optional_date_time& );
 
-    void                        operator +=                 ( double );
-    void                        operator -=                 ( double );
+    void                        operator +=                 (const Duration&);
+    void                        operator -=                 (const Duration&);
 
-    Time                        operator +                  ( const Time& );
-    Time                        operator +                  ( double );
-    Time                        operator +                  ( int t )                       { return *this + (double)t; }
-    Time                        operator -                  ( const Time& );
-    Time                        operator -                  ( double );
-    Time                        operator -                  ( int t )                       { return *this - (double)t; }
+    Time                        operator +                  ( const Duration& ) const;
+  //Time                        operator +                  ( double ) const;
+  //Time                        operator +                  ( int t ) const                 { return *this + (double)t; }
+    Duration                    operator -                  ( const Time& ) const;
+  //Time                        operator -                  ( double ) const;
+  //Time                        operator -                  ( int t ) const                 { return *this - (double)t; }
 
-    bool                        operator <                  ( const Time& t ) const         { return as_double_or_never() <  t.as_double_or_never(); }
-    bool                        operator <=                 ( const Time& t ) const         { return as_double_or_never() <= t.as_double_or_never(); }
-    bool                        operator ==                 ( const Time& t ) const         { return as_double_or_never() == t.as_double_or_never(); }
-    bool                        operator !=                 ( const Time& t ) const         { return as_double_or_never() != t.as_double_or_never(); }
-    bool                        operator >=                 ( const Time& t ) const         { return as_double_or_never() >= t.as_double_or_never(); }
-    bool                        operator >                  ( const Time& t ) const         { return as_double_or_never() >  t.as_double_or_never(); }
+    bool                        operator <                  ( const Time& t ) const         { return compare(t) < 0; }
+    bool                        operator <=                 ( const Time& t ) const         { return compare(t) <= 0; }
+    bool                        operator ==                 ( const Time& t ) const         { return compare(t) == 0; }
+    bool                        operator !=                 ( const Time& t ) const         { return compare(t) != 0; }
+    bool                        operator >=                 ( const Time& t ) const         { return compare(t) >= 0; }
+    bool                        operator >                  ( const Time& t ) const         { return compare(t) > 0; }
 
-    bool                        operator <                  ( double t ) const              { return as_double_or_never() <  round(t); }
-    bool                        operator <=                 ( double t ) const              { return as_double_or_never() <= round(t); }
-    bool                        operator ==                 ( double t ) const              { return as_double_or_never() == round(t); }
-    bool                        operator !=                 ( double t ) const              { return as_double_or_never() != round(t); }
-    bool                        operator >=                 ( double t ) const              { return as_double_or_never() >= round(t); }
-    bool                        operator >                  ( double t ) const              { return as_double_or_never() >  round(t); }
+private:
+    bool                        operator <                  ( double t ) const;
+    bool                        operator <=                 ( double t ) const;
+    bool                        operator ==                 ( double t ) const;
+    bool                        operator !=                 ( double t ) const;
+    bool                        operator >=                 ( double t ) const;
+    bool                        operator >                  ( double t ) const;
 
-    bool                        operator <                  ( int t ) const                 { return as_double_or_never() <  round(t); }
-    bool                        operator <=                 ( int t ) const                 { return as_double_or_never() <= round(t); }
-    bool                        operator ==                 ( int t ) const                 { return as_double_or_never() == round(t); }
-    bool                        operator !=                 ( int t ) const                 { return as_double_or_never() != round(t); }
-    bool                        operator >=                 ( int t ) const                 { return as_double_or_never() >= round(t); }
-    bool                        operator >                  ( int t ) const                 { return as_double_or_never() >  round(t); }
+    bool                        operator <                  ( int t ) const;
+    bool                        operator <=                 ( int t ) const;
+    bool                        operator ==                 ( int t ) const;
+    bool                        operator !=                 ( int t ) const;
+    bool                        operator >=                 ( int t ) const;
+    bool                        operator >                  ( int t ) const;
+public:
 
-                                operator double             () const                        { return as_double_or_never(); }
+                              //operator double             () const                        { return as_double_or_never(); }
+                                operator bool               () const                        { return is_defined(); }
     bool                        operator !                  () const                        { return is_null(); }
+    int                         compare                        (const Time& t) const;
 
     void                    set_null                        ()                              { set( 0 ); }
     bool                     is_null                        () const                        { return _time == 0; }
+    bool                        is_defined                  () const                        { return _time != 0; }
     void                    set_never                       ()                              { set( never_int ); } 
-    bool                     is_never                       () const                        { return _time == never_int; } 
+    bool                     is_never                       () const                        { return _time == never_double; } 
     Time                        rounded_to_next_second      () const                        { return Time( floor( _time + 0.9995 ) ); }
 
 
@@ -115,7 +155,7 @@ struct Time
     double                      as_utc_double               () const;
     Time&                       set_datetime                ( const string& );
     void                        set_datetime_utc            ( const string& );
-    Time                        time_of_day                 () const                        { return as_double() - midnight(); }
+    Time                        time_of_day                 () const                        { return Time((*this - midnight()).as_double()); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
     int                         month_nr                    () const;
@@ -123,6 +163,8 @@ struct Time
     time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
     double                      cut_fraction                ( string* datetime_string );
+    long                        ms                          () const                        { return (long)(_time * 1000 + 0.5); }
+    Time                        utc_from_time_zone          (const string&);
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
     string                      xml_value                   ( With_ms = with_ms ) const;                        
@@ -130,6 +172,7 @@ struct Time
     friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }
 
     static Time                 now                         ();
+    static Time                 local_now                   ();
 
 #   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen führt mit gcc 3.3 zum Absturz in string::string
         string                 _time_as_string;
@@ -140,29 +183,15 @@ struct Time
     bool                       _is_utc;
 
   public:
-    static int                  static_current_difference_to_utc;
     static const Time           never;
-    static const Time           epsilon;
 };      
 
 void                            insert_into_message         ( Message_string*, int index, const Time& ) throw();
 
-
-extern const Time               latter_day;
-
-//-----------------------------------------------Daylight_saving_time_transition_detector_interface
-
-struct Daylight_saving_time_transition_detector_interface : Async_operation
-{
-};
-
-
-ptr<Daylight_saving_time_transition_detector_interface> new_daylight_saving_time_transition_detector( Scheduler* );
-
 //-------------------------------------------------------------------------------------------------
 
+Duration                        duration_from_string        ( const string& );
 Time                            time_from_string            ( const string& );
-void                            test_summertime             ( const string& date_time );
 xml::Element_ptr                new_calendar_dom_element    ( const xml::Document_ptr&, const Time& );
 
 //-------------------------------------------------------------------------------------------------
@@ -180,6 +209,7 @@ inline string string_of_time_t(time_t t) {
 //-------------------------------------------------------------------------------------------------
 
 using time::Time;
+using time::Duration;
 using time::xml_of_time_t;
 using time::string_of_time_t;
 

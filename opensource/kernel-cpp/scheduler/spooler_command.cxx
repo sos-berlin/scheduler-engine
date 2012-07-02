@@ -1003,7 +1003,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zul�sst)
                         else  start_at = Time::time_with_now( at_str );         // "now+..." m�glich
 
-    if( !after_str.empty() )  start_at = Time::now() + Time( as_int( after_str ) );     // Entweder at= oder after=
+    if( !after_str.empty() )  start_at = Time::now() + Duration( as_int( after_str ) );     // Entweder at= oder after=
 
 
     ptr<Com_variable_set> params      = new Com_variable_set;

@@ -98,11 +98,11 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     string                      highest_msg                 () const                            { return _highest_msg; }
     int                         instance_number             () const                            { return _instance_number; }
 
-    void                    set_collect_within              ( Time time )                       { _collect_within = time; }
-    Time                        collect_within              ()                                  { return _collect_within; }
-    void                    set_collect_max                 ( Time time )                       { _collect_max = time; }
-    Time                        collect_max                 ()                                  { return _collect_max; }
-    Time                        collect_end                 ()                                  { return _first_send? _first_send + _collect_max : Time(0); }
+    void                    set_collect_within              ( const Duration& d )               { _collect_within = d; }
+    Duration                    collect_within              ()                                  { return _collect_within; }
+    void                    set_collect_max                 ( const Duration& d )               { _collect_max = d; }
+    Duration                    collect_max                 ()                                  { return _collect_max; }
+    Time                        collect_end                 ()                                  { return !_first_send.is_null()? _first_send + _collect_max : Time(0); }
 
     void                        inherit_settings            ( const Prefix_log& );
     void                    set_job_name                    ( const string& job_name )          { _job_name = job_name; }
@@ -209,9 +209,9 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     ptr<Com_mail>              _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen
 
-    Time                       _collect_within;             // eMails innerhalb dieser Frist sammeln, solange Job keinen Fehler macht
+    Duration                   _collect_within;             // eMails innerhalb dieser Frist sammeln, solange Job keinen Fehler macht
     Time                       _last_send;                  // Beginn dieser Frist
-    Time                       _collect_max;                // Nach dieser Frist eMail auf jeden Fall versenden
+    Duration                   _collect_max;                // Nach dieser Frist eMail auf jeden Fall versenden
     Time                       _first_send;                 // Beginn dieser Frist
 
     Mail_defaults              _mail_defaults;

@@ -966,7 +966,7 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
 
     if( _heart_beat_count )  
     {
-        result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.as_string( Time::without_ms ) );
+        result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.as_string( time::without_ms ) );
         result.setAttribute( "last_detected_heart_beat_age", max( (time_t)0, ::time(NULL) - _last_heart_beat_detected ) );
         result.setAttribute( "heart_beat_quality"          , _is_dead? "dead" : _is_heart_beat_late? "late" : "good" );
         if( _late_heart_beat_count > 0 )  result.setAttribute( "late_heart_beat_count", _late_heart_beat_count );

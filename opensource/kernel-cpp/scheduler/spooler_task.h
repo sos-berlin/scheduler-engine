@@ -182,7 +182,7 @@ struct Task : Object,
   //void                        set_order                   ( Order* );
     void                        postprocess_order           ( Order::Postprocessing_mode, bool due_to_exception = false );
 
-    void                        add_pid                     ( int pid, const Time& timeout = Time::never );
+    void                        add_pid                     ( int pid, const Duration& timeout = Duration::eternal);
     void                        remove_pid                  ( int pid );
     void                        add_subprocess              ( int pid, double timeout, bool ignore_error, bool ignore_signal, bool is_process_group, const string& title );
     void                        set_subprocess_timeout      ();
@@ -237,8 +237,8 @@ struct Task : Object,
     bool                        check_if_longer_than        ( const Time& now );
     bool                        try_kill                    ();
     
-    bool                        wait_until_terminated       ( double wait_time = Time::never );
-    void                        set_delay_spooler_process   ( Time );
+    bool                        wait_until_terminated       ( double wait_time = time::never_double );
+    void                        set_delay_spooler_process   (const Duration&);
 
     bool                        try_hold_lock               ( const Path& lock_path, lock::Lock::Lock_mode = lock::Lock::lk_exclusive );
     void                        delay_until_locks_available ();
@@ -341,13 +341,13 @@ struct Task : Object,
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
     Time                       _next_time;
-    Time                       _timeout;                    // Frist für eine Operation (oder INT_MAX)
+    Duration                   _timeout;                    // Frist für eine Operation (oder INT_MAX)
     Time                       _last_warn_if_longer_operation_time;
     Time                       _idle_since;
     Time                       _idle_timeout_at;
     Time                       _subprocess_timeout;
-    Time                       _warn_if_longer_than;
-    Time                       _warn_if_shorter_than;
+    Duration                   _warn_if_longer_than;
+    Duration                   _warn_if_shorter_than;
     Time                       _trying_deleting_files_until;
 
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)

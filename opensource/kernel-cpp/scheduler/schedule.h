@@ -54,18 +54,18 @@ struct Period
                                 Period                      ()                                      : _zero_(this+1) { init(); }
     explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_dom( e, without_date, deflt ); }
     
-    void                        init                        ()                                      { _begin = _end = _repeat = _absolute_repeat = Time::never; }
+    void                        init                        ()                                      { _begin = _end = Time::never; _repeat = Duration::eternal; _absolute_repeat = Duration::eternal; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
 
     bool                        empty                       () const                                { return _begin == Time::never; }
-    bool                        has_start                   () const                                { return is_single_start() || repeat() != Time::never; }
+    bool                        has_start                   () const                                { return is_single_start() || !repeat().is_eternal(); }
     Time                        next_try                    ( const Time& );
-    Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p += t; return p; }
-    Period                      operator -                  ( const Time& t ) const                 { Period p = *this; p -= t; return p; }
-    friend Period               operator +                  ( const Time& t, const Period& p )      { return p + t; }
-    Period&                     operator +=                 ( const Time& t )                       { _begin += t; _end += t; return *this; }
-    Period&                     operator -=                 ( const Time& t )                       { _begin -= t; _end -= t; return *this; }
+    Period                      operator +                  ( const Duration& t ) const             { Period p = *this; p += t; return p; }
+    Period                      operator -                  ( const Duration& t ) const             { Period p = *this; p -= t; return p; }
+    friend Period               operator +                  ( const Duration& t, const Period& p )  { return p + t; }
+    Period&                     operator +=                 ( const Duration& t )                   { _begin += t; _end += t; return *this; }
+    Period&                     operator -=                 ( const Duration& t )                   { _begin -= t.as_double(); _end -= t.as_double(); return *this; }
 
     void                        set_single_start            ( const Time& );
 
@@ -81,12 +81,12 @@ struct Period
 
     Time                        begin                       () const                                { return _begin; }
     Time                        end                         () const                                { return _end; }
-    Time                        repeat                      () const                                { return _repeat; }
-    Time                        absolute_repeat             () const                                { return _absolute_repeat; }
+    Duration                    repeat                      () const                                { return _repeat; }
+    Duration                    absolute_repeat             () const                                { return _absolute_repeat; }
     bool                        is_single_start             () const                                { return _single_start; }
     bool                        let_run                     () const                                { return _let_run; }
-    bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _start_once; }
-    bool                        is_seamless_repeat_of       (const Period& o) const                 { return begin() == o.end()  &&  !repeat().is_never()  &&  repeat() == o.repeat(); };
+    bool                        has_repeat_or_once          () const                                { return !_repeat.is_eternal() || _start_once; }
+    bool                        is_seamless_repeat_of       (const Period& o) const                 { return begin() == o.end()  &&  !repeat().is_eternal()  &&  repeat() == o.repeat(); };
     Absolute_path               schedule_path               () const                                { return _schedule_path; }
     Time                        next_repeated               ( const Time& ) const;
     Time                        next_repeated_allow_after_end( const Time& ) const;
@@ -104,8 +104,8 @@ struct Period
     Time                       _begin;                      // Sekunden seit Mitternacht, manchmal auch mit Datum
     Time                       _absolute_repeat_begin;      // _begin kann verschoben sein. Das ist die Basis für _absolute_repeat
     Time                       _end;                        // Sekunden seit Mitternacht, manchmal auch mit Datum
-    Time                       _repeat;
-    Time                       _absolute_repeat;
+    Duration                   _repeat;
+    Duration                   _absolute_repeat;
     bool                       _single_start;
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
     bool                       _start_once;                 // Für Joacim Zschimmer
@@ -423,8 +423,9 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
         void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
         xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-
         Period                      next_period                 ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
+        Period                      next_utc_period             ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
+
         Prefix_log*                 log                         ()                                  { return _schedule->log(); }
 
       private:
@@ -432,6 +433,8 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
         static int                  month_index_by_name         ( const string& );
         static list<int>            month_indices_by_names      ( const string& );
+
+        Period                      next_local_period           ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
         Period                      next_period_of_same_day     ( const Time&, With_single_start single_start );
         void                        check                       ();                              
         bool                        is_filled                   () const;
@@ -451,6 +454,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         xml::Document_ptr          _dom;
         string                     _start_time_function;
         bool                       _start_time_function_error;
+        string                     _time_zone;
         Absolute_path              _covered_schedule_path;
         Time                       _covered_schedule_begin;
         Time                       _covered_schedule_end;

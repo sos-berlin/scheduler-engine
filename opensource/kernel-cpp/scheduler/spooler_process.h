@@ -117,7 +117,7 @@ struct Process : zschimmer::Object, Scheduler_object
     object_server::Session*     session                     ()                                      { return _session; }
   //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
     bool                        async_continue              ();
-    double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : (double)Time::never; }
+    double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : time::never_double; }
     void                        add_module_instance         ( Module_instance* );
     void                        remove_module_instance      ( Module_instance* );
     int                         module_instance_count       ()                                      { return _module_instance_count; }

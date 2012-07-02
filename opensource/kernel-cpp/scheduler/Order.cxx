@@ -353,7 +353,7 @@ void Order::db_insert_order_history_record( Transaction* ta )
         insert[ "state"      ] = state().as_string();
         insert[ "state_text" ] = state_text();
         insert[ "spooler_id" ] = _spooler->id_for_db();
-        insert.set_datetime( "start_time", start_time().as_string(Time::without_ms) );
+        insert.set_datetime( "start_time", start_time().as_string(time::without_ms) );
         //insert.set_datetime( "end_time"  , "0000-00-00 00:00:00" );
 
         ta->execute( insert, Z_FUNCTION );
@@ -379,7 +379,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
             update[ "state"      ] = state().as_string();
             update[ "state_text" ] = state_text();
             update[ "title"      ] = title();
-            update.set_datetime( "end_time"  , ( end_time()? end_time() : Time::now() ).as_string(Time::without_ms) );
+            update.set_datetime( "end_time"  , ( end_time().is_defined()? end_time() : Time::now() ).as_string(time::without_ms) );
 
             ta.execute( update, Z_FUNCTION );
 
@@ -443,7 +443,7 @@ void Order::db_insert_order_step_history_record( Transaction* ta )
         insert[ "step"       ] = _step_number;
         insert[ "state"      ] = state().as_string();
         insert[ "task_id"    ] = _task->id();
-        insert[ "start_time" ].set_datetime( Time::now().as_string( Time::without_ms ) );
+        insert[ "start_time" ].set_datetime( Time::now().as_string( time::without_ms ) );
 
         ta->execute( insert, Z_FUNCTION );
     }
@@ -464,7 +464,7 @@ void Order::db_update_order_step_history_record( Transaction* ta )
         update.and_where_condition( "history_id", _history_id  );
         update.and_where_condition( "step"      , _step_number );
         
-        update[ "end_time"   ].set_datetime( Time::now().as_string( Time::without_ms ) );
+        update[ "end_time"   ].set_datetime( Time::now().as_string( time::without_ms ) );
       //update[ "state_text" ] = state_text();
         update[ "error"      ] = _task_error != NULL;
 
@@ -632,7 +632,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
         db_fill_stmt( &insert );
 
-        insert.set_datetime( "created_time", _created.as_string(Time::without_ms) );
+        insert.set_datetime( "created_time", _created.as_string(time::without_ms) );
 
         for( int insert_race_retry_count = 1; !insert_ok; insert_race_retry_count++ )
         {
@@ -950,7 +950,7 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
 
 void Order::db_fill_stmt( sql::Write_stmt* stmt )
 {
-    stmt->set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
+    stmt->set_datetime( "mod_time", Time::now().as_string(time::without_ms) );
 
     string t = calculate_db_distributed_next_time();
     if( stmt->is_update()  ||  t != "" )  stmt->set_datetime( "distributed_next_time", t );
@@ -994,7 +994,7 @@ string Order::calculate_db_distributed_next_time()
 
             result = next_time.is_null ()? now_database_distributed_next_time :
                      next_time.is_never()? never_database_distributed_next_time 
-                                         : next_time.as_string( Time::without_ms );
+                                         : next_time.as_string( time::without_ms );
         }
     }
 
@@ -1460,7 +1460,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     if( !show_what.is_set( show_for_database_only ) ) // &&  !show_what.is_set( show_id_only ) )
     {
-        if( _setback )
+        if( _setback.is_defined() )
             result.setAttribute( "next_start_time", _setback.as_string() );
 
         if( _schedule_use->is_defined() )   // Wie in Job::dom_element(), besser nach Schedule_use::dom_element()  <schedule.use covering_schedule="..."/>
@@ -1505,7 +1505,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
         result.setAttribute( "priority"  , _priority );
 
-        if( _created )
+        if( _created.is_defined() )
             result.setAttribute( "created"   , _created.as_string() );
 
         if( _log->is_active() )
@@ -1579,7 +1579,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     // Wenn die folgenden Werte sich ändern, _order_xml_modified = true setzen!
 
-    if( _setback  )
+    if( _setback.is_defined() )
     result.setAttribute( _setback_count == 0? "at" : "setback", _setback.as_string() );
 
     if( _setback_count > 0 )
@@ -1602,8 +1602,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
                             result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
     if( !_is_virgin      )  result.setAttribute( "touched"     , "yes" );
 
-    if( start_time()     )  result.setAttribute( "start_time", start_time().as_string() );
-    if( end_time()       )  result.setAttribute( "end_time"  , end_time  ().as_string() );
+    if( start_time().is_defined() )  result.setAttribute( "start_time", start_time().as_string() );
+    if( end_time().is_defined()   )  result.setAttribute( "end_time"  , end_time  ().as_string() );
 
     if( _outer_job_chain_path != "" )
     {
@@ -2077,7 +2077,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
             if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) ) log_line += ", Job " + job_node->job_path();
             if( is_error_state )  log_line += ", error state";
 
-            if( _setback )  log_line += ", at=" + _setback.as_string();
+            if( _setback.is_defined() )  log_line += ", at=" + _setback.as_string();
 
             if( _suspended )  log_line += ", suspended";
 
@@ -2417,7 +2417,7 @@ void Order::activate_schedule()
     bool ok = _schedule_use->try_load();
     if( ok )  
     {
-        if( _setback )  set_setback( _setback );
+        if( _setback.is_defined() )  set_setback( _setback );
                   else  set_next_start_time();
     }
 }
@@ -2876,8 +2876,8 @@ bool Order::setback()
     int maximum = _task->job()->max_order_setbacks();
     if( _setback_count <= maximum )
     {
-        Time delay = _task->job()->get_delay_order_after_setback( _setback_count );
-        _setback = delay? Time::now() + delay : Time(0);
+        Duration delay = _task->job()->get_delay_order_after_setback( _setback_count );
+        _setback = delay.is_defined()? Time::now() + delay : Time(0);
         _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurückgestellt, bis $2"
         result = true;
     }
@@ -2899,8 +2899,8 @@ bool Order::setback()
 
 void Order::set_setback( const Time& start_time_, bool keep_setback_count )
 {
-    Time start_time = start_time_ == 0  ||  start_time_ > Time::now()? start_time_ 
-                                                                     : Time(0);
+    Time start_time = start_time_.is_null() ||  start_time_ > Time::now()? start_time_ 
+                                                                         : Time(0);
 
     if( _setback != start_time )
     {
@@ -2971,7 +2971,7 @@ Time Order::next_start_time( bool first_call )
         {
             _period = _schedule_use->next_period( now, schedule::wss_next_any_start );
 
-            if( !_period.absolute_repeat().is_never() )
+            if( !_period.absolute_repeat().is_eternal() )
             {
                 result = _period.next_repeated( now );
 

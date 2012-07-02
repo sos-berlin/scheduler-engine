@@ -701,7 +701,7 @@ Spooler::Spooler(jobject java_main_context)
     _next_process_id(1),
     _configuration_directories(confdir__max+1),
     _configuration_directories_as_option_set(confdir__max+1),
-    _max_micro_step_time(Time(10))
+    _max_micro_step_time(Duration(10))
 {
     _log->init( this );              // Nochmal nach load_argv()
     _log->set_title( "Main log" );
@@ -766,7 +766,6 @@ void Spooler::check_licence()
 void Spooler::close()
 {
     spooler_ptr = NULL;
-    if( _daylight_saving_time_transition_detector )  _daylight_saving_time_transition_detector->set_async_manager( NULL );
 
     set_ctrl_c_handler( false );
 
@@ -1580,10 +1579,6 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.flag      ( "test"                   ) )  set_log_category( "self_test" ), set_log_category( "self_test.exception" ),  self_test();
             else
-            if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
-            else
-            if( opt.with_value( "test-summertime"        ) )  time::test_summertime( opt.value() );
-            else
             if( opt.flag      ( "suppress-watchdog-thread" ) )  _cluster_configuration._suppress_watchdog_thread = opt.set();
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
@@ -2031,7 +2026,7 @@ string Spooler::configuration_for_single_job_script()
 void Spooler::start()
 {
     static_log_categories.save_to( &_original_log_categories );
-    _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", (int)_max_micro_step_time.as_time_t());
+    _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", (int)_max_micro_step_time.seconds());
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -2043,10 +2038,6 @@ void Spooler::start()
     _log->info( message_string( "SCHEDULER-900", _version, _configuration_file_path, getpid() ) );
     _spooler_start_time = Time::now();
 
-
-    sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
-    _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
-    _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
     _web_services->switch_subsystem_state( subsys_loaded );
@@ -2522,7 +2513,7 @@ void Spooler::run()
             if( ++nothing_done_count > nothing_done_max )
             {
                 nichts_getan( ++nichts_getan_zaehler, catched_event_string );
-                if( wait_until == 0 )  wait_until = Time::now() + 1;
+                if( wait_until.is_null() )  wait_until = Time::now() + 1;
             }
 
             if( nothing_done_count > 1 )
@@ -2537,7 +2528,7 @@ void Spooler::run()
         {
             // NÄCHSTE (JETZT NOCH WARTENDE) TASK ERMITTELN
 
-            if( wait_until > 0 )
+            if( !wait_until.is_null() )
             {
                 FOR_EACH( Task_list, _task_subsystem->_task_list, t )
                 {
@@ -2550,7 +2541,7 @@ void Spooler::run()
                     {
                         wait_until = task_next_time; 
                         wait_until_object = task;
-                        if( wait_until == 0 )  break;
+                        if( wait_until.is_null() )  break;
                     }
                 }
             }
@@ -2558,7 +2549,7 @@ void Spooler::run()
 
             // NÄCHSTEN JOB ERMITTELN, ALSO DEN NÄCHSTEN TASK-START ODER PERIODEN-ENDE
 
-            if( wait_until > 0 )
+            if( !wait_until.is_null() )
             {
                 FOR_EACH_JOB( job )
                 {
@@ -2571,7 +2562,7 @@ void Spooler::run()
                     {
                         wait_until = next_job_time;
                         wait_until_object = job;
-                        if( wait_until == 0 )  break;
+                        if( wait_until.is_null() )  break;
                     }
                 }
             }
@@ -2630,7 +2621,7 @@ void Spooler::run()
 #                       endif
                     }
  
-                    if( wait_until == 0 )  break;
+                    if( wait_until.is_null() )  break;
                 }
             }
 
@@ -2667,7 +2658,7 @@ void Spooler::run()
 
             if( nothing_done_count > 0  ||  !wait_handles.signaled() )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {
-                if( wait_until == 0 )
+                if( wait_until.is_null() )
                 {
                     wait_handles.wait_until( Time(), wait_until_object, Time(), NULL );   // Signale checken
                 }
@@ -2677,7 +2668,7 @@ void Spooler::run()
 
                     wait( &wait_handles, wait_until, wait_until_object, resume_at, resume_at_object );
 
-                    if( nothing_done_count == nothing_done_max  &&  Time::now() - now_before_wait >= 0.010 )  nothing_done_count = 0, nichts_getan_zaehler = 0;
+                    if( nothing_done_count == nothing_done_max  &&  Time::now() - now_before_wait >= Duration(0.010) )  nothing_done_count = 0, nichts_getan_zaehler = 0;
                 }
             }
 
@@ -2748,7 +2739,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
 
     // Termination_async_operation etc.
 
-    if( wait_until > 0 )
+    if( !wait_until.is_null() )
     {
         if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
         {

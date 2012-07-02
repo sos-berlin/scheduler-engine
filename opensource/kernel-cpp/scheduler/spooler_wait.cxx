@@ -270,7 +270,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         {
             LARGE_INTEGER gmtime;
 
-            gmtime.QuadPart = -(int64)( ( resume_until - now ) * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
+            gmtime.QuadPart = -(int64)( ( resume_until - now ).as_double() * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
             if( gmtime.QuadPart < 0 )
             {
                 Z_LOG2( _spooler->_scheduler_wait_log_category, "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
@@ -295,7 +295,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
     while(1)
     {
-        double wait_time         = max( 0.0, until - now );
+        double wait_time         = max( 0.0, (until - now).as_double() );
         int    max_sleep_time_ms = INT_MAX-1;
         int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
         DWORD  ret               = SOS_WAIT_TIMEOUT;
@@ -324,7 +324,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             
             while(1)
             {
-                double remaining = until - Time::now();
+                double remaining = (until - Time::now()).as_double();
                 if( remaining < 0.7 )  break;
 
                 /**
@@ -340,20 +340,20 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 step = 1.0;
 
                 Time now = Time::now();
-                Time rest = until - now;
-                t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
+                Duration rest = until - now;
+                t = (int)ceil( min( (double)max_sleep_time_ms, rest.as_double() * 1000.0 ) );
 
                 S console_line;
-                console_line << Time::now().as_string( Time::without_ms );
+                console_line << Time::now().as_string( time::without_ms );
                 
                 if( until < Time::never  ||  wait_for_object )
                 {
                     console_line << " (";
-                    if( until < Time::never ) 
-                    {
-                        int days = rest.day_nr();
+                    if (!until.is_never()) {
+                        Time r = rest.as_double();
+                        int days = r.day_nr();
                         if( days > 0 )  console_line << days << "d+";
-                        console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
+                        console_line << r.time_of_day().as_string( time::without_ms ) << "s";
                         if( days > 0 )  console_line << " until " << Time( until ).as_string();
                     }
                     if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();

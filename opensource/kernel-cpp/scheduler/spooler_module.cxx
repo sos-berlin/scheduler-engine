@@ -84,7 +84,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
                     xml::Element_ptr e = _dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
 
                     e.setAttribute( "linenr", linenr_base );
-                  //e.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
+                  //e.setAttribute( "modtime", _modification_time.as_string( time::without_ms ) );
                 }
 
                 linenr_base += count( text.begin(), text.end(), '\n' );
@@ -1088,7 +1088,7 @@ Variant Module_instance::step__end()
                 result = false;
             }
 
-	        result = _monitor_instances.spooler_process_after( result );
+            result = _monitor_instances.spooler_process_after( result );
         }
     }
 
