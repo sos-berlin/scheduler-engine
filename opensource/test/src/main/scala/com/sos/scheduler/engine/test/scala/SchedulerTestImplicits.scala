@@ -5,6 +5,6 @@ import com.sos.scheduler.engine.kernel.Scheduler
 
 object SchedulerTestImplicits {
     implicit def toRichScheduler(scheduler: Scheduler) = new {
-        def executeXml(e: Elem) = scheduler.executeXml(e.toString())
+        def executeXml(e: Elem): Elem = xml.XML.loadString(scheduler.executeXml(e.toString()))
     }
 }
