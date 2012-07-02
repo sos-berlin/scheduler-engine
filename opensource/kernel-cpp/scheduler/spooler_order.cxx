@@ -385,7 +385,7 @@ int Database_order_detector::read_result_set( Read_transaction* ta, const string
 
         Order_queue_node* node = Order_queue_node::cast( job_chain->node_from_state( record.as_string( "state" ) ) );
 
-        distributed_next_time = Time::of_date_time_utc( record.as_string( "distributed_next_time" ) );
+        distributed_next_time = Time::of_utc_date_time( record.as_string( "distributed_next_time" ) );
         if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time = Time(0);
         if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time = Time::never;
         
@@ -2120,8 +2120,8 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                 order->set_state     ( record.as_string( "state"      ) );
                 order->set_state_text( record.as_string( "state_text" ) );
                 order->set_title     ( record.as_string( "title"      ) );
-                order->_start_time = Time::of_date_time_utc( record.as_string( "start_time" ) );
-                order->_end_time   = Time::of_date_time_utc( record.as_string( "end_time"   ) );
+                order->_start_time = Time::of_utc_date_time( record.as_string( "start_time" ) );
+                order->_end_time   = Time::of_utc_date_time( record.as_string( "end_time"   ) );
 
                 xml::Element_ptr order_element = order->dom_element( document, show_what );
                 order_element.setAttribute_optional( "job_chain" , record.as_string( "job_chain"  ) );

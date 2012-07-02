@@ -123,9 +123,9 @@ void Order::load_record( const Absolute_path& job_chain_path, const Record& reco
         _initial_state_set = true;
     }
 
-    _created = Time::of_date_time_utc( record.as_string( "created_time" ) );
+    _created = Time::of_utc_date_time( record.as_string( "created_time" ) );
 
-    if( record.has_field( "distributed_next_time" ) )  _setback = Time::of_date_time_utc( record.as_string( "distributed_next_time" ) );
+    if( record.has_field( "distributed_next_time" ) )  _setback = Time::of_utc_date_time( record.as_string( "distributed_next_time" ) );
 
     _log->set_prefix( obj_name() );
 

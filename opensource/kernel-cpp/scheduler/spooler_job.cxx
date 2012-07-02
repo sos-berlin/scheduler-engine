@@ -1469,7 +1469,7 @@ void Job::load_tasks_from_db( Read_transaction* ta )
             xml::Document_ptr       task_dom;
             bool                    force_start = force_start_default;
 
-            start_at = Time::of_date_time_utc( record.as_string( "start_at_time" ) );
+            start_at = Time::of_utc_date_time( record.as_string( "start_at_time" ) );
             _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
 
             string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
@@ -1494,7 +1494,7 @@ void Job::load_tasks_from_db( Read_transaction* ta )
 
             task->_is_in_database = true;
             task->_let_run        = true;
-            task->_enqueue_time = Time::of_date_time_utc( record.as_string( "enqueue_time" ) );
+            task->_enqueue_time = Time::of_utc_date_time( record.as_string( "enqueue_time" ) );
 
             if( !start_at  &&  !_schedule_use->period_follows( now ) ) 
             {
@@ -2329,7 +2329,7 @@ void Job::database_record_load( Read_transaction* ta )
     {
         Record record  = result_set.get_record();
         _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
-        _db_next_start_time = record.null( "next_start_time" )? Time::never :  Time::of_date_time_utc( record.as_string( "next_start_time" ) );
+        _db_next_start_time = record.null( "next_start_time" )? Time::never :  Time::of_utc_date_time( record.as_string( "next_start_time" ) );
     }
 }
 
