@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js804;
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.test.util.What;
@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import java.io.IOException;
 import java.io.StringWriter;
 
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
@@ -32,22 +31,22 @@ import static org.junit.Assert.assertTrue;
  * @version 1.0 - 20.12.2011 12:32:07
  *
  */
-public class JS804Test extends SchedulerTest {
+public final class JS804Test extends SchedulerTest {
 
 	private static final Logger logger = Logger.getLogger(JS804Test.class);
-	private final static int ONE_DAY = 86400;
-	
-	private final String order_setback = "js804";		// to be started via the test
-	private final String order_simple = "js804-1";		// not started but scheduled
+	private static final int ONE_DAY = 86400;
+	private static final String order_setback = "js804";		// to be started via the test
+	private static final String order_simple = "js804-1";		// not started but scheduled
+
 	private Document showCalendarAnswer;	
 	private final CommandBuilder util = new CommandBuilder();
 	private boolean result_setback = false;
 	private boolean result_simple = true;
 	
 	@Test
-	public void TestSetback() throws InterruptedException, IOException {
+	public void testSetback() {
 		controller().setTerminateOnError(false);
-		controller().startScheduler();
+		controller().activateScheduler();
 		controller().scheduler().executeXml( util.modifyOrder(order_setback).getCommand() );
 		controller().tryWaitForTermination(shortTimeout);
 		assertTrue("order " + order_setback + " is not in setback",result_setback);
@@ -55,7 +54,7 @@ public class JS804Test extends SchedulerTest {
 	}
 
 	@EventHandler
-	public void handleTaskEnded(TaskEndedEvent e) throws IOException, InterruptedException {
+	public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
 		Thread.sleep(2000);			// wait until setback is active
 		showCalendar();
 		result_setback = isSetback(order_setback);
@@ -73,5 +72,4 @@ public class JS804Test extends SchedulerTest {
     private boolean isSetback(String order) {
         return stringXPath(showCalendarAnswer, "/spooler/answer/calendar/at[@order='" + order + "']/@setback").equals("true");
     }
-
 }
