@@ -384,6 +384,20 @@ Time Time::of_date_time( const string& t, bool utc_is_default)
     }
 }
 
+//-------------------------------------------------------------------------Time::of_local_date_time
+
+Time Time::of_local_date_time( const string& t)
+{
+    if( t == never_name ) {
+        return Time::never;
+    } else {
+        string my_t = t;
+        double fraction = cut_fraction( &my_t );
+        double dt = Sos_optional_date_time( my_t ).as_time_t() + fraction;
+        return Time(dt);
+    }
+}
+
 //-------------------------------------------------------------------------Time::utc_from_time_zone
 
 Time Time::utc_from_time_zone(const string& time_zone) const

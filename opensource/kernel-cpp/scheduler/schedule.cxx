@@ -1291,7 +1291,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
             a_day_set = true;
             string at = e.getAttribute( "at" );
             if( at == "now" )  _once = true;   // "now" wirkt nicht in _at_set, weil der Zeitpunkt gleich verstrichen sein wird
-            Time at_time = Time::of_date_time( at );
+            Time at_time = Time::of_local_date_time( at );
             _at_set.add( at_time );
         }
         else
