@@ -97,13 +97,15 @@ void insert_into_message( Message_string* m, int index, const Duration& o) throw
 //---------------------------------------------------------------------------------------localToUtc
 
 static double localToUtc(const string& timeZone, double t) {
-    return TimeZonesJ::localToUtc(timeZone, (int64)(t * 1000.0 + 0.5)) / 1000.0;
+    return t == 0 || t == never_double? t : 
+        TimeZonesJ::localToUtc(timeZone, (int64)(t * 1000.0 + 0.5)) / 1000.0;
 }
 
 //---------------------------------------------------------------------------------------utcToLocal
 
 static double utcToLocal(const string& timeZone, double t) {
-    return TimeZonesJ::utcToLocal(timeZone, (int64)(t * 1000.0 + 0.5)) / 1000.0;
+    return t == 0 || t == never_double? t : 
+        TimeZonesJ::utcToLocal(timeZone, (int64)(t * 1000.0 + 0.5)) / 1000.0;
 }
 
 //-------------------------------------------------------------------------------------Duration::of
