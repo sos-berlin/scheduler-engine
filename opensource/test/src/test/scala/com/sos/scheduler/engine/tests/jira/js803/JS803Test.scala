@@ -10,7 +10,7 @@ import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
 import org.junit.Test
 import com.sos.scheduler.engine.kernel.order._
-import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.folder.{JobChainPath, AbsolutePath}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.test.SchedulerTest
@@ -22,14 +22,13 @@ import scala.collection.mutable
  * @see com.sos.scheduler.engine.tests.jira.js653.JS653Test */
 final class JS803Test extends SchedulerTest {
   import JS803Test._
+
   private val expectedOrders = new mutable.HashSet[OrderId]
   private val terminatedOrders = new mutable.HashSet[OrderId]
-
   private var startTime: DateTime = null
 
-  //@Ignore  //TODO Manchmal versagt der Test, weil die Aufträge nicht starten. Vielleicht helfen uns die Logzeilen weiter.
   @Test def test() {
-    controller.activateScheduler("-e")
+    controller.activateScheduler()
     startTime = secondNow() plusSeconds orderDelay
     addOrder(new OrderKey(jobChainPath, new OrderId("dailyOrder")), addDailyOrderElem)
     addOrder(new OrderKey(jobChainPath, new OrderId("singleOrder")), addSingleOrderElem)
@@ -69,7 +68,7 @@ object JS803Test {
   private val logger = Logger.getLogger(classOf[JS803Test])
   private val shortTimeout = SchedulerTest.shortTimeout
   private val orderDelay = 3+1
-  private val jobChainPath = new AbsolutePath("/super")
+  private val jobChainPath = JobChainPath.of("/super")
   private val expectedEndState = new OrderState("state.nestedC.end")
   private val hhmmssFormatter = DateTimeFormat.forPattern("HH:mm:ss")
   private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
