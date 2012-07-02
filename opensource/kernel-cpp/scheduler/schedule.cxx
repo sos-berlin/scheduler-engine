@@ -1602,8 +1602,9 @@ bool Period::operator==( const Period& o ) const
 Period& Period::operator+=(const Time& t)
 { 
     assert(!_begin.has_date() && !_end.has_date());
-    _begin += Duration(t.as_double()); 
-    _end += Duration(t.as_double()); 
+    Duration d = Duration(t.as_double());
+    _begin += d; 
+    _end += d; 
     return *this; 
 }
 
