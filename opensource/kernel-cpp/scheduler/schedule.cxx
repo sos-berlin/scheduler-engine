@@ -1394,7 +1394,7 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
 
 Period Schedule::Inlay::next_utc_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
 {
-    Period result = next_local_period(use, beginning_time.local_time(_time_zone), single_start, before);
+    Period result = next_local_period(use, beginning_time.local_time(_time_zone), single_start, before.local_time(_time_zone));
     result._begin = result._begin.utc_from_time_zone(_time_zone);
     result._end = result._end.utc_from_time_zone(_time_zone);
     return result;
