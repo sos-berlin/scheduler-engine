@@ -233,17 +233,19 @@ Variant Module_monitor_instances::spooler_process_before()
 
 //--------------------------------------------------Module_monitor_instances::spooler_process_after
 
-Variant Module_monitor_instances::spooler_process_after( Variant result )
+Variant Module_monitor_instances::spooler_process_after( const Variant& result )
 {
+    Variant new_result = result;
     Z_FOR_EACH_REVERSE( Instance_list, _instance_list, m )  
     {
         Module_monitor_instance* monitor_instance = *m;
 
-        Variant call_result = monitor_instance->_module_instance->call_if_exists( spooler_process_after_name, check_result( result ) );
-        if( call_result.vt != VT_ERROR && result.vt != VT_ERROR  &&  V_ERROR( &result ) != DISP_E_UNKNOWNNAME )  result = call_result;
+        Variant call_result = monitor_instance->_module_instance->call_if_exists( spooler_process_after_name, check_result( new_result ) );
+        if( call_result.vt != VT_ERROR && V_ERROR( &call_result ) != DISP_E_UNKNOWNNAME )
+           new_result = call_result;
     }
 
-    return result;
+    return new_result;
 }
 
 //-------------------------------------------------------------------------------------------------
