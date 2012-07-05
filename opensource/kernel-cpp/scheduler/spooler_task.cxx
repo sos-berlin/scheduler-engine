@@ -2150,7 +2150,6 @@ bool Task::step__end()
 
         if( _order )  
         {
-            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), result), _order->java_sister());
             postprocess_order( _delay_until_locks_available? Order::post_keep_state :
                                result                      ? Order::post_success 
                                                            : Order::post_error        );
@@ -2298,13 +2297,14 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
 //--------------------------------------------------------------------------Task::postprocess_order
 
-void Task::postprocess_order( Order::Postprocessing_mode postprocessing_mode, bool due_to_exception )
+void Task::postprocess_order( Order::Order_state_transition state_transition, bool due_to_exception )
 {
     if( _order )
     {
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         
-        _order->postprocessing( postprocessing_mode );
+        report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition), _order->java_sister());
+        _order->postprocessing( state_transition );
         
         if( due_to_exception )
         {
@@ -2327,6 +2327,7 @@ void Task::remove_order_after_error()
 
             _log->warn( message_string( "SCHEDULER-845" ) );
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
+            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order::post_keep_state), _order->java_sister());
             _order->processing_error();
             remove_order();
         }

@@ -84,8 +84,8 @@ public class CppEventFactory {
         return new OrderStateChangedEvent(OrderKey.of(jobChainPath, orderId), new OrderState(previousState));
     }
 
-    @ForCpp public static AbstractEvent newOrderStepEndedEvent(String jobChainPath, String orderId, boolean result) {
-        return new OrderStepEndedEvent(OrderKey.of(jobChainPath, orderId), result);
+    @ForCpp public static AbstractEvent newOrderStepEndedEvent(String jobChainPath, String orderId, int orderStateTransitionCpp) {
+        return new OrderStepEndedEvent(OrderKey.of(jobChainPath, orderId), OrderStateTransition.ofCppCode(orderStateTransitionCpp));
     }
 
     private CppEventFactory() {}

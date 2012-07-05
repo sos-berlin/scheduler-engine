@@ -2490,9 +2490,9 @@ Job_chain* Order::job_chain_for_api() const
 
 //----------------------------------------------------------------------------Order::postprocessing
 
-void Order::postprocessing( Postprocessing_mode postprocessing_mode )
+void Order::postprocessing( Order_state_transition state_transition )
 {
-    _is_success_state = postprocessing_mode == post_success;
+    _is_success_state = state_transition == post_success;
 
     Job*      last_job          = _task? _task->job() : NULL;
     Job_node* job_node          = Job_node::cast( _job_chain_node );
@@ -2516,7 +2516,7 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
 
     _task = NULL;
 
-    if( postprocessing_mode != post_keep_state  &&  !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  
+    if( state_transition != post_keep_state  &&  !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  
         force_error_state )
     {
         if( job_node )

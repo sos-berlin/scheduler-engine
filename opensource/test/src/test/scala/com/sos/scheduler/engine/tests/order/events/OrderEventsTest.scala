@@ -79,12 +79,12 @@ class OrderEventsTest extends ScalaSchedulerTest {
       "OrderFinished UnmodifiableOrder"           -> new OrderFinishedEvent(orderKey),
       "OrderStepStarted UnmodifiableOrder state1" -> new OrderStepStartedEvent(orderKey, new OrderState("state1")),
       "OrderStepStarted Order state1"             -> new OrderStepStartedEvent(orderKey, new OrderState("state1")),
-      "OrderStepEnded UnmodifiableOrder state1"   -> new OrderStepEndedEvent(orderKey, true),
-      "OrderStepEnded Order state1"               -> new OrderStepEndedEvent(orderKey, true),
+      "OrderStepEnded UnmodifiableOrder state1"   -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderStepEnded Order state1"               -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
       "OrderStepStarted UnmodifiableOrder state2" -> new OrderStepStartedEvent(orderKey, new OrderState("state2")),
       "OrderStepStarted Order state2"             -> new OrderStepStartedEvent(orderKey, new OrderState("state2")),
-      "OrderStepEnded UnmodifiableOrder state2"   -> new OrderStepEndedEvent(orderKey, true),
-      "OrderStepEnded Order state2"               -> new OrderStepEndedEvent(orderKey, true),
+      "OrderStepEnded UnmodifiableOrder state2"   -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderStepEnded Order state2"               -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
       "OrderSuspended UnmodifiableOrder"          -> new OrderSuspendedEvent(orderKey),
       "OrderResumed UnmodifiableOrder"            -> new OrderResumedEvent(orderKey)))
   }
