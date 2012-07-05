@@ -7,8 +7,8 @@ import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
-import com.sos.scheduler.engine.data.log.ErrorLogEvent;
-import com.sos.scheduler.engine.data.log.InfoLogEvent;
+import com.sos.scheduler.engine.data.log.LogEvent;
+import com.sos.scheduler.engine.data.log.LogLevel;
 import com.sos.scheduler.engine.data.order.*;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
@@ -72,12 +72,8 @@ public class CppEventFactory {
         throw new RuntimeException("Not implemented cppEventCode="+cppEventCode);
     }
 
-    @ForCpp public static AbstractEvent newInfoLogEvent(String message) {
-        return new InfoLogEvent(message);
-    }
-
-    @ForCpp public static AbstractEvent newErrorLogEvent(String message) {
-        return new ErrorLogEvent(message);
+    @ForCpp public static AbstractEvent newLogEvent(int cppLevel, String message) {
+        return LogEvent.of(LogLevel.ofCpp(cppLevel), message);
     }
 
     @ForCpp public static AbstractEvent newOrderStateChangedEvent(String jobChainPath, String orderId, String previousState) {
