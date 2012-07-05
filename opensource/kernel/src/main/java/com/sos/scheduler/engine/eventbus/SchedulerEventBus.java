@@ -41,6 +41,10 @@ public class SchedulerEventBus implements EventBus {
         coldEventBus.publish(e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e);
     }
 
+    public final void publishCold(Event e) {
+        coldEventBus.publish(e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e);
+    }
+
     public final void dispatchEvents() {
         //hotEventBus.dispatchEvents();
         coldEventBus.dispatchEvents();
