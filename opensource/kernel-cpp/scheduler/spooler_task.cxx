@@ -257,7 +257,7 @@ void Task::close()
         if( _order )  
         {
             _order->remove_from_job_chain();
-            _order->close();  //remove_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
+            _order->close();  //detach_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
         }
 
 
@@ -1880,7 +1880,7 @@ bool Task::do_something()
                                             postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
                                                                                                          : Order::post_error   );       
                                         }
-                                        else {}     // remove_order_after_error() wird sich drum kümmern.
+                                        else {}     // detach_order_after_error() wird sich drum kümmern.
                                     }                                                               
                                 }                                                               
 
@@ -2002,9 +2002,9 @@ bool Task::do_something()
 
                 try
                 {
-                    remove_order_after_error();
+                    detach_order_after_error();
                 }
-                catch( exception& x ) { _log->error( "remove_order_after_error: " + string(x.what()) ); }
+                catch( exception& x ) { _log->error( "detach_order_after_error: " + string(x.what()) ); }
 
                 if( error_count == 0  &&  _state < s_ending )
                 {
@@ -2160,7 +2160,7 @@ bool Task::step__end()
     catch( const exception& x ) 
     { 
         set_error(x); 
-        if( _order )  remove_order_after_error();
+        if( _order )  detach_order_after_error();
         continue_task = false; 
     }
 
@@ -2311,13 +2311,13 @@ void Task::postprocess_order( Order::Order_state_transition state_transition, bo
             if( !_order->setback_called() )  _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
         }
 
-        remove_order();
+        detach_order();
     }
 }
 
-//-------------------------------------------------------------------Task::remove_order_after_error
+//-------------------------------------------------------------------Task::detach_order_after_error
 
-void Task::remove_order_after_error()
+void Task::detach_order_after_error()
 {
     if( _order )
     {
@@ -2329,7 +2329,7 @@ void Task::remove_order_after_error()
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
             report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order::post_keep_state), _order->java_sister());
             _order->processing_error();
-            remove_order();
+            detach_order();
         }
         else
         {
@@ -2341,9 +2341,9 @@ void Task::remove_order_after_error()
     }
 }
 
-//-------------------------------------------------------------------------------Task::remove_order
+//-------------------------------------------------------------------------------Task::detach_order
 
-void Task::remove_order()
+void Task::detach_order()
 {
     if( _order->is_file_order() )  _trigger_files = "";
     _log->set_order_log( NULL );
@@ -2361,7 +2361,7 @@ void Task::finish()
     if( _order )    // Auftrag nicht verarbeitet? spooler_process() nicht ausgeführt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
     {
         if( !has_error()  &&  _spooler->state() != Spooler::s_stopping )  set_error( Xc( "SCHEDULER-226" ) );
-        remove_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
+        detach_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
     if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )

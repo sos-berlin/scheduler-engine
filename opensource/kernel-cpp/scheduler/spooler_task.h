@@ -200,8 +200,8 @@ struct Task : Object,
     friend struct               Stdout_reader;
     friend struct               Task_lock_requestor;
 
-    void                        remove_order_after_error    ();
-    void                        remove_order                ();
+    void                        detach_order_after_error    ();
+    void                        detach_order                ();
 
     void                        finish                      ();
     void                        fetch_order_parameters_from_process();
