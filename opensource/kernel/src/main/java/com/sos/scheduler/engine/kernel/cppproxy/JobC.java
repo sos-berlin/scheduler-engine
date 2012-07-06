@@ -15,4 +15,5 @@ public interface JobC extends CppProxyWithSister<Job> {
     String source_xml();
     String description();
     Prefix_logC log();
+    String state_name();
 }
