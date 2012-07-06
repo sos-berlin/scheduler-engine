@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job_chain
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+    orders_recoverable="false"
+>
+    <job_chain_node
+            state="initial_Shell_Exit0"
+            job="/test_Shell_Exit0"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit7"
+            job="/test_Shell_Exit7"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit7_DontStopOnError"
+            job="/test_Shell_Exit7_DontStopOnError"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit0_SpoolerProcessAfter"
+            job="/test_Shell_Exit0_SpoolerProcessAfter"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit7_SpoolerProcessAfter"
+            job="/test_Shell_Exit7_SpoolerProcessAfter"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit0_DontStopOnError"
+            job="/test_Shell_Exit0_DontStopOnError"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit0_DontStopOnError_SpoolerProcessAfter"
+            job="/test_Shell_Exit0_DontStopOnError_SpoolerProcessAfter"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_Shell_Exit7_DontStopOnError_SpoolerProcessAfter"
+            job="/test_Shell_Exit7_DontStopOnError_SpoolerProcessAfter"
+            next_state="SUCCESS" error_state="ERROR"/>
+
+    <job_chain_node
+            state="initial_SpoolerProcess"
+            job="/test_SpoolerProcess"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_SpoolerProcess_SpoolerProcessAfter"
+            job="/test_SpoolerProcess_SpoolerProcessAfter"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_SpoolerProcess_DontStopOnError"
+            job="/test_SpoolerProcess_DontStopOnError"
+            next_state="SUCCESS" error_state="ERROR"/>
+    <job_chain_node
+            state="initial_SpoolerProcess_DontStopOnError_SpoolerProcessAfter"
+            job="/test_SpoolerProcess_DontStopOnError_SpoolerProcessAfter"
+            next_state="SUCCESS" error_state="ERROR"/>
+
+    <job_chain_node.end state="SUCCESS"/>
+    <job_chain_node.end state="ERROR"/>
+</job_chain>
