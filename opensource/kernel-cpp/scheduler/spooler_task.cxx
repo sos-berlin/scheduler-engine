@@ -1870,18 +1870,13 @@ bool Task::do_something()
                                         {
                                             //Process_module_instance::attach_task() hat temporäre Datei zur Rückgabe der Auftragsparameter geöffnet
                                             process_module_instance->fetch_parameters_from_process( _order->params() );
+                                            if( !has_error() ) {
+                                                postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
+                                                                                                             : Order::post_error   );       
+                                            }
+                                            else {}     // detach_order_after_error() wird sich drum kümmern.
                                         }
                                     }
-
-                                    if( _order )
-                                    {
-                                        if( !has_error() )
-                                        {
-                                            postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
-                                                                                                         : Order::post_error   );       
-                                        }
-                                        else {}     // detach_order_after_error() wird sich drum kümmern.
-                                    }                                                               
                                 }                                                               
 
                                 report_event_code(taskEndedEvent, java_sister());
@@ -2210,6 +2205,8 @@ string Task::remote_process_step__end()
                 ptr<Com_variable_set> p = new Com_variable_set( order_params_element );
                 _order->params()->merge( p );
             }
+            postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
+                                                                         : Order::post_error   );       
         }
 
         _spooler->_task_subsystem->count_step();
