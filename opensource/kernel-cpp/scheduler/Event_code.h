@@ -12,6 +12,7 @@ enum Event_code {
 
     taskStartedEvent,
     taskEndedEvent,
+    taskFinishedEvent,
 
     orderTouchedEvent,
     orderFinishedEvent,
