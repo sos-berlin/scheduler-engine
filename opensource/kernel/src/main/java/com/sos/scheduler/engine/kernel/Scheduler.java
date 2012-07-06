@@ -77,7 +77,7 @@ public final class Scheduler implements Sister,
     private boolean threadInitiallyLocked = false;
     private final DisposableCppProxyRegister disposableCppProxyRegister = new DisposableCppProxyRegister();
     private boolean closed = false;
-    private final Lazy<Injector> injector = new Lazy<Injector>() {
+    private final Lazy<Injector> injectorLazy = new Lazy<Injector>() {
         @Override protected Injector compute() { return Guice.createInjector(guiceModule.get()); }
     };
 
@@ -128,7 +128,7 @@ public final class Scheduler implements Sister,
         folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
         jobSubsystem = new JobSubsystem(this.cppProxy.job_subsystem());
         orderSubsystem = new OrderSubsystem(this.cppProxy.order_subsystem());
-        pluginSubsystem = new PluginSubsystem(this, injector, eventBus);
+        pluginSubsystem = new PluginSubsystem(this, injectorLazy, eventBus);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
         enableJavaUtilLoggingOverSLF4J();
@@ -136,7 +136,7 @@ public final class Scheduler implements Sister,
     }
 
     public Injector getInjector() {
-        return injector.get();
+        return injectorLazy.get();
     }
 
     @Override public Module getGuiceModule() {
