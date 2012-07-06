@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.tests.spoolerapi.scala
 
-import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
 import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
-import com.sos.scheduler.engine.test.scala._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scala._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.slf4j.LoggerFactory
+import scala.collection.JavaConversions._
 
 /** Prüft, ob alle Methoden eines Scala-Jobs aufgerufen werden.
  * Der Scala-Job wird mit den Log-Levels info und error gerufen, um den Aufruf von spooler_on_success() und spooler_on_error()
@@ -16,7 +15,9 @@ import org.slf4j.LoggerFactory
  * Der Job schreibt in Spooler.variables für jeden Log-Level und jeden Aufruf eine Variable mit der Anzahl der Aufrufe.*/
 @RunWith(classOf[JUnitRunner])
 final class ScalaJobTest extends ScalaSchedulerTest {
+
   import ScalaJobTest._
+
   private val eventPipe = controller.newEventPipe()
 
   override def checkedBeforeAll() {
@@ -43,8 +44,7 @@ final class ScalaJobTest extends ScalaSchedulerTest {
 }
 
 object ScalaJobTest {
-  private val logger = LoggerFactory.getLogger(classOf[ScalaJobTest])
-  private val jobPath = new AbsolutePath("/scala")
+  private val jobPath = JobPath.of("/scala")
   private val VariableNamePattern = """test[.](\d+)[.]([a-z_]+)""".r  // "test.0.spooler_process"
 
   private val expectedCallFrequencies = Map(
@@ -64,7 +64,7 @@ object ScalaJobTest {
       "spooler_on_error" -> 1))
 
   private def startJobElem(logLevel: SchedulerLogLevel) =
-    <start_job job={jobPath.toString}>
+    <start_job job={jobPath.asString}>
       <params>
           <param name="logLevel" value={logLevel.getNumber.toString}/>
       </params>

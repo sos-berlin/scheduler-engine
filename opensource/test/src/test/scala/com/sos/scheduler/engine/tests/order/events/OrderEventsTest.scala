@@ -1,21 +1,22 @@
 package com.sos.scheduler.engine.tests.order.events
 
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
-import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.mutable
 
 /** Testet, ob die erwarteten Auftrags-Events in der richtigen Reihenfolge eintreffen,
  * außerdem @EventHandler und @HotEventHandler. */
 @RunWith(classOf[JUnitRunner])
 class OrderEventsTest extends ScalaSchedulerTest {
+
   import OrderEventsTest._
 
   private val eventPipe = controller.newEventPipe()
@@ -30,7 +31,7 @@ class OrderEventsTest extends ScalaSchedulerTest {
   test("Temporary order") {
     hotEvents.clear()
     coldEvents.clear()
-    scheduler.executeXml(<add_order job_chain={jobChainPath.toString} id={temporaryOrderKey.getId.toString}/>)
+    scheduler.executeXml(<add_order job_chain={jobChainPath.asString} id={temporaryOrderKey.getId.toString}/>)
     checkOrderStates(temporaryOrderKey)
   }
 
@@ -38,11 +39,11 @@ class OrderEventsTest extends ScalaSchedulerTest {
     hotEvents.clear()
     coldEvents.clear()
     val orderKey = temporaryOrderKey
-    scheduler.executeXml(<add_order job_chain={jobChainPath.toString} id={orderKey.getId.toString}/>)
+    scheduler.executeXml(<add_order job_chain={jobChainPath.asString} id={orderKey.getId.toString}/>)
     eventPipe.next[OrderTouchedEvent].getKey should equal (orderKey)
     eventPipe.next[OrderSuspendedEvent].getKey should equal (orderKey)
     eventPipe.next[OrderEvent] match { case e: OrderStateChangedEvent => e.getKey should equal (orderKey); e.getPreviousState should equal (new OrderState("state1")) }
-    scheduler.executeXml(<remove_order job_chain={jobChainPath.toString} order={orderKey.getId.toString}/>)
+    scheduler.executeXml(<remove_order job_chain={jobChainPath.asString} order={orderKey.getId.toString}/>)
     //eventPipe.next[OrderEvent] match { case e: OrderFinishedEvent => e.getKey should equal (orderKey) }
   }
 
@@ -57,7 +58,7 @@ class OrderEventsTest extends ScalaSchedulerTest {
     eventPipe.next[OrderEvent] match { case e: OrderStepEndedEvent => e.getKey should equal (orderKey) }
     eventPipe.next[OrderEvent] match { case e: OrderSuspendedEvent => e.getKey should equal (orderKey) }
     eventPipe.next[OrderEvent] match { case e: OrderStateChangedEvent => e.getKey should equal (orderKey); e.getPreviousState should equal (new OrderState("state1")) }
-    scheduler.executeXml(<modify_order job_chain={jobChainPath.toString} order={orderKey.getId.toString} suspended="no"/>)
+    scheduler.executeXml(<modify_order job_chain={jobChainPath.asString} order={orderKey.getId.toString} suspended="no"/>)
     eventPipe.next[OrderEvent] match { case e: OrderResumedEvent => e.getKey should equal (orderKey) }
     eventPipe.next[OrderEvent] match { case e: OrderStepStartedEvent => e.getKey should equal (orderKey); e.getState should equal (new OrderState("state2")) }
     eventPipe.next[OrderEvent] match { case e: OrderStepEndedEvent => e.getKey should equal (orderKey) }
@@ -161,7 +162,7 @@ class OrderEventsTest extends ScalaSchedulerTest {
 }
 
 object OrderEventsTest {
-  private val jobChainPath = new AbsolutePath("/a")
+  private val jobChainPath = JobChainPath.of("/a")
   private val persistentOrderKey = new OrderKey(jobChainPath, new OrderId("persistentOrder"))
   private val temporaryOrderKey = new OrderKey(jobChainPath, new OrderId("1"))
 }

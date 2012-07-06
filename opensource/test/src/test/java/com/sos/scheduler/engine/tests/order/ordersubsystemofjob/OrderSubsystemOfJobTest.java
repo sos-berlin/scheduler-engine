@@ -1,16 +1,16 @@
 package com.sos.scheduler.engine.tests.order.ordersubsystemofjob;
 
-import static org.junit.Assert.assertThat;
-
-import org.hamcrest.Matchers;
-import org.junit.Test;
-
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
+import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+
+import static org.junit.Assert.assertThat;
 
 public class OrderSubsystemOfJobTest extends SchedulerTest {
     @Test public void test() throws Exception {
@@ -23,10 +23,10 @@ public class OrderSubsystemOfJobTest extends SchedulerTest {
         JobSubsystem jobSubsystem = scheduler().getJobSubsystem();
         OrderSubsystem orderSubsystem = scheduler().getOrderSubsystem();
 
-        Job aJob = jobSubsystem.job(new AbsolutePath("/A"));
-        Job bJob = jobSubsystem.job(new AbsolutePath("/B"));
-        JobChain aJobchain = orderSubsystem.jobChain(new AbsolutePath("/a"));
-        JobChain abJobchain = orderSubsystem.jobChain(new AbsolutePath("/ab"));
+        Job aJob = jobSubsystem.job(JobPath.of("/A"));
+        Job bJob = jobSubsystem.job(JobPath.of("/B"));
+        JobChain aJobchain = orderSubsystem.jobChain(JobChainPath.of("/a"));
+        JobChain abJobchain = orderSubsystem.jobChain(JobChainPath.of("/ab"));
 
         Iterable<JobChain> a = orderSubsystem.jobchainsOfJob(aJob);
         Iterable<JobChain> ab = orderSubsystem.jobchainsOfJob(bJob);

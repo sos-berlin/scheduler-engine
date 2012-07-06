@@ -33,16 +33,16 @@ class JobLoginTest extends ScalaSchedulerTest {
   private def runJob(jobPath: JobPath) = {
     val eventPipe = controller.newEventPipe
     startJob(jobPath)
-    eventPipe.nextWithCondition[TaskEndedEvent] { _.getJobPath == jobPath.getPath }
+    eventPipe.nextWithCondition[TaskEndedEvent] { _.getJobPath == jobPath }
     jobPropertyMap(jobPath)
   }
 
   private def startJob(jobPath: JobPath) {
-    scheduler executeXml <start_job job={jobPath.getPath.toString}/>
+    scheduler executeXml <start_job job={jobPath.asString}/>
   }
 
   private def jobPropertyMap(jobPath: JobPath) = {
-    val namePrefix = jobPath.name +"."
+    val namePrefix = jobPath.getName +"."
     val NamePattern = new Regex(Pattern.quote(namePrefix) +"(.*)")
     scheduler.getVariables.toMap collect { case (NamePattern(propertyName), v) => propertyName -> v }
   }

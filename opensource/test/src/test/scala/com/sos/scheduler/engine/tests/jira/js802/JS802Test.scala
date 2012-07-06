@@ -1,22 +1,23 @@
 package com.sos.scheduler.engine.tests.jira.js802
 
+import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.data.order.{OrderTouchedEvent, OrderKey}
+import com.sos.scheduler.engine.eventbus.EventHandler
+import com.sos.scheduler.engine.test.SchedulerTest
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
 import org.junit.Test
-import com.sos.scheduler.engine.data.folder.AbsolutePath
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
-import com.sos.scheduler.engine.data.order.{OrderTouchedEvent, OrderId, OrderKey}
-import com.sos.scheduler.engine.eventbus.EventHandler
-import com.sos.scheduler.engine.test.SchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import scala.collection.mutable
 
 /** JS-802 "http://www.sos-berlin.com/jira/browse/JS-802": Testet einen Auftrag und einen Job.
  * @see <a href="http://www.sos-berlin.com/jira/browse/JS-802">JS-802</a>*/
 class JS802Test extends SchedulerTest {
-    import JS802Test._
-    @volatile private var startTime = new DateTime(0)
+
+  import JS802Test._
+
+  @volatile private var startTime = new DateTime(0)
 
     private val collector = new {
         val set = mutable.HashSet[Any]()
@@ -54,7 +55,7 @@ class JS802Test extends SchedulerTest {
 object JS802Test {
     private val shortTimeout = SchedulerTest.shortTimeout
     private val orderDelay = 3+1
-    private val orderKey = new OrderKey(new AbsolutePath("/a"), new OrderId("atOrder"))
+    private val orderKey = OrderKey.of("/a", "atOrder")
     private val jobName = "job"
     private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
 

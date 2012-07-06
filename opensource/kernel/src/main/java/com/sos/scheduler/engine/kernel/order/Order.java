@@ -1,24 +1,25 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import javax.annotation.Nullable;
-
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.FileBasedType;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.data.order.OrderKey;
 import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
-import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.engine.kernel.variable.VariableSet;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.Lazy;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
+
+import javax.annotation.Nullable;
 
 @ForCpp
 public final class Order extends FileBased implements UnmodifiableOrder, HasUnmodifiableDelegate<UnmodifiableOrder>, Sister {
@@ -72,8 +73,8 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
         return new AbsolutePath(cppProxy.path());
     }
 
-    public AbsolutePath getJobChainPath() {
-        return new AbsolutePath(cppProxy.job_chain_path_string());
+    public JobChainPath getJobChainPath() {
+        return JobChainPath.of(cppProxy.job_chain_path_string());
     }
 
     @Override public JobChain getJobChain() {

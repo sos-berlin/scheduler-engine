@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderKey;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC;
@@ -29,16 +28,12 @@ public class OrderSubsystem implements Subsystem {
     }
 
     public final JobChain jobChain(JobChainPath o) {
-        return jobChain(o.getPath());
-    }
-
-    //TODO @Deprecated
-    public final JobChain jobChain(AbsolutePath path) {
-        JobChain result = cppProxy.java_file_based_or_null(path.toString());
+        JobChain result = cppProxy.java_file_based_or_null(o.asString());
         if (result == null)
-            throw new SchedulerException("Unknown job chain '"+path+"'");
+            throw new SchedulerException("Unknown '"+o+"'");
         return result;
     }
+
 
     public final Order order(OrderKey orderKey) {
         return jobChain(orderKey.getJobChainPath()).order(orderKey.getId());

@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js655;
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
-import com.sos.scheduler.engine.data.folder.Path;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
+import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.util.Files;
 import com.sos.scheduler.engine.kernel.util.sync.Gate;
@@ -27,8 +26,8 @@ import static org.hamcrest.Matchers.equalTo;
 
 /** JS-655  "JobScheduler does not start when a webservice entry is assigned to a job chain coming from hot folder" */
 public class JS655Test extends SchedulerTest {
-    private static final Path initialJobChainPath = new AbsolutePath("/myJobChain");
-    private static final Path rightJobChainPath = new AbsolutePath("/myLazyJobChain");
+    private static final JobChainPath initialJobChainPath = JobChainPath.of("/myJobChain");
+    private static final JobChainPath rightJobChainPath = JobChainPath.of("/myLazyJobChain");
 
     private final WebResource webResource;
     enum M { jobChainActivated, jobChainRemoved, terminated }
@@ -59,12 +58,12 @@ public class JS655Test extends SchedulerTest {
         checkWebServiceIsNotReady();
     }
 
-    private void renameJobChain(Path a, Path b) {
+    private void renameJobChain(JobChainPath a, JobChainPath b) {
         Files.renameFile(jobChainFile(a), jobChainFile(b));
     }
 
-    private File jobChainFile(Path p) {
-        return controller().environment().fileFromPath(p, ".job_chain.xml");
+    private File jobChainFile(JobChainPath p) {
+        return controller().environment().fileFromPath(p);
     }
 
     private void checkWebServiceIsNotReady() throws Exception {

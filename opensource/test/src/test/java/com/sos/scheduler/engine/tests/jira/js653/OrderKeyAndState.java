@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js653;
 
 import com.google.common.base.Objects;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.data.order.OrderKey;
 import com.sos.scheduler.engine.data.order.OrderState;
@@ -33,7 +33,7 @@ class OrderKeyAndState {
 
     static OrderKeyAndState of(String jobChainPath, String orderId, String orderState) {
         return new OrderKeyAndState(
-                new OrderKey(new AbsolutePath(jobChainPath), new OrderId(orderId)),
+                new OrderKey(JobChainPath.of(jobChainPath), new OrderId(orderId)),
                 new OrderState(orderState));
     }
 }

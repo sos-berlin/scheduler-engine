@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.tests.scheduler.job.job
 
-import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers._
-import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
 class JobTest extends ScalaSchedulerTest {
@@ -18,7 +18,7 @@ class JobTest extends ScalaSchedulerTest {
   }
 
   test("job.path") {
-    assert(job.getPath.toString === "/a")
+    assert(job.getPath.asString === "/a")
   }
 
   test("job.isFileBasedReread") {
@@ -37,5 +37,5 @@ class JobTest extends ScalaSchedulerTest {
 }
 
 object JobTest {
-  private val jobPath = new AbsolutePath("/a")
+  private val jobPath = JobPath.of("/a")
 }

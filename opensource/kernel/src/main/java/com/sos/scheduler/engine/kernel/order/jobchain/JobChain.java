@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.kernel.order.jobchain;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.FileBasedType;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
@@ -27,8 +27,8 @@ public final class JobChain extends FileBased implements UnmodifiableJobchain {
         return FileBasedType.jobChain;
     }
 
-    @Override public AbsolutePath getPath() {
-        return new AbsolutePath(cppProxy.path());
+    @Override public JobChainPath getPath() {
+        return JobChainPath.of(cppProxy.path());
     }
 
     /** Markiert, dass das {@link FileBased} beim nächsten Verzeichnisabgleich neu geladen werden soll. */

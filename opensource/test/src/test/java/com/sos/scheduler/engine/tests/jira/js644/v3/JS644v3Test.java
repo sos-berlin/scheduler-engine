@@ -58,8 +58,8 @@ public final class JS644v3Test extends SchedulerTest {
     }
 
     private void runOrders() throws InterruptedException {
-        scheduler().executeXml("<modify_order job_chain='"+ lowerCaseJobChainPath.getPath() +"' order='1' at='now'/>");
-        scheduler().executeXml("<modify_order job_chain='"+ upperCaseJobChainPath.getPath() +"' order='1' at='now'/>");
+        scheduler().executeXml("<modify_order job_chain='"+ lowerCaseJobChainPath.asString() +"' order='1' at='now'/>");
+        scheduler().executeXml("<modify_order job_chain='"+ upperCaseJobChainPath.asString() +"' order='1' at='now'/>");
         waitForFinishedOrder(lowerCaseGate);
         waitForFinishedOrder(upperCaseGate);
     }

@@ -38,7 +38,7 @@ public final class JS644StoppedJobTest extends SchedulerTest {
         try {
             threadGate.expect(taskEnded, shortTimeout);
         } catch(Exception x) {
-            logger.warn(scheduler().executeXml("<job.why job='"+ jobPath.getPath() +"'/>"));
+            logger.warn(scheduler().executeXml("<job.why job='"+ jobPath.asString() +"'/>"));
             throw x;
         }
     }

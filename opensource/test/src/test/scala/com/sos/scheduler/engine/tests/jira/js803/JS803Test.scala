@@ -1,26 +1,27 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
-import scala.xml.Elem
-import scala.xml.Utility.trim
+import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.order._
+import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
+import com.sos.scheduler.engine.kernel.order._
+import com.sos.scheduler.engine.test.SchedulerTest
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.apache.log4j.Logger
-import org.hamcrest.Matchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
 import org.junit.Test
-import com.sos.scheduler.engine.kernel.order._
-import com.sos.scheduler.engine.data.folder.{JobChainPath, AbsolutePath}
-import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
-import com.sos.scheduler.engine.test.SchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import scala.collection.mutable
+import scala.xml.Elem
+import scala.xml.Utility.trim
 
 /** Ticket JS-803.
  * @see <a href='http://www.sos-berlin.com/jira/browse/JS-803'>JS-803</a>
  * @see com.sos.scheduler.engine.tests.jira.js653.JS653Test */
 final class JS803Test extends SchedulerTest {
+
   import JS803Test._
 
   private val expectedOrders = new mutable.HashSet[OrderId]

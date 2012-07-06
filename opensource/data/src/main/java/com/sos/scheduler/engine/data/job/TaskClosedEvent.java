@@ -4,9 +4,10 @@ import com.sos.scheduler.engine.data.folder.JobPath;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class TaskStartedEvent extends TaskEvent {
+/** Nach {@link TaskEndedEvent} und nachdem das Task-Objekt geschlossen worden ist. */
+public class TaskClosedEvent extends TaskEvent {
     @JsonCreator
-    public TaskStartedEvent(@JsonProperty("id") TaskId id, @JsonProperty("jobPath") JobPath jobPath) {
+    public TaskClosedEvent(@JsonProperty("id") TaskId id, @JsonProperty("jobPath") JobPath jobPath) {
         super(id, jobPath);
     }
 }

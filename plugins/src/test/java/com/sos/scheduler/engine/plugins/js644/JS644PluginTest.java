@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.plugins.js644;
 
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.data.folder.JobChainPath;
+import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
@@ -21,8 +22,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class JS644PluginTest extends SchedulerTest {
     //private static final Logger logger = Logger.getLogger(JS644PluginTest.class);
-    private static final AbsolutePath jobPath = new AbsolutePath("/a");
-    private static final AbsolutePath jobChainPath = new AbsolutePath("/A");
+    private static final JobPath jobPath = JobPath.of("/a");
+    private static final JobChainPath jobChainPath = JobChainPath.of("/A");
     private static final Time timeout = shortTimeout;
 
     enum M { jobActivated, jobchainActivated }
@@ -60,6 +61,6 @@ public class JS644PluginTest extends SchedulerTest {
     }
 
     private File fileBasedFile(Job o) {
-        return new File(controller().environment().configDirectory(), o.getPath() + ".job.xml");
+        return new File(controller().environment().configDirectory(), o.getPath().asString() + ".job.xml");
     }
 }

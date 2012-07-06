@@ -2,44 +2,36 @@ package com.sos.scheduler.engine.data.folder;
 
 import java.io.File;
 
-public class TypedPath {
+public class TypedPath extends AbsolutePath {
     private final FileBasedType typ;
-    private final AbsolutePath path;
 
     public TypedPath(FileBasedType typ, AbsolutePath path) {
+        super(path);
         this.typ = typ;
-        this.path = path;
     }
 
     public final File file(File baseDirectory) {
-        return typ.file(baseDirectory, path);
+        return typ.file(baseDirectory, this);
     }
 
-    public final FileBasedType getTyp() {
+    public final FileBasedType typ() {
         return typ;
     }
 
-    public final AbsolutePath getPath() {
-        return path;
-    }
+//    public int hashCode() {
+//        return 31*typ.hashCode() + super.hashCode();
+//    }
 
-    public final String name() {
-        return path.getName();
-    }
-
-    public int hashCode() {
-        return 31*typ.hashCode() + path.hashCode();
-    }
     public boolean equals(Object o) {
         return o instanceof TypedPath && eq((TypedPath)o);
     }
 
     private boolean eq(TypedPath o) {
-        return typ == o.typ && path.equals(o.path);
+        return typ == o.typ && super.equals(o);
     }
 
     public String toString() {
-        return typ+" "+path;
+        return typ+" "+super.toString();
     }
 
     public static TypedPath of(FileBasedType t, String absolutePath) {

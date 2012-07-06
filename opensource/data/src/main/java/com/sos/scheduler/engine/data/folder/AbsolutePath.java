@@ -8,6 +8,10 @@ public class AbsolutePath extends Path {
         assertIsEmptyOrAbsolute();
     }
 
+    protected AbsolutePath(AbsolutePath p) {
+        super(p.asString());
+    }
+
     @JsonIgnore
     public final String getName() {
         return asString().substring(asString().lastIndexOf('/') + 1);
