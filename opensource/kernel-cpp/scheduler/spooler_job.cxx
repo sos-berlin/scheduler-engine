@@ -1974,11 +1974,7 @@ bool Job::execute_state_cmd()
                                     }
                                     break;
 
-                case sc_end:        if( _state == s_running 
-                                   //|| _state == s_suspended
-                                                               )                               something_done = true;
-                                    set_state( s_running );
-                                    Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+                case sc_end:        Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
 
                 case sc_suspend:    
@@ -3249,10 +3245,12 @@ void Job::set_state_cmd( State_cmd cmd )
 
             case sc_end:        ok = true; // _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_suspended;  if( !ok )  return;
                                 _state_cmd = cmd;
+                                signal( state_cmd_name(cmd) );
                                 break;
 
             case sc_suspend:    ok = true; //_state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order;   if( !ok )  return;
                                 _state_cmd = cmd;
+                                signal( state_cmd_name(cmd) );
                                 break;
 
             case sc_continue:   ok = true; //_state == s_suspended || _state == s_running_delayed;  if( !ok )  return;
