@@ -63,7 +63,7 @@ public class JS628Test extends SchedulerTest {
     @Test
     public void test() throws Exception {
         final CommandBuilder commandBuilder = new CommandBuilder();
-        controller().activateScheduler("-e");
+        controller().activateScheduler();
         for(String jobChain : JOB_CHAINS) { 
         String cmd = commandBuilder.addOrder(jobChain).getCommand();
             controller().scheduler().executeXml(cmd);

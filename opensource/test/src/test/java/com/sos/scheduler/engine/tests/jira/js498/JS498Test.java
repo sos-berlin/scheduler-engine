@@ -49,7 +49,7 @@ public class JS498Test extends SchedulerTest {
         String logFile = FileUtils.getTempFile(JS498Test.class, "scheduler.log").getAbsolutePath();
         logger.info("logfile=" + logFile);
         //controller().activateScheduler("-e","-ignore-process-classes","-log-level=info","-log=" + logFile);
-        controller().activateScheduler("-e","-log-level=info","-log=" + logFile);
+        controller().activateScheduler("-log-level=info","-log=" + logFile);
         String resultFile = scheduler().getConfiguration().localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
 		controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
 		controller().waitForTermination(timeOut);

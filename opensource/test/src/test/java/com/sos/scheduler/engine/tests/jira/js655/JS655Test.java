@@ -34,7 +34,7 @@ public class JS655Test extends SchedulerTest {
     private final Gate<M> gate = new Gate<M>();
 
     public JS655Test() throws Exception {
-        controller().activateScheduler("-e");
+        controller().activateScheduler();
         URI uri = new URI("http://localhost:"+ scheduler().getTcpPort() +"/myService");
         webResource = Client.create().resource(uri);
     }

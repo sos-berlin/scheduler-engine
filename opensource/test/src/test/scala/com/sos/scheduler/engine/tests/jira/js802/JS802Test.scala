@@ -31,7 +31,7 @@ class JS802Test extends SchedulerTest {
     }
 
     @Test def test() {
-        controller.activateScheduler("-e")
+        controller.activateScheduler()
         startTime = secondNow() plusSeconds orderDelay
         scheduler.executeXml(orderElem(orderKey, startTime))
         scheduler.executeXml(jobElem(jobName, startTime))

@@ -16,6 +16,7 @@ abstract class JS856Test(testNamePrefix: String) extends ScalaSchedulerTest {
 
   override def checkedBeforeAll() {
     controller.useDatabase()
+    controller.setLogCategories("java.stackTrace-")   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
   }
 
   test(testNamePrefix +" - run standing order normally") {

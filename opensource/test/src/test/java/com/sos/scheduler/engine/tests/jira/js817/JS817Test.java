@@ -16,7 +16,7 @@ public class JS817Test extends SchedulerTest {
     }
 
     private void runSchedulerWithJobChain(String jobChainName) {
-        controller().activateScheduler("-e");
+        controller().activateScheduler();
         scheduler().executeXml("<order job_chain='"+jobChainName+"' id='"+orderId+"'/>");
         controller().waitForTermination(shortTimeout);
     }
