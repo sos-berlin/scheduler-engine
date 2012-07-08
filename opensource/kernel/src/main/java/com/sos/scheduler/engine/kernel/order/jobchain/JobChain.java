@@ -7,8 +7,11 @@ import com.sos.scheduler.engine.data.folder.FileBasedType;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
+import com.sos.scheduler.engine.kernel.cppproxy.OrderC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.order.Order;
+
+import javax.annotation.Nullable;
 
 public final class JobChain extends FileBased implements UnmodifiableJobchain {
     private final Job_chainC cppProxy;
@@ -42,6 +45,11 @@ public final class JobChain extends FileBased implements UnmodifiableJobchain {
 
 	public Order order(OrderId id) {
         return cppProxy.order(id.asString()).getSister();
+    }
+
+    @Nullable public Order orderOrNull(OrderId id) {
+        OrderC o = cppProxy.order_or_null(id.asString());
+        return o == null? null: o.getSister();
     }
 
     @Override public String toString() {
