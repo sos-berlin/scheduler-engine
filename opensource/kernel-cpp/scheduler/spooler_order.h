@@ -251,6 +251,7 @@ struct Order : Com_order,
     void                        place_in_job_chain      ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        place_or_replace_in_job_chain( Job_chain* );
     bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack, bool exists_exception = false );
+    void                        java_remove             ()                                          { remove(rm_standard); }
     void                        remove                  ( File_based::Remove_flag );
     void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack, Transaction* = NULL );
     void                        remove_from_job_chain_stack();

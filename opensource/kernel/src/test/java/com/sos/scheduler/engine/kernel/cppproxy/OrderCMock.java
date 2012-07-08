@@ -12,6 +12,10 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC {
 
     @Override public boolean cppReferenceIsValid() { return true; }
 
+    @Override public void java_remove() {
+        throw new UnsupportedOperationException("com.sos.scheduler.engine.kernel.cppproxy.OrderCMock.remove()");
+    }
+
     @Override public String string_id() { return id; }
 
     @Override public void set_id(String id) { this.id = id; }

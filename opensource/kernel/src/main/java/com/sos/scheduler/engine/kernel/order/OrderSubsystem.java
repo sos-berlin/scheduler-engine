@@ -10,6 +10,8 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 
+import javax.annotation.Nullable;
+
 import static com.sos.scheduler.engine.kernel.order.jobchain.JobChains.jobChainHasJob;
 
 public class OrderSubsystem implements Subsystem {
@@ -34,8 +36,17 @@ public class OrderSubsystem implements Subsystem {
         return result;
     }
 
+    @Nullable public final Order orderOrNull(OrderKey orderKey) {
+        return jobChain(orderKey.getJobChainPath()).orderOrNull(orderKey.getId());
+    }
 
     public final Order order(OrderKey orderKey) {
         return jobChain(orderKey.getJobChainPath()).order(orderKey.getId());
+    }
+
+    public  final void tryRemoveOrder(OrderKey k) {
+        Order o = orderOrNull(k);
+        if (o != null)
+            o.remove();
     }
 }

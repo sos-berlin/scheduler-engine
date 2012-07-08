@@ -34,6 +34,22 @@ static jstring JNICALL file_1path(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL java_1remove(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::java_remove()");
+        (o_->java_remove());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL job_1chain(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -219,6 +235,7 @@ static jstring JNICALL title(JNIEnv* jenv, jobject, jlong cppReference)
 
 const static JNINativeMethod native_methods[] = {
     { (char*)"file_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1path },
+    { (char*)"java_remove__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1remove },
     { (char*)"job_chain__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain },
     { (char*)"job_chain_path_string__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain_1path_1string },
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },
@@ -237,7 +254,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::order::Order >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::order::Order >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 12);
+        int ret = env->RegisterNatives(*cls, native_methods, 13);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

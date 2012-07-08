@@ -34,7 +34,10 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
         this.cppProxy = cppProxy;
     }
 
-    @Override public void onCppProxyInvalidated() {
+    @Override public void onCppProxyInvalidated() {}
+
+    public void remove() {
+        cppProxy.java_remove();
     }
 
     @Override public OrderKey getKey() {
