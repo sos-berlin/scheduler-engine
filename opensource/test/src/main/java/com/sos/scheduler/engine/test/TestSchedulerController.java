@@ -53,8 +53,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
         super(testClass.getName());
         logger.debug(testClass.getName());
-        File directory = workDirectory(testClass);
-        environment = new Environment(configurationResourcePath, directory, nameMap, fileTransformer);
+        environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
     }
@@ -75,7 +74,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     private static void makeCleanDirectory(File directory) {
-        Files.makeDirectory(directory.getParentFile());
+        //Files.makeDirectory(directory.getParentFile());
         Files.makeDirectory(directory);
         Files.removeDirectoryContentRecursivly(directory);
     }

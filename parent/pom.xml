@@ -435,7 +435,7 @@
                         </property>
                         <property>
                             <name>com.sos.scheduler.engine.test.directory</name>
-                            <value>${project.build.testOutputDirectory}/../scheduler-test</value>
+                            <value>${project.build.testOutputDirectory}/../surefire-reports</value>
                         </property>
                     </systemProperties>
                 </configuration>

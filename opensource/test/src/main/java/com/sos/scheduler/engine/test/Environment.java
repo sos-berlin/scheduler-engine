@@ -35,7 +35,7 @@ import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSyst
  */
 public final class Environment {
     private static final String configSubdir = "config";
-    private static final String logSubdir = "log";
+  //private static final String logSubdir = "log";
 
     private final ResourcePath resourcePath;
     private final File directory;
@@ -52,7 +52,7 @@ public final class Environment {
         this.nameMap = nameMap;
         this.fileTransformer = fileTransformer;
         configDirectory = new File(directory, configSubdir);
-        logDirectory = new File(directory, logSubdir);
+        logDirectory = directory;  // Wurzel (Arbeitsverzeichnis), damit Jenkins die Protokolle der Tests zeigt
     }
 
     void prepare() {
