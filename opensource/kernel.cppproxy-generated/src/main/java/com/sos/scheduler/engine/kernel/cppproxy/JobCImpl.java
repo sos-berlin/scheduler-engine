@@ -104,6 +104,20 @@ final class JobCImpl
     private static native java.lang.String path__native(long cppReference);
 
 
+    @Override public void set_state_cmd(java.lang.String p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_state_cmd__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_state_cmd__native(long cppReference, java.lang.String p0);
+
+
     @Override public java.lang.String source_xml() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

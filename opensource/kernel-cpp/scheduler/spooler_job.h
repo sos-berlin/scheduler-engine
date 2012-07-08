@@ -279,6 +279,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
+    void                        set_state_cmd               (const string&);
     void                        end_tasks                   ( const string& task_warning );
     void                        kill_task                   ( int task_id, bool immediately = false );
     void                        kill_queued_task            ( int task_id );

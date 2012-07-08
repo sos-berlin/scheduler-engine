@@ -3213,7 +3213,13 @@ void Job::set_state( State new_state )
 }
 
 //-------------------------------------------------------------------------------Job::set_state_cmd
-// Anderer Thread (wird auch vom Kommunikations-Thread gerufen)
+
+void Job::set_state_cmd(const string& cmd)
+{ 
+    set_state_cmd(as_state_cmd(cmd));
+}
+
+//-------------------------------------------------------------------------------Job::set_state_cmd
 
 void Job::set_state_cmd( State_cmd cmd )
 { 

@@ -59,6 +59,14 @@ public final class Job extends FileBased implements Sister, UnmodifiableJob {
         return JobState.valueOf(cppProxy.state_name());
     }
 
+    public void endTasks() {
+        setStateCommand(JobStateCommand.endTasks);
+    }
+
+    public void setStateCommand(JobStateCommand c) {
+        cppProxy.set_state_cmd(c.cppValue());
+    }
+
     @Override public String toString() {
         return getClass().getSimpleName() + " " + getPath();
     }
