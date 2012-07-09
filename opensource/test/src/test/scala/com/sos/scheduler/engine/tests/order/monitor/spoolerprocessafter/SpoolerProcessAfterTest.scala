@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.data.job.{TaskId, TaskClosedEvent}
 import com.sos.scheduler.engine.data.log.{LogEvent, LogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
-import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -19,11 +19,12 @@ import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
+
   import SpoolerProcessAfterTest._
 
-  private val messageCodes = new mutable.HashMap[LogLevel, mutable.Set[String]]() with mutable.MultiMap[LogLevel, String]
   private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
   private lazy val orderSubsystem = scheduler.instance[OrderSubsystem]
+  private val messageCodes = new MyMutableMultiMap[LogLevel, String]
 
   controller.setTerminateOnError(false)
 
@@ -38,75 +39,51 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
     val eventPipe = controller.newEventPipe()
     val job = jobSubsystem.job(setting.jobPath)
 
-    try {
-      val myFinishedEvent = executeOrder()
-      orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
-      job.endTasks()   // Möglicherweise schon gestoppt
-      eventPipe.next[TaskClosedEvent].getId  should equal (new TaskId(index))
-      checkAssertions(myFinishedEvent)
-    }
+    try checkAssertions(execute())
     finally cleanUp(setting)
 
-    def executeOrder() = {
+    def execute() = {
       scheduler executeXml setting.orderElem
-      eventPipe.next[MyFinishedEvent]
+      val myFinishedEvent = eventPipe.next[MyFinishedEvent]
+      orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
+      job.endTasks()   // Job ist möglicherweise schon gestoppt
+      eventPipe.next[TaskClosedEvent].getId  should equal (new TaskId(index))
+      myFinishedEvent
     }
 
     def checkAssertions(event: MyFinishedEvent) {
-      def checkOrderState() {
-        if (!expected.orderStateExpectation.isValid(event.state))
-          fail("Expected OrderState="+expected.orderStateExpectation+", but was "+event.state)
-      }
-
-      def checkSpoolerProcessParameter() {
-        val spoolerProcessAfterParameterOption = expected.details collectFirst { case SpoolerProcessAfterParameter(o) => o }
-        if (spoolerProcessAfterParameterOption != event.spoolerProcessAfterParameterOption)
-          fail("Expected parameter for spooler_process_after is "+spoolerProcessAfterParameterOption +" but was "+event.spoolerProcessAfterParameterOption)
-      }
-
-      def checkJobIsStopped() {
-        val isStopped = job.state == JobState.stopped
-        if (isStopped != (expected.details contains JobIsStopped))
-          fail("Job has"+(if (isStopped) "" else " not") +" been stopped")
-      }
-
-      def checkMessageCodes() {
-        messageCodes.toMap foreach { case (level, codes) =>
-          codes.toSet should equal ((expected.details collect { case MessageCode(`level`, code) => code }).toSet)
-        }
-      }
-
-      event.orderKey should equal (setting.orderKey)
-      checkOrderState()
-      checkSpoolerProcessParameter()
-      checkJobIsStopped()
-      checkMessageCodes()
+      assert(event.orderKey === setting.orderKey)
+      assert(expected.orderStateExpectation matches event.state, "Expected OrderState="+expected.orderStateExpectation+", but was "+event.state)
+      assert(event.spoolerProcessAfterParameterOption === expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after()")
+      assert(job.state === expected.jobState, "Job.state is not as expected")
+      assert(messageCodes.toMap === expected.messageCodes.toMap)
     }
 
     private def cleanUp(setting: Setting) {
       scheduler executeXml <modify_job job={setting.jobPath.asString} cmd="unstop"/>
       messageCodes.clear()
-      //logger.info((scheduler executeXml <show_state/>).toString)
     }
   }
 
   @HotEventHandler def handleEvent(e: OrderStepEndedEvent, order: UnmodifiableOrder) {
     if (e.stateTransition == OrderStateTransition.keepState) {
       // Es wird kein OrderFinishedEvent geben.
-      controller.getEventBus.publishCold(MyFinishedEvent(
-        e.getKey, order.getState,
-        Option(emptyToNull(order.getParameters.get(SpoolerProcessAfterNames.parameter))) map { _.toBoolean }))
+      publishMyFinishedEvent(order)
     }
   }
 
   @HotEventHandler def handleEvent(e: OrderFinishedEvent, order: UnmodifiableOrder) {
+    publishMyFinishedEvent(order)
+  }
+
+  private def publishMyFinishedEvent(order: UnmodifiableOrder) {
     controller.getEventBus.publishCold(MyFinishedEvent(
-      e.getKey, order.getState,
+      order.getKey, order.getState,
       Option(emptyToNull(order.getParameters.get(SpoolerProcessAfterNames.parameter))) map { _.toBoolean }))
   }
 
   @EventHandler def handleEvent(e: LogEvent) {
-    if (List(LogLevel.error, LogLevel.warning) contains e.level) {
+    if (Expected.logLevels contains e.level) {
       e.getCodeOrNull match {
         case code: String => messageCodes.addBinding(e.level, code)
         case null =>
@@ -117,6 +94,8 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
 
 object SpoolerProcessAfterTest {
   //private val logger = LoggerFactory.getLogger(classOf[SpoolerProcessAfterTest])
+
+  private class MyMutableMultiMap[A,B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
   private case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
 }
