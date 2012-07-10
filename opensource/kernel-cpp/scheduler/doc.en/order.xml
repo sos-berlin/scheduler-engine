@@ -76,10 +76,10 @@
 <!--Aufträge können auch per TCP mit dem Kommando <scheduler_element name="add_order"/> übergeben werden.-->
 </p>
 <p>
-    Further, the Job Scheduler <scheduler_a href="http.xml">HTML interface </scheduler_a> 
+    Further, the JobScheduler <scheduler_a href="http.xml">HTML interface </scheduler_a> 
     provides operations with which orders can be manually started.
 <!--Darüber hinaus bietet die <scheduler_a href="http.xml">HTML-Oberfläche</scheduler_a> des
-    Job Schedulers Operationen zum manuellen Starten von Aufträgen.-->
+    JobSchedulers Operationen zum manuellen Starten von Aufträgen.-->
 </p>
 
 
@@ -90,13 +90,13 @@
 <p>
     Job chains define a series of jobs, whose execution is activated by an order.
     Job chains specify job dependencies for the successful and incorrect execution of the jobs.
-    They can be restarted - that is, the Job Scheduler saves the state of an order within a job chain
+    They can be restarted - that is, the JobScheduler saves the state of an order within a job chain
     in a database. Should the processing of an order be broken off at a particular job in a job chain,
-    on restarting, the Job Scheduler is able to restore the order at the job within the job chain,
+    on restarting, the JobScheduler is able to restore the order at the job within the job chain,
     at which processing was broken off.
 <!--Job-Ketten definieren eine Abfolge von Jobs, deren Ausführung durch einen Auftrag ausgelöst wird.
     Sie definieren Job-Abhängigkeiten für die erfolgreiche und fehlerhafte Ausführung von Jobs.
-    Sie sind wiederanlauffähig, d.h. der Job Scheduler speichert den Zustand eines Auftrags innerhalb
+    Sie sind wiederanlauffähig, d.h. der JobScheduler speichert den Zustand eines Auftrags innerhalb
     einer Job-Kette persistent in einer Datenbank und restauriert einen Auftrag nach dem 
     Wiederanlaufen innerhalb der Job-Kette für den Job, an dem die Verarbeitung abgebrochen wurde.-->
 </p>
@@ -127,28 +127,28 @@
 <p>
     Every job which is order controlled has an order queue in which 
     orders which are to be processed are collected.
-    The Job Scheduler starts processing an order as soon as it is added to the queue and 
+    The JobScheduler starts processing an order as soon as it is added to the queue and 
     the <scheduler_element name="run_time"/> element allows it to start.
     Should there be a number of orders in the job queue and the job allows multiple tasks, 
     (<scheduler_element name="job" attribute="tasks"/>), 
-    then the Job Scheduler will process the tasks in parallel.
+    then the JobScheduler will process the tasks in parallel.
 <!--Jeder auftragsgesteuerte Job hat eine Auftragswarteschlange, 
     die die Aufträge aufnimmt, die der Job verarbeiten soll.
     Sobald ein Auftrag in der Warteschlange ist und die <scheduler_element name="run_time"/> dies zulässt,
-    startet der Job Scheduler eine Task.
+    startet der JobScheduler eine Task.
     Wenn mehrere Aufträge in der Warteschlange sind und der Job mehrere Tasks erlaubt
     (<scheduler_element name="job" attribute="tasks"/>), 
-    dann startet der Job Scheduler mehrere Tasks.-->
+    dann startet der JobScheduler mehrere Tasks.-->
 </p>
 <p>
-    The Job Scheduler hands an order over to a task by storing the order in the 
+    The JobScheduler hands an order over to a task by storing the order in the 
     <scheduler_method class="Task" property="order"/> method and calling up the 
     <scheduler_method class="Job_impl" method="spooler_process"/> method.
     The <code>spooler_process()</code> method ends with either a
     <code>true</code> or <code>false</code> result, which, in turn,
      determines whether or not an order is processed by the next job in the job chain 
     (see <scheduler_method class="Job_chain"/>).
-<!--Der Job Scheduler übergibt einen Auftrag einer Task, 
+<!--Der JobScheduler übergibt einen Auftrag einer Task, 
     indem er in <scheduler_method class="Task" property="order"/> den Auftrag ablegt und
     <scheduler_method class="Job_impl" method="spooler_process"/> aufruft.
     <code>spooler_process()</code> endet mit <code>true</code> oder <code>false</code>, 
@@ -159,7 +159,7 @@
 <h2>Recognition of Double Orders</h2>
 <!--<h2>Erkennung doppelter Aufträge</h2>-->
 <p>
-    When an order is added to the job queue, the Job Scheduler checks whether an order with the same <code>id</code> 
+    When an order is added to the job queue, the JobScheduler checks whether an order with the same <code>id</code> 
     has already been entered (only, however, when the order <code>id</code> has been set).
     Should the order queue or job chain already have an order with the same <code>id</code>,
     then the already existing order will be overwritten.
@@ -189,9 +189,9 @@
 
 <p>
     Order priority is set using <scheduler_method class="Order" property="priority"/>.
-    Orders with a higher priority are put by the Job Scheduler at the front of the queue.
+    Orders with a higher priority are put by the JobScheduler at the front of the queue.
 <!--Aufträge mit höherer Priorität <scheduler_method class="Order" property="priority"/> 
-    stellt der Job Scheduler an den Anfang der Warteschlange.-->
+    stellt der JobScheduler an den Anfang der Warteschlange.-->
 </p>
 
 
@@ -200,15 +200,15 @@
 <!--<h2>Wann enden die Tasks?</h2>-->
 
 <p>
-    The Job Scheduler lets tasks exist as long as the <scheduler_element name="run_time"/> parameter is valid.
+    The JobScheduler lets tasks exist as long as the <scheduler_element name="run_time"/> parameter is valid.
     They then have the status <code>running_waiting_for_order</code>.
-<!--Wenn kein Auftrag mehr zu verarbeiten ist, lässt der Job Scheduler die Tasks stehen, 
+<!--Wenn kein Auftrag mehr zu verarbeiten ist, lässt der JobScheduler die Tasks stehen, 
     solange die <scheduler_element name="run_time"/> gilt.
     Sie sind dann im Zustand <code>running_waiting_for_order</code>.-->
 </p>
 
 <p>
-    The maximum time which the Job Scheduler will wait before a task is automatically ended is set using 
+    The maximum time which the JobScheduler will wait before a task is automatically ended is set using 
     <scheduler_element name="job" attribute="idle_timeout" value="duration"/>.
     This time should be set to a value such as 30 sec., so that resources can be set free.
 <!--Mit <scheduler_element name="job" attribute="idle_timeout" value="dauer"/> können Sie eine Frist bestimmen,
@@ -219,10 +219,10 @@
 
 <p>
     
-    Should the Job Scheduler require to start a task for which no more process class resources are available, 
+    Should the JobScheduler require to start a task for which no more process class resources are available, 
     then it automatically looks for another task of the same process class with the 
     <code>running_waiting_for_order</code> status, which it then terminates.
-<!--Wenn der Job Scheduler für einen anderen Job
+<!--Wenn der JobScheduler für einen anderen Job
     eine Task starten will, 
     die Prozess-Klasse aber erschöpft ist, 
     dann beendet er automatisch eine Task mit derselben Prozessklasse, 
@@ -263,12 +263,12 @@
 </p>
 
 <p>
-    The Job Scheduler gives orders a higher priority the further advanced they are in the job chain.
+    The JobScheduler gives orders a higher priority the further advanced they are in the job chain.
     This helps reduce congestion and means that jobs which are started first will be more quickly completed.
     It is as though the machines at the end of an assembly line were running more quickly than those at the beginning.
 <!--Aufträge, die in der Job-Kette weiter fortgeschritten sind, sollen bevorzugt verarbeitet werden.
     Damit werden Staus vermieden und die ersten Aufträge werden schneller abgeschlossen.
-    Das erreicht der Job Scheduler durch Bevorzugung der Jobs, 
+    Das erreicht der JobScheduler durch Bevorzugung der Jobs, 
     die weiter am Ende der Job-Kette stehen als andere.
     Die Maschinen am Ende des Fließbands laufen flotter als die am Anfang.-->
 </p>

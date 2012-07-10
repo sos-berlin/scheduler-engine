@@ -45,9 +45,9 @@
             </p>
             <p>
                 Changes to this configuration file require
-                the Job Scheduler to be restarted.
+                the JobScheduler to be restarted.
             <!--Änderungen in dieser Konfigurationsdatei erfordern einen
-                Neustart des Job Schedulers.-->
+                Neustart des JobSchedulers.-->
             </p>
         </dd>
 
@@ -62,19 +62,19 @@
                 in einzelnen Dateien definiert.-->
             </p>
             <p>
-                The Job Scheduler installation program sets the <code>./config/live</code> directory
+                The JobScheduler installation program sets the <code>./config/live</code> directory
                 to the default configuration directory. 
-                The Job Scheduler then monitors the creation, changing and deletion of configuration files 
+                The JobScheduler then monitors the creation, changing and deletion of configuration files 
                 from this directory.
-            <!--Vom Installationsprogramm wird dem Job Scheduler das Verzeichnis
-                <code>./config/live</code> zugeiwesen. Der Job Scheduler überwacht das Anlegen,
+            <!--Vom Installationsprogramm wird dem JobScheduler das Verzeichnis
+                <code>./config/live</code> zugeiwesen. Der JobScheduler überwacht das Anlegen,
                 Ändern und Löschen von Konfigurationsdateien in diesem Verzeichnis.-->
             </p>
             <p>
-                The Job Scheduler immediately takes account of any changes made to configuration files 
+                The JobScheduler immediately takes account of any changes made to configuration files 
                 in this directory - a restart is not required.
             <!--Änderungen von Konfigurationsdateien in diesem Verzeichnis werden
-                zur Laufzeit sofort vom Job Scheduler berücksichtigt, sie erfordern
+                zur Laufzeit sofort vom JobScheduler berücksichtigt, sie erfordern
                 keinen Neustart.-->
             </p>
         </dd>
@@ -115,11 +115,11 @@
                 mit anderen Programmen von SOS GmbH verwendet.-->
             </p>
             <p>
-                The Job Scheduler reads its technical licence key out of this file. 
-                The following licence key is to be used when the Job Scheduler is operated with an Open Source licence:
-            <!--Für den Job Scheduler wird aus dieser Datei der 
+                The JobScheduler reads its technical licence key out of this file. 
+                The following licence key is to be used when the JobScheduler is operated with an Open Source licence:
+            <!--Für den JobScheduler wird aus dieser Datei der 
                 technische Lizenzschlüssel gelesen. Für den Betrieb des
-                Job Schedulers mit einer Open Source Lizenz wird folgender
+                JobSchedulers mit einer Open Source Lizenz wird folgender
                 Lizenzschlüssel verwendet:-->
                 <br/><br/><code>
                 [licence]<br/>
@@ -139,19 +139,19 @@
         </dt>
         <dd>
             <p>
-                The Job Scheduler can be started directly from the command line using the 
+                The JobScheduler can be started directly from the command line using the 
                 <scheduler_a href="command_line.xml">Command line options</scheduler_a>.
                 For simplicity, the <scheduler_a href="command_line.xml">Command line options</scheduler_a> 
                 are integrated into the <code>.\bin\jobscheduler.cmd</code> (Windows) or 
-                <code>./bin/jobscheduler.sh</code> (Unix) start scripts by the Job Scheduler installation program.
-            <!--Der Job Scheduler kann direkt von der Kommandozeile mit Hilfe der 
+                <code>./bin/jobscheduler.sh</code> (Unix) start scripts by the JobScheduler installation program.
+            <!--Der JobScheduler kann direkt von der Kommandozeile mit Hilfe der 
                 <scheduler_a href="command_line.xml">Kommandozeilenptionen</scheduler_a> gestartet werden.
                 Zur Vereinfachung werden die <scheduler_a href="command_line.xml">Kommandozeilenptionen</scheduler_a> vom Installationsprogramm
                 in das Startskript <code>.\bin\jobscheduler.cmd</code> (Windows) bzw. 
                 <code>./bin/jobscheduler.sh</code> (Unix) eingetragen.-->
             </p>
             <p>
-                The <scheduler_a href="command_line.xml"> options on starting the Job Scheduler</scheduler_a>
+                The <scheduler_a href="command_line.xml"> options on starting the JobScheduler</scheduler_a>
                 have priority over settings made in the 
                 <scheduler_a href="factory_ini.xml"/> and
                 <scheduler_a href="konfiguration.xml"/>.

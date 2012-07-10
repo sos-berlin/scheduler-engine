@@ -17,48 +17,48 @@
     <scheduler_keyword keyword="Historie"/>-->
 
 <p>
-    The Job Scheduler can be used either with or without a database. 
+    The JobScheduler be used either with a database. 
     Operation with a database has the following advantages:
-<!--Der Job Scheduler kann mit und ohne Datenbank betrieben werden. Der Betrieb mit Datenbank hat folgende Vorteile:-->
+<!--Der JobScheduler sollte mit einer Datenbank betrieben werden. Der Betrieb mit Datenbank hat folgende Vorteile:-->
 </p>
 
 <dl>
     <dt>Task Queue</dt>
 <!--<dt>Task-Warteschlange</dt>-->
     <dd>
-        The Job Scheduler stores all queued tasks in a table 
+        The JobScheduler stores all queued tasks in a table 
         under its scheduler ID (Option <scheduler_option name="id"/>).
-        When the Job Scheduler restarts, then all queued tasks are reread from the database.
-    <!--Der Job Scheduler speichert die in den Warteschlangen eingereihten Tasks in einer Tabelle
+        When the JobScheduler restarts, then all queued tasks are reread from the database.
+    <!--Der JobScheduler speichert die in den Warteschlangen eingereihten Tasks in einer Tabelle
         unter seiner Scheduler-ID (Option <scheduler_option name="id"/>).
-        Sobald der Job Scheduler erneut startet, liest er die Warteschlange aus der Datenbank.-->
+        Sobald der JobScheduler erneut startet, liest er die Warteschlange aus der Datenbank.-->
     </dd>
     
     <dt>Orders</dt>
 <!--<dt>Aufträge</dt>-->
     <dd>
-        The Job Scheduler saves every order in a database table
+        The JobScheduler saves every order in a database table
         with the scheduler ID (Option <scheduler_option name="id"/>).
-        When the Job Scheduler restarts, it rereads the orders from the database.
-    <!--Der Job Scheduler speichert jeden Auftrag in einer Tabelle 
+        When the JobScheduler restarts, it rereads the orders from the database.
+    <!--Der JobScheduler speichert jeden Auftrag in einer Tabelle 
         unter seiner Scheduler-ID (Option <scheduler_option name="id"/>).
-        Sobald der Job Scheduler erneut startet, liest er die Aufträge aus der Datenbank.-->
+        Sobald der JobScheduler erneut startet, liest er die Aufträge aus der Datenbank.-->
     </dd>
     
     <dt>Task History</dt>
 <!--<dt>Task-Historie</dt>-->
     <dd>
-        The Job Scheduler records information about every task performed, 
-        apart from the Job Scheduler start and stop.
-    <!--Für jede Task schreibt der Job Scheduler einen Satz, 
-        außerdem bei Start und Ende des Job Schedulers.-->
+        The JobScheduler records information about every task performed, 
+        apart from the JobScheduler start and stop.
+    <!--Für jede Task schreibt der JobScheduler einen Satz, 
+        außerdem bei Start und Ende des JobSchedulers.-->
     </dd>
     
     <dt>Instruction History</dt>
 <!--<dt>Auftragshistorie</dt>-->
     <dd>
-        The Job Scheduler records the course of every operation in the job stream in the instruction history.
-    <!--Der Job Scheduler hält den Lauf der Aufträge durch die Job-Ketten in der Auftragshistorie fest.-->
+        The JobScheduler records the course of every operation in the job stream in the instruction history.
+    <!--Der JobScheduler hält den Lauf der Aufträge durch die Job-Ketten in der Auftragshistorie fest.-->
     </dd>
 </dl>
 
@@ -109,7 +109,7 @@
     </dd>
     
     <scheduler_keyword keyword="Protocol"/>
-    <dt>Should Protocols be Included in the History?</dt>
+    <dt>Should Protocols be included in the History?</dt>
 <!--<dt>Ob die Protokolle in der Historie aufgenommen werden sollen</dt>-->
     <dd>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_with_log"/><br/>
@@ -174,20 +174,20 @@
 <!--<h2>Fehlertoleranz</h2>-->
 <p>
     
-    The Job Scheduler tolerates database errors and 
+    The JobScheduler tolerates database errors and 
     can carry out routine operations with a temporarily unavailable database.
     More detailed information can be found in <scheduler_ini_entry file="factory.ini" section="spooler" entry="need_db"/>.
-<!--Der Job Scheduler toleriert Datenbankfehler. 
+<!--Der JobScheduler toleriert Datenbankfehler. 
     Dadurch kann er mit einer vorübergehend heruntergefahrenen Datenbank umgehen.
     Näheres hierzu finden sie hier: <scheduler_ini_entry file="factory.ini" section="spooler" entry="need_db"/>.-->
 </p>
 <p>
-    The Job Scheduler can be set to wait for a reconnection in the event of loss of contact with the database.
+    The JobScheduler can be set to wait for a reconnection in the event of loss of contact with the database.
     In this situation, only commands other than TCP or HTTP are processed;
-    The Job Scheduler cannot be shut down, only terminated
+    The JobScheduler cannot be shut down, only terminated
     (see <a href="termination.xml">Termination</a>).
-<!--Wenn eingestellt ist, dass der Job Scheduler nach Verbindungsverlust auf eine erneute Verbindung zur Datenbank warten soll,
-    hält der Job Scheduler solange an.
+<!--Wenn eingestellt ist, dass der JobScheduler nach Verbindungsverlust auf eine erneute Verbindung zur Datenbank warten soll,
+    hält der JobScheduler solange an.
     Nur Kommandos über TCP oder HTTP verarbeitet er.
     Er kann nicht beendet werden, nur abgebrochen werden (s. <a href="termination.xml">Beendigung</a>).-->
 </p>

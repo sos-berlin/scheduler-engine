@@ -30,7 +30,7 @@
 				<p>
                     The name of the file whose content is to be included.
                     Should the name of the file not be absolute, 
-                    then the Job Scheduler assumes different directories, independent of surrounding XML elements:
+                    then the JobScheduler assumes different directories, independent of surrounding XML elements:
                 <!--Der Name der Datei, deren Inhalt eingefügt werden soll.
                     Wenn der Dateiname nicht absolut ist, 
                     dann geht der Scheduler abhängig vom umgebenden XML-Element von verschiedenen Verzeichnissen aus:-->
@@ -96,7 +96,7 @@
                 </p>
                 <p>
                     When the file containing the <code>&lt;include></code> does not come from a configuration directory,
-                    the Job Scheduler assumes the  configuration directory root.
+                    the JobScheduler assumes the configuration root directory  of the installation.
                 <!--Wenn die Datei, die das <code>&lt;include></code> enthält, nicht aus einem Konfigurationsverzeichnis stammt,
                     geht der Scheduler von der Wurzel des Konfigurationsverzeichnisses aus.-->
                 </p>
@@ -142,6 +142,7 @@
         <!--Dieses Element kann in den Text gestreut werden 
             (aber außerhalb von <code>&lt;![CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
             um Quell-Code, der in anderen Dateien steht, einzuziehen.-->
+        </p>
         <p>
             The file is read on a remote computer when such a computer is specified using
             <scheduler_element name="process_class" attribute="remote_scheduler"/>.
@@ -150,7 +151,7 @@
         </p>
 
         <p>
-            Should the Job Scheduler not be able to read a file:
+            Should the JobScheduler not be able to read a file:
         <!--Wenn der Scheduler die einzuziehende Datei nicht lesen kann:-->
         </p>
         <ul>
@@ -161,12 +162,14 @@
                 fügt aber die Fehlermeldung in die <code>&lt;description></code> ein.-->
             </li>
             <li>
-                in the <code>&lt;script></code> element: the Job Scheduler puts the job in the <code>read_error</code> state.
+                in the <code>&lt;script></code> element: the JobScheduler puts the job in the <code>read_error</code> state.
                 The <scheduler_element name="modify_job" attribute="cmd" value="reread"/> command allows the Scheduler to reread a script.
             <!--Im Element <code>&lt;script></code>: Der Scheduler versetzt den Job in den Zustand <code>read_error</code>.
                 Das Kommando <scheduler_element name="modify_job" attribute="cmd" value="reread"/> lässt den Scheduler das Skript erneut lesen.-->
             </li>
         </ul>        
-		</p>
+        <p>
+        Changes in include-files have no impact on a running JobScheduler.
+        </p>
 	</description>
 </xml_element>
