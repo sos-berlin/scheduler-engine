@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.test.util;
 
+import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.TestSchedulerController;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -27,12 +29,14 @@ public class FileUtils {
     }
 
     public File getTempFile(Class<?> classInstance, String fileWithoutPath) {
-        String path = tempDir + "/" + classInstance.getName();
-        File dir = new File(path);
-        boolean result = dir.mkdirs();
-        if (!result)
-            throw new SchedulerException("error creating directory " + path);
-        return new File( path + "/" + fileWithoutPath );
+        String filename = tempDir.replace("\\","/") + "/" + classInstance.getName() + "/" + fileWithoutPath;
+        File resultFile = new File(filename);
+        try {
+            Files.createParentDirs(resultFile);
+        } catch (IOException e) {
+            throw new SchedulerException("error creating directory for file " + filename);
+        }
+        return resultFile;
     }
 
     public File getResourceFile(String resourceName) {
