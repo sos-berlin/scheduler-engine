@@ -24,7 +24,7 @@
 						einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.-->
         </p>
         <p>
-            The use of individual parameters beginning with <b>SCHEDULER_</b> is not recommended 
+            The use of individual parameters beginning with <b>scheduler.</b> is not recommended 
 						as this name space is reserved for the JobScheduler configuration settings.
         <!--Es wird empfohlen keine eigenen Parameter einzustellen, 
 						die mit der Zeichenfolge <b>SCHEDULER_</b> beginnen, 
@@ -47,8 +47,39 @@
            The following parameters can be used to configure the JobScheduler:
        <!--Folgende Scheduler-Parameter könnnen für die Konfiguration des JobScheduler verwendet werden:-->
         </p>
+
+        <br/>
+        <table>
+          <tr>
+            <th width="30%">parameter</th>
+            <th width="10%">default</th>
+            <th width="40%">description</th>
+          </tr>
+          <tr>
+            <td><b><a href="#scheduler.variable_name_prefix">scheduler.variable_name_prefix</a></b></td>
+            <td>SCHEDULER_</td>
+            <td>Prefix of the JobScheduler einvironment variables (for compatibility reasons to older versions <b>SCHEDULER_VARIABLE_NAME_PREFIX</b> is allowed).</td>
+          </tr>
+          <tr>
+            <td><b><a href="#scheduler.max_kbyte_of_db_log_entry">scheduler.max_kbyte_of_db_log_entry</a></b></td>
+            <td>unlimitet</td>
+            <td>Maximum size of the order logs in the database.</td>
+          </tr>
+          <tr>
+            <td><b><a href="#scheduler.order.keep_order_content_on_reschedule">scheduler.order.keep_order_content_on_reschedule</a></b></td>
+            <td>TRUE</td>
+            <td>Preserves the order parameters after the execution of the order.</td>
+          </tr>
+          <tr>
+            <th width="30%"></th>
+            <th width="10%"></th>
+            <th width="70%"></th>
+          </tr>
+        </table>
+        <br/>
           
         <ul>
+          <a name="scheduler.variable_name_prefix"/>
           <li><b>SCHEDULER_VARIABLE_NAME_PREFIX</b></li>
       <!--<li><b>SCHEDULER_VARIABLE_NAME_PREFIX</b></li>-->
           <p>
@@ -152,6 +183,7 @@ echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
         </p>
         <br/><br/>
 
+        <a name="scheduler.max_kbyte_of_db_log_entry"/>
         <li><b>scheduler.max_kbyte_of_db_log_entry</b></li>
 <!--
         <p>
@@ -176,6 +208,22 @@ echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
    &lt;param name="scheduler.max_kbyte_of_db_log_entry" value="8" />
 &lt;/params>
 </pre>
+
+        <a name="scheduler.order.keep_order_content_on_reschedule"/>
+        <li><b>scheduler.order.keep_order_content_on_reschedule</b></li>
+        <p>
+          To set this parameter to <i>false</i> you can reset the order parameters after order execution to its initial values given by the order definition.
+          <!-- Mit diesem Schalter können die Auftragsparameter nach Ausführung des Auftrages auf ihren initialen Wert (aus der Auftragsdefinition) zurück gesetzt werden. -->
+<pre>&lt;params>
+   &lt;param name="scheduler.order.keep_order_content_on_reschedule" value="false" />
+&lt;/params>
+</pre>
+        </p>
+        <p>
+          The default behaviour preserves the values of the order parameters after execution.
+          <!-- Das Standardverhalten behält die Werte der Auftragsparameter nach Ausführung des Auftrages bei. -->
+        </p>
+
 </ul>
                 
         <a name="param_job" />

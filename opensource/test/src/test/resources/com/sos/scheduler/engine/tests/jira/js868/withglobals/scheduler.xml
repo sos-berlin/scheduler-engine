@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd">
+	<config>
+        <params>
+            <param name="ORDER_JOB_GLOBAL" value="global" />
+            <param name="ORDER_GLOBAL" value="global" />
+            <param name="JOB_GLOBAL" value="global" />
+            <param name="GLOBAL" value="global" />
+        </params>
+	</config>
+</spooler>

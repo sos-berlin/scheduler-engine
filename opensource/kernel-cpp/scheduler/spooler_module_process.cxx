@@ -899,6 +899,12 @@ void Process_module_instance::fill_process_environment_with_params()
         }
     }
 
+    if( _spooler && _spooler->variables() )
+    {
+      Z_FOR_EACH_CONST( Com_variable_set::Map, _spooler->variables()->_map, v )  
+         _process_environment->set_var( ucase( _module->_process_shell_variable_prefix + v->second->name() ), v->second->string_value() );
+    }
+
     Z_FOR_EACH_CONST( Com_variable_set::Map, task_params->_map, v )  
         _process_environment->set_var( ucase( _module->_process_shell_variable_prefix + v->second->name() ), v->second->string_value() );
 

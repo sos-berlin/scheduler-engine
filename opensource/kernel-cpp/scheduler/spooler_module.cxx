@@ -269,7 +269,9 @@ void Module::init0()
     string prefix = "";
     _process_shell_variable_prefix_is_configured = false;
     if (_spooler && _spooler->variables()) {
-      prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
+      prefix = _spooler->variables()->get_string( "scheduler.variable_name_prefix" );
+      if (prefix.empty())        // try the old name ...
+         prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
       if (!prefix.empty())
          _process_shell_variable_prefix_is_configured = true;     // this flag controls the transfer to remote process (see Remote_module_instance_proxy::continue_async_operation)
     }
