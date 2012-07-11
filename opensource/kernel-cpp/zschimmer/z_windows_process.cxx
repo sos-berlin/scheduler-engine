@@ -344,7 +344,8 @@ void Process::create_process(const Login* login, const string& application_name,
 
         // Das anzumeldende Konto muss das Recht "Anmelden als Stapelverarbeitung" haben (Gruppenrichtlinien -> Computerkonfiguration -> Windows-Einstellungen -> Sicherheitseinstellungen -> Lokale Richtlinien -> Zuweisen von Benutzerrechten)
         Z_LOG("LogonUserW(\""<< user_name << "\")\n");
-        BOOL ok = LogonUserW(Bstr(user_name), NULL, Bstr(login->password()), LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, login_handle.addr_of());
+        // BOOL ok = LogonUserW(Bstr(user_name), NULL, Bstr(login->password()), LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, login_handle.addr_of());
+        BOOL ok = LogonUserW(Bstr(user_name), NULL, Bstr(login->password()), LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, login_handle.addr_of());
         if (!ok) throw_mswin("LogonUser", user_name);
             
         Z_LOG( "CreateProcessAsUser(\"" << user_name << "\", \"" << application_name << "\",\"" << command_line << "\")\n" );
