@@ -10,10 +10,10 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * \file JS628Test.java
+ * \file JS873Test.java
  * \brief js-628: Order successfull when a pre/postprocessing script is used
  * 
- * \class JS628Test
+ * \class JS873Test
  * \brief js-628: Order successfull when a pre/postprocessing script is used
  * 
  * \details

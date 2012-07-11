@@ -30,7 +30,7 @@ public class CommandBuilderTest {
 		String command = util.addOrder("myJobchain").getCommand();
         File file = File.createTempFile("testBuildCommandAddOrder",".txt");
 		Files.append(command, file, SchedulerConstants.defaultEncoding);
-		File expectedFile = FileUtils.getResourceFile(expectedBuildCommandAddOrder);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandAddOrder);
 		assertEqualFiles(file, expectedFile);
         file.delete();
 	}
@@ -40,7 +40,7 @@ public class CommandBuilderTest {
 		String command = util.addOrder("myJobchain").addParam("myParam1", "value1").getCommand();
 		File file = File.createTempFile("testBuildCommandAddOrderWithParam",".txt");
 		Files.append(command, file, SchedulerConstants.defaultEncoding);
-		File expectedFile = FileUtils.getResourceFile(expectedBuildCommandAddOrderWithParams);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandAddOrderWithParams);
 		assertEqualFiles(file, expectedFile);
         file.delete();
 	}
@@ -52,7 +52,7 @@ public class CommandBuilderTest {
 		String command = util.addOrder("myJobchain").getCommand();
 		File file = File.createTempFile("testBuildCommandAddOrderWithParam2",".txt");
 		Files.append(command, file, SchedulerConstants.defaultEncoding);
-		File expectedFile = FileUtils.getResourceFile(expectedBuildCommandAddOrderWithParams2);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandAddOrderWithParams2);
 		assertEqualFiles(file, expectedFile);
         file.delete();
 	}
@@ -75,7 +75,7 @@ public class CommandBuilderTest {
 		String command = util.startJobImmediately("myJob").getCommand();
 		File file = File.createTempFile("testBuildCommandStartJobImmidiately",".txt");
 		Files.append(command, file, SchedulerConstants.defaultEncoding);
-		File expectedFile = FileUtils.getResourceFile(expectedBuildCommandStartJobImmidiately);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandStartJobImmidiately);
 		assertEqualFiles(file, expectedFile);
         file.delete();
 	}

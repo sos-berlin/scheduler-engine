@@ -95,7 +95,7 @@ public class JS793Test extends SchedulerTest {
 	}
 	
 	private File getResultfile(String jobchainName) throws IOException {
-		return FileUtils.getTempFile(JS793Test.class, "result_" + jobchainName + ".txt");
+		return FileUtils.getInstance().getTempFile(JS793Test.class, "result_" + jobchainName + ".txt");
 	}
 		
 	@HotEventHandler
