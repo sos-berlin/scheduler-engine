@@ -29,10 +29,7 @@ public class ScriptAdapterJob extends Job_impl {
     private final String code;
 
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
-    //TODO Testen für standalone jobs
-    //TODO was passiert bei gemischtem Sourceocode (z.B. shell_script, Monitore in javax);
     //TODO funktioniert das Scripting auch bei remote jobs?
-    //TODO prüfen, ob die Scheduler Parameter mit SCHEDULER__ statt mit SCHEDULER_ anfangen sollten
 
     private boolean bindingsSet = false;
 

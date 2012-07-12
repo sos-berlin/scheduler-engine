@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
+	order="no" stop_on_error="no">
+    <script language="javax.script:javascript">
+        <![CDATA[
+importClass(java.io.File);
+importClass(com.google.common.io.Files);
+importClass(java.nio.charset.Charset);
+
+function spooler_process() {
+	logger.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	
+	spooler.variables().set_var("parm1","value1");
+	spooler.variables().set_var("parm2","value2");
+	log_object("spooler.variables.count",spooler.variables().count());
+	
+	spooler_task.params().set_var("taskparam1","value1");
+	spooler_task.params().set_var("taskparam2","value2");
+	log_object("spooler_task.params.names",spooler_task.params().names());
+	
+	return false;
+}
+
+function log_object( varname, objectvalue ) {
+    filename = spooler.configuration_directory() + "/resultfile.txt";
+    msg = varname + "=" + objectvalue;
+    Files.append(msg + "\n", new File(filename), Charset.defaultCharset());
+	logger.info(msg);
+}
+        ]]>
+    </script>
+    <monitor name="process0" ordering="0">
+        <script language="javax.script:javascript">
+            <![CDATA[
+importClass(java.io.File);
+importClass(com.google.common.io.Files);
+importClass(java.nio.charset.Charset);
+
+function spooler_process_after(spooler_process_result) {
+	logger.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	return spooler_process_result;
+}
+
+function log_object( varname, objectvalue ) {
+    filename = spooler.configuration_directory() + "/resultfile.txt";
+    msg = varname + "=" + objectvalue;
+    Files.append(msg + "\n", new File(filename), Charset.defaultCharset());
+	logger.info(varname + "=" + objectvalue);
+}
+            ]]>
+        </script>
+    </monitor>
+    <run_time/>
+</job>

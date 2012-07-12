@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
+	order="yes" stop_on_error="no">
+    <script language="shell">
+        <![CDATA[
+echo hello world
+exit 5
+        ]]>
+    </script>
+    <monitor name="process0" ordering="0">
+        <script language="javax.script:javascript">
+            <![CDATA[
+function spooler_task_after() {
+    spooler_task.set_exit_code(0);
+    logger.info("the task ended with exit_code=" + spooler_task.exit_code());
+}
+            ]]>
+        </script>
+    </monitor>
+    <run_time/>
+</job>

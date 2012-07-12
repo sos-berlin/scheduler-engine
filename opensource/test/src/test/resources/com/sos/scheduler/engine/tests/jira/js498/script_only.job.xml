@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+This job demonstrates the using of the scipt element without a specific function. The code in the script element will
+implicitely used as 'spooler_process' and should result in the line 'script_only=script_only' in the result file.
+-->
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
+	order="no" stop_on_error="no">
+    <script language="javax.script:javascript">
+        <![CDATA[
+importClass(java.io.File);
+importClass(com.google.common.io.Files);
+importClass(java.nio.charset.Charset);
+
+filename = spooler.configuration_directory() + "/resultfile.txt";
+Files.append("script_only=" + spooler_job.name() + "\n", new File(filename), Charset.defaultCharset());
+        ]]>
+    </script>
+    <run_time/>
+</job>
