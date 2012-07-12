@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.util.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,7 +94,7 @@ public class JS793Test extends SchedulerTest {
 	}
 	
 	private File getResultfile(String jobchainName) throws IOException {
-		return FileUtils.getInstance().getTempFile(JS793Test.class, "result_" + jobchainName + ".txt");
+		return getTempFile(JS793Test.class, "result_" + jobchainName + ".txt");
 	}
 		
 	@HotEventHandler
