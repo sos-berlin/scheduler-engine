@@ -173,6 +173,23 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>package-documentation</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/documentation.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                              <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                              </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>package-binaries</id>
                         <phase>package</phase>
                         <goals>
@@ -182,6 +199,11 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/os-${osFamily}.xml</descriptor>
                             </descriptors>
+                            <archive>
+                              <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                              </manifest>
+                            </archive>
                         </configuration>
                     </execution>
                     <execution>
@@ -194,6 +216,11 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/os-${osFamily}-test.xml</descriptor>
                             </descriptors>
+                            <archive>
+                              <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                              </manifest>
+                            </archive>
                         </configuration>
                     </execution>
                 </executions>
