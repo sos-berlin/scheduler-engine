@@ -19,9 +19,21 @@
         </p>
         <p>
             Defines the individual parameters for the <a href="#param_scheduler">Job Scheduler</a>, 
-						a <a href="#param_job">Job</a> or an <a href="#param_auftrag">Order</a>.
-        <!--Bestimmt einen einzelnen Parameter für den <a href="#param_scheduler">Scheduler</a>, 
-						einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.-->
+						a <a href="#param_job">Job</a> or an <a href="#param_auftrag">Order</a>. In general all parameters are available with the API calls 
+						<scheduler_method class="Spooler" object="spooler" method="variables"/>, <scheduler_method class="Task" method="params" /> respectively
+            <scheduler_method class="Order" method="payload" /> or in shell Jobs as environment variable (with leading <b>SCHEDULER_PARAM_</b>)
+        <!--Bestimmt einen einzelnen Parameter für den <a href="#param_scheduler">Scheduler</a>, einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.
+            Grundsätzlich sind alle Parameter über die API Aufrufe <scheduler_method class="Spooler" object="spooler" method="variables"/>, <scheduler_method class="Task" method="params" /> bzw.
+            <scheduler_method class="Order" method="payload" /> oder in shell Jobs als environment Variable (mit vorangestelltem <b>SCHEDULER_PARAM_</b>) verfügbar. -->
+        </p>
+        <p>
+            Correspondent parameter in the JobScheduler configuration, at the Job and at the order are valid in the following sequence:
+            <!--Gleichnamige Parameter in der JobScheduler Konfiguration, am Job und am Auftrag gelten in der folgenden Reihenfolge:-->
+            <ul>
+              <li>order</li>
+              <li>job</li>
+              <li>scheduler</li>
+            </ul>
         </p>
         <p>
             The use of individual parameters beginning with <b>scheduler.</b> is not recommended 
