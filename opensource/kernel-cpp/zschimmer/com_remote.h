@@ -419,7 +419,7 @@ struct Connection_to_own_server_process : Connection
     void                        start_process           ( const Parameters& );
     bool                        call_waitpid            ( bool wait );
     void                        open_stdout_stderr_files();
-    void                    set_login                   (const ptr<Login>& o)                       { _login = o; }
+    void                    set_login                   (Login* o)                                  { _login = o; }
     void                    set_priority                ( const string& priority )                  { _priority = priority; }
     void                    set_environment_string      ( const string& env )                       { _environment_string = env;  _has_environment = true; }
     file::File_path             stdout_path             ()                                          { return _stdout_file.path(); }

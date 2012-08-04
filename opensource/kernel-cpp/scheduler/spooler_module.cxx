@@ -901,7 +901,7 @@ bool Module_instance::try_to_get_process()
         if( _process )
         {
             _process->add_module_instance( this );
-
+            _process->set_login(_module->_login);
             assert( !_process->started() );
 
             _process->set_job_name( _job_name );

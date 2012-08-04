@@ -130,6 +130,7 @@ struct Process : zschimmer::Object, Scheduler_object
   //void                    set_environment_string          ( const string& env )                   { _environment_string = env;  _has_environment = true; }
     void                    set_run_in_thread               ( bool b )                              { _run_in_thread = b; }
     void                    set_log_stdout_and_stderr       ( bool b )                              { _log_stdout_and_stderr = b; }
+    void                    set_login                       (Login* o)                              { _login = o; }
     Process_id                  process_id                  () const                                { return _process_id; }
     int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
     Process_id                  remote_process_id           () const                                { return _remote_process_id; }
@@ -169,6 +170,7 @@ struct Process : zschimmer::Object, Scheduler_object
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long32                     _module_instance_count;
     Module_instance*           _module_instance;
+    ptr<Login>                 _login;
     Process_class*             _process_class;
     string                     _priority;
     ptr<Com_variable_set>      _environment;
