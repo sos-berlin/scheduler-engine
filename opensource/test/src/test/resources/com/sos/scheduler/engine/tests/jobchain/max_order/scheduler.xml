@@ -2,7 +2,7 @@
 <spooler
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
 >
-    <config>
+    <config java_options="-Xmx20m">
         <jobs>
             <job name="job.1" order="yes" stop_on_error="no" tasks="5">
                 <script language="java" java_class="com.sos.scheduler.engine.tests.jobchain.max_order.DelayingJob" />
