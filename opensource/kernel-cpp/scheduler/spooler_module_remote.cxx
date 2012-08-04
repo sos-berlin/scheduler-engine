@@ -402,6 +402,8 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
         if( _module->_priority != "" )  _process->set_priority( _module->_priority );
         _process->set_environment( *_process_environment );
+        _process->set_java_options(_module->_java_options);
+        _process->set_java_classpath(_module->_java_class_path);
         _process->start();
 
         _session      = _process->session(); 

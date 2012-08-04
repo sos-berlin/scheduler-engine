@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by Stefan Schädlich (Schering AG) -->
-<!-- $Id: scheduler.xsd 14660 2011-06-23 12:04:10Z jz $ -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
     <!-- <xsd:key> nicht verwenden, libxslt kann das nicht: "Internal error: xmlSchemaAreValuesEqual, failed to compare the values." -->
     <xsd:annotation>
@@ -486,7 +484,7 @@
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element ref="extensions" minOccurs="0"/>
-                <xsd:element name="note" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element ref="note" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:choice>
                     <xsd:sequence>
                         <xsd:element name="job_chain_node.job_chain" type="job_chain_node.job_chain"/>
@@ -1092,6 +1090,8 @@
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:attribute>
+            <xsd:attribute name="java_options" type="String"/>
+            <xsd:attribute name="java_classpath" type="String"/>
         </xsd:complexType>
     </xsd:element>
     <xsd:element name="remote_scheduler.remote_task.close">

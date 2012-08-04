@@ -1099,6 +1099,8 @@ const char file_scheduler_xsd[] =
     "</xsd:restriction>\n"
     "</xsd:simpleType>\n"
     "</xsd:attribute>\n"
+    "<xsd:attribute name=\"java_options\" type=\"String\"/>\n"
+    "<xsd:attribute name=\"java_classpath\" type=\"String\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "<xsd:element name=\"remote_scheduler.remote_task.close\">\n"

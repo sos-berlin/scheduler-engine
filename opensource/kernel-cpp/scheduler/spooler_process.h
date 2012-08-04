@@ -174,6 +174,8 @@ struct Process : zschimmer::Object, Scheduler_object
     Process_class*             _process_class;
     string                     _priority;
     ptr<Com_variable_set>      _environment;
+    string                     _java_options;
+    string                     _java_classpath;
     bool                       _run_in_thread;
     Host_and_port              _remote_scheduler;
     Process_id                 _remote_process_id;
