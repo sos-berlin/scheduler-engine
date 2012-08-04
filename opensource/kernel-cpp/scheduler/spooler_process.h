@@ -128,6 +128,8 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
     void                    set_environment                 ( const Com_variable_set& env )         { _environment = new Com_variable_set( env ); }
   //void                    set_environment_string          ( const string& env )                   { _environment_string = env;  _has_environment = true; }
+    void                    set_java_options                (const string& o)                       { _java_options = o; }
+    void                    set_java_classpath              (const string& o)                       { _java_classpath = o; }
     void                    set_run_in_thread               ( bool b )                              { _run_in_thread = b; }
     void                    set_log_stdout_and_stderr       ( bool b )                              { _log_stdout_and_stderr = b; }
     void                    set_login                       (Login* o)                              { _login = o; }

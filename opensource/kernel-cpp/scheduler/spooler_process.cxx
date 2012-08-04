@@ -431,9 +431,8 @@ void Process::start_local_process()
     if( !_spooler->_factory_ini.empty() )
     parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
 
-    parameters.push_back(object_server::Parameter("param", "-java-options="+ spooler()->java_subsystem()->java_vm()->options()));
-    parameters.push_back(object_server::Parameter("param", "-java-classpath="+ spooler()->settings()->_job_java_class_path + Z_PATH_SEPARATOR +
-            _spooler->java_subsystem()->java_vm()->class_path()));
+    parameters.push_back(object_server::Parameter("param", "-java-options="+ _java_options));
+    parameters.push_back(object_server::Parameter("param", "-java-classpath="+ _java_classpath + Z_PATH_SEPARATOR + spooler()->settings()->_job_java_class_path));
     parameters.push_back( object_server::Parameter( "param", "-O" ) );
 
     if( !_job_name.empty() )
@@ -609,6 +608,8 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
             xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
             if( _module_instance->_module->kind() == Module::kind_process )  xml_writer.set_attribute( "kind", "process" );
+            xml_writer.set_attribute_optional("java_options", _java_options);
+            xml_writer.set_attribute_optional("java_classpath", _java_classpath);
             xml_writer.end_element( "remote_scheduler.start_remote_task" );
             xml_writer.close();
             _xml_client_connection->send( xml_writer.to_string() );
