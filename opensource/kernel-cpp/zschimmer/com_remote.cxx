@@ -1255,8 +1255,6 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         else
         if( param->first == "java-classpath" )  {}     // Schon von spooler_main() ausgewertet
         else
-        if( param->first == "program" )  object_server_filename = param->second;
-        else
         if( param->first == "param"   )  args_vector.push_back( param->second );
         else
             throw_xc( Z_FUNCTION, param->first );
