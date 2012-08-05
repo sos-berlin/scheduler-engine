@@ -22,7 +22,7 @@ public class TypedPath extends AbsolutePath {
 //        return 31*typ.hashCode() + super.hashCode();
 //    }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         return o instanceof TypedPath && eq((TypedPath)o);
     }
 
@@ -30,7 +30,7 @@ public class TypedPath extends AbsolutePath {
         return typ == o.typ && super.equals(o);
     }
 
-    public String toString() {
+    @Override public String toString() {
         return typ+" "+super.toString();
     }
 

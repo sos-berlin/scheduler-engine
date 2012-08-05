@@ -113,7 +113,7 @@ public final class Scheduler implements Sister,
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         this.cppProxy = cppProxy;
-        configuration = new SchedulerConfiguration(this, cppProxy);
+        configuration = new SchedulerConfiguration(cppProxy);
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
         cppProxy.setSister(this);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
@@ -303,10 +303,6 @@ public final class Scheduler implements Sister,
     /** @param text Sollte auf \n enden */
     public void writeToSchedulerLog(LogCategory category, String text) {
         cppProxy.write_to_scheduler_log(category.asString(), text);
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     public VariableSet getVariables() {

@@ -43,7 +43,7 @@ public final class JS644StoppedJobTest extends SchedulerTest {
         }
     }
 
-    private void modifyFile(File f) {
+    private static void modifyFile(File f) {
         try {
             assert f.exists() : "Datei fehlt: " + f;
             Files.append(" ", f, Charsets.UTF_8);

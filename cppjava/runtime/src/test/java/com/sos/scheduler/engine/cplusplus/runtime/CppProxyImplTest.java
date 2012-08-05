@@ -3,13 +3,10 @@ package com.sos.scheduler.engine.cplusplus.runtime;
 import org.junit.*;
 import static org.junit.Assert.*;
 
+public class CppProxyImplTest {
+    private final CppProxyWithSister<MySister> p = new CppProxyImpl<MySister>();
+    private final MySister sister = new MySister();
 
-public class CppProxyImplTest
-{
-    CppProxyWithSister<MySister> p = new CppProxyImpl<MySister>();
-    MySister sister = new MySister();
-
-    
     @Test public void testCppReferenceIsValid() {
         assertFalse(p.cppReferenceIsValid());
     }
@@ -26,7 +23,7 @@ public class CppProxyImplTest
 
     @Test public void testGetSister2() {
         p.setSister(sister);
-        assert(sister == p.getSister());
+        assert sister == p.getSister();
     }
 
     static class MySister implements Sister {

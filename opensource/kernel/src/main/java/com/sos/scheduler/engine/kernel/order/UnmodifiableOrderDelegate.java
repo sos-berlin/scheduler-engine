@@ -14,39 +14,39 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
         this.order = order;
     }
 
-    @Override public OrderKey getKey() {
+    @Override public final OrderKey getKey() {
         return order.getKey();
     }
 
-    @Override public OrderId getId() {
+    @Override public final OrderId getId() {
         return order.getId();
     }
 
-    @Override public OrderState getState() {
+    @Override public final OrderState getState() {
         return order.getState();
     }
 
-    @Override public OrderState getEndState() {
+    @Override public final OrderState getEndState() {
         return order.getEndState();
     }
 
-    @Override public String getTitle() {
+    @Override public final String getTitle() {
         return order.getTitle();
     }
 
-    @Override public UnmodifiableJobchain getJobChain() {
+    @Override public final UnmodifiableJobchain getJobChain() {
         return order.getJobChain();
     }
 
-    @Override public UnmodifiableJobchain getJobChainOrNull() {
+    @Override public final UnmodifiableJobchain getJobChainOrNull() {
         return order.getJobChainOrNull();  //TODO Delegate erzeugen
     }
 
-    @Override public UnmodifiableVariableSet getParameters() {
+    @Override public final UnmodifiableVariableSet getParameters() {
         return order.getParameters();   // TODO Delegate erzeugen
     }
 
-    @Override public PrefixLog getLog() {
+    @Override public final PrefixLog getLog() {
         return order.getLog();
     }
 

@@ -2,11 +2,10 @@ package com.sos.scheduler.engine.kernel.command;
 
 import org.w3c.dom.Element;
 
-
 class ACommandXmlParser extends SingleCommandXmlParser {
     static final ACommandXmlParser singleton = new ACommandXmlParser();
 
-    public ACommandXmlParser() {
+    ACommandXmlParser() {
         super("a");
     }
 

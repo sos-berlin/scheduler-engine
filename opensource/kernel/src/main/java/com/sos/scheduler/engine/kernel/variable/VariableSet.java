@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
     }
 
     @SuppressWarnings("unchecked")
-    public ImmutableList<String> getNames() {
+    @Override public ImmutableList<String> getNames() {
         return ImmutableList.copyOf(cppProxy.java_names());
     }
 

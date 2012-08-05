@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.main;
 
+import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
@@ -42,7 +43,7 @@ public class SchedulerThreadController implements SchedulerController {
     @Override public final void startScheduler(String... args) {
         checkIsNotStarted();
         controllerBridge.start();
-        thread.startThread(args);
+        thread.startThread(ImmutableList.copyOf(args));
         isStarted = true;
     }
 

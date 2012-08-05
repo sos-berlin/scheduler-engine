@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.util;
 public final class Classes {
     private Classes() {}
 
-    public String directoryOfClass(Class<?> c) {
+    public static String directoryOfClass(Class<?> c) {
         return directoryOfPackage(c.getPackage());
     }
 

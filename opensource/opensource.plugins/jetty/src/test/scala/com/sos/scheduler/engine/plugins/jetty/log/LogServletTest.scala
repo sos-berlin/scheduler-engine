@@ -57,7 +57,7 @@ object LogServletTest {
   private def logReader(reader: Reader) {
     val r = new BufferedReader(reader)
     while (true) {
-      val line = r.readLine();
+      val line = r.readLine()
       if (line == null) return
       logger.info(line)
     }

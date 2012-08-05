@@ -15,15 +15,15 @@ public class PluginConfiguration {
         this.className = className;
     }
 
-    public String getClassName() {
+    public final String getClassName() {
         return className;
     }
 
-    public ActivationMode getActivationMode() {
+    public final ActivationMode getActivationMode() {
         return activationMode;
     }
 
-    @Nullable public Element getConfigElementOrNull() {
+    @Nullable public final Element getConfigElementOrNull() {
         return configElementOrNull;
     }
 }

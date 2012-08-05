@@ -30,7 +30,7 @@ public class OrderStepStartedEvent extends OrderEvent implements ModifiableSourc
         this.state = state;
     }
 
-    public OrderState getState() {
+    public final OrderState getState() {
         return state;
     }
 }

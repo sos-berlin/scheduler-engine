@@ -1,18 +1,14 @@
 package com.sos.scheduler.engine.test.binary;
 
-import java.io.File;
-
-import com.sos.scheduler.engine.kernel.util.CpuArchitecture;
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Preconditions;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
+import org.apache.log4j.Logger;
+
+import java.io.File;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.sos.scheduler.engine.kernel.util.CpuArchitecture.x86;
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.*;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.cpuArchitecture;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {

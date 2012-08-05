@@ -16,14 +16,14 @@ public class SiblingElementIterator extends AbstractIterator<Element> {
         this.next = sameOrNextElement(firstSibling);
     }
 
-    @Override protected Element computeNext() {
+    @Override protected final Element computeNext() {
         Element result = next;
         if (next != null)
             next = sameOrNextElement(next.getNextSibling());
         return result == null? endOfData() : result;
     }
 
-    @Nullable private Element sameOrNextElement(@Nullable Node node) {
+    @Nullable private static Element sameOrNextElement(@Nullable Node node) {
         Node n = node;
         while (n != null && n.getNodeType() != ELEMENT_NODE)
             n = n.getNextSibling();

@@ -24,7 +24,7 @@ object PluginLoginService {
 
   def apply(element: Element) = new PluginLoginService(logins(element))
 
-  private val spaceSplitter = Splitter.on(Pattern.compile(" +")).omitEmptyStrings();
+  private val spaceSplitter = Splitter.on(Pattern.compile(" +")).omitEmptyStrings
 
   private def logins(element: Element) =
     new NamedChildElements("logins", element) flatMap {

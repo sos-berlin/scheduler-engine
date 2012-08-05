@@ -5,12 +5,12 @@ import sos.spooler.Job_impl;
 import static java.lang.Thread.sleep;
 
 public class TestJob extends Job_impl {
-    @Override public boolean spooler_open() throws InterruptedException {
+    @Override public final boolean spooler_open() throws InterruptedException {
         sleep(5000);
         return true;
     }
 
-    @Override public boolean spooler_process() throws InterruptedException {
+    @Override public final boolean spooler_process() throws InterruptedException {
         sleep(1000);
         return true;
     }

@@ -30,7 +30,11 @@ public final class APIModuleInstance extends ScriptInstance {
 		super(getScriptLanguage(scriptLanguage),sourcecode);
 	}
 
-	/**
+    @Override public Object call() {
+        return super.call();    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    /**
 	 * The script language to use
      * @return String
 	 */

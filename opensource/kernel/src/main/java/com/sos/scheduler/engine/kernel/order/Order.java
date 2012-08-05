@@ -99,7 +99,7 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
         return cppProxy.log().getSister();
     }
 
-    public UnmodifiableOrder unmodifiableDelegate() {
+    @Override public UnmodifiableOrder unmodifiableDelegate() {
         return unmodifiableDelegate.get();
     }
 

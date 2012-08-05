@@ -15,11 +15,9 @@ import static com.sos.scheduler.engine.kernel.settings.SettingName.htmlDir;
 public final class SchedulerConfiguration {
     private static final File workingDirectory = new File(".");
 
-    private final Scheduler scheduler;
     private final SpoolerC spoolerC;
 
-    public SchedulerConfiguration(Scheduler scheduler, SpoolerC spoolerC) {
-        this.scheduler = scheduler;
+    public SchedulerConfiguration(SpoolerC spoolerC) {
         this.spoolerC = spoolerC;
     }
 

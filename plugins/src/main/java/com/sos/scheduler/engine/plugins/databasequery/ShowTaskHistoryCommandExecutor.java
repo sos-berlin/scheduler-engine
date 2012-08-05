@@ -11,11 +11,11 @@ import java.util.List;
 
 import static com.sos.scheduler.engine.data.database.SchedulerDatabases.idForDatabase;
 
-public class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowTaskHistoryCommand, TaskHistoryEntriesResult> {
+class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowTaskHistoryCommand, TaskHistoryEntriesResult> {
     private final EntityManager em;
     private final TypedQuery<TaskHistoryEntity> query;
 
-    public ShowTaskHistoryCommandExecutor(EntityManager em, SchedulerId schedulerId, ClusterMemberId clusterMemberId) {
+    ShowTaskHistoryCommandExecutor(EntityManager em, SchedulerId schedulerId, ClusterMemberId clusterMemberId) {
         super(ShowTaskHistoryCommand.class);
         this.em = em;
         this.query = createQuery(schedulerId, clusterMemberId);

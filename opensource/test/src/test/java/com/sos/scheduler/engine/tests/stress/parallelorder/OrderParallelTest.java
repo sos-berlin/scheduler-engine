@@ -43,7 +43,7 @@ public final class OrderParallelTest extends SchedulerTest {
     }
 
     @EventHandler
-    public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
+    public void handleOrderEnd(OrderFinishedEvent e) {
         finishedOrdersCount++;
         if (finishedOrdersCount > 1)
             logger.info("order " + (finishedOrdersCount-1) + " of " + testLimit + " finished." );

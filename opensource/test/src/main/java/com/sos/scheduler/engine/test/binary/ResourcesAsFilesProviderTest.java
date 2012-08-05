@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
-public class ResourcesAsFilesProviderTest {
+public final class ResourcesAsFilesProviderTest {
     private static final String[] expectedFilenames = {"scheduler.xml", "factory.ini", "sos.ini"};
     private static final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
 

@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 
-public class VariablesTest extends SchedulerTest {
+public final class VariablesTest extends SchedulerTest {
     @Test public void test() {
         controller().startScheduler();
         VariableSet variables = scheduler().getVariables();

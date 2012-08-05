@@ -31,7 +31,7 @@ public final class OperationExecutor implements OperationQueue {
                 executeRunnable(o);
             }
             isEmpty = true;
-            assert(operations.isEmpty());
+            assert operations.isEmpty();
         }
     }
 

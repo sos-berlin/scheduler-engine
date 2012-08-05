@@ -36,7 +36,7 @@ public class SchedulerEventBus implements EventBus {
         publish(new EventSourceEvent(e, source));
     }
 
-    public final void publish(Event e) {
+    @Override public final void publish(Event e) {
         hotEventBus.publish(e);
         coldEventBus.publish(e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e);
     }

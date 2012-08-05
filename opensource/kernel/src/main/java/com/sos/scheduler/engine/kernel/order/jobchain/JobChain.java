@@ -39,11 +39,11 @@ public final class JobChain extends FileBased implements UnmodifiableJobchain {
         cppProxy.set_force_file_reread();
     }
 
-	public ImmutableList<Node> getNodes() { 
+	@Override public ImmutableList<Node> getNodes() {
         return ImmutableList.copyOf(cppProxy.java_nodes());
     }
 
-	public Order order(OrderId id) {
+	@Override public Order order(OrderId id) {
         return cppProxy.order(id.asString()).getSister();
     }
 

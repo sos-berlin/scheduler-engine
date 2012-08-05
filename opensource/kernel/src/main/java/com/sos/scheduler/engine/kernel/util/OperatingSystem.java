@@ -1,14 +1,12 @@
 package com.sos.scheduler.engine.kernel.util;
 
 import com.google.common.base.Joiner;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
-
-import static com.google.common.base.Strings.*;
-import static com.google.common.collect.ObjectArrays.*;
-import static com.sos.scheduler.engine.kernel.util.CpuArchitecture.x64;
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.common.collect.ObjectArrays.concat;
 
 public abstract class OperatingSystem {
     public static final String name = System.getProperty("os.name");

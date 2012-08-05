@@ -13,13 +13,13 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 
-public final class FilesModifier {
+final class FilesModifier {
     private static final Charset encoding = Charsets.UTF_8;
     private static final Logger logger = Logger.getLogger(FilesModifier.class);
 
     private final ImmutableList<File> files;
 
-    public FilesModifier(ImmutableList<File> files) {
+    FilesModifier(ImmutableList<File> files) {
         this.files = files;
     }
 
@@ -40,7 +40,7 @@ public final class FilesModifier {
         } catch (IOException x) { throw new RuntimeException(x); }
     }
 
-    public int fileCount() {
+    int fileCount() {
         return files.size();
     }
 }

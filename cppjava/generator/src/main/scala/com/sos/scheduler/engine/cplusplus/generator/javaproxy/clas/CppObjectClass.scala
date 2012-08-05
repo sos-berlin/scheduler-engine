@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.cplusplus.generator.javaproxy.procedure.CppConst
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature
+import scala.annotation.tailrec
 
 /** Liefert die Klasse, die das Objekt beschreibt. Das ist also die eigentliche Proxy-Klasse */
 class CppObjectClass(cppClass: CppClass) extends CppCode {
@@ -13,7 +14,7 @@ class CppObjectClass(cppClass: CppClass) extends CppCode {
   private val classClassName = cppClass.cppClassClass.name
 
   private val javaSuperclass: Option[Class[_]] = {
-    def knownSuperclass(clas: Class[_]): Option[Class[_]] = clas.getSuperclass match {
+    @tailrec def knownSuperclass(clas: Class[_]): Option[Class[_]] = clas.getSuperclass match {
       case null => ClassOps.superclass(clas)
       case superclass => if (cppClass.knownClasses contains superclass) Some(superclass)  else knownSuperclass(superclass)
     }
@@ -157,7 +158,7 @@ class CppObjectClass(cppClass: CppClass) extends CppCode {
       "        void initialize() const;\n"+
       "    };\n"+
       "\n"+
-      "    Lazy_class _class;\n";
+      "    Lazy_class _class;\n"
     def sourceCode =
       "void " + name + "::Lazy_class::initialize() const {\n" +
       "    _value = " + classClassName + "::class_factory.clas();\n" +

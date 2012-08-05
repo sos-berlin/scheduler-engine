@@ -17,7 +17,7 @@ class XsltTransformer(xsltUrl: URL) {
   def transformToString(e: xml.Elem) = {
     val w = new StringWriter
     val xml = e.toString()
-    transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(w));
+    transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(w))
     w.toString
   }
 
@@ -29,6 +29,6 @@ class XsltTransformer(xsltUrl: URL) {
 
   def transform(e: xml.Elem, out: OutputStream) {
     val xml = e.toString()
-    transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(out));
+    transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(out))
   }
 }

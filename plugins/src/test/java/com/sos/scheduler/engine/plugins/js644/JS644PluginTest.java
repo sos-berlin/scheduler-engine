@@ -20,7 +20,7 @@ import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobActiva
 import static com.sos.scheduler.engine.plugins.js644.JS644PluginTest.M.jobchainActivated;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class JS644PluginTest extends SchedulerTest {
+public final class JS644PluginTest extends SchedulerTest {
     //private static final Logger logger = Logger.getLogger(JS644PluginTest.class);
     private static final JobPath jobPath = JobPath.of("/a");
     private static final JobChainPath jobChainPath = JobChainPath.of("/A");

@@ -10,7 +10,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 import static org.junit.Assert.assertTrue;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-782'>JS-782</a> */
-public class JS782Test extends SchedulerTest {
+public final class JS782Test extends SchedulerTest {
     private static final OrderId orderId = new OrderId("testOrder");
 
     @Test public void suspendedOrderMovedToEndStateShouldBeOnBlacklist() throws InterruptedException {

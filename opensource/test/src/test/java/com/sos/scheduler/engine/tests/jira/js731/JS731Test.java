@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-731'>JS-731</a> */
-public class JS731Test extends SchedulerTest {
+public final class JS731Test extends SchedulerTest {
     @Test public void testOrderParametersNamesAndGet() throws InterruptedException {
         controller().startScheduler();
         String params = "<params><param name='a' value='ä'/><param name='B' value='B'/></params>";

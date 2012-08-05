@@ -4,9 +4,7 @@ import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-
-
-public class SimpleMessageTest {
+public final class SimpleMessageTest {
     @Test public void test0() {
         SimpleMessage m = new SimpleMessage("CODE");
         assertThat(m.getCode(), equalTo("CODE"));

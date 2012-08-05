@@ -4,11 +4,10 @@ import com.sos.scheduler.engine.kernel.util.Time;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-
-public class RendezvousTest {
-    private Rendezvous<Arg,Result> rendezvous = new Rendezvous<Arg,Result>();
-    private MyThread thread = new MyThread();
-    private Time timeout = Time.of(3);
+public final class RendezvousTest {
+    private final Rendezvous<Arg,Result> rendezvous = new Rendezvous<Arg,Result>();
+    private final MyThread thread = new MyThread();
+    private final Time timeout = Time.of(3);
 
     @Before public void before() {
         thread.start();
@@ -40,7 +39,7 @@ public class RendezvousTest {
     }
 
 
-    private class Arg { 
+    private static class Arg {
         private final int value;
         private Arg(int o) { value = o; }
     }
@@ -51,7 +50,7 @@ public class RendezvousTest {
     }
 
     
-    private class Result {
+    private static class Result {
         private final int value;
         private Result(int o) { value = o; }
     }
@@ -93,5 +92,5 @@ public class RendezvousTest {
         }
     }
         
-    private class MyException extends RuntimeException {}
+    private static class MyException extends RuntimeException {}
 }

@@ -10,7 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
-public class XmlUtilsTest {
+public final class XmlUtilsTest {
     @Test public void testLoadXml_String() {
         String xml = "<a>A</a>";
         Document result = XmlUtils.loadXml(xml);
@@ -34,7 +34,7 @@ public class XmlUtilsTest {
         testBooleanXmlAttribute(trueXmls, false);
     }
 
-    private void testBooleanXmlAttribute(String[] xmls, boolean expected) {
+    private static void testBooleanXmlAttribute(String[] xmls, boolean expected) {
         for (String xml: xmls) {
             Element e = XmlUtils.loadXml(xml).getDocumentElement();
             assertThat(XmlUtils.booleanXmlAttribute(e, "b", false), equalTo(expected));
@@ -48,7 +48,7 @@ public class XmlUtilsTest {
         testBooleanXmlAttribute_default(xmls, true);
     }
 
-    private void testBooleanXmlAttribute_default(String[] xmls, boolean deflt) {
+    private static void testBooleanXmlAttribute_default(String[] xmls, boolean deflt) {
         for (String xml: xmls) {
             Element e = XmlUtils.loadXml(xml).getDocumentElement();
             assertThat(XmlUtils.booleanXmlAttribute(e, "b", deflt), equalTo(deflt));
@@ -82,7 +82,7 @@ public class XmlUtilsTest {
         testChildElements("<root>xx<a/>x<b><bb/></b>x<c/>xx</root>", "a", "b", "c");
     }
 
-    private void testChildElements(String xml, String... expected) {
+    private static void testChildElements(String xml, String... expected) {
         Element e = XmlUtils.loadXml(xml).getDocumentElement();
         List<Element> list = XmlUtils.childElements(e);
         assertThat(list, hasSize(expected.length));

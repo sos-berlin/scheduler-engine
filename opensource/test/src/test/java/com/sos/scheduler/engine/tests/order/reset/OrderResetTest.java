@@ -19,7 +19,7 @@ public class OrderResetTest extends SchedulerTest {
 	private final String JOB_CHAIN = "chain";
 
 	@SuppressWarnings("unused")
-	private static Logger logger = Logger.getLogger(OrderResetTest.class);
+	private static final Logger logger = Logger.getLogger(OrderResetTest.class);
     
     private int touchedCount = 0;
 

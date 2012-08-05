@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.order.OrderQueue;
 public class OrderQueueNode extends Node {
     private final Order_queue_nodeCI cppProxy;
 
-    protected OrderQueueNode(Order_queue_nodeCI nodeC) {
+    OrderQueueNode(Order_queue_nodeCI nodeC) {
         super(nodeC);
         this.cppProxy = nodeC;
     }

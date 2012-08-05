@@ -13,7 +13,7 @@ class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServl
 
   private var file: File = null
   private var in: FileInputStream = null
-  private val woken = new AtomicBoolean();
+  private val woken = new AtomicBoolean
   private var started = false
   private var ended = false
 

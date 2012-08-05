@@ -11,7 +11,7 @@ public abstract class OrderEvent extends AbstractEvent {
         this.key = key;
     }
 
-    public OrderKey getKey() {
+    public final OrderKey getKey() {
         return key;
     }
 

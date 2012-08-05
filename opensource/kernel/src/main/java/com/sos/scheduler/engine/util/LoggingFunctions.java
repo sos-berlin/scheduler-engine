@@ -2,6 +2,9 @@ package com.sos.scheduler.engine.util;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
 public final class LoggingFunctions {
     public static void enableJavaUtilLoggingOverSLF4J() {
         disableJavaUtilLogging();
@@ -9,7 +12,7 @@ public final class LoggingFunctions {
     }
 
     public static void disableJavaUtilLogging() {
-        java.util.logging.Logger rootLogger = java.util.logging.LogManager.getLogManager().getLogger("");
+        Logger rootLogger = LogManager.getLogManager().getLogger("");
         for (java.util.logging.Handler h: rootLogger.getHandlers())
             rootLogger.removeHandler(h);
     }

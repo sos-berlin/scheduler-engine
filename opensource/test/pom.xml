@@ -119,6 +119,7 @@
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${osArch}</classifier>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -126,6 +127,7 @@
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${osArch}-test</classifier>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

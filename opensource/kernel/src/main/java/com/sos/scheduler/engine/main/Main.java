@@ -13,7 +13,7 @@ class Main {
         return schedulerController.exitCode();
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws ExitCodeException {
         int exitCode = new Main().apply(args);
         if (exitCode != 0)  throw new ExitCodeException(exitCode);
     }

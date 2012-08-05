@@ -48,6 +48,6 @@ class CppClassClass(cppClass: CppClass)  extends CppCode {
   private val staticVariables = new CppCode {
     def headerCode = "    static " + classFactoryTypename + " class_factory;\n"
     def sourceCode = classFactoryTypename +" "+ name +"::class_factory (\""+ cppClass.javaClass.getName +"\");\n"
-    def classFactoryTypename = "const " + JavaBridge.namespace + "::class_factory< "+ name +" >";
+    def classFactoryTypename = "const " + JavaBridge.namespace + "::class_factory< "+ name +" >"
   }
 }

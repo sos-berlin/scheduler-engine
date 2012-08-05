@@ -1,14 +1,15 @@
 package com.sos.scheduler.engine.kernel.util;
 
-import java.util.ArrayList;
+import org.junit.Test;
+
 import java.util.Date;
-import org.junit.*;
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.closeTo;
 
-
-public class LoadMeterTest {
-    private final double epsilon = 0.0001;
+public final class LoadMeterTest {
+    private static final double epsilon = 0.0001;
     
     @Test public void testMeter() {
         int beatDuration = 1000;
@@ -26,7 +27,7 @@ public class LoadMeterTest {
         float[] expected = { 0.1f, 1, 1, 0, 0.25f, 0.5f };
         int n = expected.length;
         
-        ArrayList<Float> h = m.getHistory();
+        List<Float> h = m.getHistory();
         for (int i = 0; i < n; i++) assertThat((double)h.get(n - 1 - i), closeTo(expected[i], epsilon));
 
         float sum = 0;

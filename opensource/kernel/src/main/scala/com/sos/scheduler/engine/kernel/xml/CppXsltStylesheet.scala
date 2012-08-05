@@ -13,7 +13,7 @@ class CppXsltStylesheet @ForCpp()(document: Document) {
   @ForCpp def apply(document: Document, parameters: java.util.HashMap[String,String]): Document = {
     parameters foreach { case (name, value) => transformer.setParameter(name, value) }
     val result = new DOMResult
-    transformer.transform(new DOMSource(document), result);
+    transformer.transform(new DOMSource(document), result)
     result.getNode.asInstanceOf[Document]
   }
 }

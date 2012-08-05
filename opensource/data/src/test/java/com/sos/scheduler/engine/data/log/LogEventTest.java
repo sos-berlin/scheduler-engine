@@ -7,7 +7,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
 
-public class LogEventTest {
+public final class LogEventTest {
     @Test public void test() {
         assertThat(messageCodeFromLineOrNull(""), nullValue());
         assertThat(messageCodeFromLineOrNull(" ABC-123 x"), nullValue());

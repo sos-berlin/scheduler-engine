@@ -24,7 +24,7 @@ public final class Task implements UnmodifiableTask, Sister, EventSource {
         }
     }
 
-    public Job getJob() {
+    @Override public Job getJob() {
         return cppProxy.job().getSister();
     }
 

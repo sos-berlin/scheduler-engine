@@ -47,7 +47,7 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
       val myFinishedEvent = eventPipe.next[MyFinishedEvent]
       orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
       job.endTasks()   // Job ist möglicherweise schon gestoppt
-      eventPipe.next[TaskClosedEvent].getId  should equal (new TaskId(index))
+      assert(eventPipe.next[TaskClosedEvent].getId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed")
       myFinishedEvent
     }
 

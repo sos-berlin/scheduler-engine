@@ -13,9 +13,9 @@ import org.codehaus.jackson.map.JsonDeserializer;
 
 import java.io.IOException;
 
-public class TaskIdDeserializer extends JsonDeserializer<TaskId> {
+class TaskIdDeserializer extends JsonDeserializer<TaskId> {
     @Override
-    public TaskId deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public final TaskId deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         return new TaskId( Integer.parseInt(jsonParser.getText()) );
     }
 }

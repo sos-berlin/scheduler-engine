@@ -25,7 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 /** JS-655  "JobScheduler does not start when a webservice entry is assigned to a job chain coming from hot folder" */
-public class JS655Test extends SchedulerTest {
+public final class JS655Test extends SchedulerTest {
     private static final JobChainPath initialJobChainPath = JobChainPath.of("/myJobChain");
     private static final JobChainPath rightJobChainPath = JobChainPath.of("/myLazyJobChain");
 
@@ -66,7 +66,7 @@ public class JS655Test extends SchedulerTest {
         return controller().environment().fileFromPath(p);
     }
 
-    private void checkWebServiceIsNotReady() throws Exception {
+    private void checkWebServiceIsNotReady() {
         ClientResponse response = webResource.post(ClientResponse.class, "Hej!");
         assertThat(response.getClientResponseStatus(), equalTo(INTERNAL_SERVER_ERROR));
     }

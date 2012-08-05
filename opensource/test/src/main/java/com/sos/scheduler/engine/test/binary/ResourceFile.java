@@ -2,20 +2,20 @@ package com.sos.scheduler.engine.test.binary;
 
 import java.io.File;
 
-public final class ResourceFile {
+final class ResourceFile {
     private final File file;
     private final boolean isCopied;
 
-    public ResourceFile(File file, boolean copied) {
+    ResourceFile(File file, boolean copied) {
         this.file = file;
         isCopied = copied;
     }
 
-    public File getFile() {
+    File getFile() {
         return file;
     }
 
-    public boolean isCopied() {
+    boolean isCopied() {
         return isCopied;
     }
 }

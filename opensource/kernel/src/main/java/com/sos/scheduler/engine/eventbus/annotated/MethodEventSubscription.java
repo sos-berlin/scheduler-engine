@@ -16,7 +16,7 @@ abstract class MethodEventSubscription implements EventSubscription {
     private final EventHandlerAnnotated annotatedObject;
     private final Method method;
 
-    protected MethodEventSubscription(EventHandlerAnnotated o, Method method) {
+    MethodEventSubscription(EventHandlerAnnotated o, Method method) {
         this.eventClass = checkedParameterClass(method, 0, Event.class);
         this.annotatedObject = o;
         checkReturnType(method);
@@ -25,7 +25,7 @@ abstract class MethodEventSubscription implements EventSubscription {
     }
 
     @SuppressWarnings("unchecked")
-    protected static <T, U extends T> Class<U> checkedParameterClass(Method m, int i, Class<T> c) {
+    static <T, U extends T> Class<U> checkedParameterClass(Method m, int i, Class<T> c) {
         Class<?>[] t = m.getParameterTypes();
         if (t.length < i)
             throw new IllegalArgumentException("Method "+m+" must have "+i+" parameters");
@@ -35,7 +35,7 @@ abstract class MethodEventSubscription implements EventSubscription {
         return (Class<U>)p;
     }
 
-    protected static void checkMethodParameterCount(Method m, int min, int max) {
+    static void checkMethodParameterCount(Method m, int min, int max) {
         int n = m.getParameterTypes().length;
         if (!(n >= min && n <= max))
             throw new IllegalArgumentException("Method "+m+" must have "+(min == max? min : min+" through "+max)+" arguments");
@@ -51,7 +51,7 @@ abstract class MethodEventSubscription implements EventSubscription {
         return c == Void.class || c.getName().equals("void");
     }
 
-    @Override public void handleEvent(Event event) {
+    @Override public final void handleEvent(Event event) {
         try {
             invokeHandler(event);
         } catch (IllegalArgumentException x) { throw new Error("Method "+ getMethod() +" rejected argument '"+event+"'", x);
@@ -63,7 +63,7 @@ abstract class MethodEventSubscription implements EventSubscription {
 
     protected abstract void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException;
 
-    @Override public Class<? extends Event> getEventClass() {
+    @Override public final Class<? extends Event> getEventClass() {
         return eventClass;
     }
 

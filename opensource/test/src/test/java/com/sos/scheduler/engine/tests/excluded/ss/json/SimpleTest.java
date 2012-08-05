@@ -7,6 +7,7 @@
 package com.sos.scheduler.engine.tests.excluded.ss.json;
 
 import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
@@ -27,7 +28,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 public class SimpleTest extends SchedulerTest {
-
+    private static final JobPath jobPath = JobPath.of("/job1");
 	private static final Logger logger = Logger.getLogger(SimpleTest.class);
 	
 	private final CommandBuilder util = new CommandBuilder();
@@ -66,13 +67,13 @@ public class SimpleTest extends SchedulerTest {
 
         // deserialize the event from JSON into the TaskStartEvent object
         TaskStartedEvent ev = mapper.readValue(outputStream.toString(), TaskStartedEvent.class);
-        assertEquals("TaskStartedEvent 1 (/job1)",ev.toString());
+        assertEquals(jobPath, ev.getJobPath());
 
         // deserialize the event from JSON into a JsonNode
         JsonNode n = mapper.readTree(outputStream.toString());
         assertEquals(TaskStartedEvent.class.getSimpleName(),n.get("TYPE").asText());
         assertEquals("1",n.get("id").asText());
-        assertEquals("/job1",n.get("jobPath").asText());
+        assertEquals(jobPath.asString(), n.get("jobPath").asText());
 	}
     
 	@HotEventHandler
@@ -106,12 +107,12 @@ public class SimpleTest extends SchedulerTest {
 
         // serialize the event into JSON
         mapper.writeValue(outputStream, e);
-        String expected = "{\"TYPE\":\"OrderFinishedEvent\",\"key\":{\"jobChainPath\":{\"typ\":\"jobChain\",\"path\":\"/jobchain1\"},\"id\":\"jobchain1\"}}";
+        String expected = "{\"TYPE\":\"OrderFinishedEvent\",\"key\":{\"jobChainPath\":\"/jobchain1\",\"id\":\"jobchain1\"}}";
         assertEquals(expected,outputStream.toString());
 
         // deserialize the event from JSON into the TaskStartEvent object
         OrderFinishedEvent ev = mapper.readValue(outputStream.toString(), OrderFinishedEvent.class);
-        assertEquals("OrderFinishedEvent jobChain /jobchain1:jobchain1",ev.toString());
+        assertEquals("OrderFinishedEvent JobChain /jobchain1:jobchain1",ev.toString());
 
         // deserialize the event from JSON into a JsonNode
         //TODO keine anderen Felder als TYPE werden geliefert. Warum?
@@ -120,7 +121,7 @@ public class SimpleTest extends SchedulerTest {
 
 		if (order.getId().asString().equals("jobchain1"))
 			controller().terminateScheduler();
-		
+
 	}
 
 }

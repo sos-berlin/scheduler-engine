@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertThat;
 
-public class OrderSubsystemOfJobTest extends SchedulerTest {
+public final class OrderSubsystemOfJobTest extends SchedulerTest {
     @Test public void test() throws Exception {
         controller().startScheduler();
         doTest();

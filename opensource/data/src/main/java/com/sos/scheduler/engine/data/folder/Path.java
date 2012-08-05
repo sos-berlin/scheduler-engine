@@ -22,7 +22,7 @@ public class Path extends StringValue {
         return asString().startsWith("/");
     }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         // Path und AbsolutePath sind vergleichbar
         return o instanceof Path && asString().equals(((Path)o).asString());
     }

@@ -21,22 +21,21 @@ public class Gate<T> {
         this.name = name;
     }
 
-
     public void put(T o) throws InterruptedException {
         queue.put(o);
     }
 
-    public boolean offer(T o)  {
+    public final boolean offer(T o)  {
         return queue.offer(o);
     }
 
-    public void expect(T o, Time t) throws InterruptedException {
+    public final void expect(T o, Time t) throws InterruptedException {
         T result = tryPoll(t);
         if (result == null)  throw new RuntimeException(this +": Expected message '"+o+"' has not arrived within "+t);
         if (!result.equals(o))  throw new RuntimeException(this +": Message '"+o+"' has been expected, but '"+result+"' arrived");
     }
 
-    public T poll(Time t) throws InterruptedException {
+    public final T poll(Time t) throws InterruptedException {
         T result = tryPoll(t);
         if (result == null)  throw new RuntimeException(this +": Expected message has not arrived within "+t);
         return result;
