@@ -18,10 +18,9 @@
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <scalatest.scala.version>2.9.1</scalatest.scala.version>
         <jersey.version>1.10</jersey.version>
-        <jetty.version>8.1.0.RC5</jetty.version>
+        <jetty.version>8.1.0.RC5</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <slf4j.version>1.6.4</slf4j.version>
         <jackson.version>1.9.4</jackson.version>
-        <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
         <cplusplusVersion>${project.version}</cplusplusVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
@@ -214,7 +213,7 @@
             <dependency>
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest_${scalatest.scala.version}</artifactId>
-                <version>1.7.2</version>
+                <version>1.8</version>
             </dependency>
 
             <dependency>
@@ -657,8 +656,8 @@
 -->
     
     <reporting>
-      <plugins>
-          <plugin>
+        <plugins>
+            <plugin>
               <groupId>org.scala-tools</groupId>
               <artifactId>maven-scala-plugin</artifactId>
               <version>${scala.plugin.version}</version>
