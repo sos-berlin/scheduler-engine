@@ -19,7 +19,6 @@ import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
-
   import SpoolerProcessAfterTest._
 
   private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
@@ -54,8 +53,8 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
     def checkAssertions(event: MyFinishedEvent) {
       assert(event.orderKey === setting.orderKey)
       assert(expected.orderStateExpectation matches event.state, "Expected OrderState="+expected.orderStateExpectation+", but was "+event.state)
-      assert(event.spoolerProcessAfterParameterOption === expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after()")
-      assert(job.state === expected.jobState, "Job.state is not as expected")
+      assert(event.spoolerProcessAfterParameterOption === expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after(): ")
+      assert(job.state === expected.jobState, "Job.state is not as expected: ")
       assert(messageCodes.toMap === expected.messageCodes.toMap)
     }
 
