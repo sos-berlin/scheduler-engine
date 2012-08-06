@@ -3,11 +3,12 @@ package com.sos.scheduler.engine.kernel.scripting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.sos.scheduler.engine.kernel.util.Lazy;
 
-import javax.script.*;
-
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Throwables.propagate;
@@ -27,12 +28,16 @@ module.call();
  */
 public class ScriptInstance {
     private static final String languagePrefix = "javax.script:";
-    private static final Logger logger = LoggerFactory.getLogger(ScriptInstance.class);
+    //Haben wir im Task-Prozess das Logging eingestellt? private static final Logger logger = LoggerFactory.getLogger(ScriptInstance.class);
 
     private final ScriptEngine engine;
+    private final Lazy<ImmutableMap<String, Object>> bindingsLazy;
+    private final String script;
 
-    public ScriptInstance(String language) {
+    public ScriptInstance(String language, Lazy<ImmutableMap<String, Object>> bindingsLazy, String script) {
         this.engine = newScriptEngine(normalizeLanguageName(language));
+        this.bindingsLazy = bindingsLazy;
+        this.script = script;
     }
 
     private static String normalizeLanguageName(String language) {
@@ -42,8 +47,8 @@ public class ScriptInstance {
     private static ScriptEngine newScriptEngine(String language) {
         ScriptEngine result = new ScriptEngineManager().getEngineByName(language);
         if (result == null) throw throwUnknownLanguage(language);
-        if (logger.isDebugEnabled())
-            logger.debug(result.getFactory().getEngineName() +" "+ result.getFactory().getEngineVersion());
+//        if (logger.isDebugEnabled())
+//            logger.debug(result.getFactory().getEngineName() +" "+ result.getFactory().getEngineVersion());
         return result;
     }
 
@@ -52,9 +57,9 @@ public class ScriptInstance {
         throw new SchedulerException("Script language "+ language +" is unknown. Available languages are "+availableLanguages);
     }
 
-    public void loadScript(ImmutableMap<String,Object> bindingMap, String script) {
+    public void loadScript() {
         try {
-            for (ImmutableMap.Entry<String,Object> e: bindingMap.entrySet())
+            for (ImmutableMap.Entry<String,Object> e: bindingsLazy.get().entrySet())
                 engine.put(e.getKey(), e.getValue());
             engine.eval(script);
         }
@@ -65,7 +70,7 @@ public class ScriptInstance {
         try {
             return callBooleanWithDefault(name, defaultResult);
         } catch (NoSuchMethodException e) {
-            logger.debug(e +", method="+ name);
+            //logger.debug(e +", method="+ name);
             return defaultResult;
         }
     }
@@ -78,25 +83,26 @@ public class ScriptInstance {
         if (result instanceof Boolean) return (Boolean)result;
         else
         if (result == null) return deflt;
-        else
+        //else
         //if (result instanceof Integer) return (Integer)result != 0;
-        throw new RuntimeException("The function has not returned a Boolean: "+ result);
+        else
+            throw new RuntimeException("The function has not returned a Boolean: "+ result);
     }
 
     public void callWhenExists(String name) {
         try {
             call(name);
         } catch (NoSuchMethodException e) {
-            logger.trace(e +", function="+name);
+            //logger.trace(e +", function="+name);
         }
     }
 
     public Object call(String functionName, Object... parameters) throws NoSuchMethodException {
 		try {
-			logger.trace("Call function " + functionName);
+			//logger.trace("Call function " + functionName);
 			Invocable invocableEngine = (Invocable)engine;
 			Object result = invocableEngine.invokeFunction(functionName, parameters);
-            logger.trace("Result is " + result);
+            //logger.trace("Result is " + result);
             return (Boolean)result;
         }
         catch (ScriptException e) { throw propagate(e); }
