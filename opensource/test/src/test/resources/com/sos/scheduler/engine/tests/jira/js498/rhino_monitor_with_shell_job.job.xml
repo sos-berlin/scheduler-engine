@@ -12,7 +12,7 @@ exit 5
             <![CDATA[
 function spooler_task_after() {
     spooler_task.set_exit_code(0);
-    logger.info("the task ended with exit_code=" + spooler_task.exit_code());
+    spooler_log.info("the task ended with exit_code=" + spooler_task.exit_code());
 }
             ]]>
         </script>

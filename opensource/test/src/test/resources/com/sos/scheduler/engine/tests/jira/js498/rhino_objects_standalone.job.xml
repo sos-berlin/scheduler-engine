@@ -8,7 +8,7 @@ importClass(com.google.common.io.Files);
 importClass(java.nio.charset.Charset);
 
 function spooler_process() {
-	logger.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	spooler_log.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
 	
 	spooler.variables().set_var("parm1","value1");
 	spooler.variables().set_var("parm2","value2");
@@ -25,7 +25,7 @@ function log_object( varname, objectvalue ) {
     filename = spooler.configuration_directory() + "/resultfile.txt";
     msg = varname + "=" + objectvalue;
     Files.append(msg + "\n", new File(filename), Charset.defaultCharset());
-	logger.info(msg);
+	spooler_log.info(msg);
 }
         ]]>
     </script>
@@ -37,7 +37,7 @@ importClass(com.google.common.io.Files);
 importClass(java.nio.charset.Charset);
 
 function spooler_process_after(spooler_process_result) {
-	logger.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	spooler_log.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
 	return spooler_process_result;
 }
 
@@ -45,7 +45,7 @@ function log_object( varname, objectvalue ) {
     filename = spooler.configuration_directory() + "/resultfile.txt";
     msg = varname + "=" + objectvalue;
     Files.append(msg + "\n", new File(filename), Charset.defaultCharset());
-	logger.info(varname + "=" + objectvalue);
+	spooler_log.info(varname + "=" + objectvalue);
 }
             ]]>
         </script>
