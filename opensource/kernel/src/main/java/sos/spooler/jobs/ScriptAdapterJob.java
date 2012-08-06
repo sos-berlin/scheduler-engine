@@ -4,24 +4,24 @@ import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.scripting.JobScriptInstanceAdapter;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 import sos.spooler.Job_impl;
+import sos.spooler.TaskBean;
 
 public class ScriptAdapterJob extends Job_impl {
     private final JobScriptInstanceAdapter adapter;
-    private final Lazy<ImmutableMap<String,Object>> bindingsLazy = new Lazy<ImmutableMap<String, Object>>() {
-        @Override protected ImmutableMap<String, Object> compute() {
-            return ImmutableMap.<String, Object>of(
-                    "spooler", spooler,
-                    "spooler_task", spooler_task,
-                    "spooler_job", spooler_job,
-                    "spooler_log", spooler_log);
-        }
-    };
 
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
     //TODO funktioniert das Scripting auch bei remote jobs?
 
     public ScriptAdapterJob(String language, String script) throws Exception {
-        adapter = new JobScriptInstanceAdapter(language, script, bindingsLazy);
+        adapter = new JobScriptInstanceAdapter(language, script, new Lazy<ImmutableMap<String, Object>>() {
+                    @Override protected ImmutableMap<String, Object> compute() {
+                        return ImmutableMap.of(
+                                "spooler", spooler,
+                                "spooler_task", new TaskBean(spooler_task),
+                                "spooler_job", spooler_job,
+                                "spooler_log", spooler_log);
+                    }
+                });
     }
 
     public final boolean spooler_init() throws Exception {
