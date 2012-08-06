@@ -27,13 +27,12 @@ module.call();
  */
 public class ScriptInstance {
     private static final String languagePrefix = "javax.script:";
-    private static final int bindingScope = ENGINE_SCOPE;
     private static final Logger logger = LoggerFactory.getLogger(ScriptInstance.class);
 
-    private final ScriptEngine scriptEngine;
+    private final ScriptEngine engine;
 
     public ScriptInstance(String language) {
-        this.scriptEngine = newScriptEngine(normalizeLanguageName(language));
+        this.engine = newScriptEngine(normalizeLanguageName(language));
     }
 
     private static String normalizeLanguageName(String language) {
@@ -43,6 +42,8 @@ public class ScriptInstance {
     private static ScriptEngine newScriptEngine(String language) {
         ScriptEngine result = new ScriptEngineManager().getEngineByName(language);
         if (result == null) throw throwUnknownLanguage(language);
+        if (logger.isDebugEnabled())
+            logger.debug(result.getFactory().getEngineName() +" "+ result.getFactory().getEngineVersion());
         return result;
     }
 
@@ -53,16 +54,11 @@ public class ScriptInstance {
 
     public void loadScript(ImmutableMap<String,Object> bindingMap, String script) {
         try {
-            Bindings b = bindings();
             for (ImmutableMap.Entry<String,Object> e: bindingMap.entrySet())
-                b.put(e.getKey(), e.getValue());
-            scriptEngine.eval(script);
+                engine.put(e.getKey(), e.getValue());
+            engine.eval(script);
         }
         catch (ScriptException e) { throw propagate(e); }
-    }
-
-    final Bindings bindings() {
-        return scriptEngine.getBindings(bindingScope);
     }
 
     public boolean callBooleanWhenExists(String name, boolean defaultResult) {
@@ -98,7 +94,7 @@ public class ScriptInstance {
     public Object call(String functionName, Object... parameters) throws NoSuchMethodException {
 		try {
 			logger.trace("Call function " + functionName);
-			Invocable invocableEngine = (Invocable)scriptEngine;
+			Invocable invocableEngine = (Invocable)engine;
 			Object result = invocableEngine.invokeFunction(functionName, parameters);
             logger.trace("Result is " + result);
             return (Boolean)result;
@@ -107,6 +103,6 @@ public class ScriptInstance {
     }
 
     public void close() {
-        scriptEngine.setBindings(scriptEngine.createBindings(), bindingScope);
+        engine.setBindings(engine.createBindings(), ENGINE_SCOPE);
     }
 }
