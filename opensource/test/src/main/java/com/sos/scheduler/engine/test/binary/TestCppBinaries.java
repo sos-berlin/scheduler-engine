@@ -23,6 +23,7 @@ public final class TestCppBinaries {
     private static final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
     private static final String kernelCppPackageDirectory = "com/sos/scheduler/engine/kernelcpp/bin-test";
     private static final String resourcePattern = "classpath*:" + kernelCppPackageDirectory + "/*";
+
     private TestCppBinaries() {}
 
     public static CppBinaries cppBinaries() {
@@ -36,10 +37,15 @@ public final class TestCppBinaries {
     private static CppBinaries newCppBinaries() {
         ImmutableList<Resource> resources = resources();
         if (resources.isEmpty()) {
+            // Das passiert, wenn ohne Maven gebaut wird. So unter der IntelliJ-IDE. Dann greifen wir eben direkt auf die binaries im Dateisystem zu.
+            if (System.getProperty("com.sos.scheduler.engine.test.underMaven") != null)
+                throw new RuntimeException("Missing kernel-cpp resources while running under Maven");  // Denn nur bei den Ressourcen sind wir über deren Stand sicher.
             return new KernelCppArtifactBinaries();
         } else {
+            // Wir packen die binaries aus den Ressourcen aus
             String d = System.getProperty(binariesTmpdirPropertyName);
-            return isNullOrEmpty(d)? newTemporaryCppBinaries(resources) : newCppBinaries(resources, new File(d));
+            return isNullOrEmpty(d)? newTemporaryCppBinaries(resources)
+                    : newExistingCppBinaries(resources, new File(d));   // Wir recyceln die vorher mal ausgepacken Ressourcen.
         }
     }
 
@@ -51,14 +57,14 @@ public final class TestCppBinaries {
 
     private static CppBinaries newTemporaryCppBinaries(ImmutableList<Resource> resources) {
         File dir = makeTemporaryDirectory();
-        ResourceCppBinaries result = newCppBinaries(resources, dir);
+        ResourceCppBinaries result = newExistingCppBinaries(resources, dir);
         if (result.someResourceHasBeenCopied()) warnUndeletable(dir);
         result.removeCopiesOnExit();
         dir.deleteOnExit();
         return result;
     }
 
-    private static ResourceCppBinaries newCppBinaries(ImmutableList<Resource> resources, File dir) {
+    private static ResourceCppBinaries newExistingCppBinaries(ImmutableList<Resource> resources, File dir) {
         ignore(dir.mkdir());
         Preconditions.checkArgument(dir.isDirectory(), "%s must exist and must be a directory", dir);
         return new ResourceCppBinaries(resources, dir);

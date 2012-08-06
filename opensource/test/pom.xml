@@ -119,7 +119,7 @@
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${osArch}</classifier>
-            <scope>test</scope>
+            <!-- Unter Unix wird die Produktionsvariante von kernel-cpp genommen -->
         </dependency>
 
         <dependency>
@@ -127,7 +127,7 @@
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${osArch}-test</classifier>
-            <scope>test</scope>
+            <!-- Unter Windows wird die Testvariante von kernel-cpp genommen -->
         </dependency>
 
         <dependency>
