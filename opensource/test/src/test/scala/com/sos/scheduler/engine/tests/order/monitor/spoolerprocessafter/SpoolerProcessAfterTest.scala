@@ -101,5 +101,4 @@ object SpoolerProcessAfterTest {
   /** Wegen JUnitRunner? Klammern lassen Surefire Klassen- und Testnamen durcheinanderbringen */
   private def renameTestForSurefire(name: String) = name.replace('(', '[').replace(')', ']')
       .replace(',', ' ')  // Surefire zeigt Komma als \u002C
-      .replace("'", "")   // Surefire zeigt Apostroph als &apos;
 }
