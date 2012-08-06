@@ -1964,7 +1964,7 @@ bool Task::do_something()
                             break;
 
                         case s_closed:
-                            report_event_code(taskFinishedEvent, java_sister());
+                            report_event_code(taskClosedEvent, java_sister());
                             break;
 
                         case s_none:
