@@ -429,6 +429,9 @@
                             <value>${basedir}/target</value>
                         </property-->
                         <property>
+                            <name>com.sos.scheduler.engine.test.underMaven</name>
+                        </property>
+                        <property>
                             <name>com.sos.scheduler.engine.test.binary.tmpdir</name>
                             <value>${basedir}/target/scheduler-test-binaries</value>
                         </property>

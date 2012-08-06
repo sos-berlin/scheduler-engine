@@ -7,21 +7,21 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-		        <directory>scheduler</directory>
+            <directory>scheduler</directory>
             <outputDirectory>/doc/messages</outputDirectory>
             <includes>
                 <include>scheduler_messages.xml</include>
             </includes>
         </fileSet>
         <fileSet>
-		        <directory>scheduler</directory>
+            <directory>scheduler</directory>
             <outputDirectory>/doc/xml</outputDirectory>
             <includes>
                 <include>scheduler.xsd</include>
             </includes>
         </fileSet>
         <fileSet>
-		        <directory>zschimmer</directory>
+            <directory>zschimmer</directory>
             <outputDirectory>/doc/messages</outputDirectory>
             <includes>
                 <include>charset_messages.xml</include>

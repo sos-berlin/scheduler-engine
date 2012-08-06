@@ -76,7 +76,7 @@ function cmd_windows_clean() {
 }
 
 function cmd_windows_cleanWithRm() {
-    # Weil "vcbuild.exe /clean" nicht immer löschen kann (Fehlermeldung PRJ0008), siehe http://msdn.microsoft.com/en-us/library/hk8k8k4h%28v=vs.80%29.aspx
+    # Weil "vcbuild.exe /clean" nicht immer lï¿½schen kann (Fehlermeldung PRJ0008), siehe http://msdn.microsoft.com/en-us/library/hk8k8k4h%28v=vs.80%29.aspx
     for c in $configurations; do :
         PATH=/bin find -type d -ipath "*/$visualStudioPlatform/$c" -execdir sh -c "rm -rf {}" \; -prune
     done
@@ -135,7 +135,7 @@ function cmd_linux_compile() {(
     if [ "$cpuArchitecture" == "x86" ]; then
         make/make 3rd_party/libxml2 libxml2.a
         make/make 3rd_party/libxslt/libxslt libxslt.a
-	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK="$JAVA_HOME" make -C js/src/fdlibm  -f Makefile.ref
+        CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK="$JAVA_HOME" make -C js/src/fdlibm  -f Makefile.ref
         CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK="$JAVA_HOME" make -C js/src         -f Makefile.ref
         mkdir -p scripting_engine/Release
         make -C scripting_engine/Release -f ../Makefile
