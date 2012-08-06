@@ -5,16 +5,12 @@ import com.sos.scheduler.engine.kernel.util.Lazy;
 
 public class JobScriptInstanceAdapter {
     private final ScriptInstance scriptInstance;
-    private final Lazy<ImmutableMap<String,Object>> bindingsLazy;
-    private final String script;
 
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
     //TODO funktioniert das Scripting auch bei remote jobs?
 
-    public JobScriptInstanceAdapter(String language, String script, Lazy<ImmutableMap<String, Object>> bindingsLazy) {
-        this.scriptInstance = new ScriptInstance(language);
-        this.bindingsLazy = bindingsLazy;
-        this.script = script;
+    public JobScriptInstanceAdapter(String language, Lazy<ImmutableMap<String, Object>> bindingsLazy, String script) {
+        this.scriptInstance = new ScriptInstance(language, bindingsLazy, script);
     }
 
     public final boolean callInit(boolean deflt) throws Exception {
@@ -56,7 +52,11 @@ public class JobScriptInstanceAdapter {
     }
 
     public final void callTaskAfter() throws Exception {
-        scriptInstance.callWhenExists("spooler_task_after");
+        try {
+            scriptInstance.callWhenExists("spooler_task_after");
+        } finally {
+            scriptInstance.close();
+        }
     }
 
     public final boolean callProcessBefore() throws Exception {
@@ -68,6 +68,6 @@ public class JobScriptInstanceAdapter {
     }
 
     private void loadScript() {
-        scriptInstance.loadScript(bindingsLazy.get(), script);
+        scriptInstance.loadScript();
     }
 }

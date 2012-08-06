@@ -150,10 +150,10 @@ public class ScriptInstanceTest {
         final ImmutableMap<String, Object> completeBindings = new ImmutableMap.Builder<String,Object>()
                 .put("spooler_log", scriptLogger)
                 .putAll(bindings).build();
-        JobScriptInstanceAdapter adapter = new JobScriptInstanceAdapter(language, script, new Lazy<ImmutableMap<String, Object>>() {
+        JobScriptInstanceAdapter adapter = new JobScriptInstanceAdapter(language, new Lazy<ImmutableMap<String, Object>>() {
             @Override protected ImmutableMap<String, Object> compute() {
                 return completeBindings;
-            }});
+            }}, script);
         return new TestExecutor(adapter);
     }
 

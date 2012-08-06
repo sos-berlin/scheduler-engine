@@ -13,7 +13,7 @@ public class ScriptAdapterJob extends Job_impl {
     //TODO funktioniert das Scripting auch bei remote jobs?
 
     public ScriptAdapterJob(String language, String script) throws Exception {
-        adapter = new JobScriptInstanceAdapter(language, script, new Lazy<ImmutableMap<String, Object>>() {
+        adapter = new JobScriptInstanceAdapter(language, new Lazy<ImmutableMap<String, Object>>() {
                     @Override protected ImmutableMap<String, Object> compute() {
                         return ImmutableMap.of(
                                 "spooler", spooler,
@@ -21,7 +21,7 @@ public class ScriptAdapterJob extends Job_impl {
                                 "spooler_job", spooler_job,
                                 "spooler_log", spooler_log);
                     }
-                });
+                }, script);
     }
 
     public final boolean spooler_init() throws Exception {
