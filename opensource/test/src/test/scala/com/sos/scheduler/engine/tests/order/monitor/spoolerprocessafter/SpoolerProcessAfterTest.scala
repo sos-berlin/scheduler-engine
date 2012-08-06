@@ -29,7 +29,7 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
 
   Settings.list.zipWithIndex foreach { case ((setting, expected), i) =>
     val index = i + 1
-    test(index +". "+ setting +" should result in " +expected) {
+    test(renameTestForSurefire(index +". "+ setting +" should result in " +expected)) {
       new MyTest(index, setting, expected)
     }
   }
@@ -97,4 +97,9 @@ object SpoolerProcessAfterTest {
   private class MyMutableMultiMap[A,B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
   private case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
+
+  /** Wegen JUnitRunner? Klammern lassen Surefire Klassen- und Testnamen durcheinanderbringen */
+  private def renameTestForSurefire(name: String) = name.replace('(', '[').replace(')', ']')
+      .replace(',', ' ')  // Surefire zeigt Komma als \u002C
+      .replace("'", "")   // Surefire zeigt Apostroph als &apos;
 }
