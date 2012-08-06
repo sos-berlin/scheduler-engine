@@ -18,7 +18,7 @@ function spooler_open()	{
 }
  
 function spooler_process() {
-	spooler_log.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	spooler_log.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
 	log_function("spooler_process");
 	return true;
 }
@@ -66,7 +66,7 @@ function spooler_process_before() {
 }
 
 function spooler_process_after(spooler_process_result) {
-	spooler_log.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	spooler_log.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
 	log_function("spooler_process_after");
 	return spooler_process_result;
 }

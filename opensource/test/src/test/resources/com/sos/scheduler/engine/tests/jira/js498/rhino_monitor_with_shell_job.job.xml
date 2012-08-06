@@ -11,8 +11,9 @@ exit 5
         <script language="javax.script:javascript">
             <![CDATA[
 function spooler_task_after() {
-    spooler_task.set_exit_code(0);
-    spooler_log.info("the task ended with exit_code=" + spooler_task.exit_code());
+    if (spooler_task.exit_code != 5) throw new Error("spooler_task.exit_code is not 5 but "+spooler_task.exit_code);
+    spooler_task.exit_code = 0;
+    spooler_log.info("the task ended with exit_code=" + spooler_task.exit_code);
 }
             ]]>
         </script>
