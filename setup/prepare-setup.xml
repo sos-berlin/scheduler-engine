@@ -173,8 +173,10 @@ to run without maven integration.
   </target>
 	
 	<target name="-versioninfo" description="creates a file with version information">
-    <propertyfile file="${target.dir}/${setup.version}.txt" comment="information about the last build">
-      <entry  key="${setup.platform}.lastbuild" type="date" value="now" pattern="yyyy-MM-dd'T'HH:mm:ss" />
+    <propertyfile file="${target.dir}/scheduler.${folder.name}/.version-engine" comment="build information">
+      <entry  key="version" type="string" value="${setup.version}" />
+      <entry  key="platform" type="string" value="${setup.platform}" />
+      <entry  key="builddate" type="date" value="now" pattern="yyyy-MM-dd HH:mm:ss" />
     </propertyfile>
   </target>
 
