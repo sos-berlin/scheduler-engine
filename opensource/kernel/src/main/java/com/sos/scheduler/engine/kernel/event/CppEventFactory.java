@@ -19,22 +19,6 @@ import com.sos.scheduler.engine.kernel.order.Order;
 @ForCpp
 public class CppEventFactory {
     
-    public static final Class<? extends Event>[] eventClassList = new Class[]
-            {
-                FileBasedActivatedEvent.class,
-                FileBasedRemovedEvent.class,
-                TaskStartedEvent.class,
-                TaskEndedEvent.class,
-                OrderTouchedEvent.class,
-                OrderFinishedEvent.class,
-                OrderSuspendedEvent.class,
-                OrderResumedEvent.class,
-                OrderStepStartedEvent.class,
-                OrderStepEndedEvent.class,
-                OrderStateChangedEvent.class
-            };
-
-    /** Der C++-Code benennt das Event durch CppEventCode. */
     static Event newInstance(CppEventCode cppEventCode, EventSource o) {
         switch (cppEventCode) {
             case fileBasedActivatedEvent:
