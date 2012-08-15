@@ -3,24 +3,9 @@ package com.sos.scheduler.engine.data.order;
 import com.sos.scheduler.engine.data.event.ModifiableSourceEvent;
 
 /**
- * \file OrderStepStartedEvent.java
- * \brief This event is fired before the execution of an order step begins 
- *  
- * \class OrderStepStartedEvent
- * \brief This event is fired before the execution of an order step begins 
- * 
- * \details
- * 
- * \see
- * Task::do_something in spooler_task.cxx
+ * This event is fired before the execution of an order step begins
  *
- * \code
-  \endcode
- *
- * \version 1.0 - 26.08.2011 10:02
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+ * <i>see also Job_module_task::do_step__start in spooler_task.cxx</i>
  */
 public class OrderStepStartedEvent extends OrderEvent implements ModifiableSourceEvent {
     private final OrderState state;

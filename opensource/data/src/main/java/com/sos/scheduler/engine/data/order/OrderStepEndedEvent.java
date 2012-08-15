@@ -3,24 +3,9 @@ package com.sos.scheduler.engine.data.order;
 import com.sos.scheduler.engine.data.event.ModifiableSourceEvent;
 
 /**
- * \file OrderStepEndedEvent.java
- * \brief This event is fired if a step of an order ended. 
- *  
- * \class OrderStepEndedEvent
- * \brief This event is fired if a step of an order ended. 
- * 
- * \details
- * 
- * \see
- * Task::step__end in spooler_task.cxx
+ * This event is fired if a step of an order ended.
  *
- * \code
-  \endcode
- *
- * \version 1.0 - 26.08.2011 10:05
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+ * <i>see also Task::postprocess_order in spooler_task.cxx</i>
  */
 public class OrderStepEndedEvent extends OrderEvent implements ModifiableSourceEvent {
     private final OrderStateTransition stateTransistion;

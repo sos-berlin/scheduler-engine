@@ -4,25 +4,10 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
- * \file OrderStateChangeEvent.java
- * \brief This event fired if the order of a job chain changed the state (next state starts) 
- *  
- * \class OrderStateChangeEvent
- * \brief This event fired if the order of a job chain changed the state (next state starts) 
- * 
- * \details
+ * This event fired if the order of a job chain changed the state (next state starts)
  * Beside the order object this event provides the state of the previously executed state.
  * 
- * \see
- * Order::set_state2 in Order.cxx
- *
- * \code
-  \endcode
- *
- * \version 1.0 - 12.04.2011 12:04:02
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+ * <i>see also Order::set_state2 in Order.cxx</i>
  */
 public class OrderStateChangedEvent extends OrderEvent {
     private final OrderState previousState;
@@ -33,7 +18,8 @@ public class OrderStateChangedEvent extends OrderEvent {
         this.previousState = previousState;
     }
 
-    public final OrderState getPreviousState() { 
+    /** the state of the state executed previously */
+    public final OrderState getPreviousState() {
         return previousState;
     }
 
