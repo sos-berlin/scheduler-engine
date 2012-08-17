@@ -44,6 +44,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private final Environment environment;
     private final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate;
     private boolean terminateOnError = true;
+    private boolean isPrepared = false;
     private String logCategories = "";
     private Scheduler _scheduler = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
@@ -111,9 +112,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     @Override public final void startScheduler(String... args) {
-        String extraOptions = nullToEmpty(System.getProperty(TestSchedulerController.class.getName() +".options"));
-        registerEventHandler(this);
         prepare();
+        String extraOptions = nullToEmpty(System.getProperty(TestSchedulerController.class.getName() +".options"));
         Iterable<String> allArgs = concat(
                 environment.standardArgs(cppBinaries(), logCategories),
                 Splitter.on(",").omitEmptyStrings().split(extraOptions),
@@ -121,9 +121,13 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         getDelegate().startScheduler(toArray(allArgs, String.class));
     }
 
-    private void prepare() {
-        environment.prepare();
-        getDelegate().loadModule(cppBinaries().file(CppBinary.moduleFilename));
+    public void prepare() {
+        if (!isPrepared) {
+            registerEventHandler(this);
+            environment.prepare();
+            getDelegate().loadModule(cppBinaries().file(CppBinary.moduleFilename));
+            isPrepared = true;
+        }
     }
 
     public final Scheduler scheduler() {
