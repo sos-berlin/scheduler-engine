@@ -10,7 +10,6 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.api.client.filter.LoggingFilter;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -37,20 +36,14 @@ public class UserRealmTest extends SchedulerTest {
         prepareEnvironment();
         controller().activateScheduler();
         assertThat(doHttpRequest("testuser","testpassword").getClientResponseStatus(), equalTo(ClientResponse.Status.OK));
-
-        //TODO ein Request mit ungültigem User wird trotzdem aktzeptiert. Im HTTP Header steht der entsprechende Authentication Eintrag
-        // drin z.B. > Authorization: Basic aW52YWxpZHVzZXI6aW52YWxpZHBhc3N3b3Jk
-        // Anscheinend wirken die Angaben zum HashLoginService in der jetty.xml und der web.xml nicht. Es ist jedoch nicht klar warum.
-        // Verwendend man die gleiche Konfiguration in einer bestehenden Installation und versucht sich über den Webbrowser anzumelden,
-        // funktioniert alles.
-        assertThat(doHttpRequest("invaliduser","invalidpassword").getClientResponseStatus(), equalTo(ClientResponse.Status.FORBIDDEN));
+        assertThat(doHttpRequest("invaliduser","invalidpassword").getClientResponseStatus(), equalTo(ClientResponse.Status.UNAUTHORIZED));
     }
 
     private ClientResponse doHttpRequest(String user, String password) throws Exception {
         URI uri = new URI("http://localhost:"+ tcpPort + Config.contextPath() + Config.cppPrefixPath() );
         logger.debug(uri.toASCIIString() + "/" + xmlCommand);
         Client c = Client.create();
-        c.addFilter( new LoggingFilter(System.out));
+        // c.addFilter( new LoggingFilter(System.out));
         c.addFilter( new HTTPBasicAuthFilter(user, password));
         WebResource webResource = c.resource(uri);
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);

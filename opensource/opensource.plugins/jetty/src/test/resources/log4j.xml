@@ -11,10 +11,6 @@
         <level value="info"/>
     </logger>
 
-    <logger name="com.sos.scheduler.engine.plugins.jetty.userrealm.UserRealmTest">
-        <level value="debug"/>
-    </logger>
-
     <root>
         <!-- In general the debug level should be 'warn'. If you need 'debug' or 'info' level for special cases
         please use a special logger defined above. -->
