@@ -23,7 +23,7 @@
     <Call name="addConnector">
         <Arg>
             <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                <Set name="port">44441</Set>
+                <Set name="port">${tcp.port}</Set>
             </New>
         </Arg>
     </Call>
