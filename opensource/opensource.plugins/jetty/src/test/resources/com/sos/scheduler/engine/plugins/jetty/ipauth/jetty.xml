@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+<Configure class="org.eclipse.jetty.server.Server">
+
+    <Get id="oldhandler" name="handler" />
+    <Set name="handler">
+        <New class="org.eclipse.jetty.server.handler.IPAccessHandler">
+            <Set name="handler"><Ref id="oldhandler"/></Set>
+            <Set name="white">
+                <Array type="java.lang.String">
+                    <Item>127.0.0.1</Item>
+                </Array>
+            </Set>
+            <!--
+            <Set name="black">
+                <Array type="java.lang.String">
+                </Array>
+            </Set>
+            -->
+        </New>
+    </Set>
+
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                <Set name="port">44441</Set>
+            </New>
+        </Arg>
+    </Call>
+
+</Configure>
