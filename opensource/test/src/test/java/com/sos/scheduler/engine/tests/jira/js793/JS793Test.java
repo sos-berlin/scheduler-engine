@@ -28,14 +28,6 @@ import static org.junit.Assert.assertTrue;
  * </ul>
  * 
  * This is feature is only available for shell jobs.
- * 
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *  
- * @author ss
- * @version 1.0 - 25.11.2011 11:01:20
- *
  */
 public class JS793Test extends SchedulerTest {
 

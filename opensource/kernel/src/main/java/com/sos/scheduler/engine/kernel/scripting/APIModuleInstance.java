@@ -8,12 +8,6 @@ package com.sos.scheduler.engine.kernel.scripting;
  * 
  * see http://java.sun.com/developer/technicalArticles/J2SE/Desktop/scripting/
  * see https://scripting.dev.java.net/
- *
- * @author Stefan Schaedlich
- * @version 1.0 - 2010-12-17
- * <div class="sos_branding">
- *   <p>(c) 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
  */
 
 // import org.apache.log4j.Appender;

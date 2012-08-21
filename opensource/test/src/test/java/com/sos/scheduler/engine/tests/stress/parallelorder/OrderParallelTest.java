@@ -1,9 +1,3 @@
-/*
- * <div class="sos_branding">
- *   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-
 package com.sos.scheduler.engine.tests.stress.parallelorder;
 
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
@@ -13,8 +7,6 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
 import org.junit.Test;
-
-import java.io.IOException;
 
 public final class OrderParallelTest extends SchedulerTest {
 

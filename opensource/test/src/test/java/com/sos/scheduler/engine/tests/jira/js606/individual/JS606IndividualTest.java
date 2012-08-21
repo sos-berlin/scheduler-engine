@@ -9,15 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- * This class tests the prefix "MYPARAM_" (see scheduler.xml)
- * 
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *  
- * @author ss
- * @version 1.0 - 10.01.2012 10:07:36
- *
+ * This class tests the prefix "MYPARAM_" for JobScheduler environment variables (see scheduler.xml)
  */
 public class JS606IndividualTest extends JS606Base {
 

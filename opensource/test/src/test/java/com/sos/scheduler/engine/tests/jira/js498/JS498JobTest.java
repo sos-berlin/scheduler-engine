@@ -20,14 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * This is a test for scripting with the Rhino engine. The test starts different standalone jobs.
- *
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *
- * @author ss
- * @version 1.0 - 12.07.2012 12:03:22
- *
  */
 public class JS498JobTest extends SchedulerTest {
     

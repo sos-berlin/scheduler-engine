@@ -20,18 +20,15 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * This is a test for scripting with the Rhino engine. The jobchain started executes
- * - a job with all knowing API methods (including the monitors).
- * - a job with a range of api calls for the JobScheduler api.
+ * <ul>
+ *     <li>a job with all knowing API methods (including the monitors).</li>
+ *     <li>a job with a range of api calls for the JobScheduler api.</li>
+ * </ul>
  *
  * At the end of the test the resultfile will checked for the estimated functions calls.
  *
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *
- * @author ss
+ * @author Stefan Schädlich
  * @version 1.0 - 16.12.2011 13:39:41
- *
  */
 public class JS498OrderTest extends SchedulerTest {
     

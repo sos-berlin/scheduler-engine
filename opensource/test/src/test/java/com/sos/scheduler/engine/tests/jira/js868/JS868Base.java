@@ -18,14 +18,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * This class is working with a scheduler.xml without any parameter deklaration. It is for test to get the correct
  * parameter values in a shell job.
- *
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *  
- * @author ss
- * @version 1.0 - 16.12.2011 13:39:41
- *
  */
 public abstract class JS868Base extends SchedulerTest {
     

@@ -10,13 +10,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * \file JS873Test.java
- * \brief js-628: Order successfull when a pre/postprocessing script is used
+ * js-628: Order successfull when a pre/postprocessing script is used
  * 
- * \class JS873Test
- * \brief js-628: Order successfull when a pre/postprocessing script is used
- * 
- * \details
  * This test contain four jobchains for various combinations of the result from spooler_process and
  * spooler_process_before:
  *
@@ -31,15 +26,6 @@ import static org.junit.Assert.assertEquals;
  * is true.
  *
  * The test estimate that one job_chain ends with success and three job_chains ends with a failure.
- *
- * \author ss
- * \version 1.1 - 27.03.2012 10:45:12
- * <div class="sos_branding">
- * <p>
- * (c) 2011 SOS GmbH - Berlin (<a style='color:silver'
- * href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)
- * </p>
- * </div>
  */
 public class JS628Test extends SchedulerTest {
 

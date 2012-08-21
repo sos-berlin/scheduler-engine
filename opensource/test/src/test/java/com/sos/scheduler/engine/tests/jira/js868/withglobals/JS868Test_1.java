@@ -10,14 +10,6 @@ import java.io.IOException;
 /**
  * This class is working with a scheduler.xml sith some parameter deklaration. It is for test to get the correct
  * parameter values in a shell job.
- *
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *  
- * @author ss
- * @version 1.0 - 10.07.2012
- *
  */
 public class JS868Test_1 extends JS868Base {
     
