@@ -3995,7 +3995,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
 
-#         ifdef Z_DEBUG
             if( path.file_exists() )
             {
                 File_path gz_path = path + ".gz";
@@ -4006,7 +4005,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 }
                 catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }
             }
-#         endif
 
             log_start( log_filename );
         }
