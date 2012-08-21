@@ -1511,6 +1511,23 @@ xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& 
     return xml::Element_ptr();    // Antwort wird asynchron �bergeben
 }
 
+//----------------------------------------------------------Command_processor::execute_job_chain_command
+
+xml::Element_ptr Command_processor::execute_job_chain_command( const xml::Element_ptr& element, const Show_what& show_ )
+{
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
+    return _spooler->order_subsystem()->job_chain( Absolute_path( root_path, element.getAttribute( "job_chain" ) ) )->execute_xml( this, element, show_ );
+}
+
+//----------------------------------------------------------Command_processor::execute_job_chain_node_command
+
+xml::Element_ptr Command_processor::execute_job_chain_node_command( const xml::Element_ptr& element, const Show_what& show_ )
+{
+    if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
+    return _spooler->order_subsystem()->job_chain( Absolute_path( root_path, element.getAttribute( "job_chain" ) ) ) ->
+                    node_from_state( element.getAttribute( "state" ) )->execute_xml( this, element, show_ );
+}
+
 //-----------------------------------------et_events_command_response::~Get_events_command_response
 
 Get_events_command_response::~Get_events_command_response()
@@ -1562,13 +1579,12 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     
     if( string_begins_with( element_name, "job_chain_node." ) )
     {
-        result = _spooler->order_subsystem()->job_chain( Absolute_path( root_path, element.getAttribute( "job_chain" ) ) ) ->
-                    node_from_state( element.getAttribute( "state" ) )->execute_xml( this, element, show );
+       result = execute_job_chain_node_command(element,show);
     }
     else
     if( string_begins_with( element_name, "job_chain." ) )
     {
-        result = _spooler->order_subsystem()->job_chain( Absolute_path( root_path, element.getAttribute( "job_chain" ) ) )->execute_xml( this, element, show );
+       result = execute_job_chain_command(element,show);
     }
     else
     if( element_name == "lock"  ||  string_begins_with( element_name, "lock." ) )
