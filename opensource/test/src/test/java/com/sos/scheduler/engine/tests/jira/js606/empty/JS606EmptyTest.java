@@ -9,15 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- * This class tests an empty prefix (see scheduler.xml)
- * 
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *  
- * @author ss
- * @version 1.0 - 10.01.2012 10:08:31
- *
+ * This class tests an empty prefix for JobScheduler environment variables (see scheduler.xml)
  */
 public class JS606EmptyTest extends JS606Base {
 

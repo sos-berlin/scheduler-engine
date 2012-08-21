@@ -19,20 +19,7 @@ import java.util.List;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 
 /**
- * \file JMSPlugIn.java
- * \brief JS Plugin to connect the JMS
- * 
- * \class JMSPlugIn
- * \brief JS Plugin to connect the JMS
- * 
- * \details
- * \code
- * \endcode
- * 
- * \version 1.0 - 12.04.2011 11:54:06
- * <div class="sos_branding">
- * <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+ * JS Plugin to connect the JMS
  */
 public class JMSEventPlugin extends AbstractPlugin {
 	

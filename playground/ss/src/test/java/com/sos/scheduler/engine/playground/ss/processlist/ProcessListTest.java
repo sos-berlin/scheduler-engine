@@ -11,24 +11,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-/**
- * \file ProcessListTest.java
- * \brief test functions for the JobScheduler Object Model
- * 
- * \class ProcessListTest
- * \brief test functions for the JobScheduler Object Model
- * 
- * \details
- *
- * \code
-   \endcode
- * 
- * \author ss 
- * \version 1.0 - 19.04.2012 10:53:10
- * <div class="sos_branding">
- * <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
 @SuppressWarnings("deprecation")
 public class ProcessListTest extends SchedulerTest {
 

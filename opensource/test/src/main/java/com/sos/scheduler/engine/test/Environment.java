@@ -16,22 +16,8 @@ import static com.google.common.base.Strings.nullToEmpty;
 import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
-/** Stellt eine Konfigurationsumgebung für den Scheduler bereit.
- * \file Environment.java
- * \brief Build the environment for the scheduler binary 
- *  
- * \class Environment
- * \brief Build the environment for the scheduler binary 
- * 
- * \details
- *
- * \code
-  \endcode
- *
- * \version 1.0 - 31.08.2011 10:11:54
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+/**
+ * Build the environment for the scheduler binary
  */
 public final class Environment {
     private static final String configSubdir = "config";

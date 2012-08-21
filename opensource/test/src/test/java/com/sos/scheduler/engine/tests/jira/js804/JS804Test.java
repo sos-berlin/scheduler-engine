@@ -22,14 +22,6 @@ import static org.junit.Assert.assertTrue;
  * In opposite is order <i>js-804-1</i>. It is a simple order (scheduled with the start of JS) with
  * no setback.  The result of <i>show_calendar</i> must not contain the <i>setback</i> because <i>false</i>
  * is the default for this attribute. 
- * 
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *  
- * @author ss
- * @version 1.0 - 20.12.2011 12:32:07
- *
  */
 public final class JS804Test extends SchedulerTest {
 

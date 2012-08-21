@@ -1,27 +1,9 @@
-/*
- * <div class="sos_branding">
- *   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-
-/*
- * <div class="sos_branding">
- *   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-
 package sos.spooler.jobs;
 
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scripting.APIModuleInstance;
 import sos.spooler.Job_impl;
 
-/**
- * Created by IntelliJ IDEA.
- * User: ss
- * Date: 07.02.12
- * Time: 16:27
- */
 public class ScriptAdapterJob extends Job_impl {
 
     private final APIModuleInstance scriptModule;

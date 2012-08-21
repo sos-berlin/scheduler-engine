@@ -1,30 +1,16 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
 /**
- * \file ScriptInstance.java
- * \brief general wrapper for the javax.script interface 
- *  
- * \class ScriptInstance 
- * \brief general wrapper for the javax.script interface 
- * 
- * \details
+ * General wrapper for the javax.script interface
+ *
  * This class provides a general mechanism to call script in different languages.
  *    
- * \code
-	ScriptInstance module = new ScriptInstance("javascript");
-	module.setSourceCode("print('Hello ' + name + '\\n');");
-	module.addObject("nick", "name");
-	module.call();
-  \endcode
- *
- * \author ss
- * \version 17.12.2010 12:04:34
- *
- * \author ss
- * \version 12.03.2012 10:22:17
- * <div class="sos_branding">
- *   <p>(c) 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+ * {@code
+ScriptInstance module = new ScriptInstance("javascript");
+module.setSourceCode("print('Hello ' + name + '\\n');");
+module.addObject("nick", "name");
+module.call();
+ * }
  */
 
 import com.google.common.io.Files;

@@ -1,21 +1,10 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
 /**
- * \file Script.java
- * \brief General Interface for javax.script package 
+ * General Interface for javax.script package
  *  
- * \class Script
- * \brief General Interface for javax.script package 
- * 
- * \details
  * This interface should be used from classes which implements a layer for
  * scripting via the javax.script package.
- *
- * \author ss
- * \version 1.0 - 18.01.2011 11:17:54
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
  */
 public interface Script {
     Object call(String name) throws NoSuchMethodException;

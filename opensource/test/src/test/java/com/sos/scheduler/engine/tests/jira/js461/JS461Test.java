@@ -18,13 +18,8 @@ import java.util.concurrent.BlockingQueue;
 import static org.junit.Assert.assertEquals;
 
 /**
- * \file JS461Test.java
- * \brief js-461: modify order set state to endstate
+ * js-461: modify order set state to endstate
  * 
- * \class JS461Test
- * \brief js-461: modify order set state to endstate
- * 
- * \details
  * The sample configuration contains a jobchain with three nodes.
  * Running this test the chain starts and should be suspend at the second node
  * (job js-461-2), because the job ends with error. The test set the state of
@@ -33,15 +28,6 @@ import static org.junit.Assert.assertEquals;
  * - EventOrderSuspended if the job job js-461-2 ends with error
  * - EventOrderResumed if the order was set to suspended="no"
  * - EventOrderFinished because the order resumed in the "success" state
- * 
- * \author ss
- * \version 1.1 - 29.12.2011 09:56:21
- * <div class="sos_branding">
- * <p>
- * (c) 2011 SOS GmbH - Berlin (<a style='color:silver'
- * href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)
- * </p>
- * </div>
  */
 public class JS461Test extends SchedulerTest {
 
