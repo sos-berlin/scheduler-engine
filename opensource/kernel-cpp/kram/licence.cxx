@@ -757,6 +757,26 @@ int Sos_licence::component_code_of_name_or_minus( const string& name )
     return result;
 }
 
+//--------------------------------------------------------------------Sos_licence::is_demo_version
+
+boolean Sos_licence::is_demo_version()
+{
+    boolean result = true;
+    Z_FOR_EACH_CONST( list<string>, _installed_keys, it )
+    {
+       Sos_licence lic;
+       lic.read_key( *it );
+       Sos_seriennr* s = &lic._seriennr[ 1 ];
+       Z_LOG2("scheduler","Key: " << lic.key() << ", Kunde: " << s->_kundenkuerzel << "\n");
+       if ( strcmp(s->_kundenkuerzel,"DEMO")!=0 && strcmp(s->_kundenkuerzel,"SOS")!=0 ) 
+       {
+          result = false;
+          break;
+       }
+    }
+    return result;
+}
+
 //------------------------------------------------------------------------------------check_licence
 
 void check_licence( const char* component_name )
