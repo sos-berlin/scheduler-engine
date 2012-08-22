@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -65,20 +66,20 @@ public class UserRealmTest extends SchedulerTest {
     }
 
     private void prepareAndWriteJettyXml(File tempDir, File realmFile) throws IOException, URISyntaxException {
-        String sourceFilename = this.getClass().getResource("jetty.xml.template").toExternalForm().replace("file:/", "");
+        URL sourceFile = this.getClass().getResource("jetty.xml.template");
         String targetFilename = tempDir.getAbsolutePath() + "/jetty.xml";
-        String content = Files.toString(new File(sourceFilename), Charsets.UTF_8);
+        String content = Files.toString(new File(sourceFile.toURI()), Charsets.UTF_8);
         String newContent = content.replace("${tcp.port}", String.valueOf(tcpPort));
         newContent = newContent.replace("${realm.properties}", realmFile.getAbsolutePath() );
         Files.write(newContent, new File(targetFilename), Charsets.UTF_8);
         logger.debug("file " + targetFilename + " created with reference to " + realmFile.getAbsolutePath());
     }
 
-    private File copyRealmFileToConfiguration(File tempDir) throws IOException {
-        String sourceFilename = this.getClass().getResource("realm.properties").toExternalForm().replace("file:/","");
+    private File copyRealmFileToConfiguration(File tempDir) throws IOException, URISyntaxException {
+        URL sourceFile = this.getClass().getResource("realm.properties");
         String targetFilename = tempDir.getAbsolutePath() + "/realm.properties";
         File targetFile = new File(targetFilename);
-        Files.copy( new File(sourceFilename), targetFile );
+        Files.copy( new File(sourceFile.toURI()), targetFile );
         logger.debug("file " + targetFilename + " created");
         return targetFile;
     }

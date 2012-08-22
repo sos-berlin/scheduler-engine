@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -66,10 +68,10 @@ public class IPAuthTest extends SchedulerTest {
         prepareAndWriteJettyXml(tempDir);
     }
 
-    private void prepareAndWriteJettyXml(File tempDir) throws IOException {
-        String sourceFilename = this.getClass().getResource("jetty.xml.template").toExternalForm().replace("file:/", "");
+    private void prepareAndWriteJettyXml(File tempDir) throws IOException, URISyntaxException {
+        URL sourceFile = this.getClass().getResource("jetty.xml.template");
         String targetFilename = tempDir.getAbsolutePath() + "/jetty.xml";
-        String content = Files.toString(new File(sourceFilename), Charsets.UTF_8);
+        String content = Files.toString(new File(sourceFile.toURI()), Charsets.UTF_8);
         String newContent = content.replace("${tcp.port}", String.valueOf(tcpPort));
         Files.write(newContent, new File(targetFilename), Charsets.UTF_8);
         logger.debug("file " + targetFilename + " created");
