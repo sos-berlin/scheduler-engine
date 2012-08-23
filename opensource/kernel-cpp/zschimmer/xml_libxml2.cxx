@@ -508,10 +508,11 @@ Element_ptr Document_ptr::create_root_element( const string& name )
 Simple_node_ptr Document_ptr::importNode(const Simple_node_ptr& node) const
 { 
     assert( _ptr );
-    int extended = 1;
-    xmlNodePtr result = xmlDocCopyNode( node.ptr(), ptr(), extended );
-
-    if( !result )  throw_xc( "LIBXML2-001", "xmlDocCopyNode" );
+    xmlNodePtr result = xmlCopyNode(node, 1); 
+    if (!result)  throw_xc("xmlCopyNode");
+    //int extended = 1;
+    //xmlNodePtr result = xmlDocCopyNode( node.ptr(), ptr(), extended );
+    //if( !result )  throw_xc( "LIBXML2-001", "xmlDocCopyNode" );
 
     return result;
 }
