@@ -513,6 +513,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-719", "max_orders=\"$1\" but $2 orders are now started" },
     { "SCHEDULER-720", "job_chain $1 is deactivated (set max_orders to activate it)" },
     { "SCHEDULER-721", "Scheduler is not reponding quickly, a microstep took $1s" },
+    { "SCHEDULER-722", "Preceding content truncated (field length is limited to $1 bytes)" },
     {}
 };
 } //namespace sos

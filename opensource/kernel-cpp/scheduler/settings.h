@@ -21,6 +21,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     string                     _job_java_class_path;
     string                     _html_dir;
     bool                       _keep_order_content_on_reschedule;
+    int                        _max_length_of_blob_entry;
 };
 
 }} //namespace sos::scheduler

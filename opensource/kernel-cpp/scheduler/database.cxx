@@ -1751,6 +1751,24 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
     return id;
 }
 
+//---------------------------------------------------------------------------Database::truncate_head
+
+string Database::truncate_head( const string& str )
+{
+   int max_length = _spooler->settings()->_max_length_of_blob_entry;
+   string result = str;
+   if( str.length() > max_length ) {
+      string msg = zschimmer::message_string( "SCHEDULER-722", max_length );
+      int start = str.length() - max_length - msg.length() - 1;
+      int x = str.substr(start).find_first_of("\n");
+      Z_LOG2("jdbc", msg );
+      if (x == string::npos) x = 0;
+      result = msg + str.substr(start + x);
+   }
+   return result;
+}
+
+
 //-------------------------------------------------------------------Transaction::get_variable_text
 
 string Transaction::get_variable_text( const string& name, bool* record_exists )
@@ -2039,7 +2057,7 @@ void Transaction::update_clob( const string& table_name, const string& column_na
     try
     {
        Z_LOG2("jdbc", "writing clob for field " << table_name << "." << column_name << " with len=" << value.size() << " (" << where << ")\n" );
-        clob.put( value );
+       clob.put( value );
         clob.close();
     }
     catch( exception& x )
