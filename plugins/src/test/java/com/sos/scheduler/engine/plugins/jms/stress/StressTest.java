@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
  * a test with more parallel processes you you to change max_processes in spooler.h or use the binaries 
  * of version 1.3.12.1346-BT.
  * 
- *  @see JS-721
+ *  @see <a href="http://www.sos-berlin.com/jira/browse/JS-721">JS-721</a>
  *  
  * <div class="sos_branding">
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
@@ -54,7 +54,7 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	@Test
 	public void eventTest() throws Exception {
 //        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
-        controller().activateScheduler();
+        controller().activateScheduler("-port=4446");
         File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
         JMSTaskObserver l = JMSTaskObserver.getInstance(providerUrl,ESTIMATED_TASKS, resultFile);
         l.addListener(this);
