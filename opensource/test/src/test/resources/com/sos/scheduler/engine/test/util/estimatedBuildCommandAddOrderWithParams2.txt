@@ -1,1 +1,0 @@
-<add_order id='myJobchain' job_chain='myJobchain'><params><param name='myParam2' value='value2' /><param name='myParam1' value='value1' /></params></add_order>

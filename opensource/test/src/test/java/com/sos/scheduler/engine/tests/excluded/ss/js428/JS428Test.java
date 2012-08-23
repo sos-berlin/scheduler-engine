@@ -14,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
@@ -44,7 +43,7 @@ public class JS428Test extends SchedulerTest {
      */
     public void mixedTest() throws InterruptedException {
         controller().setTerminateOnError(false);
-        String resultFile = scheduler().getConfiguration().logDirectory() + "/scheduler.log";
+        String resultFile = FileUtils.getInstance().getTempFile(JS428Test.class, "scheduler.log").getAbsolutePath();
         controller().activateScheduler("-e","-log-level=warn","-log=" + resultFile);
         util.addOrder("jobchain-mixed")
             .addParam("050/param1", "step 050")
@@ -71,7 +70,7 @@ public class JS428Test extends SchedulerTest {
     @Test
     public void apiTest() throws InterruptedException {
         controller().setTerminateOnError(false);
-        File resultFile = FileUtils.getResourceFile(this.getClass(), "scheduler.log");
+        String resultFile = FileUtils.getInstance().getTempFile(JS428Test.class, "scheduler.log").getAbsolutePath();
         controller().activateScheduler("-e","-log-level=warn","-log=" + resultFile);
         util.addOrder("jobchain-api")
             .addParam("100/param1", "step 100")

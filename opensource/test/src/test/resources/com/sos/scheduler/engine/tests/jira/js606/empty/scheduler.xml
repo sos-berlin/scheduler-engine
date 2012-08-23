@@ -3,7 +3,7 @@
 	xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
 	<config>
 		<params>
-			<param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="*NONE" />
+            <param name="scheduler.variable_name_prefix" value="*NONE" />
 		</params>
 	</config>
 </spooler>

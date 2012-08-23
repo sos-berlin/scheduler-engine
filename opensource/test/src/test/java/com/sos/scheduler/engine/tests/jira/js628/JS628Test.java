@@ -10,10 +10,10 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * \file JS628Test.java
+ * \file JS873Test.java
  * \brief js-628: Order successfull when a pre/postprocessing script is used
  * 
- * \class JS628Test
+ * \class JS873Test
  * \brief js-628: Order successfull when a pre/postprocessing script is used
  * 
  * \details
@@ -63,7 +63,7 @@ public class JS628Test extends SchedulerTest {
     @Test
     public void test() throws Exception {
         final CommandBuilder commandBuilder = new CommandBuilder();
-        controller().activateScheduler("-e");
+        controller().activateScheduler();
         for(String jobChain : JOB_CHAINS) { 
         String cmd = commandBuilder.addOrder(jobChain).getCommand();
             controller().scheduler().executeXml(cmd);

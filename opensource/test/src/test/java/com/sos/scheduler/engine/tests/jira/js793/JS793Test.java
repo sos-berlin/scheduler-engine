@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js793;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.FileUtils;
@@ -87,15 +87,15 @@ public class JS793Test extends SchedulerTest {
 		controller().scheduler().executeXml(command);
 	}
 	
-	private final File prepareResultfile(String jobchainName) {
+	private final File prepareResultfile(String jobchainName) throws IOException {
 		File f = getResultfile(jobchainName);
 		if (f.exists()) f.delete();
 		logger.debug("results of the jobs will be written in file " + f.getAbsolutePath());
 		return f;
 	}
 	
-	private File getResultfile(String jobchainName) {
-		return FileUtils.getResourceFile(this.getClass(), "result_" + jobchainName + ".txt");
+	private File getResultfile(String jobchainName) throws IOException {
+		return FileUtils.getInstance().getTempFile(JS793Test.class, "result_" + jobchainName + ".txt");
 	}
 		
 	@HotEventHandler

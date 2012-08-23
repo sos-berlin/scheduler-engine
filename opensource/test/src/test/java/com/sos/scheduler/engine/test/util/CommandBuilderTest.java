@@ -1,47 +1,48 @@
 package com.sos.scheduler.engine.test.util;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-
+import com.google.common.io.Files;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import static org.junit.Assert.assertTrue;
 
 public class CommandBuilderTest {
 	
 	private static final Logger logger = Logger.getLogger(CommandBuilderTest.class);
 	private final CommandBuilder util = new CommandBuilder();
-	
-	private static final String estimatedBuildCommandAddOrder = "estimatedBuildCommandAddOrder.txt";
-	private static final String estimatedBuildCommandAddOrderWithParams = "estimatedBuildCommandAddOrderWithParams.txt";
-	private static final String estimatedBuildCommandAddOrderWithParams2 = "estimatedBuildCommandAddOrderWithParams2.txt";
-	private static final String estimatedBuildCommandStartJobImmidiately = "estimatedBuildCommandStartJobImmidiately.txt";
-	
-	
+
+    private static final String packageRoot = "com/sos/scheduler/engine/test/util/";
+    private static final String expectedBuildCommandAddOrder = packageRoot + "expectedBuildCommandAddOrder.txt";
+	private static final String expectedBuildCommandAddOrderWithParams = packageRoot + "expectedBuildCommandAddOrderWithParams.txt";
+	private static final String expectedBuildCommandAddOrderWithParams2 = packageRoot + "expectedBuildCommandAddOrderWithParams2.txt";
+	private static final String expectedBuildCommandStartJobImmidiately = packageRoot + "expectedBuildCommandStartJobImmidiately.txt";
+    
 	@Test
 	public void addOrderTest() throws IOException {
 		String command = util.addOrder("myJobchain").getCommand();
-		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandAddOrder.txt");
-		Files.append(command, file, Charset.defaultCharset());
-		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandAddOrder);
-		compareFiles(file,estimated);
+        File file = File.createTempFile("testBuildCommandAddOrder",".txt");
+		Files.append(command, file, SchedulerConstants.defaultEncoding);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandAddOrder);
+		assertEqualFiles(file, expectedFile);
+        file.delete();
 	}
 
 	@Test
 	public void addOrderWithParamsTest() throws IOException {
 		String command = util.addOrder("myJobchain").addParam("myParam1", "value1").getCommand();
-		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandAddOrderWithParam.txt");
-		Files.append(command, file, Charset.defaultCharset());
-		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandAddOrderWithParams);
-		compareFiles(file,estimated);
+		File file = File.createTempFile("testBuildCommandAddOrderWithParam",".txt");
+		Files.append(command, file, SchedulerConstants.defaultEncoding);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandAddOrderWithParams);
+		assertEqualFiles(file, expectedFile);
+        file.delete();
 	}
 
 	@Test
@@ -49,10 +50,11 @@ public class CommandBuilderTest {
 		util.addParam("myParam1", "value1");
 		util.addParam("myParam2", "value2");
 		String command = util.addOrder("myJobchain").getCommand();
-		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandAddOrderWithParam2.txt");
-		Files.append(command, file, Charset.defaultCharset());
-		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandAddOrderWithParams2);
-		compareFiles(file,estimated);
+		File file = File.createTempFile("testBuildCommandAddOrderWithParam2",".txt");
+		Files.append(command, file, SchedulerConstants.defaultEncoding);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandAddOrderWithParams2);
+		assertEqualFiles(file, expectedFile);
+        file.delete();
 	}
 
 	@Test
@@ -62,8 +64,8 @@ public class CommandBuilderTest {
     	DateTime begin = util.getLastBegin();
     	DateTime end = util.getLastEnd();
     	DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinuteSecond();
-    	String estimated = "<show_calendar before='" + fmt.print(end) + "' from='" + fmt.print(begin) + "' limit='10' what='orders'></show_calendar>";
-		assertTrue("estimated value is '" + estimated + "'",estimated.equals(command));
+    	String expectedFile = "<show_calendar before='" + fmt.print(end) + "' from='" + fmt.print(begin) + "' limit='10' what='orders'></show_calendar>";
+		assertTrue("expected value is '" + expectedFile + "'",expectedFile.equals(command));
 	}
 
 	@Test
@@ -71,18 +73,19 @@ public class CommandBuilderTest {
 		util.addParam("myParam1", "value1");
 		util.addParam("myParam2", "value2");
 		String command = util.startJobImmediately("myJob").getCommand();
-		File file = FileUtils.alwaysCreateEmptyResourceFile(CommandBuilderTest.class, "testBuildCommandStartJobImmidiately.txt");
-		Files.append(command, file, Charset.defaultCharset());
-		File estimated = FileUtils.getResourceFile(CommandBuilderTest.class, estimatedBuildCommandStartJobImmidiately);
-		compareFiles(file,estimated);
+		File file = File.createTempFile("testBuildCommandStartJobImmidiately",".txt");
+		Files.append(command, file, SchedulerConstants.defaultEncoding);
+		File expectedFile = FileUtils.getInstance().getResourceFile(expectedBuildCommandStartJobImmidiately);
+		assertEqualFiles(file, expectedFile);
+        file.delete();
 	}
 	
-	private void compareFiles(File file, File estimated) throws IOException {
-        if (!file.exists()) throw new FileNotFoundException(file.getAbsolutePath());
-        if (!estimated.exists()) throw new FileNotFoundException(estimated.getAbsolutePath());
-		String estimatedContent = Files.toString(estimated, Charset.defaultCharset());
-		logger.debug("estimated content: " + estimatedContent);
-		assertTrue("content of file '" + file.getAbsolutePath() + "' is not estimated",Files.equal(file, estimated));
+	private void assertEqualFiles(File resultFile, File expectedFile) throws IOException {
+        if (!resultFile.exists()) throw new FileNotFoundException(resultFile.getAbsolutePath());
+        if (!expectedFile.exists()) throw new FileNotFoundException(expectedFile.getAbsolutePath());
+		String expectedContent = Files.toString(expectedFile, SchedulerConstants.defaultEncoding);
+		logger.debug("expected content: " + expectedContent);
+		assertTrue("content of file '" + resultFile.getAbsolutePath() + "' is not estimated",Files.equal(resultFile, expectedFile));
 	}
 	
 }
