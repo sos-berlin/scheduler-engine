@@ -1165,7 +1165,7 @@ void Response::finish()
 
     if( _chunked )  _headers_stream << "Transfer-Encoding: chunked\r\n";
 
-    _headers_stream << "Server: Scheduler " << version_string;
+    _headers_stream << "Server: JobScheduler engine " << version_string;
 
     _headers_stream << "\r\n\r\n";
 

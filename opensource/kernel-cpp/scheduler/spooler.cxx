@@ -3866,10 +3866,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
-            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", scheduler::version_string );
+            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string );
             else
             if( opt.flag      ( "?"                )
-             || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", scheduler::version_string ), scheduler::print_usage();
+             || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string ), scheduler::print_usage();
             else
             if( opt.flag      ( "kill"             ) )  kill_pid_file = true;
             else
@@ -3971,7 +3971,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             log_start( log_filename );
         }
 
-        Z_LOG2( "scheduler", "Scheduler " << scheduler::version_string << "\n" );
+        Z_LOG2( "scheduler", "JobScheduler engine " << scheduler::version_string << "\n" );
 
         /**
         * \change 2.0.224 - JS-XXX: Verwendung der Option 'use-xml-schema' für dynamisches XSD
