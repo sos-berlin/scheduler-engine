@@ -84,7 +84,8 @@ to run without maven integration.
   	</fileset>
   	
   	<!-- it points to the jar built in the artifact jar -->
-  	<propertyregex property="version.number" input="${setup.version}" regexp="-SNAPSHOT" replace="" />
+  	<propertyregex property="version.number" input="${setup.version}" regexp="-SNAPSHOT" replace="" defaultValue="${setup.version}" />
+  	<echo>version is ${version.number}</echo>
   	<fileset dir="${source.dir}" id="files.lib">
   		<include name="jar-${version.number}*.jar"/>
   	</fileset>
