@@ -81,6 +81,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     void                    set_append                      ( bool b )                          { _append = b; }
+    void                    set_append_for_cache            ( bool b )                          { _append_for_cache = b; }
     void                    set_filename                    ( const File_path& );
     File_path                   filename                    () const                            { return _filename == "" && _log? _log->filename() : _filename; }
     const File_path&            this_filename               () const                            { return _filename; }
@@ -189,6 +190,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     File_path                  _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
     File_path                  _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben ?ffnen
+    bool                       _append_for_cache;           
     int                        _file;                       // File handle
     ptr<log::cache::Request>   _inhibit_caching_request;
     int                        _instance_number;

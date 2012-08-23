@@ -597,6 +597,8 @@ void Prefix_log::init( Scheduler_object* o, const string& prefix )
     _mail_on_delay_after_error = _spooler->_mail_on_delay_after_error;
     _collect_within  = _spooler->_log_collect_within;
     _collect_max     = _spooler->_log_collect_max;
+
+    _append_for_cache = false;
 }
 
 //----------------------------------------------------------------------------Prefix_log::log_level
@@ -711,20 +713,6 @@ void Prefix_log::open()
             open_patiently_file();
 
             _instance_number++;
-
-            if( !_log_buffer.empty() )
-            {
-                write( _log_buffer.c_str(), _log_buffer.length() );
-                _log_buffer = "";
-
-                if( !_is_logging_continuing )
-                {
-                    string msg = "\n";
-                    if( _title != "" )  msg += _title + " - ";
-                    log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
-                }
-            }
-
             _spooler->_log_file_cache->cache(this);
         }
 
@@ -773,6 +761,7 @@ void Prefix_log::finish_log()
         }
 
         close_file();
+        _append_for_cache = false;
 
         if( !_new_filename.empty() )
         {
@@ -832,8 +821,23 @@ void Prefix_log::open_file() {
 //--------------------------------------------------------------Prefix_log::open_file_without_error
 
 void Prefix_log::open_file_without_error() {
-    Z_DEBUG_ONLY(Z_LOG2("JS-611", Z_FUNCTION << " " << _filename << "\n"));
-    _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
+    bool open_for_append = (_append || _append_for_cache);
+    _file = ::open( _filename.c_str(), O_CREAT | ( open_for_append ? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
+    if(_file != -1 )
+    {
+       Z_LOG2("scheduler","logfile " << _filename << " opened (append=" << _append << ", append_for_cache=" << _append_for_cache << ")\n");
+       if(!_log_buffer.empty() )
+       {
+          if( !_is_logging_continuing && ! open_for_append)
+            {
+               string msg = "\n";
+               if( _title != "" )  msg += _title + " - ";
+               log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
+            }
+            write( _log_buffer.c_str(), _log_buffer.length() );
+            _log_buffer = "";
+       }
+    }
 }
 
 //---------------------------------------------------------------------Prefix_log::check_open_errno
