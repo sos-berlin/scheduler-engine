@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<order  job_chain="test_chain" id="order">
+    <params>
+        <param name="ORDER_JOB_GLOBAL" value="order" />
+        <param name="ORDER_JOB" value="order" />
+        <param name="ORDER_GLOBAL" value="order" />
+        <param name="ORDER" value="order" />
+    </params>
+    <run_time  let_run="no"/>
+</order>

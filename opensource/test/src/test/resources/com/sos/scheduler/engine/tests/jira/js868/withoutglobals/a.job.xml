@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+
+<!--
+  ~ <div class="sos_branding">
+  ~   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+  ~ </div>
+  -->
+<job order="yes"
+     stop_on_error="no">
+    <params>
+        <param name="ORDER_JOB" value="job" />
+        <param name="JOB" value="job" />
+    </params>
+    <script language="shell">
+        <![CDATA[
+echo ORDER_JOB=%SCHEDULER_PARAM_ORDER_JOB% > %SCHEDULER_PARAM_RESULT_FILE%
+echo ORDER=%SCHEDULER_PARAM_ORDER% >> %SCHEDULER_PARAM_RESULT_FILE%
+echo JOB=%SCHEDULER_PARAM_JOB% >> %SCHEDULER_PARAM_RESULT_FILE%
+        ]]>
+    </script>
+    <run_time/>
+</job>
+
