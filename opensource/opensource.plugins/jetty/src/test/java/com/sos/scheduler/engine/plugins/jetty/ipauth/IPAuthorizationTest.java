@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.ipauth;
 
 import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import com.sos.scheduler.engine.plugins.jetty.Config;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.Sockets;
@@ -10,12 +10,9 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -23,37 +20,35 @@ import java.net.URL;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class IPAuthTest extends SchedulerTest {
+public class IPAuthorizationTest extends SchedulerTest {
 
 	@SuppressWarnings("unused")
-	private static Logger logger = Logger.getLogger(IPAuthTest.class);
+	private static Logger logger = Logger.getLogger(IPAuthorizationTest.class);
 
     private static final String xmlCommand = "<show_state />";
     private static final int tcpPort = Sockets.findAvailablePort();
 
-    private static final String ipAllowed = "127.0.0.1";
+    private static final String packageName = "/com/sos/scheduler/engine/plugins/jetty/ipauth/";
+    private static final String jettyXmlTemplateResourcePath = packageName + "jetty-template.xml";
 
-    //TODO die verwendete IpForbidden ist nicht allgemeingültig
-    //private static final String ipForbidden = "192.11.0.79";
-    private static String ipForbidden = null;
+    private final String ipToTest;
+    private final ClientResponse.Status expectedStatus;
 
+    protected IPAuthorizationTest(String ipToTest, ClientResponse.Status expectedStatus) {
+        this.ipToTest = ipToTest;
+        this.expectedStatus = expectedStatus;
+    }
 
-
-    @Test
-    public void test() throws Exception {
+    protected void doTest() throws Exception {
         controller().prepare();
         prepareEnvironment();
         controller().activateScheduler();
-        ipForbidden = InetAddress.getLocalHost().getHostAddress();
-        logger.debug("the external IP is " + ipForbidden);
-        assertThat(doHttpRequest(ipAllowed).getClientResponseStatus(), equalTo(ClientResponse.Status.OK));
-        assertThat(doHttpRequest(ipForbidden).getClientResponseStatus(), equalTo(ClientResponse.Status.FORBIDDEN));
+        assertThat(doHttpRequest().getClientResponseStatus(), equalTo(expectedStatus));
         controller().terminateScheduler();
     }
 
-    private ClientResponse doHttpRequest(String clientIp) throws Exception {
+    private ClientResponse doHttpRequest() throws Exception {
         URI uri = new URI("http://localhost:"+ tcpPort + Config.contextPath() + Config.cppPrefixPath());
-        //TODO wie kann man dem Client sagen, mit welcher IP er sich am Server anmelden soll?
         Client c = Client.create();
         WebResource webResource = c.resource(uri);
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
@@ -69,16 +64,21 @@ public class IPAuthTest extends SchedulerTest {
     }
 
     private void prepareAndWriteJettyXml(File tempDir) throws IOException, URISyntaxException {
-        URL sourceFile = this.getClass().getResource("jetty.xml.template");
-        String targetFilename = tempDir.getAbsolutePath() + "/jetty.xml";
-        String content = Files.toString(new File(sourceFile.toURI()), Charsets.UTF_8);
+        URL sourceFile = this.getClass().getResource(jettyXmlTemplateResourcePath);
+        File targetFile = new File(tempDir, "jetty.xml");
+        String content = Resources.toString(sourceFile, Charsets.UTF_8);
         String newContent = content.replace("${tcp.port}", String.valueOf(tcpPort));
-        Files.write(newContent, new File(targetFilename), Charsets.UTF_8);
-        logger.debug("file " + targetFilename + " created");
+        newContent = newContent.replace("${ip.number}", ipToTest);
+        newContent = newContent.replace("${method.name}", (expectedStatus == ClientResponse.Status.OK) ? "white" : "black");
+        Files.write(newContent, targetFile, Charsets.UTF_8);
+        logger.debug("file " + targetFile.getAbsolutePath() + " created");
     }
 
+    /*
     private void logResult(ClientResponse r) throws Exception {
         String s = CharStreams.toString((new InputStreamReader(r.getEntityInputStream(), "UTF-8")));
         logger.debug(s);
     }
+    */
+
 }

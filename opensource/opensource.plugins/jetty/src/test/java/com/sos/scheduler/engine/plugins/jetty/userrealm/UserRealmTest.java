@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.userrealm;
 
 import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import com.sos.scheduler.engine.plugins.jetty.Config;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.Sockets;
@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -27,6 +26,11 @@ public class UserRealmTest extends SchedulerTest {
 
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(UserRealmTest.class);
+
+    private static final String packageName = "/com/sos/scheduler/engine/plugins/jetty/userrealm/";
+    private static final String jettyXmlTemplateResourcePath = packageName + "jetty-template.xml";
+    private static final String realmPropertiesName = "realm.properties";
+    private static final String realmPropertiesPath = packageName + realmPropertiesName;
 
     private static final String xmlCommand = "<show_state />";
     private static final int tcpPort = Sockets.findAvailablePort();
@@ -54,10 +58,12 @@ public class UserRealmTest extends SchedulerTest {
         return response;
     }
 
+    /*
     private void logResult(ClientResponse r) throws Exception {
         String s = CharStreams.toString((new InputStreamReader(r.getEntityInputStream(), "UTF-8")));
         logger.debug(s);
     }
+    */
 
     private void prepareEnvironment() throws Exception {
         File tempDir = controller().environment().configDirectory();
@@ -66,21 +72,21 @@ public class UserRealmTest extends SchedulerTest {
     }
 
     private void prepareAndWriteJettyXml(File tempDir, File realmFile) throws IOException, URISyntaxException {
-        URL sourceFile = this.getClass().getResource("jetty.xml.template");
-        String targetFilename = tempDir.getAbsolutePath() + "/jetty.xml";
-        String content = Files.toString(new File(sourceFile.toURI()), Charsets.UTF_8);
+        URL sourceFile = this.getClass().getResource(jettyXmlTemplateResourcePath);
+        String content = Resources.toString(sourceFile, Charsets.UTF_8);
         String newContent = content.replace("${tcp.port}", String.valueOf(tcpPort));
         newContent = newContent.replace("${realm.properties}", realmFile.getAbsolutePath() );
-        Files.write(newContent, new File(targetFilename), Charsets.UTF_8);
-        logger.debug("file " + targetFilename + " created with reference to " + realmFile.getAbsolutePath());
+        File targetFile = new File(tempDir, "jetty.xml");
+        Files.write(newContent, targetFile, Charsets.UTF_8);
+        logger.debug("file " + targetFile.getAbsolutePath() + " created with reference to " + realmFile.getAbsolutePath());
     }
 
     private File copyRealmFileToConfiguration(File tempDir) throws IOException, URISyntaxException {
-        URL sourceFile = this.getClass().getResource("realm.properties");
-        String targetFilename = tempDir.getAbsolutePath() + "/realm.properties";
-        File targetFile = new File(targetFilename);
-        Files.copy( new File(sourceFile.toURI()), targetFile );
-        logger.debug("file " + targetFilename + " created");
+        URL sourceFile = this.getClass().getResource(realmPropertiesPath);
+        String sourceFileContent = Resources.toString(sourceFile, Charsets.UTF_8);
+        File targetFile = new File(tempDir, realmPropertiesName);
+        Files.write( sourceFileContent, targetFile, Charsets.UTF_8 );
+        logger.debug("file " + targetFile.getAbsolutePath() + " created");
         return targetFile;
     }
 }
