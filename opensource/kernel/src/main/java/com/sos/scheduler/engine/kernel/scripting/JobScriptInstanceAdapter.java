@@ -63,8 +63,8 @@ public class JobScriptInstanceAdapter {
         return scriptInstance.callBooleanWhenExists("spooler_process_before", true);
     }
 
-    public final boolean callProcessAfter(boolean spooler_process_result) throws Exception {
-        return scriptInstance.callBooleanWhenExists("spooler_process_after", spooler_process_result);
+    public final boolean callProcessAfter(boolean spoolerProcessResult) throws Exception {
+        return scriptInstance.callBooleanWhenExists("spooler_process_after", spoolerProcessResult);
     }
 
     private void loadScript() {
