@@ -58,10 +58,8 @@ public class ScriptInstanceTest {
         assertEquals(scriptLogger.lines, asList("1", "2", "3", "4", "5"));
 	}
 
-	/**
-	 * Spooler_process is the implicitly given function if no function body exists. This behavior is similiar to
-	 * the current behavior for using the scripting API  
-	 */
+	/** Spooler_process is the implicitly given function if no function body exists.
+     * This behavior is similiar to the current behavior for using the scripting API */
 	@Test
 	public void javascriptWithoutFunctions() throws Exception {
         String msg = "Empty script ran successfully";
@@ -70,18 +68,14 @@ public class ScriptInstanceTest {
         assertEquals(asList(msg), scriptLogger.lines);
 	}
 
-	/**
-	 * \brief Executes a simple javascript
-	 * \detail
+	/** Executes a simple javascript.
 	 * Calls a javascript snippet and gives them some objects via the addObject method.
-	 * 
+	 *
 	 * The script does not contain any function, but calls the scheduler_process
-	 * method to cause the executing of the script. This is a special behavior 
-	 * of the JobScheduler api: The execution of call("scheduler_process") is just the 
-	 * same like call() if the function scheduler_process is not defined in the script. 
-	 * http://www.mozilla.org/rhino/
-	 * jar-file: inherited in java
-	 */
+	 * method to cause the executing of the script. This is a special behavior
+	 * of the JobScheduler api: The execution of call("scheduler_process") is just the
+	 * same like call() if the function scheduler_process is not defined in the script.
+	 * http://www.mozilla.org/rhino/ */
 	@Test
 	public void javascriptWithObjects() throws Exception {
 		String script =	"function spooler_process() { spooler_log.info('Hello, my name is ' + name); return false }";
@@ -104,22 +98,16 @@ public class ScriptInstanceTest {
         assertEquals(asList("spooler_init", "spooler_open", "spooler_process", "spooler_close", "spooler_exit"), scriptLogger.lines);
     }
 
-    /**
-	 * \brief Executes a simple groovy script
-	 * \detail
+    /** Executes a simple groovy script,
      * Calls a groovy script and gives them some objects via the addObject method.
-     * The script contains some funtions called by the call method.
-	 */
+     * The script contains some funtions called by the call method. */
     @Test
 	public void groovyScriptFromFile() throws Exception {
         runScript("groovy", resourceString(groovyResourcePath));
 	}
 
-    /**
-     * \brief Executes a simple java script
-     * \detail
-     * Calls a java script and gives them some objects via the addObject method.
-     */
+    /** Executes a simple java script.
+     * Calls a java script and gives them some objects via the addObject method. */
     @Test
     public void javaScriptFromFile() throws Exception {
         runScript("javascript", resourceString(javaScriptResourcePath));

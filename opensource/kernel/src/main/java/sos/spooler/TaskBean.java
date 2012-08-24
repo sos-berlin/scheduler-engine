@@ -76,8 +76,8 @@ public final class TaskBean {
         delegate.add_pid(pid);
     }
 
-    public void add_pid(int pid, double timeout_seconds) {
-        delegate.add_pid(pid, timeout_seconds);
+    public void add_pid(int pid, double timeoutSeconds) {
+        delegate.add_pid(pid, timeoutSeconds);
     }
 
     public void remove_pid(int pid) {
