@@ -85,10 +85,10 @@ object ServerBuilder {
 
   private def newServer(port: Option[Int], configuration: Option[XmlConfiguration], handler: Handler, beans: Iterable[AnyRef] = Iterable()) = {
     val result = new Server
-    result.setHandler(newHandlerCollection(Iterable(handler)))
-    for (c <- configuration) c.configure(result)
     for (p <- port) result.addConnector(newConnector(p))
+    result.setHandler(newHandlerCollection(Iterable(handler)))
     for (b <- beans) result.addBean(b)
+    for (c <- configuration) c.configure(result)
     result
   }
 

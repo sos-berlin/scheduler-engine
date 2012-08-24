@@ -6,17 +6,11 @@
     <Set name="handler">
         <New class="org.eclipse.jetty.server.handler.IPAccessHandler">
             <Set name="handler"><Ref id="oldhandler"/></Set>
-            <Set name="white">
+            <Set name="${method.name}">     <!-- black or white -->
                 <Array type="java.lang.String">
-                    <Item>127.0.0.1</Item>
+                    <Item>${ip.number}</Item>
                 </Array>
             </Set>
-            <!--
-            <Set name="black">
-                <Array type="java.lang.String">
-                </Array>
-            </Set>
-            -->
         </New>
     </Set>
 
