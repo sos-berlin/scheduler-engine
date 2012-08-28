@@ -777,6 +777,22 @@ boolean Sos_licence::is_demo_version()
     return result;
 }
 
+//--------------------------------------------------------------------Sos_licence::log_licence_keys
+
+void Sos_licence::log_licence_keys()
+{
+    boolean result = true;
+    Z_FOR_EACH_CONST( list<string>, _installed_keys, it )
+    {
+       Sos_licence lic;
+       lic.read_key( *it );
+       Sos_seriennr* s = &lic._seriennr[ 1 ];
+       size_t i = lic.key().find_last_of("-");
+       string print_key = (i > 0) ? lic.key().substr(0,i) : lic.key();
+       Z_LOG2("scheduler","licence " << print_key << " is installed.\n");
+    }
+}
+
 //------------------------------------------------------------------------------------check_licence
 
 void check_licence( const char* component_name )
