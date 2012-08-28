@@ -17,11 +17,11 @@
 namespace sos
 {
 
-const int max_licence_key_length = 100;     // Länger sollte ein Linzenschlüssel nicht sein
+const int max_licence_key_length = 100;     // Lï¿½nger sollte ein Linzenschlï¿½ssel nicht sein
 const int max_seriennr_anzahl   = 50;       // Soviele Seriennr in einem Programmlauf
 const int max_ausstellerkuerzel = 8;
 const int max_kundenkuerzel     = 20;
-const int max_par               = 1000;     // Höchste Parameternummer
+const int max_par               = 1000;     // Hï¿½chste Parameternummer
 const int base                  = 10+26;    // 0-9,A-Z
 
 
@@ -42,18 +42,18 @@ const int licence_e370                  = base*1 + 2;  // 12
 const int licence_hostapi_hostdde       = base*1 + 3;  // 13  Nur einer von beiden
 const int licence_fra2rtf               = base*1 + 4;  // 14
 const int licence_saacke                = base*1 + 5;  // 15  SAB, SAN Firmenlizenzen
-const int licence_fs_demo               = base*1 + 6;  // 16  Beschränkte Anzahl Clients
+const int licence_fs_demo               = base*1 + 6;  // 16  Beschrï¿½nkte Anzahl Clients
 const int licence_foxgate               = base*1 + 7;  // 17
 const int licence_scheduler_database_password = base*1 + 8;  // 18
 const int licence_verfallsdatum_1900    = base*1 + 9;  // 19
 const int licence_os                    = base*1 + 10; // 1A  "W" Windows, "S" Solaris,    "N" NT?
-const int licence_odbc_blob             = base*1 + 11; // 1B  Für Böckmann, BfA: hostAPI für Blob <-> file
+const int licence_odbc_blob             = base*1 + 11; // 1B  Fï¿½r Bï¿½ckmann, BfA: hostAPI fï¿½r Blob <-> file
 const int licence_verfallsdatum_2000    = base*2 + 0;  // 20
 const int licence_scheduler_console     = base*2 + 1;  // 21
 const int licence_scheduler_agent       = base*2 + 2;  // 22
 
 
-// Lizenzkomponenten-Codes für hostAPI von 30 bis 4Z
+// Lizenzkomponenten-Codes fï¿½r hostAPI von 30 bis 4Z
 const int licence_hostapi_first         = base*3 + 0;  // 30
 const int licence_wbrz_logos_to_loga    = base*3 + 0;  // 30
 const int licence_kis                   = base*3 + 1;  // 31
@@ -94,6 +94,7 @@ struct Sos_licence : Sos_self_deleting
     void                        check                   ();     // Wird von sosstat.cxx gerufen
     void                        check2                  ();     // Wird von sosprof.cxx set_sos_ini_filename() gerufen
     boolean                     is_demo_version         ();
+    void                        log_licence_keys        ();
 
     const char*                 operator []             ( int ) const;
 
@@ -131,6 +132,7 @@ struct Sos_licence : Sos_self_deleting
     Sos_simple_array<Sos_string> _par;
 
     friend                      struct Licence_key_file;
+
 };
 
 
