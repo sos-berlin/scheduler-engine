@@ -4001,18 +4001,16 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
 
-#         ifdef Z_DEBUG
             if( path.file_exists() )
             {
-                File_path gz_path = path + ".gz";
-                S cmd; cmd << "gzip <" << path << " >" << gz_path;
+                size_t i = path.find_last_of(".");
+                File_path scheduler_old = ((i > 0) ? path.substr(0,i) : path) + "-old." + path.extension();
                 try
                 {
-                    copy_file( "file -b " + path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
+                    copy_file( path, scheduler_old );
                 }
-                catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }
+                catch( exception& x ) { cerr << x.what() << ", while copy file " << path << " to " << scheduler_old << "\n"; }
             }
-#         endif
 
             log_start( log_filename );
         }
