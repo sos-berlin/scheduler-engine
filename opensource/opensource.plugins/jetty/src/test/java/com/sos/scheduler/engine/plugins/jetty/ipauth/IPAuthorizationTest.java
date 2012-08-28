@@ -28,7 +28,7 @@ public class IPAuthorizationTest extends SchedulerTest {
     private static final String xmlCommand = "<show_state />";
     private static final int tcpPort = Sockets.findAvailablePort();
 
-    private static final String packageName = "/com/sos/scheduler/engine/plugins/jetty/ipauth/";
+    private static final String packageName = "com/sos/scheduler/engine/plugins/jetty/ipauth/";
     private static final String jettyXmlTemplateResourcePath = packageName + "jetty-template.xml";
 
     private final String ipToTest;
@@ -52,7 +52,7 @@ public class IPAuthorizationTest extends SchedulerTest {
         Client c = Client.create();
         WebResource webResource = c.resource(uri);
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
-        logger.info("response for " + uri.toASCIIString() + "/" + xmlCommand + ": " + response.getClientResponseStatus());
+        logger.info("Response for " + uri.toASCIIString() + "/" + xmlCommand + ": " + response.getClientResponseStatus());
         c.destroy();
         // logResult(response);
         return response;
@@ -64,7 +64,7 @@ public class IPAuthorizationTest extends SchedulerTest {
     }
 
     private void prepareAndWriteJettyXml(File tempDir) throws IOException, URISyntaxException {
-        URL sourceFile = this.getClass().getResource(jettyXmlTemplateResourcePath);
+        URL sourceFile = Resources.getResource(jettyXmlTemplateResourcePath);
         File targetFile = new File(tempDir, "jetty.xml");
         String content = Resources.toString(sourceFile, Charsets.UTF_8);
         String newContent = content.replace("${tcp.port}", String.valueOf(tcpPort));
