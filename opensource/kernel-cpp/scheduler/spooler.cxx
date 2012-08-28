@@ -771,10 +771,11 @@ void Spooler::check_licence()
     _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
     if (!_jobs_allowed_for_licence) Z_LOG2( "scheduler", "jobs are not allowed.\n"  );
     if (!_remote_commands_allowed_for_licence) Z_LOG2( "scheduler", "executing of remote commands are not allowed (licence key for agent is required. sales@sos-berlin.com).\n" );
-    if ( sos_static_ptr()->_licence->is_demo_version() )  
+    if ( Log_ptr::is_demo_version() )  
        Z_LOG2( "scheduler", "JobScheduler is running with open source licence.\n" );
     else
        Z_LOG2( "scheduler", "JobScheduler is running with commercial licence.\n" );
+    sos_static_ptr()->_licence->log_licence_keys();
 }
 
 //-----------------------------------------------------------------------------------Spooler::close
@@ -3836,6 +3837,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
 #   endif
 
+    Log_ptr::set_demo_version( sos_static_ptr()->_licence->is_demo_version() );
     scheduler::error_settings.read( scheduler::default_factory_ini );
 
     try

@@ -60,6 +60,8 @@ namespace sos {
 const int buffer_size = 300;
 const int suppress_repeated = 3;    // Bei mehr als soviele gleiche Zeilen die Ausgabe unterdrücken
 
+boolean Log_ptr::static_is_demo_version = true;
+
 extern string                   sos_ini_msg             ();
 
 //----------------------------------------------------------------------------Mswin_debug_streambuf
@@ -584,6 +586,13 @@ void Mswin_debug_streambuf::new_line( char** l_ptr )
     char* l = *l_ptr;
 
     get_app_name();
+
+    if (Log_ptr::is_demo_version() ) 
+    {
+      sprintf( l, ".");
+      l += 1;
+    }
+
 
 #   if defined USE_GETTIMEOFDAY
         strftime( l, 3+8+1+1, "%d %T", localtime( &_time_stamp.tv_sec ) );
