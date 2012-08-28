@@ -247,7 +247,8 @@ bool Directory::read( Read_flags read_what, double minimum_age )
         if( dir.is_opened() )
         {
             while( ptr<file::File_info> file_info = dir.get() ) {
-                if (file_info->path().name() != ".svn") file_info_list.push_back( &*file_info );
+               if ( is_directory_to_observe( file_info->path() )) file_info_list.push_back( &*file_info );
+               // if (file_info->path().name().find_first_of(".") != 0) file_info_list.push_back( &*file_info );     // folder starting with "." will be ignored
             }
             dir.close();
         }
@@ -384,6 +385,13 @@ bool Directory::read( Read_flags read_what, double minimum_age )
     //_repeated_read = true;
     if( directory_has_changed )  _version++;
     return directory_has_changed;
+}
+
+//-----------------------------------------------------------------------Directory::is_directory_to_observe
+
+bool Directory::is_directory_to_observe( File_path current_directory )
+{
+   return (current_directory.name().find_first_of(".") != 0) ? true : false;
 }
 
 //-------------------------------------------------------------------------------Directory::set_aging_until
