@@ -1,14 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js606.standard;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.sos.scheduler.engine.test.util.FileUtils;
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
+import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
-import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
+
+import java.io.IOException;
 
 /**
  * this class tests the default prefix "SCHEDULER_PARAM_"
