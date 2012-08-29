@@ -412,7 +412,7 @@
                         </property>
                         <property>
                             <name>com.sos.scheduler.engine.test.directory</name>
-                            <value>${project.build.testOutputDirectory}/../scheduler-test</value>
+                            <value>target/surefire-reports</value>
                         </property>
                     </systemProperties>
                 </configuration>
