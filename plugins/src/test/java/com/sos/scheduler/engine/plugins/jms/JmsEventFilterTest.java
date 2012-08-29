@@ -51,7 +51,7 @@ public class JmsEventFilterTest extends JMSConnection {
     @Test
     public void test() throws Exception {
     	try {
-//	        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
+//	        controller().activateScheduler("-e -log-level=debug"));
 	        controller().activateScheduler();
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order1").getCommand() );
 	        controller().scheduler().executeXml( util.addOrder(jobchain, "order2").getCommand() );

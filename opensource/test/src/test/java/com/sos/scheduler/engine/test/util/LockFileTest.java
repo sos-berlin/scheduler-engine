@@ -36,7 +36,7 @@ public class LockFileTest implements Observer {
 	public void testLockFileSingle() throws Exception {
 		preprocessing();
         URL url = Resources.getResource(lockfile);
-		// File lock = FileUtils.getTempFile(CommandBuilderTest.class, lockfile);
+		// File lock = getTempFile(CommandBuilderTest.class, lockfile);
 		LockFile l = new LockFile( new File(url.toURI()), 2);		// lock the file for 2 seconds
 		l.addObserver(this);
 		l.lock();

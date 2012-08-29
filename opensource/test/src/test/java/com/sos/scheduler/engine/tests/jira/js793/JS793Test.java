@@ -80,7 +80,7 @@ public class JS793Test extends SchedulerTest {
 	
 	private final File prepareResultfile(String jobchainName) throws IOException {
 		File f = getResultfile(jobchainName);
-		if (f.exists()) f.delete();
+		// if (f.exists()) f.delete();
 		logger.debug("results of the jobs will be written in file " + f.getAbsolutePath());
 		return f;
 	}

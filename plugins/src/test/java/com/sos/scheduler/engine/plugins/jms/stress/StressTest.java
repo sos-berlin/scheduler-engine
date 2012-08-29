@@ -43,10 +43,9 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	
 	@Ignore
 	public void eventTest() throws Exception {
-//        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
+//        controller().activateScheduler("-e -log-level=debug"));
         controller().activateScheduler();
         File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
-        // File resultFile = new File(FileUtils.getResourceFile("").getAbsolutePath() + "/result.csv");
         logger.info("resultfile is " + resultFile);
         JMSTaskObserver l = new JMSTaskObserver(providerUrl);
         TaskObserverWriter w = new TaskObserverWriter(resultFile.getAbsolutePath(),l,ESTIMATED_TASKS);
