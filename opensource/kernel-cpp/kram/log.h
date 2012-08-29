@@ -69,7 +69,7 @@ struct Log_ptr
     ostream*                    operator ->                 ()                                      { return _s; }
 
     static int                  log_write                   ( const char*, int length );
-    static void                 set_is_demo_version         ( boolean is_demo_version )             { static_is_demo_version = is_demo_version; }
+    static void                 set_demo_version            ( boolean is_demo_version )             { static_is_demo_version = is_demo_version; }
     static boolean              is_demo_version             ()                                      { return static_is_demo_version; }
 
 
