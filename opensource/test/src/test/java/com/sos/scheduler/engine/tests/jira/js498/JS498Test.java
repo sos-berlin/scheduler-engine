@@ -8,7 +8,6 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import com.sos.scheduler.engine.test.util.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -46,7 +45,7 @@ public class JS498Test extends SchedulerTest {
 
     @Test
 	public void testFunctions() throws InterruptedException, IOException {
-        String logFile = FileUtils.getInstance().getTempFile(JS498Test.class, "scheduler.log").getAbsolutePath();
+        String logFile = getTempFile(JS498Test.class, "scheduler.log").getAbsolutePath();
         logger.info("logfile=" + logFile);
         //controller().activateScheduler("-e","-ignore-process-classes","-log-level=info","-log=" + logFile);
         controller().activateScheduler("-log-level=info","-log=" + logFile);
