@@ -789,7 +789,7 @@ void Sos_licence::log_licence_keys()
        Sos_seriennr* s = &lic._seriennr[ 1 ];
        size_t i = lic.key().find_last_of("-");
        string print_key = (i > 0) ? lic.key().substr(0,i) : lic.key();
-       Z_LOG2("scheduler","licence " << print_key << " is installed.\n");
+       Z_LOG2("scheduler","Licence " << print_key << " is installed.\n");
     }
 }
 

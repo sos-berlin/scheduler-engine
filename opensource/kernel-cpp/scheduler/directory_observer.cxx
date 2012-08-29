@@ -391,7 +391,7 @@ bool Directory::read( Read_flags read_what, double minimum_age )
 
 bool Directory::is_directory_to_observe( File_path current_directory )
 {
-   return (current_directory.name().find_first_of(".") != 0) ? true : false;
+   return current_directory.name().find_first_of(".") != 0;
 }
 
 //-------------------------------------------------------------------------------Directory::set_aging_until

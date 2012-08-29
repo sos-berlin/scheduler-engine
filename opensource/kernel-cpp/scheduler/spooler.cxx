@@ -3837,7 +3837,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
 #   endif
 
-    Log_ptr::set_is_demo_version( sos_static_ptr()->_licence->is_demo_version() );
+    Log_ptr::set_demo_version( sos_static_ptr()->_licence->is_demo_version() );
     scheduler::error_settings.read( scheduler::default_factory_ini );
 
     try
@@ -4007,9 +4007,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 File_path scheduler_old = ((i > 0) ? path.substr(0,i) : path) + "-old." + path.extension();
                 try
                 {
-                    copy_file( path, scheduler_old );
+                   scheduler_old.try_unlink();
+                   path.move_to(scheduler_old);
                 }
-                catch( exception& x ) { cerr << x.what() << ", while copy file " << path << " to " << scheduler_old << "\n"; }
+                catch( exception& x ) { 
+                   cerr << x.what() << ", while rename file " << path << " to " << scheduler_old << "\n"; 
+                }
+
             }
 
             log_start( log_filename );
