@@ -4,24 +4,27 @@ import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.scripting.JobScriptInstanceAdapter;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 import sos.spooler.Job_impl;
-import sos.spooler.TaskBean;
+
+import static sos.spooler.Beans.toBean;
 
 public class ScriptAdapterJob extends Job_impl {
     private final JobScriptInstanceAdapter adapter;
 
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
-    //TODO funktioniert das Scripting auch bei remote jobs?
+    //TODO funktioniert das Scripting auch bei remote jobs? sos.spooler und com.sos.scheduler.engine.scripting in eigenes Artefakt auslagern, das von Taskprozessen verwendet wird -> com.sos.scheduler.task
 
     public ScriptAdapterJob(String language, String script) throws Exception {
-        adapter = new JobScriptInstanceAdapter(language, new Lazy<ImmutableMap<String, Object>>() {
-                    @Override protected ImmutableMap<String, Object> compute() {
-                        return ImmutableMap.of(
-                                "spooler", spooler,
-                                "spooler_task", new TaskBean(spooler_task),
-                                "spooler_job", spooler_job,
-                                "spooler_log", spooler_log);
-                    }
-                }, script);
+        adapter = new JobScriptInstanceAdapter(
+                language,
+                new Lazy<ImmutableMap<String,Object>>() {
+                    @Override protected ImmutableMap<String,Object> compute() {
+                        return ImmutableMap.<String,Object>of(
+                                "spooler", toBean(spooler),
+                                "spooler_task", toBean(spooler_task),
+                                "spooler_job", toBean(spooler_job),
+                                "spooler_log", toBean(spooler_log));
+                    }},
+                script);
     }
 
     public final boolean spooler_init() throws Exception {
@@ -64,7 +67,7 @@ public class ScriptAdapterJob extends Job_impl {
         return adapter.callProcessBefore();
     }
 
-    public final boolean spooler_process_after(boolean spooler_process_result) throws Exception {
-        return adapter.callProcessAfter(spooler_process_result);
+    public final boolean spooler_process_after(boolean spoolerProcessResult) throws Exception {
+        return adapter.callProcessAfter(spoolerProcessResult);
     }
 }

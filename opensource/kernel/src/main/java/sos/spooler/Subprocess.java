@@ -10,7 +10,7 @@ package sos.spooler;
  * @version $Revision: 4558 $
  */
 
-public class Subprocess  extends Idispatch
+public class Subprocess extends Idispatch implements HasBean<SubprocessBean>
 {
     private                 Subprocess          ( long idispatch )                  { super(idispatch); }
 
@@ -122,4 +122,8 @@ public class Subprocess  extends Idispatch
     public boolean          own_process_group   ()                                  { return boolean_com_call( "<own_process_group" ); }
     
     public Variable_set     env                 ()                                  { return (Variable_set)com_call( "<env" ); }
+
+    @Override public final SubprocessBean toBean() {
+        return new SubprocessBean(this);
+    }
 }

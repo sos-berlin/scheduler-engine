@@ -1,23 +1,25 @@
 package sos.spooler;
 
+import static sos.spooler.Beans.toBean;
+
 /** Ein Proxy von {@link Task}, mit Gettern und Settern für Skriptsprachen. */
-public final class TaskBean {
+public final class TaskBean implements Bean<Task> {
     private final Task delegate;
 
-    public TaskBean(Task task) {
+    TaskBean(Task task) {
         delegate = task;
     }
 
-    public Job getJob() {
-        return delegate.job();
+    public JobBean getJob() {
+        return toBean(delegate.job());
     }
 
     public int getId() {
         return delegate.id();
     }
 
-    public Variable_set getParams() {
-        return delegate.params();
+    public Variable_setBean getParams() {
+        return toBean(delegate.params());
     }
 
     public void setResult(String o) {
@@ -40,8 +42,8 @@ public final class TaskBean {
         delegate.set_error(o);
     }
 
-    public Error getError() {
-        return delegate.error();
+    public ErrorBean getError() {
+        return toBean(delegate.error());
     }
 
     public boolean wait_until_terminated() {
@@ -100,25 +102,25 @@ public final class TaskBean {
         return delegate.stderr_path();
     }
 
-    public Subprocess create_subprocess() {
-        return delegate.create_subprocess();
+    public SubprocessBean create_subprocess() {
+        return toBean(delegate.create_subprocess());
     }
 
-    public Subprocess create_subprocess(String commandLine) {
-        return delegate.create_subprocess(commandLine);
+    public SubprocessBean create_subprocess(String commandLine) {
+        return toBean(delegate.create_subprocess(commandLine));
     }
 
-    public Subprocess create_subprocess(String[] filenameAndArguments) {
-        return delegate.create_subprocess(filenameAndArguments);
+    public SubprocessBean create_subprocess(String[] filenameAndArguments) {
+        return toBean(delegate.create_subprocess(filenameAndArguments));
     }
 
-    public Web_service getWeb_service() {
-        return delegate.web_service();
-    }
-
-    public Web_service getWeb_service_or_null() {
-        return delegate.web_service_or_null();
-    }
+//    public Web_serviceBean getWeb_service() {
+//        return toBean(delegate.web_service());
+//    }
+//
+//    public Web_serviceBean getWeb_service_or_null() {
+//        return toBean(delegate.web_service_or_null());
+//    }
 
     public void setPriority(int o) {
         delegate.set_priority(o);
@@ -158,5 +160,9 @@ public final class TaskBean {
 
     public void call_me_again_when_locks_available() {
         delegate.call_me_again_when_locks_available();
+    }
+
+    @Override public Task getDelegate() {
+        return delegate;
     }
 }

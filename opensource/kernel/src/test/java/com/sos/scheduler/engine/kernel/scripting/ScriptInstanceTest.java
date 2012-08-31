@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 import org.junit.Test;
+import sos.spooler.Bean;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -7,7 +7,7 @@ package sos.spooler;
  * @version $Revision: 4558 $
  */
 
-public class Lock extends Idispatch
+public class Lock extends Idispatch implements HasBean<LockBean>
 {
     private                 Lock                ( long idispatch )                  { super(idispatch); }
 
@@ -16,4 +16,8 @@ public class Lock extends Idispatch
     public void         set_max_non_exclusive   ( int n )                           {                       com_call( ">max_non_exclusive", n    ); }
     public int              max_non_exclusive   ()                                  { return            int_com_call( "<max_non_exclusive"       ); }
     public void             remove              ()                                  {                       com_call( "remove"                   ); }
+
+    @Override public LockBean toBean() {
+        return new LockBean(this);
+    }
 }
