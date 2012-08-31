@@ -27,31 +27,31 @@ public class ScriptAdapterJob extends Job_impl {
                 script);
     }
 
-    public final boolean spooler_init() throws Exception {
+    @Override public final boolean spooler_init() throws Exception {
         return adapter.callInit(super.spooler_init());
     }
 
-    public final void spooler_exit() {
+    @Override public final void spooler_exit() {
         adapter.callExit();
     }
 
-    public final boolean spooler_open() throws Exception {
+    @Override public final boolean spooler_open() throws Exception {
         return adapter.callOpen(super.spooler_open());
     }
 
-    public final void spooler_close() throws Exception {
+    @Override public final void spooler_close() throws Exception {
         adapter.callClose();
     }
 
-    public final boolean spooler_process() throws Exception {
+    @Override public final boolean spooler_process() throws Exception {
         return adapter.callProcess(super.spooler_process());
     }
 
-    public final void spooler_on_error() throws Exception {
+    @Override public final void spooler_on_error() throws Exception {
         adapter.callOnError();
     }
 
-    public final void spooler_on_success() throws Exception {
+    @Override public final void spooler_on_success() throws Exception {
         adapter.callOnSuccess();
     }
 

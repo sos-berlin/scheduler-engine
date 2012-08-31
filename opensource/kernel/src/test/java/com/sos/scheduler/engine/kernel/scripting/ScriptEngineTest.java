@@ -6,7 +6,7 @@ import javax.script.*;
 
 import static junit.framework.Assert.assertEquals;
 
-public class ScriptEngineTest {
+public final class ScriptEngineTest {
 	private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
 
     @Test public void testBinding() {
