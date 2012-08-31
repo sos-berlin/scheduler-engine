@@ -37,7 +37,7 @@ package sos.spooler;
 
 
 
-public class Order extends Idispatch
+public class Order extends Idispatch implements HasBean<OrderBean>
 {
     private                 Order               ( long idispatch )                  { super(idispatch); }
 
@@ -236,4 +236,8 @@ public class Order extends Idispatch
     public String           end_state           ()                                  { return (String)   com_call( "<end_state"         ); }
 
     public int              setback_count       ()                                  { return ((Integer) com_call( "<setback_count"     )).intValue(); }
+
+    public final OrderBean toBean() {
+        return new OrderBean(this);
+    }
 }

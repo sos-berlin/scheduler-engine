@@ -7,10 +7,14 @@ package sos.spooler;
  * @version $Revision: 4558 $
  */
 
-public class Supervisor_client extends Idispatch
+public class Supervisor_client extends Idispatch implements HasBean<Supervisor_clientBean>
 {
     private                 Supervisor_client   ( long idispatch )                  { super(idispatch); }
 
     public String           hostname            ()                                  { return (String)       com_call( "<hostname" ); }
     public int              tcp_port            ()                                  { return            int_com_call( "<tcp_port" ); }
+
+    @Override public final Supervisor_clientBean toBean() {
+        return new Supervisor_clientBean(this);
+    }
 }

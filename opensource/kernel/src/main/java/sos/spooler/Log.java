@@ -12,7 +12,7 @@ package sos.spooler;
  * @version $Revision: 3946 $
  */
 
-public class Log extends Idispatch
+public class Log extends Idispatch implements HasBean<LogBean>
 {
     private                     Log                     ( long idispatch )                          { super(idispatch); }
 
@@ -236,4 +236,8 @@ public class Log extends Idispatch
      * @param level 2 für error bis -9 für debug9
      */
     public String               last                    ( int level )                               { return (String)   com_call( "<last", level            ); }
+
+    @Override public final LogBean toBean() {
+        return new LogBean(this);
+    }
 }

@@ -10,7 +10,7 @@ package sos.spooler;
  * @version $Revision: 3946 $
  */
 
-public class Error extends sos.spooler.Idispatch
+public class Error extends Idispatch implements HasBean<ErrorBean>
 {
     private                     Error                       ( long idispatch )                      { super(idispatch); }
 
@@ -31,4 +31,8 @@ public class Error extends sos.spooler.Idispatch
     /*+ Der Fehlertext (mit Fehlercode)
      */
     public String               text                        ()                                      { return (String)com_call( "<text"     ); }
+
+    @Override public final ErrorBean toBean() {
+        return new ErrorBean(this);
+    }
 }

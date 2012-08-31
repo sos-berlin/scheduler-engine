@@ -23,7 +23,7 @@ package sos.spooler;
  * @version $Revision: 3946 $
  */
 
-public class Order_queue extends Idispatch
+public class Order_queue extends Idispatch implements HasBean<Order_queueBean>
 {
     private                 Order_queue         ( long idispatch )                  { super(idispatch); }
 
@@ -45,4 +45,8 @@ public class Order_queue extends Idispatch
      * @see Job_chain#add_order(Order)
      */ 
     public Order            add_order           ( Order order )                     { return (Order)    com_call( "add_order", order    ); }
+
+    @Override public final Order_queueBean toBean() {
+        return new Order_queueBean(this);
+    }
 }

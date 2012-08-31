@@ -16,7 +16,7 @@ package sos.spooler;
  * @version $Revision: 6009 $
  */
 
-public class Job extends Idispatch
+public class Job extends Idispatch implements HasBean<JobBean>
 {
     private                 Job                 ( long idispatch )                  { super(idispatch); }
     
@@ -315,4 +315,8 @@ public class Job extends Idispatch
     public String           configuration_directory()                               { return (String)     com_call( "<configuration_directory"      ); }
 
     public int              setback_max         ()                                  { return ((Integer) com_call( "<setback_max"     )).intValue(); }
+
+    @Override public final JobBean toBean() {
+        return new JobBean(this);
+    }
 }

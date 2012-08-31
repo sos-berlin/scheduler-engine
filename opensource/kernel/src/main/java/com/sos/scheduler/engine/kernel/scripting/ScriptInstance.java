@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.Lazy;
+import sos.spooler.Bean;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

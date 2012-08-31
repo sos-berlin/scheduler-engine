@@ -10,7 +10,7 @@ package sos.spooler;
  * @version $Revision: 5854 $
  */
 
-public class Spooler extends Idispatch
+public class Spooler extends Idispatch implements HasBean<SpoolerBean>
 {
     private                 Spooler             ( long idispatch )                  { super(idispatch); }
 
@@ -157,4 +157,8 @@ public class Spooler extends Idispatch
     public String           configuration_directory()                               { return (String)        com_call( "<configuration_directory" ); }
     
     public Schedule         schedule( String path )                                 { return (Schedule)      com_call( "<schedule", path ); }
+
+    @Override public SpoolerBean toBean() {
+        return new SpoolerBean(this);
+    }
 }
