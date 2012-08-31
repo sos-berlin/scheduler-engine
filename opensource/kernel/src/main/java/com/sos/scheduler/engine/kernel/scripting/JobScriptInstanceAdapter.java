@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.scripting;
 
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.util.Lazy;
-import sos.spooler.Bean;
 
 public class JobScriptInstanceAdapter {
     private final ScriptInstance scriptInstance;

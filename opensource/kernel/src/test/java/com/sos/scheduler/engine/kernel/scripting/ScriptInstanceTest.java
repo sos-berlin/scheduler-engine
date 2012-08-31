@@ -5,21 +5,20 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 import org.junit.Test;
-import sos.spooler.Bean;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.*;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.io.Resources.getResource;
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class ScriptInstanceTest {
+public final class ScriptInstanceTest {
     private static final String javaScriptResourcePath = "com/sos/scheduler/engine/kernel/scripting/test.js";
     private static final String groovyResourcePath = "com/sos/scheduler/engine/kernel/scripting/test.groovy";
     private static final ImmutableMap<String, Object> emptyBindings = ImmutableMap.of();
@@ -80,8 +79,7 @@ public class ScriptInstanceTest {
 	@Test
 	public void javascriptWithObjects() throws Exception {
 		String script =	"function spooler_process() { spooler_log.info('Hello, my name is ' + name); return false }";
-		TestExecutor executor = newExecutor(ImmutableMap.<String, Object>of("name", "Walter"),
-                "javascript", script);
+		TestExecutor executor = newExecutor(ImmutableMap.<String, Object>of("name", "Walter"), "javascript", script);
 		executor.runLimited(1);
         assertEquals(asList("Hello, my name is Walter"), scriptLogger.lines);
 	}

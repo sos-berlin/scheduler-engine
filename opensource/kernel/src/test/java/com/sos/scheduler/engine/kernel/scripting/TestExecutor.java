@@ -7,7 +7,7 @@ class TestExecutor {
         this.adapter = adapter;
     }
 
-    void runLimited(int stepLimit) throws Exception {
+    final void runLimited(int stepLimit) throws Exception {
         boolean initOk = adapter.callInit(true);
         try {
             if (initOk) {
