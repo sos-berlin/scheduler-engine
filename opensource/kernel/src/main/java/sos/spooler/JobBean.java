@@ -60,8 +60,8 @@ public final class JobBean implements Bean<Job> {
         return delegate.title();
     }
 
-    public Order_queue getOrder_queue() {
-        return delegate.order_queue();
+    public Order_queueBean getOrder_queue() {
+        return toBean(delegate.order_queue());
     }
 
     public void setDelay_after_error(int errorSteps, double seconds) {
