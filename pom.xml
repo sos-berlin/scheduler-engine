@@ -28,6 +28,7 @@
         <module>setup</module>
     </modules>
 
+
     <build>
         <plugins>
             <plugin>
@@ -35,22 +36,22 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <tagBase>http://subversion.sos/svn/sos/scheduler/engine-releases</tagBase>
+                    <tagBase>scm:git:git@github.com:sos-berlin/scheduler-engine.git</tagBase>
                     <!--tagNameFormat>{1}</tagNameFormat--><!-- {0} ist ${project.artifactId}, {1} ist ${project.version} -->
                 </configuration>
             </plugin>
         </plugins>
     </build>
-	
+
     <scm>
         <!-- Falls release:prepare <scm> geändert hat (die Versionsbezeichnungen angehängt hat), so soll es für Snapshot aussehen:
         <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
         <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
         <url>http://subversion.sos/svn/sos/scheduler/engine</url>
         -->
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
+        <connection>scm:git:git@github.com:sos-berlin/scheduler-engine.git</connection>
+        <developerConnection>scm:git:git@github.com:sos-berlin/scheduler-engine.git</developerConnection>
+        <url>https://github.com/sos-berlin/scheduler-engine</url>
     </scm>
 
     <profiles>
