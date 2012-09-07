@@ -10,9 +10,9 @@ final class WaitForTest extends FunSuite {
 
   import WaitForTest._
 
-  test("durationIterator") {
-    durationIterator(millis(7), millis(3)).toSeq should equal (Seq(millis(3), millis(6), millis(7)))
-    durationIterator(millis(3), millis(7)).toSeq should equal (Seq(millis(3)))
+  test("durationSeq") {
+    durationSeq(millis(7), millis(3)).toSeq should equal (Seq(millis(3), millis(6), millis(7)))
+    durationSeq(millis(3), millis(7)).toSeq should equal (Seq(millis(3)))
   }
 
   test("waitTimeNowIterator") {

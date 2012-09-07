@@ -53,7 +53,7 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
       job.endTasks()   // Job ist möglicherweise schon gestoppt
       val e = eventPipe.next[TaskClosedEvent]
       assert(e.getId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed")
-      waitFor(standardSeconds(1), millis(10)) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+      waitFor(timeout=standardSeconds(5), step=millis(10)) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
       result
     }
 
