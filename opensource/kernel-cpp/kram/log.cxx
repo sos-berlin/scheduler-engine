@@ -60,7 +60,7 @@ namespace sos {
 const int buffer_size = 300;
 const int suppress_repeated = 3;    // Bei mehr als soviele gleiche Zeilen die Ausgabe unterdrücken
 
-boolean Log_ptr::static_is_demo_version = true;
+bool Log_ptr::static_is_demo_version = true;
 
 extern string                   sos_ini_msg             ();
 
