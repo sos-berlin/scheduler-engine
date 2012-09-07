@@ -66,8 +66,8 @@ public final class TaskBean implements Bean<Task> {
         delegate.set_delay_spooler_process(hhmmss);
     }
 
-    public Order getOrder() {
-        return delegate.order();
+    public OrderBean getOrder() {
+        return toBean(delegate.order());
     }
 
     public String getChanged_directories() {

@@ -71,8 +71,8 @@ public class OrderBean implements Bean<Order> {
         return delegate.payload_is_type(type);
     }
 
-    public Run_time getRun_time() {
-        return delegate.run_time();
+    public Run_timeBean getRun_time() {
+        return toBean(delegate.run_time());
     }
 
     public void remove_from_job_chain() {

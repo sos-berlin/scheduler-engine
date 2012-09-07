@@ -1,6 +1,7 @@
 package sos.spooler;
 
 import static sos.spooler.Beans.toBean;
+import static sos.spooler.Beans.toDelegate;
 
 public final class Job_chainBean implements Bean<Job_chain>{
     private final Job_chain delegate;
@@ -25,12 +26,12 @@ public final class Job_chainBean implements Bean<Job_chain>{
         delegate.add_end_state(state);
     }
 
-    public void add_order(Order order) {
-        delegate.add_order(order);
+    public void add_order(OrderBean order) {
+        delegate.add_order(toDelegate(order));
     }
 
-    public void add_or_replace_order(Order order) {
-        delegate.add_or_replace_order(order);
+    public void add_or_replace_order(OrderBean order) {
+        delegate.add_or_replace_order(toDelegate(order));
     }
 
 

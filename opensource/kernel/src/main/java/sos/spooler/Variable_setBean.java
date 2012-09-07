@@ -7,7 +7,7 @@ public final class Variable_setBean implements Bean<Variable_set>{
         this.delegate = delegate;
     }
 
-    public void setVar(String name, String value) {
+    public void set_var(String name, String value) {
         delegate.set_var(name, value);
     }
 
@@ -39,7 +39,7 @@ public final class Variable_setBean implements Bean<Variable_set>{
         return delegate.xml();
     }
 
-    public String names() {
+    public String getNames() {
         return delegate.names();
     }
 

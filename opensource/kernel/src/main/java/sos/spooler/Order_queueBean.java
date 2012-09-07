@@ -1,5 +1,6 @@
 package sos.spooler;
 
+import static sos.spooler.Beans.toBean;
 import static sos.spooler.Beans.toDelegate;
 
 public final class Order_queueBean implements Bean<Order_queue> {
@@ -13,8 +14,8 @@ public final class Order_queueBean implements Bean<Order_queue> {
         return delegate.length();
     }
 
-    public Order add_order(OrderBean order) {
-        return delegate.add_order(toDelegate(order));
+    public OrderBean add_order(OrderBean order) {
+        return toBean(delegate.add_order(toDelegate(order)));
     }
 
     @Override public Order_queue getDelegate() {
