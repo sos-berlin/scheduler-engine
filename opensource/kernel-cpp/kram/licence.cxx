@@ -759,9 +759,9 @@ int Sos_licence::component_code_of_name_or_minus( const string& name )
 
 //--------------------------------------------------------------------Sos_licence::is_demo_version
 
-boolean Sos_licence::is_demo_version()
+bool Sos_licence::is_demo_version()
 {
-    boolean result = true;
+    bool result = true;
     Z_FOR_EACH_CONST( list<string>, _installed_keys, it )
     {
        Sos_licence lic;
@@ -781,7 +781,7 @@ boolean Sos_licence::is_demo_version()
 
 void Sos_licence::log_licence_keys()
 {
-    boolean result = true;
+    bool result = true;
     Z_FOR_EACH_CONST( list<string>, _installed_keys, it )
     {
        Sos_licence lic;
