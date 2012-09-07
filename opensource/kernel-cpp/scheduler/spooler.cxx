@@ -3487,6 +3487,36 @@ void Spooler::assign_stdout()
     #endif
 }
 
+//----------------------------------------------------------------------Spooler::string backup_logfile
+
+string Spooler::backup_logfile( const File_path path )
+{
+   string msg = "";
+   if( path.file_exists() )
+   {
+         size_t i = path.find_last_of(".");
+         File_path scheduler_old = ((i > 0) ? path.substr(0,i) : path) + "-old." + path.extension();
+         try
+         {
+            scheduler_old.try_unlink();
+            path.move_to(scheduler_old);
+            msg = S() << "file " << path << " moved to " << scheduler_old << "\n"; 
+         }
+         catch( exception& x ) { 
+            try {
+               msg = S() << x.what() << ", while rename file " << path << " to " << scheduler_old << " - try to copy\n"; 
+               copy_file(path,scheduler_old);
+               msg += S() << "file " << path << " copied to " << scheduler_old << "\n"; 
+            }
+            catch( exception& x1 ) {
+               msg += S() << x1.what() << ", while copy file " << path << " to " << scheduler_old << "\n"; 
+            }
+         }
+
+   }
+   return msg;
+}
+
 //------------------------------------------------------------------------------------start_process
 #ifdef Z_WINDOWS
 
@@ -4000,23 +4030,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         {
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
-
-            if( path.file_exists() )
-            {
-                size_t i = path.find_last_of(".");
-                File_path scheduler_old = ((i > 0) ? path.substr(0,i) : path) + "-old." + path.extension();
-                try
-                {
-                   scheduler_old.try_unlink();
-                   path.move_to(scheduler_old);
-                }
-                catch( exception& x ) { 
-                   cerr << x.what() << ", while rename file " << path << " to " << scheduler_old << "\n"; 
-                }
-
-            }
-
+            string msg = sos::scheduler::Spooler::backup_logfile( path );
             log_start( log_filename );
+            if (!msg.empty()) Z_LOG2("scheduler",msg);
         }
 
         Z_LOG2( "scheduler", "JobScheduler engine " << scheduler::version_string << "\n" );
@@ -4031,7 +4047,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         */
         if( use_external_schema != "" ) 
         {
-            Z_LOG2( "scheduler", "using dynamic schema: " << use_external_schema << "\n" );
+            Z_LOG2( "scheduler", "Using dynamic schema: " << use_external_schema << "\n" );
             //zschimmer::embedded_and_dynamic_files
             string xsd_schema_content = sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path);
             // xsd_schema_content = sos::scheduler::file::xsd_from_file(use_external_schema);
