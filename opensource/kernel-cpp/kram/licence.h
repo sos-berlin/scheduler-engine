@@ -93,7 +93,7 @@ struct Sos_licence : Sos_self_deleting
 
     void                        check                   ();     // Wird von sosstat.cxx gerufen
     void                        check2                  ();     // Wird von sosprof.cxx set_sos_ini_filename() gerufen
-    boolean                     is_demo_version         ();
+    bool                        is_demo_version         ();
     void                        log_licence_keys        ();
 
     const char*                 operator []             ( int ) const;
