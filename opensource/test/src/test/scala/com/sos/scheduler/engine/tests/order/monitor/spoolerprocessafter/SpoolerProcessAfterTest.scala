@@ -10,15 +10,17 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.util.WaitFor.waitFor
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting._
+import org.joda.time.Duration.{millis, standardSeconds}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
+
   import SpoolerProcessAfterTest._
 
   private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
@@ -34,20 +36,25 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
     }
   }
 
-  private class MyTest(index: Int, setting: Setting, expected: Expected) {
+  private final class MyTest(index: Int, setting: Setting, expected: Expected) {
     val eventPipe = controller.newEventPipe()
     val job = jobSubsystem.job(setting.jobPath)
 
-    try checkAssertions(execute())
-    finally cleanUp(setting)
+    try {
+      val e = execute()
+      checkAssertions(e)
+    }
+    finally cleanUp()
 
     def execute() = {
       scheduler executeXml setting.orderElem
-      val myFinishedEvent = eventPipe.next[MyFinishedEvent]
+      val result = eventPipe.next[MyFinishedEvent]
       orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
       job.endTasks()   // Job ist möglicherweise schon gestoppt
-      assert(eventPipe.next[TaskClosedEvent].getId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed")
-      myFinishedEvent
+      val e = eventPipe.next[TaskClosedEvent]
+      assert(e.getId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed")
+      waitFor(standardSeconds(1), millis(10)) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+      result
     }
 
     def checkAssertions(event: MyFinishedEvent) {
@@ -58,7 +65,7 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
       assert(messageCodes.toMap === expected.messageCodes.toMap)
     }
 
-    private def cleanUp(setting: Setting) {
+    private def cleanUp() {
       scheduler executeXml <modify_job job={setting.jobPath.asString} cmd="unstop"/>
       messageCodes.clear()
     }
@@ -83,22 +90,20 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
 
   @EventHandler def handleEvent(e: LogEvent) {
     if (Expected.logLevels contains e.level) {
-      e.getCodeOrNull match {
-        case code: String => messageCodes.addBinding(e.level, code)
-        case null =>
-      }
+      for (code <- Option(e.getCodeOrNull))
+        messageCodes.addBinding(e.level, code)
     }
   }
 }
 
-object SpoolerProcessAfterTest {
+private object SpoolerProcessAfterTest {
   //private val logger = LoggerFactory.getLogger(classOf[SpoolerProcessAfterTest])
 
-  private class MyMutableMultiMap[A,B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
+  class MyMutableMultiMap[A,B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
-  private case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
+  case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
 
   /** Wegen JUnitRunner? Klammern lassen Surefire Klassen- und Testnamen durcheinanderbringen */
-  private def renameTestForSurefire(name: String) = name.replace('(', '[').replace(')', ']')
+  def renameTestForSurefire(name: String) = name.replace('(', '[').replace(')', ']')
       .replace(',', ' ')  // Surefire zeigt Komma als \u002C
 }
