@@ -3,10 +3,12 @@ package sos.spooler.jobs;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.scripting.JobScriptInstanceAdapter;
 import com.sos.scheduler.engine.kernel.util.Lazy;
+import sos.spooler.HasBean;
 import sos.spooler.Job_impl;
 
 import static sos.spooler.Beans.toBean;
 
+// Wird nur von C++ aufgerufen.
 public class ScriptAdapterJob extends Job_impl {
     private final JobScriptInstanceAdapter adapter;
 
@@ -14,17 +16,33 @@ public class ScriptAdapterJob extends Job_impl {
     //TODO funktioniert das Scripting auch bei remote jobs? sos.spooler und com.sos.scheduler.engine.scripting in eigenes Artefakt auslagern, das von Taskprozessen verwendet wird -> com.sos.scheduler.task
 
     public ScriptAdapterJob(String language, String script) throws Exception {
+        final Parameters p = parseLanguageParameter(language);
         adapter = new JobScriptInstanceAdapter(
-                language,
+                p.language,
                 new Lazy<ImmutableMap<String,Object>>() {
                     @Override protected ImmutableMap<String,Object> compute() {
-                        return ImmutableMap.<String,Object>of(
-                                "spooler", toBean(spooler),
-                                "spooler_task", toBean(spooler_task),
-                                "spooler_job", toBean(spooler_job),
-                                "spooler_log", toBean(spooler_log));
+                        return ImmutableMap.of(
+                                "spooler", conditionalToBean(p.isUsingBean, spooler),
+                                "spooler_task", conditionalToBean(p.isUsingBean, spooler_task),
+                                "spooler_job", conditionalToBean(p.isUsingBean, spooler_job),
+                                "spooler_log", conditionalToBean(p.isUsingBean, spooler_log));
                     }},
                 script);
+    }
+
+    private static Parameters parseLanguageParameter(String languageString) {
+        String s = languageString;
+        boolean isBeanCall = true;
+        String javaCalls = "-javaCalls";
+        if (s.endsWith(javaCalls)) {
+            s = s.substring(0, s.length() - javaCalls.length());
+            isBeanCall = false;
+        }
+        return new Parameters(s, isBeanCall);
+    }
+
+    private static Object conditionalToBean(boolean isToBean, HasBean<?> o) {
+        return isToBean? toBean(o) : o;
     }
 
     @Override public final boolean spooler_init() throws Exception {
@@ -69,5 +87,15 @@ public class ScriptAdapterJob extends Job_impl {
 
     public final boolean spooler_process_after(boolean spoolerProcessResult) throws Exception {
         return adapter.callProcessAfter(spoolerProcessResult);
+    }
+
+    private static class Parameters {
+        final String language;
+        final boolean isUsingBean;
+
+        Parameters(String language, boolean isBeanCall) {
+            this.language = language;
+            this.isUsingBean = isBeanCall;
+        }
     }
 }

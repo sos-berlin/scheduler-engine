@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
-	order="no" stop_on_error="no">
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
     <script language="javax.script:javascript">
         <![CDATA[
 importClass(java.io.File);
@@ -18,7 +17,7 @@ function spooler_open()	{
 }
  
 function spooler_process() {
-	spooler_log.warn(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
+	spooler_log.warn(spooler.id +": " + spooler_job.name + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
 	log_function("spooler_process");
 	return false;
 }
@@ -40,9 +39,9 @@ function spooler_on_success() {
 }
 
 function log_function( functionname ) {
-	count = (spooler.variables().value(functionname)) ? (spooler.variables().value(functionname)) : 0;
+	count = spooler.variables.value(functionname) ? spooler.variables.value(functionname) : 0;
 	count++;
-	filename = spooler.configuration_directory() + "/resultfile.txt";
+	filename = spooler.configuration_directory + "/resultfile.txt";
     Files.append(functionname + "=" + count + "\n", new File(filename), Charset.defaultCharset());
 	spooler_log.info(functionname + " called " + count + " times.");
 }
@@ -66,7 +65,7 @@ function spooler_process_before() {
 }
 
 function spooler_process_after(spooler_process_result) {
-	spooler_log.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
+	spooler_log.info(spooler.id +": " + spooler_job.name + " is running with task id " + spooler_task.id);   // use alle objects given by JS kernel
 	log_function("spooler_process_after");
 	return spooler_process_result;
 }
@@ -76,9 +75,9 @@ function spooler_task_after() {
 }
 
 function log_function( functionname ) {
-	count = spooler.variables().value(functionname)? spooler.variables().value(functionname) : 0;
+	count = spooler.variables.value(functionname)? spooler.variables.value(functionname) : 0;
 	count++;
-	filename = spooler.configuration_directory() + "/resultfile.txt";
+	filename = spooler.configuration_directory + "/resultfile.txt";
     Files.append(functionname + "=" + count + "\n", new File(filename), Charset.defaultCharset());
 	spooler_log.info(functionname + " called " + count + " times.");
 }

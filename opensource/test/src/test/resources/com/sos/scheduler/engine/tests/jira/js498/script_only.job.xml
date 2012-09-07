@@ -11,8 +11,8 @@ importClass(java.io.File);
 importClass(com.google.common.io.Files);
 importClass(java.nio.charset.Charset);
 
-filename = spooler.configuration_directory() + "/resultfile.txt";
-Files.append("script_only=" + spooler_job.name() + "\n", new File(filename), Charset.defaultCharset());
+filename = spooler.configuration_directory + "/resultfile.txt";
+Files.append("script_only=" + spooler_job.name + "\n", new File(filename), Charset.defaultCharset());
         ]]>
     </script>
     <run_time/>

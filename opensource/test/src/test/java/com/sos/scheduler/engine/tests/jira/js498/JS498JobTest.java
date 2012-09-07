@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
@@ -26,7 +25,7 @@ public class JS498JobTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(JS498JobTest.class);
 
 
-    private static final ImmutableList<String> jobs = ImmutableList.of ("script_only","rhino_objects_standalone","rhino_functions_standalone");
+    private static final ImmutableList<String> jobs = ImmutableList.of ("script_only","rhino_objects_noorder","rhino_functions_noorder");
 	private final CommandBuilder util = new CommandBuilder();
 
 	private HashMap<String,String> resultMap;
@@ -58,14 +57,14 @@ public class JS498JobTest extends SchedulerTest {
         HashMap<String,String> result = new HashMap<String, String>();
         List<String> lines = Files.readLines(resultFile, Charset.defaultCharset());
         for(String line : lines) {
-            String[] arr = line.split("=");
+            String[] arr = line.split("=", 2);
             if (arr.length != 2)
-                throw new SchedulerException("line in resultfile '" + resultFile + "' is not valid: " + line);
+                throw new RuntimeException("Line in resultfile '" + resultFile + "' is not valid: " + line);
             result.put(arr[0],arr[1]);
         }
         return result;
     }
-	
+
 	@EventHandler
 	public void handleOrderEnd(TaskEndedEvent e) throws IOException {
         taskCount++;
