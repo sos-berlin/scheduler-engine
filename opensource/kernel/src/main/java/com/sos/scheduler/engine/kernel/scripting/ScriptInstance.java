@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.Lazy;
-import sos.spooler.Bean;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -41,8 +40,9 @@ public class ScriptInstance {
         this.script = script;
     }
 
+
     private static String normalizeLanguageName(String language) {
-        return language.replaceFirst("^" + Pattern.quote(languagePrefix), "");   //.toLowerCase();
+        return language.replaceFirst("^" + Pattern.quote(languagePrefix), "").toLowerCase();
     }
 
     private static ScriptEngine newScriptEngine(String language) {
@@ -55,10 +55,10 @@ public class ScriptInstance {
 
     private static RuntimeException throwUnknownLanguage(String language) {
         String availableLanguages = Joiner.on(", ").join(new ScriptEngineManager().getEngineFactories());
-        throw new SchedulerException("Script language "+ language +" is unknown. Available languages are "+availableLanguages);
+        throw new SchedulerException("Script language '"+ language +"' is unknown. Available languages are "+availableLanguages);
     }
 
-    public void loadScript() {
+    public final void loadScript() {
         try {
             for (ImmutableMap.Entry<String,Object> e: bindingsLazy.get().entrySet())
                 engine.put(e.getKey(), e.getValue());
@@ -67,7 +67,7 @@ public class ScriptInstance {
         catch (ScriptException e) { throw propagate(e); }
     }
 
-    public boolean callBooleanWhenExists(String name, boolean defaultResult) {
+    public final boolean callBooleanWhenExists(String name, boolean defaultResult) {
         try {
             return callBooleanWithDefault(name, defaultResult);
         } catch (NoSuchMethodException e) {
@@ -76,7 +76,7 @@ public class ScriptInstance {
         }
     }
 
-    public boolean callBooleanWithDefault(String functionName, boolean deflt) throws NoSuchMethodException {
+    public final boolean callBooleanWithDefault(String functionName, boolean deflt) throws NoSuchMethodException {
         return resultToBoolean(call(functionName), deflt);
     }
 
@@ -90,7 +90,7 @@ public class ScriptInstance {
             throw new RuntimeException("The function has not returned a Boolean: "+ result);
     }
 
-    public void callWhenExists(String name) {
+    public final void callWhenExists(String name) {
         try {
             call(name);
         } catch (NoSuchMethodException e) {
@@ -98,7 +98,7 @@ public class ScriptInstance {
         }
     }
 
-    public Object call(String functionName, Object... parameters) throws NoSuchMethodException {
+    public final Object call(String functionName, Object... parameters) throws NoSuchMethodException {
 		try {
 			//logger.trace("Call function " + functionName);
 			Invocable invocableEngine = (Invocable)engine;
@@ -109,7 +109,7 @@ public class ScriptInstance {
         catch (ScriptException e) { throw propagate(e); }
     }
 
-    public void close() {
+    public final void close() {
         engine.setBindings(engine.createBindings(), ENGINE_SCOPE);
     }
 }

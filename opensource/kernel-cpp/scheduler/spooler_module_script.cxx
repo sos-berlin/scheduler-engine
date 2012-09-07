@@ -35,7 +35,7 @@ void Java_module_script_instance::init()
 
     assert( _jobject == NULL );
     _jobject = env->NewObject( _java_class, method_id, language, code );
-    if( !_jobject || env->ExceptionCheck() )  env.throw_java( java_adapter_job() + " Konstruktor" );
+    if( !_jobject || env->ExceptionCheck() )  env.throw_java( java_adapter_job() + " constructor" );
 
 }
 
