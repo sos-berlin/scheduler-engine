@@ -10,11 +10,11 @@ object WaitFor {
   /** Wartet längstens die Dauer d in Schritten von step, bis condition wahr wird.
     * condition wird bei d > 0 wenigsten zweimal aufgerufen: am Anfang und am Ende.
     * @return letztes Ergebnis von condition */
-  def waitFor(d: Duration, step: Duration)(condition: => Boolean): Boolean =
-    waitFor(durationIterator(d, step))(condition)
+  def waitFor(timeout: Duration, step: Duration)(condition: => Boolean): Boolean =
+    waitFor(durationSeq(timeout, step))(condition)
 
   /** Liefert einen Iterator beginnend mit step, dann in Schritten von step, zum Schluss d. **/
-  def durationIterator(d: Duration, step: Duration) =
+  def durationSeq(d: Duration, step: Duration): IndexedSeq[Duration] =
     ((step.getMillis until d.getMillis by step.getMillis) ++ Seq(d)) map { o => new Duration(o) }
 
   /** Wartet die waitPeriods, bis condition wahr wird.
