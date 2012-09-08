@@ -735,32 +735,39 @@ struct Non_cloneable
                             void operator =             ( const Non_cloneable& );                   // Nicht implementiert
 };
 
-//---------------------------------------------------------------------------------------Set_locale
+//---------------------------------------------------------------------------------------Use_locale
 
-struct Set_locale
+struct Use_locale
 {
-                            Set_locale                  ( const char* locale )                      { set( LC_ALL, locale ); }
-                            Set_locale                  ( int category, const char* locale )        { set( category, locale ); }
-                           ~Set_locale                  ()                                          { restore(); }
+                            Use_locale                  ( const char* locale )                      { set( LC_ALL, locale ); }
+                            Use_locale                  ( int category, const char* locale )        { set( category, locale ); }
+                           ~Use_locale                  ()                                          { restore(); }
 
-                            operator bool               () const                                    { return _saved_locale != NULL; }
+private:
     void                    set                         ( int category, const char* locale );
     void                    restore                     ();
 
     int                    _category;
-    const char*            _saved_locale;
+    string                 _saved_locale;
+};
+
+//-------------------------------------------------------------------------------------Use_c_locale
+
+struct Use_c_locale : Use_locale {
+                            Use_c_locale                ()                                          : Use_locale("C") {}                                
+                            Use_c_locale                (int category)                              : Use_locale(category, "C") {}                                
 };
 
 //-----------------------------------------------------------------------------------------Z_LOCALE
 #ifdef __GNUC__xxx
 
 #   define Z_LOCALE( CATEGORY, LOCALE )                                                             \
-        for( ::zschimmer::Set_locale __set_locale__ ( CATEGORY, LOCALE ) )
+        for( ::zschimmer::Use_locale __set_locale__ ( CATEGORY, LOCALE ) )
 
 #else
 
 #   define Z_LOCALE( CATEGORY, LOCALE )                                                             \
-        for( ::zschimmer::Set_locale __set_locale__ ( CATEGORY, LOCALE ); __set_locale__; __set_locale__.close() )
+        for( ::zschimmer::Use_locale __set_locale__ ( CATEGORY, LOCALE ); __set_locale__; __set_locale__.close() )
 
 #endif
 

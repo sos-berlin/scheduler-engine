@@ -837,6 +837,7 @@ double as_double( const char* str )
 {
     if( !str )  throw_xc( "Z-4001", "double" ); 
 
+    Use_c_locale use_c_locale (LC_NUMERIC);
     char*  t;
     double a = strtod( str, &t );
 
@@ -902,25 +903,25 @@ bool as_bool( const char* str )
     return false;
 }
 
-//----------------------------------------------------------------------------------Set_locale::set
+//----------------------------------------------------------------------------------Use_locale::set
 
-void Set_locale::set( int category, const char* locale )
+void Use_locale::set( int category, const char* locale )
 { 
     if( strcmp( locale, setlocale( category, NULL ) ) != 0 )
     {
         _category = category;  
-        _saved_locale = setlocale( category, locale ); 
+        const char* s = setlocale( category, locale ); 
+        if (s) _saved_locale = s;
     }
 }
 
-//------------------------------------------------------------------------------Set_locale::restore
+//------------------------------------------------------------------------------Use_locale::restore
 
-void Set_locale::restore()
+void Use_locale::restore()
 { 
-    if( _saved_locale )  
-    {
-        setlocale( _category, _saved_locale );
-        _saved_locale = NULL; 
+    if(_saved_locale != "") {
+        setlocale( _category, _saved_locale.c_str() );
+        _saved_locale = ""; 
     }
 }
 
