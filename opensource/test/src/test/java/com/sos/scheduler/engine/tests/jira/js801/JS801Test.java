@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js801;
 
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderId;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
 
@@ -21,14 +21,15 @@ public class JS801Test extends SchedulerTest {
         runSchedulerWithJobChain("with_delay");
     }
 
-    @Test public void testJobChainWithAt() {
+    @Test public void testJobChainWithAt() throws Exception {
         String expectedErrorCode = "SCHEDULER-217";
         boolean ok;
         try {
             runSchedulerWithJobChain("with_at");
             ok = false;
         } catch (Exception x) {
-            ok = x.getMessage().contains(expectedErrorCode);
+            if (!x.getMessage().contains(expectedErrorCode)) throw x;
+            ok = true;
         }
         if (!ok) fail("Exception "+expectedErrorCode+" expected");
     }
