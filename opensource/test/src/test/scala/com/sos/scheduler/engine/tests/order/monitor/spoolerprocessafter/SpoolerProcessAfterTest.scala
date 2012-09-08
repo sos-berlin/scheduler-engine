@@ -17,6 +17,7 @@ import org.joda.time.Duration.millis
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
+import org.slf4j.LoggerFactory
 
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
@@ -58,15 +59,20 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
       job.endTasks()   // Task kann schon beendet und Job schon gestoppt sein.
       eventPipe.next[TaskClosedEvent] match {
         case e => assert(e.getId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed") }
-      waitForCondition(TimeoutWithSteps(millis(3000), millis(10))) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+      waitForCondition(TimeoutWithSteps(millis(3000), millis(10))) {
+        val jobState = job.state
+        val result = jobState == expected.jobState   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+        logger.info("*) job.state="+ jobState +" expected.jobState="+ expected.jobState +" => "+ result)  // waitForCondition() scheint auf manchen Maschinen nicht zu greifen?
+        result
+      }
     }
 
     def checkAssertions(event: MyFinishedEvent) {
       assert(event.orderKey === setting.orderKey)
       assert(expected.orderStateExpectation matches event.state, "Expected OrderState="+expected.orderStateExpectation+", but was "+event.state)
       assert(event.spoolerProcessAfterParameterOption === expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after(): ")
-      assert(job.state === expected.jobState, "Job.state is not as expected: ")
       assert(messageCodes.toMap === expected.messageCodes.toMap)
+      assert(job.state === expected.jobState, "Job.state is not as expected: ")
     }
 
     private def cleanUpAfterTest() {
@@ -101,7 +107,7 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
 }
 
 private object SpoolerProcessAfterTest {
-  //private val logger = LoggerFactory.getLogger(classOf[SpoolerProcessAfterTest])
+  val logger = LoggerFactory.getLogger(classOf[SpoolerProcessAfterTest])
 
   class MyMutableMultiMap[A,B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
