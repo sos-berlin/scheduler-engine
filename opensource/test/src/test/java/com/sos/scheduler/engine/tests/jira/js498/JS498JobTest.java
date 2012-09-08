@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,32 +19,29 @@ import static org.junit.Assert.assertTrue;
 /**
  * This is a test for scripting with the Rhino engine. The test starts different standalone jobs.
  */
-public class JS498JobTest extends SchedulerTest {
-    
-    private static final Logger logger = Logger.getLogger(JS498JobTest.class);
+public final class JS498JobTest extends SchedulerTest {
 
+    private static final ImmutableList<String> jobs = ImmutableList.of("script_only", "rhino_objects_noorder", "rhino_functions_noorder");
 
-    private static final ImmutableList<String> jobs = ImmutableList.of ("script_only","rhino_objects_noorder","rhino_functions_noorder");
-	private final CommandBuilder util = new CommandBuilder();
-
-	private HashMap<String,String> resultMap;
+    private final CommandBuilder util = new CommandBuilder();
+    private HashMap<String,String> resultMap;
     private int taskCount = 0;
 
     @Test
-    public void test() throws InterruptedException, IOException {
+    public void test() throws IOException {
         //controller().activateScheduler("-e","-ignore-process-classes","-log-level=info","-log=" + logFile);
-        controller().activateScheduler("-e","-log-level=info");
+        controller().activateScheduler();
         File resultFile = prepareResultFile();
         for (String jobName : jobs) {
             controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
         }
         controller().waitForTermination(shortTimeout);
         resultMap = getResultMap(resultFile);
-        testScript();
-        testObjectsJob();
-        testFunctions();
+        checkScriptOnlyJob();
+        checkRhinoObjectsJob();
+        testRhinoFunctionsJob();
     }
-    
+
     private File prepareResultFile() {
         String resultFileName = scheduler().getConfiguration().localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
         File resultFile = new File(resultFileName);
@@ -60,31 +56,28 @@ public class JS498JobTest extends SchedulerTest {
             String[] arr = line.split("=", 2);
             if (arr.length != 2)
                 throw new RuntimeException("Line in resultfile '" + resultFile + "' is not valid: " + line);
-            result.put(arr[0],arr[1]);
+            result.put(arr[0], arr[1]);
         }
         return result;
     }
 
-	@EventHandler
-	public void handleOrderEnd(TaskEndedEvent e) throws IOException {
+    @EventHandler
+    public void handleOrderEnd(TaskEndedEvent e) {
         taskCount++;
         if (taskCount == jobs.size())
             controller().terminateScheduler();
-	}
+    }
 
-    // result of job script_only
-    public void testScript() throws IOException {
+    private void checkScriptOnlyJob() {
         assertObject("script_only", "script_only");
     }
 
-    // result of job rhino_objects
-    public void testObjectsJob() throws IOException {
+    private void checkRhinoObjectsJob() {
         assertObject("spooler.variables.count", "2");
         assertObject("spooler_task.params.names", "taskparam1;taskparam2");
     }
 
-    // result of job rhino_functions
-    public void testFunctions() throws IOException {
+    private void testRhinoFunctionsJob() {
         assertObject("spooler_init","1");
         assertObject("spooler_open","1");
         assertObject("spooler_process","1");
@@ -97,14 +90,12 @@ public class JS498JobTest extends SchedulerTest {
         assertObject("spooler_process_after","1");
     }
 
-
-	/**
-	 * checks if an estimated object was given
-	 */
-	private void assertObject(String varname, String expected) {
-		String value = resultMap.get(varname);
-		assertTrue(varname + " is not set in scheduler variables", value != null);
-		assertTrue(value + " is not valid - " + expected + " expected", value.equals(expected));
-	}
-
+    /**
+     * checks if an estimated object was given
+     */
+    private void assertObject(String varname, String expected) {
+        String value = resultMap.get(varname);
+        assertTrue(varname + " is not set in scheduler variables", value != null);
+        assertTrue(value + " is not valid - " + expected + " expected", value.equals(expected));
+    }
 }
