@@ -327,6 +327,7 @@ int as_uintK( const char* str )
 
 double c_str_as_double( const char* str )
 {
+    z::Use_c_locale use_c_locale (LC_NUMERIC);
     char* t;
     double a = strtod( str, &t );
 
