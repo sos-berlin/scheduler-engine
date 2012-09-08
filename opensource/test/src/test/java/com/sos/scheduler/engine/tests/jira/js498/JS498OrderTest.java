@@ -1,13 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js498;
 
-
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
@@ -31,25 +29,22 @@ import static org.junit.Assert.assertTrue;
  * @version 1.0 - 16.12.2011 13:39:41
  */
 public class JS498OrderTest extends SchedulerTest {
-    
-    private static final Logger logger = Logger.getLogger(JS498OrderTest.class);
-
 
     private static final String jobchain = "chain_rhino";
-	private final CommandBuilder util = new CommandBuilder();
 
-	private HashMap<String,String> resultMap;
+    private final CommandBuilder util = new CommandBuilder();
+    private HashMap<String,String> resultMap;
 
     @Test
-    public void test() throws InterruptedException, IOException {
+    public void test() throws IOException {
         //controller().activateScheduler("-e","-ignore-process-classes","-log-level=info","-log=" + logFile);
-        controller().activateScheduler("-log-level=info");
+        controller().activateScheduler();
         File resultFile = prepareResultFile();
         controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
         controller().waitForTermination(shortTimeout);
         resultMap = getResultMap(resultFile);
-        testObjects();
-        testFunctions();
+        checkJobRhinoObjects();
+        checkJobRhinoFunctions();
     }
 
     private File prepareResultFile() {
@@ -70,29 +65,27 @@ public class JS498OrderTest extends SchedulerTest {
         }
         return result;
     }
-	
-	@EventHandler
-	public void handleOrderEnd(OrderFinishedEvent e) throws IOException {
-        controller().terminateScheduler();
-	}
 
-    // result of job rhino_objects
-    public void testObjects() throws IOException {
+    @EventHandler
+    public void handleOrderEnd(OrderFinishedEvent e)  {
+        controller().terminateScheduler();
+    }
+
+    private void checkJobRhinoObjects() {
         assertObject("spooler.variables.count", "2");
-        assertObject("spooler_task.order.job_chain.name","chain_rhino");
-        assertObject("spooler_task.params.names","taskparam1;taskparam2");
-        assertObject("spooler_job.order_queue.length","1");
-        assertObject("spooler_task.order.id","chain_rhino");
+        assertObject("spooler_task.order.job_chain.name", "chain_rhino");
+        assertObject("spooler_task.params.names", "taskparam1;taskparam2");
+        assertObject("spooler_job.order_queue.length", "1");
+        assertObject("spooler_task.order.id", "chain_rhino");
     }
 
     // result of job rhino_objects
-    public void testObjectsJob() throws IOException {
+    private void testObjectsJob() {
         assertObject("spooler.variables.count", "2");
         assertObject("spooler_task.params.names", "taskparam1;taskparam2");
     }
 
-    // result of job rhino_functions
-    public void testFunctions() throws IOException {
+    private void checkJobRhinoFunctions() {
         assertFunction("spooler_init");
         assertFunction("spooler_open");
         assertFunction("spooler_process");
@@ -105,21 +98,20 @@ public class JS498OrderTest extends SchedulerTest {
         assertFunction("spooler_process_after");
     }
 
-	/**
-	 * checks if an estimated funtion was called.
-	 * @param function
-	 */
-	private void assertFunction(String function) {
-		assertObject(function,"1");		// any funtion should be called exactly one time
-	}
-	
-	/**
-	 * checks if an estimated object was given
-	 */
-	private void assertObject(String varname, String expected) {
-		String value = resultMap.get(varname);
-		assertTrue(varname + " is not set in scheduler variables", value != null);
-		assertTrue(value + " is not valid - " + expected + " expected", value.equals(expected));
-	}
+    /**
+     * checks if an estimated funtion was called.
+     * @param function
+     */
+    private void assertFunction(String function) {
+        assertObject(function,"1");		// any funtion should be called exactly one time
+    }
 
+    /**
+     * checks if an estimated object was given
+     */
+    private void assertObject(String varname, String expected) {
+        String value = resultMap.get(varname);
+        assertTrue(varname + " is not set in scheduler variables", value != null);
+        assertTrue(value + " is not valid - " + expected + " expected", value.equals(expected));
+    }
 }
