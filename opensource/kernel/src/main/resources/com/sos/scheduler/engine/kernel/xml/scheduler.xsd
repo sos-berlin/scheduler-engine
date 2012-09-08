@@ -71,8 +71,9 @@
                         <xsd:attribute name="log_dir" type="File"/>
                         <xsd:attribute name="priority_max" type="xsd:nonNegativeInteger"/>
                         <xsd:attribute name="include_path" type="File"/>
+                        <!-- Seit der Umstellung von libxml2 auf Java-DOM an der Kommandozeile anzugeben:
                         <xsd:attribute name="java_class_path" type="String"/>
-                        <xsd:attribute name="java_options" type="String"/>
+                        <xsd:attribute name="java_options" type="String"/-->
                         <xsd:attribute name="main_scheduler" type="String"/>
                         <xsd:attribute name="mail_xslt_stylesheet" type="File"/>
                         <xsd:attribute name="supervisor" type="String"/>

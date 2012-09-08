@@ -2,7 +2,7 @@
 <spooler
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
 >
-    <config tcp_port="6364" java_options="-Xmx5m">
+    <config tcp_port="6364">
         <security>
             <allowed_host host="0.0.0.0" level="all"/>
         </security>
