@@ -2594,7 +2594,7 @@ void Spooler::run()
                 // PROCESS-HANDLES EINSAMMELN
     
 #               ifndef Z_WINDOWS
-                    if( wait_until > 0 )
+                    if( !wait_until.is_zero() )
 #               endif 
                 FOR_EACH_FILE_BASED( Process_class, process_class )
                 {
@@ -2615,7 +2615,7 @@ void Spooler::run()
                             {
                                 wait_until = next_time;
                                 wait_until_object = *p;
-                                if( wait_until == 0 )  break;
+                                if( wait_until.is_zero() )  break;
                             }
 
 #                       endif

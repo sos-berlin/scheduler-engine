@@ -440,7 +440,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         Time now = Time::now();
 
         //if( until > now )
-            Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
+            Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (until.as_double() - now.as_double()) << "s)" <<
                 ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
         ptr<Socket_wait> wait = _spooler->_connection_manager->create_wait();
@@ -452,7 +452,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         int ret;
         {
             Java_thread_unlocker unlocker ( _spooler );
-            int ret = wait->wait( (double)( until - now ) );
+            ret = wait->wait(until.as_double() - now.as_double());
         }
         return ret > 0;
     }
