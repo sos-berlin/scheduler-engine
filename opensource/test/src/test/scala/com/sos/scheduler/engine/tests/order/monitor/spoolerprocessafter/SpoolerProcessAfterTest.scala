@@ -10,10 +10,10 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.util.WaitFor.waitFor
+import com.sos.scheduler.engine.test.util.WaitForCondition.{TimeoutWithSteps, waitForCondition}
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting._
-import org.joda.time.Duration.{millis, standardSeconds}
+import org.joda.time.Duration.millis
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
@@ -44,17 +44,21 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
       val e = execute()
       checkAssertions(e)
     }
-    finally cleanUp()
+    finally cleanUpAfterTest()
 
     def execute() = {
       scheduler executeXml setting.orderElem
       val result = eventPipe.next[MyFinishedEvent]
-      orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
-      job.endTasks()   // Job ist möglicherweise schon gestoppt
-      val e = eventPipe.next[TaskClosedEvent]
-      assert(e.getId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed")
-      waitFor(timeout=standardSeconds(5), step=millis(10)) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
+      cleanUpAfterExcecute()
       result
+    }
+
+    def cleanUpAfterExcecute() {
+      orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
+      job.endTasks()   // Task kann schon beendet und Job schon gestoppt sein.
+      eventPipe.next[TaskClosedEvent] match {
+        case e => assert(e.getId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed") }
+      waitForCondition(TimeoutWithSteps(millis(3000), millis(10))) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.
     }
 
     def checkAssertions(event: MyFinishedEvent) {
@@ -65,7 +69,7 @@ final class SpoolerProcessAfterTest extends ScalaSchedulerTest {
       assert(messageCodes.toMap === expected.messageCodes.toMap)
     }
 
-    private def cleanUp() {
+    private def cleanUpAfterTest() {
       scheduler executeXml <modify_job job={setting.jobPath.asString} cmd="unstop"/>
       messageCodes.clear()
     }
