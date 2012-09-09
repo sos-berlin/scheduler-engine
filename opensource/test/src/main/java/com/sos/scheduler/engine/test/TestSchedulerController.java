@@ -62,6 +62,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private File workDirectory(Class<?> testClass) {
         String p = System.getProperty(workDirectoryPropertyName);
         if (p != null) {
+            new File(p).mkdir();    // Das Unterverzeichnis failsafe-reports wird verzögert angelegt. Dem kommen wir zuvor.
             File result = new File(p, testClass.getName());
             makeCleanDirectory(result);
             return result;
