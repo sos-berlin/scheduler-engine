@@ -25,6 +25,7 @@
         <cplusplusVersion>${project.version}</cplusplusVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
         <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
+        <failsafe.threadCount>2</failsafe.threadCount>
     </properties>
 
     <profiles>
@@ -428,12 +429,22 @@
                     <parallel>classes</parallel>
                     <forkMode>perthread</forkMode>
                     <threadCount>4</threadCount>-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.12.3</version>
+                <configuration>
+                    <printSummary>false</printSummary>
+                    <parallel>classes</parallel>
+                    <forkMode>perthread</forkMode>
+                    <threadCount>${failsafe.threadCount}</threadCount>
                     <systemProperties>
-                        <!--property>
-                            <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
+                        <property>
                             <name>java.io.tmpdir</name>
                             <value>${basedir}/target</value>
-                        </property-->
+                        </property>
                         <property>
                             <name>com.sos.scheduler.engine.test.underMaven</name>
                         </property>
@@ -443,10 +454,18 @@
                         </property>
                         <property>
                             <name>com.sos.scheduler.engine.test.directory</name>
-                            <value>target/surefire-reports</value>
+                            <value>${basedir}/target/failsafe-reports</value>
                         </property>
                     </systemProperties>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

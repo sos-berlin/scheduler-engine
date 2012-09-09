@@ -1,23 +1,27 @@
-package com.sos.scheduler.engine.playground.ss.packageload;
+package com.sos.scheduler.engine.playground.ss.processlist;
 
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.IOException;
 
-public final class ExtractResourcesTest extends SchedulerTest {
+@SuppressWarnings("deprecation")
+public class ProcessListIT extends SchedulerTest {
 
-    private static final String testChain = "extract_resources";
+    private static final Logger logger = Logger.getLogger(ProcessListIT.class);
 
-    @Test public void test() throws Exception {
+    private CommandBuilder cmd = new CommandBuilder();
+
+    @Test
+    public void test() throws Exception {
+        controller().setTerminateOnError(true);
         controller().activateScheduler("-e");
-        CommandBuilder c = new CommandBuilder();
-        String command = c.addOrder(testChain)
-                .addParam("classname", "com.sos.scheduler.engine.tests.stress.parallelorder.OrderParallelIT")
-                .getCommand();
+        String command = cmd.addOrder("processlist_test").getCommand();
+        logger.info("command: " + command);
         controller().scheduler().executeXml(command);
         controller().waitForTermination(shortTimeout);
     }
