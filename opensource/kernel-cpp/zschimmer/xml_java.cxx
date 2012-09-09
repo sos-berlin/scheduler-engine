@@ -90,7 +90,8 @@ bool Document_ptr::try_load_xml( const string& xml_text, const string& encoding 
 
 void Document_ptr::load_xml(const string& xml_text, const string& encoding) 
 {
-    assign(XmlUtilsJ::loadXml(javabridge::Local_java_byte_array(xml_text)));        //TOOD encoding berücksichtigen
+    javabridge::Local_java_byte_array array (xml_text);
+    assign(XmlUtilsJ::loadXml(array));        //TOOD encoding berücksichtigen
 }
 
 //---------------------------------------------------------------------------Document_ptr::load_xml
