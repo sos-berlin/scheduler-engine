@@ -42,15 +42,14 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
         return controller().scheduler();
     }
 
-    public final File getTempFile(Class<?> classInstance, String fileWithoutPath) {
-        File resultDir = new File(controller.environment().directory().getAbsolutePath(),classInstance.getName());
-        File resultFile = new File(resultDir,fileWithoutPath);
+    public final File getTempFile(String fileWithoutPath) {
+        File resultFile = new File(controller.environment().directory().getAbsolutePath(),fileWithoutPath);
         try {
             Files.createParentDirs(resultFile);
         } catch (IOException e) {
-            throw new SchedulerException("error creating directory " + resultDir.getAbsolutePath());
+            throw new SchedulerException("error creating directory " + resultFile.getPath());
         }
-        return new File(resultDir,fileWithoutPath);
+        return resultFile;
     }
 
 }

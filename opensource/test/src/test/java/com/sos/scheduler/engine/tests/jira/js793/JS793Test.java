@@ -74,7 +74,7 @@ public final class JS793Test extends SchedulerTest {
     }
 
     private File getResultfile(String jobchainName) {
-        return getTempFile(JS793Test.class, "result_" + jobchainName + ".txt");
+        return getTempFile("result_" + jobchainName + ".txt");
     }
 
     @HotEventHandler
