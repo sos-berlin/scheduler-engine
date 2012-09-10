@@ -25,7 +25,7 @@ public class JS868Test_2 extends JS868Base {
     @Test
 	public void test() throws InterruptedException, IOException {
         final CommandBuilder util = new CommandBuilder();
-        File resultFile = getTempFile(JS868Test_2.class, "result.txt");
+        File resultFile = getTempFile("result.txt");
         // controller().activateScheduler("-e","-log-level=info");
         controller().activateScheduler();
         String cmd = util.modifyOrder("test_chain","order")
