@@ -12,8 +12,8 @@ import org.scalatest.matchers.ShouldMatchers._
 import org.slf4j.LoggerFactory
 
 @RunWith(classOf[JUnitRunner])
-final class EventsResourceTest extends ScalaSchedulerTest {
-  import EventsResourceTest._
+final class EventsResourceTestIgnore extends ScalaSchedulerTest {
+  import EventsResourceTestIgnore._
 
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val eventsResource = javaResource(injector).path("TESTONLY/events")
@@ -43,8 +43,8 @@ final class EventsResourceTest extends ScalaSchedulerTest {
   }
 }
 
-object EventsResourceTest {
-  private val logger = LoggerFactory.getLogger(classOf[EventsResourceTest])
+object EventsResourceTestIgnore {
+  private val logger = LoggerFactory.getLogger(classOf[EventsResourceTestIgnore])
 
   class ResponsePrinter(resource: WebResource) extends Thread {
     val result = new StringBuilder
