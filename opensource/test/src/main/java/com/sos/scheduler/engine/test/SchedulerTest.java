@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.test;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.Time;
 import org.junit.After;
 import org.junit.Before;
@@ -43,13 +42,12 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     }
 
     public final File getTempFile(String fileWithoutPath) {
-        File resultFile = new File(controller.environment().directory().getAbsolutePath(),fileWithoutPath);
+        File resultFile = new File(controller.environment().directory().getAbsolutePath(), fileWithoutPath);
         try {
             Files.createParentDirs(resultFile);
         } catch (IOException e) {
-            throw new SchedulerException("error creating directory " + resultFile.getPath());
+            throw new RuntimeException("Error creating directory: " + resultFile, e);
         }
         return resultFile;
     }
-
 }
