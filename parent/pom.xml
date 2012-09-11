@@ -14,6 +14,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> <!-- für maven-failsafe-plugin -->
         <scala.version>2.9.1-1</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <scalatest.scala.version>2.9.1</scalatest.scala.version>
