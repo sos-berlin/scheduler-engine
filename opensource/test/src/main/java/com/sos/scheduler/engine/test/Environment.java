@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.data.folder.Path;
 import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
@@ -87,11 +86,6 @@ public final class Environment {
 
     public File fileFromPath(TypedPath p) {
         return p.file(configDirectory());
-    }
-
-    @Deprecated  // Nimm fileFromPath()
-    public File fileFromPath(Path p, String suffix) {
-        return new File(configDirectory(), p + suffix);
     }
 
     public File directory() {

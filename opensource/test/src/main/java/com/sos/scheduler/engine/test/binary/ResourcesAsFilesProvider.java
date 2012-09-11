@@ -1,25 +1,23 @@
 package com.sos.scheduler.engine.test.binary;
 
-import static com.sos.scheduler.engine.kernel.util.Files.copyURLToFile;
-import static com.sos.scheduler.engine.kernel.util.Util.ignore;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.io.File;
+import java.io.IOException;
+
+import static com.sos.scheduler.engine.kernel.util.Files.copyURLToFile;
+import static com.sos.scheduler.engine.kernel.util.Util.ignore;
 
 /** Stellt Resourcen als Dateien zur Verfügung -
  * basiert auf {@link PathMatchingResourcePatternResolver}, das nicht in jeder Umgebung funktionieren muss.
  * Ist also nur für den Test des Schedulers geeignet, nicht unbedingt für die Produktion. */
 class ResourcesAsFilesProvider {
     private static final Logger logger = Logger.getLogger(ResourcesAsFilesProvider.class);
-    private static final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
 
     private final File directory;
     private final ImmutableList<Resource> resources;
