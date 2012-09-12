@@ -12,11 +12,11 @@ import java.io.IOException;
  * This class is working with a scheduler.xml without any parameter declaration. It is for test to get the correct
  * parameter values in a shell job.
  */
-public class JS868NoGlobalParamsTest extends JS868Base {
+public class JS868NoGlobalParamsIT extends JS868Base {
     
     @Test
 	public void test() throws InterruptedException, IOException {
-        final CommandBuilder util = new CommandBuilder();
+        CommandBuilder util = new CommandBuilder();
         File resultFile = getTempFile("result.txt");
         // controller().activateScheduler("-e","-log-level=info");
         controller().activateScheduler();
