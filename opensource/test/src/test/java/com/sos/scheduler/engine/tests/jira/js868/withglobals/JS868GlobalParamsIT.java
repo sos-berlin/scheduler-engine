@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js868.withglobals;
 
+import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.tests.jira.js868.JS868Base;
 import org.junit.Test;
@@ -12,6 +13,8 @@ import java.io.IOException;
  * parameter values in a shell job.
  */
 public class JS868GlobalParamsIT extends JS868Base {
+
+    private final static String orderName = "test_chain_" + (OperatingSystem.isWindows ? "windows" : "unix");
     
     @Test
 	public void test() throws InterruptedException, IOException {
@@ -19,7 +22,7 @@ public class JS868GlobalParamsIT extends JS868Base {
         File resultFile = getTempFile("result.txt");
 //        controller().activateScheduler("-e","-log-level=info");
         controller().activateScheduler();
-        String cmd = util.modifyOrder("test_chain","order")
+        String cmd = util.modifyOrder(orderName,"order")
                 .addParam("RESULT_FILE",resultFile.getAbsolutePath())
                 .getCommand();
 		controller().scheduler().executeXml(cmd);
