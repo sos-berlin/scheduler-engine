@@ -128,8 +128,26 @@
             <properties>
                 <operatingSystem>solaris</operatingSystem>
                 <osArch>solaris-${os.arch}</osArch>
-		<cpuArchitecture>${os.arch}</cpuArchitecture>
+		        <cpuArchitecture>${os.arch}</cpuArchitecture>
             </properties>
+        </profile>
+
+        <profile>
+            <id>test-parallel</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <!-- Als Profil, weil Plugin unter Windows mit NullPointerExeption abstürzt bei -rf :test -e -Ptest-parallel -->
+                            <parallel>classes</parallel>
+                            <forkMode>perthread</forkMode>
+                            <threadCount>${failsafe.threadCount}</threadCount>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -438,9 +456,6 @@
                 <version>2.12.3</version>
                 <configuration>
                     <printSummary>false</printSummary>
-                    <parallel>classes</parallel>
-                    <forkMode>perthread</forkMode>
-                    <threadCount>${failsafe.threadCount}</threadCount>
                     <systemProperties>
                         <property>
                             <name>java.io.tmpdir</name>
