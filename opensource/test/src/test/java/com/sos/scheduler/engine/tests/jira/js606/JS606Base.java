@@ -26,7 +26,7 @@ public abstract class JS606Base extends SchedulerTest {
 		
 		this.jobchainName = jobchain;
 
-		resultfile = File.createTempFile("result_" + jobchainName, ".txt");
+		resultfile = getTempFile("result_" + jobchainName + ".txt");
 		logger.debug("results of the jobs will be written in file " + resultfile.getAbsolutePath());
 	}
 	
