@@ -37,17 +37,14 @@ to run without maven integration.
     <if>
      <equals arg1="${os.architecture}" arg2="windows" />
      <then>
-      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
-      		<include name="scheduler.exe"/>
-      		<include name="spidermonkey.dll"/>
-      	</fileset>
+      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform" />
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
-      		<include name="scheduler.dll"/>
+      		<exclude name="**"/>
       	</fileset>
      </then>
      <else>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
-      		<include name="scheduler"/>
+      		<exclude name="libspidermonkey.so"/>
       	</fileset>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
       		<include name="libspidermonkey.so"/>
