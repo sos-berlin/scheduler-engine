@@ -452,7 +452,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         int ret;
         {
             Java_thread_unlocker unlocker ( _spooler );
-            int ret = wait->wait( (double)( until - now ) );
+            ret = wait->wait( (double)( until - now ) );
         }
         return ret > 0;
     }
