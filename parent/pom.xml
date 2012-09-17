@@ -456,6 +456,7 @@
                 <version>2.12.3</version>
                 <configuration>
                     <printSummary>false</printSummary>
+                    <argLine>-Xms5m -Xmx10m</argLine>  <!-- Sparsame Heap-Zuteilung für die vielen Prozesse (Tests + Scheduler-Task-Prozesse) -->
                     <systemProperties>
                         <property>
                             <name>java.io.tmpdir</name>
