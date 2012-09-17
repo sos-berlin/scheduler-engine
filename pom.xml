@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>parent</artifactId>
-        <version>1.5.0.2178-SNAPSHOT</version>
+        <version>1.5.2261-SNAPSHOT</version>
         <relativePath>parent</relativePath>
     </parent>
 
@@ -35,7 +35,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <tagBase>http://subversion.sos/svn/sos/scheduler/engine-releases</tagBase>
+                    <tagBase>scm:git:git@github.com:sos-berlin/scheduler-engine.git</tagBase>
                     <!--tagNameFormat>{1}</tagNameFormat--><!-- {0} ist ${project.artifactId}, {1} ist ${project.version} -->
                 </configuration>
             </plugin>
@@ -48,9 +48,9 @@
         <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
         <url>http://subversion.sos/svn/sos/scheduler/engine</url>
         -->
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
+        <connection>scm:git:git@github.com:sos-berlin/scheduler-engine.git</connection>
+        <developerConnection>scm:git:git@github.com:sos-berlin/scheduler-engine.git</developerConnection>
+        <url>https://github.com/sos-berlin/scheduler-engine</url>
     </scm>
 
     <profiles>
@@ -58,8 +58,8 @@
             <id>release</id>
             <properties>
                 <!-- Versionsbezeichnungen für die nächste Freigabe und die darauffolgende Entwicklungsversion hier einstellen -->
-                <releaseVersion>1.5.0.2177</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
-                <developmentVersion>1.5.0.2178-SNAPSHOT</developmentVersion>
+                <releaseVersion>1.5.2260-BETA</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
+                <developmentVersion>1.5.2261-SNAPSHOT</developmentVersion>
                 <tag>engine-${releaseVersion}</tag>
             </properties>
         </profile>

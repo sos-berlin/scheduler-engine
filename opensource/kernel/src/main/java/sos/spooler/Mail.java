@@ -11,7 +11,7 @@ package sos.spooler;
  * @version $Revision $
  */
 
-public class Mail extends Idispatch
+public class Mail extends Idispatch implements HasBean<MailBean>
 {
     private             Mail                ( long idispatch )                              { super(idispatch); }
 
@@ -462,4 +462,8 @@ public class Mail extends Idispatch
      * @see #set_xslt_stylesheet_path(String)
      */
     public String       xslt_stylesheet_path()                                              { return (String)   com_call( "<xslt_stylesheet_path"   ); }
+
+    @Override public final MailBean toBean() {
+        return new MailBean(this);
+    }
 }

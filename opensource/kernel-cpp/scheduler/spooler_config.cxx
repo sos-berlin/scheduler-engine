@@ -51,35 +51,31 @@ xml::Element_ptr optional_single_element( const xml::Element_ptr& element, const
 
 xml::Element_ptr default_single_element( const xml::Element_ptr& element, const string& name )
 {
-    xml::Element_ptr result = optional_single_element( element, name );
-    if( result == NULL ) {
+    if (xml::Element_ptr result = optional_single_element( element, name ))
+        return result;
+    else
         return element.ownerDocument().createElement( name );     // Künstliches Element mit Attributwerten aus der DTD
-    }
-
-    return result;
 }
 
 //-----------------------------------------------------------------------------------single_element
 
 xml::Element_ptr single_element( const xml::Element_ptr& element, const string& name )
 {
-    xml::Element_ptr result = optional_single_element( element, name );
-    if( result == NULL )  z::throw_xc( "SOS-1422", name );
-
-    return result;
+    if (xml::Element_ptr result = optional_single_element( element, name ))
+        return result;
+    else
+        z::throw_xc( "SOS-1422", name );
 }
 
 //-----------------------------------------------------------------------------------single_element
 
 string optional_single_element_as_text( const xml::Element_ptr& element, const string& name )
 {
-    xml::Element_ptr result = optional_single_element( element, name );
-    if( result == NULL )  return empty_string;
-    
-    xml::Element_ptr text_element = result.firstChild();
-    if( text_element == NULL )  return empty_string;
-
-    return text_element.nodeValue();
+    if (xml::Element_ptr result = optional_single_element( element, name )) {
+        if (xml::Element_ptr text_element = result.firstChild())
+            return text_element.nodeValue();
+    }    
+    return empty_string;
 }
 
 //-----------------------------------------------------------------------------Spooler::load_config

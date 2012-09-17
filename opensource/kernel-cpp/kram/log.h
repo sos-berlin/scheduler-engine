@@ -69,8 +69,15 @@ struct Log_ptr
     ostream*                    operator ->                 ()                                      { return _s; }
 
     static int                  log_write                   ( const char*, int length );
+    static void                 set_demo_version            ( bool is_demo_version )                { static_is_demo_version = is_demo_version; }
+    static bool                 is_demo_version             ()                                      { return static_is_demo_version; }
+
 
     ostream*                   _s;
+
+  private:
+    static bool                 static_is_demo_version;
+
 };
 
 #define log_ptr ( Log_ptr()._s )

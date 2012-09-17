@@ -1,131 +1,101 @@
-/*
- * <div class="sos_branding">
- *   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-
-/*
- * <div class="sos_branding">
- *   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-
 package sos.spooler.jobs;
 
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.kernel.scripting.APIModuleInstance;
+import com.google.common.collect.ImmutableMap;
+import com.sos.scheduler.engine.kernel.scripting.JobScriptInstanceAdapter;
+import com.sos.scheduler.engine.kernel.util.Lazy;
+import sos.spooler.HasBean;
 import sos.spooler.Job_impl;
 
-/**
- * Created by IntelliJ IDEA.
- * User: ss
- * Date: 07.02.12
- * Time: 16:27
- */
-public class ScriptAdapterJob extends Job_impl {
+import static sos.spooler.Beans.toBean;
 
-    private final APIModuleInstance scriptModule;
-    private final String language;
-    private final String code;
+// Wird nur von C++ aufgerufen.
+public class ScriptAdapterJob extends Job_impl {
+    private final JobScriptInstanceAdapter adapter;
 
     //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
-    //TODO Testen für standalone jobs
-    //TODO was passiert bei gemischtem Sourceocode (z.B. shell_script, Monitore in javax);
-    //TODO funktioniert das Scripting auch bei remote jobs?
-    //TODO prüfen, ob die Scheduler Parameter mit SCHEDULER__ statt mit SCHEDULER_ anfangen sollten
+    //TODO funktioniert das Scripting auch bei remote jobs? sos.spooler und com.sos.scheduler.engine.scripting in eigenes Artefakt auslagern, das von Taskprozessen verwendet wird -> com.sos.scheduler.task
 
-    private boolean bindingsSet = false;
+    public ScriptAdapterJob(String language, String script) throws Exception {
+        final Parameters p = parseLanguageParameter(language);
+        adapter = new JobScriptInstanceAdapter(
+                p.language,
+                new Lazy<ImmutableMap<String,Object>>() {
+                    @Override protected ImmutableMap<String,Object> compute() {
+                        return ImmutableMap.of(
+                                "spooler", conditionalToBean(p.isUsingBean, spooler),
+                                "spooler_task", conditionalToBean(p.isUsingBean, spooler_task),
+                                "spooler_job", conditionalToBean(p.isUsingBean, spooler_job),
+                                "spooler_log", conditionalToBean(p.isUsingBean, spooler_log));
+                    }},
+                script);
+    }
 
-    public ScriptAdapterJob(String language, String code) {
-
-        this.language = language;
-        this.code = code;
-        try {
-            this.scriptModule = new APIModuleInstance(language, code);
-        } catch (Exception e) {
-            throw new SchedulerException("error creating instance of APIModuleInstance",e);
+    private static Parameters parseLanguageParameter(String languageString) {
+        String s = languageString;
+        boolean isBeanCall = true;
+        String javaCalls = "-javaCalls";
+        if (s.endsWith(javaCalls)) {
+            s = s.substring(0, s.length() - javaCalls.length());
+            isBeanCall = false;
         }
+        return new Parameters(s, isBeanCall);
     }
 
-    public boolean spooler_init() throws Exception {
-        String method = "spooler_init";
-        try {
-            setBindings();
-            callMethod(method);
-        } catch (Exception e) {
-            spooler_log.error(e.getMessage());
-            throw new SchedulerException(method + " failed",e);
-        }
-        return true;
+    private static Object conditionalToBean(boolean isToBean, HasBean<?> o) {
+        return isToBean? toBean(o) : o;
     }
 
-    public void spooler_exit() throws Exception {
-        callMethod("spooler_exit");
+    @Override public final boolean spooler_init() throws Exception {
+        return adapter.callInit(super.spooler_init());
     }
 
-    public boolean spooler_open() throws Exception {
-        return callMethod("spooler_open", super.spooler_open());
+    @Override public final void spooler_exit() {
+        adapter.callExit();
     }
 
-    public void spooler_close() throws Exception {
-        callMethod("spooler_close");
+    @Override public final boolean spooler_open() throws Exception {
+        return adapter.callOpen(super.spooler_open());
     }
 
-    public boolean spooler_process() throws Exception {
-        return callMethod("spooler_process", super.spooler_process());
+    @Override public final void spooler_close() throws Exception {
+        adapter.callClose();
     }
 
-    public void spooler_on_error() throws Exception {
-        callMethod("spooler_on_error");
+    @Override public final boolean spooler_process() throws Exception {
+        return adapter.callProcess(super.spooler_process());
     }
 
-    public void spooler_on_success() throws Exception {
-        callMethod("spooler_on_success");
+    @Override public final void spooler_on_error() throws Exception {
+        adapter.callOnError();
     }
 
-    public boolean spooler_task_before() throws Exception {
-        String method = "spooler_task_before";
-        try {
-            setBindings();
-            callMethod(method);
-        } catch (Exception e) {
-            spooler_log.error(e.getMessage());
-            throw new SchedulerException(method + " failed",e);
-        }
-        return true;
+    @Override public final void spooler_on_success() throws Exception {
+        adapter.callOnSuccess();
     }
 
-
-    public void spooler_task_after() throws Exception {
-        callMethod("spooler_task_after");
+    public final boolean spooler_task_before() throws Exception {
+        return adapter.callTaskBefore();
     }
 
-
-    public boolean spooler_process_before() throws Exception {
-        return callMethod("spooler_process_before", true);
+    public final void spooler_task_after() throws Exception {
+        adapter.callTaskAfter();
     }
 
-
-    public boolean spooler_process_after(boolean spooler_process_result) throws Exception {
-        return callMethod("spooler_process_after", spooler_process_result);
+    public final boolean spooler_process_before() throws Exception {
+        return adapter.callProcessBefore();
     }
 
-    private void callMethod(String function) {
-        scriptModule.call(function);
+    public final boolean spooler_process_after(boolean spoolerProcessResult) throws Exception {
+        return adapter.callProcessAfter(spoolerProcessResult);
     }
 
-    private boolean callMethod(String function, boolean defaultResult) {
-        return scriptModule.callBoolean(function,defaultResult);
-    }
+    private static class Parameters {
+        final String language;
+        final boolean isUsingBean;
 
-    private void setBindings() {
-        if (!bindingsSet) {
-            scriptModule.addObject(spooler, "spooler");
-            scriptModule.addObject(spooler_task, "spooler_task");
-            scriptModule.addObject(spooler_job, "spooler_job");
-            scriptModule.addObject(spooler_log, "spooler_log");
-            scriptModule.addObject(spooler_log, "logger");
-            bindingsSet = true;
+        Parameters(String language, boolean isBeanCall) {
+            this.language = language;
+            this.isUsingBean = isBeanCall;
         }
     }
 }

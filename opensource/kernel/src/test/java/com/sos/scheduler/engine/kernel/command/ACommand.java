@@ -1,11 +1,9 @@
 package com.sos.scheduler.engine.kernel.command;
 
-
 class ACommand implements Command {
     final String value;
 
-
-    public ACommand(String v) {
+    ACommand(String v) {
         value = v;
     }
 }

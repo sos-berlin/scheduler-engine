@@ -31,11 +31,11 @@ public class ClassResource {
 //        return clas.getPackage().getName().replace(".", "/") + "/" + subPath;
 //    }
 
-    public URL url() {
+    public final URL url() {
         return clas.getResource(subPath);
     }
 
-    public ImmutableMap<String,String> properties() {
+    public final ImmutableMap<String,String> properties() {
         try {
             Properties properties = new Properties();
             properties.load(getInputStream());

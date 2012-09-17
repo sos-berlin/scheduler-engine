@@ -251,8 +251,8 @@ void Order::handle_changed_processable_state()
     // denn die weiter hinten stehenden Aufträge laufen nie vor dem ersten an.
     // Dann hätten wir weniger Aufruf an Job::signal_earlier_order().
 
-    Time new_next_time = next_time();
-
+    //Time new_next_time = next_time();
+    //
     //if( new_next_time <= _signaled_next_time )
     //{
         if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) )
@@ -1654,7 +1654,7 @@ void Order::set_attributes_and_remove_duplicates(
       xml::Element_ptr setback_element
 )
 {
-    for( node; node; node = node.nextSibling() )
+    for(; node; node = node.nextSibling() )
     {
         if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
         {
@@ -2490,9 +2490,9 @@ Job_chain* Order::job_chain_for_api() const
 
 //----------------------------------------------------------------------------Order::postprocessing
 
-void Order::postprocessing( Postprocessing_mode postprocessing_mode )
+void Order::postprocessing( Order_state_transition state_transition )
 {
-    _is_success_state = postprocessing_mode == post_success;
+    _is_success_state = state_transition == post_success;
 
     Job*      last_job          = _task? _task->job() : NULL;
     Job_node* job_node          = Job_node::cast( _job_chain_node );
@@ -2516,7 +2516,7 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
 
     _task = NULL;
 
-    if( postprocessing_mode != post_keep_state  &&  !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  
+    if( state_transition != post_keep_state  &&  !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  
         force_error_state )
     {
         if( job_node )

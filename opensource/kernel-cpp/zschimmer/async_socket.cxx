@@ -29,7 +29,7 @@ namespace zschimmer {
 //--------------------------------------------------------------------------------------------const
 
 const int                       default_buffer_size                 = 4096; //1024;
-const size_t                    Socket_stream::read_bytes_maximum   = 10000;
+const int                       Socket_stream::read_bytes_maximum   = 10000;
 
 static Message_code_text error_codes[] =
 {
@@ -1478,10 +1478,10 @@ void Socket_stream::write_bytes( const io::Byte_sequence& bytes )
 
 //------------------------------------------------------------------------Socket_stream::read_bytes
 
-string Socket_stream::read_bytes( size_t maximum )
+string Socket_stream::read_bytes( int maximum )
 {
     char buffer [ read_bytes_maximum ];
-    int length = call_recv( buffer, min( maximum, NO_OF( buffer ) ) );
+    int length = call_recv( buffer, min( maximum, int_cast(NO_OF( buffer ) )) );
     return string( buffer, length );
 }
 

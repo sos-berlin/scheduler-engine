@@ -18,7 +18,7 @@ namespace sos {
 
 //------------------------------------------------------------------------------------sos_alloc
 
-void* sos_alloc( int4 size, const char* info )
+void* sos_alloc( size_t size, const char* info )
 {
     void* p = zschimmer::z_malloc(size, info, 0);
     if( !p )  throw_no_memory_error( size );

@@ -103,7 +103,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
                                 Task_queue                  ( Job* job )                            : _job(job), _spooler(job->_spooler) {}
         
         void                    clear                       ()                                      { _queue.clear(); }
-        int                     size                        () const                                { return _queue.size(); }
+        int                     size                        () const                                { return int_cast(_queue.size()); }
         bool                    empty                       () const                                { return _queue.empty(); }
         iterator                begin                       ()                                      { return _queue.begin(); }
         iterator                end                         ()                                      { return _queue.end(); }
@@ -279,6 +279,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
+    void                        set_state_cmd               (const string&);
     void                        end_tasks                   ( const string& task_warning );
     void                        kill_task                   ( int task_id, bool immediately = false );
     void                        kill_queued_task            ( int task_id );

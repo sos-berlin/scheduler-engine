@@ -445,12 +445,10 @@ bool Schedule_use::on_requisite_loaded( File_based* file_based )
 {
     assert( file_based->subsystem()       == spooler()->schedule_subsystem() );
     assert( file_based->normalized_path() == spooler()->schedule_subsystem()->normalized_path( _schedule_path ) );
-
-    Schedule* schedule = dynamic_cast<Schedule*>( file_based );
-    assert( schedule );
+    assert( dynamic_cast<Schedule*>( file_based ) );
 
     try_load();
-    assert( _schedule == schedule );
+    assert( _schedule == dynamic_cast<Schedule*>( file_based ) );
 
     on_schedule_loaded();
 
@@ -738,9 +736,7 @@ Schedule* Schedule::on_replace_now()
 {
     assert( can_be_replaced_now() );
 
-    Typed_folder* typed_folder = this->typed_folder();
     ptr<Schedule> replacement  = this->replacement();
-
     assert( replacement );
 
     set_inlay( replacement->_inlay );

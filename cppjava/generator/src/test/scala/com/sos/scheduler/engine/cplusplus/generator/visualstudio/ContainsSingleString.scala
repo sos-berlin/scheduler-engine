@@ -10,6 +10,6 @@ case class ContainsSingleString(singleString: String) extends BaseMatcher[String
   }
 
   def describeTo(d: Description) {
-    d.appendText("single occurrence of " + singleString);
+    d.appendText("single occurrence of " + singleString)
   }
 }

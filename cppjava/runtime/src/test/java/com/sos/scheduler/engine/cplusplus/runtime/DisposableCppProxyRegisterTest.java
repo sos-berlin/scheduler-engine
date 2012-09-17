@@ -44,7 +44,7 @@ public final class DisposableCppProxyRegisterTest {
         register.dispose(aRef);
     }
 
-    class MockCppProxy implements ReleasableCppProxy {
+    final class MockCppProxy implements ReleasableCppProxy {
         private final String name;
 
         MockCppProxy(String name) {

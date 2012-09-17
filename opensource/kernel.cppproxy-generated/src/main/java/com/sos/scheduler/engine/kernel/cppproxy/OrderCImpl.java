@@ -26,6 +26,20 @@ final class OrderCImpl
     private static native java.lang.String file_path__native(long cppReference);
 
 
+    @Override public void java_remove() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java_remove__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void java_remove__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

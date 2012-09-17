@@ -58,6 +58,12 @@
         verlängert ihn, wenn keine Änderung vorliegt, bis auf 60 Sekunden.
     </p>
 
+    <p>
+        <b>Achtung!</b><br/>
+        Seit Version 1.5.xx der JobScheduler engine werden Ordner, deren Name mit einem . (Punkt) beginnt, nicht 
+        überwacht. Konfigurationsdateien, die sich in einem solchen Ordner befinden, werden ignoriert.
+    </p>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <a name="files"/>

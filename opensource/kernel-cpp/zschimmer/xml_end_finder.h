@@ -36,7 +36,7 @@ struct Xml_end_finder
 
                                 Xml_end_finder              ();
 
-    bool                        is_complete                 ( const char* p, int length );
+    bool                        is_complete                 ( const char* p, size_t length );
     bool                        is_complete                 ()                          { return _xml_is_complete; }
 
     Fill_zero                  _zero_;

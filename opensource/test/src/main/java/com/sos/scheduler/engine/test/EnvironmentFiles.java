@@ -30,7 +30,7 @@ public class EnvironmentFiles {
     private final ImmutableMap<String,String> nameMap;
     private final ResourceToFileTransformer fileTransformer;
 
-    public EnvironmentFiles(ResourcePath configResourcePath, File directory,
+    EnvironmentFiles(ResourcePath configResourcePath, File directory,
             @Nullable ImmutableMap<String,String> nameMap,
             @Nullable ResourceToFileTransformer fileTransformer) {
         this.configResourcePath = configResourcePath;

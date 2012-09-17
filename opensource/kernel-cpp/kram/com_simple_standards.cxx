@@ -249,7 +249,7 @@ CLSID string_as_clsid( const string& class_name )
 
     if( length(class_name) > NO_OF(class_namew) - 1 )  throw_xc( "string_as_clsid", "Klassenname zu lang", c_str(class_name) );
 
-    MultiByteToWideChar( CP_ACP, 0, c_str(class_name), length(class_name), class_namew, length(class_name) );
+    MultiByteToWideChar( CP_ACP, 0, c_str(class_name), z::int_cast(class_name.length()), class_namew, length(class_name) );
     class_namew[ length(class_name) ] = '\0';
 
 
@@ -403,7 +403,7 @@ string w_as_string( const OLECHAR* wstr )
 {
     if( !wstr )  return "";
 
-    return w_as_string( wstr, wmemchr( wstr, 0, (uint)-1 ) - wstr );
+    return w_as_string( wstr, z::int_cast(wmemchr( wstr, 0, (uint)-1 ) - wstr) );
 }
 
 //---------------------------------------------------------------------------------w_as_string
@@ -1056,7 +1056,7 @@ Variant com_invoke( DWORD flags, IDispatch* dispatch, const string& method, vect
 
     is_optional = method[0] == '?';
 
-    int pos = method.find( '(' );  if( pos == string::npos )  pos = method.length();        // Java-Signatur abschneiden, die ignorieren wir (s. spooler_module_java.cxx)
+    size_t pos = method.find( '(' );  if( pos == string::npos )  pos = method.length();        // Java-Signatur abschneiden, die ignorieren wir (s. spooler_module_java.cxx)
     clean_method_name.assign( method.c_str() + is_optional, pos - is_optional );
 
     if( flags == DISPATCH_METHOD  &&  method == "()" )
@@ -1081,7 +1081,7 @@ Variant com_invoke( DWORD flags, IDispatch* dispatch, const string& method, vect
     memset( &excepinfo, 0, sizeof excepinfo );
 
     dispparams.rgvarg            = params->size()? &(*params)[0] : NULL;               // Array of arguments.
-    dispparams.cArgs             = params->size();              // Number of arguments.
+    dispparams.cArgs             = z::int_cast(params->size());             // Number of arguments.
     dispparams.rgdispidNamedArgs = flags == DISPATCH_PROPERTYPUT || flags == DISPATCH_PROPERTYPUTREF? &dispid_propertyput  // Dispatch IDs of named arguments.
                                                                                                     : NULL; 
     dispparams.cNamedArgs        = flags == DISPATCH_PROPERTYPUT || flags == DISPATCH_PROPERTYPUTREF? 1 : 0;  // Number of named arguments.
@@ -1120,8 +1120,8 @@ bool com_name_exists( const ptr<IDispatch>& dispatch, const string& name )
     if( name == "()" )  throw_xc( "com_name_exists(\"()\") ???" );
     if( name.empty() )  throw_xc( "com_name_exists", "Leerer Name" );
 
-    int pos = name.find( '(' );  if( pos == string::npos )  pos = name.length();        // Java-Signatur abschneiden, die ignorieren wir (s. spooler_module_java.cxx)
-    name_bstr.assign( name.c_str(), pos );
+    size_t pos = name.find( '(' );  if( pos == string::npos )  pos = name.length();        // Java-Signatur abschneiden, die ignorieren wir (s. spooler_module_java.cxx)
+    name_bstr.assign( name.c_str(), z::int_cast(pos) );
     
     hr = dispatch->GetIDsOfNames( IID_NULL, &name_bstr._bstr, 1, std_lcid, &dispid );
 

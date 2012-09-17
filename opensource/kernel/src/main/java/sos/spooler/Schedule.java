@@ -7,7 +7,7 @@ package sos.spooler;
  * @version $Revision: 5751 $
  */
 
-public class Schedule  extends Idispatch
+public class Schedule  extends Idispatch implements HasBean<ScheduleBean>
 {
     private                 Schedule            ( long idispatch )                  { super(idispatch); }
 
@@ -20,4 +20,8 @@ public class Schedule  extends Idispatch
     
     public void         set_xml                 ( String xml )                      {                   com_call( ">xml", xml           ); }
     public String           xml                 ()                                  { return (String)   com_call( "<xml"                ); }
+
+    @Override public final ScheduleBean toBean() {
+        return new ScheduleBean(this);
+    }
 }

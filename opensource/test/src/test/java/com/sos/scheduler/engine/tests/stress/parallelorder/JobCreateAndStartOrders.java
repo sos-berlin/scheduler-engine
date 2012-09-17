@@ -1,9 +1,3 @@
-/*
- * <div class="sos_branding">
- *   <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-
 package com.sos.scheduler.engine.tests.stress.parallelorder;
 
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;

@@ -591,10 +591,10 @@ int Lock::enqueue_lock_use( Use* lock_use )
 
     _waiting_queues[ lock_use->lock_mode() ].push_back( lock_use );
 
-    int result = _waiting_queues[ lk_exclusive ].size();
+    size_t result = _waiting_queues[ lk_exclusive ].size();
     if( lock_use->lock_mode() == lk_non_exclusive )  result += _waiting_queues[ lk_non_exclusive ].size();
 
-    return result;
+    return int_cast(result);
 }
 
 //---------------------------------------------------------------------------Lock::dequeue_lock_use
@@ -629,7 +629,7 @@ int Lock::count_non_exclusive_holders() const
 
     //return result;
 
-    return _lock_mode == lk_non_exclusive? _holder_map.size() : 0; 
+    return _lock_mode == lk_non_exclusive? int_cast(_holder_map.size()) : 0; 
 }
 
 //------------------------------------------------------------------------------------Lock::set_dom
@@ -1182,13 +1182,9 @@ void Use::load()
 
 bool Use::on_requisite_loaded( File_based* file_based )
 {
-    Lock_subsystem* lock_subsystem = spooler()->lock_subsystem();
-
-    assert( file_based->subsystem() == lock_subsystem );
-    assert( file_based->normalized_path() == lock_subsystem->normalized_path( _lock_path ) );
-
-    Lock* lock = dynamic_cast<Lock*>( file_based );
-    assert( lock );
+    assert( file_based->subsystem() == spooler()->lock_subsystem() );
+    assert( file_based->normalized_path() == spooler()->lock_subsystem()->normalized_path( _lock_path ) );
+    assert( dynamic_cast<Lock*>( file_based ) );
 
     load();
 

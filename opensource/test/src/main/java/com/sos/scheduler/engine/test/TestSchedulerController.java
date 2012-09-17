@@ -44,6 +44,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private final Environment environment;
     private final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate;
     private boolean terminateOnError = true;
+    private boolean isPrepared = false;
     private String logCategories = "";
     private Scheduler _scheduler = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
@@ -53,8 +54,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
         super(testClass.getName());
         logger.debug(testClass.getName());
-        File directory = workDirectory(testClass);
-        environment = new Environment(configurationResourcePath, directory, nameMap, fileTransformer);
+        environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
     }
@@ -62,6 +62,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private File workDirectory(Class<?> testClass) {
         String p = System.getProperty(workDirectoryPropertyName);
         if (p != null) {
+            new File(p).mkdir();    // Das Unterverzeichnis failsafe-reports wird verzögert angelegt. Dem kommen wir zuvor.
             File result = new File(p, testClass.getName());
             makeCleanDirectory(result);
             return result;
@@ -75,7 +76,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     private static void makeCleanDirectory(File directory) {
-        Files.makeDirectory(directory.getParentFile());
+        //Files.makeDirectory(directory.getParentFile());
         Files.makeDirectory(directory);
         Files.removeDirectoryContentRecursivly(directory);
     }
@@ -112,9 +113,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     @Override public final void startScheduler(String... args) {
-        String extraOptions = nullToEmpty(System.getProperty(TestSchedulerController.class.getName() +".options"));
-        registerEventHandler(this);
         prepare();
+        String extraOptions = nullToEmpty(System.getProperty(TestSchedulerController.class.getName() +".options"));
         Iterable<String> allArgs = concat(
                 environment.standardArgs(cppBinaries(), logCategories),
                 Splitter.on(",").omitEmptyStrings().split(extraOptions),
@@ -122,9 +122,13 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         getDelegate().startScheduler(toArray(allArgs, String.class));
     }
 
-    private void prepare() {
-        environment.prepare();
-        getDelegate().loadModule(cppBinaries().file(CppBinary.moduleFilename));
+    public void prepare() {
+        if (!isPrepared) {
+            registerEventHandler(this);
+            environment.prepare();
+            getDelegate().loadModule(cppBinaries().file(CppBinary.moduleFilename));
+            isPrepared = true;
+        }
     }
 
     public final Scheduler scheduler() {

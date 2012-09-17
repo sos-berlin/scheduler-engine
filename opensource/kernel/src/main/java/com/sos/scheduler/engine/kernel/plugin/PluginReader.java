@@ -11,7 +11,7 @@ import static com.sos.scheduler.engine.kernel.plugin.ActivationMode.dontActivate
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.booleanXmlAttribute;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.elementXPathOrNull;
 
-public class PluginReader {
+class PluginReader {
     private final PrefixLog log;
 
     PluginReader(PrefixLog log) {

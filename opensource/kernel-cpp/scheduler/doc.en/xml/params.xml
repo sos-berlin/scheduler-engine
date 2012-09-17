@@ -46,13 +46,13 @@
 
     <description>
         <p>
-            Specifies the parameters for the Job Scheduler, a job or an order.
-            The parameters can be overwritten and extended whilst the Job Scheduler is running.
-        <!--Bestimmt Parameter für the Job Scheduler, einen Job.
+            Specifies the parameters for the JobScheduler, a job or an order.
+            The parameters can be overwritten and extended whilst the JobScheduler is running.
+        <!--Bestimmt Parameter für the JobScheduler, einen Job.
             Die Parameter können zur Laufzeit überschrieben und erweitert werden.-->
         </p>
         <p>
-            Job Scheduler parameters can be called up using the 
+            JobScheduler parameters can be called up using the 
             <scheduler_method class="Spooler" object="spooler" method="variables"/> method.
         <!--Scheduler-Parameter können mit der Methode <scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.-->
         </p>

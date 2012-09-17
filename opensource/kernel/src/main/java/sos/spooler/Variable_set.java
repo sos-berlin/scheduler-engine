@@ -27,7 +27,7 @@ package sos.spooler;
  * @version $Revision: 5812 $
  */
 
-public class Variable_set extends Idispatch
+public class Variable_set extends Idispatch implements HasBean<Variable_setBean>
 {
     private                 Variable_set        ( long idispatch )                  { super(idispatch); }
 
@@ -154,4 +154,8 @@ public class Variable_set extends Idispatch
     public String           names               ()                                  { return (String)       com_call( "<names"                  ); }
     
     public String           substitute          ( String string )                   { return (String)       com_call( "substitute", string      ); }
+
+    @Override public final Variable_setBean toBean() {
+        return new Variable_setBean(this);
+    }
 }

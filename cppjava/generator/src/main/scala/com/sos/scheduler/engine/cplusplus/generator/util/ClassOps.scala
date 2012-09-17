@@ -12,7 +12,7 @@ object ClassOps {
     var newClasses = Set[JavaClass](clas)
     var result = mutable.Set[JavaClass]() ++ newClasses
     while (newClasses.nonEmpty) {
-      newClasses = (newClasses flatMap directlyUsedJavaClasses) -- result;
+      newClasses = (newClasses flatMap directlyUsedJavaClasses) -- result
       result ++= newClasses
     }
     result.toSet - clas

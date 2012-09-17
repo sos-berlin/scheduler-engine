@@ -13,5 +13,5 @@ class JavadocJavaModule(packageName: String) extends JavaModule {
         "/** Dummy-Modul für Javadoc, damit es nicht mangels Klasse mit öffentlichem Konstruktor abbricht. */\n\n" +
         "public final class " + simpleName + "{\n" +
         "    public " + simpleName + "() { throw new UnsupportedOperationException(\"" + name + "\"); }\n" +
-        "}\n";
+        "}\n"
 }

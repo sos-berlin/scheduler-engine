@@ -5,7 +5,7 @@ import java.io.File
 
 object VisualStudio {
     def updateProjectFiles(dir: File, modules: Seq[CppModule]) {
-        VcprojFile.update(dir, modules);
-        VcxprojFile.update(dir, modules);
+        VcprojFile.update(dir, modules)
+        VcxprojFile.update(dir, modules)
     }
 }

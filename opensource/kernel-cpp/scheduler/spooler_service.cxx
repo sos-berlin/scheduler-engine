@@ -136,7 +136,7 @@ static void event_log( const exception& x, int argc, char** argv, Spooler* spool
                  1,                     // event identifier ???
                  NULL,                  // no user security identifier 
                  1,                     // one substitution string 
-                 msg.length(),          // no data 
+                 int_cast(msg.length()),// no data 
                  &m,                    // pointer to string array 
                  (void*)msg.c_str() );  // pointer to data 
 

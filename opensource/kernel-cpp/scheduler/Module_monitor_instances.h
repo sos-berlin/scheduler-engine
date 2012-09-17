@@ -27,7 +27,7 @@ struct Module_monitor_instances : Object
     void                        add_obj                     ( IDispatch*, const string& name );
     bool                        load                        ();
     Variant                     spooler_process_before      ();
-    Variant                     spooler_process_after       ( Variant );
+    Variant                     spooler_process_after       ( const Variant& );
 //
     bool                        is_empty                    ()                                      { return _instance_list.empty(); }
     Fill_zero                  _zero_;

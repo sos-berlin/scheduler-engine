@@ -49,7 +49,7 @@ void Text_with_includes::initialize()
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
-    int linenr_base = element.line_number();
+    size_t linenr_base = element.line_number();
 
     for( xml::Node_ptr node = element.firstChild(); node; node = node.nextSibling() )
     {
@@ -269,7 +269,9 @@ void Module::init0()
     string prefix = "";
     _process_shell_variable_prefix_is_configured = false;
     if (_spooler && _spooler->variables()) {
-      prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
+      prefix = _spooler->variables()->get_string( "scheduler.variable_name_prefix" );
+      if (prefix.empty())        // try the old name ...
+         prefix = _spooler->variables()->get_string( "SCHEDULER_VARIABLE_NAME_PREFIX" );
       if (!prefix.empty())
          _process_shell_variable_prefix_is_configured = true;     // this flag controls the transfer to remote process (see Remote_module_instance_proxy::continue_async_operation)
     }
@@ -634,7 +636,7 @@ Module_instance::In_call::In_call( Module_instance* module_instance, const strin
     {
         _module_instance = module_instance;
 
-        int pos = name.find( '(' );
+        size_t pos = name.find( '(' );
         _name = pos == string::npos? name : name.substr( 0, pos );
 
         _module_instance->set_in_call( this, extra ); 
@@ -899,7 +901,7 @@ bool Module_instance::try_to_get_process()
         if( _process )
         {
             _process->add_module_instance( this );
-
+            _process->set_login(_module->_login);
             assert( !_process->started() );
 
             _process->set_job_name( _job_name );

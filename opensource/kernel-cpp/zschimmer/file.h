@@ -69,16 +69,16 @@ struct File_base : Object
 
   //virtual void                open                    ( const string& filename, const string& mode, int rights = 0600 ) = 0;
     virtual void                close                   ()                                  = 0;
-    virtual void                write                   ( const void*, size_t )             = 0;
-    void                        print                   ( const char* s )                   { write( s, strlen(s) ); }
-    void                        print                   ( const string& s )                 { write( s.data(), s.length() ); }
+    virtual void                write                   ( const void*, int )                = 0;
+    void                        print                   ( const char* s )                   { write( s, int_strlen(s) ); }
+    void                        print                   ( const string& s )                 { write( s.data(), int_cast(s.length()) ); }
     void                        print                   ( int );
     void                        print                   ( char c )                          { put_char( c ); }
     void                        print                   ( const io::Char_sequence& );
     virtual void                put_char                ( char c )                          { write( &c, 1 ); }
   //void                        printf                  ( const char* format, ... );
-    string                      read_string             ( size_t );
-    virtual size_t              read                    ( void*, size_t )                   = 0;
+    string                      read_string             ( int );
+    virtual int                 read                    ( void*, int )                      = 0;
     virtual void                seek                    ( int64, int origin = SEEK_SET )    = 0;
     virtual int64               tell                    ()                                  = 0;
     virtual int64               length                  ();
@@ -138,8 +138,8 @@ struct File : File_base, Non_cloneable
     int                         file_no                 () const                                    { return _file; }
     virtual bool                opened                  () const                                    { return _file != -1; }
 
-    void                        write                   ( const void*, size_t );
-    size_t                      read                    ( void*, size_t );
+    void                        write                   ( const void*, int );
+    int                         read                    ( void*, int );
     void                        seek                    ( int64, int origin = SEEK_SET );
     int64                       tell                    ();
     void                        truncate                ( int64 new_size );
@@ -206,9 +206,9 @@ struct Stream_file : File_base, Non_cloneable
     void                        open                    ( const string& path, const string& mode );
     bool                        try_open                ( const string& path, const string& mode );
     void                        close                   ();
-    void                        write                   ( const void*, size_t );
+    void                        write                   ( const void*, int );
     void                        put_char                ( char );
-    size_t                      read                    ( void*, size_t );
+    int                         read                    ( void*, int );
     string                      read_line               ();
     void                        seek                    ( int64, int origin = SEEK_SET );
     int64                       tell                    ();
@@ -233,7 +233,7 @@ struct File_base_input_stream : simple_iunknown_implementation< io::Input_stream
                                 File_base_input_stream  ( ptr<File_base> file ) : _file(file) {}
 
     void                        close                   ()                                          { _file->close(); }
-    string                      read_bytes              ( size_t size )                             { return _file->read_string( size ); }
+    string                      read_bytes              ( int size )                                { return _file->read_string( size ); }
 
   private:
     ptr<File_base>             _file;

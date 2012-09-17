@@ -11,9 +11,9 @@ import org.junit.Test;
 
 
 public class ConnectorTest {
-	
-	private static Connector connector = Connector.newInstance(ActiveMQConfiguration.vmProviderUrl, "c:/temp/amq");
-    
+
+	private static final Connector connector = Connector.newInstance(ActiveMQConfiguration.vmProviderUrl, "c:/temp/amq");
+
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		connector.start();

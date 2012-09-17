@@ -6,10 +6,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.newDocument;
 
-public class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHistoryEntriesResult> {
-    public static final TaskHistoryEntriesResultXmlizer singleton = new TaskHistoryEntriesResultXmlizer();
+class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHistoryEntriesResult> {
+    static final TaskHistoryEntriesResultXmlizer singleton = new TaskHistoryEntriesResultXmlizer();
 
-    public TaskHistoryEntriesResultXmlizer() {
+    TaskHistoryEntriesResultXmlizer() {
         super(TaskHistoryEntriesResult.class);
     }
 

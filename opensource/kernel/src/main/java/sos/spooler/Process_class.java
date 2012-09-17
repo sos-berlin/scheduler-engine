@@ -7,7 +7,7 @@ package sos.spooler;
  * @version $Revision: 4558 $
  */
 
-public class Process_class  extends Idispatch
+public class Process_class extends Idispatch implements HasBean<Process_classBean>
 {
     private                 Process_class       ( long idispatch )                  { super(idispatch); }
 
@@ -18,4 +18,8 @@ public class Process_class  extends Idispatch
     public void         set_max_processes       ( int n )                           {                       com_call( ">max_processes"    , n    ); }
     public int              max_processes       ()                                  { return            int_com_call( "<max_processes"           ); }
     public void             remove              ()                                  {                       com_call( "remove"                   ); }
+
+    @Override public final Process_classBean toBean() {
+        return new Process_classBean(this);
+    }
 }

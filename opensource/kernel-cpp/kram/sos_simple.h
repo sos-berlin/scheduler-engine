@@ -25,7 +25,7 @@ struct Fill_zero
 
     Fill_zero( const Fill_end& ende )
     {
-        int length = (char*)&ende - (char*)( this+1 );
+        size_t length = (char*)&ende - (char*)( this+1 );
         assert( length >= 0 );
         memset( this + 1, 0, length );
     }

@@ -23,7 +23,7 @@ public class DisposableCppProxyRegister {
     private boolean closed = false;
 
     /** Das C++-Objekt MUSS mit {@link #dispose(CppReference)} wieder freigegeben werden, sonst Speicherleck. */
-    public <T extends ReleasableCppProxy> CppReference<T> reference(T o) {
+    public final <T extends ReleasableCppProxy> CppReference<T> reference(T o) {
         checkState(!closed, DisposableCppProxyRegister.class.getSimpleName() +".reference("+ o +"): register has been closed");
         CppReference<T> result = new CppReference<T>(o);
         register.add(result);
@@ -32,7 +32,7 @@ public class DisposableCppProxyRegister {
 
     /** Alle übrigen C++-Objekte freigeben, nur beim Beenden des Schedulers aufzurufen.
      * Das kann zum Absturz führen, ist also nur für bestimmte C++-Objekte verwendbar. */
-    public void tryDisposeAll() {
+    public final void tryDisposeAll() {
         closed = true;
         while(true) {
             CppReference<?> ref = tryStealAReference();
@@ -60,7 +60,7 @@ public class DisposableCppProxyRegister {
         }
     }
 
-    public <T extends ReleasableCppProxy> void dispose(CppReference<T> o) {
+    public final <T extends ReleasableCppProxy> void dispose(CppReference<T> o) {
         if (closed)
             logger.debug("Ignored after disposeAll(): dispose({})", o);
         else {

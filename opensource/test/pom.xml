@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>opensource</artifactId>
-        <version>1.5.0.2178-SNAPSHOT</version>
+        <version>1.5.2261-SNAPSHOT</version>
     </parent>
 
     <artifactId>test</artifactId>
@@ -119,6 +119,7 @@
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${osArch}</classifier>
+            <!-- Unter Unix wird die Produktionsvariante von kernel-cpp genommen -->
         </dependency>
 
         <dependency>
@@ -126,6 +127,7 @@
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${osArch}-test</classifier>
+            <!-- Unter Windows wird die Testvariante von kernel-cpp genommen -->
         </dependency>
 
         <dependency>
@@ -136,6 +138,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

@@ -11,7 +11,7 @@
         <level value="info"/>
     </logger>
 
-	<root>
+    <root>
         <!-- In general the debug level should be 'warn'. If you need 'debug' or 'info' level for special cases
         please use a special logger defined above. -->
         <level value="warn"/>

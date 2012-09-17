@@ -4398,7 +4398,7 @@
         
         <message code="SCHEDULER-721" weight="warn" object="Scheduler">
             <text xml:lang="en">
-                <title>Scheduler is not reponding quickly, a microstep took <p1/>s</title>
+                <title>Scheduler is not responding quickly, a microstep took <p1/>s</title>
             </text>
         </message>
 

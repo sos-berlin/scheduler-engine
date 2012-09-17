@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
+import static scala.collection.JavaConversions.*;
 
 /** Ablage der Scheduler-Binärdateien, die nötigenfalls aus der kernelcpp.jar entladen werden. */
 public final class ResourceCppBinaries implements CppBinaries {
@@ -18,7 +19,7 @@ public final class ResourceCppBinaries implements CppBinaries {
 
     ResourceCppBinaries(ImmutableList<Resource> resources, File temporaryBinDirectory) {
         File directory = temporaryBinDirectory.getAbsoluteFile();
-        resourceFiles = provideResourcesAsFiles(resources, directory);
+        resourceFiles = ImmutableMap.copyOf(mapAsJavaMap(provideResourcesAsFiles(iterableAsScalaIterable(resources), directory)));
         checkFiles();
         setExecutable();
     }

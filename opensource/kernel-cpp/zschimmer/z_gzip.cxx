@@ -127,7 +127,7 @@ Byte* Simple_byte_queue::request_write_buffer_2( int size, int used_length )
             return result;
         }
 
-        last_buffer._size = _write_position;
+        last_buffer._size = int_cast(_write_position);
     }
 
     _buffer_list.push_back( Buffer() );
@@ -405,7 +405,7 @@ void Gzip::write( const Byte* p, int length )
         size_t l = read_header( p, length );
         _is_gzip_header_read = true;
         p += l;
-        length -= l;
+        length -= int_cast(l);
     }
 
     //_crc = crc32( _crc, p, length );

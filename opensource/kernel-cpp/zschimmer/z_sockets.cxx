@@ -536,7 +536,7 @@ void send_udp_message( const Host_and_port& host_and_port, const string& message
         throw_socket( errn, "ioctl(FIONBIO)" );
     }
 
-    ret = sendto( udp_socket, message.data(), message.length(), 0, (struct sockaddr*)&sa, sizeof sa );
+    ret = sendto( udp_socket, message.data(), int_cast(message.length()), 0, (struct sockaddr*)&sa, sizeof sa );
     if( ret != message.length() )
     {
         int errn = socket_errno();

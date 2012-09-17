@@ -1109,15 +1109,15 @@ void Jdbc_file::close( Close_mode close_mode )
 
                     while( 1 )
                     {
-                        int len = file.read( buffer.ptr(), block_size );
+                        size_t len = file.read( buffer.ptr(), block_size );
                         if( len == 0 )  break;
 
                         jchar* char_array = env->GetCharArrayElements( jchar_array, NULL );
-                        for( int i = 0; i < len; i++ )  char_array[i] = (uint)buffer.char_ptr()[ i ];
+                        for( size_t i = 0; i < len; i++ )  char_array[i] = (uint)buffer.char_ptr()[ i ];
                         env->ReleaseCharArrayElements( jchar_array, char_array, 0 );
 
                         if( _debug )  Z_LOG2( "jdbc", "jdbc write(" << len << " bytes)\n" );
-                        output_stream.call_void_method( "write", "([CII)V", (jobject)jchar_array, (jint)0, (jint)len );
+                        output_stream.call_void_method( "write", "([CII)V", (jobject)jchar_array, (jint)0, int_cast(len) );
                     }
                 }
                 else
@@ -1136,12 +1136,12 @@ void Jdbc_file::close( Close_mode close_mode )
                     while( 1 )
                     {
                         jbyte* byte_array = env->GetByteArrayElements( jbyte_array, NULL );
-                        int len = file.read( byte_array, block_size );
+                        size_t len = file.read( byte_array, block_size );
                         env->ReleaseByteArrayElements( jbyte_array, byte_array, 0 );
                         if( len == 0 )  break;
 
                         if( _debug )  Z_LOG2( "jdbc", "jdbc write(" << len << " bytes)\n" );
-                        output_stream.call_void_method( "write", "([BII)V", (jobject)jbyte_array, (jint)0, (jint)len );
+                        output_stream.call_void_method( "write", "([BII)V", (jobject)jbyte_array, (jint)0, int_cast(len) );
                     }
                 }
 
@@ -1365,7 +1365,7 @@ void Jdbc_file::get_record( Area& buffer )
 
                         while( value.length() < size )
                         {
-                            local_jobject<jbyteArray> jbyte_array = env->NewByteArray( size - value.length() );
+                            local_jobject<jbyteArray> jbyte_array = env->NewByteArray( size - int_cast(value.length()) );
 
                             int length = stream.call_int_method( "read", "([B)I", (jbyteArray)jbyte_array );
                             if( length == -1 )  break;

@@ -58,6 +58,22 @@ final class Job_chainCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.OrderC order__native(long cppReference, java.lang.String p0);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.OrderC order_or_null(java.lang.String p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.OrderC result = order_or_null__native(cppReference(), p0);
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.OrderC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.OrderC order_or_null__native(long cppReference, java.lang.String p0);
+
+
     @Override public java.lang.String path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

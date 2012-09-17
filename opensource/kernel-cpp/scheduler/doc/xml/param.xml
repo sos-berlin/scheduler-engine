@@ -16,9 +16,19 @@
         </p>
         <p>
             Bestimmt einen einzelnen Parameter für den <a href="#param_scheduler">Scheduler</a>, einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.
+            Grundsätzlich sind alle Parameter über die API Aufrufe <scheduler_method class="Spooler" object="spooler" method="variables"/>, <scheduler_method class="Task" method="params" /> bzw.
+            <scheduler_method class="Order" method="payload" /> oder in shell Jobs als environment Variable (mit vorangestelltem <b>SCHEDULER_PARAM_</b>) verfügbar.
         </p>
         <p>
-            Es wird empfohlen keine eigenen Parameter einzustellen, die mit der Zeichenfolge <b>SCHEDULER_</b> beginnen, da dieser Namensraum
+            Gleichnamige Parameter in der JobScheduler Konfiguration, am Job und am Auftrag gelten in der folgenden Reihenfolge:
+            <ul>
+              <li>Auftrag</li>
+              <li>Job</li>
+              <li>Scheduler</li>
+            </ul>
+        </p>
+        <p>
+            Es wird empfohlen keine eigenen Parameter einzustellen, die mit der Zeichenfolge <b>scheduler.</b> beginnen, da dieser Namensraum
             für Konfigurationseinstellungen des JobScheduler reserviert ist.
         </p>
         <p>
@@ -34,9 +44,39 @@
         <p> 
            Folgende Scheduler-Parameter könnnen für die Konfiguration des JobScheduler verwendet werden:
         </p>
+        <br/>
+        <table>
+          <tr>
+            <th width="30%">Parameter</th>
+            <th width="10%">Default</th>
+            <th width="40%">Beschereibung</th>
+          </tr>
+          <tr>
+            <td><b><a href="#scheduler.variable_name_prefix">scheduler.variable_name_prefix</a></b></td>
+            <td>SCHEDULER_</td>
+            <td>Prefix der JobScheduler einvironment Variablen (aus Kompatibilitätsgründen zu älteren Versionen ist auch <b>SCHEDULER_VARIABLE_NAME_PREFIX</b> gültig).</td>
+          </tr>
+          <tr>
+            <td><b><a href="#scheduler.max_kbyte_of_db_log_entry">scheduler.max_kbyte_of_db_log_entry</a></b></td>
+            <td>unbegrenzt</td>
+            <td>Maximale Größe der Orderlogs in der Datenbank.</td>
+          </tr>
+          <tr>
+            <td><b><a href="#scheduler.order.keep_order_content_on_reschedule">scheduler.order.keep_order_content_on_reschedule</a></b></td>
+            <td>TRUE</td>
+            <td>Behält den Zustand der Auftragsparameter nach dessen Ausführung.</td>
+          </tr>
+          <tr>
+            <th width="30%"></th>
+            <th width="10%"></th>
+            <th width="70%"></th>
+          </tr>
+        </table>
+        <br/>
           
         <ul>
-          <li><b>SCHEDULER_VARIABLE_NAME_PREFIX</b></li>
+          <a name="scheduler.variable_name_prefix"/>
+          <li><b>scheduler.variable_name_prefix</b></li>
           <p>
             Mit diesem Parameter kann bestimmt werden, unter welchen Namen Parameter aus Aufträgen und Jobs in in einem Shell job bekannt gemacht
             werden. Der Prefix wird den Umgebungsvariablen aus Aufträgen und Jobs vorangestellt.
@@ -45,12 +85,12 @@
             Fehlt diese Angabe, verwendet der JobScheduler <i>SCHEDULER_PARAM_</i>.
           </p>
           <p>
-            Wird <i>SCHEDULER_VARIABLE_NAME_PREFIX</i> auf <i>*NONE</i> gesetzt, werden Umgebungsvariablen ohne Prefix verwendet.
+            Wird <i>scheduler.variable_name_prefix</i> auf <i>*NONE</i> gesetzt, werden Umgebungsvariablen ohne Prefix verwendet.
           </p>
           <p>
             Der Parameter ist inbesondere dann nützlich, wenn bestehende shell Scripte mit dem JobScheduler gesteuert werden sollen. Durch Angabe von 
 <pre>&lt;params>
-   &lt;param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="*NONE" />
+   &lt;param name="scheduler.variable_name_prefix" value="*NONE" />
 &lt;/params>
 </pre>
             in der zentralen Konfigurationsdatei <i>scheduler.xml</i> kann der JobScheduler so konfiguriert werden, das die shell Scripte direkt mit Parametern
@@ -65,7 +105,7 @@
 
           <p>
             <b style="color:red">ACHTUNG!</b><br/>
-            Bei Verwendung von Agenten vor Version 1.3.12.2068 ist der Parameter <b>SCHEDULER_VARIABLE_NAME_PREFIX</b> nicht nutzbar. 
+            Bei Verwendung von Agenten vor Version 1.3.12.2068 ist der Parameter <b>scheduler.variable_name_prefix</b> nicht nutzbar. 
           </p>
 
           <p>
@@ -75,7 +115,7 @@
           <b>Beispiel (Windows):</b>
           <p>In der <i>scheduler.xml</i> ist der Prefix <i>MYPREFIX_</i> definiert:</p>
 <pre>&lt;params>
-   &lt;param name="SCHEDULER_VARIABLE_NAME_PREFIX" value="MYPREFIX_" />
+   &lt;param name="scheduler.variable_name_prefix" value="MYPREFIX_" />
 &lt;/params>
 </pre>
           <p>Folgender Auftrag startet den job <i>sample</i> (über eine Jobkette) und übergibt den Parameter <i>ORDER_PARAM</i>:</p>
@@ -108,6 +148,7 @@ echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
         </p>
         <br/><br/>
 
+        <a name="scheduler.max_kbyte_of_db_log_entry"/>
         <li><b>scheduler.max_kbyte_of_db_log_entry</b></li>
         <p>
           Mit diesem Parameter kann die maximale Größe von Auftragsprotokollen in der Datenbank bestimmt werden. Die Angabe erfolgt in kByte und bezieht sich auf die
@@ -126,6 +167,19 @@ echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
    &lt;param name="scheduler.max_kbyte_of_db_log_entry" value="8" />
 &lt;/params>
 </pre>
+
+        <a name="scheduler.order.keep_order_content_on_reschedule"/>
+        <li><b>scheduler.order.keep_order_content_on_reschedule</b></li>
+        <p>
+          Mit diesem Schalter können die Auftragsparameter nach Ausführung des Auftrages auf ihren initialen Wert (aus der Auftragsdefinition) zurück gesetzt werden.
+<pre>&lt;params>
+   &lt;param name="scheduler.order.keep_order_content_on_reschedule" value="false" />
+&lt;/params>
+</pre>
+        </p>
+        <p>
+          Das Standardverhalten behält die Werte der Auftragsparameter nach Ausführung des Auftrages bei.
+        </p>
 
         </ul>
                 

@@ -551,7 +551,7 @@ struct file_based_subsystem : File_based_subsystem
 {
                                 file_based_subsystem        ( Spooler* spooler, IUnknown* u, Type_code t ) : File_based_subsystem( spooler, u, t ), _zero_(this+1) {}
 
-    int                         file_based_count            () const                                { return _file_based_map.size(); }
+    int                         file_based_count            () const                                { return int_cast(_file_based_map.size()); }
 
     int                         visible_file_based_count    () const 
     {
@@ -717,7 +717,7 @@ struct file_based_subsystem : File_based_subsystem
 
     javaproxy::java::util::ArrayList java_file_baseds() 
     {
-        javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(_file_based_map.size());
+        javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(int_cast(_file_based_map.size()));
         Z_FOR_EACH (typename File_based_map, _file_based_map, it)
             if (FILE_BASED* file_based = it->second)
                 result.add(file_based->java_sister());

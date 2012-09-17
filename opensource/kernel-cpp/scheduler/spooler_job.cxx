@@ -1973,11 +1973,7 @@ bool Job::execute_state_cmd()
                                     }
                                     break;
 
-                case sc_end:        if( _state == s_running 
-                                   //|| _state == s_suspended
-                                                               )                               something_done = true;
-                                    set_state( s_running );
-                                    Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+                case sc_end:        Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
 
                 case sc_suspend:    
@@ -2402,7 +2398,6 @@ bool Job::is_in_period( const Time& now )
 void Job::set_next_start_time( const Time& now, bool repeat )
 {
     Time next_start_time     = Time::never;
-    Time old_next_start_time = _next_start_time;
 
     select_period( now );
     _next_single_start = Time::never;
@@ -3216,7 +3211,13 @@ void Job::set_state( State new_state )
 }
 
 //-------------------------------------------------------------------------------Job::set_state_cmd
-// Anderer Thread (wird auch vom Kommunikations-Thread gerufen)
+
+void Job::set_state_cmd(const string& cmd)
+{ 
+    set_state_cmd(as_state_cmd(cmd));
+}
+
+//-------------------------------------------------------------------------------Job::set_state_cmd
 
 void Job::set_state_cmd( State_cmd cmd )
 { 
@@ -3248,10 +3249,12 @@ void Job::set_state_cmd( State_cmd cmd )
 
             case sc_end:        ok = true; // _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_suspended;  if( !ok )  return;
                                 _state_cmd = cmd;
+                                signal( state_cmd_name(cmd) );
                                 break;
 
             case sc_suspend:    ok = true; //_state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order;   if( !ok )  return;
                                 _state_cmd = cmd;
+                                signal( state_cmd_name(cmd) );
                                 break;
 
             case sc_continue:   ok = true; //_state == s_suspended || _state == s_running_delayed;  if( !ok )  return;

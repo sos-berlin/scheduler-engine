@@ -1,9 +1,7 @@
 package com.sos.scheduler.engine.data.order;
 
 import com.google.common.base.Objects;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
-import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import static com.google.common.base.Objects.equal;
@@ -12,15 +10,9 @@ public class OrderKey {
     private final JobChainPath jobChainPath;
     private final OrderId id;
 
-    @JsonCreator
     public OrderKey(@JsonProperty("jobChainPath") JobChainPath jobChainPath, @JsonProperty("id") OrderId id) {
         this.id = id;
         this.jobChainPath = jobChainPath;
-    }
-
-    public OrderKey(AbsolutePath jobChainPath, OrderId id) {
-        this.id = id;
-        this.jobChainPath = new JobChainPath(jobChainPath);
     }
 
     public final JobChainPath getJobChainPath() {
@@ -28,7 +20,7 @@ public class OrderKey {
     }
 
     public final String jobChainPathString() {
-        return jobChainPath.getPath().asString();
+        return jobChainPath.asString();
     }
 
     public final OrderId getId() {
@@ -56,6 +48,6 @@ public class OrderKey {
     }
 
     public static OrderKey of(String jobChainPath, String id) {
-        return new OrderKey(new AbsolutePath(jobChainPath), new OrderId(id));
+        return new OrderKey(JobChainPath.of(jobChainPath), new OrderId(id));
     }
 }

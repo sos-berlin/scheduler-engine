@@ -8,7 +8,7 @@ import org.junit.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class ShowTaskHistoryCommandExecutorTest {
+public final class ShowTaskHistoryCommandExecutorTest {
     private final EntityManager em = null;  // TOOO Wir brauchen eine Attrappe unserer Datenbank
     private static final SchedulerId schedulerId = new SchedulerId("SCHEDULER_ID");
     private static final ClusterMemberId clusterMemberId = new ClusterMemberId("CLUSTER_MEMBER_ID");

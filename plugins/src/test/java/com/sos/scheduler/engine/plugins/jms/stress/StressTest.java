@@ -20,14 +20,6 @@ import static org.junit.Assert.assertEquals;
  * Please note the JobScheduler installation supports 200 maximum parallel processes at the time. To run
  * a test with more parallel processes you you to change max_processes in spooler.h or use the binaries 
  * of version 1.3.12.1346-BT.
- * 
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:darkblue' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- *  
- * @author ss
- * @version 1.0 - 27.01.2012 09:05:52
- *
  */
 public class StressTest extends SchedulerTest implements TaskInfoListener {
 
@@ -51,10 +43,9 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	
 	@Ignore
 	public void eventTest() throws Exception {
-//        controller().activateScheduler("-e -log-level=debug","-log=" + FileUtils.getLocalFile(this.getClass(), "scheduler.log"));
+//        controller().activateScheduler("-e -log-level=debug"));
         controller().activateScheduler();
         File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
-        // File resultFile = new File(FileUtils.getResourceFile("").getAbsolutePath() + "/result.csv");
         logger.info("resultfile is " + resultFile);
         JMSTaskObserver l = new JMSTaskObserver(providerUrl);
         TaskObserverWriter w = new TaskObserverWriter(resultFile.getAbsolutePath(),l,ESTIMATED_TASKS);

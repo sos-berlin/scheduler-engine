@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /** Zur Rendezvous-Synchronisierung zweier Threads, also zum synchronsierten Aufruf eines Entrys eines anderen Threads.
  * Der rufende Thread ruft call(ARG a) und wartet damit auf den dienenden Thread, bis dieser enter() erreicht.
  * enter() setzt erst fort, wenn ein rufender Thread im call() ist. Dann beginnt das Rendezvous.
@@ -66,11 +68,11 @@ public class Rendezvous<ARG,RESULT> {
     }
 
     public final RESULT awaitResult() {
-        return awaitResult(Time.eternal);
+        return checkNotNull(awaitResult(Time.eternal));
     }
 
     /** Wenn awaitResult() NULL liefert, den Aufruf wiederholen! */
-    public final RESULT awaitResult(Time t) {
+    @Nullable public final RESULT awaitResult(Time t) {
         try {
             Return r = returnQueue.poll(t.value, t.unit);
             if (r == null)
@@ -85,11 +87,11 @@ public class Rendezvous<ARG,RESULT> {
 
     /** Am Ende immer leave aufrufen! */
     public final ARG enter() {
-        return enter(Time.eternal);
+        return checkNotNull(enter(Time.eternal));
     }
 
     /** Am Ende immer leave() aufrufen! */
-    public ARG enter(Time timeout) {
+    @Nullable public ARG enter(Time timeout) {
         try {
             assertIsServingThread();
             if (inRendezvous)  throw new IllegalStateException("Already in rendezvous");

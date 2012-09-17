@@ -4,17 +4,14 @@ import com.sos.scheduler.engine.kernel.command.Result;
 import com.sos.scheduler.engine.data.database.TaskHistoryEntity;
 import java.util.Collection;
 
+class TaskHistoryEntriesResult implements Result {
+    private final Collection<TaskHistoryEntity> entities;   // Nimmt TypedQuery.getResultList auf
 
-public class TaskHistoryEntriesResult implements Result {
-    private final Collection<TaskHistoryEntity> entities;
-
-
-    public TaskHistoryEntriesResult(Collection<TaskHistoryEntity> entities) {
+    TaskHistoryEntriesResult(Collection<TaskHistoryEntity> entities) {
         this.entities = entities;
     }
 
-
-    public final Collection<TaskHistoryEntity> getTaskHistoryEntries() {
+    final Collection<TaskHistoryEntity> getTaskHistoryEntries() {
         return entities;
     }
 }

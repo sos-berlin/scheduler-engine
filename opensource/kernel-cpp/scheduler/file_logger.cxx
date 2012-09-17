@@ -293,7 +293,7 @@ string File_logger::File_line_reader::read_lines()
                 else
                     end = nl + 1;
 
-                int before_end = nl;
+                size_t before_end = nl;
                 if( before_end > 0  &&  lines[ before_end - 1 ] == '\r' )  --before_end;
 
                 lines.erase( before_end );

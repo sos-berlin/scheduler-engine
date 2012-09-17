@@ -7,6 +7,7 @@ public enum CppEventCode {
 
     taskStartedEvent,
     taskEndedEvent,
+    taskClosedEvent,
 
     orderTouchedEvent,
     orderFinishedEvent,

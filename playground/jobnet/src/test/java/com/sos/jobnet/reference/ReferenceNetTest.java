@@ -11,22 +11,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- * \file ReferenceNetTest.java
- * \brief test for the reference jobnet
- * 
- * \class ReferenceNetTest
- * \brief test for the reference jobnet
- * 
- * \details
- *
- * \code
-   \endcode
- * 
- * \author ss 
- * \version 1.0 - 19.04.2012 10:53:10
- * <div class="sos_branding">
- * <p>(c) 2012 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+ * test for the reference jobnet
  */
 @SuppressWarnings("deprecation")
 public class ReferenceNetTest extends SchedulerTest {

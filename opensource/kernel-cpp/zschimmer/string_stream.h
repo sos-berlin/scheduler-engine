@@ -67,47 +67,6 @@ struct String_stream : std::ostringstream
     friend ostream&             operator <<             ( ostream& s, const String_stream& ss )     { return s << ss.str(); }
 };
 
-/*
-
-struct String_stream 
-{
-                                String_stream           ();
-                               ~String_stream           ();
-
-
-    template< typename TYPE >   String_stream           ( const TYPE& first )                       { _ostringstream << first; }
- 
-
-    //template< typename TYPE >
-    //String_stream& operator<< ( const TYPE& value )
-    //{ 
-    //    using namespace com;    // Für VARIANT und BSTR
-    //    
-    //    _ostringstream << value;
-    //    return *this; 
-    //}
-
-
-                                operator string         () const                                    { return to_string(); }
-    string                      to_string               () const                                    { return _ostringstream.str(); }
-    bool                        empty                   ()                                          { return length() == 0; }
-    size_t                      length                  ();
-    void                        truncate                ( size_t length )                           { _ostringstream.seekp( length ); }
-    friend ostream&             operator <<             ( std::ostream& s, const String_stream& ss ){ return s << ss._ostringstream.str(); }
-
-
-    std::ostringstream         _ostringstream;
-};
-
-
-template< typename TYPE >
-String_stream& operator<< ( String_stream& string_stream, const TYPE& value )
-{ 
-    string_stream._ostringstream << value;
-    return string_stream; 
-}
-*/
-
 typedef String_stream           S;
 
 inline string                   operator +              ( const string &a, const String_stream& b )  { return a + b.to_string(); }

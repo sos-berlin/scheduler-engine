@@ -57,7 +57,7 @@ package sos.spooler;
  */
 
 
-public class Job_chain extends Idispatch
+public class Job_chain extends Idispatch implements HasBean<Job_chainBean>
 {
     private                 Job_chain           ( long idispatch )                  { super(idispatch); }
 
@@ -176,4 +176,8 @@ public class Job_chain extends Idispatch
     
     public void         set_title               ( String title )                    {                           com_call( ">title", title ); }
     public String           title               ()                                  { return (String)           com_call( "<title" ); }
+
+    public final Job_chainBean toBean() {
+        return new Job_chainBean(this);
+    }
 }

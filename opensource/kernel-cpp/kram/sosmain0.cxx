@@ -128,17 +128,7 @@ int sos_main0( int argc, char** argv )
 
     catch( const exception& x )
     {
-#       if defined __BORLANDC__
-            SHOW_ERR( "Exception " << __throwExceptionName
-                   << "( "         << x.why().c_str()
-                   << " ) in "     << __throwFileName
-                   << ", Zeile "   << __throwLineNumber );
-//#    elif defined SYSTEM_SOLARIS
-     //     SHOW_ERR( "Unbekannte Exception: " << x.why() );
-#       else
-            SHOW_ERR( "Exception exception(\"" << exception_text( x ) << "\")" );
-#       endif
-
+        SHOW_ERR( "Exception exception(\"" << exception_text( x ) << "\")" );
         rc = 9999;
     }
 
@@ -165,11 +155,7 @@ int sos_main0( int argc, char** argv )
 #if !defined _MSC_VER       // Für MSVC++ ist auch ein Absturz eine Exception
     catch( ... )
     {
-#       if defined __BORLANDC__
-            SHOW_ERR( "Exception " << __throwExceptionName
-                      << " in "       << __throwFileName
-                      << ", Zeile "   << __throwLineNumber );
-#		 elif defined SYSTEM_GNU
+#		 if defined SYSTEM_GNU
             SHOW_ERR( "Unbekannte Exception" );
 #        elif defined SYSTEM_SOLARIS
             //SHOW_ERR( "Unbekannte Exception: " << exception_name() );

@@ -13,11 +13,11 @@ public class ColdMethodEventSubscriptionFactory implements MethodEventSubscripti
 
     private ColdMethodEventSubscriptionFactory() {}
 
-    @Override public Class<? extends Annotation> getAnnotation() {
+    @Override public final Class<? extends Annotation> getAnnotation() {
         return EventHandler.class;
     }
 
-    @Override public EventSubscription newSubscription(EventHandlerAnnotated annotatedObject, Method method) {
+    @Override public final EventSubscription newSubscription(EventHandlerAnnotated annotatedObject, Method method) {
         return new SimpleMethodEventSubscription(annotatedObject, method);
     }
 }

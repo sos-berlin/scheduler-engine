@@ -266,7 +266,7 @@ struct Output_stream : IUnknown, Closeable, Flushable
 struct Input_stream : IUnknown, Closeable
 {
     virtual                    ~Input_stream                ()                                      {}
-    virtual string              read_bytes                  ( size_t maximum )                      = 0;    // sollten wir string nutzen?
+    virtual string              read_bytes                  ( int maximum )                         = 0;    // sollten wir string nutzen?
 };
 
 //-----------------------------------------------------------------------------Filter_output_stream
@@ -300,7 +300,7 @@ struct Writer : IUnknown, Closeable, Flushable
 struct Reader : IUnknown, Closeable
 {
   //virtual char                read_char                   ();
-    virtual string              read_string                 ( size_t maximum )                      = 0;
+    virtual string              read_string                 ( int maximum )                         = 0;
   //virtual bool                eof                         ()                                      = 0;
 };
 
@@ -342,7 +342,7 @@ struct Transparent_input_stream_reader : simple_iunknown_implementation< Reader 
 {
                                 Transparent_input_stream_reader( Input_stream* );
 
-    string                      read_string                 ( size_t maximum );
+    string                      read_string                 ( int maximum );
     void                        close                       ()                                      { _input_stream->close(); }
 
   private:

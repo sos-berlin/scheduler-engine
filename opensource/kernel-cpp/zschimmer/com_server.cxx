@@ -296,8 +296,8 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
             {
               //case VT_EMPTY:      return DISP_E_BADPARAMCOUNT;        // Zuviele Parameter angegeben
               //case VT_NULL:
-                case VT_I2:         *a++ = (void*)(int)V_I2      ( p );      break;
-                case VT_I4:         *a++ = (void*)     V_I4      ( p );      break;
+                case VT_I2:         *a++ = (void*)(long)V_I2      ( p );      break;
+                case VT_I4:         *a++ = (void*)(long)V_I4      ( p );      break;
 
                 case VT_BYREF|VT_R4: *a++ = r;
                                      memcpy( r, &V_R4( p ), 4 );  r += 4;       break;
@@ -324,21 +324,21 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
                 case VT_BSTR:       *a++ = (void*)     V_BSTR    ( p );      break;
                 case VT_DISPATCH:   *a++ = (void*)     V_DISPATCH( p );      break;
               //case VT_ERROR:
-                case VT_BOOL:       *a++ = (void*)(int)V_BOOL    ( p );      break;
+                case VT_BOOL:       *a++ = (void*)(long)V_BOOL    ( p );      break;
               //case VT_VARIANT|VT_BYREF: *a++ = p;                          break;
                 case VT_VARIANT:    for( int j = 0; j < sizeof(VARIANT) / sizeof (void*); j++ )  *a++ = ((void**)p)[j];   break;
                 case VT_UNKNOWN:    *a++ = (void*)     V_UNKNOWN ( p );      break;
               //case VT_DECIMAL:    *a++ = (void*)p->intVal;            break;
-                case VT_I1:         *a++ = (void*)(int)V_I1      ( p );      break;
-                case VT_UI1:        *a++ = (void*)(int)V_UI1     ( p );      break;
-                case VT_UI2:        *a++ = (void*)(int)V_UI2     ( p );      break;
-                case VT_UI4:        *a++ = (void*)     V_UI4     ( p );      break;
+                case VT_I1:         *a++ = (void*)(long)V_I1      ( p );      break;
+                case VT_UI1:        *a++ = (void*)(long)V_UI1     ( p );      break;
+                case VT_UI2:        *a++ = (void*)(long)V_UI2     ( p );      break;
+                case VT_UI4:        *a++ = (void*)(long)V_UI4     ( p );      break;
               //case VT_I8:         a = align( a, 8 );  
               //                    *a++ = (void*)     V_I8      ( p );      break;
               //case VT_UI8:        a = align( a, 8 );  
               //                    *a++ = (void*)     V_UI8     ( p );      break;
-                case VT_INT:        *a++ = (void*)     V_INT     ( p );      break;
-                case VT_UINT:       *a++ = (void*)     V_UINT    ( p );      break;
+                case VT_INT:        *a++ = (void*)(long)V_INT     ( p );      break;
+                case VT_UINT:       *a++ = (void*)(long)V_UINT    ( p );      break;
               //case VT_VOID:
               //case VT_HRESULT:
               //case VT_PTR:
@@ -441,7 +441,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
     }
     */
 
-    Z_LOG2( "com.invoke", "Com_invoke ... hr=" << (void*)hr << " => " << debug_string_from_variant( *result ).substr(0,50) << '\n' );
+    Z_LOG2( "com.invoke", "Com_invoke ... hr=" << (void*)(long)hr << " => " << debug_string_from_variant( *result ).substr(0,50) << '\n' );
     DEBUG_PRINTF( " hr=%X ", (uint)hr );
     DEBUG_PRINTF( " => %s", debug_string_from_variant( *result ).c_str() );
 

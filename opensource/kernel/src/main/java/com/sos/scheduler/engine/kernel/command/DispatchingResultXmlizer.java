@@ -4,15 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.w3c.dom.Element;
 
-
 class DispatchingResultXmlizer implements ResultXmlizer {
     private final ImmutableMap<Class<?>,ResultXmlizer> resultXmlizers;
-
 
     DispatchingResultXmlizer(Iterable<ResultXmlizer> xmlizers) {
         resultXmlizers = mapOfXmlizers(xmlizers);
     }
-
 
     private static ImmutableMap<Class<?>,ResultXmlizer> mapOfXmlizers(Iterable<ResultXmlizer> rx) {
         ImmutableMap.Builder<Class<?>,ResultXmlizer> b = new ImmutableMap.Builder<Class<?>,ResultXmlizer>();
@@ -20,16 +17,13 @@ class DispatchingResultXmlizer implements ResultXmlizer {
         return b.build();
     }
 
-
-    @Override public Class<? extends Result> getResultClass() {
+    @Override public final Class<? extends Result> getResultClass() {
         return Result.class;   // Dummy
     }
 
-
-    @Override public Element toElement(Result r) {
+    @Override public final Element toElement(Result r) {
         return resultXmlizer(r.getClass()).toElement(r);
     }
-
 
     private ResultXmlizer resultXmlizer(Class<?> clas) {
         ResultXmlizer result = resultXmlizers.get(clas);

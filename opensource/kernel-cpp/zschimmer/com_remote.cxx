@@ -1255,8 +1255,6 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         else
         if( param->first == "java-classpath" )  {}     // Schon von spooler_main() ausgewertet
         else
-        if( param->first == "program" )  object_server_filename = param->second;
-        else
         if( param->first == "param"   )  args_vector.push_back( param->second );
         else
             throw_xc( Z_FUNCTION, param->first );
@@ -1319,7 +1317,7 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
 
     argv[0] = object_server_filename.c_str();
     for( uint i = 0; i < args_vector.size(); i++ )  argv[1+i] = args_vector[i].c_str();
-    argc = args_vector.size() + 1;
+    argc = int_cast(args_vector.size()) + 1;
     argv[argc] = NULL;
 
 
@@ -2025,7 +2023,7 @@ Object_id Object_table::get_object_id( IUnknown* iunknown, bool* is_new, bool be
         if( o->second._iunknown == iunknown )  return  o->first;
     }
 
-    if( !is_new )  throw_xc( "Z-REMOTE-103", printf_string( "%X", (size_t)(void*)iunknown ) );
+    if( !is_new )  throw_xc( "Z-REMOTE-103", printf_string( "%lX", (long)(void*)iunknown ) );
 
 
     
@@ -2264,7 +2262,7 @@ void Session::execute_object_invoke( IDispatch* idispatch, Input_message* in, Ou
     in->read_dispparams( &dispparams );
     in->finish();
 
-    Z_LOG2( "object_server.Invoke", "pid=" << _connection->pid() << " Session::execute_object_invoke " << (void*)dispid << ' ' << name_of_dispid_or_empty( idispatch, dispid ) << "\n" ); 
+    Z_LOG2( "object_server.Invoke", "pid=" << _connection->pid() << " Session::execute_object_invoke " << (void*)(long)dispid << ' ' << name_of_dispid_or_empty( idispatch, dispid ) << "\n" ); 
 
     HRESULT hr = idispatch->Invoke( dispid, iid, lcid, flags, &dispparams, &result, &excepinfo, &argerr );
 
@@ -2687,7 +2685,7 @@ bool Output_message::send_async()
 {
     //Z_LOG( "Simple_operation::send_async(" << _data_bytes_written << ',' << ( _data.length() - _data_bytes_written ) << " Bytes)\n" );
 
-    int written = _session->connection()->send_async( _data.data() + _data_bytes_written, _data.length() - _data_bytes_written );
+    int written = _session->connection()->send_async( _data.data() + _data_bytes_written, int_cast(_data.length() - _data_bytes_written) );
 
     _data_bytes_written += written;
     _is_sent = _data_bytes_written == _data.length();
@@ -2701,7 +2699,7 @@ bool Output_message::send_async()
 
 void Output_message::finish()
 {
-    int len = _data.length() - 4;
+    int len = int_cast(_data.length()) - 4;
 
     _data[0] = (char)( ( (uint32)len >> 24 ) & 0xff );
     _data[1] = (char)( ( (uint32)len >> 16 ) & 0xff );
@@ -2740,7 +2738,7 @@ void Output_message::write_int64( int64 i )
 void Output_message::write_string( const string& str )
 {
     //int bytes = utf8_byte_count_from_iso_8859_1( str );
-    int bytes = str.length();
+    int bytes = int_cast(str.length());
     write_int32( bytes );
     _data += str;
     //_data += utf8_from_iso_8859_1( str );
@@ -2968,7 +2966,7 @@ void Output_message::write_iunknown( IUnknown* iunknown )
 
             write_guid( ref_with_props->_proxy_clsid );
             
-            write_int32( ref_with_props->_properties.size() );
+            write_int32( int_cast(ref_with_props->_properties.size()) );
             Z_FOR_EACH( Properties, ref_with_props->_properties, p )  write_string( p->first ),  write_variant( p->second );
         }
         else

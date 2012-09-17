@@ -8,7 +8,7 @@ import org.w3c.dom.Element;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
-public class NamedChildElementsTest {
+public final class NamedChildElementsTest {
     @Test public void test1() {
         Element e1 = XmlUtils.loadXml("<root><a/><b/><a/><b/><a/></root>").getDocumentElement();
         Element e2 = XmlUtils.loadXml("<root> <a/> <b/> <a/> <b/> <a/> </root>").getDocumentElement();

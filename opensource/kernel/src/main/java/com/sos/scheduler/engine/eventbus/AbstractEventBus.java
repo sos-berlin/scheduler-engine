@@ -113,7 +113,7 @@ public abstract class AbstractEventBus implements EventBus {
         return result;
     }
 
-    private void collectAllSuperEventClasses(Set<Class<? extends Event>> result, Class<?> clas) {
+    private static void collectAllSuperEventClasses(Set<Class<? extends Event>> result, Class<?> clas) {
         if (clas != null && Event.class.isAssignableFrom(clas)) {
             @SuppressWarnings("unchecked") Class<? extends Event> eventClass = (Class<? extends Event>)clas;
             if (!result.contains(eventClass)) {

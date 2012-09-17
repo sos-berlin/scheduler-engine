@@ -38,7 +38,7 @@ string          name                    ( const IID& );
 CLSID           string_as_clsid         ( const string& class_name );                   // ProgId oder ClassId {...}
 
 BSTR            SysAllocStringLen_char  ( const char* single_byte_text, uint len );
-inline BSTR     SysAllocString_string   ( const string& str )                           { return SysAllocStringLen_char( str.c_str(), str.length() ); }
+inline BSTR     SysAllocString_string   ( const string& str )                           { return SysAllocStringLen_char( str.c_str(), z::int_cast(str.length()) ); }
 
 string          w_as_string             ( const OLECHAR*, int len );
 string          w_as_string             ( const OLECHAR* );

@@ -53,7 +53,7 @@ const string needed_api_version = "2.0.160.4605 (2006-11-23)";
 
 const static JNINativeMethod native_methods[] = 
 {
-    { "com_call", "(JLjava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void*)Java_sos_spooler_Idispatch_com_1call }
+    { (char*)"com_call", (char*)"(JLjava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void*)Java_sos_spooler_Idispatch_com_1call }
 };
 
 //-------------------------------------------------------------------------------------------static
@@ -462,7 +462,7 @@ jmethodID Java_module_instance::java_method_id( const string& name )
     Method_map::iterator it = _method_map.find( name );
     if( it == _method_map.end() )  
     {
-        int pos = name.find( '(' );
+        size_t pos = name.find( '(' );
         if( pos == string::npos )  pos = name.length();
         
         if( !_java_class )  z::throw_xc( "SCHEDULER-197", name );

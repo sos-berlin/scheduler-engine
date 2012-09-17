@@ -154,9 +154,9 @@ struct Input_message
                                                                                                       _is_complete = false; 
                                                                                                     }
 
-    bool                        end                     ()                                          { return (uint)_index >= _data.length(); }
+    bool                        end                     ()                                          { return (size_t)_index >= _data.length(); }
     void                        need_bytes              ( int byte_count );
-    int                         length                  () const                                    { return _data.length() - 4; }
+    int                         length                  () const                                    { return int_cast(_data.length()) - 4; }   // Das kann negativ werden ...
 
     char                        operator []             ( int index ) const;
     char                        peek_char               ();
@@ -419,7 +419,7 @@ struct Connection_to_own_server_process : Connection
     void                        start_process           ( const Parameters& );
     bool                        call_waitpid            ( bool wait );
     void                        open_stdout_stderr_files();
-    void                    set_login                   (const ptr<Login>& o)                       { _login = o; }
+    void                    set_login                   (Login* o)                                  { _login = o; }
     void                    set_priority                ( const string& priority )                  { _priority = priority; }
     void                    set_environment_string      ( const string& env )                       { _environment_string = env;  _has_environment = true; }
     file::File_path             stdout_path             ()                                          { return _stdout_file.path(); }
@@ -912,7 +912,7 @@ struct Output_message
     void                        write_uint32            ( uint32 u )                                { write_int32( (int32)u ); }
     void                        write_int64             ( int64 );
     void                        write_string            ( const string& );
-    void                        write_string            ( const OLECHAR* str )                      { write_string( str, wcslen( str ) ); }
+    void                        write_string            ( const OLECHAR* str )                      { write_string( str, int_cast(wcslen( str )) ); }
     void                        write_string            ( const OLECHAR*, int length );
     void                        write_double            ( double );
     void                        write_bstr              ( const BSTR bstr )                         { write_string( bstr, SysStringLen( bstr ) ); }

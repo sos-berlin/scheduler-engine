@@ -1760,8 +1760,8 @@ string Database::truncate_head( const string& str )
    string result = str;
    if( str.length() > max_length ) {
       string msg = zschimmer::message_string( "SCHEDULER-722", max_length );
-      int start = str.length() - max_length - msg.length() - 1;
-      int x = str.substr(start).find_first_of("\n");
+      size_t start = str.length() - max_length - msg.length() - 1;
+      size_t x = str.substr(start).find_first_of("\n");
       Z_LOG2("jdbc", msg );
       if (x == string::npos) x = 0;
       result = msg + str.substr(start + x);
@@ -2501,7 +2501,7 @@ void Task_history::append_tabbed( string value )
 {
     if( !_tabbed_record.empty() )  _tabbed_record += '\t';
 
-    int i = _tabbed_record.length();
+    size_t i = _tabbed_record.length();
 
     _tabbed_record += value.substr( 0, max_field_length );
 

@@ -57,7 +57,7 @@ void Xml_end_finder::Tok_entry::step_end( char c )
 
 //----------------------------------------------------------------------Xml_end_finder::is_complete
 
-bool Xml_end_finder::is_complete( const char* p, int len )
+bool Xml_end_finder::is_complete( const char* p, size_t len )
 {
     if( _at_begin  &&  len >= 1 )
     {

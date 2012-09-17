@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
+import com.sos.scheduler.engine.data.EventList;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
-import com.sos.scheduler.engine.kernel.event.CppEventFactory;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.plugins.jms.JMSConnection;
 import org.apache.log4j.Logger;
@@ -37,7 +37,7 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
 		setMessageListener(this);
 
         mapper = new ObjectMapper();
-        mapper.registerSubtypes( CppEventFactory.eventClassList );
+        mapper.registerSubtypes( EventList.eventClassList );
 
 		listener.clear();
 	}

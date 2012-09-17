@@ -65,7 +65,7 @@ void Md5_calculator::add( const io::Byte_sequence& seq )
 {
     if( _finished )  throw_xc( Z_FUNCTION, "finished" );
 
-    MD5Update( &_md5_context, seq.ptr(), seq.length() );
+    MD5Update( &_md5_context, seq.ptr(), int_cast(seq.length()) );
 }
 
 //------------------------------------------------------------------------------Md5_calculator::md5

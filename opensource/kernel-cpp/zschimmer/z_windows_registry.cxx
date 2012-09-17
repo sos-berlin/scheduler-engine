@@ -169,7 +169,7 @@ void Registry_key::set_value( const string& entry_name, const string& value )
 {
     Z_LOG( "RegSetValueEx (" << _name << "," << entry_name << "," << value << ")\n" );
 
-    _error = RegSetValueEx( _hkey, entry_name.c_str(), 0, REG_SZ, (const Byte*)value.c_str(), value.length() + 1 );
+    _error = RegSetValueEx( _hkey, entry_name.c_str(), 0, REG_SZ, (const Byte*)value.c_str(), int_cast(value.length() + 1) );
     if( _error )  throw_mswin( _error, "RegSetValueEx" );
 }
 

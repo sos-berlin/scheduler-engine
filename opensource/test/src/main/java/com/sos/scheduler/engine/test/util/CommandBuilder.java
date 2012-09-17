@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.test.util;
 
-import java.util.HashMap;
-
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
+import java.util.HashMap;
 
 public class CommandBuilder {
 	
@@ -40,20 +40,27 @@ public class CommandBuilder {
 	public CommandBuilder addOrder(String jobchainName) {
 		return addOrder(jobchainName,jobchainName);
 	}
-	
-	public CommandBuilder addOrder(String jobchainName, String id) {
-		lastId = id;
-		commandPrefix = "<add_order id='" + getId() + "' job_chain='" + jobchainName + "'>";
-		commandSuffix = "</add_order>";
-		return this;
-	}
+
+    public CommandBuilder addOrder(String jobchainName, String id) {
+        lastId = id;
+        commandPrefix = "<add_order id='" + getId() + "' job_chain='" + jobchainName + "'>";
+        commandSuffix = "</add_order>";
+        return this;
+    }
+
+    public CommandBuilder addOrderWithState(String jobchainName, String state) {
+        lastId = jobchainName + "_" + state;
+        commandPrefix = "<add_order id='" + getId() + "' job_chain='" + jobchainName + "' state='" + state + "' >";
+        commandSuffix = "</add_order>";
+        return this;
+    }
 	
 	public CommandBuilder modifyOrder(String order) {
 		return modifyOrder(order, order);
 	}
 	
-	public CommandBuilder modifyOrder(String order, String id) {
-		commandPrefix = "<modify_order at='now' job_chain='" + order + "_chain' order='" + id + "'>";
+	public CommandBuilder modifyOrder(String jobChain, String orderId) {
+		commandPrefix = "<modify_order at='now' job_chain='" + jobChain + "' order='" + orderId + "'>";
 		commandSuffix = "</modify_order>";
 		return this;
 	}

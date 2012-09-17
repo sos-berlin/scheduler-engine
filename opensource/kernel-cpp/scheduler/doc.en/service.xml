@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description 
-    title               = "Running the Job Scheduler as a Service or Daemon" 
+    title               = "Running the JobScheduler as a Service or Daemon" 
     base_dir            = ""
     author              = "$Author: ap $"
     date                = "$Date: 2012-06-12 21:42:49 +0200 (Di, 12 Jun 2012) $"
@@ -21,13 +21,13 @@
 		</table>
 		
 		<p>
-			The Job Scheduler is operated on Window systems as a service. 
-			This is automatically set-up by the Job Scheduler installation program.
+			The JobScheduler is operated on Window systems as a service. 
+			This is automatically set-up by the JobScheduler installation program.
 			In the following section, the command line operations relevant to the set-up are described.
 			These operations are written by the installation program in the 
 			<code>.\bin\jobscheduler.cmd</code> (Windows) and 
 			<code>./bin/jobscheduler.sh</code> (Unix) start scripts.
-	<!--Der Job Scheduler wird unter Windows als Dienst betrieben. Die Einrichtung erfolgt
+	<!--Der JobScheduler wird unter Windows als Dienst betrieben. Die Einrichtung erfolgt
 			automatisch mit dem Installationsprogramm. Nachstehend sind die Kommandozeilenoptionen
 			beschrieben, die für die Einrichtung relevant sind. Diese Optionen werden vom
 			Installationsprogramm ins Start-Script <code>.\bin\jobscheduler.cmd</code> (Windows)
@@ -68,10 +68,10 @@
 		
 		<p class="indent">Installs the service.
 		Additional command line options, which are not described here, 
-		are passed over when the Job Scheduler service starts (see <font class="mono">-id=</font>,
+		are passed over when the JobScheduler service starts (see <font class="mono">-id=</font>,
 		<font class="mono">-log-dir=</font>)</p>
 <!--<p class="indent">Installiert den Dienst. Weitere Kommandozeilenoptionen <i>optionen</i>, die hier nicht aufgeführt
-		sind, werden beim Start des Dienst dem Job Scheduler übergeben (v.a. <font class="mono">-id=</font>,
+		sind, werden beim Start des Dienst dem JobScheduler übergeben (v.a. <font class="mono">-id=</font>,
 		<font class="mono">-log-dir=</font>)</p>-->
 		
 		<p><br/>
@@ -97,11 +97,11 @@
 		<p class="indent">Sets the name under which the service will run.</p>
 <!--<p class="indent">Gibt den angezeigten Namen des Dienstes an.</p>-->
 		
-		<p class="indent">The default value used should the service name not be specified is &quot;SOS Job Scheduler&quot;.
-		When the option <font class="mono"> -id=</font> is set: &quot;SOS Job Scheduler -id=<i>id</i>&quot;.
+		<p class="indent">The default value used should the service name not be specified is &quot;SOS JobScheduler&quot;.
+		When the option <font class="mono"> -id=</font> is set: &quot;SOS JobScheduler -id=<i>id</i>&quot;.
 		and when <font class="mono"> -service-name=</font> is specified, then this is used as the default name.</p>
-<!--<p class="indent">Voreinstellung bei nicht angegebenen -service-name ist &quot;SOS Job Scheduler&quot;.
-		Wenn die Option <font class="mono"> -id=</font> angegeben ist: &quot;SOS Job Scheduler -id=<i>id</i>&quot;.
+<!--<p class="indent">Voreinstellung bei nicht angegebenen -service-name ist &quot;SOS JobScheduler&quot;.
+		Wenn die Option <font class="mono"> -id=</font> angegeben ist: &quot;SOS JobScheduler -id=<i>id</i>&quot;.
 		Wenn <font class="mono"> -service-name=</font> angegeben ist, ist dies als angezeigter Name voreinstellt.</p>-->
 		
 		<p><br/>
@@ -111,8 +111,8 @@
 		<p class="indent">The service description. The default value here is &quot;Job Automation Processor&quot;.&#160;</p>
 <!--<p class="indent">Setzt die Beschreibung des Dienstes. Voreinstellung ist &quot;Job Automation Processor&quot;.&#160;</p>-->
 		
-		<p class="indent">The Job Scheduler ignores this option in Windows NT 4.</p>
-<!--<p class="indent">In Windows NT 4 ignoriert der Job Scheduler diese Option.</p>-->
+		<p class="indent">The JobScheduler ignores this option in Windows NT 4.</p>
+<!--<p class="indent">In Windows NT 4 ignoriert der JobScheduler diese Option.</p>-->
 		
 		<p><br/>
 		<font class="mono">-need-service=</font><i>Service</i></p>
@@ -127,11 +127,11 @@
 		Option kann mehrfach angegeben werden. Ein unbekannter Dienstname wird von
 		Windows nicht bemängelt.&#160;</p>-->
     <p class="indent">
-    This option can be used, e.g. when the Job Scheduler and its database are operated
+    This option can be used, e.g. when the JobScheduler and its database are operated
     for the same server and it should be guaranteed that the database service is up
-    and running before the Job Scheduler starts.
-<!--Diese Option kann bspw. eingesetzt werden, wenn Job Scheduler und Datenbank auf demselben Server ablaufen
-    und sichergestellt werden soll, dass die Datenbank zuerst gestartet ist bevor der Job Scheduler startet.-->
+    and running before the JobScheduler starts.
+<!--Diese Option kann bspw. eingesetzt werden, wenn JobScheduler und Datenbank auf demselben Server ablaufen
+    und sichergestellt werden soll, dass die Datenbank zuerst gestartet ist bevor der JobScheduler startet.-->
     </p>
 		
 		<p class="indent">The name of a service is shown in the System services panel.</p>

@@ -22,7 +22,7 @@ public class JS644Plugin extends AbstractPlugin {
         this.folderSubsystem = folderSubsystem;
     }
 
-    @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, final Job job) {
+    @HotEventHandler public final void handleEvent(FileBasedActivatedEvent e, final Job job) {
         if (job.isFileBasedReread()) {
             operationQueue.add(new Runnable() {
                 @Override public void run() {

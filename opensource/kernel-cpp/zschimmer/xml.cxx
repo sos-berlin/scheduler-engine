@@ -78,7 +78,7 @@ string encode_text( const string& value, bool quote )
     // Für UTF-8 umstellen!
 
     string result;
-    int reserve = value.length() + 10 + value.length() / 10;
+    size_t reserve = value.length() + 10 + value.length() / 10;
 
     int last = -1;
 

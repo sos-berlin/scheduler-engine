@@ -563,29 +563,6 @@ void _check_pointer( const void* ptr, uint length, const char* info )
 #   endif
 }
 
-//-----------------------------------------------------------------------_check_string0_pointer
-
-void _check_string0_pointer( const char* ptr, const char* info )
-{
-    uint len = 1;
-
-#   if defined SYSTEM_WIN32
-#       define CODE_OK
-        if( IsBadStringPtr( ptr, INT_MAX ) )  goto FEHLER;
-        len = strlen( ptr );
-#   endif
-
-    check_pointer( ptr, len, info );
-    return;
-
-#   ifdef CODE_OK
-      FEHLER:
-        SHOW_ERR( "Programmfehler - Ungültige String-Adresse " << (void*)ptr << ' ' << info
-                  << "\nBitte beenden Sie sofort die Anwendung!" );
-        throw_xc( "SOS-INVALID-POINTER" );
-#   endif
-}
-
 //-------------------------------------------------------------------------------------sos_time
 
 time_t sos_time( time_t *timer )

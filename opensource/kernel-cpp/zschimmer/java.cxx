@@ -394,36 +394,41 @@ void Vm::log_version( JNIEnv* jenv, const string& module_filename )
     Z_LOG( line << "\n" );
 }
 
-//-------------------------------------------------------------------------------------set_filename
+//----------------------------------------------------------------------------------------filenames
 
-void Vm::set_filename()
+vector<string> Vm::filenames()
 {
-#   ifdef Z_WINDOWS
+    vector<string> result;
 
-        windows::Registry_key hkey;
-        windows::Registry_key version_hkey;
+    if (!_filename.empty()) {
+        result.push_back(_filename);
+    } else {
+#       ifdef Z_WINDOWS
+            windows::Registry_key hkey;
+            windows::Registry_key version_hkey;
 
-        if( hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\Java Runtime Environment", KEY_QUERY_VALUE ) )
-        {
-            string current_version = hkey.get_string( "CurrentVersion", "" );
-            if( current_version != "" 
-             && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
-            {
-                _filename = version_hkey.get_string( "RuntimeLib", "" );
+            if (hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\Java Runtime Environment", KEY_QUERY_VALUE)) {
+                string current_version = hkey.get_string("CurrentVersion", "");
+                if( current_version != "" 
+                 && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
+                {
+                    string filename = version_hkey.get_string( "RuntimeLib", "" );
+                    result.push_back(filename);
+                    string client_jvm = "\\client\\jvm.dll";
+                    if (string_ends_with(filename, client_jvm))
+                        result.push_back(filename.substr(0, filename.length() - client_jvm.length()) + "\\server\\jvm.dll");    // Java 7.0.7 64bit registriert eine ...\client\jvm.dll, installiert sie aber nicht. 2012-09-17 Zschimmer
+                }
             }
-        }
 
-        if( _filename == "" )  _filename = "jvm.dll";
+            result.push_back("jvm.dll");
+#       elif defined Z_HPUX_PARISC
+            result.push_back("libjvm.sl");
+#       else
+            result.push_back("libjvm.so");
+#       endif
+    }
 
-#   elif defined Z_HPUX_PARISC
-
-        _filename = "libjvm.sl";
-
-#   else
-
-        _filename = "libjvm.so";
-
-#   endif
+    return result;
 }
 
 //----------------------------------------------------------------------------------------Vm::start
@@ -472,68 +477,28 @@ void Vm::start()
     if (_debug || Memory_allocator::debug_memory())
         _jobject_debug_register = Z_NEW(Jobject_debug_register);
 
-    /// JAVA-MODUL LADEN
-
-    if( _filename == "" )  set_filename();
-
-    string module_filename = _filename;
-
-    typedef int JNICALL JNI_CreateJavaVM_func( JavaVM**, JNIEnv**, JavaVMInitArgs* );
-    JNI_CreateJavaVM_func* JNI_CreateJavaVM;
-
-#   ifdef Z_WINDOWS
-    {    
-        Z_LOG2( "scheduler", "LoadLibrary " << module_filename << '\n' );
-        HINSTANCE vm_module = LoadLibrary( module_filename.c_str() );
-        if( !vm_module )  throw_mswin( "LoadLibrary", "Java Virtual Machine " + module_filename );
-
-        //module_filename = filename_of_hinstance( vm_module );
-        //Z_LOG2( Vm::java_log_category, "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
-
-        JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)GetProcAddress( vm_module, "JNI_CreateJavaVM" );
-        if( !JNI_CreateJavaVM )  throw_mswin( "GetProcAddress", "JNI_CreateJavaVM" );
+    JNI_CreateJavaVM_func* JNI_CreateJavaVM = NULL;
+    vector<string> module_filenames = filenames();
+    string module_filename;
+    try {
+        if (module_filenames.empty()) z::throw_xc("Vm::filenames");
+        module_filename = module_filenames[0];
+        JNI_CreateJavaVM = load_module(module_filename);
     }
-#   else
-    {
-        Z_LOG2( "scheduler", "LD_LIBRARY_PATH=" << get_environment_variable( "LD_LIBRARY_PATH" ) << "\n" 
-#           ifdef Z_HPUX
-               "SHLIB_PATH="      << get_environment_variable( "SHLIB_PATH" ) << "\n" 
-               "LD_PRELOAD="      << get_environment_variable( "LD_PRELOAD" ) << "\n" 
-#           endif
-#           ifdef Z_AIX
-               "LIBPATH="         << get_environment_variable( "LIBPATH"    ) << "\n" 
-#           endif
-        );
-
-#       if defined Z_HPUX_IA64
-            Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY|RTLD_GLOBAL\n" );
-            void *vm_module = dlopen( module_filename.c_str(), RTLD_LAZY | RTLD_GLOBAL );
-#        else
-            Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY\n" );
-            void *vm_module = dlopen( module_filename.c_str(), RTLD_LAZY );
-
-#           ifdef Z_AIX
-                if( !vm_module  &&  string_ends_with( module_filename, ".so" ) )        // Dateinamensendung .a probieren
-                {
-                    Z_LOG2( Vm::java_log_category, dlerror() << "\n" );
-
-                    module_filename.replace( module_filename.length() - 3, 3, ".a" );
-                    Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY\n" );
-
-                    vm_module = dlopen( module_filename.c_str(), RTLD_LAZY );
-                }
-#           endif
-#       endif
-
-        if( !vm_module )  throw_xc( "Z-JAVA-100", dlerror(), module_filename );
-
-        JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
-        if( !JNI_CreateJavaVM )  throw_xc( "Z-JAVA-100", dlerror(), "JNI_CreateJavaVM" );
+    catch (Xc& x) {
+        Z_FOR_EACH(vector<string>, module_filenames, i) {
+            module_filename = *i;
+            try {
+                JNI_CreateJavaVM = load_module(module_filename);
+                break;
+            }
+            catch (Xc& xx) {
+                Z_LOG("ERROR loading Java VM from " << module_filename << ": " << xx.what() << "\n");
+            }
+        }
+        if (!JNI_CreateJavaVM)  throw x;
     }
-#   endif
-
-
-
+    
     expand_class_path();
 
 
@@ -629,6 +594,65 @@ void Vm::start()
     new_instances( _new_instances );
 
     load_standard_classes();           // Wirkt nat�rlich nur f�r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
+}
+
+//----------------------------------------------------------------------------------Vm::load_module
+
+Vm::JNI_CreateJavaVM_func* Vm::load_module(const string& module_filename) {
+    JNI_CreateJavaVM_func* result;
+
+#   ifdef Z_WINDOWS
+    {    
+        Z_LOG2( "scheduler", "LoadLibrary " << module_filename << '\n' );
+        HINSTANCE vm_module = LoadLibrary( module_filename.c_str() );
+        if( !vm_module )  throw_mswin( "LoadLibrary", "Java Virtual Machine " + module_filename );
+
+        //module_filename = filename_of_hinstance( vm_module );
+        //Z_LOG2( Vm::java_log_category, "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
+
+        result = (JNI_CreateJavaVM_func*)GetProcAddress( vm_module, "JNI_CreateJavaVM" );
+        if( !result)  throw_mswin( "GetProcAddress", "JNI_CreateJavaVM" );
+    }
+#   else
+    {
+        Z_LOG2( "scheduler", "LD_LIBRARY_PATH=" << get_environment_variable( "LD_LIBRARY_PATH" ) << "\n" 
+#           ifdef Z_HPUX
+               "SHLIB_PATH="      << get_environment_variable( "SHLIB_PATH" ) << "\n" 
+               "LD_PRELOAD="      << get_environment_variable( "LD_PRELOAD" ) << "\n" 
+#           endif
+#           ifdef Z_AIX
+               "LIBPATH="         << get_environment_variable( "LIBPATH"    ) << "\n" 
+#           endif
+        );
+
+#       if defined Z_HPUX_IA64
+            Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY|RTLD_GLOBAL\n" );
+            void *vm_module = dlopen( module_filename.c_str(), RTLD_LAZY | RTLD_GLOBAL );
+#        else
+            Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY\n" );
+            void *vm_module = dlopen( module_filename.c_str(), RTLD_LAZY );
+
+#           ifdef Z_AIX
+                if( !vm_module  &&  string_ends_with( module_filename, ".so" ) )        // Dateinamensendung .a probieren
+                {
+                    Z_LOG2( Vm::java_log_category, dlerror() << "\n" );
+
+                    module_filename.replace( module_filename.length() - 3, 3, ".a" );
+                    Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY\n" );
+
+                    vm_module = dlopen( module_filename.c_str(), RTLD_LAZY );
+                }
+#           endif
+#       endif
+
+        if( !vm_module )  throw_xc( "Z-JAVA-100", dlerror(), module_filename );
+
+        result = (JNI_CreateJavaVM_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
+        if( !result)  throw_xc( "Z-JAVA-100", dlerror(), "JNI_CreateJavaVM" );
+    }
+#   endif
+
+    return result;
 }
 
 //----------------------------------------------------------------------------------------Vm::close
@@ -894,19 +918,19 @@ string Env::string_from_jstring( const jstring& jstr )
 
 jstring Env::jstring_from_string( const char* str )
 { 
-    return jstring_from_string( str, strlen(str) ); 
+    return jstring_from_string( str, int_strlen(str) ); 
 }
 
 //-------------------------------------------------------------------------Env::jstring_from_string
 
 jstring Env::jstring_from_string( const string& str )  
 { 
-    return jstring_from_string( str.data(), str.length() ); 
+    return jstring_from_string( str.data(), int_cast(str.length()) ); 
 }
 
 //-------------------------------------------------------------------------Env::jstring_from_string
 
-jstring Env::jstring_from_string( const char* str, size_t length )
+jstring Env::jstring_from_string( const char* str, int length )
 {
     return jstring_from_string(com::Bstr(str, length));
 }
@@ -919,7 +943,7 @@ jstring Env::jstring_from_string(const com::Bstr& str) {
 
 //-------------------------------------------------------------------------Env::jstring_from_string
 
-jstring Env::jstring_from_string(const OLECHAR* str, size_t length) {
+jstring Env::jstring_from_string(const OLECHAR* str, int length) {
     JNIEnv* jenv = jni_env();
     return jenv->NewString((const jchar*)str, length);
 }

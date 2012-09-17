@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import com.sos.scheduler.engine.data.EventList;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
-import com.sos.scheduler.engine.kernel.event.CppEventFactory;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
@@ -90,8 +90,7 @@ public class JmsOrderEventsTest extends JMSConnection {
 
         public JmsListener() {
             mapper = new ObjectMapper();
-            // mapper.registerSubtypes(OrderTouchedEvent.class, OrderStateChangedEvent.class, OrderFinishedEvent.class);
-            mapper.registerSubtypes( CppEventFactory.eventClassList );
+            mapper.registerSubtypes( EventList.eventClassList );
         }
 
         // runs in an own thread

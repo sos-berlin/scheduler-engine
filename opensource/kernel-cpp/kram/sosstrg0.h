@@ -16,7 +16,7 @@ typedef unsigned int uint;
 #   include <string.h>
 #endif
 
-inline uint             length      ( const char* s )   { return strlen( s ); }
+inline size_t           length      ( const char* s )   { return strlen( s ); }
 inline const char*      c_str       ( const char* );    // in sos.h implementiert
        Big_int          as_big_int  ( const char* );
        Ubig_int         as_ubig_int ( const char* );

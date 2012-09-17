@@ -11,7 +11,7 @@ package sos.spooler;
  * @version $Revision: 5854 $
  */
 
-public class Run_time  extends Idispatch
+public class Run_time extends Idispatch implements HasBean<Run_timeBean>
 {
     private                 Run_time            ( long idispatch )                  { super(idispatch); }
 
@@ -25,4 +25,8 @@ public class Run_time  extends Idispatch
     public void         set_xml                 ( String xml )                      {                   com_call( ">xml", xml           ); }
   //public String           xml                 ()                                  { return (String)   com_call( "<xml"                ); }
     public Schedule     schedule                ()                                  { return (Schedule) com_call( "<schedule"           ); }
+
+    @Override public final Run_timeBean toBean() {
+        return new Run_timeBean(this);
+    }
 }

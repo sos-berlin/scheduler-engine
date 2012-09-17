@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>parent</artifactId>
-    <version>1.5.0.2178-SNAPSHOT</version>
+    <version>1.5.2261-SNAPSHOT</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
 
@@ -14,18 +14,19 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> <!-- für maven-failsafe-plugin -->
         <scala.version>2.9.1-1</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <scalatest.scala.version>2.9.1</scalatest.scala.version>
         <jersey.version>1.10</jersey.version>
-        <jetty.version>8.1.0.RC5</jetty.version>
+        <jetty.version>8.1.0.RC5</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <slf4j.version>1.6.4</slf4j.version>
         <jackson.version>1.9.4</jackson.version>
-        <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
         <cplusplusVersion>${project.version}</cplusplusVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
         <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
+        <failsafe.threadCount>2</failsafe.threadCount>
     </properties>
 
     <profiles>
@@ -127,8 +128,26 @@
             <properties>
                 <operatingSystem>solaris</operatingSystem>
                 <osArch>solaris-${os.arch}</osArch>
-		<cpuArchitecture>${os.arch}</cpuArchitecture>
+		        <cpuArchitecture>${os.arch}</cpuArchitecture>
             </properties>
+        </profile>
+
+        <profile>
+            <id>test-parallel</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <!-- Als Profil, weil Plugin unter Windows mit NullPointerExeption abstürzt bei -rf :test -e -Ptest-parallel -->
+                            <parallel>classes</parallel>
+                            <forkMode>perthread</forkMode>
+                            <threadCount>${failsafe.threadCount}</threadCount>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -141,7 +160,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>10.0</version>
+                <version>13.0.1</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -151,27 +170,27 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.generator</artifactId>
-                <version>1.5.0.2178-SNAPSHOT</version>
+                <version>1.5.2261-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.scalautil.io</artifactId>
-                <version>1.5.0.2178-SNAPSHOT</version>
+                <version>1.5.2261-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.runtime</artifactId>
-                <version>1.5.0.2178-SNAPSHOT</version>
+                <version>1.5.2261-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>data</artifactId>
-                <version>1.5.0.2178-SNAPSHOT</version>
+                <version>1.5.2261-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>web</artifactId>
-                <version>1.5.0.2178-SNAPSHOT</version>
+                <version>1.5.2261-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -214,7 +233,7 @@
             <dependency>
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest_${scalatest.scala.version}</artifactId>
-                <version>1.7.2</version>
+                <version>1.8</version>
             </dependency>
 
             <dependency>
@@ -347,7 +366,7 @@
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
-                <version>1.3.9</version>
+                <version>2.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
@@ -427,28 +446,56 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12</version>
                 <configuration>
+                    <printSummary>false</printSummary>
+                    <!-- Soll ab Version 2.13 gehen. http://jira.codehaus.org/browse/SUREFIRE-827
+                    <parallel>classes</parallel>
+                    <forkMode>perthread</forkMode>
+                    <threadCount>4</threadCount>-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.12.3</version>
+                <configuration>
+                    <printSummary>false</printSummary>
+                    <argLine>-Xms5m -Xmx10m</argLine>  <!-- Sparsame Heap-Zuteilung für die vielen Prozesse (Tests + Scheduler-Task-Prozesse) -->
                     <systemProperties>
-                        <!--property>
-                            <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
+                        <property>
                             <name>java.io.tmpdir</name>
                             <value>${basedir}/target</value>
-                        </property-->
+                        </property>
+                        <property>
+                            <name>com.sos.scheduler.engine.test.underMaven</name>
+                        </property>
                         <property>
                             <name>com.sos.scheduler.engine.test.binary.tmpdir</name>
                             <value>${basedir}/target/scheduler-test-binaries</value>
                         </property>
                         <property>
                             <name>com.sos.scheduler.engine.test.directory</name>
-                            <value>${project.build.testOutputDirectory}/../scheduler-test</value>
+                            <value>${basedir}/target/failsafe-reports</value>
                         </property>
                     </systemProperties>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.8</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8</version>
+                <configuration>
+                    <quiet>true</quiet>
+                </configuration>
             </plugin>
             <!--
          <plugin>
@@ -662,8 +709,8 @@
 -->
     
     <reporting>
-      <plugins>
-          <plugin>
+        <plugins>
+            <plugin>
               <groupId>org.scala-tools</groupId>
               <artifactId>maven-scala-plugin</artifactId>
               <version>${scala.plugin.version}</version>

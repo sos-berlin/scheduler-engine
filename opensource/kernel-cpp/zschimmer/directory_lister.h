@@ -39,7 +39,7 @@ struct Directory_lister
     string                     _directory_path;
 
 #   ifdef Z_WINDOWS
-        int                    _handle;
+        intptr_t               _handle;
         _finddata_t            _finddata;
 #    else
         DIR*                   _handle;

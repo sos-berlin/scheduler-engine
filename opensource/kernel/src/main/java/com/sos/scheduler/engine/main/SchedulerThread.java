@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.main;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.CppScheduler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 
@@ -10,7 +11,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 class SchedulerThread extends Thread {
     private final SchedulerControllerBridge controllerBridge;
     private final CppScheduler cppScheduler = new CppScheduler();
-    private String[] arguments = {};
+    private ImmutableList<String> arguments = null;
     private final AtomicReference<Integer> exitCodeAtom = new AtomicReference<Integer>();
 
     SchedulerThread(SchedulerControllerBridge controllerBridge) {
@@ -22,7 +23,7 @@ class SchedulerThread extends Thread {
         cppScheduler.loadModule(f);
     }
 
-    final void startThread(String[] args) {
+    final void startThread(ImmutableList<String> args) {
         this.arguments = args;
         start();  // Thread läuft in run()
     }

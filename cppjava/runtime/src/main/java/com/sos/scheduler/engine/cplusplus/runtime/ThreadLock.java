@@ -7,6 +7,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import javax.annotation.Nullable;
+
 public class ThreadLock {
     private static final int logTimeoutMillis = 30*1000;     // Wenn's länger dauert, Meldung loggen
     private static final Level logLevel = Level.WARN;
@@ -14,11 +16,11 @@ public class ThreadLock {
 
     private final SimpleLock myLock = logger.isEnabledFor(logLevel)? new LoggingLock() : new SimpleLock();
 
-    public void lock() {
+    public final void lock() {
         myLock.lock();
     }
 
-    public void unlock() {
+    public final void unlock() {
         myLock.unlock();
     }
 
@@ -33,7 +35,7 @@ public class ThreadLock {
             lock.lock();
         }
 
-        boolean tryLock(int time, TimeUnit unit) {
+        final boolean tryLock(int time, TimeUnit unit) {
             try {
                 return lock.tryLock(time, unit);
             }
@@ -70,8 +72,8 @@ public class ThreadLock {
         }
 
         private static class CallersData {
-            private volatile Thread lockingThread = null;
-            private volatile Exception lockingStackTrace = null;
+            @Nullable private volatile Thread lockingThread = null;
+            @Nullable private volatile Exception lockingStackTrace = null;
         
             private synchronized void logBefore() {
                 Thread t = lockingThread;

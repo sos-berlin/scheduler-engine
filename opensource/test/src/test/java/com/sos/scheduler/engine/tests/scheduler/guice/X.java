@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.guice;
 
 import javax.inject.Inject;
 
-public class X {
+public final class X {
     private final I i;
     private final BI b;
 

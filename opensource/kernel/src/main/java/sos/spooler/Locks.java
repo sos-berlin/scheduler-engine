@@ -7,7 +7,7 @@ package sos.spooler;
  * @version $Revision: 4558 $
  */
 
-public class Locks extends Idispatch
+public class Locks extends Idispatch implements HasBean<LocksBean>
 {
     private                 Locks               ( long idispatch )                  { super(idispatch); }
 
@@ -15,4 +15,8 @@ public class Locks extends Idispatch
     public Lock             lock_or_null        ( String path )                     { return (Lock)         com_call( "<lock_or_null" , path ); }
     public Lock             create_lock         ()                                  { return (Lock)         com_call( "create_lock"          ); }
     public void             add_lock            ( Lock lock )                       {                       com_call( "add_lock"      , lock ); }
+
+    @Override public final LocksBean toBean() {
+        return new LocksBean(this);
+    }
 }

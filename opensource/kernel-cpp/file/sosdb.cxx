@@ -136,33 +136,6 @@ const Dbms_word dbms_words[] =
     { dbms_unknown      , NULL           , NULL              },
 };
 
-//------------------------------------------------------------------------------------time_stamp
-#ifdef SYSTEM_UNIX
-
-static string time_stamp()
-{
-    char buffer [ 20 ];
-
-#   if defined USE_GETTIMEOFDAY
-        struct timeval t;
-        strftime( buffer, 11+1, "%d %T", localtime( &t.tv_sec ) );
-        sprintf( buffer + 11, ".%04d", (int)_time_stamp.tv_usec / 100 );
-        buffer[ 31 + 5 ] = '\0';
-#    elif defined SYSTEM_MICROSOFT
-        _timeb t;
-        _ftime( &t );
-        strftime( buffer, 11+1, "%d %H:%M:%S", localtime( &t.time ) );
-        sprintf( buffer + 11, ".%03d", (int)t.millitm );
-#    else
-        time_t t;
-        time( &t );
-        strftime( buffer, 11+1, "%d %T", localtime( &t ) );
-#   endif
-
-    return buffer;
-}
-
-#endif
 //-----------------------------------------------------Sos_database_static::Sos_database_static
 
 Sos_database_static::Sos_database_static()
@@ -673,8 +646,6 @@ string Sos_database_session::convert_texttimestamp( const char** pp, const char*
 
 string Sos_database_session::convert_secondsdiff( const char** pp, const char* p_end )
 {
-    const char*& p = *pp;
-
     vector<string> args = parse_argumentlist( pp, p_end, 2 );
 
     switch( _dbms )

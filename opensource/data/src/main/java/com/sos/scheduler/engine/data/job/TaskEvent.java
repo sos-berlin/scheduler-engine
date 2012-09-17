@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.data.job;
 
 import com.sos.scheduler.engine.data.event.AbstractEvent;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
+import com.sos.scheduler.engine.data.folder.JobPath;
 
 public abstract class TaskEvent extends AbstractEvent {
     private final TaskId id;
-    private final AbsolutePath jobPath;
+    private final JobPath jobPath;
 
-    protected TaskEvent(TaskId id, AbsolutePath jobPath) {
+    protected TaskEvent(TaskId id, JobPath jobPath) {
         this.jobPath = jobPath;
         this.id = id;
     }
@@ -16,7 +16,7 @@ public abstract class TaskEvent extends AbstractEvent {
         return id;
     }
 
-    public final AbsolutePath getJobPath() {
+    public final JobPath getJobPath() {
         return jobPath;
     }
 

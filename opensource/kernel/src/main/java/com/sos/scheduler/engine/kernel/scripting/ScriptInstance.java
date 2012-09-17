@@ -1,194 +1,115 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.kernel.util.Lazy;
+
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.Throwables.propagate;
+import static javax.script.ScriptContext.ENGINE_SCOPE;
+
 /**
- * \file ScriptInstance.java
- * \brief general wrapper for the javax.script interface 
- *  
- * \class ScriptInstance 
- * \brief general wrapper for the javax.script interface 
- * 
- * \details
+ * General wrapper for the javax.script interface
+ *
  * This class provides a general mechanism to call script in different languages.
  *    
- * \code
-	ScriptInstance module = new ScriptInstance("javascript");
-	module.setSourceCode("print('Hello ' + name + '\\n');");
-	module.addObject("nick", "name");
-	module.call();
-  \endcode
- *
- * \author ss
- * \version 17.12.2010 12:04:34
- *
- * \author ss
- * \version 12.03.2012 10:22:17
- * <div class="sos_branding">
- *   <p>(c) 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+ * {@code
+ScriptInstance module = new ScriptInstance("javascript");
+module.setSourceCode("print('Hello ' + name + '\\n');");
+module.addObject("nick", "name");
+module.call();
+ * }
  */
+public class ScriptInstance {
+    private static final String languagePrefix = "javax.script:";
+    //Haben wir im Task-Prozess das Logging eingestellt? private static final Logger logger = LoggerFactory.getLogger(ScriptInstance.class);
 
-import com.google.common.io.Files;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import org.apache.log4j.Logger;
+    private final ScriptEngine engine;
+    private final Lazy<ImmutableMap<String, Object>> bindingsLazy;
+    private final String script;
 
-import javax.script.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-public class ScriptInstance implements Script {
-
-	private static final Logger 		logger = Logger.getLogger(ScriptInstance.class);
-	
-	private final String		languageId;
-	private final ScriptEngine	scriptengine;
-	private final Bindings		scriptbindings;
-	private final String		sourceCode;
-
-    private boolean isEvaluated = false;
-    private Object scriptResult = null;
-
-
-    public ScriptInstance(String scriptLanguage, String sourceCode) {
-        this.languageId = scriptLanguage;
-        this.sourceCode = sourceCode;
-        this.scriptengine = getScriptEngine();
-        this.scriptbindings = this.scriptengine.getBindings(ScriptContext.ENGINE_SCOPE);
-        logger.debug("The language id is " + scriptLanguage);
+    public ScriptInstance(String language, Lazy<ImmutableMap<String, Object>> bindingsLazy, String script) {
+        this.engine = newScriptEngine(normalizeLanguageName(language));
+        this.bindingsLazy = bindingsLazy;
+        this.script = script;
     }
 
-    public ScriptInstance(String scriptLanguage, File sourceFile) {
-        this.sourceCode = readSourceFromFile(sourceFile);
-        this.languageId = scriptLanguage;
-        this.scriptengine = getScriptEngine();
-        this.scriptbindings = this.scriptengine.getBindings(ScriptContext.ENGINE_SCOPE);
-        logger.debug("the language id is " + scriptLanguage);
+
+    private static String normalizeLanguageName(String language) {
+        return language.replaceFirst("^" + Pattern.quote(languagePrefix), "").toLowerCase();
     }
-    
-    private String readSourceFromFile(File sourceFile) {
-        String result = "";
-        try {
-            result = Files.toString(sourceFile, SchedulerConstants.defaultEncoding);
-        } catch (IOException e) {
-            throw new SchedulerException("Error reading file " + sourceFile.getAbsolutePath() + ": " + e,e);
-        }
+
+    private static ScriptEngine newScriptEngine(String language) {
+        ScriptEngine result = new ScriptEngineManager().getEngineByName(language);
+        if (result == null) throw throwUnknownLanguage(language);
+//        if (logger.isDebugEnabled())
+//            logger.debug(result.getFactory().getEngineName() +" "+ result.getFactory().getEngineVersion());
         return result;
     }
 
-    private ScriptEngine getScriptEngine() {
-        ScriptEngineManager sm = new ScriptEngineManager();
-        ScriptEngine se = sm.getEngineByName(getLanguageId());
-        if (se == null) {
-            logAvailableLanguages();
-            throw new SchedulerException("script language " + getLanguageId() + " not valid.");
-        }
-        return se;
+    private static RuntimeException throwUnknownLanguage(String language) {
+        String availableLanguages = Joiner.on(", ").join(new ScriptEngineManager().getEngineFactories());
+        throw new SchedulerException("Script language '"+ language +"' is unknown. Available languages are "+availableLanguages);
     }
 
-    public static void logAvailableLanguages() {
-        ScriptEngineManager sm = new ScriptEngineManager();
-        List<ScriptEngineFactory> factories = sm.getEngineFactories();
-        for(ScriptEngineFactory factory : factories) {
-            logger.info(factory.getEngineName() + " is available (" + factory.getNames().toString() + ")");
-        }
-    }
-    
-    private Object evalScript() {
+    public final void loadScript() {
         try {
-            if (!isEvaluated) {
-                scriptResult = scriptengine.eval(sourceCode, scriptbindings);
-                isEvaluated = true;
-            }
+            for (ImmutableMap.Entry<String,Object> e: bindingsLazy.get().entrySet())
+                engine.put(e.getKey(), e.getValue());
+            engine.eval(script);
         }
-        catch (ScriptException e) {
-            throw new SchedulerException(e + ": error in script code " + sourceCode, e);
-        }
-        return scriptResult;
+        catch (ScriptException e) { throw propagate(e); }
     }
 
-	public final Object getObject(String name) {
-		return scriptbindings.get(name); 		
-	}
-	
-	@Override
-	public final void addObject(Object object, String name) {
-        logger.debug("add object " + name + " to script");
-        scriptbindings.put(name, object);
-	}
-	
-	public Object call() {
-        return evalScript();
-	}
+    public final boolean callBooleanWhenExists(String name, boolean defaultResult) {
+        try {
+            return callBooleanWithDefault(name, defaultResult);
+        } catch (NoSuchMethodException e) {
+            //logger.debug(e +", method="+ name);
+            return defaultResult;
+        }
+    }
 
-	@Override
-	public Object call(String functionname, Object[] params) throws NoSuchMethodException {
-        evalScript();
+    public final boolean callBooleanWithDefault(String functionName, boolean deflt) throws NoSuchMethodException {
+        return resultToBoolean(call(functionName), deflt);
+    }
+
+    private static boolean resultToBoolean(Object result, boolean deflt) {
+        if (result instanceof Boolean) return (Boolean)result;
+        else
+        if (result == null) return deflt;
+        //else
+        //if (result instanceof Integer) return (Integer)result != 0;
+        else
+            throw new RuntimeException("The function has not returned a Boolean: "+ result);
+    }
+
+    public final void callWhenExists(String name) {
+        try {
+            call(name);
+        } catch (NoSuchMethodException e) {
+            //logger.trace(e +", function="+name);
+        }
+    }
+
+    public final Object call(String functionName, Object... parameters) throws NoSuchMethodException {
 		try {
-			logger.debug("executing function " + functionname);
-			Invocable invocableEngine = (Invocable) scriptengine;
-			return invocableEngine.invokeFunction(functionname, params);
-		}
-		catch (ScriptException e) {
-			throw new SchedulerException("error in script code " + sourceCode + ": " + e, e);
-		}
-	}
+			//logger.trace("Call function " + functionName);
+			Invocable invocableEngine = (Invocable)engine;
+			Object result = invocableEngine.invokeFunction(functionName, parameters);
+            //logger.trace("Result is " + result);
+            return (Boolean)result;
+        }
+        catch (ScriptException e) { throw propagate(e); }
+    }
 
-	@Override
-	public Object call(String rawfunctionname) throws NoSuchMethodException {
-		return call(rawfunctionname, new Object[] {});
-	}
-
-	@Override
-	public Object call(String rawfunctionname, boolean param) throws NoSuchMethodException {
-		return call(rawfunctionname, new Object[] {param});
-	}
-
-	@Override
-	public boolean callBoolean(String functionname, Object[] params) throws NoSuchMethodException {
-		Object obj = call(functionname, params);
-		if (obj instanceof Boolean) return (Boolean) obj; 
-		if (obj instanceof Integer) return (Integer)obj == 1;
-		throw new ClassCastException("the result of function " + functionname + " could not cast to " + Boolean.class.getName());
-	}
-
-	@Override
-	public boolean callBoolean(String functionname) throws NoSuchMethodException {
-		return callBoolean(functionname, new Object[]{});
-	}
-
-	@Override
-	public String callString(String functionname, Object[] params) throws NoSuchMethodException {
-		Object obj = call(functionname, params);
-		if (obj instanceof String) return (String) obj;
-		throw new ClassCastException("the result of function " + functionname + " could not cast to " + String.class.getName());
-	}
-
-	@Override
-	public String callString(String functionname) throws NoSuchMethodException {
-		return callString(functionname, new Object[]{});
-	}
-
-	@Override
-	public double callDouble(String functionname, Object[] params) throws NoSuchMethodException {
-		Object obj = call(functionname, params);
-		if (obj instanceof Double) return (Double) obj;
-		throw new ClassCastException("the result of function " + functionname + " could not cast to " + Double.class.getName());
-	}
-
-	@Override
-	public double callDouble(String functionname) throws NoSuchMethodException {
-		return callDouble(functionname, new Object[]{});
-	}
-
-	@Override
-	public final String getLanguageId() {
-		return this.languageId;
-	}
-
-	@Override
-	public final String getSourcecode() {
-		return sourceCode;
-	}
-
+    public final void close() {
+        engine.setBindings(engine.createBindings(), ENGINE_SCOPE);
+    }
 }

@@ -11,14 +11,15 @@
 	    <directory>${cpuArchitecture}/Release</directory>
             <outputDirectory>/com/sos/scheduler/engine/kernelcpp/bin-test</outputDirectory>
             <includes>
-                <include>scheduler.debug-info</include>
                 <include>javascript.debug-info</include>
+                <include>scheduler.debug-info</include>
+                <include>libjobscheduler-engine.so.debug-info</include>
                 <include>libspidermonkey.so.debug-info</include>
-                <!-- die folgendes includes sind die release Versionen aus dem Artifakt os-unix.xml, da unter unix derzeit keine debug Version kompiliert wird -->
-                <include>libjobscheduler-engine.so</include>
-                <include>scheduler</include>
-                <include>libspidermonkey.so</include>
+                <!-- Die folgendes includes sind die release Versionen aus dem Artifakt os-unix.xml, da unter unix derzeit keine debug Version kompiliert wird -->
                 <include>javascript</include>
+                <include>libjobscheduler-engine.so</include>
+                <include>libspidermonkey.so</include>
+                <include>scheduler</include>
             </includes>
         </fileSet>
     </fileSets>

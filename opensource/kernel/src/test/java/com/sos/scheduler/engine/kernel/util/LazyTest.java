@@ -5,12 +5,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 
-public class LazyTest {
+public final class LazyTest {
     private int i = 0;
 
     @Test public void testApply() throws Exception {
         Lazy<Integer> lazy = new Lazy<Integer>() {
-            protected Integer compute() { return ++i; }
+            @Override protected Integer compute() { return ++i; }
         };
         assertThat(lazy.get(), equalTo(1));
         assertThat(lazy.get(), equalTo(1));

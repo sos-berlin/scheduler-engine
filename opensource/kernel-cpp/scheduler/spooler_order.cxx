@@ -1021,7 +1021,7 @@ Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )
 
     _log = job_chain->log();
 
-    _node_index = job_chain->_node_list.size();
+    _node_index = int_cast(job_chain->_node_list.size());
 }
 
 //--------------------------------------------------------------------------------------Node::close
@@ -2278,7 +2278,7 @@ Node* Job_chain::add_end_node( const Order::State& state )
 
 javaproxy::java::util::ArrayList Job_chain::java_nodes() 
 {
-    javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(_node_list.size());
+    javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(int_cast(_node_list.size()));
     Z_FOR_EACH (Node_list, _node_list, it)
         result.add((*it)->java_sister());
     return result;
@@ -4078,7 +4078,7 @@ int Order_queue::order_count( Read_transaction* ta ) const
         }
         else
         {
-            result += _queue.size();
+            result += int_cast(_queue.size());
         }
     }
 

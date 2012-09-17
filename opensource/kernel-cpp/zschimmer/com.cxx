@@ -863,7 +863,7 @@ HRESULT VariantClear( VARIANT* v )
 
     memset( v, 0, sizeof *v );
 
-    return S_OK;
+    return hr;
 }
 
 //--------------------------------------------------------------------------------VariantChangeType
@@ -1076,7 +1076,7 @@ HRESULT VariantChangeTypeEx( VARIANT* dest, const VARIANT* src, LCID lcid, unsig
 ENDE:
     if( FAILED( hr ) )
     {
-        Z_LOG( "*** VariantChangeTypeEx(" << vartype_name(vt) << "<-" << vartype_name(src->vt) << ",\"" << str << "\") => " << (void*)hr << " ***\n" );
+        Z_LOG( "*** VariantChangeTypeEx(" << vartype_name(vt) << "<-" << vartype_name(src->vt) << ",\"" << str << "\") => " << (void*)(size_t)hr << " ***\n" );
     }
 
     return hr;

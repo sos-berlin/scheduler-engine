@@ -12,12 +12,11 @@ import org.junit.Test;
  *
  * @author Joacim Zschimmer
  */
-public class TaskHistoryEntityTest {
+public final class TaskHistoryEntityTest {
     private static final String persistenceUnitName = "schedulerEngine";
     private static final String jdbcDriverClassName = "org.h2.Driver";
     private static final String jdbcUrl = "jdbc:h2:c:/sos/tmp/scheduler-database";
 	private static EntityManagerFactory entityManagerFactory;
-
 
     @Ignore
     @Test public void test() throws Exception {
@@ -33,7 +32,6 @@ public class TaskHistoryEntityTest {
             em.close();
         }
     }
-
 
     private static Properties persistenceProperties() {
         Properties result = new Properties();

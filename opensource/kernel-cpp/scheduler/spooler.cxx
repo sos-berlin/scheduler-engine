@@ -622,7 +622,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
         case s_killing_1:
         {
-            int count = _spooler->_task_subsystem->_task_list.size();
+            int count = int_cast(_spooler->_task_subsystem->_task_list.size());
             _spooler->_log->warn( message_string( "SCHEDULER-254", count, kill_timeout_1, kill_timeout_total ) );    // $1 Tasks haben sich nicht beendet trotz kill vor $2. Die $3s lange Nachfrist läuft weiter</title>
             //_spooler->_log->warn( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_1 << "s."
             //                     " Die " << kill_timeout_total << "s lange Nachfrist läuft weiter" );
@@ -641,7 +641,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
         case s_killing_2:
         {
-            int count = _spooler->_task_subsystem->_task_list.size();
+            int count = int_cast(_spooler->_task_subsystem->_task_list.size());
             _spooler->_log->error( message_string( "SCHEDULER-255", count, kill_timeout_total ) );  // "$1 Tasks haben sich nicht beendet trotz kill vor $2s. Scheduler bricht ab"
             //_spooler->_log->error( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_total << "s."
             //                                      " Scheduler bricht ab" ); 
@@ -759,6 +759,11 @@ void Spooler::check_licence()
     _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
     if (!_jobs_allowed_for_licence) Z_LOG2( "scheduler", "jobs are not allowed.\n"  );
     if (!_remote_commands_allowed_for_licence) Z_LOG2( "scheduler", "executing of remote commands are not allowed (licence key for agent is required. sales@sos-berlin.com).\n" );
+    if ( Log_ptr::is_demo_version() )  
+       Z_LOG2( "scheduler", "JobScheduler is running with open source licence.\n" );
+    else
+       Z_LOG2( "scheduler", "JobScheduler is running with commercial licence.\n" );
+    sos_static_ptr()->_licence->log_licence_keys();
 }
 
 //-----------------------------------------------------------------------------------Spooler::close
@@ -1036,13 +1041,12 @@ MEMORYSTATUS Spooler::memory_status_init()
     return m;
 }
 
-DWORD Spooler::memory_status_calculate_reserved_virtual(MEMORYSTATUS m)
+SIZE_T Spooler::memory_status_calculate_reserved_virtual(MEMORYSTATUS m)
 {
-  DWORD reserved_virtual = m.dwTotalVirtual - m.dwAvailVirtual;      // Das sollte der belegte Adressraum sein
-  return reserved_virtual;
+  return m.dwTotalVirtual - m.dwAvailVirtual;      // Das sollte der belegte Adressraum sein
 }
 
-string Spooler::mb_formatted(DWORD value)
+string Spooler::mb_formatted(SIZE_T value)
 {
     char buffer [ 30 ];
     int len = snprintf( buffer, sizeof buffer - 1, "%-.3f", (double)value / 1024 / 1024 );
@@ -1351,7 +1355,7 @@ void Spooler::send_cmd()
 
     while( p < p_end )
     {
-        ret = send( sock, p, p_end - p, 0 );
+        ret = send( sock, p, int_cast(p_end - p), 0 );
         if( ret == -1 )  z::throw_socket( socket_errno(), "send" );
 
         p += ret;
@@ -1484,8 +1488,6 @@ void Spooler::read_command_line_arguments()
 
     _my_program_filename = _argv? _argv[0] : "(missing program path)";
 
-    int param_count = 0;
-
     try
     {
         for( Sos_option_iterator opt ( _argc, _argv, _parameter_line ); !opt.end(); opt.next() )
@@ -1521,7 +1523,7 @@ void Spooler::read_command_line_arguments()
                 // Nicht offiziell. Verbessert werden könnte, dass <params> diese Werte nicht überschreibt, sondern umgekehrt den Default vorgibt.
                 // Sollte vielleicht auch mit -config funktionieren. Jetzt muss die Konfigurationsdatei als 1. Parameter (ohne -config=) angegeben werden.
                 string value = opt.value();
-                uint eq = value.find( '=' );
+                size_t eq = value.find( '=' );
                 _variables->set_var( value.substr( 0, eq ), value.substr( eq + 1 ) );
             }
             else
@@ -3424,7 +3426,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     _communication.init();  // Initialisiert Windows-Sockets
 
     if( _state_cmd != sc_load_config )  load();
-    if( _config_element_to_load == NULL )  z::throw_xc( "SCHEDULER-116", _spooler_id );
+    if( !_config_element_to_load )  z::throw_xc( "SCHEDULER-116", _spooler_id );
 
     assign_stdout();
     //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
@@ -3473,6 +3475,36 @@ void Spooler::assign_stdout()
     #endif
 }
 
+//----------------------------------------------------------------------Spooler::string backup_logfile
+
+string Spooler::backup_logfile( const File_path path )
+{
+   string msg = "";
+   if( path.file_exists() )
+   {
+         size_t i = path.find_last_of(".");
+         File_path scheduler_old = (i > 0) ? path.substr(0,i) : path + "-old." + path.extension();
+         try
+         {
+            scheduler_old.try_unlink();
+            path.move_to(scheduler_old);
+            msg = S() << "file " << path << " moved to " << scheduler_old << "\n"; 
+         }
+         catch( exception& x ) { 
+            try {
+               msg = S() << x.what() << ", while rename file " << path << " to " << scheduler_old << " - try to copy\n"; 
+               copy_file(path,scheduler_old);
+               msg += S() << "file " << path << " copied to " << scheduler_old << "\n"; 
+            }
+            catch( exception& x1 ) {
+               msg += S() << x1.what() << ", while copy file " << path << " to " << scheduler_old << "\n"; 
+            }
+         }
+
+   }
+   return msg;
+}
+
 //------------------------------------------------------------------------------------start_process
 #ifdef Z_WINDOWS
 
@@ -3485,7 +3517,7 @@ static void start_process( const string& command_line )
     BOOL                ok;
     Dynamic_area        my_command_line;
     
-    my_command_line.assign( command_line.c_str(), command_line.length() + 1 );
+    my_command_line.assign( command_line.c_str(), int_cast(command_line.length() + 1) );
 
     memset( &process_info, 0, sizeof process_info );
 
@@ -3532,7 +3564,7 @@ void spooler_restart( Log* log, bool is_service )
         if( GetFileAttributes( new_spooler.c_str() ) != -1 )      // spooler~new.exe vorhanden?
         {
             // Programmdateinamen aus command_line ersetzen
-            int pos;
+            size_t pos;
             if( command_line.length() == 0 )  z::throw_xc( "SCHEDULER-COMMANDLINE" );
             if( command_line[0] == '"' ) {
                 pos = command_line.find( '"', 1 );  if( pos == string::npos )  z::throw_xc( "SCHEDULER-COMMANDLINE" );
@@ -3823,6 +3855,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
 #   endif
 
+    Log_ptr::set_demo_version( sos_static_ptr()->_licence->is_demo_version() );
     scheduler::error_settings.read( scheduler::default_factory_ini );
 
     try
@@ -3830,9 +3863,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         int     relevant_arg_count  = 0;
         bool    need_call_scheduler = true;
         bool    call_scheduler      = false;
+#ifdef Z_WINDOWS
         bool    do_install_service  = false;
         bool    do_remove_service   = false;
-        bool    is_service_set      = false;
+        bool    renew_service = false;
+        string  service_name, service_display;
+        string  service_description = "Job scheduler for process automation";
+#endif
         bool    is_backup           = false;
         /**
         * \newoption lokale Variabel zur Aufnahme der neuen Option 'use-xml-schema'
@@ -3842,11 +3879,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
           \endcode
         */
         string  id;
-        string  service_name, service_display;
-        string  service_description = "Job scheduler for process automation";
         string  renew_spooler;
         string  command_line;
-        bool    renew_service = false;
         string  send_cmd;
         string  log_filename;
         string  factory_ini = scheduler::default_factory_ini;
@@ -3889,15 +3923,16 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
-            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", scheduler::version_string );
+            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string );
             else
             if( opt.flag      ( "?"                )
-             || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", scheduler::version_string ), scheduler::print_usage();
+             || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "JobScheduler engine %s\n", scheduler::version_string ), scheduler::print_usage();
             else
             if( opt.flag      ( "kill"             ) )  kill_pid_file = true;
             else
             if( opt.with_value( "kill"             ) )  kill_pid = opt.as_int();
             else
+#ifdef Z_WINDOWS
             if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
             else
             if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
@@ -3916,9 +3951,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             else
             if( opt.with_value( "service-descr"    ) )  service_description = opt.value();
             else
-            if( opt.flag      ( "service"          ) )  call_scheduler = true, is_service = opt.set(), is_service_set = true;
+            if( opt.with_value( "service"          ) )  call_scheduler = true, is_service = true, service_name = opt.value();
             else
-            if( opt.with_value( "service"          ) )  call_scheduler = true, is_service = true, is_service_set = true, service_name = opt.value();
+#endif
+            if( opt.flag      ( "service"          ) )  call_scheduler = true, is_service = opt.set();
             else
             if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
             else
@@ -3973,11 +4009,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
         if( send_cmd != "" )  is_service = false;
 
-        #if defined Z_USE_JAVAXML
-            start_java(subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options,
-                subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath);
-        #endif
-
         // scheduler.log
 
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
@@ -3985,24 +4016,17 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         {
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
-
-#         ifdef Z_DEBUG
-            if( path.file_exists() )
-            {
-                File_path gz_path = path + ".gz";
-                S cmd; cmd << "gzip <" << path << " >" << gz_path;
-                try
-                {
-                    copy_file( "file -b " + path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
-                }
-                catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }
-            }
-#         endif
-
+            string msg = sos::scheduler::Spooler::backup_logfile( path );
             log_start( log_filename );
+            if (!msg.empty()) Z_LOG2("scheduler",msg);
         }
 
-        Z_LOG2( "scheduler", "Scheduler " << scheduler::version_string << "\n" );
+        Z_LOG2( "scheduler", "JobScheduler engine " << scheduler::version_string << "\n" );
+
+        #if defined Z_USE_JAVAXML
+            start_java(subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options,
+                subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath);
+        #endif
 
         /**
         * \change 2.0.224 - JS-XXX: Verwendung der Option 'use-xml-schema' für dynamisches XSD
@@ -4014,7 +4038,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         */
         if( use_external_schema != "" ) 
         {
-            Z_LOG2( "scheduler", "using dynamic schema: " << use_external_schema << "\n" );
+            Z_LOG2( "scheduler", "Using dynamic schema: " << use_external_schema << "\n" );
             //zschimmer::embedded_and_dynamic_files
             string xsd_schema_content = sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path);
             // xsd_schema_content = sos::scheduler::file::xsd_from_file(use_external_schema);
@@ -4084,8 +4108,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 if( call_scheduler || need_call_scheduler )
                 {
                     _beginthread( scheduler::delete_new_spooler, 50000, NULL );
-
-                    //if( !is_service_set )  is_service = scheduler::service_is_started(service_name);
 
                     if( is_service )
                     {

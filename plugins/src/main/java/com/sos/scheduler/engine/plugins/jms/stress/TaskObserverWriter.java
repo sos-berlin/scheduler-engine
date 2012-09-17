@@ -15,7 +15,7 @@ public class TaskObserverWriter extends TaskObserver implements TaskInfoListener
 		out.println("duration;running;highwater;ended;estimated");
 	}
 	
-	public void close() {
+	@Override public void close() {
 		out.close();
 	}
 

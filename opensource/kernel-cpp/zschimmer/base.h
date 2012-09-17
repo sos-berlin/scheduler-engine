@@ -541,7 +541,7 @@ string join( const string& glue, const CONTAINER_TYPE& container )
 
     if( !container.empty() )
     {
-        int size = ( container.size() - 1 ) * glue.length();
+        size_t size = ( container.size() - 1 ) * glue.length();
 
         for( typename CONTAINER_TYPE::const_iterator it = container.begin(); it != container.end(); it++ )  size += it->length();
 
@@ -715,6 +715,11 @@ inline uint16               as_uint16                   ( const string& str )   
 inline double               as_double                   ( const string& str )       { return as_double( str.c_str() ); }
 inline bool                 as_bool                     ( const string& str )       { return as_bool  ( str.c_str() ); }
 
+//int int_cast(int64);
+int int_cast(size_t);
+
+inline int int_strlen(const char* s) { return int_cast(strlen(s)); }
+
 //-----------------------------------------------------------------------------------------min, max
 #ifdef min
 #   undef min
@@ -735,32 +740,39 @@ struct Non_cloneable
                             void operator =             ( const Non_cloneable& );                   // Nicht implementiert
 };
 
-//---------------------------------------------------------------------------------------Set_locale
+//---------------------------------------------------------------------------------------Use_locale
 
-struct Set_locale
+struct Use_locale
 {
-                            Set_locale                  ( const char* locale )                      { set( LC_ALL, locale ); }
-                            Set_locale                  ( int category, const char* locale )        { set( category, locale ); }
-                           ~Set_locale                  ()                                          { restore(); }
+                            Use_locale                  ( const char* locale )                      { set( LC_ALL, locale ); }
+                            Use_locale                  ( int category, const char* locale )        { set( category, locale ); }
+                           ~Use_locale                  ()                                          { restore(); }
 
-                            operator bool               () const                                    { return _saved_locale != NULL; }
+private:
     void                    set                         ( int category, const char* locale );
     void                    restore                     ();
 
     int                    _category;
-    const char*            _saved_locale;
+    string                 _saved_locale;
+};
+
+//-------------------------------------------------------------------------------------Use_c_locale
+
+struct Use_c_locale : Use_locale {
+                            Use_c_locale                ()                                          : Use_locale("C") {}                                
+                            Use_c_locale                (int category)                              : Use_locale(category, "C") {}                                
 };
 
 //-----------------------------------------------------------------------------------------Z_LOCALE
 #ifdef __GNUC__xxx
 
 #   define Z_LOCALE( CATEGORY, LOCALE )                                                             \
-        for( ::zschimmer::Set_locale __set_locale__ ( CATEGORY, LOCALE ) )
+        for( ::zschimmer::Use_locale __set_locale__ ( CATEGORY, LOCALE ) )
 
 #else
 
 #   define Z_LOCALE( CATEGORY, LOCALE )                                                             \
-        for( ::zschimmer::Set_locale __set_locale__ ( CATEGORY, LOCALE ); __set_locale__; __set_locale__.close() )
+        for( ::zschimmer::Use_locale __set_locale__ ( CATEGORY, LOCALE ); __set_locale__; __set_locale__.close() )
 
 #endif
 

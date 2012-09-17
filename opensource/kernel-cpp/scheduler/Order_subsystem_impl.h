@@ -24,7 +24,7 @@ struct Order_id_space : Object, Scheduler_object
     void                        close                       ();
   //void                        connect_job_chain           ( Job_chain* );
   //void                        disconnect_job_chain        ( Job_chain* );
-    int                         number_of_job_chains        () const                                { return _job_chain_set.size(); }
+    int                         number_of_job_chains        () const                                { return int_cast(_job_chain_set.size()); }
     void                        check_for_unique_order_ids_of( Job_chain* ) const;
     Job_chain*                  job_chain_by_order_id_or_null( const string& order_id ) const;
     ptr<Order>                  order_or_null               ( const string& order_id ) const;
@@ -33,7 +33,7 @@ struct Order_id_space : Object, Scheduler_object
     int                         index                       () const                                { return _index; }
     string                      name                        () const;
     string                      path                        () const                                { return name(); }
-    int                         size                        () const                                { return _job_chain_set.size(); }
+    int                         size                        () const                                { return int_cast(_job_chain_set.size()); }
     bool                        is_empty                    () const                                { return _job_chain_set.empty(); }
     void                        on_order_id_space_added     ( Job_chain* causing_job_chain );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );

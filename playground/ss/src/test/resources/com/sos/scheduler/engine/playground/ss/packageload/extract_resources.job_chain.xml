@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job_chain>
+    <job_chain_node state="100" job="extract_resources" />
+</job_chain>

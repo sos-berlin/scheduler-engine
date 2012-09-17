@@ -313,6 +313,8 @@ struct Command_processor
     xml::Element_ptr            execute_register_remote_scheduler( const xml::Element_ptr& );
     xml::Element_ptr            execute_service_request     ( const xml::Element_ptr& );
     xml::Element_ptr            execute_get_events          ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_job_chain_command   ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_job_chain_node_command   ( const xml::Element_ptr&, const Show_what& );
 
     void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );
 

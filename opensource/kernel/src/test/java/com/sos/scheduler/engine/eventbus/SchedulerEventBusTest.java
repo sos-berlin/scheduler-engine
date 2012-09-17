@@ -124,10 +124,10 @@ public final class SchedulerEventBusTest {
         }
     }
 
-    static class A extends AbstractEvent {}
-    static class AA extends A {}
-    static class B extends AbstractEvent {}
+    private static class A extends AbstractEvent {}
+    private static class AA extends A {}
+    private static class B extends AbstractEvent {}
 
-    static class S implements EventSource {}
-    static class T extends S {}
+    private static class S implements EventSource {}
+    private static class T extends S {}
 }

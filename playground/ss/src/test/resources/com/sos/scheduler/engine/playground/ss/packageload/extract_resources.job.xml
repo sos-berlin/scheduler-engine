@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job title="extract the resources of a package" order="yes">
+    <script language="java" java_class="com.sos.scheduler.engine.playground.ss.packageload.ExtractJob" />
+    <run_time/>
+</job>

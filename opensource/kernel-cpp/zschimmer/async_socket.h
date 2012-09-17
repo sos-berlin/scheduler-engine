@@ -285,7 +285,7 @@ struct Socket_manager : Event_manager
 
 struct Socket_stream : Buffered_socket_operation, io::Input_stream, io::Output_stream
 {
-    static const size_t         read_bytes_maximum;
+    static const int            read_bytes_maximum;
 
 
     STDMETHODIMP_( ULONG )      AddRef                      ()                                      { return Buffered_socket_operation::AddRef(); }
@@ -295,7 +295,7 @@ struct Socket_stream : Buffered_socket_operation, io::Input_stream, io::Output_s
 
     void                        connect_tcp                 ( const string& address );
     void                        write_bytes                 ( const io::Byte_sequence& );
-    string                      read_bytes                  ( size_t maximum = read_bytes_maximum );
+    string                      read_bytes                  ( int maximum = read_bytes_maximum );
     void                        flush                       ();
 };
 

@@ -41,7 +41,7 @@ object FileUtil {
   }
 
   def moveOrCopyFile(from: File, to: File) = from.renameTo(to) || {
-    copyFile(from, to);
+    copyFile(from, to)
     from.delete()
   }
 

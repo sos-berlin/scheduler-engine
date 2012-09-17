@@ -50,10 +50,9 @@ struct CppEventFactory : ::zschimmer::javabridge::proxy_jobject< CppEventFactory
     }
   public:
 
-    static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newErrorLogEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
-    static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newInfoLogEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
+    static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newLogEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1);
     static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newOrderStateChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2);
-    static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jboolean p2);
+    static ::javaproxy::com::sos::scheduler::engine::data::event::AbstractEvent newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2);
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

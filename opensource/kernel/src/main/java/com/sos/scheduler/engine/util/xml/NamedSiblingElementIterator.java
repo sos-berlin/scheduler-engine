@@ -17,14 +17,14 @@ public class NamedSiblingElementIterator extends AbstractIterator<Element> {
         next = sameOrNextElement(firstSibling);
     }
 
-    @Override protected Element computeNext() {
+    @Override protected final Element computeNext() {
         Element result = next;
         if (next != null)
             next = sameOrNextElement(next.getNextSibling());
         return result == null? endOfData() : result;
     }
 
-    @Nullable protected Element sameOrNextElement(@Nullable Node node) {
+    @Nullable protected final Element sameOrNextElement(@Nullable Node node) {
         Node n = node;
         while (n != null && (n.getNodeType() != ELEMENT_NODE || !n.getNodeName().equals(name)))
             n = n.getNextSibling();

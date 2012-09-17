@@ -75,11 +75,11 @@ struct Env
     void                        log_stack_trace             (jthrowable);
 
     string                      string_from_jstring         ( const jstring& );
-    jstring                     jstring_from_string         ( const char*, size_t length );
+    jstring                     jstring_from_string         ( const char*, int length );
     jstring                     jstring_from_string         ( const char* );
     jstring                     jstring_from_string         ( const string& );
     jstring                     jstring_from_string         ( const com::Bstr& );
-    jstring                     jstring_from_string         (const OLECHAR*, size_t length);
+    jstring                     jstring_from_string         (const OLECHAR*, int length);
 
     string                      get_class_name              ( jclass );
     jobject                     new_local_ref               (jobject);
@@ -272,7 +272,7 @@ struct Local_jstring : local_jobject<jstring>
                                 Local_jstring               ( jstring jstr )                        { assign( jstr ); }
                                 Local_jstring               ( const string& str )                   { assign( str ); }
                                 Local_jstring               ( const char* str )                     { assign( str ); }
-                                Local_jstring               ( const char* str, size_t length )      { assign( str, length ); }
+                                Local_jstring               ( const char* str, int length )         { assign( str, length ); }
 
     Local_jstring&              operator =                  ( jstring jstr )                        { assign( jstr );  return *this; }
     Local_jstring&              operator =                  ( const string& str )                   { assign( str  );  return *this; }
@@ -280,9 +280,9 @@ struct Local_jstring : local_jobject<jstring>
                                 operator jstring            ()                                      { return get_jstring(); }
 
     void                        assign                      ( jstring jstr )                        { local_jobject<jstring>::assign( jstr ); }
-    void                        assign                      ( const string& str )                   { assign( str.data(), str.length() ); }
-    void                        assign                      ( const char* str )                     { assign( str, strlen( str ) ); }
-    void                        assign                      ( const char* s, size_t l )             { assign( Env().jstring_from_string( s, l ) ); }
+    void                        assign                      ( const string& str )                   { assign( str.data(), int_cast(str.length()) ); }
+    void                        assign                      ( const char* str )                     { assign( str, int_strlen( str ) ); }
+    void                        assign                      ( const char* s, int l )                { assign( Env().jstring_from_string( s, l ) ); }
     jstring                     get_jstring                 ()                                      { return (jstring)get_jobject(); }
 };
 
@@ -528,7 +528,6 @@ struct Vm : Object              // Java virtual machine
     void                        load_standard_classes       ();
     Standard_classes*           standard_classes            ();
     void                    set_log                         ( Has_log* );
-    void                    set_filename                    ();
     void                    set_filename                    ( const string& module_filename )       { _filename = module_filename; }
     string                      filename                    () const                                { return _filename; }
 
@@ -570,6 +569,13 @@ struct Vm : Object              // Java virtual machine
     static JavaVM*              request_jvm                 ();
     static void                 release_jvm                 ( JavaVM* );
 
+  private:
+    std::vector<string>         filenames                   ();
+
+    typedef int JNICALL JNI_CreateJavaVM_func( JavaVM**, JNIEnv**, JavaVMInitArgs* );
+    JNI_CreateJavaVM_func*      load_module                 (const string& filename);
+
+  public:
     static Mutex                static_vm_mutex;
     static Vm*                  static_vm;
 

@@ -11,9 +11,8 @@ import static org.hamcrest.Matchers.*;
  *
  * @author Joacim Zschimmer
  */
-public class CommandDispatcherTest {
-    private CommandDispatcher commandDispatcher = commandDispatcher();
-
+public final class CommandDispatcherTest {
+    private final CommandDispatcher commandDispatcher = commandDispatcher();
 
     private static CommandDispatcher commandDispatcher() {
         Iterable<CommandHandler> commandHandlers = asList(
@@ -26,14 +25,12 @@ public class CommandDispatcherTest {
         return new CommandDispatcher(commandHandlers);
     }
 
-
     @Test public void testExecuteXml_A() {
         String resultXml = commandDispatcher.executeXml("<a value1='VALUE 1'/>");
         Element e = loadXml(resultXml).getDocumentElement();
         assertThat(e.getNodeName(), equalTo("aResult"));
         assertThat(e.getAttribute("value1"), equalTo("VALUE 1"));
     }
-
 
     @Test public void testExecuteXml_B() {
         String resultXml = commandDispatcher.executeXml("<b value2='VALUE 2'/>");

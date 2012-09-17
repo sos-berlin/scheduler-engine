@@ -120,7 +120,7 @@ static string simplified_path( const string& path )
 
 Path::Path( const string& folder_path, const string& tail_path ) 
 { 
-    if( int len = folder_path.length() + tail_path.length() )
+    if( size_t len = folder_path.length() + tail_path.length() )
     {
         string path;
 

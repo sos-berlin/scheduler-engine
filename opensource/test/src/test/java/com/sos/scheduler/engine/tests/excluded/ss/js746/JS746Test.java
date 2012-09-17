@@ -28,24 +28,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * \file JS746Test.java
- * \brief js-746: test show_calendar
- * 
- * \class JS746Test
- * \brief js-746: test show_calendar
- * 
- * \details
+ * js-746: test for command show_calendar
+ *
  * The class is for testing the behaviour of the command show_calendar for different run_times (single_start,
  * repeat and absolute_repeat).
- * 
- * \code
-   \endcode
- * 
- * \author ss 
- * \version 1.0 - 30.09.2011 09:12:21 
- * <div class="sos_branding">
- * <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
  */
 @SuppressWarnings("deprecation")
 public class JS746Test extends SchedulerTest {

@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.data.folder.Path;
 import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
@@ -16,26 +15,13 @@ import static com.google.common.base.Strings.nullToEmpty;
 import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
 import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
 
-/** Stellt eine Konfigurationsumgebung für den Scheduler bereit.
- * \file Environment.java
- * \brief Build the environment for the scheduler binary 
- *  
- * \class Environment
- * \brief Build the environment for the scheduler binary 
- * 
- * \details
- *
- * \code
-  \endcode
- *
- * \version 1.0 - 31.08.2011 10:11:54
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
+/**
+ * Build the environment for the scheduler binary
  */
 public final class Environment {
+    private static final String javaOptions = "-Xmx20m";    // Größe des Java-Heaps vor allem für Task-Prozesse stark beschränken, damit viele Tasks laufen können.
     private static final String configSubdir = "config";
-    private static final String logSubdir = "log";
+  //private static final String logSubdir = "log";
 
     private final ResourcePath resourcePath;
     private final File directory;
@@ -52,7 +38,7 @@ public final class Environment {
         this.nameMap = nameMap;
         this.fileTransformer = fileTransformer;
         configDirectory = new File(directory, configSubdir);
-        logDirectory = new File(directory, logSubdir);
+        logDirectory = directory;  // Wurzel (Arbeitsverzeichnis), damit Jenkins die Protokolle der Tests zeigt
     }
 
     void prepare() {
@@ -69,6 +55,7 @@ public final class Environment {
     ImmutableList<String> standardArgs(CppBinaries cppBinaries, String logCategories) {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
         result.add(cppBinaries.file(CppBinary.exeFilename).getPath());
+        result.add("-java-options=" +javaOptions);
         result.add("-id=test");
         result.add("-sos.ini=" + sosIniFile());
         result.add("-ini=" + iniFile());
@@ -99,11 +86,6 @@ public final class Environment {
 
     public File fileFromPath(TypedPath p) {
         return p.file(configDirectory());
-    }
-
-    @Deprecated  // Nimm fileFromPath()
-    public File fileFromPath(Path p, String suffix) {
-        return new File(configDirectory(), p + suffix);
     }
 
     public File directory() {

@@ -14,7 +14,7 @@ package sos.spooler;
  * @version $Revision: 5811 $
  */
 
-public class Task extends Idispatch
+public class Task extends Idispatch implements HasBean<TaskBean>
 {
     private                 Task                ( long idispatch )                  { super(idispatch); }
     
@@ -272,4 +272,8 @@ public class Task extends Idispatch
     public boolean          try_hold_lock       ( String lock_path )                { return boolean_com_call( "try_hold_lock"              , lock_path ); }
     public boolean          try_hold_lock_non_exclusive( String lock_path )         { return boolean_com_call( "try_hold_lock_non_exclusive", lock_path ); }
     public void             call_me_again_when_locks_available()                    {                com_call( "call_me_again_when_locks_available"     ); }
+
+    @Override public final TaskBean toBean() {
+        return new TaskBean(this);
+    }
 }

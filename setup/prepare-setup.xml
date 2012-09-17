@@ -37,17 +37,14 @@ to run without maven integration.
     <if>
      <equals arg1="${os.architecture}" arg2="windows" />
      <then>
-      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
-      		<include name="scheduler.exe"/>
-      		<include name="spidermonkey.dll"/>
-      	</fileset>
+      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform" />
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
-      		<include name="scheduler.dll"/>
+      		<exclude name="**"/>
       	</fileset>
      </then>
      <else>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
-      		<include name="scheduler"/>
+      		<exclude name="libspidermonkey.so"/>
       	</fileset>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
       		<include name="libspidermonkey.so"/>
@@ -173,8 +170,10 @@ to run without maven integration.
   </target>
 	
 	<target name="-versioninfo" description="creates a file with version information">
-    <propertyfile file="${target.dir}/${setup.version}.txt" comment="information about the last build">
-      <entry  key="${setup.platform}.lastbuild" type="date" value="now" pattern="yyyy-MM-dd'T'HH:mm:ss" />
+    <propertyfile file="${target.dir}/scheduler.${folder.name}/.version-engine" comment="build information">
+      <entry  key="version" type="string" value="${setup.version}" />
+      <entry  key="platform" type="string" value="${setup.platform}" />
+      <entry  key="builddate" type="date" value="now" pattern="yyyy-MM-dd HH:mm:ss" />
     </propertyfile>
   </target>
 

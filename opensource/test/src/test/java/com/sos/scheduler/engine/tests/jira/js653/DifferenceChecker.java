@@ -16,18 +16,18 @@ class DifferenceChecker<T> {
     private final Set<T> actual;
     private final String adjective;
 
-    DifferenceChecker(Set<T> expected, Set<T> actual, String adjective) {
+    private DifferenceChecker(Set<T> expected, Set<T> actual, String adjective) {
         this.expected = expected;
         this.actual = actual;
         this.adjective = adjective;
     }
 
-    void check() {
+    final void check() {
         if (!actual.equals(expected))
             fail(differenceMessage());
     }
 
-    String differenceMessage() {
+    final String differenceMessage() {
         return Joiner.on("; ").skipNulls().join(wrongActualString(), missingActualString());
     }
 
