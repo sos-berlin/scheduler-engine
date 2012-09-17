@@ -2,14 +2,14 @@ package com.sos.scheduler.engine.test.binary
 
 import com.sos.scheduler.engine.kernel.util.Files.copyURLToFile
 import com.sos.scheduler.engine.kernel.util.Util.ignore
-import com.sos.scheduler.engine.test.util.WaitForCondition._
+import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import java.io.File
 import org.joda.time.Duration
 import org.joda.time.Duration.{millis, standardSeconds}
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
-import com.sos.scheduler.engine.kernel.util.Stopwatch
 
 /** Stellt Resourcen als Dateien zur Verfügung -
   * basiert auf [[org.springframework.core.io.support.PathMatchingResourcePatternResolver]], das nicht in jeder Umgebung funktionieren muss.

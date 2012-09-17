@@ -1,4 +1,5 @@
-package com.sos.scheduler.engine.test.binary
+package com.sos.scheduler.engine
+package test.binary
 
 import com.google.common.io.Files.createTempDir
 import com.sos.scheduler.engine.kernel.util.Classes.springPattern
@@ -19,9 +20,9 @@ final class ResourcesAsFilesProviderTest extends FunSuite {
     try {
       val pattern = springPattern(classOf[SchedulerTest].getPackage, "config/*")
       val resources = (new PathMatchingResourcePatternResolver).getResources(pattern)
-      provideResourcesAsFiles(resources, directory).keySet should equal (Set("scheduler.xml", "factory.ini", "sos.ini"))
-    } finally
-      removeDirectoryRecursivly(directory)
+      provideResourcesAsFiles(resources, directory).keySet should equal(Set("scheduler.xml", "factory.ini", "sos.ini"))
+    }
+    finally removeDirectoryRecursivly(directory)
   }
 }
 
