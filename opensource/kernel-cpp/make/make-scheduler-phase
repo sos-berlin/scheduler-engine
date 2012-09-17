@@ -133,8 +133,8 @@ function cmd_linux_compile() {(
     make/make javaproxy
 
     if [ "$cpuArchitecture" == "x86" ]; then
-        make/make 3rd_party/libxml2 libxml2.a
-        make/make 3rd_party/libxslt/libxslt libxslt.a
+#        make/make 3rd_party/libxml2 libxml2.a
+#        make/make 3rd_party/libxslt/libxslt libxslt.a
         CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK="$JAVA_HOME" make -C js/src/fdlibm  -f Makefile.ref
         CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK="$JAVA_HOME" make -C js/src         -f Makefile.ref
         mkdir -p scripting_engine/Release
