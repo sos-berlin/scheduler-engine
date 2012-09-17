@@ -638,7 +638,7 @@ string z_strerror( int errn )
 
         char buffer [ 300 ];
         int err = strerror_s( buffer, sizeof buffer, errn );
-        int len = strlen( buffer );
+        size_t len = strlen( buffer );
         if( len > 0  &&  buffer[ len - 1 ] == '\n' )  len--;
         return string( buffer, len );
 
@@ -903,6 +903,30 @@ bool as_bool( const char* str )
     return false;
 }
 
+//-------------------------------------------------------------------------------------------as_int
+
+int int_cast(size_t n)
+{
+    if (n > (size_t)INT_MAX) {  // size_t ist unsigned, < 0 brauchen wir nicht zu prüfen.
+        string s = (S() << "size_t(" << (long)n << ")").to_string();    // long, damit unmögliche negative Zahl -1 nicht als 18446744073709551613 ausgegeben wird. 
+        //assert(!"int_cast(): size_t out of int range");   // DebugBreak()
+        throw_overflow("Z-4002", "int", s.c_str());
+    }
+    return (int)n;
+}
+
+//-------------------------------------------------------------------------------------------as_int
+
+//int int_cast(int64 n)
+//{
+//    if (n > INT_MAX || n < INT_MIN) {
+//        string s = (S() << "int64(" << n << ")").to_string();
+//        //assert(!"int_cast(): size_t out of int range");   // DebugBreak()
+//        throw_overflow("Z-4002", "int", s.c_str());
+//    }
+//    return (int)n;
+//}
+
 //----------------------------------------------------------------------------------Use_locale::set
 
 void Use_locale::set( int category, const char* locale )
@@ -990,7 +1014,7 @@ string subst_env( const string& value, const Get_string_by_name_interface* get_s
             if( *p == '{' )
             {
                 p++;
-                int e = value.find( '}', p - p0 );
+                size_t e = value.find( '}', p - p0 );
                 if( e == string::npos ) { p -= 2; break; }    // Fehler: Schließende Klammer
                 name.assign( p, e - ( p - p0 ) );
                 p = p0 + e + 1;
@@ -1305,7 +1329,7 @@ string string_gmt_strftime( const string& format, time_t time )
 string string_strftime( const string& format, const struct tm& tm )
 {
     char      buffer [ 100+1 ];
-    int length = strftime( buffer, sizeof buffer, format.c_str(), &tm );
+    size_t length = strftime( buffer, sizeof buffer, format.c_str(), &tm );
     return string( buffer, length );
 }
 
@@ -1490,12 +1514,12 @@ string get_environment_variable( const string& name )
 string remove_password( const string& text_with_password, const char* replacement )
 {
     string text = text_with_password;
-    int    pos  = 0;
+    size_t pos  = 0;
 
     while(1)
     {
         const char keyword[] = "password="; 
-        int keyword_len = strlen(keyword);
+        size_t keyword_len = strlen(keyword);
         pos = text.find( keyword, pos );
         if( pos == string::npos )  break;
 
@@ -1517,7 +1541,7 @@ string remove_password( const string& text_with_password, const char* replacemen
             while( *p  &&  !isspace( (Byte)*p ) )  p++;
         }
 
-        int len = p - ( text.c_str() + pos );
+        size_t len = p - ( text.c_str() + pos );
 
         if( replacement )
         {

@@ -319,7 +319,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         // Regelmässige Ausgabe von Text auf der Konsole
         if( _spooler  &&  _spooler->_print_time_every_second )
         {
-            int     console_line_length = 0;
+            size_t  console_line_length = 0;
             double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
             
             while(1)
@@ -334,7 +334,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                     ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT ); 
                    \endcode
                  */
-                ret = sosMsgWaitForMultipleObjects( _handles.size(), handles, (int)( ceil( min( step, remaining ) * 1000 ) ) ); 
+                ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, (int)( ceil( min( step, remaining ) * 1000 ) ) ); 
                 if( ret != SOS_WAIT_TIMEOUT )  break;
 
                 step = 1.0;
@@ -376,7 +376,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                     ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
                    \endcode
                  */
-                ret = sosMsgWaitForMultipleObjects( _handles.size(), handles, max( 0, t ) ); 
+                ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, max( 0, t ) ); 
             }
 
             if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
@@ -390,7 +390,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
            ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
            \endcode
          */
-         ret = sosMsgWaitForMultipleObjects( _handles.size(), handles, t ); 
+         ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, t ); 
         }
         
         delete [] handles;  handles = NULL;

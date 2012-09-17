@@ -100,9 +100,9 @@ struct Area : Const_area
 
     void                        assign          ( const Const_area& area )          { assign( area.byte_ptr(), area.length() ); }
     inline void                 assign          ( const void*, unsigned int length );
-    void                        assign          ( const char* string )              { assign( string, strlen( string ) ); }
+    void                        assign          ( const char* string )              { assign( string, z::int_strlen( string ) ); }
     void                        append          ( const Const_area& area )          { append( area.byte_ptr(), area.length() ); }
-    void                        append          ( const char* string )              { append( string, strlen( string ) ); }
+    void                        append          ( const char* string )              { append( string, z::int_strlen( string ) ); }
     void                        append          ( char c )                          { *this += c; }
     void                        append          ( const void*, unsigned int length );
 
@@ -129,7 +129,7 @@ struct Area : Const_area
     // Ohne inline-Code:
 
     void                       _assign          ( const Const_area& area )          { _assign( area.byte_ptr(), area.length() ); }
-    void                       _assign          ( const char* string )              { _assign( string, strlen( string ) ); }
+    void                       _assign          ( const char* string )              { _assign( string, z::int_strlen( string ) ); }
 #   if defined __SOSSTRNG_H
         void                   _assign          ( const Sos_string& str )           { _assign( c_str( str ), ::sos::length( str ) ); }
 #   endif

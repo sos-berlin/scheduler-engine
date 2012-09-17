@@ -468,8 +468,8 @@ struct Spooler : Object,
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
 #ifdef Z_WINDOWS
     MEMORYSTATUS                memory_status_init();
-    DWORD                        memory_status_calculate_reserved_virtual(MEMORYSTATUS m);
-    string                        mb_formatted(DWORD value);
+    SIZE_T                      memory_status_calculate_reserved_virtual(MEMORYSTATUS m);
+    string                      mb_formatted(SIZE_T value);
 #endif
 
     void                        set_state                   ( State );

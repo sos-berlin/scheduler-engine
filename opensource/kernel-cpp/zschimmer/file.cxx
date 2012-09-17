@@ -135,7 +135,7 @@ bool File_base::try_unlink( Has_log* log )
 
 void File_base::print( const io::Char_sequence& seq )
 {
-    write( seq.ptr(), seq.length() );
+    write( seq.ptr(), int_cast(seq.length()) );
 }
 
 //---------------------------------------------------------------------------------File_base::print
@@ -151,11 +151,11 @@ void File_base::print( int i )
 
 //---------------------------------------------------------------------------File_base::read_string
 
-string File_base::read_string( size_t size )
+string File_base::read_string( int size )
 {
     file::Buffer buffer ( size );
 
-    size_t length = read( buffer._buffer, size );
+    int length = read( buffer._buffer, size );
     return string( buffer._buffer, length );
 }
 
@@ -165,7 +165,7 @@ string File_base::read_all()
 {
     string       result;
     list<string> blocks;
-    int          total_length = 0;
+    size_t       total_length = 0;
 
     while( !eof() )
     {
@@ -376,9 +376,6 @@ void File::open_temporary( int flags, const string& a_name )
 
     if( opened() )  throw_xc( "Z-FILE-102" );
 
-    int pmode = S_IREAD | S_IWRITE;
-
-
 #   ifdef Z_WINDOWS
 
         create_temporary( 0, a_name );
@@ -388,7 +385,7 @@ void File::open_temporary( int flags, const string& a_name )
         if( !( flags & open_inheritable ) )  oflag |= O_NOINHERIT;      // Nicht an Prozesse vererben (machen wir zum Default, nur Windows)
 
         Z_LOG( "sopen(\"" << _path << "\")\n" );
-        int errn = _sopen_s( &_file, _path.c_str(), oflag | O_CREAT | O_TRUNC | O_RDWR | O_BINARY, flags & open_private? _SH_DENYRW : _SH_DENYWR, pmode );
+        int errn = _sopen_s( &_file, _path.c_str(), oflag | O_CREAT | O_TRUNC | O_RDWR | O_BINARY, flags & open_private? _SH_DENYRW : _SH_DENYWR, S_IREAD | S_IWRITE );
         if( errn )  _last_errno = errn, throw_errno( _last_errno, "open", _path.c_str() );
 
 #    else
@@ -425,7 +422,7 @@ void File::open_temporary( int flags, const string& a_name )
                 Z_LOG( "=> " << _path << "\n" );
 
                 Z_LOG( "open(\"" << _path << "\")\n" );
-                _file = ::open( _path.c_str(), O_EXCL | O_CREAT | O_RDWR, pmode );
+                _file = ::open( _path.c_str(), O_EXCL | O_CREAT | O_RDWR, S_IREAD | S_IWRITE );
                 if( _file == -1 )
                 {
                     if( errno == EEXIST )  continue;
@@ -523,23 +520,23 @@ void File::take_fileno( int f )
 
 //--------------------------------------------------------------------------------------File::write
 
-void File::write( const void* p, size_t len )
+void File::write( const void* p, int len )
 {
     _last_errno = 0;
 
-    size_t ret = ::write( _file,  p, len );
+    int ret = ::write( _file,  p, len );
     if( ret != len )  _last_errno = errno, check_error( "write" );
 }
 
 //---------------------------------------------------------------------------------------File::read
 
-size_t File::read( void* p, size_t len )
+int File::read( void* p, int len )
 {
     _last_errno = 0;
 
-    size_t ret = ::read( _file, p, len );
+    int ret = ::read( _file, p, len );
 
-    if( ret == (size_t)-1 )  _last_errno = errno, check_error( "read" );
+    if( ret == -1 )  _last_errno = errno, check_error( "read" );
     _eof = ret == 0;
     return ret;
 }
@@ -705,11 +702,10 @@ void* Mapped_file::map()
         if( !_ptr && !_map )
         {
             int64 length64 = this->length();
-            if( length64 > SIZE_MAX )  throw_xc( "Z-FILE-104", length64 );
+            if( length64 > INT_MAX )  throw_xc( "Z-FILE-104", length64 );
+            if( length64 == -1 )  _last_errno = errno, throw_errno( _last_errno, "filelength", _path.c_str() );
             
-            size_t length = (size_t)length64;
-
-            if( length == -1 )  _last_errno = errno, throw_errno( _last_errno, "filelength", _path.c_str() );
+            int length = int_cast(length64);
 
             if( length > 0 )
             {
@@ -845,7 +841,7 @@ void Stream_file::close()
 
 //-------------------------------------------------------------------------------Stream_file::write
 
-void Stream_file::write( const void* p, size_t len )
+void Stream_file::write( const void* p, int len )
 {
     _last_errno = 0;
 
@@ -875,13 +871,13 @@ void Stream_file::printf( const char* format, ... )
 */
 //--------------------------------------------------------------------------------Stream_file::read
 
-size_t Stream_file::read( void* p, size_t len )
+int Stream_file::read( void* p, int len )
 {
     _last_errno = 0;
 
     size_t ret = fread( p, 1, len, _file );
     if( ret == (size_t)-1 )  throw_error( "fread" );
-    return ret;
+    return int_cast(ret);
 }
 
 //---------------------------------------------------------------------------Stream_file::read_line
@@ -901,7 +897,7 @@ string Stream_file::read_line()
             throw_error( "fgets" );
         }
 
-        int length = strlen( buffer._buffer );
+        size_t length = strlen( buffer._buffer );
         if( buffer._buffer[ length - 1 ] == '\n' )
         {
             if( length >= 2  &&  buffer._buffer[ length - 2 ] == '\r' )  length--;

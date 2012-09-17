@@ -106,7 +106,7 @@ bool is_directory_separator( char c )
     
 File_path::File_path( const string& directory, const string& tail_path ) 
 { 
-    if( int len = directory.length() + tail_path.length() )
+    if( size_t len = directory.length() + tail_path.length() )
     {
         if( directory != ""  &&  *directory.rbegin() != Z_DIR_SEPARATOR[0]  &&  *directory.rbegin() != '/' )
         {

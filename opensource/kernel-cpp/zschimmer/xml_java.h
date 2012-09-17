@@ -282,6 +282,7 @@ struct Element_ptr : Node_ptr
     void                        setAttribute                ( const string& name, int64 value ) const;
     void                        setAttribute                ( const string& name, int value ) const           { setAttribute( name, (int64)value ); }  // Für gcc 3.3
     void                        setAttribute                ( const string& name, long value ) const          { setAttribute( name, (int64)value ); }  // Für gcc 3.3
+    void                        setAttribute                ( const string& name, size_t value ) const        { setAttribute( name, (int64)value ); }  // Für gcc 3.3
     bool                        hasAttributes               () const;
     void                        removeAttribute             ( const string& name ) const;
     bool                        hasAttribute                ( const string& name ) const;

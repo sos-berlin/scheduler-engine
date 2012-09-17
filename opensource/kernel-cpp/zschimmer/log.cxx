@@ -162,7 +162,7 @@ int Log_ptr::Log_streambuf::overflow( int character )
     if( Log_context* log_context = *static_log_context_ptr )
     {
         char* p      = pbase();
-        int   length = p? pptr() - p : 0;
+        int   length = p? int_cast(pptr() - p) : 0;
 
         if( length > 0 )  
         {

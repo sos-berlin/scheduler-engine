@@ -154,7 +154,7 @@ bool Process_module_instance::load()
                 vector<char> buffer                     ( 2 * script.length() );
 
                 int cp = _module->_encoding_code_page;
-                int length = WideCharToMultiByte( cp, WC_NO_BEST_FIT_CHARS, script_bstr, script_bstr.length(), &buffer[0], buffer.size(), 
+                int length = WideCharToMultiByte( cp, WC_NO_BEST_FIT_CHARS, script_bstr, script_bstr.length(), &buffer[0], int_cast(buffer.size()), 
                                                   NULL, cp == CP_UTF8 || cp == CP_UTF7? NULL : &default_character_was_used );
                 if( length <= 0 )  z::throw_mswin( GetLastError(), "WideCharToMultiByte" );
                 assert( length <= buffer.size() );
@@ -285,7 +285,6 @@ bool Process_module_instance::begin__end()
     File stdin_file ("nul", "rI");
     PROCESS_INFORMATION process_info;
     STARTUPINFOW        startup_info;
-    BOOL                ok;
 
     memset( &process_info, 0, sizeof process_info );
 

@@ -16,8 +16,8 @@ struct Charset
   //virtual size_t                  wchar_count_of_encoded  ( const string& ) const                             = 0;
     //virtual BSTR                    bstr_from_encoded       ( const string& ) const                             = 0;
     virtual HRESULT                 Encoded_to_bstr         ( const string&, BSTR* result ) const               = 0;
-    virtual HRESULT                 Encoded_to_olechar      ( const string&, OLECHAR* result, size_t size ) const  = 0;
-    virtual HRESULT                 Olechar_to_encoded      ( const OLECHAR*, size_t, string* result ) const       = 0;
+    virtual HRESULT                 Encoded_to_olechar      ( const string&, OLECHAR* result, int size ) const  = 0;
+    virtual HRESULT                 Olechar_to_encoded      ( const OLECHAR*, int, string* result ) const       = 0;
     HRESULT                         Bstr_to_encoded         ( const BSTR bstr, string* result ) const             { return Olechar_to_encoded( bstr, SysStringLen( bstr ), result ); }
     string                          encoded_from_bstr       ( const BSTR ) const;
 

@@ -154,9 +154,9 @@ struct Input_message
                                                                                                       _is_complete = false; 
                                                                                                     }
 
-    bool                        end                     ()                                          { return (uint)_index >= _data.length(); }
+    bool                        end                     ()                                          { return (size_t)_index >= _data.length(); }
     void                        need_bytes              ( int byte_count );
-    int                         length                  () const                                    { return _data.length() - 4; }
+    int                         length                  () const                                    { return int_cast(_data.length()) - 4; }   // Das kann negativ werden ...
 
     char                        operator []             ( int index ) const;
     char                        peek_char               ();
@@ -912,7 +912,7 @@ struct Output_message
     void                        write_uint32            ( uint32 u )                                { write_int32( (int32)u ); }
     void                        write_int64             ( int64 );
     void                        write_string            ( const string& );
-    void                        write_string            ( const OLECHAR* str )                      { write_string( str, wcslen( str ) ); }
+    void                        write_string            ( const OLECHAR* str )                      { write_string( str, int_cast(wcslen( str )) ); }
     void                        write_string            ( const OLECHAR*, int length );
     void                        write_double            ( double );
     void                        write_bstr              ( const BSTR bstr )                         { write_string( bstr, SysStringLen( bstr ) ); }

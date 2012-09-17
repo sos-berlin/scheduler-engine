@@ -162,7 +162,7 @@ const Vartype_name vartype_names[] =
 
 //-------------------------------------------------------------------------------------------static
 
-extern Com_context const*       static_com_context_ptr  = NULL;
+Com_context const*              static_com_context_ptr  = NULL;
 static Loaded_modules           loaded_modules;
 
 //--------------------------------------------------------------------------------hash_value(CLSID)
@@ -727,12 +727,12 @@ HRESULT Bstr_to_string( const BSTR bstr, string* result )  throw()
 string string_from_ole( const OLECHAR* wstr )
 {
     if( !wstr )  return "";
-    return string_from_ole( wstr, wmemchr( wstr, 0, (size_t)-1 ) - wstr );
+    return string_from_ole( wstr, int_cast(wmemchr( wstr, 0, (long)-1 ) - wstr) );
 }
 
 //----------------------------------------------------------------------------------string_from_ole
 
-string string_from_ole( const OLECHAR* wstr, size_t len )
+string string_from_ole( const OLECHAR* wstr, int len )
 {
 /*
     //fprintf( stderr, "string_from_ole ,%d\n", len );
@@ -790,7 +790,7 @@ HRESULT String_to_bstr( const OLECHAR* str, size_t len, BSTR* bstr ) throw()
     else
     {
         //for( int i = 0; i < len; i++ )  fputc(str[i],stderr);
-        *bstr = SysAllocStringLen( str, len );
+        *bstr = SysAllocStringLen( str, int_cast(len) );
 
         if( !*bstr )  return E_OUTOFMEMORY;
     }
@@ -809,14 +809,15 @@ HRESULT String_to_bstr( const char* str, size_t len, BSTR* bstr ) throw()
     }
     else
     {
-        int count = MultiByteToWideChar( CP_ACP, 0, str, len, NULL, 0 );
+        int int_len = int_cast(len);
+        int count = MultiByteToWideChar( CP_ACP, 0, str, int_len, NULL, 0 );
         if( !count )  return E_INVALIDARG;
 
 
         *bstr = SysAllocStringLen( (OLECHAR*)NULL, count );
         if( !*bstr )  return E_OUTOFMEMORY;
 
-        int c = MultiByteToWideChar( CP_ACP, 0, str, len, *bstr, len );
+        int c = MultiByteToWideChar( CP_ACP, 0, str, int_len, *bstr, int_len );
         if( !c )  
         {
             if( GetLastError() == ERROR_INSUFFICIENT_BUFFER )  return E_OUTOFMEMORY;
@@ -833,7 +834,7 @@ HRESULT String_to_bstr( const char* str, size_t len, BSTR* bstr ) throw()
 
 HRESULT Bstr_to_bstr( const BSTR src, BSTR* dst ) throw()
 {
-    size_t len = SysStringLen( src );
+    int len = SysStringLen( src );
     if( len == 0 )
     {
         *dst = NULL;
@@ -853,14 +854,15 @@ BSTR bstr_from_string( const char* single_byte_text, size_t len )
 {
     if( len == 0 )  return NULL;
 
+    int int_len = int_cast(len);
 
-    size_t count = MultiByteToWideChar( CP_ACP, 0, single_byte_text, len, NULL, 0 );
+    int count = MultiByteToWideChar( CP_ACP, 0, single_byte_text, int_len, NULL, 0 );
     if( !count )  throw_mswin( "bstr_from_string/MultiByteToWideChar" );
 
     OLECHAR* ptr = SysAllocStringLen( (OLECHAR*)NULL, count );
     if( !ptr )  throw_com( E_OUTOFMEMORY, "bstr_from_string/SysAllocStringLen" );
 
-    int c = MultiByteToWideChar( CP_ACP, 0, single_byte_text, len, ptr, len );
+    int c = MultiByteToWideChar( CP_ACP, 0, single_byte_text, int_len, ptr, int_len );
     if( !c )  throw_mswin( "bstr_from_string/MultiByteToWideChar" );
 
     ptr[ count ] = L'\0';
@@ -895,13 +897,13 @@ BSTR bstr_from_wstring( const std::wstring& str )
 
 #   else
 
-        size_t len = str.length();
+        int len = int_cast(str.length());
         if( len == 0 )  return NULL;
 
         BSTR bstr = SysAllocStringLen( NULL, len );
         if( !bstr )  throw_com( E_OUTOFMEMORY, "bstr_from_wstring/SysAllocStringLen" );
 
-        for( size_t i = 0; i < len; i++ )  bstr[i] = str[i];
+        for( int i = 0; i < len; i++ )  bstr[i] = str[i];
         bstr[ len ] = 0;
 
         return bstr;
@@ -1302,8 +1304,8 @@ string debug_string_from_variant( const VARIANT& v )
         {
             case VT_EMPTY           :
             case VT_NULL            : return vartype_name(v.vt);
-            case VT_UNKNOWN         : return printf_string( "IUnknown:%X" , (size_t)V_UNKNOWN(&v) );
-            case VT_DISPATCH        : return printf_string( "IDispatch:%X", (size_t)V_DISPATCH(&v) );
+            case VT_UNKNOWN         : return printf_string( "IUnknown:%X" , (long)V_UNKNOWN(&v) );
+            case VT_DISPATCH        : return printf_string( "IDispatch:%X", (long)V_DISPATCH(&v) );
 
             case VT_ERROR:
                 if( v.scode == DISP_E_PARAMNOTFOUND )  return "DISP_E_PARAMNOTFOUND (missing value)";   // Nicht angegebener optionaler Parameter: Keine Fehlermeldung zeigen!
@@ -1661,11 +1663,11 @@ Bstr::~Bstr()
 
 //-------------------------------------------------------------------------------------Bstr::append
 
-void Bstr::append( const OLECHAR* s, size_t s_len )
+void Bstr::append( const OLECHAR* s, int s_len )
 {
     if( s_len > 0 )
     {
-        size_t len = length();
+        int len = length();
         BSTR   b   = ::SysAllocStringLen( NULL, len + s_len );
 
         if( !b )  throw_com( E_OUTOFMEMORY, "Bstr::append" );
@@ -1682,7 +1684,7 @@ void Bstr::append( const OLECHAR* s, size_t s_len )
 //-------------------------------------------------------------------------------------Bstr::append
 #ifndef Z_OLECHAR_IS_WCHAR
 
-void Bstr::append( const wchar_t* s, size_t s_len )
+void Bstr::append( const wchar_t* s, int s_len )
 {
     if( s_len > 0 )
     {
@@ -1706,18 +1708,18 @@ void Bstr::append( const wchar_t* s, size_t s_len )
 
 //-------------------------------------------------------------------------------------Bstr::append
 
-void Bstr::append( const char* s, size_t s_len )
+void Bstr::append( const char* s, int s_len )
 {
     if( s_len > 0 )
     {
-        size_t len = length();
-        BSTR   b   = ::SysAllocStringLen( NULL, len + s_len );
+        int len = length();
+        BSTR b = ::SysAllocStringLen( NULL, len + s_len );
 
         if( !b )  throw_com( E_OUTOFMEMORY, "Bstr::append" );
     
         memcpy( b, _bstr, len * sizeof (OLECHAR) );
         
-        for( size_t i = 0; i < s_len; i++ )  b[ len + i ] = (unsigned char)s[ i ];
+        for( int i = 0; i < s_len; i++ )  b[ len + i ] = (unsigned char)s[ i ];
 
         b[ len + s_len ] = 0;
 
@@ -1732,7 +1734,7 @@ void Bstr::copy_to( BSTR* bstr )
 {
     if( !bstr )  return;
 
-    size_t len = SysStringLen( _bstr );
+    int len = SysStringLen( _bstr );
     if( len == 0 )
     {
         *bstr = NULL;
@@ -1756,12 +1758,12 @@ void Bstr::alloc_string( const Bstr& s )
 
 void Bstr::alloc_string( const OLECHAR* s )
 {
-    alloc_string( s, s? wcslen( s ) : 0 );
+    alloc_string( s, s? int_cast(wcslen( s )) : 0 );
 }
 
 //-------------------------------------------------------------------------------Bstr::alloc_string
 
-void Bstr::alloc_string( const OLECHAR* s, size_t len )
+void Bstr::alloc_string( const OLECHAR* s, int len )
 {
     BSTR old_bstr = _bstr;      // Falls _bstr == s
 
@@ -1783,14 +1785,14 @@ void Bstr::alloc_string( const OLECHAR* s, size_t len )
 
 void Bstr::alloc_string( const wchar_t* s )
 {
-    alloc_string( s, wcslen( s ) );
+    alloc_string( s, int_cast(wcslen( s )) );
 }
 
 #endif
 //-------------------------------------------------------------------------------Bstr::alloc_string
 #ifndef Z_OLECHAR_IS_WCHAR
 
-void Bstr::alloc_string( const wchar_t* s, size_t len )
+void Bstr::alloc_string( const wchar_t* s, int len )
 {
     ::SysFreeString( _bstr );
 
@@ -1823,7 +1825,7 @@ void Bstr::alloc_string( const uint16* s )
 //-------------------------------------------------------------------------------Bstr::alloc_string
 #ifndef Z_OLECHAR_IS_UINT16
 
-void Bstr::alloc_string( const uint16* s, size_t len )
+void Bstr::alloc_string( const uint16* s, int len )
 {
     assert( sizeof (OLECHAR) == sizeof (uint16) );
 
@@ -1906,7 +1908,7 @@ size_t Bstr::hash_value() const
     size_t      length   = this->length();
     size_t      result   = 0xDeadBeef;
     const int   n        = 10;
-    const int   distance = length < n? 1 : length / n;
+    const size_t distance = length < n? 1 : length / n;
 
     for( size_t i = 0; i < length; i += distance )  result += (uint)_bstr[i];
 

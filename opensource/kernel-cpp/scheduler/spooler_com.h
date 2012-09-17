@@ -176,7 +176,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     xml::Document_ptr           dom                         ( const string& element_name, const string& subelement_name );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );
 
-    int                         count                       ()                                      { return _map.size(); }
+    int                         count                       ()                                      { return int_cast(_map.size()); }
     int                         estimated_byte_count        () const;
     void                        set_var                     ( const string& name, const Variant& value );
     void                        set_var                     ( const string& name, const string& value );

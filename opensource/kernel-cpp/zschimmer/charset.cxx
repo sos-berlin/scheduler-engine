@@ -102,7 +102,7 @@ struct Windows_charset : Charset
         if( encoded.length() > 0 )
         {
             DWORD flags = 0; // Muss 0 sein für UTF-8 u.a   WC_NO_BEST_FIT_CHARS
-            size_t wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), encoded.length(), NULL, 0 );
+            size_t wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), int_cast(encoded.length()), NULL, 0 );
             if( wchar_count == 0 )
             {
                 int error = GetLastError();
@@ -113,7 +113,7 @@ struct Windows_charset : Charset
             *result = SysAllocStringLen( (OLECHAR*)NULL, wchar_count );
             if( !*result )  return E_OUTOFMEMORY;
 
-            int c = MultiByteToWideChar( _codepage, 0, encoded.data(), encoded.length(), *result, wchar_count );
+            int c = MultiByteToWideChar( _codepage, 0, encoded.data(), int_cast(encoded.length()), *result, wchar_count );
             if( !c )  
             {
                 //if( GetLastError() == ERROR_INSUFFICIENT_BUFFER )  return E_OUTOFMEMORY;
@@ -128,14 +128,14 @@ struct Windows_charset : Charset
 
     //------------------------------------------------------------Windows_charset::Encoded_to_wchar
     
-    HRESULT Encoded_to_olechar( const string& encoded, OLECHAR* result, size_t size ) const
+    HRESULT Encoded_to_olechar( const string& encoded, OLECHAR* result, int size ) const
     {
         HRESULT hr = S_OK;
 
         if( encoded.length() > 0 )
         {
             DWORD flags = 0; // Muss 0 sein für UTF-8 u.a   WC_NO_BEST_FIT_CHARS
-            size_t wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), encoded.length(), NULL, 0 );
+            size_t wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), int_cast(encoded.length()), NULL, 0 );
             if( wchar_count == 0 )
             {
                 int error = GetLastError();
@@ -145,7 +145,7 @@ struct Windows_charset : Charset
 
             if( wchar_count > size )  return HRESULT_FROM_WIN32( ERROR_INSUFFICIENT_BUFFER );
 
-            int c = MultiByteToWideChar( CP_ACP, 0, encoded.data(), encoded.length(), result, wchar_count );
+            int c = MultiByteToWideChar( CP_ACP, 0, encoded.data(), int_cast(encoded.length()), result, wchar_count );
             if( !c )  
             {
                 //if( GetLastError() == ERROR_INSUFFICIENT_BUFFER )  return E_OUTOFMEMORY;
@@ -167,7 +167,7 @@ struct Windows_charset : Charset
 
     //------------------------------------------------------------Windows_charset::Wchar_to_encoded
     
-    HRESULT Olechar_to_encoded( const OLECHAR* wstr, size_t length, string* encoded_result ) const
+    HRESULT Olechar_to_encoded( const OLECHAR* wstr, int length, string* encoded_result ) const
     {
         HRESULT hr = S_OK;
 
@@ -187,7 +187,7 @@ struct Windows_charset : Charset
 
             encoded_result->resize( encoded_length );
 
-            size_t ret = WideCharToMultiByte( _codepage, 0, wstr, length, &(*encoded_result)[0], encoded_length, NULL, NULL );
+            int ret = WideCharToMultiByte( _codepage, 0, wstr, length, &(*encoded_result)[0], encoded_length, NULL, NULL );
             if( ret == 0 )  hr = HRESULT_FROM_WIN32( GetLastError() );
 /*
             char  local_buffer [ 200+1 ];

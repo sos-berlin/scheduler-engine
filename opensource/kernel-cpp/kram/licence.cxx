@@ -341,7 +341,7 @@ uint4 Sos_licence::alnum_as_uint4( const char* p, int n )
 
 void Sos_licence::set_par( int n, const char* str )
 {
-    set_par( n, str, str? strlen( str ) : 0 );
+    set_par( n, str, str? z::int_strlen( str ) : 0 );
 }
 
 //-------------------------------------------------------------------------Sos_licence::set_par
@@ -353,7 +353,7 @@ void Sos_licence::set_par( int n, const char* value, int len )
     if( n > _par.last_index() )  _par.last_index( n );
 
     if( len == 0 )  _par[ n ] = _empty_value_string;
-              else  _par[ n ] = as_string( value, len );
+              else  _par[ n ] = string( value, len );
 /*
     char* str;
 
@@ -435,7 +435,7 @@ void Sos_licence::read_key( const char* key )
                 if( q != p )  throw_xc( "SOS-1003" );
                 _zz = true;
             } else {
-                set_par( n, p, q - p );
+                set_par( n, p, z::int_cast(q - p) );
             }
 
             p = q + 1;
@@ -781,12 +781,11 @@ bool Sos_licence::is_demo_version()
 
 void Sos_licence::log_licence_keys()
 {
-    bool result = true;
     Z_FOR_EACH_CONST( list<string>, _installed_keys, it )
     {
        Sos_licence lic;
        lic.read_key( *it );
-       Sos_seriennr* s = &lic._seriennr[ 1 ];
+       //Sos_seriennr* s = &lic._seriennr[ 1 ];
        size_t i = lic.key().find_last_of("-");
        string print_key = (i > 0) ? lic.key().substr(0,i) : lic.key();
        Z_LOG2("scheduler","Licence " << print_key << " is installed.\n");

@@ -203,7 +203,7 @@ THROW_NONE
 void Msg_insertions::assign( int i, const char* text, Xc_base* x )
 THROW_NONE
 {
-    assign( i, text, text? strlen( text ) : 0, x );
+    assign( i, text, text? z::int_strlen( text ) : 0, x );
 }
 
 //-----------------------------------------------------------------------Msg_insertions::assign
@@ -287,7 +287,7 @@ THROW_NONE
 void Msg_insertions::append( const char* text, Xc_base* x )
 THROW_NONE
 {
-    if( text )  append( text, strlen( text ), x );
+    if( text )  append( text, z::int_strlen( text ), x );
 }
 
 //-----------------------------------------------------------------------Msg_insertions::append
@@ -440,7 +440,7 @@ void Xc_base::set_code( const char* code )
 
 void Xc_base::name( const char* n ) throw()
 {
-    int len = min( strlen( n ), sizeof _name - 1 );
+    size_t len = min( strlen( n ), sizeof _name - 1 );
     memcpy( _name, n, len );
     _name[ len ] = '\0';
 }
@@ -597,7 +597,7 @@ THROW_NONE
         if( e ) {
             *s << code();                         // Fehlercode einstellen
             *s << "  ";
-            int l = strlen( e );
+            size_t l = strlen( e );
             if( l > 0 && e[ l-1 ] == '\n' )  l--;
             s->write( e, l );
             found = true;
@@ -1029,7 +1029,7 @@ THROW_NONE
 :
     Xc( e )
 {
-    int len = MIN( strlen( usage ), sizeof _usage - 1 );
+    size_t len = MIN( strlen( usage ), sizeof _usage - 1 );
     memcpy( _usage, usage, len );
     _usage[len] = '\0';
     insert( usage );

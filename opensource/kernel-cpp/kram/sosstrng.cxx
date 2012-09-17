@@ -28,21 +28,6 @@ void ltrim( Sos_string* str_ptr )
     if ( p != c_str(*str_ptr) ) *str_ptr = p;
 }
 
-//----------------------------------------------------------------------------------------rtrim
-/*
-void rtrim( Sos_string* str_ptr )
-{
-    int         len = length(*str_ptr);
-    const char* p   = c_str(*str_ptr)+len;
-    int         l   = len;
-
-    while (*p && isspace(*p)) { p--; l--; }
-
-    if ( l < len ) {
-        *str_ptr = as_string( c_str(*str_ptr), l );
-    }
-}
-*/
 //-----------------------------------------------------------------------------------------trim
 
 void trim( Sos_string* str_ptr )
@@ -66,88 +51,6 @@ string right_string( const string& str, int len )
     return str.substr( str.length() - len, len );
 }
 
-/*
-Sos_string as_string( const Const_area& area )
-{
-    if( area.length() == 0 ) {
-        return Sos_string( "" );
-    }
-#if defined( SYSTEM_BORLAND )
-	return( string( area.char_ptr(), 0, area.length() ) );
-#endif
-#if defined( SYSTEM_SOLARIS )
-	return( RWCString( area.char_ptr(), area.length() ) );
-#endif
-#if defined( __GNU_C__ )
-	// Gnu String?
-#endif
-}
-*/
-
-
-#if 0
-void convert_from_string( const Sos_string& str, Area* area_ptr )
-{
-	if ( area_ptr->size() < str.length() ) raise( "D???", "???" );
-	memcpy( area_ptr->char_ptr(), c_str(str), str.length() );
-	area_ptr->length( str.length() );
-
-  exceptions
-}
-
-
-#endif
-
-/*
-size_t find( const Sos_string& str, const Sos_string& to_find, size_t pos )
-{
-#if defined( SYSTEM_SOLARIS )
-    RWCRegexp regex(c_str(to_find));
-	size_t erg = str.index( regex, NULL, pos );
-    return ( erg == RW_NPOS ? NO_POS : erg );
-#endif
-#if defined( SYSTEM_WIN )
-	return str.find( to_find, pos );
-#endif
-#if defined( __GNU_C__ )
-	// Gnu String?
-#endif
-}
-*/
-/*
-Sos_string sub_string( const Sos_string str, size_t pos, size_t length )
-{
-    size_t real_length;
-    if ( length == (size_t)STRING_LENGTH )
-    {
-        real_length = strlen( c_str( str ) );
-    } else real_length = length;
-#if defined( SYSTEM_BORLAND )
-	return( string( c_str( str ), pos, real_length ) );
-#endif
-#if defined( SYSTEM_SOLARIS )
-	return( RWCString( c_str( str ) + pos , real_length ) );
-#endif
-#if defined( __GNU_C__ )
-	// Gnu String?
-#endif
-}
-*/
-
-#if defined OWN_SOSSTRING
-
-char Sos_string::_null_string [ 1 ] = "";
-
-/*
-void Sos_string::size( int s )
-{
-    delete [] _ptr;
-    _ptr = new char [ s ];        assert( _ptr );
-    _size = s;
-}
-*/
-#endif
-
 //---------------------------------------------------------------------------------------_empty
 
 Bool _empty( const Sos_string& str )
@@ -169,12 +72,6 @@ Sos_string as_string( Big_int o )
 {
     ZERO_RETURN_VALUE( Sos_string );
 
-/* Microsoft: Operator << ist mehrdeutig
-    char buffer [ 40 ];
-    ostrstream s ( buffer, sizeof buffer );
-    s << o;
-    return as_string( buffer, s.pcount() );
-*/
     char buffer [ 50 ];
 
     int len = sprintf( buffer, "%" PRINTF_LONG_LONG "d", o );
@@ -187,12 +84,6 @@ Sos_string as_string( Ubig_int o )
 {
     ZERO_RETURN_VALUE( Sos_string );
 
-/* Microsoft: Operator << ist mehrdeutig
-    char buffer [ 40 ];
-    ostrstream s ( buffer, sizeof buffer );
-    s << o;
-    return as_string( buffer, s.pcount() );
-*/
     char buffer [ 50 ];
 
     int len = sprintf( buffer, "%" PRINTF_LONG_LONG "u", o );
@@ -311,24 +202,6 @@ Ubig_int as_ubig_int( const Sos_string& string )
     return as_ubig_int( c_str( string ) );
 }
 
-// ---------------------------------------------------------------------------- expanded_string
-
-Sos_string expanded_string( const Area& area,  char c )
-{
-    ZERO_RETURN_VALUE( Sos_string );
-
-  	return expanded_string( as_string( area ), area.size(), c );
-}
-
-//------------------------------------------------------------------------------expanded_string
-
-Sos_string expanded_string( const Const_area& area, int len,  char c )
-{
-    ZERO_RETURN_VALUE( Sos_string );
-
-  	return expanded_string( as_string( area ), len, c );
-}
-
 //---------------------------------------------------------------------------------------append
 
 void append( Sos_string* string_ptr, const char* ptr, int length )
@@ -336,20 +209,9 @@ void append( Sos_string* string_ptr, const char* ptr, int length )
     *string_ptr += as_string( ptr, length );
 }
 
-//-----------------------------------------------------------------------------------sub_string
-
-Sos_string sub_string( const Sos_string& str, int pos, int len )
-{
-    ZERO_RETURN_VALUE( Sos_string );
-
-  	if( (uint)pos > length( str ) )  pos = length( str );
-
-  	return as_string( c_str( str ) + pos, ( len == -1? length( str ) : len ) - pos );
-}
-
 //--------------------------------------------------------------------------------quoted_string
 
-Sos_string quoted_string( const char* text, char quote1, char quote2, int len )
+Sos_string quoted_string( const char* text, char quote1, char quote2, size_t len )
 {
     ZERO_RETURN_VALUE( Sos_string );
 
@@ -401,200 +263,5 @@ void append_option( Sos_string* string, const char* option, const char* value )
     if( should_be_quoted( value ) )  *string += quoted_string( value );
                                else  *string += value;
 }
-
-
-// ---------------------------------------------------------------------------- expanded_string
-#if !defined SOS_STRING_STARVIEW
-
-Sos_string expanded_string( const Sos_string& string, int size, char c )
-{
-    ZERO_RETURN_VALUE( Sos_string );
-
-    int         rest          = size - length( string );
-    if( rest <= 0 )  return string;
-
-    const int   max           = 200;
-    uint        r             = min( rest, max );
-    Sos_string  s             ( string );
-    char        einige_blanks [ max+1 ];
-
-    memset( einige_blanks, ' ', r );
-    einige_blanks[ r ] = '\0';
-
-    while( r == max ) {
-        s += einige_blanks;
-        rest -= max;
-        r = min( rest, max );
-    }
-
-    einige_blanks[ r ] = '\0';
-    return s + einige_blanks;
-}
-
-#endif
-
-// RWCString besitzt schon <</>>-Operatoren !
-#if defined SOS_STRING_STARVIEW
-//------------------------------------------------------------------------------------as_string
-
-Sos_string as_string( const char* string, unsigned int length )
-{
-    ZERO_RETURN_VALUE( Sos_string );
-
-    return String( string, length );
-}
-
-//--------------------------------------------------------------------------------------operator >>
-
-istream& operator>> ( istream& s, Sos_string& string )
-{
-    string = "";
-
-    while(1) {
-        char buffer [ 256 ];
-
-        s.read( buffer, sizeof buffer );
-
-        int length = s.gcount();
-        if( length == 0 )  break;
-
-        append( &string, buffer, length );
-
-        if( length < sizeof buffer )  break;
-    }
-
-    return s;
-}
-
-//--------------------------------------------------------------------------------------operator <<
-
-ostream& operator<< ( ostream& s, const Sos_string& string )
-{
-    s.write( c_str( string ), length( string ) );
-    return s;
-}
-#endif
-
-#if defined SOS_STRING_BORLAND
-
-string as_string( const char* str, unsigned int length )
-{
-    ZERO_RETURN_VALUE( string );
-    return string( str, 0, length );
-}
-
-void assign( string* str, const char* o )
-{
-    *str = o;               // äquivalent zu: str = string( s );  temporäres Objekt und Destruktor!
-}
-
-#endif
-
-#if defined OWN_SOSSTRING
-
-//--------------------------------------------------------------------------Sos_string::Sos_string
-
-Sos_string::Sos_string( const Sos_string& string )
-:
-    _ptr  ( _null_string ),
-    _length( 0 ),
-    _size ( 1 )
-{
-    assert( string._length < string._size );
-
-    size( string._size );
-    memcpy( _ptr, string._ptr, string._length );
-    _length = string._length;
-    _ptr[ _length ] = '\0';
-}
-
-//--------------------------------------------------------------------------Sos_string::Sos_string
-
-Sos_string::Sos_string( char c )
-:
-    _ptr  ( _null_string ),
-    _length( 0 ),
-    _size ( 1 )
-{
-    size( 1+1 );
-	_ptr[ 0 ] = c;
-	_ptr[ 1 ] = '\0';
-	_length = 1;
-}
-
-//--------------------------------------------------------------------------Sos_string::~Sos_string
-
-Sos_string::~Sos_string()
-{
-    if( _ptr  &&  _ptr != _null_string )  sos_free( _ptr );
-
-	_ptr = NULL;
-	_size = 0;
-	_length = 0;
-}
-
-//--------------------------------------------------------------------------------Sos_string::size
-
-void Sos_string::size( int s )
-{
-    if( s <= _size )  return;
-
-    char* ptr = (char*)sos_alloc( s, "Sos_string" );
-
-    if( _ptr ) {
-        memcpy( ptr, _ptr, _length + 1 );
-        if( _ptr != _null_string )   sos_free( _ptr );
-    }
-
-    _ptr = ptr;
-    _size = s;
-}
-
-//------------------------------------------------------------------------------Sos_string::assign
-
-void Sos_string::assign( const char* str, int length )
-{
-    if( length == 0 ) 
-    {
-        if( _ptr  &&  _ptr != _null_string )  sos_free( _ptr );
-        _ptr    = _null_string;
-        _size   = 1;
-        _length = 0;
-    }
-    else
-    {
-        if( length + 1 > _size )  size( length + 1 );
-
-        memcpy( _ptr, str, length );
-        _ptr[ length ] = '\0';
-        _length = length;
-    }
-}
-
-//------------------------------------------------------------------------------Sos_string::append
-
-void Sos_string::append( const char* string, int len )
-{
-    int l = _length + len;
-    if( l + 1 > _size )  size( l + 1 );
-
-    memcpy( _ptr + _length, string, len );
-    _length += len;
-    _ptr[ _length ] = '\0';
-}
-
-//------------------------------------------------------------------------------Sos_string::append
-
-void Sos_string::append( char c )
-{
-    if( _length + 1 + 1 > _size )  size( _length + 20 );
-
-    _ptr[ _length++ ] = c;
-    _ptr[ _length   ] = '\0';
-}
-
-
-#endif
-
 
 } //namespace sos

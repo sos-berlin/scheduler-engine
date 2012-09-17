@@ -457,14 +457,14 @@ void Parser::add_text( const char* text, int len )
     if( !_reading_body )
     {
         int end_size = 3;
-        int header_end = _text.find( "\n\r\n" );  // Leerzeile?
+        size_t header_end = _text.find( "\n\r\n" );  // Leerzeile?
         if( header_end == string::npos )  header_end = _text.find( "\n\n" ), end_size = 2;
 
         if( header_end != string::npos )
         {
             // Kopf gelesen
 
-            _body_start = header_end + end_size;
+            _body_start = int_cast(header_end) + end_size;
             _reading_body = true;
 
             parse_header();
@@ -478,7 +478,7 @@ void Parser::add_text( const char* text, int len )
 
     if( _reading_body  &&  _text.length() >= _body_start + _content_length )
     {
-        int rest = _text.length() - ( _body_start + _content_length );
+        size_t rest = _text.length() - ( _body_start + _content_length );
         if( rest > 0 )  
         {
             if( rest == 2  &&  string_ends_with( _text, "\r\n" ) )  {}  // Okay für Firefox
@@ -957,7 +957,7 @@ STDMETHODIMP C_request::get_Binary_content( SAFEARRAY** result )
     
     try
     {
-        Locked_safearray<unsigned char> safearray ( _body.length() );
+        Locked_safearray<unsigned char> safearray ( int_cast(_body.length()) );
         memcpy( safearray.data(), _body.data(), _body.length() );
         *result = safearray.take_safearray();
     }
@@ -1134,7 +1134,7 @@ void Response::finish()
 
     _headers_stream << "\r\n\r\n";
 
-    _chunk_size = _headers_stream.length();
+    _chunk_size = int_cast(_headers_stream.length());
     _finished = true;
 
     Z_LOG2( "scheduler.http", "HTTP response: " << _headers_stream );    // Wird auch mit "socket.data" protokolliert (default aus)
@@ -1161,7 +1161,7 @@ string Response::read( int recommended_size )
     if( _chunk_index == 0  &&  _chunk_offset < _chunk_size )
     {
         result = _headers_stream;
-        _chunk_offset += _headers_stream.length();
+        _chunk_offset += int_cast(_headers_stream.length());
     }
 
     if( _chunk_offset == _chunk_size ) 
@@ -1180,7 +1180,7 @@ string Response::read( int recommended_size )
     if( _chunk_offset < _chunk_size )
     {
         string data =_chunk_reader->read_from_chunk( min( recommended_size, (int)( _chunk_size - _chunk_offset ) ) );
-        _chunk_offset += data.length();
+        _chunk_offset += int_cast(data.length());
         result += data;
     }
 
@@ -1440,7 +1440,7 @@ int String_chunk_reader::get_next_chunk_size()
     //if( _get_next_chunk_size_called )  return 0;
     //_get_next_chunk_size_called = true;
 
-    return _text.length();
+    return int_cast(_text.length());
 }
 
 //-------------------------------------------------------------String_chunk_reader::read_from_chunk
@@ -1708,7 +1708,7 @@ bool Html_chunk_reader::next_chunk_is_ready()
 
 int Html_chunk_reader::get_next_chunk_size()
 {
-    return _chunk.length();
+    return int_cast(_chunk.length());
 }
 
 //------------------------------------------------------------------------------append_html_encoded
@@ -1880,7 +1880,7 @@ bool Html_chunk_reader::try_fill_line()
             _next_characters = _chunk_reader->read_from_chunk( _available_net_chunk_size );
             if( _next_characters.length() == 0 )  return true;  // Fertig, bei _chunk_length() == 0: eof
 
-            _available_net_chunk_size -= _next_characters.length();
+            _available_net_chunk_size -= int_cast(_next_characters.length());
         }
 
         size_t end = _next_characters.find( '\n', _next_offset );

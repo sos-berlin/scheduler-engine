@@ -474,7 +474,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, (16+2) + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, int_cast((16+2) + 8 * _module->_monitors->_monitor_map.size()) );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -573,8 +573,8 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant objects ( Variant::vt_array, _object_list.size() );
-            Variant names   ( Variant::vt_array, _object_list.size() );
+            Variant objects ( Variant::vt_array, int_cast(_object_list.size()) );
+            Variant names   ( Variant::vt_array, int_cast(_object_list.size()) );
 
             {
                 Locked_safearray<Variant> objects_array ( V_ARRAY( &objects ) );

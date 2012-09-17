@@ -371,41 +371,14 @@ uint position( const char* string, const char* to_find, unsigned int pos )
     return s - string;  // s == s_end? string + length( string ) - s    ?????
 }
 
-//---------------------------------------------------------------length_without_trailing_spaces
-/*
-uint length_without_trailing_spaces( const char* text, uint len )
+//-------------------------------------------------------------------------------------position
+
+unsigned int position( const Sos_string& str, const Sos_string& to_find, unsigned int pos)
 {
-    // Der String wird Wortweise (int32) geprüft.
-    // Dabei werden bis drei Bytes vor dem String gelesen, die müssen aber zugreifbar sein, weil sie im selben Speicherwort liegen.
-
-    static const int32 blanks = ( (int32) ' ' << 24 ) | ( (int32) ' ' << 16 ) | ( (int32) ' ' << 8 ) | ' ';
-    
-    const char* p = text + len;
-
-    if( *(int32*)( (long)text & (long)~3 ) == blanks )
-    {
-        const char* p0 = (const char*)( (long)p & (long)~3 );
-        if( p0 < text )  p0 = text;
-        while( p > p0  &&  p[-1] == ' ' )  p--;     // Bis p ausgerichtet ist
-
-        p -= 4;
-        while( p > text  &&  *(int32*)p == blanks )  p -= 4;
-    } 
-    else 
-    {
-        while( ( (int)p & 3 )  &&  p[-1] == ' ' )  p--;     // Bis p ausgerichtet ist
-    
-        p -= 4;
-        while( *(int32*)p == blanks )  p -= 4;
-    }
-
-    p += 4 - 1;
-
-    while( p > text  &&  *p == ' ' )  p--;  
-
-    return p + 1 - text;
+    size_t p = str.find( to_find, pos );
+    return z::int_cast(p == string::npos? length( str ) : p);
 }
-*/
+
 //-----------------------------------------------------------------length_without_trailing_char
 
 uint length_without_trailing_char( const char* text, uint len, char c )

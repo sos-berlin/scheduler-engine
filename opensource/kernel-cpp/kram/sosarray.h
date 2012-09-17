@@ -205,7 +205,7 @@ inline T& Sos_array<T>::operator[]( int4 index ) const
 template< class T >
 inline Sos_simple_array<T>::Sos_simple_array()
 :
-    _increment ( max( (size_t)1, 100 / sizeof( T ))),
+    _increment ( max( 1, 100 / (int)sizeof( T ))),
     _array     ( 0 ),
     _size      ( 0 )
 {

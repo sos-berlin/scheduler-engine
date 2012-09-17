@@ -541,7 +541,7 @@ string join( const string& glue, const CONTAINER_TYPE& container )
 
     if( !container.empty() )
     {
-        int size = ( container.size() - 1 ) * glue.length();
+        size_t size = ( container.size() - 1 ) * glue.length();
 
         for( typename CONTAINER_TYPE::const_iterator it = container.begin(); it != container.end(); it++ )  size += it->length();
 
@@ -714,6 +714,11 @@ inline int16                as_int16                    ( const string& str )   
 inline uint16               as_uint16                   ( const string& str )       { return as_uint16( str.c_str() ); }
 inline double               as_double                   ( const string& str )       { return as_double( str.c_str() ); }
 inline bool                 as_bool                     ( const string& str )       { return as_bool  ( str.c_str() ); }
+
+//int int_cast(int64);
+int int_cast(size_t);
+
+inline int int_strlen(const char* s) { return int_cast(strlen(s)); }
 
 //-----------------------------------------------------------------------------------------min, max
 #ifdef min

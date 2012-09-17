@@ -163,7 +163,7 @@ STDMETHODIMP Com_error::get_Code( BSTR* code_bstr )
     try
     {
         if( !_xc )  *code_bstr = NULL;
-              else  *code_bstr = SysAllocStringLen_char( _xc->code(), strlen( _xc->code() ) );
+              else  *code_bstr = SysAllocStringLen_char( _xc->code(), int_strlen( _xc->code() ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Error::code" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Error::code" ); }
@@ -605,7 +605,7 @@ string Com_variable_set::get_string_by_name( const string& name, bool* name_foun
 //---------------------------------------------------------------------Com_variable_set::java_names
 
 javaproxy::java::util::ArrayList Com_variable_set::java_names() const {
-    javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(_map.size());
+    javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(int_cast(_map.size()));
     Z_FOR_EACH_CONST(Map, _map, it)
         result.add(javaproxy::java::lang::String(it->second->_name));
     return result;
@@ -828,7 +828,7 @@ void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log
 {
     THREAD_LOCK( _lock )
     {
-        result->allocate( _map.size() );
+        result->allocate( int_cast(_map.size()) );
 
         int i = 0;
         for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
@@ -1028,7 +1028,7 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
     THREAD_LOCK( _lock )
     try
     {
-        int length = _map.size() - 1;  // Anzahl der Semikolons
+        int length = int_cast(_map.size()) - 1;  // Anzahl der Semikolons
         
         if( length < 0 )
         {

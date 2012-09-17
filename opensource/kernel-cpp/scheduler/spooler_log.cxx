@@ -250,7 +250,7 @@ static int my_write( Spooler* spooler, const string& filename, int file, const c
    
     while( t < text + len )   // Solange write() etwas schreiben kann
     {
-        ret = ::write( file, t, text + len - t );
+        ret = ::write( file, t, int_cast(text + len - t) );
 
         if( ret < 0 )
         {
@@ -275,7 +275,7 @@ static int my_write( Spooler* spooler, const string& filename, int file, const c
             //Z_LOG2( "scheduler", "Prefix_log::write ERRNO-" << err << " " << strerror(err) );
             sos_sleep( 0.01 );
             ::write( file, "<<errno=EAGAIN>>", 16 ); 
-            ret = ::write( file, t, text + len - t );
+            ret = ::write( file, t, int_cast(text + len - t) );
             if( ret != text + len - t  &&  file != fileno(stderr) )  return -1;  // Nur bei stderr ignorieren wir den Fehler
         }
 
@@ -363,13 +363,13 @@ void Log::open_new()
         if( old_file != -1  &&  old_file != fileno(stderr) )
         {
             string line = "\nDas Protokoll wird fortgefuehrt in " + _filename + "\n";
-            ::write( old_file, line.c_str(), line.length() );
+            ::write( old_file, line.c_str(), int_cast(line.length()) );
             ::close( old_file );
         }
 
         if( _log_buffer.length() > 0  &&  _file != -1 )
         {
-            int ret = my_write( _spooler, _filename, _file, _log_buffer.c_str(), _log_buffer.length() );
+            int ret = my_write( _spooler, _filename, _file, _log_buffer.c_str(), int_cast(_log_buffer.length()) );
             if( ret != _log_buffer.length() )  
             {
                 _err_no = errno;
@@ -469,7 +469,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
     }
 
     string line = line_;
-    for( int i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
+    for( size_t i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
 
     
     THREAD_LOCK( _semaphore )
@@ -500,9 +500,9 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
         }
 
 
-        int begin = 0;
+        size_t begin = 0;
         while(1) {
-            int level_len = strlen(level_buffer);   // " [info]"
+            int level_len = int_strlen(level_buffer);   // " [info]"
             string prefix_string;
             if (!prefix.empty()) {
                 prefix_string.reserve(prefix.length() + 3); 
@@ -510,11 +510,11 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
                 prefix_string += prefix;
                 prefix_string += ") ";
             }
-            int next = line.find('\n', begin);  
+            size_t next = line.find('\n', begin);  
             string line_end;
-            if (next == string::npos)  next = line.length(), line_end = "\n"; 
+            if (next == string::npos)  next = int_cast(line.length()), line_end = "\n"; 
                                  else  next++;
-            int len = next - begin;
+            size_t len = next - begin;
             while (len > 1  &&  line.c_str()[begin+len-1] == '\r')  len--;
             
             if (z::Log_ptr log = "scheduler") {
@@ -525,11 +525,11 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             }
 
             if (log_to_files) {
-                write(level, extra_log, order_log, time_buffer, strlen(time_buffer));   // Zeit
+                write(level, extra_log, order_log, time_buffer, int_strlen(time_buffer));   // Zeit
                 write(level, extra_log, order_log, level_buffer, level_len);            // [info]
                 write(level, NULL, order_log, prefix_string);                           // (Job ...)
-                write(level, extra_log, order_log, line.c_str() + begin, len );         // Text
-                write(level, extra_log, order_log, line_end.data(), line_end.length()); // "\n"
+                write(level, extra_log, order_log, line.c_str() + begin, int_cast(len));    // Text
+                write(level, extra_log, order_log, line_end.data(), int_cast(line_end.length())); // "\n"
             }
 
             begin = next;
@@ -834,7 +834,7 @@ void Prefix_log::open_file_without_error() {
                if( _title != "" )  msg += _title + " - ";
                log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
             }
-            write( _log_buffer.c_str(), _log_buffer.length() );
+            write( _log_buffer.c_str(), int_cast(_log_buffer.length()) );
             _log_buffer = "";
        }
     }

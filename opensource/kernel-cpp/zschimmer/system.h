@@ -365,9 +365,9 @@ typedef unsigned long           ulong32;
 // gcc 3.2 löst bei string( NULL, 0 )  exception aus. Das wollen wir nicht.
 
 #if defined __GNUC__ && __GNUC_VERSION_ < 30202  // Bis gcc 3.2.1:
-    inline std::string          make_string                 ( const char* s, int len )              { return std::string( s? s : "", len ); }
+    inline std::string          make_string                 ( const char* s, size_t len )           { return std::string( s? s : "", len ); }
 #else
-    inline std::string          make_string                 ( const char* s, int len )              { return std::string( s, len ); }
+    inline std::string          make_string                 ( const char* s, size_t len )           { return std::string( s, len ); }
 #endif
 
 //-------------------------------------------------------------------------------------------------

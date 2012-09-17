@@ -308,7 +308,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
                 const OLECHAR* ole_value = wcschr( V_BSTR( &params[i] ), '=' );
                 if( !ole_value )  assert(0), throw_xc( "_spooler_construct" );
-                string key_word = string_from_ole( V_BSTR( &params[i] ), ole_value - V_BSTR( &params[i] ) );
+                string key_word = string_from_ole( V_BSTR( &params[i] ), int_cast(ole_value - V_BSTR( &params[i] )));
                 ole_value++;
                 string value = string_from_ole( ole_value );
 

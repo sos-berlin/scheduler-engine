@@ -69,7 +69,7 @@ string                          name_of_dispid_or_empty     ( IDispatch*, DISPID
 void                            olechar_from_wchar          ( OLECHAR* o, const wchar_t* w, size_t len );  // (Unix, wchar_t != OLECHAR)
 
 string                          string_from_ole             ( const OLECHAR* );
-string                          string_from_ole             ( const OLECHAR*, size_t len );
+string                          string_from_ole             ( const OLECHAR*, int len );
 string                          string_from_bstr            ( const BSTR );
 
 string                          string_from_variant         ( const VARIANT&, LCID = STANDARD_LCID );
@@ -252,7 +252,7 @@ struct Bstr
                                 Bstr                        (Bstr&& o)                              : _bstr(o._bstr) { o._bstr = NULL; }
 #endif
                                 Bstr                        ( const Bstr& );
-                                Bstr                        ( const OLECHAR* s, size_t size )       : _bstr( NULL ) { alloc_string( s, size ); }
+                                Bstr                        ( const OLECHAR* s, int size )          : _bstr( NULL ) { alloc_string( s, size ); }
                                 Bstr                        ( const OLECHAR* s )                    : _bstr( NULL ) { alloc_string( s ); }
                               //Bstr                        ( const BSTR s )                        : _bstr( NULL ) { alloc_string( s, ::SysStringLen(s) ); }   // Vorsicht! typedef wchar_t* BSTR, SysStringLen() stürzt ab!
 
@@ -276,8 +276,8 @@ struct Bstr
     
     Bstr&                       operator =                  ( const Bstr& s )                       { alloc_string( s );  return *this; }
     Bstr&                       operator =                  ( const OLECHAR* s )                    { alloc_string( s );  return *this; }
-    Bstr&                       operator =                  ( const char* s )                       { assign      ( s       , strlen( s ) );  return *this; }
-    Bstr&                       operator =                  ( const string& s )                     { assign      ( s.data(), s.length()  );  return *this; }
+    Bstr&                       operator =                  ( const char* s )                       { assign      ( s       , int_strlen( s ) );  return *this; }
+    Bstr&                       operator =                  ( const string& s )                     { assign      ( s.data(), int_cast(s.length()) );  return *this; }
 
     Bstr&                       operator +=                 ( const BSTR s )                        { append( s ); return *this; }
     Bstr&                       operator +=                 ( const Bstr& s )                       { append( s ); return *this; }
@@ -286,32 +286,32 @@ struct Bstr
 
     void                        clear                       ()                                      { ::SysFreeString(_bstr); _bstr = NULL; }
 
-    size_t                      length                      () const                                { return ::SysStringLen(_bstr); }
+    int                         length                      () const                                { return ::SysStringLen(_bstr); }
     
     BSTR                        copy                        () const                                { uint len = ::SysStringLen(_bstr); return len? ::SysAllocStringLen(_bstr,len) : NULL; }
     void                        copy_to                     ( BSTR* );
     HRESULT                     CopyTo                      ( BSTR* bstr )                          { *bstr = ::SysAllocStringLen( _bstr, ::SysStringLen( _bstr ) );  return *bstr? S_OK : E_OUTOFMEMORY; }
     BSTR                        take                        ()                                      { BSTR result = _bstr;  _bstr = NULL;  return result; }
 
-    void                        assign                      ( const char* s, size_t len )           { ::SysFreeString(_bstr); _bstr = bstr_from_string(s,len); }
-    void                        assign                      ( const OLECHAR* s, size_t len )        { alloc_string(s,len); }
+    void                        assign                      ( const char* s, int len )              { ::SysFreeString(_bstr); _bstr = bstr_from_string(s,len); }
+    void                        assign                      ( const OLECHAR* s, int len )           { alloc_string(s,len); }
     
     void                        attach                      ( BSTR s )                              { ::SysFreeString( _bstr );  _bstr = s; }
     BSTR                        detach                      ()                                      { BSTR s = _bstr; _bstr = NULL; return s; }
     
     void                        append                      ( const Bstr& s )                       { append_bstr( s ); }
-    void                        append                      ( const OLECHAR* s )                    { append( s, wcslen(s) ); }
+    void                        append                      ( const OLECHAR* s )                    { append( s, int_cast(wcslen(s)) ); }
 
 #ifndef Z_OLECHAR_IS_WCHAR
     void                        append                      ( const wchar_t* s )                    { append( s, wcslen(s) ); }
-    void                        append                      ( const wchar_t*, size_t len );
+    void                        append                      ( const wchar_t*, int len );
 #endif
 
     void                        append_bstr                 ( const BSTR s )                        { append( s, ::SysStringLen(s) ); }
-    void                        append                      ( const OLECHAR*, size_t len );
-    void                        append                      ( const string& s )                     { append( s.data(), s.length() ); }
-    void                        append                      ( const char* s )                       { append( s, s? strlen(s) : 0 ); }
-    void                        append                      ( const char* s, size_t len );
+    void                        append                      ( const OLECHAR*, int len );
+    void                        append                      ( const string& s )                     { append( s.data(), int_cast(s.length()) ); }
+    void                        append                      ( const char* s )                       { append( s, s? int_strlen(s) : 0 ); }
+    void                        append                      ( const char* s, int len );
 
     void                        to_lower                    ();
 
@@ -347,16 +347,16 @@ struct Bstr
   protected:
     void                        alloc_string                ( const Bstr& );
     void                        alloc_string                ( const OLECHAR* );
-    void                        alloc_string                ( const OLECHAR*, size_t len );
-    void                        alloc_string                ( const char*, size_t len );
+    void                        alloc_string                ( const OLECHAR*, int len );
+    void                        alloc_string                ( const char*, int len );
 
 #ifndef Z_OLECHAR_IS_WCHAR
     void                        alloc_string                ( const wchar_t* );
-    void                        alloc_string                ( const wchar_t*, size_t len );
+    void                        alloc_string                ( const wchar_t*, int len );
 #endif
 #ifndef Z_OLECHAR_IS_UINT16
     void                        alloc_string                ( const uint16* );
-    void                        alloc_string                ( const uint16*, size_t len );
+    void                        alloc_string                ( const uint16*, int len );
 #endif
 
   public:

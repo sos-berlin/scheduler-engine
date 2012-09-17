@@ -60,7 +60,7 @@ struct Buffered_async_output_stream : Filter_async_output_stream, Output_stream
     virtual                    ~Buffered_async_output_stream()                                      {}
 
     // Async_output_stream
-    int                         try_write_bytes             ( const Byte_sequence& s )              { write_bytes( s );  return s.length(); }
+    int                         try_write_bytes             ( const Byte_sequence& s )              { write_bytes( s );  return int_cast(s.length()); }
     bool                        try_flush                   ();
 
     void                        write_bytes                 ( const Byte_sequence& );
@@ -75,7 +75,7 @@ struct Async_input_stream : IUnknown
 {
     virtual                    ~Async_input_stream          ()                                      = 0;
 
-    virtual string              read_bytes                  ( size_t maximum )                      = 0;
+    virtual string              read_bytes                  ( int maximum )                         = 0;
     virtual bool                eof                         ()                                      = 0;
 };
 

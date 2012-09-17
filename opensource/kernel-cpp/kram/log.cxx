@@ -418,7 +418,7 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
     THREAD_LOCK( sos_static_ptr()->_log_lock )
     {
         char  line [ buffer_size + 50 ];
-        int   text_begin = 0;               // Hier beginnt der eigentliche Text (nach den Spalten für Zeit etc.)
+        int text_begin = 0;               // Hier beginnt der eigentliche Text (nach den Spalten für Zeit etc.)
         char* l     = line;
         char* l_end = line + sizeof line - 5;
         char* p     = pbase();
@@ -452,10 +452,10 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
         {
             while( p < p_end )
             {
-                if( _new_line )  new_line( &l ),  text_begin = l - line;
+                if( _new_line )  new_line( &l ),  text_begin = z::int_cast(l - line);
 
                 char* n = (char*)memchr( p, '\n', p_end - p );
-                int len  = min( ( n? n : p_end ) - p, l_end - l );
+                int len  = z::int_cast(min( ( n? n : p_end ) - p, l_end - l ));
                 memcpy( l, p, len );
                 p += len;
 
@@ -475,15 +475,15 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
                 {
                     string      line_str;
                     const char* line_p = line;
-                    int         len    = l - line;
+                    int         len    = z::int_cast(l - line);
 
                     *l++ = '\0';
 
                     if( strstr( line, "password=" ) )
                     {
-                        line_str = zschimmer::remove_password( string(line,len), "?" );
+                        line_str = zschimmer::remove_password( string(line, len), "?" );
                         line_p = line_str.c_str();
-                        len = line_str.length();
+                        len = z::int_cast(line_str.length());
                     }
 
                     if( strncmp( _last_line.c_str(), line_p + text_begin, len - text_begin ) == 0 )  
@@ -495,7 +495,7 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
                         if( _repeated >= suppress_repeated )
                         {
                             string str = as_string(_repeated-suppress_repeated+1) + " mal)" Z_NL;
-                            if( _out != -1 )  write( _out, str.c_str(), str.length() );
+                            if( _out != -1 )  write( _out, str.c_str(), z::int_cast(str.length()) );
                         }
                         _repeated = 0;
                     }
@@ -511,13 +511,13 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
                         if( _repeated < suppress_repeated )
                         {
                             if( _out != -1 )  write( _out, line_p, len );
-                            _last_line = string( line_p + text_begin, max( 0, len - text_begin ) );
+                            _last_line = string( line_p + text_begin, max( (int)0, len - text_begin ) );
                         }
                         else
                         if( _repeated == suppress_repeated )
                         {
                             string str = string( line_p, text_begin ) + "(Letzte Zeile wiederholt sich ";
-                            if( _out != -1 )  write( _out, str.c_str(), str.length() );
+                            if( _out != -1 )  write( _out, str.c_str(), z::int_cast(str.length()) );
                         }
 
                     l = line;
@@ -559,7 +559,7 @@ void Mswin_debug_streambuf::get_app_name()
                 while( p > path  &&  p[-1] != '/'  &&  p[-1] != '\\'  &&  p[-1] != ':' )  p--;
                 while( q > p  &&  q[-1] != '.' )  q--;
                 if( q > p  &&  q[-1] == '.' ) q--;
-                int l = min( sizeof _app_name - 1, size_t( q - p ) );
+                size_t l = min( sizeof _app_name - 1, (size_t)(q - p));
                 memcpy( _app_name, p, l );
                 _app_name[ l ] = '\0';
                 //sprintf( _app_name, "%04X ", (uint)htask );

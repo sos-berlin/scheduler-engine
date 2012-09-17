@@ -85,7 +85,7 @@ Transparent_input_stream_reader::Transparent_input_stream_reader( Input_stream* 
 
 //-----------------------------------------------------Transparent_input_stream_reader::read_string
     
-string Transparent_input_stream_reader::read_string( size_t maximum )
+string Transparent_input_stream_reader::read_string( int maximum )
 { 
     return _input_stream->read_bytes( maximum );
 }

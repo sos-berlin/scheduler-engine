@@ -49,7 +49,7 @@ void Text_with_includes::initialize()
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
-    int linenr_base = element.line_number();
+    size_t linenr_base = element.line_number();
 
     for( xml::Node_ptr node = element.firstChild(); node; node = node.nextSibling() )
     {
@@ -636,7 +636,7 @@ Module_instance::In_call::In_call( Module_instance* module_instance, const strin
     {
         _module_instance = module_instance;
 
-        int pos = name.find( '(' );
+        size_t pos = name.find( '(' );
         _name = pos == string::npos? name : name.substr( 0, pos );
 
         _module_instance->set_in_call( this, extra ); 

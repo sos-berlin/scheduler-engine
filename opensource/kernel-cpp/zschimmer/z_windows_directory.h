@@ -24,7 +24,11 @@ struct Simple_directory_reader : Simple_directory_reader_base
 
   private:
     Fill_zero                      _zero_;
+#ifdef Z_WINDOWS
+    intptr_t                       _handle;
+#else
     int                            _handle;
+#endif
     Flags                          _flags;
     Regex                          _regex;
     bool                           _is_first_entry;

@@ -95,7 +95,7 @@ struct Wait_handles : Non_cloneable
   //bool                        wait                        ( double time );
 
     bool                        signaled                    ();
-    int                         length                      ()                                      { return _events.size(); }
+    int                         length                      ()                                      { return int_cast(_events.size()); }
     bool                        empty                       () const                                { return _events.empty(); }
 
     string                      as_string                   ();
@@ -142,7 +142,7 @@ struct Directory_watcher : Event  //, Async_operation
         bool                   _first_read;
 
 #       ifdef Z_WINDOWS
-            int                _handle;
+            intptr_t           _handle;
 #        else
             DIR*               _handle;
 #       endif

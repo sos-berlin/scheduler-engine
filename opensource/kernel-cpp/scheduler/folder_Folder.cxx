@@ -141,12 +141,12 @@ bool Folder::on_activate()
 
 int Folder::position_of_extension_point( const string& filename )
 {
-    int e = filename.length() - 1;
+    int e = int_cast(filename.length()) - 1;
     while( e >= 0  &&  filename[ e ]  != '.' )  e--;        assert( e < 0  ||  filename[ e ] == '.' );
     if( e >= 0 )  e--;                                       
     while( e >= 0  &&  filename[ e ]  != '.' )  e--;        assert( e < 0  ||  filename[ e ] == '.' );
 
-    if( e < 0 )  e = filename.length();     // Keine Dateinamenserweiterung
+    if( e < 0 )  e = int_cast(filename.length());     // Keine Dateinamenserweiterung
 
     return e;
 }

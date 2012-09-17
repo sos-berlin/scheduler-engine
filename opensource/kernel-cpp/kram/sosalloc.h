@@ -9,7 +9,7 @@
 namespace sos
 {
 
-void*   sos_alloc       ( int4 size, const char* info = NULL );
+void*   sos_alloc       ( size_t size, const char* info = NULL );
 void    sos_free        ( void* );
 
 void    sos_alloc_check         ( const void* );        // Prüft einen mit sos_alloc() angeforderten Datenbereich

@@ -623,7 +623,7 @@ Local_java_byte_array::Local_java_byte_array(const string& s)
 {
     Env env;
 
-    _jbyteArray = env->NewByteArray(s.size());
+    _jbyteArray = env->NewByteArray(int_cast(s.size()));
     if (!_jbyteArray)  env.throw_java("GetByteArrayElements", as_string(s.size()));
 
     jboolean is_copy = false;

@@ -86,9 +86,10 @@ Has_proxy* Has_proxy::of_cpp_reference_(jlong cpp_reference, const char* debug_s
 
 jobjectArray java_array_from_c(const std::vector<string>& v) {
     Env jenv;
-    jobjectArray result = jenv->NewObjectArray(v.size(), Vm::static_vm->standard_classes()->_java_lang_string_class, NULL);
+    jint n = int_cast(v.size());
+    jobjectArray result = jenv->NewObjectArray(n, Vm::static_vm->standard_classes()->_java_lang_string_class, NULL);
     if (result != NULL) {  // Keine Exception
-        for (size_t i = 0; i < v.size(); i++)
+        for (int i = 0; i < n; i++)
             jenv->SetObjectArrayElement(result, i, jenv.jstring_from_string(v[i]));
     }
     return result;
@@ -98,9 +99,10 @@ jobjectArray java_array_from_c(const std::vector<string>& v) {
 
 jbyteArray java_byte_array_from_c(const string& s) {
     Env jenv;
-    jbyteArray result = jenv->NewByteArray(s.length());
+    jint length = int_cast(s.length());
+    jbyteArray result = jenv->NewByteArray(length);
     jbyte* jbytes = jenv->GetByteArrayElements(result, NULL);
-    memcpy(jbytes, s.data(), s.length());
+    memcpy(jbytes, s.data(), length);
     jenv->ReleaseByteArrayElements(result, jbytes, 0);
     return result;
 }

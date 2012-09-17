@@ -38,8 +38,8 @@ struct Log
     friend struct               Prefix_log;                 // _semaphore
 
     void                        write                       ( Log_level  , Prefix_log* extra, Prefix_log* order, const char*, int len );
-    void                        write                       ( Log_level l, Prefix_log* extra, Prefix_log* order, const string& line )       { write( l, extra, order, line.c_str(), line.length() ); }
-    void                        write                       ( Log_level l, Prefix_log* extra, Prefix_log* order, const char* line )         { write( l, extra, order, line, strlen(line) ); }
+    void                        write                       ( Log_level l, Prefix_log* extra, Prefix_log* order, const string& line )       { write( l, extra, order, line.c_str(), int_cast(line.length()) ); }
+    void                        write                       ( Log_level l, Prefix_log* extra, Prefix_log* order, const char* line )         { write( l, extra, order, line, int_strlen(line) ); }
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;

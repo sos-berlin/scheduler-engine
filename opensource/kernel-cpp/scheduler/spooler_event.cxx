@@ -356,7 +356,7 @@ void Scheduler_event::print_xml( String_stream* s )
     //}
 
     *s << '>';
-    int length_without_children = s->length(); 
+    size_t length_without_children = s->length(); 
 
     if( _object )
     {

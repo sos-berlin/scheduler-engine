@@ -894,19 +894,19 @@ string Env::string_from_jstring( const jstring& jstr )
 
 jstring Env::jstring_from_string( const char* str )
 { 
-    return jstring_from_string( str, strlen(str) ); 
+    return jstring_from_string( str, int_strlen(str) ); 
 }
 
 //-------------------------------------------------------------------------Env::jstring_from_string
 
 jstring Env::jstring_from_string( const string& str )  
 { 
-    return jstring_from_string( str.data(), str.length() ); 
+    return jstring_from_string( str.data(), int_cast(str.length()) ); 
 }
 
 //-------------------------------------------------------------------------Env::jstring_from_string
 
-jstring Env::jstring_from_string( const char* str, size_t length )
+jstring Env::jstring_from_string( const char* str, int length )
 {
     return jstring_from_string(com::Bstr(str, length));
 }
@@ -919,7 +919,7 @@ jstring Env::jstring_from_string(const com::Bstr& str) {
 
 //-------------------------------------------------------------------------Env::jstring_from_string
 
-jstring Env::jstring_from_string(const OLECHAR* str, size_t length) {
+jstring Env::jstring_from_string(const OLECHAR* str, int length) {
     JNIEnv* jenv = jni_env();
     return jenv->NewString((const jchar*)str, length);
 }

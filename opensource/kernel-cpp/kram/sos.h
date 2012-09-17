@@ -203,7 +203,7 @@ struct Has_constructions_module_name
         Dynamic_area _buffer_ ( SHOW_MSG_SIZE );                                \
         ostrstream _s_ ( _buffer_.char_ptr(), _buffer_.size() );                \
         _s_ << text;                                                            \
-        _buffer_.length( _s_.pcount() );                                        \
+        _buffer_.length( (int)_s_.pcount() );                                   \
         _buffer_ += '\0';                                                       \
         ::sos::show_msg( _buffer_.char_ptr() );                                 \
     }
