@@ -10,14 +10,15 @@ import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.util.WaitForCondition.{TimeoutWithSteps, waitForCondition}
+import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
+import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting._
 import org.joda.time.Duration.millis
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import scala.collection.mutable
 import org.slf4j.LoggerFactory
+import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
