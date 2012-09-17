@@ -1,21 +1,20 @@
 package com.sos.scheduler.engine.test.binary;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
-import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
-import static com.sos.scheduler.engine.kernel.util.Util.ignore;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.google.common.collect.ImmutableList;
+import com.sos.scheduler.engine.kernel.util.Lazy;
+import com.sos.scheduler.engine.main.CppBinaries;
 import org.apache.log4j.Logger;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.main.CppBinaries;
-import com.sos.scheduler.engine.kernel.util.Lazy;
+import java.io.File;
+import java.io.IOException;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
+import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.kernel.util.Util.ignore;
 
 public final class TestCppBinaries {
     private static final Logger logger = Logger.getLogger(TestCppBinaries.class);
@@ -45,7 +44,7 @@ public final class TestCppBinaries {
             // Wir packen die binaries aus den Ressourcen aus
             String d = System.getProperty(binariesTmpdirPropertyName);
             return isNullOrEmpty(d)? newTemporaryCppBinaries(resources)
-                    : newExistingCppBinaries(resources, new File(d));   // Wir recyceln die vorher mal ausgepacken Ressourcen.
+                    : newExistingCppBinaries(resources, new File(d));   // Wir recyceln die vorher mal oder von einem parallel laufenden Test ausgepacken Ressourcen.
         }
     }
 
@@ -66,7 +65,7 @@ public final class TestCppBinaries {
 
     private static ResourceCppBinaries newExistingCppBinaries(ImmutableList<Resource> resources, File dir) {
         ignore(dir.mkdir());
-        Preconditions.checkArgument(dir.isDirectory(), "%s must exist and must be a directory", dir);
+        checkArgument(dir.isDirectory(), "%s must exist and must be a directory", dir);
         return new ResourceCppBinaries(resources, dir);
     }
 
