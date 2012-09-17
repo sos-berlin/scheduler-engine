@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>opensource</artifactId>
-        <version>1.5.0.2178-SNAPSHOT</version>
+        <version>1.5.2260-BETA</version>
     </parent>
 
     <artifactId>kernel-cpp</artifactId>
@@ -234,8 +234,8 @@
                         <configuration>
                             <target>
                                 <ant antfile="prepare_build.xml" target="all">
-                                    <property name="settings.localRepository" value="${settings.localRepository}"/>
-                                    <property name="operatingSystem" value="${operatingSystem}"/>
+                                    <property name="settings.localRepository" value="${settings.localRepository}" />
+                                    <property name="operatingSystem" value="${operatingSystem}" />
                                 </ant>
                             </target>
                         </configuration>
