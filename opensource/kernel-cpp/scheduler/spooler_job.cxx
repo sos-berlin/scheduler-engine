@@ -379,7 +379,6 @@ void Combined_job_nodes::close()
     withdraw_order_requests();
 
     while (!_job_node_set.empty()) {
-		Job_node_set::iterator it = _job_node_set.begin();
         Job_node* job_node = *_job_node_set.begin();
         job_node->disconnect_job();     // Ruft disconnect_job_node() und der löscht den Eintrag
     }
@@ -2399,7 +2398,6 @@ bool Job::is_in_period( const Time& now )
 void Job::set_next_start_time( const Time& now, bool repeat )
 {
     Time next_start_time     = Time::never;
-    Time old_next_start_time = _next_start_time;
 
     select_period( now );
     _next_single_start = Time::never;

@@ -251,8 +251,8 @@ void Order::handle_changed_processable_state()
     // denn die weiter hinten stehenden Aufträge laufen nie vor dem ersten an.
     // Dann hätten wir weniger Aufruf an Job::signal_earlier_order().
 
-    Time new_next_time = next_time();
-
+    //Time new_next_time = next_time();
+    //
     //if( new_next_time <= _signaled_next_time )
     //{
         if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) )
@@ -1654,7 +1654,7 @@ void Order::set_attributes_and_remove_duplicates(
       xml::Element_ptr setback_element
 )
 {
-    for( node; node; node = node.nextSibling() )
+    for(; node; node = node.nextSibling() )
     {
         if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
         {
