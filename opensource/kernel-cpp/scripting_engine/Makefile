@@ -26,8 +26,8 @@ INCLUDES += -I$(PROD_DIR)/js/src/$(OBJDIR)
 MY_LIBS += $(PROD_DIR)/zschimmer/Release/libzschimmer.a
 MY_LIBS += $(PROD_DIR)/js/src/$(OBJDIR)/libjs.a
 MY_LIBS += $(PROD_DIR)/js/src/liveconnect/$(OBJDIR)/libjsj.a
-MY_LIBS += $(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a
-MY_LIBS += $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
+#MY_LIBS += $(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a
+#MY_LIBS += $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
 
 
 libspidermonkey.a: $(objects)
