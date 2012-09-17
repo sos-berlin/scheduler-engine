@@ -4018,11 +4018,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
         if( send_cmd != "" )  is_service = false;
 
-        #if defined Z_USE_JAVAXML
-            start_java(subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options,
-                subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath);
-        #endif
-
         // scheduler.log
 
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
@@ -4036,6 +4031,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         }
 
         Z_LOG2( "scheduler", "JobScheduler engine " << scheduler::version_string << "\n" );
+
+        #if defined Z_USE_JAVAXML
+            start_java(subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options,
+                subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath);
+        #endif
 
         /**
         * \change 2.0.224 - JS-XXX: Verwendung der Option 'use-xml-schema' für dynamisches XSD
