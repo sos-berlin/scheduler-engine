@@ -528,7 +528,6 @@ struct Vm : Object              // Java virtual machine
     void                        load_standard_classes       ();
     Standard_classes*           standard_classes            ();
     void                    set_log                         ( Has_log* );
-    void                    set_filename                    ();
     void                    set_filename                    ( const string& module_filename )       { _filename = module_filename; }
     string                      filename                    () const                                { return _filename; }
 
@@ -570,6 +569,13 @@ struct Vm : Object              // Java virtual machine
     static JavaVM*              request_jvm                 ();
     static void                 release_jvm                 ( JavaVM* );
 
+  private:
+    std::vector<string>         filenames                   ();
+
+    typedef int JNICALL JNI_CreateJavaVM_func( JavaVM**, JNIEnv**, JavaVMInitArgs* );
+    JNI_CreateJavaVM_func*      load_module                 (const string& filename);
+
+  public:
     static Mutex                static_vm_mutex;
     static Vm*                  static_vm;
 
