@@ -19,7 +19,7 @@
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <scalatest.scala.version>2.9.1</scalatest.scala.version>
         <jersey.version>1.10</jersey.version>
-        <jetty.version>8.1.0.RC5</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
+        <jetty.version>8.1.5.v20120716</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <slf4j.version>1.6.4</slf4j.version>
         <jackson.version>1.9.4</jackson.version>
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
@@ -245,7 +245,7 @@
             <dependency>
                 <groupId>net.sf.saxon</groupId>
                 <artifactId>saxon</artifactId>
-                <version>7.9.1</version>
+                <version>8.7</version>
             </dependency>
 
             <dependency>
