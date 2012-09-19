@@ -37,7 +37,7 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
 		setMessageListener(this);
 
         mapper = new ObjectMapper();
-        mapper.registerSubtypes( EventList.eventClassList );
+        mapper.registerSubtypes(EventList.eventClassArray());
 
 		listener.clear();
 	}

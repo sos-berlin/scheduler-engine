@@ -90,7 +90,7 @@ public class JmsOrderEventsTest extends JMSConnection {
 
         public JmsListener() {
             mapper = new ObjectMapper();
-            mapper.registerSubtypes( EventList.eventClassList );
+            mapper.registerSubtypes(EventList.eventClassArray());
         }
 
         // runs in an own thread
