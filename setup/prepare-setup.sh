@@ -10,4 +10,6 @@
 mvn clean
 mvn install -U -Pprepare-platform -Dengine.platform=windows-x86
 mvn install -U -Pprepare-platform -Dengine.platform=linux-x86
+mvn install -U -Pprepare-platform -Dengine.platform=windows-x64
+mvn install -U -Pprepare-platform -Dengine.platform=linux-x64
 
