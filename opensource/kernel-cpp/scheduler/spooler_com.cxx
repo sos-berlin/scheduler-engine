@@ -65,11 +65,11 @@ Com_task_proxy   ::Class_descriptor Com_task_proxy   ::class_descriptor ( &typel
     DEFINE_GUID( IID_Ihostware_dynobj, 0x9F716A02, 0xD1F0, 0x11CF, 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 );
 #endif
 
-//--------------------------------------------------------------------------------time_from_variant
+//----------------------------------------------------------------------------duration_from_variant
 
-Time time_from_variant( const VARIANT& vt )
+Duration duration_from_variant( const VARIANT& vt )
 {
-    return time::time_from_string( variant_as_string( vt ) );
+    return Duration::of( variant_as_string( vt ) );
 }
 
 //----------------------------------------------------------------------order_from_order_or_payload
@@ -565,13 +565,25 @@ string Com_variable_set::get_string( const string& name ) const
     return string_from_variant( result );
 }
 
-//---------------------------------------------------------------------Com_variable_set::get_string
+//------------------------------------------------------------------------Com_variable_set::get_int
 
 int Com_variable_set::get_int(const string& name, int deflt) const {
     int result = deflt;
     string s = get_string(name);
     if (!s.empty()) 
         try { result = as_int(s); } 
+        catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
+        catch (Xc& x) { x.insert("parameter " + name); throw; }
+    return result;
+}
+
+//----------------------------------------------------------------------Com_variable_set::get_int64
+
+int64 Com_variable_set::get_int64(const string& name, int64 deflt) const {
+    int result = deflt;
+    string s = get_string(name);
+    if (!s.empty()) 
+        try { result = as_int64(s.c_str()); } 
         catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
         catch (Xc& x) { x.insert("parameter " + name); throw; }
     return result;
@@ -1627,7 +1639,7 @@ STDMETHODIMP Com_log::put_Collect_within( VARIANT* time )
     {
         if( !_log )  return E_POINTER;
 
-        _log->set_collect_within( time_from_variant(*time) );
+        _log->set_collect_within( duration_from_variant(*time) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
@@ -1646,7 +1658,7 @@ STDMETHODIMP Com_log::get_Collect_within( double* result )
     {
         if( !_log )  return E_POINTER;
 
-        *result = _log->collect_within();
+        *result = _log->collect_within().as_double();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
@@ -1665,7 +1677,7 @@ STDMETHODIMP Com_log::put_Collect_max( VARIANT* time )
     {
         if( !_log )  return E_POINTER;
 
-        _log->set_collect_max( time_from_variant(*time) );
+        _log->set_collect_max( duration_from_variant(*time) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
@@ -1684,7 +1696,7 @@ STDMETHODIMP Com_log::get_Collect_max( double* result )
     {
         if( !_log )  return E_POINTER;
 
-        *result = _log->collect_max();
+        *result = _log->collect_max().as_double();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
@@ -2076,7 +2088,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         ptr<Task>           task;
 
         ptr<Ivariable_set>  pars;
-        Time                start_at = 0; 
+        Time                start_at = Time(0); 
 
         if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
         {
@@ -2094,7 +2106,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         if( start_after_vt.vt != VT_EMPTY )
         {
             hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
-            start_at = Time::now() + start_after_vt.dblVal;
+            start_at = Time::now() + Duration(start_after_vt.dblVal);
         }
 
         //THREAD_LOCK( _job->_lock )
@@ -2775,7 +2787,7 @@ STDMETHODIMP Com_task::put_Repeat( double* seconds )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
-        _task->_job->set_repeat( *seconds );
+        _task->_job->set_repeat(Duration(*seconds));
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
@@ -2831,7 +2843,7 @@ STDMETHODIMP Com_task::put_Delay_spooler_process( VARIANT* time )
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
-        _task->set_delay_spooler_process( time_from_variant( *time ) );
+        _task->set_delay_spooler_process( duration_from_variant( *time ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
@@ -3039,8 +3051,8 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
-        Time t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? Time::never 
-                                                                                : time_from_variant( *timeout );
+        Duration t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? Duration::eternal
+                                                                                    : duration_from_variant( *timeout );
         _task->add_pid( pid, t );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -3156,7 +3168,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double* timeout, VARIANT_BOOL ig
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
         _task->add_subprocess( pid, 
-                               *timeout, 
+                               Duration(*timeout), 
                                ignore_error? true : false, 
                                ignore_signal? true : false, 
                                is_process_group != 0,
@@ -5688,7 +5700,9 @@ STDMETHODIMP Com_order::put_At( VARIANT* datetime )
         if( !_order )  return E_POINTER;
         if( !datetime )  return E_POINTER;
 
-        _order->set_at( Time::time_with_now( string_from_variant( *datetime ) ) );
+        Order* o = dynamic_cast<Order*>(this);
+        if (!o) return E_FAIL;
+        _order->set_at( Time::of_date_time_with_now( string_from_variant( *datetime ), o->spooler()->_time_zone_name));
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }

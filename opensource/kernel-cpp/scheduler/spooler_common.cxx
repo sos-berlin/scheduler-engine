@@ -52,6 +52,13 @@ xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const 
     return result;
 }
 
+//----------------------------------------------------------------------------require_not_attribute
+
+void require_not_attribute(const xml::Element_ptr& e, const string& name) 
+{
+    if (e.hasAttribute(name))  z::throw_xc("SCHEDULER-232", e.nodeName(), name, e.getAttribute(name));
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

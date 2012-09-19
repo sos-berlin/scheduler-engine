@@ -22,8 +22,8 @@ using job_chain::Job_node;
 
 //--------------------------------------------------------------------------------------------const
 
-const int    max_task_time_out             = 365*24*3600;
-const double directory_watcher_intervall   = 10.0;          // Nur für Unix (Windows gibt ein asynchrones Signal)
+const Duration max_task_time_out           = Duration(365*24*3600);
+const Duration directory_watcher_intervall = Duration(10.0);          // Nur für Unix (Windows gibt ein asynchrones Signal)
 const bool   Job::force_start_default      = true;
 
 //-------------------------------------------------------------------------------Job_subsystem_impl
@@ -379,6 +379,7 @@ void Combined_job_nodes::close()
     withdraw_order_requests();
 
     while (!_job_node_set.empty()) {
+        Job_node_set::iterator it = _job_node_set.begin();
         Job_node* job_node = *_job_node_set.begin();
         job_node->disconnect_job();     // Ruft disconnect_job_node() und der löscht den Eintrag
     }
@@ -476,7 +477,7 @@ Time Combined_job_nodes::next_time()
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
-        if( result == 0 )  break;
+        if( result.is_zero() )  break;
 
         Order_queue* order_queue = (*it)->order_queue();
         result = min( result, order_queue->next_time() );
@@ -552,8 +553,8 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;
     _default_params = new Com_variable_set;
-    _task_timeout   = Time::never;
-    _idle_timeout   = 5;
+    _task_timeout   = Duration::eternal;
+    _idle_timeout   = Duration(5);
     _max_tasks      = 1;
 
     _combined_job_nodes = Z_NEW( Combined_job_nodes( this ) );
@@ -747,7 +748,7 @@ bool Job::on_activate()
             {
                 set_state( _is_permanently_stopped? s_stopped : s_pending );
                 
-                _delay_until = 0;
+                _delay_until = Time(0);
                 reset_scheduling();
                 init_start_when_directory_changed();
                 check_min_tasks( Z_FUNCTION );
@@ -830,14 +831,13 @@ void Job::set_dom( const xml::Element_ptr& element )
         string t    = element.     getAttribute( "timeout"      );
         if( t != "" )  
         {
-            _task_timeout = time::time_from_string( t );
-            if( _task_timeout > max_task_time_out )  _task_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
+            _task_timeout = Duration::of(t);
         }
 
         t           = element.     getAttribute( "idle_timeout"    );
         if( t != "" )  
         {
-            set_idle_timeout( time::time_from_string( t ) );
+            set_idle_timeout(Duration::of(t));
         }
 
         {
@@ -1017,9 +1017,9 @@ void Job::set_dom( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------Job::get_step_duration_or_percentage
 
-Time Job::get_step_duration_or_percentage( const string& value, const Time& deflt )
+Duration Job::get_step_duration_or_percentage( const string& value, const Duration& deflt )
 {
-    Time result = deflt;
+    Duration result = deflt;
 
     if( value != "" )
     {
@@ -1027,19 +1027,19 @@ Time Job::get_step_duration_or_percentage( const string& value, const Time& defl
         {
             Sos_optional_date_time dt;
             dt.set_time( value );
-            result = dt.time_as_double();
+            result = Duration(dt.time_as_double());
         }
         else
         if( string_ends_with( value, "%" ) ) 
         {
             int percentage = as_int( value.substr( 0, value.length() - 1 ) );
-            Time avg = average_step_duration( deflt );
-            result = avg.is_never()? Time::never 
-                                   : Time( percentage/100.0 * avg );
+            Duration avg = average_step_duration( deflt );
+            result = avg.is_eternal()? Duration::eternal 
+                : Duration( percentage/100.0 * avg.as_double() );
         }
         else
         {
-            result = as_double( value );
+            result = Duration(as_double(value));
         }
     }
 
@@ -1048,9 +1048,9 @@ Time Job::get_step_duration_or_percentage( const string& value, const Time& defl
 
 //-----------------------------------------------------------------------Job::average_step_duration
 
-Time Job::average_step_duration( const Time& deflt )
+Duration Job::average_step_duration( const Duration& deflt )
 {
-    Time result = deflt;
+    Duration result = deflt;
 
     if( _spooler->_db->opened() )
     {
@@ -1070,7 +1070,7 @@ Time Job::average_step_duration( const Time& deflt )
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_history_tablename, x ), Z_FUNCTION ); }
 
         if( !record.null(0) && record.as_string(0) != "" ) {
-            result = floor( record.as_double( 0 ) );
+            result = Duration(floor( record.as_double( 0 ) ));
         }
     }
 
@@ -1088,9 +1088,9 @@ void Job::set_order_controlled()
 
 //----------------------------------------------------------------------------Job::set_idle_timeout
 
-void Job::set_idle_timeout( const Time& t )
+void Job::set_idle_timeout( const Duration& d )
 { 
-    _idle_timeout = t; 
+    _idle_timeout = d; 
     if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
 }
 
@@ -1361,7 +1361,7 @@ string Job::profile_section()
 void Job::set_error_xc_only( const Xc& x )
 {
     _error = x;
-    _repeat = 0;
+    _repeat = Duration(0);
 }
 
 //--------------------------------------------------------------------------------Job::set_error_xc
@@ -1399,7 +1399,7 @@ void Job::signal( const string& signal_name )
 { 
     //Z_DEBUG_ONLY( assert( _state != s_stopped ) );
 
-    _next_time = 0;
+    _next_time = Time(0);
     
     Z_LOG2( "zschimmer", obj_name() << "  " << Z_FUNCTION << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
@@ -1425,7 +1425,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     task->_id          = id;
     task->_obj_name    = S() << "Task " << path().without_slash() << ":" << task->_id;
     task->_name        = task_name;
-    task->_force_start = start_at? force : false;
+    task->_force_start = start_at.not_zero()? force : false;
     task->_start_at    = start_at;     // 0: Bei nächster Periode starten
 
     if( const Com_variable_set* p = dynamic_cast<const Com_variable_set*>( +params ) )  task->merge_params( p );
@@ -1469,8 +1469,8 @@ void Job::load_tasks_from_db( Read_transaction* ta )
             xml::Document_ptr       task_dom;
             bool                    force_start = force_start_default;
 
-            start_at.set_datetime( record.as_string( "start_at_time" ) );
-            _log->info( message_string( "SCHEDULER-917", task_id, start_at? start_at.as_string() : "period" ) );
+            start_at = Time::of_utc_date_time( record.as_string( "start_at_time" ) );
+            _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
 
             string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
                                                                                        " where \"TASK_ID\"=" + as_string( task_id ), 
@@ -1494,7 +1494,7 @@ void Job::load_tasks_from_db( Read_transaction* ta )
 
             task->_is_in_database = true;
             task->_let_run        = true;
-            task->_enqueue_time.set_datetime( record.as_string( "enqueue_time" ) );
+            task->_enqueue_time = Time::of_utc_date_time( record.as_string( "enqueue_time" ) );
 
             if( !start_at  &&  !_schedule_use->period_follows( now ) ) 
             {
@@ -1537,10 +1537,10 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
                 insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
 
-                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( Time::without_ms ) );
+                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
 
-                if( task->_start_at )
-                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( Time::without_ms ) );
+                if( task->_start_at.not_zero() )
+                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
 
                 ta.execute( insert, Z_FUNCTION );
 
@@ -2110,7 +2110,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         *it = new_dw;       // Alte durch neue Überwachung ersetzen
     }
 
-    _directory_watcher_next_time = 0;
+    _directory_watcher_next_time = Time(0);
     calculate_next_time( Time::now() );
 }
 
@@ -2325,7 +2325,7 @@ void Job::database_record_load( Read_transaction* ta )
     {
         Record record  = result_set.get_record();
         _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
-        _db_next_start_time = record.null( "next_start_time" )? Time::never : Time().set_datetime( record.as_string( "next_start_time" ) );
+        _db_next_start_time = record.null( "next_start_time" )? Time::never :  Time::of_utc_date_time( record.as_string( "next_start_time" ) );
     }
 }
 
@@ -2373,7 +2373,7 @@ void Job::select_period( const Time& now )
 
             _period = _schedule_use->next_period( now );  
 
-            if( _period.begin() != Time::never )
+            if( !_period.begin().is_never() )
             {
                 _log->debug( message_string( "SCHEDULER-921", _period.to_xml(), _period.schedule_path().name() == ""? Absolute_path() : _period.schedule_path() ) );
             }
@@ -2407,7 +2407,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
     {
         string msg;
 
-        if( _delay_until )
+        if( _delay_until.not_zero() )
         {
             next_start_time = _period.next_try( _delay_until );
             //if( next_start_time.is_never() )  next_start_time = _schedule_use->next_period( _delay_until, time::wss_next_period_or_single_start ).begin();   // Jira JS-137
@@ -2442,19 +2442,19 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                 else
                 if( repeat )
                 {
-                    if( _repeat > 0 )       // spooler_task.repeat
+                    if( !_repeat.is_zero() )       // spooler_task.repeat
                     {
                         next_start_time = _period.next_try( now + _repeat );
                         if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
-                        _repeat = 0;
+                        _repeat = Duration(0);
                     }
                     else
                     //JS-436  if( now >= _period.begin()  &&  !_period.repeat().is_never() )
-                    if( !_period.repeat().is_never() )
+                    if( !_period.repeat().is_eternal() )
                     {
                         next_start_time = _period.next_repeated( now );
 
-                        if( _spooler->_debug && next_start_time != Time::never )  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
+                        if( _spooler->_debug && !next_start_time.is_never())  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
 
                         if( next_start_time >= _period.end() )
                         {
@@ -2462,7 +2462,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
 
                             if( _period.end()    == next_period.begin()  &&  
                                 _period.repeat() == next_period.repeat()  &&  
-                                _period.absolute_repeat().is_never() )
+                                _period.absolute_repeat().is_eternal() )
                             {
                                 if( _spooler->_debug )  msg += " (in the following period)";
                             }
@@ -2515,7 +2515,7 @@ Time Job::next_start_time()
     if( _state == s_pending  ||  _state == s_running )
     {
         result = min( _next_start_time, _next_single_start );
-        if( result > 0  &&  is_order_controlled() ) 
+        if( !result.is_zero() &&  is_order_controlled() ) 
             result = min( result, max( _combined_job_nodes->next_time(), _period.begin() ) );
 
         //if( _order_queue )  result = min( result, _order_queue->next_time() );
@@ -2540,12 +2540,12 @@ void Job::calculate_next_time( const Time& now )
         if( _lock_requestor  &&  
             ( _lock_requestor->is_enqueued()  ||  !_lock_requestor->locks_are_known() ) )
         {
-            if( _lock_requestor->locks_are_available() )  next_time = 0;    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
+            if( _lock_requestor->locks_are_available() )  next_time = Time(0);    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
         }
         else
         if( _waiting_for_process )
         {
-            if( _waiting_for_process_try_again )  next_time = 0;            // task_to_start() ruft remove_waiting_job_from_process_list()
+            if( _waiting_for_process_try_again )  next_time = Time(0);            // task_to_start() ruft remove_waiting_job_from_process_list()
         }
         else
         {
@@ -2555,7 +2555,7 @@ void Job::calculate_next_time( const Time& now )
                 bool in_period = is_in_period(now);
 
                 if( in_period  &&  ( _start_once || _start_once_for_directory ) )
-                    next_time = 0;
+                    next_time = Time(0);
                 else {
                     next_time = min(next_time, _task_queue->next_start_time() );
                     next_time = min(next_time, _next_start_time);
@@ -2565,7 +2565,7 @@ void Job::calculate_next_time( const Time& now )
                 if( next_time > now  &&  is_order_controlled() ) {
                     if (in_period) {
                         bool has_order = request_order( now, Z_FUNCTION );
-                        if( has_order )  next_time = 0;
+                        if( has_order )  next_time = Time(0);
                         else next_time = min(next_time, _combined_job_nodes->next_time() );
                     }
                     else
@@ -2606,7 +2606,7 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
     {
         Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << obj_name() << "  " << order_name << " " << next_time.as_string() << "\n" );
 
-        if( _next_time > 0   &&  _next_time > next_time )
+        if( !_next_time.is_zero()  &&  _next_time > next_time )
         {
             Time now = Time::now();
             calculate_next_time( now );
@@ -2747,7 +2747,7 @@ ptr<Task> Job::task_to_start()
 
     
     task = get_task_from_queue( now );
-    if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
+    if( task )  cause = task->_start_at.not_zero()? cause_queue_at : cause_queue;
         
     if( _state == s_pending  &&  _max_tasks > 0  &&  now >= _next_single_start )  
     {
@@ -2761,7 +2761,7 @@ ptr<Task> Job::task_to_start()
             if( _start_once )              cause = cause_period_once,                           log_line += "Task starts due to <run_time once=\"yes\">\n";
             else
             if( now >= _next_start_time )  
-                if( _delay_until && now >= _delay_until )
+                if( _delay_until.not_zero() && now >= _delay_until )
                                            cause = cause_delay_after_error,                     log_line += "Task starts due to delay_after_error\n";
                                       else cause = cause_period_repeat,                         log_line += "Task starts, because start time is reached: " + _next_start_time.as_string();
 
@@ -2993,8 +2993,8 @@ bool Job::do_something()
                             _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
                             reset_error();
-                            _repeat = 0;
-                            _delay_until = 0;
+                            _repeat = Duration(0);
+                            _delay_until = Time(0);
 
                             _running_tasks.push_back( task );
                             set_state( s_running );
@@ -3037,7 +3037,7 @@ bool Job::do_something()
 
                 if( _next_time <= now )
                 {
-                    _next_time = Time::now() + 1;
+                    _next_time = Time::now() + Duration(1);
                 }
             }
         }
@@ -3373,21 +3373,21 @@ string Job::state_cmd_name( Job::State_cmd cmd )
 void Job::set_delay_after_error( int error_steps, const string& delay )
 { 
     if( lcase( delay ) == "stop" )  set_stop_after_error( error_steps );
-                              else  set_delay_after_error( error_steps, time::time_from_string( delay ) );
+                              else  set_delay_after_error( error_steps, Duration::of( delay ) );
 }
 
 //---------------------------------------------------------------Job::set_delay_order_after_setback
 
 void Job::set_delay_order_after_setback( int setback_count, const string& delay )
 {
-    set_delay_order_after_setback( setback_count, time::time_from_string( delay ) );
+    set_delay_order_after_setback( setback_count, Duration::of( delay ) );
 }
 
 //---------------------------------------------------------------Job::get_delay_order_after_setback
 
-Time Job::get_delay_order_after_setback( int setback_count )
+Duration Job::get_delay_order_after_setback( int setback_count )
 {
-    Time delay = 0;
+    Duration delay = Duration(0);
 
     FOR_EACH( Delay_order_after_setback, _delay_order_after_setback, it )  
     {
@@ -3448,10 +3448,10 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( _state_cmd         )  result.setAttribute( "cmd"    , state_cmd_name()  );
 
         Time next = next_start_time();
-        if( next < Time::never )
+        if( !next.is_never() )
         result.setAttribute( "next_start_time", next.as_string() );
 
-        if( _delay_until )
+        if( _delay_until.not_zero() )
         result.setAttribute( "delay_until", _delay_until.as_string() );
 
         result.setAttribute( "in_period", is_in_period( now )? "yes" : "no" );
@@ -3541,7 +3541,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
                 queued_task_element.setAttribute( "name"       , task->_name );
                 queued_task_element.setAttribute( "force_start", task->_force_start? "yes" : "no" );
 
-                if( task->_start_at )
+                if( task->_start_at.not_zero() )
                     queued_task_element.setAttribute( "start_at", task->_start_at.as_string() );
                 
                 if( task->has_parameters() )  queued_task_element.appendChild( task->_params->dom_element( document, "params", "param" ) );
@@ -3655,7 +3655,7 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
         if (_state != s_pending)  append_obstacle_element(e, "state", state_name());
     }
 
-    if (_delay_until) { // cause_delay_after_error
+    if (_delay_until.not_zero()) { // cause_delay_after_error
         xml::Element_ptr e = result.append_new_element(reason_start_element_name);
         e.setAttribute("delay_until", _delay_until.xml_value());
         if (now >= _delay_until)

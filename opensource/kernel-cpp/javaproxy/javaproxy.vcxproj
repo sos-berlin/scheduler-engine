@@ -224,6 +224,8 @@
     <ClCompile Include="java__io__File.cxx" />
     <ClCompile Include="java__net__URI.cxx" />
     <ClCompile Include="java__net__URL.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones.cxx" />
+    
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

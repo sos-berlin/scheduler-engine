@@ -127,8 +127,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     typedef list< ptr<Task> >                   Task_list;
     typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
-    typedef map< int, Time >                    Delay_after_error;
-    typedef map< int, Time >                    Delay_order_after_setback;
+    typedef map< int, Duration >                Delay_after_error;
+    typedef map< int, Duration >                Delay_order_after_setback;
 
     static const bool           force_start_default;
 
@@ -170,8 +170,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
  //   Job*                        on_replace_now              ();
     void                        set_dom                     ( const xml::Element_ptr& );
-    Time                        get_step_duration_or_percentage( const string& value, const Time& deflt );
-    Time                        average_step_duration       ( const Time& deflt );
+    Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
+    Duration                    average_step_duration       ( const Duration& deflt );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
 
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
@@ -209,12 +209,12 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
   //Job*                        on_replace_now              ();
 
     void                        set_delay_after_error       ( int error_steps, const string& delay );
-    void                        set_delay_after_error       ( int error_steps, const Time& delay )  { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
-    void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = Time::never; }
+    void                        set_delay_after_error       ( int error_steps, const Duration& delay )  { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
+    void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = Duration::eternal; }
     void                        clear_delay_after_error     ()                                      { _log->debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
     void                        set_delay_order_after_setback( int setbacks, const string& delay );
-    void                        set_delay_order_after_setback( int setbacks, const Time& delay )    { _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
-    Time                        get_delay_order_after_setback( int setback_count );
+    void                        set_delay_order_after_setback( int setbacks, const Duration& delay ){ _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
+    Duration                    get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks="+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     void                        database_record_store       ();
@@ -225,7 +225,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     void                        close                       ();
 
-    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = 0 );
+    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) );
     void                        enqueue_task                ( Task* );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
@@ -263,7 +263,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     Time                        next_time                   ()                                      { return _next_time; }
     Time                        next_start_time             ();
-    bool                        has_next_start_time         ()                                      { return next_start_time() < Time::never; }
+    bool                        has_next_start_time         ()                                      { return !next_start_time().is_never(); }
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
@@ -274,8 +274,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     ptr<Task>                   task_to_start               ();
     bool                        do_something                ();
 
-    void                    set_repeat                      ( double seconds )                      { _log->debug( "repeat=" + as_string(seconds) ),  _repeat = seconds; }
-    Time                        repeat                      ()                                      { return _repeat; }
+    void                    set_repeat                      (const Duration& d)                     { _log->debug( "repeat=" + d.as_string() ),  _repeat = d; }
+    Duration                    repeat                      ()                                      { return _repeat; }
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
@@ -314,7 +314,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                        is_in_job_chain             () const                                { return _combined_job_nodes && !_combined_job_nodes->is_empty(); }
     bool                     is_order_controlled            () const                                { return _is_order_controlled; }
     void                    set_order_controlled            ();
-    void                    set_idle_timeout                ( const Time& );
+    void                    set_idle_timeout                ( const Duration& );
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
     void                        withdraw_order_request      ();
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
@@ -359,8 +359,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     State_cmd                  _state_cmd;
     bool                       _is_permanently_stopped;     // s_stopped wird zum Beenden verwendet und gilt nicht dauerhaft. Das sollte vereinfacht werden!
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
-    Time                       _task_timeout;               // Frist für einen Schritt einer Task
-    Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
+    Duration                   _task_timeout;               // Frist für einen Schritt einer Task
+    Duration                   _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
     bool                       _force_idle_timeout;         // _idle_timeout wirkt beendet auch Tasks, wenn _min_tasks unterschritten wird
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _start_once_for_directory;
@@ -378,7 +378,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     Time                       _next_start_time;
     Time                       _next_time;                  // Für Task_subsystem::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
 
-    Time                       _repeat;                     // spooler_task.repeat
+    Duration                   _repeat;                     // spooler_task.repeat
     Time                       _delay_until;                // Nach Fehler verzögern
 
     xml::Document_ptr          _commands_document;          // <commands>...

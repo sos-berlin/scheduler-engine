@@ -65,6 +65,12 @@ using namespace zschimmer::com;
 namespace sos {
 namespace scheduler {
 
+namespace time {
+    struct Duration;
+}
+
+using time::Duration;
+
 //--------------------------------------------------------------------------------------------const
     
 extern const char               version_string[];
@@ -76,8 +82,8 @@ extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;
 const int                       max_memory_file_size          = 10*1024*1024;   // F�r Dateien, die komplett in den Speicher geladen werden
 extern const int                max_open_log_files;
-extern const double             delete_temporary_files_delay;
-extern const double             delete_temporary_files_retry;
+extern const Duration           delete_temporary_files_delay;
+extern const Duration           delete_temporary_files_retry;
 
 #ifdef Z_WINDOWS
 /**
@@ -627,8 +633,8 @@ struct Spooler : Object,
 
     Mail_defaults              _mail_defaults;
 
-    int                        _log_collect_within;
-    int                        _log_collect_max;
+    Duration                   _log_collect_within;
+    Duration                   _log_collect_max;
 
     Time                       _last_mail_timestamp;
 
@@ -777,7 +783,6 @@ struct Spooler : Object,
     bool                       _suspend_after_resume;
     bool                       _should_suspend_machine;
 
-    ptr<time::Daylight_saving_time_transition_detector_interface> _daylight_saving_time_transition_detector;
     Event                      _waitable_timer;
     bool                       _is_waitable_timer_set;
 
@@ -792,10 +797,11 @@ struct Spooler : Object,
     bool                       _has_windows_console;
     bool                       _check_memory_leak;
     Process_id                 _next_process_id;
-    Time                       _max_micro_step_time;
+    Duration                   _max_micro_step_time;
 
     string                     _java_options;
     string                     _java_classpath;
+    string                     _time_zone_name;
 };
 
 //------------------------------------------------------------------------------------Object_server 

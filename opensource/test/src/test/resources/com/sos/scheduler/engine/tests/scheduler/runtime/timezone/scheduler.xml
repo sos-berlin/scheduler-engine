@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+>
+    <config time_zone="Europe/Helsinki">
+        <jobs>
+            <job name="a">
+                <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
+                <run_time time_zone="Pacific/Honolulu">
+                    <period single_start="12:12"/>
+                </run_time>
+            </job>
+            <job name="orderJob" order="yes">
+                <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
+            </job>
+        </jobs>
+        <job_chains>
+            <job_chain name="A" orders_recoverable="no">
+                <job_chain_node state="100" job="/orderJob"/>
+            </job_chain>
+        </job_chains>
+        <commands>
+            <order job_chain="A" id="1">
+                <run_time time_zone="Asia/Shanghai">
+                    <period single_start="12:12"/>
+                </run_time>
+            </order>
+        </commands>
+    </config>
+</spooler>

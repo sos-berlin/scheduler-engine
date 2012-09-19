@@ -21,10 +21,10 @@ const int    database_orders_read_ahead_count           = 1;
 //--------------------------------------------------------------------------------------------const
 
 // Datenbank-Feld distributed_next_time
-const string now_database_distributed_next_time         = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
-const string never_database_distributed_next_time       = "3111-11-11 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
-const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";        // Auftrag ist auf der schwarzen Liste
-const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
+const string now_database_distributed_next_time         = "2000-01-01T00:00:00Z";        // Auftrag ist verteilt und ist sofort ausführbar
+const string never_database_distributed_next_time       = "3111-11-11T00:00:00Z";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
+const string blacklist_database_distributed_next_time   = "3111-11-11T00:01:00Z";        // Auftrag ist auf der schwarzen Liste
+const string replacement_database_distributed_next_time = "3111-11-11T00:02:00Z";        // <order replacement="yes">
 // distributed_next_time is null => Auftrag ist nicht verteilt
 
 //--------------------------------------------------------------------------------------------const
@@ -205,9 +205,9 @@ Database_order_detector::Database_order_detector( Spooler* spooler )
     _zero_(this+1),
     Scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
 {
-    _now_database_distributed_next_time  .set_datetime( now_database_distributed_next_time   );
-    _never_database_distributed_next_time.set_datetime( never_database_distributed_next_time );
-    _blacklist_database_distributed_next_time.set_datetime( blacklist_database_distributed_next_time );
+    _now_database_distributed_next_time   = Time::of_utc_date_time( now_database_distributed_next_time   );
+    _never_database_distributed_next_time = Time::of_utc_date_time( never_database_distributed_next_time );
+    _blacklist_database_distributed_next_time = Time::of_utc_date_time( blacklist_database_distributed_next_time );
 }
 
 //---------------------------------------------------------Database_order_detector::async_finished_
@@ -363,8 +363,8 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
     Time t = order_queue->next_announced_distributed_order_time();
     assert( t );
 
-    string before = t < Time::never? t.as_string( Time::without_ms ) 
-                                   : never_database_distributed_next_time;
+    string before = !t.is_never()? t.as_string( time::without_ms ) 
+                                  : never_database_distributed_next_time;
     result << " and " << db_text_distributed_next_time() << " < " << sql::quoted( before );
 
     return result;
@@ -385,9 +385,9 @@ int Database_order_detector::read_result_set( Read_transaction* ta, const string
 
         Order_queue_node* node = Order_queue_node::cast( job_chain->node_from_state( record.as_string( "state" ) ) );
 
-        distributed_next_time.set_datetime( record.as_string( "distributed_next_time" ) );
-        if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time.set_null();
-        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time.set_never();
+        distributed_next_time = Time::of_utc_date_time( record.as_string( "distributed_next_time" ) );
+        if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time = Time(0);
+        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time = Time::never;
         
         bool is_now = distributed_next_time <= _now;
         node->order_queue()->set_next_announced_distributed_order_time( distributed_next_time, is_now );
@@ -553,8 +553,8 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
                    << order_select_database_columns << ", `job_chain`"
                       "  from " << db()->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db());
-        if(  options->_from              )  select_sql << " and " << db_text_distributed_next_time() << " >= " << sql::quoted( options->_from  .as_string(Time::without_ms) );
-        if( !options->_before.is_never() )  select_sql << " and " << db_text_distributed_next_time() << " < "  << sql::quoted( options->_before.as_string(Time::without_ms) );
+        if(  options->_from.not_zero()   )  select_sql << " and " << db_text_distributed_next_time() << " >= " << sql::quoted( options->_from  .as_string(time::without_ms) );
+        if( !options->_before.is_never() )  select_sql << " and " << db_text_distributed_next_time() << " < "  << sql::quoted( options->_before.as_string(time::without_ms) );
         else
         if( !options->_from              )  select_sql << " and `distributed_next_time` is not null ";
         
@@ -2005,7 +2005,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             if( node )
             {
                 node->set_suspending_order( e.bool_getAttribute( "suspend", node->is_suspending_order() ) );
-                node->set_delay           ( e. int_getAttribute( "delay"  , node->delay()               ) );
+                node->set_delay(Duration(e.int_getAttribute( "delay", node->delay().seconds())));
                 //node->set_action( e.getAttribute( "action", node->string_action() ) );      // Hiernach _is_distributed nicht mehr setzen!
             }
         }
@@ -2069,7 +2069,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     fill_file_based_dom_element( result, show_what );
     result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
-    if ( number_of_touched_orders_available() )			// JS-682
+    if ( number_of_touched_orders_available() )            // JS-682
         result.setAttribute( "running_orders", number_of_touched_orders() );
     if ( is_max_orders_set() )
         result.setAttribute( "max_orders", _max_orders );
@@ -2120,8 +2120,8 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                 order->set_state     ( record.as_string( "state"      ) );
                 order->set_state_text( record.as_string( "state_text" ) );
                 order->set_title     ( record.as_string( "title"      ) );
-                order->_start_time.set_datetime( record.as_string( "start_time" ) );
-                order->_end_time  .set_datetime( record.as_string( "end_time"   ) );
+                order->_start_time = Time::of_utc_date_time( record.as_string( "start_time" ) );
+                order->_end_time   = Time::of_utc_date_time( record.as_string( "end_time"   ) );
 
                 xml::Element_ptr order_element = order->dom_element( document, show_what );
                 order_element.setAttribute_optional( "job_chain" , record.as_string( "job_chain"  ) );
@@ -2985,7 +2985,7 @@ bool Job_chain::tip_for_new_distributed_order( const Order::State& state, const 
         if( node->order_queue()->is_distributed_order_requested( time_max - 1 ) 
          && at < node->order_queue()->next_announced_distributed_order_time() )
         {
-            node->order_queue()->set_next_announced_distributed_order_time( at, at.is_null() || at <= Time::now() );
+            node->order_queue()->set_next_announced_distributed_order_time( at, at.is_zero() || at <= Time::now() );
             result = true;
         }
 
@@ -4110,13 +4110,13 @@ void Order_queue::add_order( Order* order, Do_log do_log )
     Time next_time = order->next_time();
 
 
-    if( next_time )
+    if( next_time.not_zero() )
     {
         if( !order->_suspended )
         {
-            if( order->_setback < Time::never )  
+            if( !order->_setback.is_never() )  
             {
-                if( order->_setback )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
+                if( order->_setback.not_zero() )  order->_log->log( do_log? log_info : log_debug3, message_string( "SCHEDULER-938", order->_setback ) );
             }
             //else  JS-474
             //    order->_log->log( do_log? log_warn : log_debug3, message_string( "SCHEDULER-296" ) );       // "Die <run_time> des Auftrags hat keine nächste Startzeit" ); JS-474
@@ -4384,7 +4384,7 @@ Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin
         if( order->is_immediately_processable( now )  &&  (virgin_is_allowed  ||  !order->is_virgin()))
         {
             result = order;
-            result->_setback = 0;
+            result->_setback = Time(0);
             break;
         }
 
@@ -4483,7 +4483,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* o
 
     select_sql << "select %limit(1)  `job_chain`, " << db_text_distributed_next_time() << " as distributed_next_time, " << order_select_database_columns <<
                 "  from " << db()->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
-                "  where `distributed_next_time` <= " << db()->database_descriptor()->timestamp_string( now.as_string( Time::without_ms ) ) <<
+                "  where `distributed_next_time` <= " << db()->database_descriptor()->timestamp_string( now.as_string( time::without_ms ) ) <<
                    " and `occupying_cluster_member_id` is null" << 
                    " and " << w <<
                 "  order by `distributed_next_time`, `priority`, `ordering`";

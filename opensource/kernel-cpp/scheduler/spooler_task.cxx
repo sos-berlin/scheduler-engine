@@ -168,9 +168,9 @@ Task::Task( Job* job )
     _zero_(this+1),
     _job(job),
     _history(&job->_history,this),
-    _timeout(Time::never),
+    _timeout(Duration::eternal),
     _lock_requestors( 1+lock_level__max ),
-    _warn_if_longer_than( Time::never )
+    _warn_if_longer_than( Duration::eternal )
 {
     _log = Z_NEW( Prefix_log( this ) );
 
@@ -184,8 +184,8 @@ Task::Task( Job* job )
     _idle_timeout_at = Time::never;
 
     set_subprocess_timeout();
-    _warn_if_shorter_than = _job->get_step_duration_or_percentage( _job->_warn_if_shorter_than_string, Time(0) );
-    _warn_if_longer_than  = _job->get_step_duration_or_percentage( _job->_warn_if_longer_than_string , Time::never );
+    _warn_if_shorter_than = _job->get_step_duration_or_percentage( _job->_warn_if_shorter_than_string, Duration(0) );
+    _warn_if_longer_than  = _job->get_step_duration_or_percentage( _job->_warn_if_longer_than_string , Duration::eternal );
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
 
@@ -354,22 +354,22 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
         task_element.setAttribute( "name"            , _name );
 
-        if( _running_since )
+        if( _running_since.not_zero() )
         task_element.setAttribute( "running_since"   , _running_since.as_string() );
 
-        if( _enqueue_time )
+        if( _enqueue_time.not_zero() )
         task_element.setAttribute( "enqueued"        , _enqueue_time.as_string() );
 
-        if( _start_at )
+        if( _start_at.not_zero() )
         task_element.setAttribute( "start_at"        , _start_at.as_string() );
 
-        if( _idle_since )
+        if( _idle_since.not_zero() )
         task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
 
         if( _cause )
         task_element.setAttribute( "cause"           , start_cause_name( _cause ) );
 
-        if( _state == s_running  &&  _last_process_start_time )
+        if( _state == s_running  &&  _last_process_start_time.not_zero() )
         task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
 
         task_element.setAttribute( "steps"           , _step_count );
@@ -766,7 +766,7 @@ void Task::set_state_direct( State new_state )
         _enqueued_state = s_none;
     }
 
-    if( new_state != s_running_waiting_for_order )  _idle_since = 0;
+    if( new_state != s_running_waiting_for_order )  _idle_since = Time(0);
 
     if( new_state != _state )
     {
@@ -823,13 +823,13 @@ void Task::set_state_direct( State new_state )
         }
 
         default:
-            _next_time = 0;
+            _next_time = Time(0);
     }
 
 
-    if( _next_time && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
+    if( _next_time.not_zero() && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
-    if( _end )  _next_time = 0;   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgef¸hrt wird.
+    if( _end )  _next_time = Time(0);   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgef¸hrt wird.
 
     if( new_state != _state )
     {
@@ -839,7 +839,7 @@ void Task::set_state_direct( State new_state )
             if( _state    == s_starting ||  _state    == s_opening  ||  _state    == s_running )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
         }
 
-        if( new_state != s_running_delayed )  _next_spooler_process = 0;
+        if( new_state != s_running_delayed )  _next_spooler_process = Time(0);
 
         State old_state = _state;
         _state = new_state;
@@ -852,8 +852,8 @@ void Task::set_state_direct( State new_state )
         if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
         {
             S details;
-            if( _next_time )  details << " (" << _next_time << ")";
-            if( new_state == s_starting  &&  _start_at )  details << " (at=" << _start_at << ")";
+            if( _next_time.not_zero() )  details << " (" << _next_time << ")";
+            if( new_state == s_starting  &&  _start_at.not_zero() )  details << " (at=" << _start_at << ")";
             if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
 
             _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
@@ -902,7 +902,7 @@ string Task::state_name( State state )
 void Task::signal( const string& signal_name )
 {
         _signaled = true;
-        set_next_time( 0 );
+        set_next_time(Time(0));
 
         if( _spooler->_task_subsystem )  _spooler->_task_subsystem->signal( signal_name );
                //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
@@ -935,10 +935,10 @@ void Task::set_history_field( const string& name, const Variant& value )
 
 //------------------------------------------------------------------Task::set_delay_spooler_process
 
-void Task::set_delay_spooler_process( Time t )
+void Task::set_delay_spooler_process(const Duration& d)
 { 
-    _log->debug("delay_spooler_process=" + t.as_string() ); 
-    _next_spooler_process = Time::now() + t; 
+    _log->debug("delay_spooler_process=" + d.as_string() ); 
+    _next_spooler_process = Time::now() + d; 
 }
 
 //------------------------------------------------------------------------------Task::try_hold_lock
@@ -1044,19 +1044,19 @@ Time Task::next_time()
     if( _operation )
     {
         if( _operation->async_finished() ) {
-            result = 0;   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l‰uft)
+            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l‰uft)
         } else {
-            Time t = _timeout;
+            Duration t = _timeout;
             if( _state == s_running ||
                 _state == s_running_process ||
                 _state == s_running_remote_process )  t = min( t, _warn_if_longer_than );
 
-            result = t.is_never()? Time::never 
-                                 : _last_operation_time + t;     // _timeout sollte nicht zu groﬂ sein
+            result = t.is_eternal()? Time::never 
+                                   : _last_operation_time + t;     // _timeout sollte nicht zu groﬂ sein
         }                 
     }
     else
-    if( _state == s_running_process  &&  !_timeout.is_never() )
+    if( _state == s_running_process  &&  !_timeout.is_eternal() )
     {
         result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groﬂ sein
     }
@@ -1075,9 +1075,9 @@ Time Task::next_time()
 
 bool Task::check_timeout( const Time& now )
 {
-    if( _timeout < Time::never  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
+    if( !_timeout.is_eternal()  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
-        _log->error( message_string( "SCHEDULER-272", _timeout.as_time_t() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
+        _log->error( message_string( "SCHEDULER-272", _timeout.seconds() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
     }
 
@@ -1088,13 +1088,13 @@ bool Task::check_timeout( const Time& now )
 
 void Task::check_if_shorter_than( const Time& now )
 {
-    if( _warn_if_shorter_than ) 
+    if( _warn_if_shorter_than.not_zero() ) 
     {
-        Time step_time = now - _last_operation_time;
+        Duration step_time = now - _last_operation_time;
 
         if( step_time < _warn_if_shorter_than ) 
         {
-            string msg = message_string( "SCHEDULER-711", _warn_if_shorter_than.as_string( Time::without_ms ), step_time.as_string( Time::without_ms ) );
+            string msg = message_string( "SCHEDULER-711", _warn_if_shorter_than.as_string( time::without_ms ), step_time.as_string( time::without_ms ) );
             _log->warn( msg );
 
             Scheduler_event scheduler_event ( evt_task_step_too_short, log_error, _spooler );
@@ -1102,7 +1102,7 @@ void Task::check_if_shorter_than( const Time& now )
             mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
             mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                           "Step time: " << step_time << "\n" <<
-                                          "warn_if_shorter_than=" << _warn_if_shorter_than.as_string( Time::without_ms ) );
+                                          "warn_if_shorter_than=" << _warn_if_shorter_than.as_string( time::without_ms ) );
             scheduler_event.send_mail( mail_defaults );
         }
     }
@@ -1114,9 +1114,9 @@ bool Task::check_if_longer_than( const Time& now )
 {
     bool something_done = false;
 
-    if( !_warn_if_longer_than.is_never() ) 
+    if( !_warn_if_longer_than.is_eternal() ) 
     {
-        double step_time = now - _last_operation_time;   // JS-448
+        Duration step_time = now - _last_operation_time;   // JS-448
         // double task_duration = now - _running_since;  
         
         //S s;
@@ -1132,7 +1132,7 @@ bool Task::check_if_longer_than( const Time& now )
 
                 _last_warn_if_longer_operation_time = _last_operation_time;       
 
-                string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( Time::without_ms ) );
+                string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( time::without_ms ) );
                 _log->warn( msg );
 
                 Scheduler_event scheduler_event ( evt_task_step_too_long, log_error, _spooler );
@@ -1140,7 +1140,7 @@ bool Task::check_if_longer_than( const Time& now )
                 mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
                 mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                               "Task step time: " << step_time << "\n" <<
-                                              "warn_if_longer_than=" << _warn_if_longer_than.as_string( Time::without_ms ) );
+                                              "warn_if_longer_than=" << _warn_if_longer_than.as_string( time::without_ms ) );
                 scheduler_event.send_mail( mail_defaults );
             }     
         }
@@ -1151,7 +1151,7 @@ bool Task::check_if_longer_than( const Time& now )
 
 //------------------------------------------------------------------------------------Task::add_pid
 
-void Task::add_pid( int pid, const Time& timeout_period )
+void Task::add_pid( int pid, const Duration& timeout )
 {
     if( _module_instance->is_remote_host() )
     {
@@ -1162,9 +1162,9 @@ void Task::add_pid( int pid, const Time& timeout_period )
     {
         Time timeout_at = Time::never;
 
-        if( timeout_period != Time::never )
+        if(!timeout.is_eternal())
         {
-            timeout_at = Time::now() + timeout_period;
+            timeout_at = Time::now() + timeout;
             _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
         }
 
@@ -1188,7 +1188,7 @@ void Task::remove_pid( int pid )
 
 //-----------------------------------------------------------------------------Task::add_subprocess
 
-void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
+void Task::add_subprocess( int pid, const Duration& timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
 {
     Z_LOG2( "scheduler", Z_FUNCTION << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
     Z_LOG2( "scheduler", Z_FUNCTION << "   title=" << title << "\n" );   // Getrennt, falls Parameter¸bergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
@@ -1200,8 +1200,7 @@ void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool i
     }
     else
     {
-        Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
-                                               : Time::never;
+        Time timeout_at = timeout.is_eternal()? Time::never : Time::now() + timeout;
 
         _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
 
@@ -1294,7 +1293,7 @@ void Task::set_subprocess_timeout()
     _subprocess_timeout = Time::never;
     FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout_at )  _subprocess_timeout = p->second->_timeout_at;
 
-    if( _subprocess_timeout != Time::never )  signal( "subprocess_timeout" );
+    if( !_subprocess_timeout.is_never() )  signal( "subprocess_timeout" );
     //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
 }
 
@@ -1593,7 +1592,7 @@ bool Task::do_something()
                         {
                             if( !_operation )
                             {
-                                if( _next_spooler_process )
+                                if( _next_spooler_process.not_zero() )
                                 {
                                     set_state_direct( s_running_delayed );
                                     something_done = true;
@@ -1604,7 +1603,7 @@ bool Task::do_something()
                                     {
                                         if( !fetch_and_occupy_order( now, state_name() ) )
                                         {
-                                            _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
+                                            _idle_timeout_at = now + _job->_idle_timeout;
                                             set_state_direct( s_running_waiting_for_order );
                                             break;
                                         }
@@ -1686,7 +1685,7 @@ bool Task::do_something()
                                 }
                                 else
                                 {
-                                    _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
+                                    _idle_timeout_at = now + _job->_idle_timeout;
                                     set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
                                     Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
@@ -1704,7 +1703,7 @@ bool Task::do_something()
                         {
                             if( now >= _next_spooler_process )
                             {
-                                _next_spooler_process = 0;
+                                _next_spooler_process = Time(0);
                                 set_state_direct( s_running ), loop = true;
                             }
 
@@ -1839,7 +1838,7 @@ bool Task::do_something()
                         {
                             if( _module_instance  &&  _module_instance->is_kill_thread_running() )
                             {
-                                _next_time = Time::now() + 0.1;
+                                _next_time = Time::now() + Duration(0.1);
                             }
                             else
                             {
@@ -1913,7 +1912,7 @@ bool Task::do_something()
                                     ok = _module_instance->try_delete_files( my_log );
                                     if( ok )
                                     {
-                                        if( _trying_deleting_files_until )  
+                                        if( _trying_deleting_files_until.not_zero() )  
                                         {
                                             _log->debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht lˆschbar gewesen ist
                                         }
@@ -1927,7 +1926,7 @@ bool Task::do_something()
                                         }
 
                                         //if( _end == end_kill_immediately  &&  // Bei kill_immediately nur einmal warten (1/10s, das ist zu kurz!)
-                                        if( _trying_deleting_files_until  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
+                                        if( _trying_deleting_files_until.not_zero()  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
                                         {
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->info( message_string( "SCHEDULER-878", paths ) );
@@ -2049,7 +2048,7 @@ bool Task::do_something()
             if( _next_time <= now )
             {
                 Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time << ", delayed\n" );
-                _next_time = Time::now() + 0.1;
+                _next_time = Time::now() + Duration(0.1);
             }
             else
             {
@@ -2151,7 +2150,7 @@ bool Task::step__end()
                                                            : Order::post_error        );
         }
 
-        if( _next_spooler_process )  continue_task = true;
+        if( _next_spooler_process.not_zero() )  continue_task = true;
     }
     catch( const exception& x ) 
     { 
@@ -2362,12 +2361,12 @@ void Task::finish()
         detach_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzˆgert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
-    if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )
+    if( has_error()  &&  _job->repeat().is_zero()  &&  _job->_delay_after_error.empty() )
     {
         _job->stop_after_task_error( _error.what() );
     }
     else
-    if( _job->_temporary  &&  _job->repeat() == 0 )
+    if( _job->_temporary  &&  _job->repeat().is_zero() )
     {
         _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
     }
@@ -2382,12 +2381,12 @@ void Task::finish()
 
         if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
         {
-            Time delay = _job->_delay_after_error.empty()? Time::never : Time(0);
+            Duration delay = _job->_delay_after_error.empty()? Duration::eternal : Duration(0);
 
             FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )
                 if( _job->_error_steps >= it->first )  delay = it->second;
 
-            if( delay == Time::never )
+            if(delay.is_eternal())
             {
                 _is_last_job_delay_after_error = true;
                 _job->stop( false );
@@ -2406,7 +2405,7 @@ void Task::finish()
                     catch( exception& x )
                     {
                         _log->error( x.what() );
-                        _job->_delay_until = 0;
+                        _job->_delay_until = Time(0);
                         _job->stop_after_task_error( x.what() );
                     }
                 }

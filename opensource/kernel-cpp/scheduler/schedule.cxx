@@ -263,7 +263,8 @@ Schedule_use::Schedule_use( File_based* using_object )
     Scheduler_object( using_object->spooler(), static_cast<spooler_com::Irun_time*>( this ), type_schedule_use ),
     _zero_(this+1),
     _using_object(using_object),
-    _scheduler_holidays_usage(with_scheduler_holidays)
+    _scheduler_holidays_usage(with_scheduler_holidays),
+    _time_zone_name(using_object->spooler()->_time_zone_name)
 {
     _log = using_object->log();
     assert( _log );
@@ -378,6 +379,7 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
     }
 
     _active_schedule_path = _schedule_path.without_slash();
+    _time_zone_name = element.getAttribute("time_zone", _time_zone_name);
 
     on_schedule_modified();
 }
@@ -506,8 +508,8 @@ Time Schedule_use::next_single_start( const Time& time )
     return !period.absolute_repeat().is_never()? period.next_repeated( time )
    \endcode
  */
-    return !period.absolute_repeat().is_never()? period.next_absolute_repeated( time, 0 )
-                                               : period.begin();
+    return !period.absolute_repeat().is_eternal()? period.next_absolute_repeated( time, 0 )
+                                                 : period.begin();
 }
 
 //---------------------------------------------------------------------Schedule_use::next_any_start
@@ -516,15 +518,18 @@ Time Schedule_use::next_any_start( const Time& time )
 { 
     Period period = next_period( time, wss_next_any_start );
 
-    return !period.absolute_repeat().is_never()? period.next_repeated( time )
-                                               : period.begin();
+    return !period.absolute_repeat().is_eternal()? period.next_repeated( time )
+                                                 : period.begin();
 }
 
 //------------------------------------------------------------------------Schedule_use::next_period
 
 Period Schedule_use::next_period( const Time& t, With_single_start single_start, const Time& before ) 
 { 
-    return schedule()->next_period( this, t, single_start, before ); 
+    Period result = schedule()->next_local_period( this, t.local_time(_time_zone_name), single_start, before.local_time(_time_zone_name) ); 
+    result._begin = result._begin.utc_from_time_zone(_time_zone_name);
+    result._end = result._end.utc_from_time_zone(_time_zone_name);
+    return result;
 }
 
 //-----------------------------------------------------------------Schedule_use::next_allowed_start
@@ -556,7 +561,7 @@ void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element
         while( options->_count < options->_limit )
         {
             Period period = next_period( t, wss_next_any_start, options->_before );  
-            if( period.begin() >= options->_before  ||  period.begin() == Time::never )  break;
+            if( period.begin() >= options->_before  ||  period.begin().is_never() )  break;
 
             //if( period._start_once  ||
             //    period._single_start  ||     
@@ -575,7 +580,7 @@ void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element
                 }
             }
 
-            Time new_t = period._single_start? period.begin() + 1 : period.end();
+            Time new_t = period._single_start? period.begin() + Duration(1) : period.end();
             assert( t < new_t );
             if( new_t <= t )  break;
             t = new_t;
@@ -848,7 +853,7 @@ void Schedule::cover_with_schedule( Schedule* covering_schedule )
     if( is_covering() )  z::throw_xc( "SCHEDULER-463", obj_name(), covering_schedule->obj_name() );
 
     assert_no_overlapped_covering( covering_schedule );
-    _covering_schedules[ covering_schedule->_inlay->_covered_schedule_begin ] = covering_schedule;
+    _covering_schedules[ covering_schedule->_inlay->_covered_schedule_begin.as_double() ] = covering_schedule;
 
     on_schedule_modified();
 }
@@ -857,7 +862,7 @@ void Schedule::cover_with_schedule( Schedule* covering_schedule )
 
 void Schedule::assert_no_overlapped_covering( Schedule* covering_schedule )
 {
-    Covering_schedules::iterator after = _covering_schedules.lower_bound( covering_schedule->_inlay->_covered_schedule_end );
+    Covering_schedules::iterator after = _covering_schedules.lower_bound( covering_schedule->_inlay->_covered_schedule_end.as_double() );
     
     if( after != _covering_schedules.begin() )
     {
@@ -871,9 +876,9 @@ void Schedule::assert_no_overlapped_covering( Schedule* covering_schedule )
 
 void Schedule::uncover_from_schedule( Schedule* covering_schedule )
 {
-    assert( _covering_schedules.find( covering_schedule->_inlay->_covered_schedule_begin ) != _covering_schedules.end() );
+    assert( _covering_schedules.find( covering_schedule->_inlay->_covered_schedule_begin.as_double() ) != _covering_schedules.end() );
 
-    _covering_schedules.erase( covering_schedule->_inlay->_covered_schedule_begin );
+    _covering_schedules.erase( covering_schedule->_inlay->_covered_schedule_begin.as_double() );
 
     on_schedule_modified();
 }
@@ -942,24 +947,24 @@ void Schedule::disconnect_covering_schedules()
     assert( _covering_schedules.empty() );
 }
 
-//----------------------------------------------------------------------------Schedule::next_period
+//----------------------------------------------------------------------Schedule::next_local_period
 
-Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
+Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
 { 
     Period result;
-    Time   interval_begin = 0;            // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
+    Time   interval_begin = Time(0);      // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
     Time   interval_end   = Time::never;  // Standard-Schedule endet. Gilt, falls kein überdeckendes Schedule >= t
     Time   t              = tim;
 
     // Überdeckende Schedule prüfen, <schedule substitute="...">
 
-    for( Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t );; next_schedule++ )   // Liefert das erste Schedule nach t
+    for( Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t.as_double() );; next_schedule++ )   // Liefert das erste Schedule nach t
     {
         assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
         if( next_schedule == _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
         { 
-            interval_begin = 0;
+            interval_begin = Time(0);
         }
         else
         {
@@ -976,7 +981,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
                 interval_end   = covering_schedule->_inlay->_covered_schedule_end;
                 assert( t >= interval_begin  &&  t < interval_end );
 
-                Period period = covering_schedule->_inlay->next_period( use, t, single_start, before );
+                Period period = covering_schedule->_inlay->next_local_period( use, t, single_start, before );
                 if( period._begin < interval_end )  
                 {
                     result = period;
@@ -998,7 +1003,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
         if( interval_begin < interval_end )     // Die Lücke nach dem überdeckenden Schedule ist länger als 0?
         {
             assert( !covering_schedule_at( t ) );
-            Period period = _inlay->next_period( use, t, single_start, before );       // Unser Standard-Schedule
+            Period period = _inlay->next_local_period( use, t, single_start, before );       // Unser Standard-Schedule
             if( period.begin() < interval_end )  
             {
                 result = period;
@@ -1049,7 +1054,7 @@ Schedule* Schedule::covering_schedule_at( const Time& t )
 {
     Schedule* result = NULL;
 
-    Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t );   // Liefert das erste Schedule nach t
+    Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t.as_double() );   // Liefert das erste Schedule nach t
     assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
     if( next_schedule != _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
@@ -1115,8 +1120,8 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
         if( is_in_folder() )    // Benanntes <schedule>?
         {
             result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
-            //ist schon korrekt: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
-            //ist schon korrekt: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
+            //ist schon korrekt: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( time::without_ms ) );
+            //ist schon korrekt: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( time::without_ms ) );
 
             if( file_based_state() == s_active )
             {
@@ -1251,20 +1256,23 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _title = element.getAttribute( "title ");
 
     _covered_schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "substitute" ) );
-    _covered_schedule_begin.set_datetime( element.getAttribute( "valid_from"          ) );
-    _covered_schedule_end  .set_datetime( element.getAttribute( "valid_to"  , "never" ) );
+    _covered_schedule_begin = Time::of_date_time( element.getAttribute( "valid_from"          ), "(NO-TIME-ZONE)" );
+    _covered_schedule_end   = Time::of_date_time( element.getAttribute( "valid_to"  , "never" ), "(NO-TIME-ZONE)" );
     if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.as_string(), _covered_schedule_end.as_string() );
 
     if( _covered_schedule_path == "" )
     {
-        if( _covered_schedule_begin != 0           )  z::throw_xc( "SCHEDULER-467", "valid_from", "substitute" );
-        if( _covered_schedule_end   != Time::never )  z::throw_xc( "SCHEDULER-467", "valid_to"  , "substitute" );
+        if( !_covered_schedule_begin.is_zero() )  z::throw_xc( "SCHEDULER-467", "valid_from", "substitute" );
+        if( !_covered_schedule_end.is_never()  )  z::throw_xc( "SCHEDULER-467", "valid_to"  , "substitute" );
     }
-
 
     _once = element.bool_getAttribute( "once", _once );
     //if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
     _start_time_function = element.getAttribute( "start_time_function" );
+
+    if (element.hasAttribute("name")) {
+        require_not_attribute(element, "time_zone");
+    }
 
 
     default_period.set_dom( element );
@@ -1286,8 +1294,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
             a_day_set = true;
             string at = e.getAttribute( "at" );
             if( at == "now" )  _once = true;   // "now" wirkt nicht in _at_set, weil der Zeitpunkt gleich verstrichen sein wird
-            Time at_time;
-            at_time.set_datetime( at );
+            Time at_time = Time::of_local_date_time( at );
             _at_set.add( at_time );
         }
         else
@@ -1379,9 +1386,9 @@ bool Schedule::Inlay::is_filled() const
     return result;
 }
 
-//---------------------------------------------------------------------Schedule::Inlay::next_period
+//---------------------------------------------------------------Schedule::Inlay::next_local_period
 
-Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
+Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
 {
     // Wenn mehrere Jahre vorausgesehen werden sollen (s. foresee_years), könnte der Algorithmus vielleicht beschleunigt werden.
     // single_start könnte geprüft werden: <run_time> ohne single_start usw. muss dann nicht durchsucht werden.
@@ -1398,12 +1405,12 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
         bool   is_no_function_warning_logged = false; 
         Period last_function_result;
         
-        last_function_result.set_single_start( 0 );
+        last_function_result.set_single_start(Time(0));
 
-        Time limited_before = min( before.as_double_or_never(), beginning_time + foresee_years*366*24*60*60 );     // Längstens soviele Jahre ab beginning_time voraussehen
+        Time limited_before = min( before, beginning_time + Duration(foresee_years*366*24*60*60));     // Längstens soviele Jahre ab beginning_time voraussehen
 
 
-        for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + 24*60*60 )     
+        for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + Duration::day)     
         {
             if( _holidays.is_included( t ) )  
             {
@@ -1439,24 +1446,25 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
 
 
                 // Gestern war Feiertag? Periode mit when_holiday="next_non_holiday" suchen
+                Duration foresee_duration = Duration(foresee_years*24*60*60);
 
-                for( int before = -24*60*60;
-                     before >= -foresee_years*24*60*60  &&  _holidays.is_included( t + before ); 
-                     before -= 24*60*60 )
+                for (Duration before = -Duration::day;
+                     before >= -foresee_duration  &&  _holidays.is_included(t + before); 
+                     before -= Duration::day)
                 {
                     Period p = next_period_of_same_day( t + before, single_start | wss_when_holiday_next_non_holiday );
-                    if( !p.empty() )  result = min( result, p - before );   // Vergangene Periode auf heute verschieben
+                    if( !p.empty() )  result = min( result, p - before);   // Vergangene Periode auf heute verschieben
                 }
 
 
                 // Morgen ist Feiertag? Periode mit when_holiday="previous_non_holiday" suchen
 
-                for( int after = +24*60*60;
-                     after <= foresee_years*24*60*60  &&  t + after < time::never_int  &&  _holidays.is_included( t + after ); 
-                     after += 24*60*60 )
+                for (Duration after = Duration::day;
+                     after <= foresee_duration  &&  !(t + after).is_never()  &&  _holidays.is_included(t + after); 
+                     after += Duration::day)
                 {
-                    Period p = next_period_of_same_day( t + after, single_start | wss_when_holiday_previous_non_holiday );
-                    if( !p.empty() )  result = min( result, p - after );    // Zukünftige Periode auf heute verschieben
+                    Period p = next_period_of_same_day(t + after, single_start | wss_when_holiday_previous_non_holiday);
+                    if( !p.empty() )  result = min(result, p - after);    // Zukünftige Periode auf heute verschieben
                 }
             }
         }
@@ -1502,7 +1510,7 @@ Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_
         try
         {
 
-            string            date_string      = requested_beginning.as_string( Time::without_ms );
+            string            date_string      = requested_beginning.as_string( time::without_ms );
             string            param2           = use->name_for_function();
             Scheduler_script* scheduler_script = _spooler->scheduler_script_subsystem()->default_scheduler_script();
             string            function_name    = _start_time_function;
@@ -1513,11 +1521,11 @@ Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_
             if( !v.is_null_or_empty_string() )
             {
                 Time t;
-                if( variant_is_numeric( v ) )  t = (time_t)v.as_int64();
+                if( variant_is_numeric( v ) )  t = Time((time_t)v.as_int64());
                 else
-                if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
+                if( v.vt == VT_DATE         )  t = Time(seconds_since_1970_from_com_date( V_DATE( &v ) ));
                 else                           
-                                               t.set_datetime( v.as_string() );
+                                               t = Time::of_date_time( v.as_string(), "(NO-TIME-ZONE)" );
 
                 if( t < requested_beginning )
                 {
@@ -1585,14 +1593,25 @@ bool Period::operator==( const Period& o ) const
            _single_start          == o._single_start;
 }
 
+//-------------------------------------------------------------------------------Period::operator+=
+
+Period& Period::operator+=(const Time& t)
+{ 
+    assert(!_begin.has_date() && !_end.has_date());
+    Duration d = Duration(t.as_double());
+    _begin += d; 
+    _end += d; 
+    return *this; 
+}
+
 //-------------------------------------------------------------------------Period::set_single_start
 
 void Period::set_single_start( const Time& t )
 {
     _begin           = t;
     _end             = t;
-    _repeat          = Time::never;
-    _absolute_repeat = Time::never;
+    _repeat          = Duration::eternal;
+    _absolute_repeat = Duration::eternal;
     _single_start    = true;
     _let_run         = true;
 }
@@ -1623,7 +1642,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
         {
             if( w == with_date )  dt = begin;
                             else  dt.set_time( begin );
-            _begin = dt;
+            _begin = Time(dt);
         }
         string repeat = element.getAttribute( "repeat" );
         if( !repeat.empty() )
@@ -1632,13 +1651,13 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
             {
                 Sos_optional_date_time dt;
                 dt.set_time( repeat );
-                _repeat = dt.time_as_double();
+                _repeat = Duration(dt.time_as_double());
             }
             else
-                _repeat = as_double( repeat );
+                _repeat = Duration(as_double(repeat));
         }
 
-        if( _repeat == 0 )  _repeat = Time::never;
+        if( _repeat.is_zero() )  _repeat = Duration::eternal;
 
 
         string absolute_repeat = element.getAttribute( "absolute_repeat" );
@@ -1648,13 +1667,13 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
             {
                 Sos_optional_date_time dt;
                 dt.set_time( absolute_repeat );
-                _absolute_repeat = dt.time_as_double();
+                _absolute_repeat = Duration(dt.time_as_double());
             }
             else
-                _absolute_repeat = as_double( absolute_repeat );
+                _absolute_repeat = Duration(as_double(absolute_repeat));
 
-            if( _absolute_repeat == 0 )  z::throw_xc( "SCHEDULER-441", element.nodeName(), "absolute_repeat", "0" );
-            if( !_absolute_repeat.is_never() )  _repeat = Time::never;
+            if( _absolute_repeat.is_zero() )  z::throw_xc( "SCHEDULER-441", element.nodeName(), "absolute_repeat", "0" );
+            if( !_absolute_repeat.is_eternal() )  _repeat = Duration::eternal;
           //if( !_repeat.is_never()   )  z::throw_xc( "SCHEDULER-442", "absolute_repeat", "repeat" );
         }
     }
@@ -1664,7 +1683,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
     {
         if( w == with_date )  dt = end;
                         else  dt.set_time( end );
-        _end = dt;
+        _end = Time(dt);
     }
 
     _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
@@ -1679,9 +1698,9 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
 
 void Period::check( With_or_without_date w ) const
 {
-    if( _begin < 0      )  goto FEHLER;
+    if( _begin < Time(0))  goto FEHLER;
     if( _begin > _end   )  goto FEHLER;
-    if( w == without_date )  if( _end > 24*60*60 )  goto FEHLER;
+    if( w == without_date )  if( _end > Time(24*60*60) )  goto FEHLER;
     return;
 
   FEHLER:
@@ -1714,8 +1733,8 @@ bool Period::is_coming( const Time& time_of_day, With_single_start single_start 
     if( single_start & wss_next_any_start  &&  ( _single_start         && time_of_day <= _begin ||
                                                   has_repeat_or_once() && time_of_day <  _end      ) )  result = true;
     else
-    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_never()  &&  !next_absolute_repeated( time_of_day, 0 ).is_never() )  result = true;
-                                                                                                                                                // ^ Falls zwei Perioden direkt aufeinander folgen
+    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_eternal()  &&  !next_absolute_repeated( time_of_day, 0 ).is_never() )  result = true;
+                                                                                                                                                  // ^ Falls zwei Perioden direkt aufeinander folgen
     else
         result = false;
 
@@ -1750,13 +1769,13 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
 {
     Time result = Time::never;
     
-    if( !_repeat.is_never() )
+    if( !_repeat.is_eternal() )
     {
         result = t < _begin? _begin 
                            : Time( t + _repeat );
     }
     else
-    if( !_absolute_repeat.is_never() )
+    if( !_absolute_repeat.is_eternal() )
     {
         // JS-474: result = next_absolute_repeated( t, 1 );
         result = next_absolute_repeated( t, 0 ); 
@@ -1772,7 +1791,7 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
 {
     //TODO next ausbauen, ist immer 0
     assert( next == 0  ||  next == 1 );
-    assert( !_absolute_repeat.is_never() );
+    assert( !_absolute_repeat.is_eternal() );
 
 
     Time t      = tim;
@@ -1780,8 +1799,8 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
 
     if( t < _begin )  t = _begin;
 
-    int n = (int)( ( t - _absolute_repeat_begin ) / _absolute_repeat );
-    result = _absolute_repeat_begin + ( n + 1 ) * _absolute_repeat;
+    int n = (int)( ( t - _absolute_repeat_begin ).as_double() / _absolute_repeat.as_double() );
+    result = Time(_absolute_repeat_begin.as_double() + (n + 1) * _absolute_repeat.as_double());
     if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
 
     assert( next == 0? result >= t : result > t );
@@ -1795,8 +1814,8 @@ void Period::print( ostream& s ) const
 {
     s << "Period(" << _begin << ".." << _end;
     if( _single_start )  s << " single_start";
-    if( !_repeat.is_never() )  s << " repeat=" << _repeat;
-    if( !_absolute_repeat.is_never() )  s << " absolute_repeat=" << _absolute_repeat;
+    if( !_repeat.is_eternal() )  s << " repeat=" << _repeat;
+    if( !_absolute_repeat.is_eternal() )  s << " absolute_repeat=" << _absolute_repeat;
     if( _let_run )  s << " let_run";
     s << ")";
 }
@@ -1810,18 +1829,18 @@ xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document ) co
     if( _single_start )
     {
         result =  dom_document.createElement( "at" );
-        result.setAttribute( "at", _begin.xml_value( Time::without_ms ) );
+        result.setAttribute( "at", _begin.xml_value( time::without_ms ) );
     }
     else
     {
         result =  dom_document.createElement( "period" );
-        result.setAttribute( "begin", _begin.xml_value( Time::without_ms ) );
-        result.setAttribute( "end"  , _end  .xml_value( Time::without_ms ) );
+        result.setAttribute( "begin", _begin.xml_value( time::without_ms ) );
+        result.setAttribute( "end"  , _end  .xml_value( time::without_ms ) );
         if( _let_run )  result.setAttribute( "let_run", "yes" );
 
-        if( _repeat          != Time::never )  result.setAttribute( "repeat"         , _repeat.as_time_t() );
-        if( _absolute_repeat != Time::never )  result.setAttribute( "absolute_repeat", _absolute_repeat.as_time_t() );
-        if( _when_holiday                   )  result.setAttribute( "when_holiday"   , string_from_when_holiday( _when_holiday ) );
+        if( !_repeat.is_eternal()          )  result.setAttribute( "repeat"         , _repeat.seconds() );
+        if( !_absolute_repeat.is_eternal() )  result.setAttribute( "absolute_repeat", _absolute_repeat.seconds() );
+        if( _when_holiday                  )  result.setAttribute( "when_holiday"   , string_from_when_holiday( _when_holiday ) );
     }
 
     result.setAttribute_optional( "schedule", _schedule_path );
@@ -1838,8 +1857,8 @@ string Period::to_xml() const
     result << "<period";
     result << " begin=\"" << _begin.as_string() << "\"";
     result << " end=\""   << _end  .as_string() << "\"";
-    if( !_repeat         .is_never() )  result << " repeat=\""          << _repeat         .as_string() << "\"";
-    if( !_absolute_repeat.is_never() )  result << " absolute_repeat=\"" << _absolute_repeat.as_string() << "\"";
+    if( !_repeat         .is_eternal() )  result << " repeat=\""          << _repeat         .as_string() << "\"";
+    if( !_absolute_repeat.is_eternal() )  result << " absolute_repeat=\"" << _absolute_repeat.as_string() << "\"";
     result << "/>";
 
     return result;
@@ -1976,7 +1995,7 @@ Period Weekday_set::next_period_of_same_day( const Time& tim, With_single_start 
         if( const Day* day = _days[ weekday % 7 ] )
         {
             Period period = day->next_period( time_of_day, single_start );
-            if( !period.empty() )  result = day_nr*(24*60*60) + period;
+            if( !period.empty() )  result = Time(day_nr*(24*60*60)) + period;
         }
     }
 
@@ -2075,7 +2094,7 @@ Period Monthday_set::next_period_of_same_day( const Time& tim, With_single_start
 
         if( !period.empty() )
         {
-            result = day_nr*(24*60*60) + period;
+            result = Time(day_nr*(24*60*60)) + period;
         }
     }
 
@@ -2104,12 +2123,12 @@ Period Ultimo_set::next_period_of_same_day( const Time& tim, With_single_start s
     {
         Time     time_of_day = tim.time_of_day();
         int      day_nr      = tim.day_nr();
-        Sos_date date        = Sos_optional_date_time( (time_t)tim );
+        Sos_date date        = Sos_optional_date_time(tim.as_time_t());
 
         if( const Day* day = _days[ last_day_of_month( date ) - date.day() ] )
         {
             Period period = day->next_period( time_of_day, single_start );
-            if( !period.empty() )  result = day_nr*(24*60*60) + period;
+            if( !period.empty() )  result = Time(day_nr*(24*60*60)) + period;
         }
     }
 
@@ -2217,7 +2236,7 @@ Period Date_set::next_period_of_same_day( const Time& tim, With_single_start sin
             if( date._day_nr == day_nr )
             {
                 const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : Time(0), single_start );
-                if( !period.empty() )  result = date._day_nr*(24*60*60) + period;
+                if( !period.empty() )  result = Time(date._day_nr*(24*60*60)) + period;
             }
 
             break;
@@ -2258,11 +2277,11 @@ Period At_set::next_period_of_same_day( const Time& tim, With_single_start singl
                 if( time.day_nr() == tim.day_nr() )
                 {
                     result._begin           = time;
-                    result._end             = time + Time::epsilon;     // JS-802, damit ein Auftrag nicht wegen _period.end() == at in eine Schleife geht
+                    result._end             = time + Duration::epsilon;     // JS-802, damit ein Auftrag nicht wegen _period.end() == at in eine Schleife geht
                     result._single_start    = true;
                     result._let_run         = true;
-                    result._repeat          = Time::never;
-                    result._absolute_repeat = Time::never;
+                    result._repeat          = Duration::eternal;
+                    result._absolute_repeat = Duration::eternal;
                 }
 
                 break;

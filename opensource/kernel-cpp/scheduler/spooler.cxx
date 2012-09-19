@@ -60,10 +60,10 @@ const string                    new_suffix                          = "~new";   
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 
-const int                       before_suspend_wait_time            = 5;                // Diese Zeit vor Suspend auf Ereignis warten (eigentlich so kurz wie möglich)
-const int                       inhibit_suspend_wait_time           = 10*60;            // Nur Suspend, wenn Wartezeit länger ist
-const int                       show_message_after_seconds          = 15*60;            // Nach dieser Wartezeit eine Meldung ausgeben
-const int                       show_message_after_seconds_debug    = 60;               // Nach dieser Wartezeit eine Meldung ausgeben
+const Duration                  before_suspend_wait_time            = Duration(5);      // Diese Zeit vor Suspend auf Ereignis warten (eigentlich so kurz wie möglich)
+const Duration                  inhibit_suspend_wait_time           = Duration(10*60);  // Nur Suspend, wenn Wartezeit länger ist
+const Duration                  show_message_after_seconds          = Duration(15*60);  // Nach dieser Wartezeit eine Meldung ausgeben
+const Duration                  show_message_after_seconds_debug    = Duration(60);     // Nach dieser Wartezeit eine Meldung ausgeben
 
 const int                       nothing_done_max                    = 10;  //2+1;        // Ein überflüssiges Signal wird toleriert wegen Race condition, und dann gibt es manch voreiliges Signal (vor allem zu Beginn einer Operation)
                                                                                         // +1 für Job::start_when_directory_changed() unter Windows
@@ -86,8 +86,8 @@ const int                       tcp_restart_close_delay             = 3;        
 
 const int                       const_order_id_length_max           = 250;              // Die Datenbankspalte _muss_ so groß sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
 
-const double                    delete_temporary_files_delay        = 2;                                
-const double                    delete_temporary_files_retry        = 0.1;                              
+const Duration                  delete_temporary_files_delay        = Duration(2);                                
+const Duration                  delete_temporary_files_retry        = Duration(0.1);                              
 
 const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;
@@ -701,7 +701,7 @@ Spooler::Spooler(jobject java_main_context)
     _next_process_id(1),
     _configuration_directories(confdir__max+1),
     _configuration_directories_as_option_set(confdir__max+1),
-    _max_micro_step_time(Time(10))
+    _max_micro_step_time(Duration(10))
 {
     _log->init( this );              // Nochmal nach load_argv()
     _log->set_title( "Main log" );
@@ -771,7 +771,6 @@ void Spooler::check_licence()
 void Spooler::close()
 {
     spooler_ptr = NULL;
-    if( _daylight_saving_time_transition_detector )  _daylight_saving_time_transition_detector->set_async_manager( NULL );
 
     set_ctrl_c_handler( false );
 
@@ -872,7 +871,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "time"                 , Sos_optional_date_time::now().as_string() );   // Veraltet (<answer> hat time).
     state_element.setAttribute( "id"                   , id() );
     state_element.setAttribute( "spooler_id"           , id() );
-    state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( (time_t)start_time() ).as_string() );
+    state_element.setAttribute( "spooler_running_since", start_time().as_string(time::without_ms));
     state_element.setAttribute( "state"                , state_name() );
     state_element.setAttribute( "log_file"             , _base_log.filename() );
     state_element.setAttribute( "version"              , version_string );
@@ -918,10 +917,10 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "loop"                 , _loop_counter );
     state_element.setAttribute( "waits"                , _wait_counter );
 
-    if( _last_wait_until )
+    if( _last_wait_until.not_zero() )
     state_element.setAttribute( "wait_until", _last_wait_until.as_string() );
 
-    if( _last_resume_at  &&  _last_resume_at != Time::never )
+    if( _last_resume_at.not_zero()  &&  !_last_resume_at.is_never() )
     state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
 
 //#   ifdef Z_UNIX
@@ -1477,8 +1476,8 @@ void Spooler::read_ini_file()
     _mail_defaults.set( "subject"  ,            read_profile_string( _factory_ini, "spooler", "log_mail_subject" ) );
 
     _subprocess_own_process_group_default = read_profile_bool( _factory_ini, "spooler", "subprocess.own_process_group", _subprocess_own_process_group_default );
-    _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
-    _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
+    _log_collect_within = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 ));
+    _log_collect_max    = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 ));
   //_zschimmer_mode     = read_profile_bool  ( _factory_ini, "spooler", "zschimmer", _zschimmer_mode );
 }
 
@@ -1581,10 +1580,6 @@ void Spooler::read_command_line_arguments()
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
             else
             if( opt.flag      ( "test"                   ) )  set_log_category( "self_test" ), set_log_category( "self_test.exception" ),  self_test();
-            else
-            if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
-            else
-            if( opt.with_value( "test-summertime"        ) )  time::test_summertime( opt.value() );
             else
             if( opt.flag      ( "suppress-watchdog-thread" ) )  _cluster_configuration._suppress_watchdog_thread = opt.set();
           //else
@@ -2033,7 +2028,7 @@ string Spooler::configuration_for_single_job_script()
 void Spooler::start()
 {
     static_log_categories.save_to( &_original_log_categories );
-    _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", (int)_max_micro_step_time.as_time_t());
+    _max_micro_step_time = Duration(_variables->get_int64("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.seconds()));
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -2045,10 +2040,6 @@ void Spooler::start()
     _log->info( message_string( "SCHEDULER-900", _version, _configuration_file_path, getpid() ) );
     _spooler_start_time = Time::now();
 
-
-    sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
-    _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
-    _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
     _web_services->switch_subsystem_state( subsys_loaded );
@@ -2300,7 +2291,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
                 if( tasks.length() > 0 )  tasks << ", ";
                 tasks << task->obj_name() << " " << task->state_name();
                 Time next_time = task->next_time();
-                if( next_time < Time::never )  tasks << " until " << next_time;
+                if( !next_time.is_never() )  tasks << " until " << next_time;
             }
         }
         if( tasks.length() == 0 )  tasks << "no tasks";
@@ -2311,7 +2302,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
             if( jobs.length() > 0 )  jobs << ", ";
             jobs << job->obj_name() << " " << job->state_name();
             Time next_time = job->next_time();
-            if( next_time < Time::never )  jobs << " until " << next_time; 
+            if( !next_time.is_never() )  jobs << " until " << next_time; 
             if( !job->is_in_period( Time::now() ) )  jobs << " (not in period)";
             if( job->_waiting_for_process )  jobs << " (waiting for process)";
         }
@@ -2509,7 +2500,7 @@ void Spooler::run()
 
         if( _task_subsystem  &&  _task_subsystem->is_ready_for_termination() )  break;
 
-        if( something_done )  wait_until.set_null();   // Nicht warten, wir drehen noch eine Runde
+        if( something_done )  wait_until = Time(0);   // Nicht warten, wir drehen noch eine Runde
 
         //----------------------------------------------------------------------------NICHTS GETAN?
 
@@ -2524,7 +2515,7 @@ void Spooler::run()
             if( ++nothing_done_count > nothing_done_max )
             {
                 nichts_getan( ++nichts_getan_zaehler, catched_event_string );
-                if( wait_until == 0 )  wait_until = Time::now() + 1;
+                if( wait_until.is_zero() )  wait_until = Time::now() + Duration(1);
             }
 
             if( nothing_done_count > 1 )
@@ -2539,7 +2530,7 @@ void Spooler::run()
         {
             // NÄCHSTE (JETZT NOCH WARTENDE) TASK ERMITTELN
 
-            if( wait_until > 0 )
+            if( !wait_until.is_zero() )
             {
                 FOR_EACH( Task_list, _task_subsystem->_task_list, t )
                 {
@@ -2552,7 +2543,7 @@ void Spooler::run()
                     {
                         wait_until = task_next_time; 
                         wait_until_object = task;
-                        if( wait_until == 0 )  break;
+                        if( wait_until.is_zero() )  break;
                     }
                 }
             }
@@ -2560,7 +2551,7 @@ void Spooler::run()
 
             // NÄCHSTEN JOB ERMITTELN, ALSO DEN NÄCHSTEN TASK-START ODER PERIODEN-ENDE
 
-            if( wait_until > 0 )
+            if( !wait_until.is_zero() )
             {
                 FOR_EACH_JOB( job )
                 {
@@ -2573,7 +2564,7 @@ void Spooler::run()
                     {
                         wait_until = next_job_time;
                         wait_until_object = job;
-                        if( wait_until == 0 )  break;
+                        if( wait_until.is_zero() )  break;
                     }
                 }
             }
@@ -2605,7 +2596,7 @@ void Spooler::run()
                 // PROCESS-HANDLES EINSAMMELN
     
 #               ifndef Z_WINDOWS
-                    if( wait_until > 0 )
+                    if( !wait_until.is_zero() )
 #               endif 
                 FOR_EACH_FILE_BASED( Process_class, process_class )
                 {
@@ -2626,13 +2617,13 @@ void Spooler::run()
                             {
                                 wait_until = next_time;
                                 wait_until_object = *p;
-                                if( wait_until == 0 )  break;
+                                if( wait_until.is_zero() )  break;
                             }
 
 #                       endif
                     }
  
-                    if( wait_until == 0 )  break;
+                    if( wait_until.is_zero() )  break;
                 }
             }
 
@@ -2669,7 +2660,7 @@ void Spooler::run()
 
             if( nothing_done_count > 0  ||  !wait_handles.signaled() )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {
-                if( wait_until == 0 )
+                if( wait_until.is_zero() )
                 {
                     wait_handles.wait_until( Time(), wait_until_object, Time(), NULL );   // Signale checken
                 }
@@ -2679,7 +2670,7 @@ void Spooler::run()
 
                     wait( &wait_handles, wait_until, wait_until_object, resume_at, resume_at_object );
 
-                    if( nothing_done_count == nothing_done_max  &&  Time::now() - now_before_wait >= 0.010 )  nothing_done_count = 0, nichts_getan_zaehler = 0;
+                    if( nothing_done_count == nothing_done_max  &&  Time::now() - now_before_wait >= Duration(0.010) )  nothing_done_count = 0, nichts_getan_zaehler = 0;
                 }
             }
 
@@ -2750,7 +2741,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
 
     // Termination_async_operation etc.
 
-    if( wait_until > 0 )
+    if( !wait_until.is_zero() )
     {
         if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
         {
@@ -2830,7 +2821,7 @@ bool Spooler::run_continue( const Time& now )
         if( _task_subsystem )  something_done |= _task_subsystem->process( now );    
     }
 
-    if( something_done )  _last_wait_until.set_null(), _last_resume_at.set_null();
+    if( something_done )  _last_wait_until = Time(0), _last_resume_at = Time(0);
 
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
