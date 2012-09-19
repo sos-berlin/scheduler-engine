@@ -17,33 +17,29 @@ final class WaitForConditionTest extends FunSuite {
 
   test("realTimeIterator (time critical test)") {
     realTimeIterator(Seq(now().getMillis)) // Aufruf zum Warmwerden. Laden der Klasse kann eine Weile dauern
-    meterElapsedTime {realTimeIterator(Seq(now().getMillis + 10000))} should be < (50L) // Bereitstellung soll nicht warten
+    meterElapsedTime { realTimeIterator(Seq(now().getMillis + 10000)) } should be < (50L) // Bereitstellung soll nicht warten
     val t0 = now().getMillis
     val (t1, t2, t3) = (t0 + 100, t0 + 300, t0 + 400)
     val i = realTimeIterator(Seq(t1, t2, t3))
-    meterElapsedTime {i.next()} should be(t1 - t0 plusOrMinus 50)
-    meterElapsedTime {i.next()} should be(t2 - t1 plusOrMinus 50)
-    meterElapsedTime {i.next()} should be(t3 - t2 plusOrMinus 50)
+    meterElapsedTime { i.next() } should be (t1 - t0 plusOrMinus 90)
+    meterElapsedTime { i.next() } should be (t2 - t1 plusOrMinus 90)
+    meterElapsedTime { i.next() } should be (t3 - t2 plusOrMinus 90)
   }
 
-  test("waitForCondition(TimeoutWithSteps) 0 steps (time critical test)") {
-    val elapsed = meterElapsedTime {
-      waitForCondition(TimeoutWithSteps(millis(2000), millis(1000)))(true)
-    }
+  test("waitForCondition(TimeoutWithSteps) 0 steps (time-critical test)") {
+    val elapsed = meterElapsedTime { waitForCondition(TimeoutWithSteps(millis(2000), millis(1000)))(true) }
     elapsed.toInt should be < (50)
   }
 
-  test("waitForCondition(TimeoutWithSteps) all steps (time critical test)") {
-    val elapsed = meterElapsedTime {
-      waitForCondition(TimeoutWithSteps(millis(100), millis(1)))(false)
-    }
+  test("waitForCondition(TimeoutWithSteps) all steps (time-critical test)") {
+    val elapsed = meterElapsedTime { waitForCondition(TimeoutWithSteps(millis(100), millis(1)))(false) }
     elapsed.toInt should (be >= 100 and be <= 200)
   }
 
-  test("waitForCondition(TimeoutWithSteps) some steps (time critical test)") {
+  test("waitForCondition(TimeoutWithSteps) some steps (time-critical test)") {
     var cnt = 0
-    val elapsed = meterElapsedTime {waitForCondition(TimeoutWithSteps(millis(100), millis(10))) {cnt += 1; cnt > 3}}
-    elapsed.toInt should (be >= 30 and be < 90)
+    val elapsed = meterElapsedTime { waitForCondition(TimeoutWithSteps(millis(1000), millis(10))) { cnt += 1; cnt > 10 } }  // 100ms
+    elapsed.toInt should (be >= 100 and be < 200)
   }
 }
 
@@ -51,6 +47,6 @@ private object WaitForConditionTest {
   def meterElapsedTime(f: => Unit) = {
     val start = currentTimeMillis()
     f
-    (currentTimeMillis() - start)
+    currentTimeMillis() - start
   }
 }
