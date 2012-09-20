@@ -4007,10 +4007,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             }
         }
 
+        java_options = subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options;
+        java_classpath = subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath;
+        
         if( send_cmd != "" )  is_service = false;
 
         // scheduler.log
-
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
         if( !log_filename.empty()  &&  renew_spooler == "" )  
         {
@@ -4020,13 +4022,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             log_start( log_filename );
             if (!msg.empty()) Z_LOG2("scheduler",msg);
         }
-
         Z_LOG2( "scheduler", "JobScheduler engine " << scheduler::version_string << "\n" );
-
-        #if defined Z_USE_JAVAXML
-            start_java(subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options,
-                subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath);
-        #endif
 
         /**
         * \change 2.0.224 - JS-XXX: Verwendung der Option 'use-xml-schema' für dynamisches XSD
@@ -4047,11 +4043,17 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
         if( is_scheduler_client )
         {
+            #if defined Z_USE_JAVAXML
+                start_java(java_options, java_classpath);
+            #endif
             ret = scheduler::scheduler_client_main( argc, argv );
         }
         else
         if( is_object_server )
         {
+            #if defined Z_USE_JAVAXML
+                start_java(java_options, java_classpath);
+            #endif
             ret = scheduler::object_server( argc, argv );   // Ruft _exit()
         }
         else
@@ -4107,6 +4109,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 else
                 if( call_scheduler || need_call_scheduler )
                 {
+                    #if defined Z_USE_JAVAXML
+                        start_java(java_options, java_classpath);
+                    #endif
+
                     _beginthread( scheduler::delete_new_spooler, 50000, NULL );
 
                     if( is_service )
@@ -4130,6 +4136,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                         Z_LOG2( "scheduler", "Scheduler wird Daemon. Pid wechselt\n");
                         scheduler::be_daemon();
                     }
+
+                    #if defined Z_USE_JAVAXML
+                        start_java(java_options, java_classpath);
+                    #endif
 
                     ret = scheduler::spooler_main( argc, argv, command_line, java_main_context );
                 }
