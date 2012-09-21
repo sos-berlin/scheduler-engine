@@ -1,3 +1,4 @@
+package com.sos.scheduler.engine.jobapi.scripting
 cnt = 0
 
 public boolean spooler_init() {

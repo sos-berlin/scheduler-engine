@@ -1,14 +1,13 @@
-package com.sos.scheduler.engine.kernel.scripting;
+package com.sos.scheduler.engine.jobapi.scripting;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.util.Lazy;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javax.script.*;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Throwables.propagate;
@@ -54,7 +53,12 @@ public class ScriptInstance {
     }
 
     private static RuntimeException throwUnknownLanguage(String language) {
-        String availableLanguages = Joiner.on(", ").join(new ScriptEngineManager().getEngineFactories());
+        String availableLanguages = Joiner.on(", ").join(Iterables.transform(new ScriptEngineManager().getEngineFactories(),
+                new Function<ScriptEngineFactory, String>() {
+                    public String apply(ScriptEngineFactory o) {
+                        return o.getLanguageName();
+                    }
+                }));
         throw new SchedulerException("Script language '"+ language +"' is unknown. Available languages are "+availableLanguages);
     }
 

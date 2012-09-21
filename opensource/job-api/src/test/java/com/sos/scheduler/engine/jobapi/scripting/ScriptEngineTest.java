@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.scripting;
+package com.sos.scheduler.engine.jobapi.scripting;
 
 import org.junit.Test;
 

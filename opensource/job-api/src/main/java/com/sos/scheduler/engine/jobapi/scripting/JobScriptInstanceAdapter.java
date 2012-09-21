@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.scripting;
+package com.sos.scheduler.engine.jobapi.scripting;
 
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.kernel.util.Lazy;

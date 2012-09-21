@@ -53,7 +53,7 @@
 # assign the appender for the scripting-api
 # please notice: if appender scheduler is used the log-entries of the class
 # will be placed in the task-log of the scheduler job
-log4j.logger.com.sos.scheduler.engine.kernel.scripting=debug, scheduler
+log4j.logger.com.sos.scheduler.engine.jobapi.scripting=debug, scheduler
 log4j.appender.scheduler=com.sos.JSHelper.Logging.BufferedJobSchedulerLog4JAppender
 log4j.appender.scheduler.layout=org.apache.log4j.PatternLayout
 log4j.appender.scheduler.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n

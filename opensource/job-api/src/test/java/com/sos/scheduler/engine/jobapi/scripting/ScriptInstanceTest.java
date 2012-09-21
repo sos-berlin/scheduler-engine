@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.scripting;
+package com.sos.scheduler.engine.jobapi.scripting;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
@@ -19,18 +19,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public final class ScriptInstanceTest {
-    private static final String javaScriptResourcePath = "com/sos/scheduler/engine/kernel/scripting/test.js";
-    private static final String groovyResourcePath = "com/sos/scheduler/engine/kernel/scripting/test.groovy";
+    private static final String javaScriptResourcePath = "com/sos/scheduler/engine/jobapi/scripting/test.js";
+    private static final String groovyResourcePath = "com/sos/scheduler/engine/jobapi/scripting/test.groovy";
     private static final ImmutableMap<String, Object> emptyBindings = ImmutableMap.of();
 
     private final JavaScriptLogger scriptLogger = new JavaScriptLogger();
 
-    @Test public void testInvalidLanguage() {
+    @Test public void testUnknownLanguage() {
         try {
-            newExecutor(emptyBindings, "unknownLaguage", "a = 0");
+            newExecutor(emptyBindings, "unknownLanguage", "a = 0");
             fail("Exception for unknown language expected");
         } catch (RuntimeException e) {
-            assertThat(e.getMessage(), containsString("javascript"));   // Fehlermeldung listet bekannte Sprachen auf
+            assertThat(e.getMessage(), containsString("ECMAScript"));   // Fehlermeldung listet bekannte Sprachen auf
         }
     }
 
