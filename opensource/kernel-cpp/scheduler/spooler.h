@@ -369,15 +369,6 @@ struct Spooler : Object,
         sc__max
     };
 
-    /*
-    enum Need_db
-    {
-        need_db_no = false,
-        need_db_yes,
-        need_db_strict
-    };
-    */
-
                                 Spooler                     (jobject java_main_context = NULL);
                                ~Spooler                     ();
 
