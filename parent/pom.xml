@@ -465,8 +465,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.12.3</version>
                 <configuration>
-                    <printSummary>false</printSummary>
-                    <argLine>-Xms5m -Xmx10m</argLine>  <!-- Sparsame Heap-Zuteilung für die vielen Prozesse (Tests + Scheduler-Task-Prozesse) -->
+                    <argLine>-Xms10m -Xmx20m</argLine>  <!-- Sparsame Heap-Zuteilung für die vielen Prozesse (Tests + Scheduler-Task-Prozesse) -->
                     <systemProperties>
                         <property>
                             <name>java.io.tmpdir</name>
@@ -675,8 +674,6 @@
                 <!-- updatePolicy>always</updatePolicy -->
             </snapshots>
         </repository>
-        <!--
-        -->
         <repository>
             <id>sos</id>
             <name>SOS Internal Repository</name>
@@ -698,21 +695,12 @@
           <id>snapshots</id>
           <url>http://archiva.sos:8080/archiva/repository/snapshots/</url>
         </snapshotRepository>
-        <!--
-        -->
         <!--site>
             <id>sos-http</id>
             <url>scp://www.yourcompany.com/www/docs/project/</url>
         </site-->
     </distributionManagement>
 
-<!--
-    <issueManagement>
-      <system>jira</system>
-      <url>http://www.sos-berlin.com/jira</url>
-    </issueManagement>
--->
-    
     <reporting>
         <plugins>
             <plugin>
