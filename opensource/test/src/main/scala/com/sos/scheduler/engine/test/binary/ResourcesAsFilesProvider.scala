@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.test.binary
 
-import com.sos.scheduler.engine.kernel.util.Files.copyURLToFile
+import com.sos.scheduler.engine.common.system.Files.copyURLToFile
 import com.sos.scheduler.engine.kernel.util.Util.ignore
-import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
+import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import java.io.File
 import org.joda.time.Duration
 import org.joda.time.Duration.{millis, standardSeconds}

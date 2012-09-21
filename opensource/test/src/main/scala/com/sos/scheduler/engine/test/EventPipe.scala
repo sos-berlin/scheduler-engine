@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.test
 
+import com.sos.scheduler.engine.common.time.Time
+import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.eventbus._
+import com.sos.scheduler.engine.main.event.TerminatedEvent
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
-import com.sos.scheduler.engine.main.event.TerminatedEvent
-import com.sos.scheduler.engine.eventbus._
-import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.data.event.Event
 
 class EventPipe(defaultTimeout: Time) extends EventHandlerAnnotated {
   private final val queue = new LinkedBlockingQueue[Event]

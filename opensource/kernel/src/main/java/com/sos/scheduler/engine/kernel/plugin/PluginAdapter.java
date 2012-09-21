@@ -14,8 +14,8 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.xmlQuoted;
 import static com.sos.scheduler.engine.kernel.util.Util.optional;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.xmlQuoted;
 
 /** Die Engine spricht das Plugin über diesen Adapter an. */
 class PluginAdapter {

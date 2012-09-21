@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.scheduler;
 
-import com.sos.scheduler.engine.kernel.util.XmlUtils;
+import com.sos.scheduler.engine.common.xml.XmlUtils;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
 

@@ -4,7 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 
 import static com.google.common.base.Charsets.ISO_8859_1;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.toXml;
 
 public final class SchedulerXmlUtils {
     /** Bytes, die in einem String zwischen C++ und Java ausgetauscht werden. */

@@ -12,7 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
 import static org.junit.Assert.assertTrue;
 
 /**

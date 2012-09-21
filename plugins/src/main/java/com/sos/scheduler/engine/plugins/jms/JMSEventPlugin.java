@@ -16,7 +16,7 @@ import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
 
 /**
  * JS Plugin to connect the JMS

@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
-import com.sos.scheduler.engine.kernel.command.GenericResultXmlizer;
 import com.sos.scheduler.engine.data.database.TaskHistoryEntity;
+import com.sos.scheduler.engine.kernel.command.GenericResultXmlizer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.newDocument;
+
+import static com.sos.scheduler.engine.common.xml.XmlUtils.newDocument;
 
 class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHistoryEntriesResult> {
     static final TaskHistoryEntriesResultXmlizer singleton = new TaskHistoryEntriesResultXmlizer();

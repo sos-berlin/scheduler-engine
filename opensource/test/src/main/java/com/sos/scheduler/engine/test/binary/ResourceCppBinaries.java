@@ -1,17 +1,17 @@
 package com.sos.scheduler.engine.test.binary;
 
-import static com.sos.scheduler.engine.kernel.util.Files.makeExecutable;
-import static com.sos.scheduler.engine.test.binary.ResourcesAsFilesProvider.provideResourcesAsFiles;
-
-import java.io.File;
-
-import org.springframework.core.io.Resource;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
-import static scala.collection.JavaConversions.*;
+import org.springframework.core.io.Resource;
+
+import java.io.File;
+
+import static com.sos.scheduler.engine.common.system.Files.makeExecutable;
+import static com.sos.scheduler.engine.test.binary.ResourcesAsFilesProvider.provideResourcesAsFiles;
+import static scala.collection.JavaConversions.iterableAsScalaIterable;
+import static scala.collection.JavaConversions.mapAsJavaMap;
 
 /** Ablage der Scheduler-Binärdateien, die nötigenfalls aus der kernelcpp.jar entladen werden. */
 public final class ResourceCppBinaries implements CppBinaries {

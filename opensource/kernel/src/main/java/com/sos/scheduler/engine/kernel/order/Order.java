@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.order;
 
+import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -16,7 +17,6 @@ import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 
 import javax.annotation.Nullable;

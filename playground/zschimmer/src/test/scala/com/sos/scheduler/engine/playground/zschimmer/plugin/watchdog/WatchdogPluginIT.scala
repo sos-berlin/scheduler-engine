@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
+import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent
 import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
-import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.test.SchedulerTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers

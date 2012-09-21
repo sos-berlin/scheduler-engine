@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.test;
 
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.util.Time;
 import org.junit.After;
 import org.junit.Before;
 

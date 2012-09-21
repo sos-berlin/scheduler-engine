@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js868.withglobals;
 
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
+import com.sos.scheduler.engine.common.system.OperatingSystem;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.tests.jira.js868.JS868Base;
 import org.junit.Test;

@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test;
 
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.settings.Settings;
-import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.main.SchedulerController;
 import com.sos.scheduler.engine.main.SchedulerThreadController;
 

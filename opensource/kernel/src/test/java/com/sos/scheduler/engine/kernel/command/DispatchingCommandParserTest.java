@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.kernel.command;
 
-import java.util.Arrays;
 import org.junit.Test;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
+
+import java.util.Arrays;
+
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  *

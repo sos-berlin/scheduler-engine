@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.playground.zschimmer
 
-import com.sos.scheduler.engine.kernel.util.Time
+import com.sos.scheduler.engine.common.time.Time
 
 object Threads {
   def untilInterruptedEvery(t: Time)(f: => Unit) {

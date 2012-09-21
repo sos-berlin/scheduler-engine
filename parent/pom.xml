@@ -184,6 +184,11 @@
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
+                <artifactId>common</artifactId>
+                <version>1.5.2264-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>data</artifactId>
                 <version>1.5.2264-SNAPSHOT</version>
             </dependency>

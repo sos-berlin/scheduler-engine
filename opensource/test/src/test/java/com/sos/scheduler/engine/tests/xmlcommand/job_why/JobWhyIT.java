@@ -1,25 +1,21 @@
 package com.sos.scheduler.engine.tests.xmlcommand.job_why;
 
-import static com.google.common.collect.Sets.difference;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.booleanXPath;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.elementXPath;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.toXml;
-import static com.sos.scheduler.engine.tests.xmlcommand.job_why.Configuration.jobNames;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
-import java.util.Map;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.sos.scheduler.engine.test.TestSchedulerController;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.sos.scheduler.engine.test.TestSchedulerController;
+import java.util.Map;
+
+import static com.google.common.collect.Sets.difference;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.*;
+import static com.sos.scheduler.engine.tests.xmlcommand.job_why.Configuration.jobNames;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 public final class JobWhyIT {
     private static final Logger logger = Logger.getLogger(JobWhyIT.class);

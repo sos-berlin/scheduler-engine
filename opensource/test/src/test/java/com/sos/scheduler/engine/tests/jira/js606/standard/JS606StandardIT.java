@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js606.standard;
 
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
+import com.sos.scheduler.engine.common.system.OperatingSystem;
 import com.sos.scheduler.engine.tests.jira.js606.JS606Base;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;

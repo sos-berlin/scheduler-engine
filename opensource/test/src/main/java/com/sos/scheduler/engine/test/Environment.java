@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.sos.scheduler.engine.common.system.OperatingSystem;
 import com.sos.scheduler.engine.data.folder.TypedPath;
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 import java.io.File;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.sos.scheduler.engine.kernel.util.Files.makeDirectories;
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
+import static com.sos.scheduler.engine.common.system.Files.makeDirectories;
+import static com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem;
 
 /**
  * Build the environment for the scheduler binary

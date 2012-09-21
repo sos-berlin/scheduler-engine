@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test.binary;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.kernel.util.Lazy;
+import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.main.CppBinaries;
 import org.apache.log4j.Logger;
 import org.springframework.core.io.Resource;
@@ -12,8 +12,8 @@ import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.sos.scheduler.engine.kernel.util.Files.makeTemporaryDirectory;
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory;
+import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
 import static com.sos.scheduler.engine.kernel.util.Util.ignore;
 
 public final class TestCppBinaries {

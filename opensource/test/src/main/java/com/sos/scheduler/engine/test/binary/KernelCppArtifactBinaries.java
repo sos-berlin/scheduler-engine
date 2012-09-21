@@ -7,8 +7,8 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.cpuArchitecture;
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.common.system.OperatingSystem.cpuArchitecture;
+import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {

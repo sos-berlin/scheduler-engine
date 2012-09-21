@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.playground.zschimmer
 
-import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.kernel.util.sync.{Rendezvous => JavaRendezvous}
+import com.sos.scheduler.engine.common.sync.{Rendezvous => JavaRendezvous}
+import com.sos.scheduler.engine.common.time.Time
 import java.lang.Math.max
 import scala.annotation.tailrec
 

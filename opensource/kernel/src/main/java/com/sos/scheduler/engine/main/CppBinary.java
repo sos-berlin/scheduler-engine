@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.main;
 
-import static com.sos.scheduler.engine.kernel.util.OperatingSystem.operatingSystem;
+import static com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem;
 
 public enum CppBinary {
     moduleFilename(operatingSystem.makeModuleFilename("jobscheduler-engine")),  // jobscheduler-engine.dll oder libjobscheduler-engine.so

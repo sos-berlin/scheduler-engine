@@ -1,8 +1,8 @@
 package sos.spooler.jobs;
 
 import com.google.common.collect.ImmutableMap;
+import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.jobapi.scripting.JobScriptInstanceAdapter;
-import com.sos.scheduler.engine.kernel.util.Lazy;
 import sos.spooler.HasBean;
 import sos.spooler.Job_impl;
 

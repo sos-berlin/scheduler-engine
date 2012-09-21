@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.plugins.jetty.webxml
 
+import com.google.common.base.Charsets.UTF_8
+import com.google.common.io.{Resources, Files}
+import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.google.common.base.Charsets.UTF_8
-import com.google.common.io.{Resources, Files}
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

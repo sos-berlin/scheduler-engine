@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.main.event;
 
-import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.common.time.Time;
 
 public class TimeoutEvent extends ExceptionEvent {
     public TimeoutEvent(Time timeout) {

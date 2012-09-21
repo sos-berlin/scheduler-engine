@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.kernel.command;
 
 import org.w3c.dom.Element;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
+
+import static com.sos.scheduler.engine.common.xml.XmlUtils.newDocument;
 
 class AResultXmlizer extends GenericResultXmlizer<AResult> {
     static final AResultXmlizer singleton = new AResultXmlizer();

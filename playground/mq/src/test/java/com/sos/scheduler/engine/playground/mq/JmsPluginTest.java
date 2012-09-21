@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import com.sos.scheduler.engine.kernel.util.sync.Gate;
+import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.apache.log4j.Logger;
 import org.junit.Test;

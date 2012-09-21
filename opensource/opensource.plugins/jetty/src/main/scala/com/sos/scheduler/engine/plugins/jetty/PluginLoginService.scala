@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.util.xml.NamedChildElements
+import PluginLoginService._
+import com.google.common.base.Splitter
+import com.sos.scheduler.engine.common.xml.NamedChildElements
+import java.util.regex.Pattern
 import org.eclipse.jetty.security.MappedLoginService
 import org.eclipse.jetty.util.security.{Credential, Password}
 import org.w3c.dom.Element
-
-import PluginLoginService._
-import com.google.common.base.Splitter
-import java.util.regex.Pattern
+import scala.collection.JavaConversions._
 
 class PluginLoginService(logins: Iterable[Login]) extends MappedLoginService {
   logins foreach { o => putUser(o.name, o.credential, o.roles) }

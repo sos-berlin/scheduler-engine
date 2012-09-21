@@ -1,14 +1,15 @@
 package com.sos.scheduler.engine.tests.scheduler.config.schema
 
-import com.sos.scheduler.engine.kernel.util.Time
+import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.test.TestSchedulerController
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 class SchemaIT extends FunSuite {
+
   import SchemaIT._
 
   test("XML Schema validation detects invalid scheduler.xml") {

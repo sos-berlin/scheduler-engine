@@ -1,21 +1,22 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.sos.scheduler.engine.common.xml.XmlUtils._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.kernel.util.XmlUtils._
 import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet
 import com.sos.scheduler.engine.plugins.jetty.log.{MainLogServlet, OrderLogServlet, JobLogServlet}
 import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.BodyWriters
+import com.sos.scheduler.engine.plugins.jetty.rest.{ObjectMapperJacksonJsonProvider, RestResources}
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.io.File
-import org.w3c.dom.Element
-import rest.{ObjectMapperJacksonJsonProvider, RestResources}
+import org.codehaus.jackson.Version
 import org.codehaus.jackson.map.ObjectMapper
 import org.codehaus.jackson.map.module.SimpleModule
-import org.codehaus.jackson.Version
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import org.w3c.dom.Element
 
 class Config(pluginElement: Element, conf: SchedulerConfiguration) {
+
   import Config._
 
   val portOption: Option[Int] = xmlAttributeIntOption(pluginElement, "port")

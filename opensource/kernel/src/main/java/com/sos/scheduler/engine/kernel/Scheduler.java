@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.kernel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.*;
+import com.sos.scheduler.engine.common.Lazy;
+import com.sos.scheduler.engine.common.xml.NamedChildElements;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
@@ -31,10 +33,8 @@ import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
-import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
-import com.sos.scheduler.engine.util.xml.NamedChildElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -48,10 +48,9 @@ import java.util.UUID;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.version;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.childElements;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.util.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
+import static com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.childElements;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
 
 @ForCpp
 public final class Scheduler implements Sister,

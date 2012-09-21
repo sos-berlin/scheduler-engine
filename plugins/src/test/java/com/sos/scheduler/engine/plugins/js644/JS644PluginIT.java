@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.plugins.js644;
 
+import com.sos.scheduler.engine.common.sync.Gate;
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
-import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernel.util.sync.Gate;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
 

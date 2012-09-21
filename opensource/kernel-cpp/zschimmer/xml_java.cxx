@@ -8,8 +8,8 @@
 #include <stdarg.h>
 
 #include "../javaproxy/java__lang__String.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__util__XmlUtils.h"
-typedef ::javaproxy::com::sos::scheduler::engine::kernel::util::XmlUtils XmlUtilsJ;
+#include "../javaproxy/com__sos__scheduler__engine__common__xml__XmlUtils.h"
+typedef ::javaproxy::com::sos::scheduler::engine::common::xml::XmlUtils XmlUtilsJ;
 
 using namespace javaproxy::org::w3c::dom;
 using namespace std;

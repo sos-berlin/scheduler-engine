@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test;
 
-import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.common.time.Time;
 
 class SchedulerRunningAfterTimeoutException extends RuntimeException {
     SchedulerRunningAfterTimeoutException(Time timeout) {

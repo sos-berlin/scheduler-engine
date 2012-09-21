@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.google.inject.Guice._
 import com.google.inject.Injector
 import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
+import com.sos.scheduler.engine.common.xml.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.kernel.scheduler.{SchedulerConfiguration, HasGuiceModule}
-import com.sos.scheduler.engine.kernel.util.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.plugins.jetty.Config._
 import java.net.{URL, ServerSocket, BindException}
 import javax.servlet.Filter
@@ -18,9 +19,9 @@ import org.eclipse.jetty.webapp.{WebXmlConfiguration, WebAppContext}
 import org.eclipse.jetty.xml.XmlConfiguration
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Element
-import com.google.inject.Guice._
 
 class ServerBuilder(pluginElement: Element, hasGuiceModule: HasGuiceModule, schedulerConfiguration: SchedulerConfiguration) {
+
   import ServerBuilder._
 
   private val config = new Config(pluginElement, schedulerConfiguration)

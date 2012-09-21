@@ -1,8 +1,12 @@
 package com.sos.scheduler.engine.kernel.util.sync;
 
-import com.sos.scheduler.engine.kernel.util.Time;
-import org.junit.*;
-import static org.junit.Assert.*;
+import com.sos.scheduler.engine.common.sync.Rendezvous;
+import com.sos.scheduler.engine.common.time.Time;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 public final class RendezvousTest {
     private final Rendezvous<Arg,Result> rendezvous = new Rendezvous<Arg,Result>();

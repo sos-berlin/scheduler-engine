@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
-import com.sos.scheduler.engine.kernel.util.Time
+import com.sos.scheduler.engine.common.time.Time
 import scala.xml.Elem
-
 
 case class Configuration(checkEvery: Time, timeout: Time, warnEvery: Time)
 

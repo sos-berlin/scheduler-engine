@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.jobapi.scripting;
 
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.kernel.util.Lazy;
+import com.sos.scheduler.engine.common.Lazy;
 
 public class JobScriptInstanceAdapter {
     private final ScriptInstance scriptInstance;

@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.stress.parallelorder;
 
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;

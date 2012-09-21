@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.main.event;
 
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.EventPredicate;
-import com.sos.scheduler.engine.kernel.util.Time;
 
 
 public class EventExpectation {

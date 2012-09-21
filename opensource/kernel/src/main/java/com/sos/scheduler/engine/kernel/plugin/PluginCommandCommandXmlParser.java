@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.kernel.command.SingleCommandXmlParser;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.w3c.dom.Element;
 
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.elementsXPath;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.elementsXPath;
 
 class PluginCommandCommandXmlParser extends SingleCommandXmlParser {
     private final PluginSubsystem subsystem;

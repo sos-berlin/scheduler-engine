@@ -1,10 +1,13 @@
 package com.sos.scheduler.engine.kernel.command;
 
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import org.w3c.dom.Element;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.w3c.dom.Element;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
+
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.toXml;
 
 
 public class CommandDispatcher {

@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
+import com.sos.scheduler.engine.common.system.OperatingSystem;
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.util.OperatingSystem;
-import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;

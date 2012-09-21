@@ -4,8 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.kernel.util.Lazy;
+import com.sos.scheduler.engine.common.Lazy;
 
 import javax.script.*;
 import java.util.regex.Pattern;
@@ -59,7 +58,7 @@ public class ScriptInstance {
                         return o.getLanguageName();
                     }
                 }));
-        throw new SchedulerException("Script language '"+ language +"' is unknown. Available languages are "+availableLanguages);
+        throw new RuntimeException("Script language '"+ language +"' is unknown. Available languages are "+availableLanguages);
     }
 
     public final void loadScript() {

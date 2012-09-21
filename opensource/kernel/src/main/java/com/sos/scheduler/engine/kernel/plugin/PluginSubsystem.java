@@ -3,21 +3,22 @@ package com.sos.scheduler.engine.kernel.plugin;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
+import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.engine.kernel.util.Lazy;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
+import org.w3c.dom.Element;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.w3c.dom.Element;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.elementXPathOrNull;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.elementsXPath;
 
 public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
     private final CommandHandler[] commandHandlers = {

@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.tests.jira.js644.stop;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.data.folder.FileBasedType;
 import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.util.sync.Gate;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.apache.log4j.Logger;

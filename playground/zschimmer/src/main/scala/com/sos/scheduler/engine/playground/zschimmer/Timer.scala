@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.playground.zschimmer
 
-import com.sos.scheduler.engine.kernel.util.Time
+import com.sos.scheduler.engine.common.time.Time
 import java.util.Date
-
 
 class Timer(timeout: Time) {
     val startTime = now

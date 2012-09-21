@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.main;
 
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.settings.Settings;
-import com.sos.scheduler.engine.kernel.util.Time;
 
 /** Steuerung für den C++-Scheduler in einem eigenen nebenläufigen Thread. */
 public interface SchedulerController {

@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.inject.Guice.createInjector;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.startsWith;
 
 public final class PluginAdapterTest {
     private static final Logger logger = LoggerFactory.getLogger(PluginAdapterTest.class);

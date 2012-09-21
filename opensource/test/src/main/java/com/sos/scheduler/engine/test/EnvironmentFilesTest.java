@@ -1,21 +1,18 @@
 package com.sos.scheduler.engine.test;
 
-import static com.google.common.io.Files.createTempDir;
-import static com.sos.scheduler.engine.kernel.util.Classes.springPattern;
-import static com.sos.scheduler.engine.kernel.util.Files.removeFile;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.hamcrest.Matchers.arrayWithSize;
-import static org.hamcrest.Matchers.emptyArray;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import com.sos.scheduler.engine.kernel.util.ResourcePath;
+import java.io.File;
+import java.io.IOException;
+
+import static com.google.common.io.Files.createTempDir;
+import static com.sos.scheduler.engine.common.system.Files.removeFile;
+import static com.sos.scheduler.engine.kernel.util.Classes.springPattern;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public final class EnvironmentFilesTest {
     private static final String[] expectedNames = {"scheduler.xml", "factory.ini", "sos.ini"};

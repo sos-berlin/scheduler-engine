@@ -17,10 +17,8 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>kernel</artifactId>  <!-- Vorübergehend, bis package util nach common extrahiert ist -->
-            <version>${project.version}</version>
+            <artifactId>common</artifactId>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit-dep</artifactId>

@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js674;
 
-import org.apache.log4j.Logger;
-
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.kernel.util.Time;
+import org.apache.log4j.Logger;
 
 
 //FIXME Test wiederbeleben!

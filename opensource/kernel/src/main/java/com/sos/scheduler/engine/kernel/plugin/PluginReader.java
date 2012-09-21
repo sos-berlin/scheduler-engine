@@ -6,10 +6,10 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
 
+import static com.sos.scheduler.engine.common.xml.XmlUtils.booleanXmlAttribute;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.elementXPathOrNull;
 import static com.sos.scheduler.engine.kernel.plugin.ActivationMode.activateOnStart;
 import static com.sos.scheduler.engine.kernel.plugin.ActivationMode.dontActivate;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.booleanXmlAttribute;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.elementXPathOrNull;
 
 class PluginReader {
     private final PrefixLog log;

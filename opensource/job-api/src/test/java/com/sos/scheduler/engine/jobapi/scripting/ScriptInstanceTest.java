@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.jobapi.scripting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
-import com.sos.scheduler.engine.kernel.util.Lazy;
+import com.sos.scheduler.engine.common.Lazy;
 import org.junit.Test;
 
 import java.io.IOException;

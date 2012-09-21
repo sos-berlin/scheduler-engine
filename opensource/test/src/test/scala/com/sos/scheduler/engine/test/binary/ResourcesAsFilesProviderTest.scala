@@ -2,8 +2,8 @@ package com.sos.scheduler.engine
 package test.binary
 
 import com.google.common.io.Files.createTempDir
+import com.sos.scheduler.engine.common.system.Files.removeDirectoryRecursivly
 import com.sos.scheduler.engine.kernel.util.Classes.springPattern
-import com.sos.scheduler.engine.kernel.util.Files.removeDirectoryRecursivly
 import com.sos.scheduler.engine.test.SchedulerTest
 import com.sos.scheduler.engine.test.binary.ResourcesAsFilesProvider.provideResourcesAsFiles
 import org.junit.runner.RunWith

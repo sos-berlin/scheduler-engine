@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.test;
 import java.io.File;
 import java.net.URL;
 
-import static com.sos.scheduler.engine.kernel.util.Files.copyURLToFile;
+import static com.sos.scheduler.engine.common.system.Files.copyURLToFile;
 
 public class StandardResourceToFileTransformer implements ResourceToFileTransformer {
     public static final StandardResourceToFileTransformer singleton = new StandardResourceToFileTransformer();

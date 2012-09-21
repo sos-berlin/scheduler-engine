@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js644.v3;
 
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.common.sync.Gate;
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
-import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernel.util.sync.Gate;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
