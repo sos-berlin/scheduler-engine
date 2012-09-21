@@ -41,11 +41,9 @@ public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
         Element pluginsElement = elementXPathOrNull(root, "config/plugins");
         if (pluginsElement != null) {
             for (Element e: elementsXPath(pluginsElement, "plugin")) {
-                PluginAdapter a = pluginReader.tryReadPlugin(e);
-                if (a != null) {
-                    plugins.put(a.getPluginClassName(), a);
-                    log.info(a + " added");
-                }
+                PluginAdapter a = pluginReader.readPlugin(e);
+                plugins.put(a.getPluginClassName(), a);
+                log.info(a + " added");
             }
         }
     }
@@ -61,7 +59,7 @@ public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
     }
 
     void activatePluginAdapter(PluginAdapter p) {
-        p.tryActivate(lazyInjector.get());
+        p.activate(lazyInjector.get());
         eventBus.registerAnnotated(p.getPlugin());
     }
 

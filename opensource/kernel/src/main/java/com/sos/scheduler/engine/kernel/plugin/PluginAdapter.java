@@ -38,11 +38,15 @@ class PluginAdapter {
     }
 
     final void activate(Injector injector) {
-        checkState(!isActive, this +" is already active");
-        if (plugin == null)
-            plugin = newPlugin(injector);
-        plugin.activate();
-        isActive = true;
+        try {
+            checkState(!isActive, this +" is already active");
+            if (plugin == null)
+                plugin = newPlugin(injector);
+            plugin.activate();
+            isActive = true;
+        } catch (Exception x) {
+            throw new RuntimeException(this +" cannot be activated: "+x, x);
+        }
     }
 
     final String getXmlState() {

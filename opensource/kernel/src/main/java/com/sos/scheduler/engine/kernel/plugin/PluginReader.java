@@ -18,22 +18,13 @@ class PluginReader {
         this.log = log;
     }
 
-    @Nullable final PluginAdapter tryReadPlugin(Element e) {
+    final PluginAdapter readPlugin(Element e) {
         String className = e.getAttribute("java_class");
         if (className.isEmpty()) throw new SchedulerException("Missing attribute java_class in <plugin>");
-        return tryReadPlugin(new PluginConfiguration(
+        return pluginAdapter(new PluginConfiguration(
                 className,
-                booleanXmlAttribute(e, "dont_activate", false)? dontActivate : activateOnStart ,
+                booleanXmlAttribute(e, "dont_activate", false)? dontActivate : activateOnStart,
                 elementXPathOrNull(e, "plugin.config")));
-    }
-
-    @Nullable private PluginAdapter tryReadPlugin(PluginConfiguration c) {
-        try {
-            return pluginAdapter(c);
-        } catch (Exception x) {
-            PluginSubsystem.logError(log, "Plugin "+ c.getClassName(), x);
-            return null;
-        }
     }
 
     private PluginAdapter pluginAdapter(PluginConfiguration c)  {
