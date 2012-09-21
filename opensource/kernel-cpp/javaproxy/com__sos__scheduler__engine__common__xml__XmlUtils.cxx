@@ -2,7 +2,7 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__util__XmlUtils.h"
+#include "com__sos__scheduler__engine__common__xml__XmlUtils.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 #include "org__w3c__dom__Document.h"
@@ -10,7 +10,7 @@
 #include "org__w3c__dom__Node.h"
 #include "org__w3c__dom__NodeList.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace util { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace common { namespace xml { 
 
 struct XmlUtils__class : ::zschimmer::javabridge::Class
 {
@@ -30,7 +30,7 @@ struct XmlUtils__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< XmlUtils__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< XmlUtils__class > XmlUtils__class::class_factory ("com.sos.scheduler.engine.kernel.util.XmlUtils");
+const ::zschimmer::javabridge::class_factory< XmlUtils__class > XmlUtils__class::class_factory ("com.sos.scheduler.engine.common.xml.XmlUtils");
 
 XmlUtils__class::XmlUtils__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
