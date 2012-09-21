@@ -2425,7 +2425,6 @@ void Spooler::try_run()
         set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
 
         try {
-            _log->error( "" );
             _log->error( x.what() );
             _log->error( message_string( "SCHEDULER-264" ) );  // "SCHEDULER TERMINATES AFTER SERIOUS ERROR"
         }
