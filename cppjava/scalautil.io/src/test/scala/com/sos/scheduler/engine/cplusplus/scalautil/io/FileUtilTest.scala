@@ -1,15 +1,17 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
+import com.google.common.io.Files
 import java.io._
 import java.nio.charset.Charset
 import org.apache.commons.io.FileUtils
-import org.junit._
 import org.junit.Assert._
-import FileUtil._
+import org.junit._
 
+final class FileUtilTest {
 
-class FileUtilTest {
-  @Test def testDeleteFile {
+  import FileUtil._
+
+  @Test def testDeleteFile() {
     val file = File.createTempFile("test", "tmp")
     deleteFile(file)
     assert(!file.exists)
@@ -47,7 +49,7 @@ class FileUtilTest {
       val subDirs = List("a", "a/b", "a/c", ".test")
       val paths = List("a/1", "a/b/ab1", "a/b/ignore", "a/b/ab2", "a/c/ac1", ".test/ignore")
       subDirs foreach { d => new File(dir, d).mkdir() }
-      paths foreach { p => FileUtils.touch(new File(dir, p)) }
+      paths foreach { p => Files.touch(new File(dir, p)) }
       assertEquals(paths.toSet, listFilePathsRecursive(dir).toSet)
       assertEquals(paths filter { !_.endsWith("ignore") } toSet, listFilePathsRecursiveFiltered(dir){_.getName != "ignore"} toSet)
     }

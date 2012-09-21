@@ -67,19 +67,19 @@
                             <arguments>
                                 <argument>-c++-output-directory=${basedir}</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
-                                <argument>com.sos.scheduler.engine.common</argument>
+                                <argument>com.sos.scheduler.engine.common.xml.XmlUtils</argument>
+                                <argument>com.sos.scheduler.engine.data.event.AbstractEvent</argument>
+                                <argument>java.io.File</argument>
                                 <argument>java.net.URI</argument>
                                 <argument>java.net.URL</argument>
-                                <argument>java.io.File</argument>
                                 <argument>java.util.ArrayList</argument>
                                 <argument>java.util.HashMap</argument>
-                                <argument>com.sos.scheduler.engine.data.event.AbstractEvent</argument>
                                 <argument>org.w3c.dom.Attr</argument>
-                                <argument>org.w3c.dom.Comment</argument>
-                                <argument>org.w3c.dom.Element</argument>
                                 <argument>org.w3c.dom.CDATASection</argument>
                                 <argument>org.w3c.dom.CharacterData</argument>
+                                <argument>org.w3c.dom.Comment</argument>
                                 <argument>org.w3c.dom.Document</argument>
+                                <argument>org.w3c.dom.Element</argument>
                                 <argument>org.w3c.dom.Node</argument>
                                 <argument>org.w3c.dom.NodeList</argument>
                                 <argument>org.w3c.dom.Text</argument>

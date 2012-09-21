@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
+import com.google.common.io.Files
+import com.sos.scheduler.engine.cplusplus.scalautil.io.Util._
 import java.io._
 import java.nio.charset.Charset
-import org.apache.commons.io.FileUtils._
-import Util._
 
 object FileUtil {
   def readingFile[A](file: File, encoding: Charset)(writeFunction: Reader => A): A = {
@@ -22,7 +22,7 @@ object FileUtil {
     var written = false
     try {
         writingFile(tempFile, encoding)(writeFunction)
-        if (contentEquals(tempFile, file))
+        if (file.exists() && Files.equal(tempFile, file))
             tempFile.delete()
         else {
             moveOrCopyFile(tempFile, file)  //Manchmal funktioniert tempFile.moveTo(file) nicht, deshalb copyFile.
@@ -41,7 +41,7 @@ object FileUtil {
   }
 
   def moveOrCopyFile(from: File, to: File) = from.renameTo(to) || {
-    copyFile(from, to)
+    Files.copy(from, to)
     from.delete()
   }
 

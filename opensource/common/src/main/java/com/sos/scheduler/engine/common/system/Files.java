@@ -1,23 +1,25 @@
 package com.sos.scheduler.engine.common.system;
 
 import com.google.common.base.Function;
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import com.google.common.io.ByteStreams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.*;
 import java.net.URL;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.io.Closeables.closeQuietly;
 import static com.google.common.io.Files.createParentDirs;
 import static com.google.common.io.Files.createTempDir;
 import static com.sos.scheduler.engine.common.system.Files.DirectoryHandling.dontRemoveDirectory;
 import static com.sos.scheduler.engine.common.system.Files.DirectoryHandling.removeDirectory;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public final class Files {
     public enum DirectoryHandling {removeDirectory, dontRemoveDirectory}
-    private static final Logger logger = Logger.getLogger(Files.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(Files.class);
 
     private Files() {}
 
@@ -97,7 +99,7 @@ public final class Files {
             try {
                 removeFile(f);
             } catch (Exception x) {
-                logger.error(x);
+                logger.error("File '{}' cannot be removed: {}", f, x);
             }
             return null;
         }
@@ -126,7 +128,7 @@ public final class Files {
             InputStream in = source.openStream();
             OutputStream out = new FileOutputStream(destination);
             try {
-                IOUtils.copy(in, out);
+                ByteStreams.copy(in, out);
                 out.close();
             } finally {
                 closeQuietly(out);

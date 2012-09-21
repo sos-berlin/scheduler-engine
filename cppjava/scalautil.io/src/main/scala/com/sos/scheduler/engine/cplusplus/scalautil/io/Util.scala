@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
-import org.apache.log4j.{Level, Logger}
+import org.slf4j.LoggerFactory
 
 // Kann gelegentlich verallgemeinert werden zu com.sos.scalautil.io
 
 object Util {
-    private val log = Logger.getLogger(getClass)
+    private val logger = LoggerFactory.getLogger(getClass)
 
     private type HasClose = { def close() }
     
@@ -27,14 +27,14 @@ object Util {
 
     def closeQuietly[A <: HasClose](o: A) {
         try o.close()
-        catch { case x: Exception => log.error(x.toString, x) }
+        catch { case x: Exception => logger.error(x.toString, x) }
     }
 
     def suppressLogging[A](c: Class[_])(f: => A) {
-        val lg = Logger.getLogger(Util.getClass)
-        val originalLevel = lg.getLevel
-        lg.setLevel(Level.OFF)
-        try f
-        finally lg.setLevel(originalLevel)
+//        val lg = Logger.getLogger(Util.getClass)
+//        val originalLevel = lg.getLevel
+//        lg.setLevel(Level.OFF)
+//        try f
+//        finally lg.setLevel(originalLevel)
     }
 }

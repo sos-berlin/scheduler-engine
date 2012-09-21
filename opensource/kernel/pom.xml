@@ -15,30 +15,6 @@
     <description>Java-Klassen für den Scheduler-Kern</description>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>${project.build.sourceDirectory}</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-             </resource>
-        </resources>
-        <testResources>
-            <testResource>
-                <!-- Standard wiederholen -->
-                <directory>${basedir}/src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
-                <directory>${project.build.testSourceDirectory}</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </testResource>
-        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.scala-tools</groupId>
@@ -56,7 +32,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>data</artifactId>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>cppjava.runtime</artifactId>
@@ -65,82 +40,42 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>web</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit-dep</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-        
-        <dependency>
-            <!-- Für MemoryLeakReport -->
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>

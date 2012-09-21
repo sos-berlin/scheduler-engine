@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.cplusplus.generator.util
 
+import com.google.common.io.Files
 import java.io.File
 import java.nio.charset.Charset
-import org.apache.commons.io.FileUtils
 import scala.xml._
 
 object XmlUtil {
@@ -22,7 +22,7 @@ object XmlUtil {
     correctNewlinesInAttributesForScala(e.toString)
 
   def saveAndCorrectScalaBug(file: File, document: Elem, encoding: Charset) {
-    FileUtils.writeStringToFile(file, xmlOf(document, encoding), encoding.name)
+    Files.write(xmlOf(document, encoding), file, encoding)
   }
 
   /** Scala 2.8.0 schreibt Zeilenwechsel in Attributen uncodiert. Das ist falsch, Zeilenwechsel muss als &#10; geschrieben werden.

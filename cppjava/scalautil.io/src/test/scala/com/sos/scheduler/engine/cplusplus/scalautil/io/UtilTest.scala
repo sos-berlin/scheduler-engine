@@ -14,7 +14,7 @@ final class UtilTest {
         suppressLogging(Util.getClass){ closeQuietly(null) }
     }
 
-    private class A {
+  private class A {
         var closed = false
         def close() {
             closed = true
