@@ -3464,8 +3464,8 @@ string Spooler::backup_logfile( const File_path path )
    string msg = "";
    if( path.file_exists() )
    {
-         size_t i = path.find_last_of(".");
-         File_path scheduler_old = (i > 0) ? path.substr(0,i) + "-old." + path.extension() : path + "-old";
+         size_t i = path.name().find_last_of(".");
+         File_path scheduler_old = (i > string::npos) ? path.substr(0,i) + "-old." + path.extension() : path + "-old";
          try
          {
             scheduler_old.try_unlink();
