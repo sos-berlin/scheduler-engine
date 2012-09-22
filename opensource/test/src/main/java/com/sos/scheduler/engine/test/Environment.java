@@ -19,7 +19,7 @@ import static com.sos.scheduler.engine.common.system.OperatingSystem.operatingSy
  * Build the environment for the scheduler binary
  */
 public final class Environment {
-    private static final String javaOptions = "-Xmx20m";    // Größe des Java-Heaps vor allem für Task-Prozesse stark beschränken, damit viele Tasks laufen können.
+    private static final String javaOptions = "-Xmx20000m";    // Größe des Java-Heaps vor allem für Task-Prozesse stark beschränken, damit viele Tasks laufen können.
     private static final String configSubdir = "config";
   //private static final String logSubdir = "log";
 
@@ -29,6 +29,7 @@ public final class Environment {
     @Nullable private final ResourceToFileTransformer fileTransformer;
     private final File configDirectory;
     private final File logDirectory;
+    private final File schedulerLog;
 
     Environment(ResourcePath resourcePath, File directory,
             @Nullable ImmutableMap<String,String> nameMap,
@@ -39,6 +40,7 @@ public final class Environment {
         this.fileTransformer = fileTransformer;
         configDirectory = new File(directory, configSubdir);
         logDirectory = directory;  // Wurzel (Arbeitsverzeichnis), damit Jenkins die Protokolle der Tests zeigt
+        schedulerLog = new File(logDirectory, "scheduler.log");
     }
 
     void prepare() {
@@ -60,11 +62,18 @@ public final class Environment {
         result.add("-sos.ini=" + sosIniFile());
         result.add("-ini=" + iniFile());
         result.add("-log-dir=" + logDirectory.getPath());
-        result.add("-log="+logCategories+">" + new File(logDirectory, "scheduler.log").getPath());
+        result.add("-log="+logCategories+">" + schedulerLog.getPath());
         if (OperatingSystem.isUnix)
             result.add("-env=" + libraryPathEnv(cppBinaries.directory()));
         result.add(configDirectory.getPath());
         return result.build();
+    }
+
+    /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
+    private static String libraryPathEnv(File directory) {
+        String varName = operatingSystem.getDynamicLibraryEnvironmentVariableName();
+        String previous = nullToEmpty(System.getenv(varName));
+        return varName + "=" + OperatingSystem.concatFileAndPathChain(directory, previous);
     }
 
     public File sosIniFile() {
@@ -77,11 +86,8 @@ public final class Environment {
         // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
     }
 
-    /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
-    private static String libraryPathEnv(File directory) {
-        String varName = operatingSystem.getDynamicLibraryEnvironmentVariableName();
-        String previous = nullToEmpty(System.getenv(varName));
-        return varName + "=" + OperatingSystem.concatFileAndPathChain(directory, previous);
+    public File schedulerLog() {
+        return schedulerLog;
     }
 
     public File fileFromPath(TypedPath p) {
