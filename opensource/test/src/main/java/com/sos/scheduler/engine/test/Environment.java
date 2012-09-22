@@ -19,7 +19,7 @@ import static com.sos.scheduler.engine.common.system.OperatingSystem.operatingSy
  * Build the environment for the scheduler binary
  */
 public final class Environment {
-    private static final String javaOptions = "-Xmx20000m";    // Größe des Java-Heaps vor allem für Task-Prozesse stark beschränken, damit viele Tasks laufen können.
+    private static final String jobJavaOptions = "-Xms5m -Xmx10m";    // Größe des Java-Heaps vor allem für Task-Prozesse stark beschränken, damit viele Tasks laufen können.
     private static final String configSubdir = "config";
   //private static final String logSubdir = "log";
 
@@ -57,7 +57,7 @@ public final class Environment {
     ImmutableList<String> standardArgs(CppBinaries cppBinaries, String logCategories) {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
         result.add(cppBinaries.file(CppBinary.exeFilename).getPath());
-        result.add("-java-options=" +javaOptions);
+        result.add("-job-java-options=" +jobJavaOptions);
         result.add("-id=test");
         result.add("-sos.ini=" + sosIniFile());
         result.add("-ini=" + iniFile());
