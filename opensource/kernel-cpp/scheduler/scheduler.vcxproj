@@ -577,14 +577,6 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <None Include="html\jz\translation_de.js" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\3rd_party\libxml2\libxml2.vcxproj">
-      <Project>{56595346-8fe5-4dbc-8f4a-cc0e3a943f92}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\3rd_party\libxslt\libxslt\libxslt.vcxproj">
-      <Project>{5e3cb3d3-de63-4863-a562-1aac05d93ddb}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\3rd_party\regexp\regexp.vcxproj">
       <Project>{d2a07ab6-a18a-49b4-9b34-8da638eda3c4}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
