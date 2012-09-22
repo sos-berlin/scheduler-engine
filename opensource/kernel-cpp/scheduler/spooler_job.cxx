@@ -43,8 +43,6 @@ struct Job_subsystem_impl : Job_subsystem
 
     ptr<Job_folder>             new_job_folder              ( Folder* folder )                      { return Z_NEW( Job_folder( folder ) ); }
     int                         remove_temporary_jobs       ();
-  //Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized );
-  //Job*                        active_job                  ( const string& job_name );
     bool                        has_any_order               ();
     bool                        is_any_task_queued          ();
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
@@ -178,15 +176,8 @@ bool Job_subsystem_impl::subsystem_initialize()
 
 bool Job_subsystem_impl::subsystem_load()
 {
-    //Transaction ta ( db() );
-
     _subsystem_state = subsys_loaded;           // Schon jetzt für Job::load()
-
     file_based_subsystem<Job>::subsystem_load();
-    //FOR_EACH_JOB( job )  job->load( &ta );
-
-    //ta.commit( Z_FUNCTION );
-
     return true;
 }
 
@@ -334,14 +325,6 @@ int Job_subsystem_impl::count_jobs_waiting_for_process() const
 
     return result;
 }
-
-//-------------------------------------------------------Job_folder_interface::Job_folder_interface
-
-//Job_folder_interface::Job_folder_interface( Folder* folder )
-//:
-//    Typed_folder( folder, type_job_folder )
-//{
-//}
 
 //---------------------------------------------------------------------------Job_folder::Job_folder
 
@@ -532,7 +515,6 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
- //   _visible(visible_yes),
     _stop_on_error(true),
     _db_next_start_time( Time::never ),
     _enabled(true)      // JS-551
@@ -548,7 +530,6 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _com_job  = new Com_job( this );
 
     _schedule_use = Z_NEW( Job_schedule_use( this ) );
-  //_schedule_use->set_default_schedule( _spooler->job_subsystem()->default_schedule() );   // Falls <schedule> unbekannt ist
 
     _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;
@@ -785,13 +766,13 @@ bool Job::on_activate()
 }
 
 //-------------------------------------------------------------------------------------Job::on_replace_now
+
 //Job* Job::on_replace_now() {
 //    Job* job = static_cast<Job*>(My_file_based::on_replace_now());
 ////    _enabled ? signal( state_cmd_name(Job::sc_enable) ) : signal( state_cmd_name(Job::sc_disable) );
 //    _enabled ? _state_cmd = Job::sc_enable : _state_cmd = Job::sc_disable ;    
 //    return job;
 //}
-
 
 //-------------------------------------------------------------------------------------Job::set_dom
 
@@ -873,20 +854,9 @@ void Job::set_dom( const xml::Element_ptr& element )
         _warn_if_shorter_than_string = element.getAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );
         _warn_if_longer_than_string  = element.getAttribute( "warn_if_longer_than" , _warn_if_longer_than_string  );
         _enabled                     = element.bool_getAttribute( "enabled" , _enabled  );  // JS-551
-        //_enabled ? signal( state_cmd_name(Job::sc_enable) ) : signal( state_cmd_name(Job::sc_disable) );
         _enabled ? _state_cmd = Job::sc_enable : _state_cmd = Job::sc_disable;   // JS-551
 
         if( order )  set_order_controlled();
-
-
-        string text;
-
-        //text = element.getAttribute( "output_level" );
-        //if( !text.empty() )  _output_level = as_int( text );
-
-        //for( time::Holiday_set::iterator it = _spooler->_schedule_use->_holidays.begin(); it != _spooler->_schedule_use->_holidays.end(); it++ )
-        //    _schedule_use->_holidays.insert( *it );
-        
 
         DOM_FOR_EACH_ELEMENT( element, e )
         {
@@ -963,15 +933,6 @@ void Job::set_dom( const xml::Element_ptr& element )
             if( e.nodeName_is( "monitor" ) )
             {
                 _module->_monitors->set_dom( e );
-                //if( !_module->_monitor )  _module->_monitor = Z_NEW( Module( _spooler, _spooler->include_path(), _log ) );
-
-                //DOM_FOR_EACH_ELEMENT( e, ee )
-                //{
-                //    if( ee.nodeName_is( "script" ) )  
-                //    {
-                //        _module->_monitor->set_dom( ee );
-                //    }
-                //}
             }
             else
             if( e.nodeName_is( "commands" ) )
@@ -991,7 +952,6 @@ void Job::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "delay_order_after_setback" ) )
             {
-                //if( e.has_attribute( "max_order_setbacks" ) )  set_max_order_setbacks( e.int_getAttribte( "max_order_setbacks" ) );
                 if( e.bool_getAttribute( "is_maximum", false ) )
                 {
                     set_max_order_setbacks( e.int_getAttribute( "setback_count" ) );
@@ -1056,7 +1016,6 @@ Duration Job::average_step_duration( const Duration& deflt )
     {
         Record record;
         S select_sql;
-        // select_sql << "select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )"
         select_sql << "select round (sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` ),2 )" // JS-448
                       "  from " << db()->_job_history_tablename
                    << "  where `steps` > 0 "
@@ -1083,7 +1042,6 @@ void Job::set_order_controlled()
 {
     if( _temporary )  z::throw_xc( "SCHEDULER-155" );
     _is_order_controlled = true;
-    //if( !_order_queue )  _order_queue = new Order_queue( this, _log );
 }
 
 //----------------------------------------------------------------------------Job::set_idle_timeout
@@ -1291,7 +1249,6 @@ bool Job::can_be_removed_now()
         if( _state == s_not_initialized )  return true;
         if( _state == s_initialized     )  return true;
         if( _state == s_stopped         )  return true;
-      //if( _state == s_read_error      )  return true;  Läuft jetzt keine Task?
       //if( _state == s_error           )  return true;  Diesen Zustand sollte es nicht geben
         if( _state == s_pending         )  return true;
     }
@@ -1312,42 +1269,6 @@ zschimmer::Xc Job::remove_error()
 {
     return zschimmer::Xc( "SCHEDULER-258" );
 }
-
-//--------------------------------------------------------------------------Job::prepare_to_replace
-
-//void Job::prepare_to_replace()
-//{
-//    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
-//
-//    stop( true );
-//}
-
-//-------------------------------------------------------------------------Job::can_be_replaced_now
-
-//bool Job::can_be_replaced_now()
-//{
-//    return _running_tasks.size() == 0;
-//}
-
-//------------------------------------------------------------------------------Job::on_replace_now
-
-//Job* Job::on_replace_now()
-//{
-//    assert( can_be_replaced_now() );
-//
-//    //Nach File_based  _log->info( message_string( "SCHEDULER-988" ) );
-//
-//    replacement()->_task_queue = _task_queue;
-//    replacement()->_task_queue->move_to_new_job( replacement() );
-//    _task_queue = Z_NEW( Task_queue( this ) );
-//
-//    Job* replacement_job = job_folder()->replace_file_based( this );
-//    // this ist ungültig.
-//
-//    replacement_job->activate();
-//
-//    return replacement_job;
-//}
 
 //-----------------------------------------------------------------------------Job::profile_section
 
@@ -1414,7 +1335,6 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
     switch( _state )
     {
-      //case s_read_error:  z::throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
         case s_error:       z::throw_xc( "SCHEDULER-204", name(), _error.what() );
         case s_stopped:     if( force  &&  _spooler->state() != Spooler::s_stopping )  set_state( s_pending );  break;
         default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), Z_FUNCTION, state_name() );
@@ -1444,8 +1364,6 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 void Job::load_tasks_from_db( Read_transaction* ta )
 {
-    //_spooler->assert_has_exclusiveness( obj_name() + " " + Z_FUNCTION );
-
     Time now = Time::now();
 
     S select_sql;
@@ -1525,7 +1443,6 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
             if( !task->_is_in_database  &&  _spooler->db()->opened() )
             {
                 Transaction ta ( _spooler->db() );
-                //task->_history.enqueue();
 
                 Insert_stmt insert ( ta.database_descriptor() );
                 insert.set_table_name( _spooler->db()->_tasks_tablename );
@@ -1730,7 +1647,6 @@ ptr<Task> Job::get_task_from_queue( const Time& now )
 {
     ptr<Task> task;
 
-  //if( _state == s_read_error )  return NULL;
     if( _state == s_error      )  return NULL;
 
     if( _task_queue->empty() )     return NULL;
@@ -1829,27 +1745,6 @@ void Job::enqueue_task( Task* task )
     signal( "start job" );
 }
 
-//---------------------------------------------------------------------------------Job::read_script
-
-//bool Job::read_script( Module* module )
-//{
-//    {
-//        try
-//        {
-//            module->set_dom_source_only( include_path() );
-//        }
-//        catch( const exception& x ) 
-//        { 
-//            set_error(x);  
-//        //_close_engine = true;  
-//            set_state( s_read_error );  
-//            return false; 
-//        }
-//    }
-//
-//    return true;
-//}
-
 //-----------------------------------------------------------------------Job::stop_after_task_error
 
 void Job::stop_after_task_error( const string& error_message )
@@ -1879,20 +1774,7 @@ void Job::stop_simply( bool end_all_tasks )
     // _is_permanenty_stopped wird nicht gesetzt. Muss verbessert werden!
 
     set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
-
     if( end_all_tasks )  end_tasks( "" );
-    //{
-    //    Z_FOR_EACH( Task_list, _running_tasks, t )
-    //    {
-    //        Task* task = *t;
-
-    //        if( task->state() < Task::s_ending )
-    //        {
-    //            task->cmd_end();
-    //        }
-    //    }
-    //}
-
     clear_when_directory_changed();
     _start_min_tasks = false;
 }
@@ -1912,22 +1794,6 @@ void Job::end_tasks( const string& task_warning )
         }
     }
 }
-
-//--------------------------------------------------------------------------------------Job::unstop
-
-//void Job::unstop()
-//{
-//    if( _is_permanently_stopped )  set_state( s_pending );
-//}
-
-//--------------------------------------------------------------------------------------Job::reread
-
-//void Job::reread()
-//{
-//    _log->info( message_string( "SCHEDULER-920" ) );
-//    read_script( _module );
-//    if( _module->_monitor )  read_script( _module->_monitor );
-//}
 
 //---------------------------------------------------------------------------Job::execute_state_cmd
 
@@ -1988,7 +1854,6 @@ bool Job::execute_state_cmd()
                              || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
                         }
 
-                        //set_state( s_suspended );
                         something_done = true;
                     }
                     break;
@@ -2012,9 +1877,6 @@ bool Job::execute_state_cmd()
 
                 case sc_wake:
                 {
-                    //if( _state == s_suspended
-                    // || _state == s_running_delayed )  set_state( s_running ), something_done = true;
-
                     if( _state == s_pending
                      || _state == s_stopped )
                     {
@@ -2248,34 +2110,24 @@ void Job::database_record_store()
     {
         Time next_start_time = this->next_start_time();
 
-
         if( next_start_time         != _db_next_start_time  ||
             _is_permanently_stopped != _db_stopped            )
         {
-            //if( is_to_be_removed()  && 
-            //    next_start_time.is_never()  &&
-            //    !_is_permanently_stopped )
-            //{
-            //    database_record_remove();
-            //}
-            //else
+            for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
             {
-                for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
-                {
-                    sql::Update_stmt update ( &db()->_jobs_table );
+                sql::Update_stmt update ( &db()->_jobs_table );
                     
-                    update[ "spooler_id"        ] = _spooler->id_for_db();
-                    update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
-                    update[ "path"              ] = path().without_slash();
+                update[ "spooler_id"        ] = _spooler->id_for_db();
+                update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
+                update[ "path"              ] = path().without_slash();
 
-                    if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
-                    update[ "stopped" ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
+                if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
+                update[ "stopped" ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
 
-                    ta.store( update, Z_FUNCTION );
-                    ta.commit( Z_FUNCTION );
-                }
-                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
+                ta.store( update, Z_FUNCTION );
+                ta.commit( Z_FUNCTION );
             }
+            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
 
             _db_next_start_time = next_start_time;
             _db_stopped         = _is_permanently_stopped;
@@ -2402,7 +2254,6 @@ void Job::set_next_start_time( const Time& now, bool repeat )
     select_period( now );
     _next_single_start = Time::never;
 
-
     if( !now.is_never()  &&  _state >= s_pending  &&  _schedule_use->is_defined() )
     {
         string msg;
@@ -2449,7 +2300,6 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                         _repeat = Duration(0);
                     }
                     else
-                    //JS-436  if( now >= _period.begin()  &&  !_period.repeat().is_never() )
                     if( !_period.repeat().is_eternal() )
                     {
                         next_start_time = _period.next_repeated( now );
@@ -2475,12 +2325,6 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                         }
                     }
                 }
-                //else  
-                //if( !_period.absolute_repeat().is_never() )
-                //{
-                //    Time t = _period.next_repeated( now );
-                //    if( t < _period.end() )  next_start_time = t;
-                //}
             }
         }
         else
@@ -2517,8 +2361,6 @@ Time Job::next_start_time()
         result = min( _next_start_time, _next_single_start );
         if( !result.is_zero() &&  is_order_controlled() ) 
             result = min( result, max( _combined_job_nodes->next_time(), _period.begin() ) );
-
-        //if( _order_queue )  result = min( result, _order_queue->next_time() );
     }
 
     return result;
@@ -2613,14 +2455,6 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
        }
     }
 }
-
-//----------------------------------------------------------------------------Job::on_removing_lock
-
-//void Job::on_removing_lock( lock::Lock* lock )
-//{
-//    end_tasks( message_string( "SCHEDULER-885", lock->obj_name() ) );
-//    //set_state( s_incomplete );
-//}
 
 //----------------------------------------------------------------------------Job::connect_job_node
 
@@ -2725,13 +2559,6 @@ bool Job::on_requisite_to_be_removed( File_based* file_based )
     return true;
 }
 
-//--------------------------------------------------------------------------Job::on_include_changed
-
-//void Job::on_include_changed()
-//{
-//    int TODO;
-//}
-
 //-------------------------------------------------------------------------------Job::task_to_start
 
 ptr<Task> Job::task_to_start()
@@ -2780,7 +2607,6 @@ ptr<Task> Job::task_to_start()
             cause = cause_min_tasks;
         }
 
-        // js-610 if( !cause  &&  is_order_controlled() )
         if( is_order_controlled() && ( !cause || cause == cause_delay_after_error) )
         {
             has_order = request_order( now, obj_name() );
@@ -2931,10 +2757,6 @@ bool Job::do_something()
     something_done |= check_for_changed_directory( now );         // Hier prüfen, damit Signal zurückgesetzt wird
 
 
-    //if( _state == s_read_error )  
-    //{
-    //    //
-    //}
     if( _state == s_error )
     {
         //
@@ -3052,25 +2874,6 @@ bool Job::do_something()
 
     return something_done;
 }
-
-//--------------------------------------------------------------Job::fetch_orders_for_waiting_tasks
-
-//bool Job::fetch_orders_for_waiting_tasks( const string& now )
-//{
-//    bool result = false;
-//
-//    FOR_EACH( Task_list, _running_tasks, t )    // 2006-12-16  Ist das nicht doppelt geprüft? Siehe first_immediately_processable_order() und s_running_waiting_for_order in diesem Modul
-//    {
-//        Task* task = *t;
-//        if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() )    //|| (*t)->state() == Task::s_suspended  ) 
-//        { 
-//            //task->fetch_and_occupy_order( now, obj_name() );
-//            result += task->do_something();
-//        }
-//    }
-//
-//    return result;
-//}
 
 //----------------------------------------------------------------------------Job::on_task_finished
 
@@ -3201,10 +3004,6 @@ void Job::set_state( State new_state )
 
     if( _state == s_stopped )  check_for_replacing_or_removing();
 
-
-
-    //if( new_state == s_stopping  ||  new_state == s_stopped )  _is_permanently_stopped = true;
-    //else
     if( new_state == s_pending  ||  new_state == s_running )  _is_permanently_stopped = false;
 
     database_record_store();
@@ -3277,7 +3076,6 @@ void Job::set_state_cmd( State_cmd cmd )
 }
 
 //-----------------------------------------------------------------------------------Job::job_state
-// Anderer Thread
 
 string Job::job_state()
 {
@@ -3306,11 +3104,9 @@ string Job::state_name( State state )
         case s_loaded:          return "loaded";
         case s_stopping:        return "stopping";
         case s_stopped:         return "stopped";
-      //case s_read_error:      return "read_error";
         case s_error:           return "error";
         case s_pending:         return "pending";
         case s_running:         return "running";
-      //case s_suspended:       return "suspended";
         default:                return as_string( (int)state );
     }
 }
@@ -3489,7 +3285,6 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( show_what.is_set( show_tasks ) )
         {
             xml::Element_ptr tasks_element = document.createElement( "tasks" );
-            //tasks_element.setAttribute( "count", (int)_running_tasks.size() );
             int task_count = 0;        
             Z_FOR_EACH( Task_list, _running_tasks, t )
             {
@@ -3729,20 +3524,6 @@ void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_ca
     }
 }
 
-//------------------------------------------------------------------------Job::commands_dom_element
-/*
-xml::Element_ptr Job::commands_dom_element(  const xml::Document_ptr& document, const Show_what& show )
-{
-    xml::Element_ptr result;
-
-    if( _commands_document )
-    {
-        result = document.clone( _commands_document.documentElement().firstChild() );
-    }
-
-    return result;
-}
-*/
 //---------------------------------------------------------------------------------kill_queued_task
 
 void Job::kill_queued_task( int task_id )
@@ -3777,24 +3558,6 @@ void Job::kill_task( int id, bool immediately )
     }
 }
 
-//-------------------------------------------------------------------------------Job::signal_object
-// Anderer Thread
-
-//void Job::signal_object( const string& object_set_class_name, const Level& level )
-//{
-//    {
-//        if( _state == Job::s_pending
-//         && _object_set_descr
-//         && _object_set_descr->_class->_name == object_set_class_name 
-//         && _object_set_descr->_level_interval.is_in_interval( level ) )
-//        {
-//            //start_without_lock( NULL, object_set_class_name );
-//            //_event->signal( "Object_set " + object_set_class_name );
-//            //_thread->signal( obj_name() + ", Object_set " + object_set_class_name );
-//        }
-//    }
-//}
-
 //----------------------------------------------------------------------Job::create_module_instance
 
 ptr<Module_instance> Job::create_module_instance()
@@ -3802,7 +3565,6 @@ ptr<Module_instance> Job::create_module_instance()
     ptr<Module_instance>  result;
 
     {
-      //if( _state == s_read_error )  z::throw_xc( "SCHEDULER-190" );
         if( _state == s_error      )  z::throw_xc( "SCHEDULER-204", name(), _error.what() );
 
         result = _module->create_instance();

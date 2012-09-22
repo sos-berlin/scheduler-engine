@@ -62,9 +62,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         s_loaded,   
         s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped). Sollte durch _is_stopped ersetzt werden!
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
-      //s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden
         s_error,                // Ein Fehler ist aufgetreten (nicht vom Skript), der Job ist nicht mehr aufrufbar.
-      //s_incomplete,           // Eine Resource fehlt, Lock oder Process_class
         s_pending,              // Warten auf Start
         s_running,              // Mindestens eine Task läuft (die Tasks können aber ausgesetzt, also gerade nicht aktiv sein: s_suspended etc.)
         s__max
