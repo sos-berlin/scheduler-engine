@@ -40,6 +40,9 @@ void Settings::set(int number, const string& value) {
         case 3:
             _html_dir = value;
             break;
+        case 4:
+            _job_java_options = value;
+            break;
         default:
             z::throw_xc("UNKNOWN_SETTING", number);
     }

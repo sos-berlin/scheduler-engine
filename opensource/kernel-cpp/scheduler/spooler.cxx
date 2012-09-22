@@ -1606,6 +1606,10 @@ void Spooler::read_command_line_arguments()
             else
             if (opt.with_value("java-classpath")) { _java_classpath = opt.value(); }   // wird in sos::spooler_main vearbeitet
             else
+            if (opt.with_value("job-java-options")) { modifiable_settings()->_job_java_options = opt.value(); }
+            else
+            if (opt.with_value("job-java-classpath")) { modifiable_settings()->_job_java_options = opt.value(); }
+            else
                 throw_sos_option_error( opt );
         }
 
@@ -4006,8 +4010,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             }
         }
 
-        java_options = subst_env(read_profile_string(factory_ini, "java", "options")) +" "+ java_options;
-        java_classpath = subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath;
+        java_options += " "+ subst_env(read_profile_string(factory_ini, "java", "options"));
+        java_classpath = java_classpath + Z_PATH_SEPARATOR + subst_env(read_profile_string(factory_ini, "java", "class_path"));
         
         if( send_cmd != "" )  is_service = false;
 

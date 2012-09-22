@@ -431,7 +431,7 @@ void Process::start_local_process()
     if( !_spooler->_factory_ini.empty() )
     parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
 
-    parameters.push_back(object_server::Parameter("param", "-java-options="+ _java_options));
+    parameters.push_back(object_server::Parameter("param", "-java-options="+ _java_options +" "+spooler()->settings()->_job_java_options));
     parameters.push_back(object_server::Parameter("param", "-java-classpath="+ _java_classpath + Z_PATH_SEPARATOR + spooler()->settings()->_job_java_classpath));
     parameters.push_back( object_server::Parameter( "param", "-O" ) );
 
@@ -496,7 +496,8 @@ void Process::fill_connection( object_server::Connection* connection )
     stdin_xml_writer.begin_element( "task_process" );
     {
         stdin_xml_writer.set_attribute_optional( "include_path"          , _spooler->include_path() );
-        stdin_xml_writer.set_attribute_optional( "java_options"          , _spooler->java_subsystem()->java_vm()->options() );
+        stdin_xml_writer.set_attribute_optional( "java_options"          , _spooler->java_subsystem()->java_vm()->options() +" "+
+            _spooler->settings()->_job_java_options);
         stdin_xml_writer.set_attribute_optional( "java_class_path"       , spooler()->settings()->_job_java_classpath + Z_PATH_SEPARATOR +
             _spooler->java_subsystem()->java_vm()->class_path());
         stdin_xml_writer.set_attribute_optional( "javac"                 , _spooler->java_subsystem()->java_vm()->javac_filename() );
