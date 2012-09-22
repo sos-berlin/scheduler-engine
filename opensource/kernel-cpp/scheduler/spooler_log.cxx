@@ -853,7 +853,7 @@ void Prefix_log::close_file()
 {
     if( _file != -1 )
     {
-        Z_DEBUG_ONLY(Z_LOG2("JS-611", Z_FUNCTION << " " << _filename << "\n"));
+        Z_DEBUG_ONLY(Z_LOG2("JS-611", Z_FUNCTION << " " << _filename << "\n"));  // JS611IT liest das
         try
         {
             int ret = ::close( _file );
