@@ -564,13 +564,13 @@ void Vm::start()
     _vm_args.options = new JavaVMOption[ _vm_args.nOptions ];
 
     {
-        Log_ptr log ( "java" );
+        Log_ptr log;
         log << "Java options: ";
         for( int i = 0; i < _vm_args.nOptions; i++ )
         {
             _vm_args.options[i].optionString = (char*)_options[i]._option.c_str();
             _vm_args.options[i].extraInfo    =        _options[i]._extra;
-            log << _vm_args.options[i].optionString << "  ";
+            log << "[" << _vm_args.options[i].optionString << "] ";
         }
         log << "\n";
     }
