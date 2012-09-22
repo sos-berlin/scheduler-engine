@@ -1,11 +1,7 @@
-// $Id: database.h 14628 2011-06-20 09:40:12Z ss $
-
 #ifndef __SCHEDULER_DATABASE_H
 #define __SCHEDULER_DATABASE_H
 
 #include "../file/anyfile.h"
-
-
 
 #if defined Z_HPUX_PARISC
 #   define GZIP_AUTO ""   // gzip -auto liefert ZLIB_STREAM_ERROR mit gcc 3.1, jz 7.5.2003
@@ -14,8 +10,6 @@
 #   define GZIP_AUTO "gzip -auto | "
 #   define GZIP      "gzip | "
 #endif
-
-
 
 namespace sos {
 namespace scheduler {
@@ -52,18 +46,11 @@ enum Database_lock_syntax
 
 //-----------------------------------------------------------------------------------------Database
 
-struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Subsystem
+struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
 {
                                 Database                ( Spooler* );
 
-    // Subsystem
-
     void                        close                   ();
-    //bool                        subsystem_initialize    ();
-    //bool                        subsystem_load          ();
-    //bool                        subsystem_start         ();
-
-
     void                        open                    ( const string& db_name );
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
@@ -84,7 +71,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
 
     Transaction*                transaction             ();
-	 Transaction*                transaction_or_null     ()                                          { return _transaction; }
+    Transaction*                transaction_or_null     ()                                          { return _transaction; }
     bool                        is_in_transaction       ()                                          { return _transaction != NULL; }
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
@@ -92,11 +79,9 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     ptr<Com_variable_set>       properties              ();                                         // Mit "password"
     Database_lock_syntax        lock_syntax             ();
     void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
-  //void                        run_create_table_script ();
     void                        check_database          ();
     void                        create_tables_when_needed();
     bool                        create_table_when_needed( Transaction*, const string& table_name, const string& fields );
-    void                        recreate_table          ( Transaction*, const string& table_name, const string& column_definitions, const string& primary_key );
     void                        rename_column           ( Transaction*, const string& table_name, const string& column_name, const string& new_column_name, const string& type );
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }
@@ -128,11 +113,9 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
 
     void                        open2                   ( const string& db_name );
     void                        open_history_table      ( Read_transaction* );
-  //void                        get_history_table_table ();
     bool                        add_column              ( Transaction*, const string& table_name, const string& column_name, const string add_clause );
     bool                        alter_column_allow_null ( Transaction*, const string& table_name, const string& column_name, const string& type );
     void                        handle_order_id_columns ( Transaction* );
-  //bool                        column_is_nullable      ( const string& table_name, const string& column_name );
     int                         expand_varchar_column   ( Transaction*, const string& table_name, const string& column_name, int minimum_width, int new_width );
     int                         column_width            ( Transaction*, const string& table_name, const string& column_name );
     int                         get_id_                 ( const string& variable_name, Transaction* );
@@ -142,11 +125,8 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     Any_file                   _db;
     ptr<Com_variable_set>      _properties;
     string                     _error;
-  //Any_file                   _job_id_update;
-  //Any_file                   _job_id_select;
     map<string,long32>         _id_counters;
     Any_file                   _history_table;
-  //Any_file                   _history_update;
     vector<Dyn_obj>            _history_update_params;
     int                        _id;
     bool                       _email_sent_after_db_error;
@@ -159,7 +139,6 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
   public:
     static const int            seconds_before_reopen;
     string                      truncate_head           ( const string& str );
-  //static const int            lock_timeout;
 };
 
 //---------------------------------------------------------------------------------Read_transaction
@@ -228,8 +207,7 @@ struct Transaction : Read_transaction
     void                        intermediate_commit     ( const string& debug_text );
     void                        rollback                ( const string& debug_text, Execute_flags = ex_none );
     void                        force_rollback          ( const string& debug_text )                { rollback( debug_text, ex_force ); }
-  //void                        try_reopen_after_error  ();
-    void                        set_transaction_written ()                                          {} //{ _transaction_written = true; }
+    void                        set_transaction_written ()                                          {}
     void                        suppress_heart_beat_timeout_check()                                 { _suppress_heart_beat_timeout_check = true; }
     bool                        is_transaction_used     ()                                          { return db()->_db.is_transaction_used(); }
     bool                        need_commit_or_rollback ()                                          { return db()->_db.need_commit_or_rollback(); }
@@ -343,7 +321,7 @@ struct Job_history
     Task*                      _last_task;              // Wem gehört der zuletzt geschriebene Satz?
     Absolute_path              _job_path;
     bool                       _history_yes;
-    int                        _on_process;             // Beim soundsovieltem _on_process Historiensazt schreiben
+    int                        _on_process;             // Beim soundsovieltem _on_process Historiensatz schreiben
     With_log_switch            _with_log;
     bool                       _use_db;
     bool                       _use_file;

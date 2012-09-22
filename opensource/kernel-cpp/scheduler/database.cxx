@@ -45,34 +45,6 @@ const int max_column_length = 249;      // Für MySQL 249 statt 250. jz 7.1.04
 
 const int Database::seconds_before_reopen   = Z_NDEBUG_DEBUG( 60, 20 );     // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird. 
 
-// Zeiten wie Cluster::heart_beat_period
-//const int Database::lock_timeout            = 30;   // Wartezeit für gesperrte Datenbanksätze, nicht von jeder Datenbank begrenzbar
-
-//---------------------------------------------------------------------------------------------test
-/*
-template< class B >
-string operator << ( const string& a, const B& b )
-{
-    ostrstream s;
-    s << a << b;
-    return s.str();
-}
-
-template< class B >
-string operator << ( const char* a, const B& b )
-{
-    ostrstream s;
-    s << a << b;
-    return s.str();
-}
-*/
-//------------------------------------------------------------------------------------------uquoted
-/*
-static string uquoted( const string& value ) 
-{ 
-    return quoted_string( ucase( value ), '\"', '\"' ); 
-}
-*/
 //---------------------------------------------------------------------------------------sql_quoted
 
 inline string sql_quoted( const string& value ) 
@@ -172,7 +144,6 @@ Any_file Read_transaction::open_file( const string& db_prefix, const string& sql
 Any_file Read_transaction::open_file_2( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql )
 {
     if( need_commit_or_rollback )  assert_is_commitable( debug_text );
-    //if( need_commit_or_rollback ) set_transaction_written(); else set_transaction_read();
 
     string debug_extra;
     if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";
@@ -242,7 +213,6 @@ string Read_transaction::file_as_string( const string& hostware_filename )
 {
     if( _db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
 
-    //set_transaction_read();
     try
     {
         return ::sos::file_as_string( "-binary " + _db->db_name() + hostware_filename, "" );
@@ -325,8 +295,6 @@ void Transaction::commit( const string& debug_text )
     if( _outer_transaction ) 
     {
         Z_LOG2( "zschimmer", Z_FUNCTION << "  Commit delayed because of _outer_transaction.  " << debug_text << "\n" );
-        //_outer_transaction->_transaction_written |= _transaction_written;
-        //_outer_transaction->_transaction_read    |= _transaction_read;
     }
     else
     {
@@ -356,13 +324,6 @@ void Transaction::commit( const string& debug_text )
 void Transaction::intermediate_commit( const string& debug_text )
 { 
     assert( _db );
-
-    //if( _outer_transaction ) 
-    //{
-    //    _outer_transaction->_transaction_written |= _transaction_written;
-    //    _outer_transaction->_transaction_read    |= _transaction_read;
-    //}
-    
     if( db()->opened() )  execute( "COMMIT", debug_text, ex_force );
 }
 
@@ -374,9 +335,6 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
     {
         if( _outer_transaction )  
         {
-            //_outer_transaction->_transaction_written |= _transaction_written;
-            //_outer_transaction->_transaction_read    |= _transaction_read;
-
             Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
             Z_LOG( "Rollback in inner transaction." << debug_text );        // Keine Exception, weil wir schon in einer Exception sein können.
         }
@@ -432,12 +390,6 @@ void Retry_nested_transaction::operator++(int)
 { 
     _database_retry++; 
     _database_retry.enter_loop();
-
-    //if( _database_retry.enter_loop() )
-    //{
-    //    rollback( Z_FUNCTION );  
-    //    begin_transaction( _database_retry._db );
-    //}
 }
 
 //--------------------------------------------------Retry_nested_transaction::intermediate_rollback
@@ -467,7 +419,6 @@ Database::Database( Spooler* spooler )
 :
     Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
-    //javabridge::has_proxy<Database>(spooler),
     _lock("Database"),
     _database_descriptor( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names ),
     _jobs_table           ( &_database_descriptor, "scheduler_jobs"           , "spooler_id,cluster_member_id,path" ),
@@ -502,27 +453,6 @@ Transaction* Database::transaction()
 
     return _transaction;
 }
-
-//-------------------------------------------------------------------Database::subsystem_initialize
-
-//bool Database::subsystem_initialize()
-//{
-//    set_subsystem_state( subsys_initialized );
-//}
-//
-////-------------------------------------------------------------------------Database::subsystem_load
-//
-//bool Database::subsystem_load()
-//{
-//    set_subsystem_state( subsys_loaded );
-//}
-//
-////------------------------------------------------------------------------Database::subsystem_
-//
-//bool Database::subsystem_activate()
-//{
-//    set_subsystem_state( subsys_active );
-//}
 
 //-----------------------------------------------------------------------------Database::properties
 
@@ -624,45 +554,6 @@ void Database::open2( const string& db_name )
         }
     }
 }
-
-//----------------------------------------------------------------Database::run_create_table_script
-
-//void Database::run_create_table_script()
-//{
-//    string filename;
-//
-//    switch( _db.dbms_kind() )
-//    {
-//        case dbms_access:       filename = "create_tables.access.sql";                break;
-//        case dbms_db2:          filename = "create_tables.db2.sql";                   break;
-//        case dbms_firebird:     filename = "create_tables.firebird.sql";              break;
-//        case dbms_mysql:        filename = "create_tables.mysql.sql";                 break;
-//        case dbms_oracle:
-//        case dbms_oracle_thin:  filename = "create_tables.oracle.sql";                break;
-//        case dbms_sql_server:   filename = "create_tables.microsoft_sql_server.sql";  break;
-//        case dbms_postgresql:   filename = "create_tables.postgresql.sqk";            break;
-//        default: ;
-//    }
-//
-//    if( const Embedded_file* embedded_file = embedded_files.get_embedded_file_or_null( "database/" + filename ) )
-//    {
-//        try
-//        {
-//            Transaction ta ( this );
-//            //string cmd = sql::without_comments_regardless_quotes( embedded_file->_content );
-//            //for( int i = 0; i < cmd.length(); i++ )  if( cmd[i] == '\r'  ||  cmd[i] == '\n' )  cmd[i] = ' ';
-//            //ta.execute( cmd, Z_FUNCTION, Transaction::ex_native );
-//            ta.execute( embedded_file->_content , Z_FUNCTION, Transaction::ex_native );
-//            ta.commit( Z_FUNCTION );
-//        }
-//        catch( exception& x )
-//        {
-//            _log->warn( message_string( "SCHEDULER-883", embedded_file->_filename, x ) );
-//        }
-//    }
-//    else
-//        _log->info( message_string( "SCHEDULER-882", _db.dbms_name() ) );
-//}
 
 //-------------------------------------------------------------------------Database::check_database
 
@@ -975,25 +866,14 @@ void Database::create_tables_when_needed()
             }
             catch( exception& )
             {
-                //if( _db.dbms_kind() == dbms_access )
-                //{
-                //    Transaction ta ( this );
-                //    ta.intermediate_commit( Z_FUNCTION );
-                //    recreate_table( &ta, _order_history_tablename, column_definitions, primary_key );
-                //    ta.commit( Z_FUNCTION );
-                //    created = true;
-                //}
-                //else
-                //{
-                    Transaction ta ( this );
-                    alter_column_allow_null( &ta, _order_history_tablename, "end_time", "datetime" );
+                Transaction ta ( this );
+                alter_column_allow_null( &ta, _order_history_tablename, "end_time", "datetime" );
                     
-                    if( _db.dbms_kind() == dbms_mysql )
-                        ta.execute( S() << "UPDATE " << _order_history_tablename << 
-                                           "  set `end_time`=NULL  where `end_time`='0000-00-00 00:00:00'", Z_FUNCTION );   // Fehler von MySQL 5 korrigieren (fehlender Wert bei NOT NULL-Spalte führt zu '0000-00-00 00:00:00')
+                if( _db.dbms_kind() == dbms_mysql )
+                    ta.execute( S() << "UPDATE " << _order_history_tablename << 
+                                        "  set `end_time`=NULL  where `end_time`='0000-00-00 00:00:00'", Z_FUNCTION );   // Fehler von MySQL 5 korrigieren (fehlender Wert bei NOT NULL-Spalte führt zu '0000-00-00 00:00:00')
 
-                    ta.commit( Z_FUNCTION );
-                //}
+                ta.commit( Z_FUNCTION );
             }
         }
 
@@ -1079,8 +959,6 @@ bool Database::create_table_when_needed( Transaction* ta, const string& tablenam
 
             ta->execute( create_table, Z_FUNCTION );
 
-            //ta->intermediate_commit( Z_FUNCTION ); 
-
             result = true;
         }
         catch( exception& x )
@@ -1090,24 +968,6 @@ bool Database::create_table_when_needed( Transaction* ta, const string& tablenam
     }
 
     return result;
-}
-
-//-------------------------------------------------------------------------Database::recreate_table
-// Wird nicht benutzt.
-
-void Database::recreate_table( Transaction* ta, const string& tablename, const string& column_definitions, const string& primary_key )
-{
-    //log()->info( message_string( "SCHEDULER-704", tablename ) );
-
-    string copy_tablename = tablename + "_copy";
-
-    ta->execute( S() << "CREATE TABLE " << copy_tablename << " ( " << column_definitions << " )", Z_FUNCTION );
-    ta->execute( S() << "INSERT into " << copy_tablename << " select *  from " << tablename     , Z_FUNCTION );
-    ta->execute( S() << "DROP TABLE " << tablename                                              , Z_FUNCTION );
-
-    ta->execute( S() << "CREATE TABLE " << tablename << " ( " << column_definitions << ", primary key( " << primary_key << " ) )", Z_FUNCTION );  // Besser: primary key nach insert einrichten
-    ta->execute( S() << "INSERT into " << tablename << " select *  from " << copy_tablename                                      , Z_FUNCTION );
-    ta->execute( S() << "DROP TABLE " << copy_tablename                                                                          , Z_FUNCTION );
 }
 
 //-----------------------------------------------------------------------------Database::add_column
@@ -1218,16 +1078,6 @@ void Database::rename_column( Transaction* ta, const string& table_name, const s
             z::throw_xc( Z_FUNCTION );
     }
 }
-
-//---------------------------------------------------------------------Database::column_is_nullable
-
-//bool Database::column_is_nullable( const string& table_name, const string& column_name )
-//{
-//    // true ist nicht zuverlässig
-//
-//    return Any_file( S() << "-in " << db_name() << "select `" << column_name <<"` from " << table_name << " where 1=0" )
-//           .record_type()->field_descr(0).nullable();
-//}
 
 //----------------------------------------------------------------Database::handle_order_id_columns
 
@@ -1430,11 +1280,6 @@ void Database::close()
 {
     Z_MUTEX( _lock )
     {
-      //_job_id_select.close();
-      //_job_id_select.destroy();
-
-      //_history_update.close();
-
         _history_table.close();
         _history_table.destroy();
 
@@ -1460,7 +1305,6 @@ void Database::open_history_table( Read_transaction* ta )
         {
             ta->set_transaction_read();
             _history_table.open( "-in -out -key=id sql -table=" + _job_history_tablename + 
-                               //" -sql-fields=(id,spooler_id,job_name,start_time,cause,parameters) | " +       extra-Felder nicht vergessen!
                                  " | " + _db_name + " -ignore=(parameters,log) -max-length=" + as_string(blob_field_size) );
         }
     }
@@ -1527,8 +1371,6 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                     _email_sent_after_db_error = true;
                 }
             }
-
-            //sos_sleep( 2 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
 
             while(1)
             {
@@ -1640,7 +1482,6 @@ Database_lock_syntax Database::lock_syntax()
 }
 
 //---------------------------------------------------------------------------------Database::get_id
-// Wird von den Threads gerufen
 
 int Database::get_id( const string& variable_name, Transaction* outer_transaction )
 {
@@ -1672,13 +1513,10 @@ int Database::get_id( const string& variable_name, Transaction* outer_transactio
 }
 
 //--------------------------------------------------------------------------------Database::get_id_
-// Wird von den Threads gerufen
 
 int Database::get_id_( const string& variable_name, Transaction* outer_transaction )
 {
     int id;
-
-    //if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( "" );
 
 
     if( _db.opened() )
@@ -1811,18 +1649,6 @@ void Transaction::insert_variable( const string& name, const string& value )
     execute( insert, Z_FUNCTION );
 }
 
-//-------------------------------------------------------------------------Transaction::set_variable
-/* Nicht getestet
-void Transaction::update_variable( const string& name, const string& value )
-{
-    sql::Update_stmt update ( database_descriptor(), _db->_variables_tablename );
-    
-    update.and_where_condition( "name", name );
-    update[ "wert"     ] = value;
-
-    execute_single( update );
-}
-*/
 //-----------------------------------------------------------------Transaction::try_update_variable
 
 bool Transaction::try_update_variable( const string& name, const string& value )
@@ -1845,7 +1671,6 @@ void Transaction::execute( const string& stmt, const string& debug_text, Execute
 { 
     bool is_commit   = stmt == "COMMIT";
     bool is_rollback = stmt == "ROLLBACK";
-  //if( !is_commit_or_rollback )  set_transaction_written();
 
     if( flags == ex_force || !is_commit && !is_rollback || need_commit_or_rollback() )
     {
@@ -1862,23 +1687,15 @@ void Transaction::execute( const string& stmt, const string& debug_text, Execute
         }
         catch( zschimmer::Xc& x )
         {
-            // Besser Fehler melden (mit Andreas klären)
-            //_log->warn( stmt );
-            //_log->error( x.what() );
             _log->log( _spooler->_db_log_level, native_sql + debug_extra );
             _log->log( _spooler->_db_log_level, x.what() );
-
             x.append_text( debug_text );
             throw;
         }
         catch( exception& x )
         {
-            // Besser Fehler melden (mit Andreas klären)
-            //_log->warn( stmt );
-            //_log->error( x.what() );
             _log->log( _spooler->_db_log_level, native_sql + debug_extra );
             _log->log( _spooler->_db_log_level, x.what() );
-
             throw;
         }
 
@@ -1949,36 +1766,29 @@ void Database::spooler_start()
 {
     if( _db.opened() )
     {
-        //try   Fehler beim Spooler-Start führen zum Abbruch
+        _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
+
+        if( _db.opened() )   // get_id() kann die DB schließen (nach Fehler)
         {
-            _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
-
-            if( _db.opened() )   // get_id() kann die DB schließen (nach Fehler)
+            Transaction ta ( this );
             {
-                Transaction ta ( this );
-                {
-                    sql::Insert_stmt insert ( ta.database_descriptor(), _job_history_tablename );
+                sql::Insert_stmt insert ( ta.database_descriptor(), _job_history_tablename );
         
-                    insert[ "id"                ] = _id;
-                    insert[ "spooler_id"        ] = _spooler->id_for_db();
+                insert[ "id"                ] = _id;
+                insert[ "spooler_id"        ] = _spooler->id_for_db();
 
-                    if( _spooler->is_cluster() )
-                    insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
+                if( _spooler->is_cluster() )
+                insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
 
-                    insert[ "job_name"          ] = "(Spooler)";
-                    insert[ "start_time"        ].set_datetime( Time::now().as_string(time::without_ms) );
-                    insert[ "pid"               ] = getpid();
+                insert[ "job_name"          ] = "(Spooler)";
+                insert[ "start_time"        ].set_datetime( Time::now().as_string(time::without_ms) );
+                insert[ "pid"               ] = getpid();
 
-                    ta.execute( insert, Z_FUNCTION );
+                ta.execute( insert, Z_FUNCTION );
 
-                    ta.commit( Z_FUNCTION );
-                }
+                ta.commit( Z_FUNCTION );
             }
         }
-        //catch( exception& x )  
-        //{ 
-        //    _log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
-        //}
     }
 }
 
@@ -2095,27 +1905,12 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
             task_element.setAttribute( "id"              , task_id );
             //task_element.setAttribute( "state"           , state_name() );
 
-            //if( _thread )
-            //task_element.setAttribute( "thread"          , _thread->name() );
-
-            //task_element.setAttribute( "name"            , _name );
-
-            //if( _running_since )
-            //task_element.setAttribute( "running_since"   , _running_since.as_string() );
             task_element.setAttribute( "start_time"      , record.as_string( "START_TIME" ) );      // Gibt es nicht in Task::dom_element()
             task_element.setAttribute( "end_time"        , record.as_string( "END_TIME" ) );        // Gibt es nicht in Task::dom_element()
 
-            //if( _idle_since )
-            //task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
-
             task_element.setAttribute( "cause"           , record.as_string( "CAUSE" ) );
 
-            //if( _state == s_running  &&  _last_process_start_time )
-            //task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
-
             task_element.setAttribute( "steps"           , record.as_string( "STEPS" ) );
-
-            //task_element.setAttribute( "log_file"        , _log.filename() );
 
             if( !record.null( "ERROR" )  &&  record.as_int( "ERROR" ) )  
             {
@@ -2262,8 +2057,6 @@ void Job_history::open( Transaction* outer_transaction )
             _job->_log->debug( message_string( "SCHEDULER-910", _filename ) );
             _use_file = true;
         }
-
-         //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
     }
     catch( exception& x )  
     { 
@@ -2280,8 +2073,6 @@ void Job_history::close()
     {
         _use_db = false;
         _use_file = false;
-      //_task_id = 0;
-
         _file.close();
     }
     catch( exception& x )  
@@ -2319,8 +2110,6 @@ void Job_history::archive( Archive_switch arc, const File_path& filename )
 }
 
 //---------------------------------------------------------------------------Job_history::read_tail
-// Anderer Thread.
-// Hier nicht auf _job etc. zugreifen!
 
 xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, const Show_what& show, bool use_task_schema )
 {
@@ -2709,31 +2498,11 @@ void Task_history::end()
     try
     {
         if( _job_history->_use_file && _job_history->_last_task == _task )  _job_history->_file.seek( _record_pos );
-
-        //if( _job->has_error() )  
-        //{
-            write( false );
-/*
-        }
-        else
-        {
-            Z_DEBUG_ONLY( if(_use_file|_use_db) _task->_log->debug9( "Historieneintrag wird wieder gelöscht, weil nicht genug Jobschritte ausgeführt worden sind\n" ); )
-
-            //if( _use_file )  SetEndOfFile();
-
-            if( _use_db )
-            {
-                Transaction ta ( &_spooler->_db );
-                _spooler->_db->execute( "DELETE from " + _job_history_tablename + " where \"id\"=" + as_string(_task->_id) );
-                ta.commit( Z_FUNCTION );
-            }
-        }
-*/
+        write( false );
     }
     catch( exception& x )  
     { 
         _task->_log->warn( message_string( "SCHEDULER-266", x ) );      // "FEHLER BEIM SCHREIBEN DER HISTORIE: "
-        //_error = true;
     }
 
     _task_id = 0;
