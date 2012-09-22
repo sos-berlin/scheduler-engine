@@ -56,7 +56,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
         logger.debug(testClass.getName());
         environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
-        setSettings(Settings.of(SettingName.jobJavaClassPath, System.getProperty("java.class.path")));
+        setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")));
     }
 
     private File workDirectory(Class<?> testClass) {

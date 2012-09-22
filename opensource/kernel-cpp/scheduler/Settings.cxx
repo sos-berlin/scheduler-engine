@@ -35,7 +35,7 @@ void Settings::set(int number, const string& value) {
             _db_name = value; 
             break;
         case 2: 
-            _job_java_class_path = value; 
+            _job_java_classpath = value; 
             break;
         case 3:
             _html_dir = value;
@@ -52,7 +52,7 @@ string Settings::get(int number) const {
 
     switch (number) {
         case 1: return _db_name;
-        case 2: return _job_java_class_path;
+        case 2: return _job_java_classpath;
         case 3: return _html_dir;
         default:
             z::throw_xc("UNKNOWN_SETTING", number);

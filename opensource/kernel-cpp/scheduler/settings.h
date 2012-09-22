@@ -18,7 +18,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     string                      get                         (int number) const;
 
     string                     _db_name;
-    string                     _job_java_class_path;
+    string                     _job_java_classpath;
     string                     _html_dir;
     bool                       _keep_order_content_on_reschedule;
     int                        _max_length_of_blob_entry;

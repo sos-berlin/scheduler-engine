@@ -5,7 +5,7 @@ public enum SettingName {
     dbName(1),
 
     /** Erweitert den Class-Path für einen Java-Job. */
-    jobJavaClassPath(2),
+    jobJavaClasspath(2),
 
     /** Default für factory.ini [spooler] html_dir */
     htmlDir(3);
