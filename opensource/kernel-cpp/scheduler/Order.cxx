@@ -1762,7 +1762,7 @@ void Order::set_id( const Order::Id& id )
 
 void Order::set_default_id()
 {
-    set_id( _spooler->_db->get_order_id() );
+    set_id( _spooler->db()->get_order_id() );
 }
 
 //-----------------------------------------------------------------------------Order::set_file_path

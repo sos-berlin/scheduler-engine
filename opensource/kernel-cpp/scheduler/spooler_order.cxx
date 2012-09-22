@@ -1273,7 +1273,7 @@ string Node::obj_name() const
 
 xml::Element_ptr Node::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
-    Read_transaction ta ( spooler()->_db );
+    Read_transaction ta ( spooler()->db() );
 
     xml::Element_ptr element;
 
@@ -1410,7 +1410,7 @@ xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& documen
     xml::Element_ptr element = Base_class::dom_element( document, show_what );
 
     //{
-    //    Read_transaction ta ( spooler()->_db );
+    //    Read_transaction ta ( spooler()->db() );
 
     //    element.setAttribute( "orders", _order_queue->order_count( &ta ) );
     //}

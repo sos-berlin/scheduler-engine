@@ -731,7 +731,7 @@ void Directory_file_order_source::read_known_orders( String_set* known_orders )
     select_sql << "select `id`  from " << db()->_orders_tablename
                << "  where " << _job_chain->db_where_condition();
 
-    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
     {
         known_orders->clear();
 
@@ -903,7 +903,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
                     else
                     if( _job_chain->is_distributed() )
                     {
-                        Transaction ta ( _spooler->_db ); 
+                        Transaction ta ( _spooler->db() ); 
 
                         ptr<Order> order = order_subsystem()->try_load_order_from_database( &ta, _job_chain->path(), path, Order_subsystem::lo_blacklisted_lock );
                         if( order )

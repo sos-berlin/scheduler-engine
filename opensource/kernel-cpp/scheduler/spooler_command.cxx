@@ -946,7 +946,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
     }
     else
     {
-        return _spooler->_db->read_task( _answer, task_id, show );
+        return _spooler->db()->read_task( _answer, task_id, show );
     }
 }
 
@@ -1210,9 +1210,9 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
             order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id );
     }
 
-    if( !order  &&  _spooler->_db->opened() )
+    if( !order  &&  _spooler->db()->opened() )
     {
-        Read_transaction ta ( _spooler->_db );
+        Read_transaction ta ( _spooler->db() );
     
         if( history_id == "" )
         {
@@ -1259,7 +1259,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                 /* Payload steht nicht in der Historie
                 if( show & show_payload )
                 {
-                    string payload = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + db()->_order_history_tablename + " -clob=\"PAYLOAD\"" 
+                    string payload = file_as_string( GZIP_AUTO + _spooler->db()->db_name() + " -table=" + db()->_order_history_tablename + " -clob=\"PAYLOAD\"" 
                                                      " where \"HISTORY_ID\"=" + history_id );
                     if( payload != "" )  order->set_payload( payload );
                 }
@@ -1320,7 +1320,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     ptr<Order>     order;
 
-    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+    for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
     {
         order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
                                            : job_chain->order( id );
@@ -1426,7 +1426,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     {
         assert( job_chain->is_distributed() );
 
-        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
         {
             sql::Delete_stmt delete_stmt ( _spooler->db()->database_descriptor(), _spooler->db()->_orders_tablename );
 
@@ -1778,7 +1778,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                             log = task->log();
                         else
                         {
-                            xml::Element_ptr task_element = _spooler->_db->read_task( _answer, task_id, show_log );
+                            xml::Element_ptr task_element = _spooler->db()->read_task( _answer, task_id, show_log );
                             S title;  title << "Task " << task_id;
 
                             DOM_FOR_EACH_ELEMENT( task_element, e )
@@ -1828,7 +1828,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
                         if( !log )
                         {
-                            Read_transaction ta ( _spooler->_db );
+                            Read_transaction ta ( _spooler->db() );
 
                             if( history_id == "" )
                             {

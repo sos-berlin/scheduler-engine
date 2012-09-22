@@ -1052,7 +1052,7 @@ Duration Job::average_step_duration( const Duration& deflt )
 {
     Duration result = deflt;
 
-    if( _spooler->_db->opened() )
+    if( _spooler->db()->opened() )
     {
         Record record;
         S select_sql;
@@ -1437,7 +1437,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, bool force, const Time& start_at )
 {
-    return create_task( params, name, force, start_at, _spooler->_db->get_task_id() );
+    return create_task( params, name, force, start_at, _spooler->db()->get_task_id() );
 }
 
 //--------------------------------------------------------------------------Job::load_tasks_from_db
@@ -1472,13 +1472,13 @@ void Job::load_tasks_from_db( Read_transaction* ta )
             start_at = Time::of_utc_date_time( record.as_string( "start_at_time" ) );
             _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
 
-            string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
+            string parameters_xml = file_as_string( "-binary " + _spooler->db()->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
                                                                                        " where \"TASK_ID\"=" + as_string( task_id ), 
                                                     "" );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
 
-            string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + db()->_tasks_tablename + " -clob='task_xml'"
+            string xml = file_as_string( "-binary " + _spooler->db()->db_name() + " -table=" + db()->_tasks_tablename + " -clob='task_xml'"
                                                                                  " where \"TASK_ID\"=" + as_string( task_id ),
                                          "" );
 
@@ -1522,9 +1522,9 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
     {
         try
         {
-            if( !task->_is_in_database  &&  _spooler->_db->opened() )
+            if( !task->_is_in_database  &&  _spooler->db()->opened() )
             {
-                Transaction ta ( _spooler->_db );
+                Transaction ta ( _spooler->db() );
                 //task->_history.enqueue();
 
                 Insert_stmt insert ( ta.database_descriptor() );
@@ -1566,7 +1566,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
         }
         catch( exception& x )
         {
-            _spooler->_db->try_reopen_after_error( x, Z_FUNCTION );
+            _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
         }
     }
 
@@ -1586,9 +1586,9 @@ void Job::Task_queue::remove_task_from_db( int task_id )
     {
         try
         {
-            if( _spooler->_db->opened() )
+            if( _spooler->db()->opened() )
             {
-                Transaction ta ( _spooler->_db );
+                Transaction ta ( _spooler->db() );
 
                 ta.execute( "DELETE from " + _spooler->db()->_tasks_tablename +
                             "  where \"TASK_ID\"=" + as_string( task_id ),
@@ -1600,7 +1600,7 @@ void Job::Task_queue::remove_task_from_db( int task_id )
         }
         catch( exception& x )
         {
-            _spooler->_db->try_reopen_after_error( x, Z_FUNCTION );
+            _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
         }
     }
 }
@@ -2260,7 +2260,7 @@ void Job::database_record_store()
             //}
             //else
             {
-                for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+                for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
                 {
                     sql::Update_stmt update ( &db()->_jobs_table );
                     
@@ -2289,7 +2289,7 @@ void Job::database_record_remove()
 {
     if( db()->opened() )
     {
-        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
         {
             sql::Delete_stmt delete_statement ( &db()->_jobs_table );
             
