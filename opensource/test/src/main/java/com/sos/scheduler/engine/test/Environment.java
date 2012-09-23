@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.common.system.OperatingSystem;
 import com.sos.scheduler.engine.data.folder.TypedPath;
+import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
@@ -19,6 +20,7 @@ import static com.sos.scheduler.engine.common.system.OperatingSystem.operatingSy
  * Build the environment for the scheduler binary
  */
 public final class Environment {
+    public static final SchedulerId schedulerId = new SchedulerId("test");
     private static final String jobJavaOptions = "-Xms5m -Xmx10m";    // Größe des Java-Heaps vor allem für Task-Prozesse stark beschränken, damit viele Tasks laufen können.
     private static final String configSubdir = "config";
   //private static final String logSubdir = "log";
@@ -58,7 +60,7 @@ public final class Environment {
         ImmutableList.Builder<String> result = new ImmutableList.Builder<String>();
         result.add(cppBinaries.file(CppBinary.exeFilename).getPath());
         result.add("-job-java-options=" +jobJavaOptions);
-        result.add("-id=test");
+        result.add("-id="+schedulerId);
         result.add("-sos.ini=" + sosIniFile());
         result.add("-ini=" + iniFile());
         result.add("-log-dir=" + logDirectory.getPath());
