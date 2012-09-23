@@ -88,9 +88,7 @@ public final class Scheduler implements Sister,
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
                     bind(EntityManager.class).toProvider(new Provider<EntityManager>(){
-                        @Override public EntityManager get() {
-                            return databaseSubsystem.getEntityManager();
-                        }
+                        @Override public EntityManager get() { return databaseSubsystem.getEntityManager(); }
                     });
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  // Für JettyPlugin

@@ -1,13 +1,15 @@
-package com.sos.scheduler.engine.data.database;
+package com.sos.scheduler.engine.persistence;
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 
-import java.util.Date;
 import javax.persistence.*;
-import static com.google.common.base.Strings.*;
-import static com.sos.scheduler.engine.data.database.SchedulerDatabases.emptyIdInDatabase;
-import static com.sos.scheduler.engine.data.database.SchedulerDatabases.idForDatabase;
-import static javax.persistence.TemporalType.*;
+import java.util.Date;
+
+import static com.google.common.base.Strings.emptyToNull;
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.sos.scheduler.engine.persistence.SchedulerDatabases.emptyIdInDatabase;
+import static com.sos.scheduler.engine.persistence.SchedulerDatabases.idForDatabase;
+import static javax.persistence.TemporalType.TIMESTAMP;
 
 @Entity
 @Table(name="SCHEDULER_HISTORY")

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.database;
 
+import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.cppproxy.DatabaseC;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
@@ -8,8 +9,6 @@ import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import java.util.HashMap;
-import java.util.Map;
 
 
 @ForCpp
@@ -37,18 +36,18 @@ public class DatabaseSubsystem implements Subsystem {
         return entityManager;
     }
 
-    private Map<String,String> entityManagerProperties() {
-        Map<String,String> result = new HashMap<String,String>();
-        UnmodifiableVariableSet p = getProperties();
-        result.put("javax.persistence.jdbc.driver", p.get("jdbc.driverClass"));
-        result.put("javax.persistence.jdbc.url", p.get("path"));
-        result.put("javax.persistence.jdbc.user", p.get("user"));
-        result.put("javax.persistence.jdbc.password", p.get("password"));
-        return result;
+    private ImmutableMap<String,String> entityManagerProperties() {
+        UnmodifiableVariableSet v = schedulerVariableSet();
+        return new ImmutableMap.Builder<String,String>()
+            .put("javax.persistence.jdbc.driver", v.get("jdbc.driverClass"))
+            .put("javax.persistence.jdbc.url", v.get("path"))
+            .put("javax.persistence.jdbc.user", v.get("user"))
+            .put("javax.persistence.jdbc.password", v.get("password"))
+            .build();
     }
 
     /** Liefert auch "password" */
-    public final UnmodifiableVariableSet getProperties() {
+    private UnmodifiableVariableSet schedulerVariableSet() {
         return cppProxy.properties().getSister();
     }
 }

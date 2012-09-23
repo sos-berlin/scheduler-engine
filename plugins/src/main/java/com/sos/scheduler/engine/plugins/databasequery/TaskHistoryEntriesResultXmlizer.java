@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
-import com.sos.scheduler.engine.data.database.TaskHistoryEntity;
 import com.sos.scheduler.engine.kernel.command.GenericResultXmlizer;
+import com.sos.scheduler.engine.persistence.TaskHistoryEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
