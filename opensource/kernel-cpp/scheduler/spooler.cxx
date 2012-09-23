@@ -1608,7 +1608,7 @@ void Spooler::read_command_line_arguments()
             else
             if (opt.with_value("job-java-options")) { modifiable_settings()->_job_java_options = opt.value(); }
             else
-            if (opt.with_value("job-java-classpath")) { modifiable_settings()->_job_java_options = opt.value(); }
+            if (opt.with_value("job-java-classpath")) { modifiable_settings()->_job_java_classpath = opt.value(); }
             else
                 throw_sos_option_error( opt );
         }
