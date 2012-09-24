@@ -1,29 +1,33 @@
 package com.sos.scheduler.engine.tests.database
 
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
+import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.persistence.TaskHistoryEntity
 import com.sos.scheduler.engine.test.Environment.schedulerId
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import javax.persistence.EntityManager
+import org.joda.time.DateTime.now
+import org.joda.time.DateTimeZone.UTC
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
-final class EntitiesTest extends ScalaSchedulerTest {
+final class EntitiesIT extends ScalaSchedulerTest {
 
-  import EntitiesTest._
+  import EntitiesIT._
 
-  private val testStartTime = new java.util.Date()
+  private val testStartTime = now(UTC) withMillisOfSecond 0
 
   override def checkedBeforeAll() {
     controller.useDatabase()
+    controller.setLogCategories("java.stackTrace-")
     controller.activateScheduler()
     val eventPipe = controller.newEventPipe()
-    scheduler executeXml <start_job job={jobPath.asString()}/>
+    scheduler executeXml <order job_chain={jobChainPath.asString} id={orderId.asString}/>
     eventPipe.nextWithCondition[TaskClosedEvent] { e => e.getJobPath == jobPath}
   }
 
@@ -51,16 +55,30 @@ final class EntitiesTest extends ScalaSchedulerTest {
       'getErrorCode (""),
       'getErrorText ("")
     )
-    assert(e.getStartTime.getTime / 1000 >= testStartTime.getTime / 1000, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be before testStartTime="+testStartTime)
-    new java.util.Date() match { case now => assert(e.getStartTime.getTime / 1000 <= now.getTime / 1000, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+now) }
+    assert(e.getStartTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be before testStartTime="+testStartTime)
+    now(UTC) match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
   }
 
-  test("Second TaskHistoryEntity") {
-    pending
+  test("Second TaskHistoryEntity is from an order job") {
+    val e = taskHistoryEntities(1)
+    e should have (
+      'getId (firstTaskHistoryEntityId + 1),
+      'getSchedulerId (schedulerId),
+      'getClusterMemberId (""),
+      'getJobPath (jobPath.asString),
+      'getCause ("order"),
+      'getSteps (1),
+      'getErrorCode (""),
+      'getErrorText ("")
+    )
+    assert(e.getStartTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be before testStartTime="+testStartTime)
+    now(UTC) match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
   }
 }
 
-private object EntitiesTest {
-  val jobPath = JobPath.of("/test-a")
+private object EntitiesIT {
+  val jobChainPath = JobChainPath.of("/test-job-chain")
+  val orderId = new OrderId("ORDER-1")
+  val jobPath = JobPath.of("/test-order-job")
   val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
 }
