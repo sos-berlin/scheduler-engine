@@ -5,7 +5,7 @@ implicitely used as 'spooler_process' and should result in the line 'script_only
 -->
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd" 
 	order="no" stop_on_error="no">
-    <script language="javax.script:javascript">
+    <script language="javascript">
         <![CDATA[
 importClass(java.io.File);
 importClass(com.google.common.io.Files);
@@ -17,3 +17,4 @@ Files.append("script_only=" + spooler_job.name + "\n", new File(filename), Chars
     </script>
     <run_time/>
 </job>
+
