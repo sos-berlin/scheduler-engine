@@ -1620,6 +1620,20 @@ const char* z_memrchr( const char* s, char c, size_t length )
     }
 }
 
+//--------------------------------------------------------------------------------------string_find
+
+size_t string_find(const string& s, char searched)
+{ 
+    size_t i = s.find(searched); 
+    return i != string::npos? i : s.length(); 
+}
+
+size_t string_find(const string& s, const string& searched)  
+{ 
+    size_t i = s.find(searched); 
+    return i != string::npos? i : s.length(); 
+}
+
 //---------------------------------------------------------------------------truncate_with_ellipsis
 
 string truncate_with_ellipsis( const io::Char_sequence& seq, size_t length, const string& ellipsis )

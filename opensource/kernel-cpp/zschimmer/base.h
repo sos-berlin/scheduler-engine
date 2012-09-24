@@ -462,6 +462,9 @@ inline bool                 string_begins_with          ( const string& str, con
 inline bool                 string_ends_with            ( const string& str, const char* suffix )       { size_t len = strlen(suffix); return str.length() >= len && memcmp( &str.end()[0-len], suffix, len ) == 0; }
 inline bool                 string_ends_with            ( const string& str, const string& suffix )     { return str.length() >= suffix.length() && memcmp( &str.end()[0-suffix.length()], suffix.data(), suffix.length() ) == 0; }
 
+size_t                      string_find                 (const string& s, char searched);               // Liefert s.length(), wenn nicht gefunden
+size_t                      string_find                 (const string& s, const string& searched);      // Liefert s.length(), wenn nicht gefunden
+
 string                      remove_password             ( const string& text, const char* replacement = NULL );  // NULL: Jede Spur verwischen, "?" => -password=?
 string                      truncate_with_ellipsis      ( const io::Char_sequence&, size_t length, const string& ellipse = "..." );
 string                      truncate_to_one_line_with_ellipsis( const io::Char_sequence&, size_t length, const string& ellipse = "..." );
