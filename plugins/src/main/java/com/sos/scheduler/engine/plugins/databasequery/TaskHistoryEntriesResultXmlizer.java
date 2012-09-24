@@ -25,7 +25,7 @@ class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHistoryEn
     private static Element elementOfTaskHistoryEntity(Document doc, TaskHistoryEntity e) {
         Element result = doc.createElement("row");
         if (!e.getClusterMemberId().isEmpty())
-            result.setAttribute("clusterMemberId", e.getClusterMemberId());
+            result.setAttribute("clusterMemberId", e.getClusterMemberId().asString());
         if (!e.getSchedulerId().isEmpty())
             result.setAttribute("schedulerId", e.getSchedulerId().asString());
         if (!e.getJobPath().isEmpty())

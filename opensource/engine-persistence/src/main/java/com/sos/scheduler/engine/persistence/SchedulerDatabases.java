@@ -10,5 +10,9 @@ public final class SchedulerDatabases {
         return id.isEmpty()? emptyIdInDatabase : id.asString();
     }
 
+    public static SchedulerId schedulerIdFromDatabase(String id) {
+        return new SchedulerId(id.equals(emptyIdInDatabase)? "" : id);
+    }
+
     private SchedulerDatabases() {}
 }

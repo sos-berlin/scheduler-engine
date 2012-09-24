@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.persistence.entities;
 
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 
 import javax.annotation.Nullable;
@@ -8,8 +9,8 @@ import java.util.Date;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.sos.scheduler.engine.persistence.SchedulerDatabases.emptyIdInDatabase;
 import static com.sos.scheduler.engine.persistence.SchedulerDatabases.idForDatabase;
+import static com.sos.scheduler.engine.persistence.SchedulerDatabases.schedulerIdFromDatabase;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
 @Entity
@@ -37,19 +38,19 @@ public class TaskHistoryEntity {
     }
 
     public SchedulerId getSchedulerId() {
-        return new SchedulerId(schedulerId.equals(emptyIdInDatabase)? "" : schedulerId);
+        return schedulerIdFromDatabase(schedulerId);
     }
 
     public void setSchedulerId(SchedulerId id) {
         this.schedulerId = idForDatabase(id);
     }
 
-    public String getClusterMemberId() {
-        return nullToEmpty(clusterMemberId);
+    public ClusterMemberId getClusterMemberId() {
+        return new ClusterMemberId(nullToEmpty(clusterMemberId));
     }
 
-    public void setClusterMemberId(String clusterMemberId) {
-        this.clusterMemberId = emptyToNull(clusterMemberId);
+    public void setClusterMemberId(ClusterMemberId clusterMemberId) {
+        this.clusterMemberId = emptyToNull(clusterMemberId.asString());
     }
 
     public String getJobPath() {
