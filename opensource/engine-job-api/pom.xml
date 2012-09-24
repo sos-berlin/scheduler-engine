@@ -8,7 +8,7 @@
         <version>1.5.2264-SNAPSHOT</version>
     </parent>
     
-    <artifactId>job-api</artifactId>
+    <artifactId>engine-job-api</artifactId>
 
     <name>${project.artifactId}</name>
     <inceptionYear>2012</inceptionYear>

@@ -22,7 +22,7 @@
         <module>common</module>
         <module>data</module>
         <module>engine-persistence</module>
-		<module>job-api</module>
+		<module>engine-job-api</module>
         <module>kernel</module>
         <module>kernel.cppproxy-generated</module>
         <module>kernel-cpp</module>
