@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.persistence;
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.util.Date;
 
@@ -65,27 +66,27 @@ public class TaskHistoryEntity {
                 " jobName=" + getJobPath();
     }
 
-    public String getCause() {
+    @Nullable public String getCause() {
         return cause;
     }
 
-    public Integer getSteps() {
+    @Nullable public Integer getSteps() {
         return steps;
     }
 
     public String getErrorCode() {
-        return errorCode;
+        return nullToEmpty(errorCode);
     }
 
     public String getErrorText() {
-        return errorText;
+        return nullToEmpty(errorText);
     }
 
     public Date getStartTime() {
-        return startTime;
+        return (Date)startTime.clone();
     }
 
-    public Date getEndTime() {
-        return endTime;
+    @Nullable public Date getEndTime() {
+        return endTime == null? null: (Date)endTime.clone();
     }
 }

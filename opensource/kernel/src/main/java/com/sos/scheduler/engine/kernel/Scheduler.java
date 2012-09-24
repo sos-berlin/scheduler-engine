@@ -44,6 +44,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import static com.google.common.base.Objects.firstNonNull;
@@ -109,6 +110,9 @@ public final class Scheduler implements Sister,
     };
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
+        enableJavaUtilLoggingOverSLF4J();
+        TimeZone.setDefault(TimeZone.getTimeZone("Etc/UTC"));       // Für Hibernate @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
+
         this.cppProxy = cppProxy;
         configuration = new SchedulerConfiguration(cppProxy);
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
@@ -128,7 +132,6 @@ public final class Scheduler implements Sister,
         pluginSubsystem = new PluginSubsystem(this, injectorLazy, eventBus);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
-        enableJavaUtilLoggingOverSLF4J();
         initializeThreadLock();
     }
 
