@@ -465,7 +465,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.12.3</version>
                 <configuration>
-                    <argLine>-Xms10m -Xmx20m</argLine>  <!-- Sparsame Heap-Zuteilung für die vielen Prozesse (Tests + Scheduler-Task-Prozesse) -->
+                    <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemProperties>
                         <property>
                             <name>java.io.tmpdir</name>
