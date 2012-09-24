@@ -2835,16 +2835,16 @@ void Order::set_suspended( bool suspended )
 
         if( _job_chain )
         {
+            report_event_code(_suspended? orderSuspendedEvent : orderResumedEvent, java_sister());
+
             if( _is_on_blacklist  &&  !suspended )  remove_from_job_chain();
             else
             if( _is_in_order_queue )  order_queue()->reinsert_order( this );
 
             if( _suspended )  {
-               _log->info( message_string( "SCHEDULER-991" ) );
-                report_event_code(orderSuspendedEvent, java_sister());
+                _log->info( message_string( "SCHEDULER-991" ) );
             } else {
-               _log->info( message_string( "SCHEDULER-992", _setback ) );
-                report_event_code(orderResumedEvent, java_sister());
+                _log->info( message_string( "SCHEDULER-992", _setback ) );
             }
         }
 

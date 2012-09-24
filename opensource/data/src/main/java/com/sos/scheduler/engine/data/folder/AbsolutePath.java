@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public class AbsolutePath extends Path {
     public AbsolutePath(String p) {
         super(p);
-        assertIsEmptyOrAbsolute();
+        assertIsAbsolute();
     }
 
     protected AbsolutePath(AbsolutePath p) {

@@ -2300,7 +2300,8 @@ void Task::postprocess_order( Order::Order_state_transition state_transition, bo
     {
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         
-        report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition), _order->java_sister());
+        if (!_order->job_chain_path().empty())
+            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition), _order->java_sister());
         _order->postprocessing( state_transition );
         
         if( due_to_exception )
@@ -2324,7 +2325,8 @@ void Task::detach_order_after_error()
 
             _log->warn( message_string( "SCHEDULER-845" ) );
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
-            report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order::post_keep_state), _order->java_sister());
+            if (!_order->job_chain_path().empty())
+                report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order::post_keep_state), _order->java_sister());
             _order->processing_error();
             detach_order();
         }

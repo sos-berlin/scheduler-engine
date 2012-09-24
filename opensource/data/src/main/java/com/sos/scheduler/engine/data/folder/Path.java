@@ -9,7 +9,8 @@ public class Path extends StringValue {
     }
 
     public final void assertIsAbsolute() {
-        if (!isAbsolute())  throw new RuntimeException("Absolute path expected: " + this);
+        if (!isAbsolute())
+            throw new RuntimeException("Absolute path expected: " + this);
     }
 
     public final void assertIsEmptyOrAbsolute() {
