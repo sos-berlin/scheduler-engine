@@ -265,7 +265,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
         _regex.compile( _regex_string );
     }
 
-    _delay_after_error = Duration(element.int_getAttribute( "delay_after_error", _delay_after_error.seconds()));
+    _delay_after_error = Duration(element.int_getAttribute( "delay_after_error", int_cast(_delay_after_error.seconds())));
 
     if( element.getAttribute( "repeat" ) == "no" )  _repeat = Duration::eternal;
                                               else  _repeat = Duration(element.int_getAttribute( "repeat", _repeat.seconds()));

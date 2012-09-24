@@ -102,7 +102,7 @@ struct Windows_charset : Charset
         if( encoded.length() > 0 )
         {
             DWORD flags = 0; // Muss 0 sein für UTF-8 u.a   WC_NO_BEST_FIT_CHARS
-            size_t wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), int_cast(encoded.length()), NULL, 0 );
+            int wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), int_cast(encoded.length()), NULL, 0 );
             if( wchar_count == 0 )
             {
                 int error = GetLastError();
@@ -135,7 +135,7 @@ struct Windows_charset : Charset
         if( encoded.length() > 0 )
         {
             DWORD flags = 0; // Muss 0 sein für UTF-8 u.a   WC_NO_BEST_FIT_CHARS
-            size_t wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), int_cast(encoded.length()), NULL, 0 );
+            int wchar_count = MultiByteToWideChar( _codepage, flags, encoded.data(), int_cast(encoded.length()), NULL, 0 );
             if( wchar_count == 0 )
             {
                 int error = GetLastError();
