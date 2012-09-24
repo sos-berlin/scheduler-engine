@@ -17,6 +17,10 @@ public abstract class Lazy<T> {
         return value;
     }
 
+    public final boolean isDefined() {
+        return computed;
+    }
+
     /** Die Methode wird synchronized aufgerufen, also bei der Implementierung auf Deadlock achten! */
     protected abstract T compute();
 }
