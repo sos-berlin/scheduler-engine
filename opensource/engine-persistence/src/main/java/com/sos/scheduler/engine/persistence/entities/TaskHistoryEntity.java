@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.persistence;
+package com.sos.scheduler.engine.persistence.entities;
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 

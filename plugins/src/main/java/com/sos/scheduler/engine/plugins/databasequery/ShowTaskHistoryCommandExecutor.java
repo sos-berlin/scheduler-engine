@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.databasequery;
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.kernel.command.GenericCommandExecutor;
-import com.sos.scheduler.engine.persistence.TaskHistoryEntity;
+import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;

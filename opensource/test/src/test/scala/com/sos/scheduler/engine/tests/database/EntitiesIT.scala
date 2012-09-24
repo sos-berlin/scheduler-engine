@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.tests.database
 import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.OrderId
-import com.sos.scheduler.engine.persistence.TaskHistoryEntity
 import com.sos.scheduler.engine.test.Environment.schedulerId
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -14,6 +13,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.JavaConversions._
+import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity
 
 @RunWith(classOf[JUnitRunner])
 final class EntitiesIT extends ScalaSchedulerTest {
