@@ -1,14 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js461;
 
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.data.order.OrderEvent;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderResumedEvent;
 import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -18,7 +16,7 @@ import java.util.concurrent.BlockingQueue;
 import static org.junit.Assert.assertEquals;
 
 /**
- * js-461: modify order set state to endstate
+ * JS-461: modify order set state to endstate.
  * 
  * The sample configuration contains a jobchain with three nodes.
  * Running this test the chain starts and should be suspend at the second node
@@ -31,19 +29,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class JS461IT extends SchedulerTest {
 
-	private final String JOB_CHAIN = "js-461";
+	private static final String JOB_CHAIN = "js-461";
 
-	@SuppressWarnings("unused")
-	private static Logger logger;
 	private final CommandBuilder utils = new CommandBuilder();
 
 	// Queue for collecting the fired events in the listener thread
 	private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		logger = Logger.getLogger(JS461IT.class);
-	}
 
 	@Test
 	public void test() throws Exception {

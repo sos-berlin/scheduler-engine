@@ -114,7 +114,9 @@ function cmd_linux_clean() {
     rm -fr */{Debug,Release} */*/{Debug,Release} */*/{Debug,Release} */*/*/{Debug,Release}
     rm -fr `find .  -name "*.class"  -o -name "*.o"  -o -name "lib*.a"  -o -name "*.d"  -print`
     BUILD_OPT=1 JS_LIVECONNECT=1 make -C js/src  -f Makefile.ref  clean || true
-    make  -C spidermonkey/Release  -f ../Makefile  clean || true
+    if [ "$cpuArchitecture" == "x86" ]; then
+        make  -C scripting_engine/Release  -f ../Makefile  clean || true
+    fi
 }
 
 function cmd_linux_compile() {(
@@ -143,15 +145,15 @@ function cmd_linux_compile() {(
 
     make/make scheduler
 
-    provide_binaries_as_resources
+    #provide_binaries_as_resources
 )}
 
-function provide_binaries_as_resources() {
-    rm -rf generated-java-resources/*
-    dir="generated-java-resources/test/com/sos/scheduler/engine/kernelcpp/bin-test"
-    mkdir -p "$dir"
-    ln -s ../../../../../../../../bin/{libscheduler.so,scheduler,libspidermonkey.so} "$dir/"
-}
+#function provide_binaries_as_resources() {
+#    rm -rf generated-java-resources/*
+#    dir="generated-java-resources/test/com/sos/scheduler/engine/kernelcpp/bin-test"
+#    mkdir -p "$dir"
+#    ln -s ../../../../../../../../bin/{libscheduler.so,scheduler,libspidermonkey.so} "$dir/"
+#}
 
 function searchAndDestroySubDirectory() {
     subDirName="$1"

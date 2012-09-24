@@ -20,7 +20,7 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 
-public class EnvironmentFiles {
+class EnvironmentFiles {
     private static final ResourcePath defaultConfigResourcePath = new ResourcePath(EnvironmentFiles.class.getPackage(), "config");
     private final ResourcePath configResourcePath;
     private final File directory;
