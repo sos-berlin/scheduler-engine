@@ -19,7 +19,7 @@
     </organization>
 
     <modules>
-        <module>common</module>
+        <module>engine-common</module>
         <module>data</module>
         <module>engine-persistence</module>
 		<module>engine-job-api</module>

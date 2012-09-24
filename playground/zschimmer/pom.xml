@@ -50,7 +50,7 @@
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>engine-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

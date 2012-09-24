@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>engine-common</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
