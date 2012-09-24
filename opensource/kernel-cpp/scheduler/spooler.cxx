@@ -3474,29 +3474,29 @@ void Spooler::assign_stdout()
     #endif
 }
 
-//----------------------------------------------------------------------Spooler::string backup_logfile
+//--------------------------------------------------------------------------Spooler::backup_logfile
 
 string Spooler::backup_logfile( const File_path path )
 {
    string msg = "";
    if( path.file_exists() )
    {
-         size_t i = path.name().find_last_of(".");
-         File_path scheduler_old = (i > string::npos) ? path.substr(0,i) + "-old." + path.extension() : path + "-old";
+         size_t i = string_find(path, '.');
+         File_path scheduler_old = path.substr(0,i) + "-old" + path.substr(i);
          try
          {
             scheduler_old.try_unlink();
             path.move_to(scheduler_old);
-            msg = S() << "file " << path << " moved to " << scheduler_old << "\n"; 
+            msg = S() << "File " << path << " moved to " << scheduler_old << "\n"; 
          }
          catch( exception& x ) { 
             try {
-               msg = S() << x.what() << ", while rename file " << path << " to " << scheduler_old << " - try to copy\n"; 
+               msg = S() << x.what() << ", while renaming file " << path << " to " << scheduler_old << " - trying to copy\n"; 
                copy_file(path,scheduler_old);
-               msg += S() << "file " << path << " copied to " << scheduler_old << "\n"; 
+               msg += S() << "File " << path << " copied to " << scheduler_old << "\n"; 
             }
             catch( exception& x1 ) {
-               msg += S() << x1.what() << ", while copy file " << path << " to " << scheduler_old << "\n"; 
+               msg += S() << x1.what() << ", while copying file " << path << " to " << scheduler_old << "\n"; 
             }
          }
 
