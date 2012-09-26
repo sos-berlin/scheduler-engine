@@ -67,8 +67,8 @@ library Spooler
     interface Ierror : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(0),propget]
         HRESULT                 Is_error                    ( [out,retval] VARIANT_BOOL* Result );
@@ -99,8 +99,8 @@ library Spooler
     interface Ivariable : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(0),propput]
         HRESULT                 Value                       ( [in] VARIANT* Value );
@@ -136,8 +136,8 @@ library Spooler
     interface Ivariable_set : IDispatch
     {
         [id(7),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1)]
         HRESULT                 Set_var                     ( [in] BSTR Name, [in] VARIANT* Value );
@@ -251,8 +251,8 @@ library Spooler
     interface Irun_time: IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(2),propput]
         HRESULT                 Xml                         ( [in] BSTR );
@@ -271,8 +271,8 @@ library Spooler
     interface Ischedule : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(2),propput]
         HRESULT                 Xml                         ( [in] BSTR );
@@ -291,8 +291,8 @@ library Spooler
     interface Ijob : IDispatch
     {
         [id(12),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
         [id(1)]
         HRESULT                 Start_when_directory_changed( [in] BSTR directory_name, [in,defaultvalue("")] BSTR filename_pattern );
 
@@ -346,10 +346,10 @@ library Spooler
         HRESULT                 Remove                      ();
 
         [id(17)]
-        HRESULT                 Execute_command             ( [in] BSTR );                      // Für Joacim 2006-02-20
+        HRESULT                 Execute_command             ( [in] BSTR );                      // Fï¿½r Joacim 2006-02-20
 
         [id(18),propput]                                                                               
-        HRESULT                 Machine_resumable           ( [in] VARIANT_BOOL );              // Für Joacim 2006-06-15
+        HRESULT                 Machine_resumable           ( [in] VARIANT_BOOL );              // Fï¿½r Joacim 2006-06-15
 
         [id(19),propget]                                                                               
         HRESULT                 Process_class               ( [out,retval] Iprocess_class** );
@@ -362,6 +362,9 @@ library Spooler
 
         [id(22),propget]
         HRESULT                 Setback_max                 ( [out,retval] int* );
+
+        [id(23),propget]
+        HRESULT                 Script_code                 ( [out,retval] BSTR* );
     }
 
     [
@@ -383,14 +386,14 @@ library Spooler
     interface Itask : IDispatch
     {
         [id(14),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1),propget]
         HRESULT                 Object_set                  ( [out,retval] Iobject_set** Result );
 
         [id(2),propput]
-        HRESULT                 Error                       ( [in] VARIANT* error_text );       // Für PerlScript, das einen Fehlertext nicht durchreicht
+        HRESULT                 Error                       ( [in] VARIANT* error_text );       // Fï¿½r PerlScript, das einen Fehlertext nicht durchreicht
 
         [id(2),propget]
         HRESULT                 Error                       ( [out,retval] Ierror** Result );
@@ -452,7 +455,7 @@ library Spooler
         [id(20)]
         HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
 
-        // Nur für Itask_proxy
+        // Nur fï¿½r Itask_proxy
         [id(21)]
         HRESULT                 Add_subprocess              ( [in] int Pid, [in] double* timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, 
                                                               [in] VARIANT_BOOL kill_dependants_too, [in,defaultvalue("")] BSTR Title );
@@ -464,7 +467,7 @@ library Spooler
         HRESULT                 Priority_class              ( [out,retval] BSTR* );
 
         [id(23),propget]
-        HRESULT                 Step_count                  ( [out,retval] int* );                              // Für Joacim 2005-04-02
+        HRESULT                 Step_count                  ( [out,retval] int* );                              // Fï¿½r Joacim 2005-04-02
 
         [id(24),propget]
         HRESULT                 Stderr_path                 ( [out,retval] BSTR* Result );
@@ -473,7 +476,7 @@ library Spooler
         HRESULT                 Stdout_path                 ( [out,retval] BSTR* Result );
 
         [id(26)]
-        HRESULT                 Set_error_code_and_text     ( [in] BSTR Code, [in] BSTR Text );                 // Für spooler_process_after()
+        HRESULT                 Set_error_code_and_text     ( [in] BSTR Code, [in] BSTR Text );                 // Fï¿½r spooler_process_after()
 
         [id(27),propget]
         HRESULT                 Web_service                 ( [out,retval] Iweb_service** );
@@ -539,7 +542,7 @@ library Spooler
     ]
     interface Itask_proxy : IDispatch
     {
-        // Ids sollten mit Itask übereinstimmen!
+        // Ids sollten mit Itask ï¿½bereinstimmen!
 
         [id(20)]
         HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
@@ -587,8 +590,8 @@ library Spooler
     interface Ithread : IDispatch
     {
         [propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [propget]
         HRESULT                 Log                     ( [out,retval] Ilog** log );
@@ -624,11 +627,11 @@ library Spooler
     ]
     interface Ispooler : IDispatch
     {
-        // Ids sollten mit Itask_proxy übereinstimmen!
+        // Ids sollten mit Itask_proxy ï¿½bereinstimmen!
 
         [id(18),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1),propget]
         HRESULT                 Log                     ( [out,retval] Ilog** Log );
@@ -702,19 +705,19 @@ library Spooler
         [id(23)]
         HRESULT                 Abort_immediately_and_restart();
 
-        [id(24),propget,helpstring("Name der Datenbanktabelle für die internen Variablen des Schedulers")]
+        [id(24),propget,helpstring("Name der Datenbanktabelle fï¿½r die internen Variablen des Schedulers")]
         HRESULT                 Db_variables_table_name ( [out,retval] BSTR* );
 
-        [id(25),propget,helpstring("Name der Datenbanktabelle für die Tasks")]
+        [id(25),propget,helpstring("Name der Datenbanktabelle fï¿½r die Tasks")]
         HRESULT                 Db_tasks_table_name     ( [out,retval] BSTR* );
 
-        [id(26),propget,helpstring("Name der Datenbanktabelle für die Aufträge")]
+        [id(26),propget,helpstring("Name der Datenbanktabelle fï¿½r die Auftrï¿½ge")]
         HRESULT                 Db_orders_table_name    ( [out,retval] BSTR* );
 
-        [id(27),propget,helpstring("Name der Datenbanktabelle für die Historie")]
+        [id(27),propget,helpstring("Name der Datenbanktabelle fï¿½r die Historie")]
         HRESULT                 Db_history_table_name   ( [out,retval] BSTR* );
 
-        [id(28),propget,helpstring("Name der Datenbanktabelle für die Auftragshistorie")]
+        [id(28),propget,helpstring("Name der Datenbanktabelle fï¿½r die Auftragshistorie")]
         HRESULT                 Db_order_history_table_name( [out,retval] BSTR* );
 
         [id(29),propget,helpstring("Option -ini= (Pfadname der factory.ini)")]
@@ -845,8 +848,8 @@ library Spooler
     interface Imail : IDispatch
     {
         [id(15),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
       //[hidden]
       //void                    Init                    ();
@@ -946,7 +949,7 @@ library Spooler
     interface Idirectory_file_order_source : IDispatch
     {
         //[propget]
-        //HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        //HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
     }
     
     //--------------------------------------------------------------------------------Job_chain_node
@@ -959,8 +962,8 @@ library Spooler
     interface Ijob_chain_node : IDispatch
     {
         [id(7),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1),propget]
         HRESULT                 State                   ( [out,retval] VARIANT* Result );
@@ -1006,8 +1009,8 @@ library Spooler
     interface Ijob_chain : IDispatch
     {
         [id(8),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1),propput]
         HRESULT                 Name                    ( [in] BSTR Name );
@@ -1042,15 +1045,15 @@ library Spooler
         HRESULT                 Orders_recoverable      ( [out,retval] VARIANT_BOOL* );
 
         [id(10)]
-        HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // Für Joacim, 2005-02-27 (was fehlt: Werden alle Aufträge in DB gelöscht? Wird eine Historie geschieben? 
+        HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // Fï¿½r Joacim, 2005-02-27 (was fehlt: Werden alle Auftrï¿½ge in DB gelï¿½scht? Wird eine Historie geschieben? 
                                                                                             // Besser mit Orders_recoverable=false!
                                                                                             // Vielleicht besser so:
                                                                                             // Begin_refresh_all_orders()
-                                                                                            //    job_chain.add_order(order): Ersetzt Auftrag (nur wenn er hängt)
+                                                                                            //    job_chain.add_order(order): Ersetzt Auftrag (nur wenn er hï¿½ngt)
                                                                                             // End_refresh_all_orders() (automatisch bei Jobende)
-                                                                                            // Alle nicht angerührten Aufträge werden entfernt.
+                                                                                            // Alle nicht angerï¿½hrten Auftrï¿½ge werden entfernt.
         [id(11)]
-        HRESULT                 Try_add_order           ( [in] Iorder* order, [out,retval] VARIANT_BOOL* Ok );  // Für Joacim, 2005-05-28
+        HRESULT                 Try_add_order           ( [in] Iorder* order, [out,retval] VARIANT_BOOL* Ok );  // Fï¿½r Joacim, 2005-05-28
 
         [id(12)]
         HRESULT                 Add_or_replace_order    ( [in] Iorder* );
@@ -1084,8 +1087,8 @@ library Spooler
     interface Iorder_queue : IDispatch
     {
         [id(3),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1),propget]
         HRESULT                 Length                  ( [out,retval] int* Result );
@@ -1113,8 +1116,8 @@ library Spooler
     interface Iorder : IDispatch
     {
         [id(12),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1),propput]
         HRESULT                 Id                      ( [in] VARIANT* Value );
@@ -1180,10 +1183,10 @@ library Spooler
         HRESULT                 Setback                 ();
 
         [id(14),propput]
-        HRESULT                 At                      ( [in] VARIANT* date_time );                // Für Joacim, 2005-02-27 (was fehlt: Speichern in Datenbank, aufrufbar im Taskschritt?)
+        HRESULT                 At                      ( [in] VARIANT* date_time );                // Fï¿½r Joacim, 2005-02-27 (was fehlt: Speichern in Datenbank, aufrufbar im Taskschritt?)
 
         [id(14),propget]
-        HRESULT                 At                      ( [out,retval] DATE* Result );              // Für Joacim, 2005-02-27
+        HRESULT                 At                      ( [out,retval] DATE* Result );              // Fï¿½r Joacim, 2005-02-27
 
         [id(15),propget]
         HRESULT                 Run_time                ( [out,retval] Irun_time** );
@@ -1262,8 +1265,8 @@ library Spooler
     interface Ilog : IDispatch
     {
         [id(24),propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                    // Für den Objectserver
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                    // Fï¿½r den Objectserver
 
         [id(1)]
         HRESULT                 Debug9                  ( [in] BSTR line );
@@ -1299,7 +1302,7 @@ library Spooler
         HRESULT                 Info                    ( [in] BSTR line );
         
         [id(11)]
-        HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
+        HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilitï¿½t, wie info()
         
         [id(12)]
         HRESULT                 Warn                    ( [in] BSTR line );
@@ -1399,8 +1402,8 @@ library Spooler
     interface Ilog_proxy : IDispatch
     {
         [propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
 
         HRESULT                 Debug9                  ( [in] BSTR line );
         HRESULT                 Debug8                  ( [in] BSTR line );
@@ -1417,7 +1420,7 @@ library Spooler
         [id(0)]
         HRESULT                 Info                    ( [in] BSTR line );
         
-        HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
+        HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilitï¿½t, wie info()
         
         HRESULT                 Warn                    ( [in] BSTR line );
         
@@ -1494,8 +1497,8 @@ library Spooler
     interface Isubprocess : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
 
         [id(2)]
         HRESULT                 Close                   ();
@@ -1559,7 +1562,7 @@ library Spooler
         HRESULT                 Timeout                 ( [in] double* seconds );
 
         [propput]
-        HRESULT                 Show_window             ( [in] VARIANT* );      // Für Joacim, 2005-05-17
+        HRESULT                 Show_window             ( [in] VARIANT* );      // Fï¿½r Joacim, 2005-05-17
 
         [id(14)]
         HRESULT                 Wait_for_termination    ( [in,optional] VARIANT* seconds, [out,retval] VARIANT_BOOL* );       // seconds: VT_DOUBLE oder VT_INT
@@ -1602,8 +1605,8 @@ library Spooler
     interface Ixslt_stylesheet : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(2)]
         HRESULT                 Close                   ();
 
@@ -1637,8 +1640,8 @@ library Spooler
     interface Ixslt_stylesheet_proxy : IDispatch
     {
         [propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         HRESULT                 Close                   ();
 
         HRESULT                 Load_xml                ( [in] BSTR Xml, [out,retval] Ixslt_stylesheet** );
@@ -1660,8 +1663,8 @@ library Spooler
     interface Iweb_service: IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(2),propget]
         HRESULT                 Name                    ( [out,retval] BSTR* );
 
@@ -1688,8 +1691,8 @@ library Spooler
     interface Iweb_service_operation: IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(2),propget]
         HRESULT                 Web_service             ( [out,retval] Iweb_service** );
 
@@ -1716,8 +1719,8 @@ library Spooler
     interface Iweb_service_request: IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(3),propget]
         HRESULT                 Header                  ( [in] BSTR Name, [out,retval] BSTR* Result );
 
@@ -1747,8 +1750,8 @@ library Spooler
     interface Iweb_service_response: IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(2),propput]
         HRESULT                 Status_code             ( [in] int );
 
@@ -1790,8 +1793,8 @@ library Spooler
     interface Ilocks : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(0),propget]
         HRESULT                 Lock                    ( [in] BSTR, [out,retval] Ilock** );
 
@@ -1815,8 +1818,8 @@ library Spooler
     interface Ilock : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(2),propput]
         HRESULT                 Name                    ( [in] BSTR );
 
@@ -1843,8 +1846,8 @@ library Spooler
     interface Iprocess_classes : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(0),propget]
         HRESULT                 Process_class           ( [in] BSTR, [out,retval] Iprocess_class** );
 
@@ -1868,8 +1871,8 @@ library Spooler
     interface Iprocess_class : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(2),propput]
         HRESULT                 Name                    ( [in] BSTR );
 
@@ -1902,8 +1905,8 @@ library Spooler
     interface Isupervisor_client : IDispatch
     {
         [id(1),propget]
-        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-                                                                                                // Für den Objectserver
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+                                                                                                // Fï¿½r den Objectserver
         [id(2),propget]
         HRESULT                 Hostname                ( [out,retval] BSTR* );
 
@@ -1921,8 +1924,8 @@ library Spooler
     //interface Ischeduler_event2 : IDispatch
     //{
     //    [id(1),propget]
-    //    HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
-    //                                                                                                // Für den Objectserver
+    //    HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name ï¿½ber IDispatch, statt ï¿½ber Ihas_java_class_name gerufen werden kann
+    //                                                                                                // Fï¿½r den Objectserver
 
     //    [id(2),propget]
     //    HRESULT                 Object                      ( [out,retval] Iorder** Result );

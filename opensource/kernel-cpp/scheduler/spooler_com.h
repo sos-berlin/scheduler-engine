@@ -113,7 +113,7 @@ struct Com_variable: spooler_com::Ivariable,
                      spooler_com::Ihas_java_class_name, 
                      Sos_ole_object
 {
-    Z_GNU_ONLY(                 Com_variable                ();  )                                  // Für gcc 3.2. Nicht implementiert.
+    Z_GNU_ONLY(                 Com_variable                ();  )                                  // Fï¿½r gcc 3.2. Nicht implementiert.
                                 Com_variable                ( const BSTR name, const VARIANT& );
                                 Com_variable                ( const Com_variable& );
 
@@ -394,7 +394,7 @@ struct Com_object_set : spooler_com::Iobject_set,
                       //spooler_com::Ihas_java_class_name, 
                         Sos_ole_object               
 {
-    Z_GNU_ONLY(                 Com_object_set              ();  )                                  // Für gcc 3.2. Nicht implementiert.
+    Z_GNU_ONLY(                 Com_object_set              ();  )                                  // Fï¿½r gcc 3.2. Nicht implementiert.
                                 Com_object_set              ( Object_set* );
 
     USE_SOS_OLE_OBJECT
@@ -418,7 +418,7 @@ struct Com_job : spooler_com::Ijob,
                  spooler_com::Ihas_java_class_name, 
                  Sos_ole_object               
 {
-    Z_GNU_ONLY(                 Com_job                     ();  )                                  // Für gcc 3.2. Nicht implementiert.
+    Z_GNU_ONLY(                 Com_job                     ();  )                                  // Fï¿½r gcc 3.2. Nicht implementiert.
                                 Com_job                     ( Job* );
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
@@ -452,6 +452,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            get_Folder_path                 ( BSTR* );
     STDMETHODIMP            get_Configuration_directory     ( BSTR* );
     STDMETHODIMP            get_Setback_max             ( int* );
+    STDMETHODIMP            get_Script_code                 ( BSTR* );
 
   private:
     Thread_semaphore           _lock;
@@ -614,7 +615,7 @@ struct Com_spooler : spooler_com::Ispooler,
                      z::com::object_server::Ihas_reference_with_properties,
                      Sos_ole_object               
 {
-                                Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
+                                Com_spooler                 ();                                     // Fï¿½r gcc 3.2. Nicht implementiert.
                                 Com_spooler                 ( Spooler* ); 
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );

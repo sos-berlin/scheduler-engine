@@ -53,7 +53,7 @@ const string needed_api_version = "2.0.160.4605 (2006-11-23)";
 
 const static JNINativeMethod native_methods[] = 
 {
-    { "com_call", "(JLjava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void*)Java_sos_spooler_Idispatch_com_1call }
+    { (char*)"com_call", (char*)"(JLjava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void*)Java_sos_spooler_Idispatch_com_1call }
 };
 
 //-------------------------------------------------------------------------------------------static
@@ -68,12 +68,12 @@ static jobject scheduler_jobject_from_variant( JNIEnv* jenv, const VARIANT& v, J
 
     if( v.vt == VT_EMPTY )
     {
-        return jenv->NewString( NULL, 0 );       // Für job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
+        return jenv->NewString( NULL, 0 );       // F?r job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
     }
     else
     if( v.vt == VT_ERROR  && v.scode == DISP_E_PARAMNOTFOUND ) 
     {
-        return jenv->NewString( NULL, 0 );       // Für job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
+        return jenv->NewString( NULL, 0 );       // F?r job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
     }
     else
     {
@@ -106,61 +106,9 @@ Java_idispatch_stack_frame::~Java_idispatch_stack_frame()
     thread_data->_idispatch_container.release_objects(); 
 }
 
-//--------------------------------------------------------------------------Module::make_java_class
-// Quellcode compilieren
+//-------------------------------------------------------------------------------------init_java_vm
 
-bool Module::make_java_class( bool )
-{
-    if( _java_vm->work_dir().empty() )  z::throw_xc( "SCHEDULER-201" );    // Vorsichtshalber, sollte nicht passieren.
-
-    File_path filepath       = _java_vm->work_dir() + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
-    File_path java_filepath  = filepath + ".java";
-    File_path class_filepath = filepath + ".class";
-    string    source;
-        if( source.empty() )  source = read_source_script();
-
-        make_path( java_filepath.directory() );
-
-
-        // Windows: Falls die Großschreibung des Klassennamens geändert worden ist, müssen die alten Dateinamen gelöscht werden (Jira JS-181)
-        bool ok = java_filepath.try_unlink();
-        if( !ok  &&  java_filepath.exists() )  z::throw_xc( "SCHEDULER-450", java_filepath ); 
-
-        ok = class_filepath.try_unlink();
-        if( !ok  &&  class_filepath.exists() )  z::throw_xc( "SCHEDULER-450", class_filepath ); 
-
-
-        File source_file ( java_filepath, "wb" );
-        source_file.print( source );
-        source_file.close();
-
-        set_environment_variable( "CLASSPATH", _java_vm->class_path() );  // Auf Wunsch von Püschel, Jira JS-180
-
-        
-        S cmd;
-        cmd << '"' << _java_vm->javac_filename() << "\" -g "
-                                                  //"-classpath " << quoted_string( _java_vm->class_path(), '"', cmd_escape ) << ' ' 
-                                                 //<< quoted_string( java_filepath, '"', cmd_escape );     // + " -verbose"
-                                                 << java_filepath;     // + " -verbose"
-        _log.info( message_string( "SCHEDULER-934", cmd ) );
-        
-        System_command c;
-        c.set_throw( false );
-        c.execute( cmd );
-
-        //Löscht nicht. set_environment_variable( "CLASSPATH", old_classpath );
-
-        if( c.stderr_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stderr_text() ),  _log.info( "" );
-        if( c.stdout_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stdout_text() ),  _log.info( "" );
-
-        if( c.xc() )  throw *c.xc();
-
-    return true;
-}
-
-//---------------------------------------------------------------Java_module_instance::init_java_vm
-
-void Java_module_instance::init_java_vm( javabridge::Vm* java_vm )
+void init_java_vm( javabridge::Vm* java_vm )
 {
     string work_dir = java_vm->work_dir();
     if( !work_dir.empty() )
@@ -168,14 +116,14 @@ void Java_module_instance::init_java_vm( javabridge::Vm* java_vm )
         try
         {
             //fprintf( stderr, "make_path %s\n", work_dir.c_str() );
-            make_path( work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
+            make_path( work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath ber?cksichtigt.
         }
         catch( const exception& x ) { java_vm->_log.warn( "mkdir " + work_dir + " => " + x.what() ); }
     }
 
     java_vm->start();
 
-  //make_path( _java_vm->work_dir() );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
+  //make_path( _java_vm->work_dir() );       // Java-VM pr?ft Vorhandensein der Verzeichnisse in classpath schon beim Start
 
     {
         Env env = java_vm->jni_env();
@@ -229,27 +177,6 @@ void Java_module_instance::init()
     if( !_java_class )
     {
         string class_name = replace_regex( _module->_java_class_name, "\\.", "/" );
-
-        if( _module->has_source_script() )
-        {
-            bool compiled = _module->make_java_class( _module->_recompile & !_module->_compiled );     // Java-Klasse ggfs. übersetzen
-            _module->_compiled |= compiled;
-
-            if( !compiled )
-            {
-                try 
-                {
-                    _java_class = env.find_class( class_name.c_str() );
-                }
-                catch( const exception& x )
-                {
-                    Vm::static_vm->_log.warn( x.what() );
-                    Vm::static_vm->_log.warn( message_string( "SCHEDULER-294", class_name ) );     // "Die Java-Klasse " + class_name + " konnte nicht geladen werden. Die Java-Quelle wird neu übersetzt, mal sehen, ob's dann geht"
-                    _module->make_java_class( true );       // force=true, Mod_time nicht berücksichtigen und auf jeden Fall kompilieren
-                }
-            }
-        }
-
         _java_class = env.find_class( class_name.c_str() );
     }
 
@@ -263,8 +190,8 @@ void Java_module_instance::init()
     try
     {
         // Das ist die falsche Stelle.
-        // Die Prüfung sollte an höherer Stelle, im Haupt-Prozess gerufen werden.
-        // Dort haben wir ein Protokoll für log()->warn() und für entfernte Jobs kann der Client-Scheduler die Version prüfen.
+        // Die Pr?fung sollte an h?herer Stelle, im Haupt-Prozess gerufen werden.
+        // Dort haben wir ein Protokoll f?r log()->warn() und f?r entfernte Jobs kann der Client-Scheduler die Version pr?fen.
         check_api_version();
     }
     catch( exception& x )  { Z_LOG2( "scheduler", "*** ERROR ***  " << x.what() << "\n" ); }  
@@ -274,7 +201,7 @@ void Java_module_instance::init()
 
 void Java_module_instance::check_api_version()
 {
-    /* Das muss auch für Monitor_impl realisiert werden. Besser auf statische Klassenmethode zurückgreifen (sos.spooler.Spooler_constants). 
+    /* Das muss auch f?r Monitor_impl realisiert werden. Besser auf statische Klassenmethode zur?ckgreifen (sos.spooler.Spooler_constants). 
 
     Local_frame local_frame ( jenv(), 10 );
 
@@ -293,8 +220,8 @@ void Java_module_instance::check_api_version()
     
     for( int i = 0; i < 4; i++ )  m[i] = as_int( my_version[i] ),  j[i] = as_int( java_version[i] );
 
-    if( j[0] != m[0]                        // 1. Teil muss übereinstimmen
-     || j[1] != m[1]                        // 2. Teil muss übereinstimmen
+    if( j[0] != m[0]                        // 1. Teil muss ?bereinstimmen
+     || j[1] != m[1]                        // 2. Teil muss ?bereinstimmen
      || j[1] == m[1]  &&  j[2] < m[2]       // 3. Teil muss nicht kleiner sein
      || j[2] == m[2]  &&  j[3] < m[3] )     // 4. Teil muss nicht kleiner sein
     {
@@ -371,7 +298,7 @@ Variant Java_module_instance::call( const string& name_par )
         result = env->CallBooleanMethod( _jobject, method_id ) != 0;
     }
     else
-    if( *name.rbegin() == ';' )     // Für spooler_api_version()
+    if( *name.rbegin() == ';' )     // F?r spooler_api_version()
     {
         In_call in_call ( this, name ); 
         Local_jstring jstr ( (jstring)env->CallObjectMethod( _jobject, method_id ) );
@@ -410,7 +337,7 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
             result = env->CallBooleanMethod( _jobject, method_id, param.as_bool() ) != 0;
         }
         else
-        if( string_ends_with( name, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;" ) )  // Für <run_time start_time_function="">, s. Run_time::call_function
+        if( string_ends_with( name, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;" ) )  // F?r <run_time start_time_function="">, s. Run_time::call_function
         {
             Bstr result;
 
@@ -462,7 +389,7 @@ jmethodID Java_module_instance::java_method_id( const string& name )
     Method_map::iterator it = _method_map.find( name );
     if( it == _method_map.end() )  
     {
-        int pos = name.find( '(' );
+        size_t pos = name.find( '(' );
         if( pos == string::npos )  pos = name.length();
         
         if( !_java_class )  z::throw_xc( "SCHEDULER-197", name );
