@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job order="no" stop_on_error="no">
+    <script language="java" java_class="com.sos.scheduler.engine.tests.spoolerapi.job.GetSourceJob">
+        <![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>opensource.plugins</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>jetty</module>
+    </modules>
+</project>
+        ]]>
+    </script>
+</job>

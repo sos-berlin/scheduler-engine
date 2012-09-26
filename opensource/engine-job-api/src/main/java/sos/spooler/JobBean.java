@@ -108,6 +108,10 @@ public final class JobBean implements Bean<Job> {
         return delegate.setback_max();
     }
 
+    public String getScript_code() {
+        return delegate.script_code();
+    }
+
     public Job getDelegate() {
         return delegate;
     }
