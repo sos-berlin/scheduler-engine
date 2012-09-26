@@ -69,26 +69,20 @@ call prepare-setup.sh <version> to use this pom
                     <phase>install</phase>
                     <goals>
                         <goal>copy-dependencies</goal>
-                        <!-- goal>copy</goal -->
+                        <goal>copy</goal>
                     </goals>
-                    <!--
                     <configuration>
                         <artifactItems>
+                            <!-- fat jar mit allen benötigten jars der JobScheduler engine (derzeit nicht ausgeliefert) -->
                             <artifactItem>
                                 <groupId>${project.groupId}</groupId>
                                 <artifactId>jar</artifactId>
                                 <version>${project.version}</version>
                                 <type>jar</type>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>jar</artifactId>
-                                <version>${project.version}</version>
-                                <type>pom</type>
+                                <destFileName>engine-all-${project.version}.jar</destFileName>
                             </artifactItem>
                         </artifactItems>
                     </configuration>
-                    -->
                 </execution>
             </executions>
         </plugin>
@@ -116,7 +110,8 @@ call prepare-setup.sh <version> to use this pom
     </build>
 
     <dependencies>
-        
+
+        <!-- liefert alle benötigten jars für die engine aus dem Artifakt jar und deren Abhängige -->        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jar</artifactId>
@@ -124,55 +119,7 @@ call prepare-setup.sh <version> to use this pom
             <type>jar</type>
         </dependency>
 
-<!--
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>kernel</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>kernel.cppproxy-generated</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cppjava.runtime</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-      
-        <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
-            <artifactId>data</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>engine-job-api</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>jetty</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-            <exclusions>
-              <exclusion>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>kernel-cpp</artifactId>
-              </exclusion>
-            </exclusions>
-        </dependency>
--->
-
+        <!-- plattformspezifischer C++ Kern -->        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>kernel-cpp</artifactId>
