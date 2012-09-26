@@ -26,11 +26,6 @@
     <logger name="com.sos.scheduler.engine">
         <level value="info"/>
     </logger>
-	
-    <logger name="com.sos.scheduler.engine.tests.jira.js793">
-        <level value="debug"/>
-		<appender-ref ref="console_simple"/>
-    </logger>
 
     <!--logger name="com.sos.scheduler.engine.tests.jira.js644">
         <level value="debug"/>
