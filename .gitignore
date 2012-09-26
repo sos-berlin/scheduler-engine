@@ -17,3 +17,6 @@
 /out/
 *.iml
 atlassian-ide-plugin.xml
+
+release.properties
+opensource/kernel-cpp/javaproxy/javaproxy.vcproj.mobile-2.schaedi.user
