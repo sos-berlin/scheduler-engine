@@ -69,8 +69,9 @@ call prepare-setup.sh <version> to use this pom
                     <phase>install</phase>
                     <goals>
                         <goal>copy-dependencies</goal>
-                        <goal>copy</goal>
+                        <!-- goal>copy</goal -->
                     </goals>
+                    <!--
                     <configuration>
                         <artifactItems>
                             <artifactItem>
@@ -85,17 +86,9 @@ call prepare-setup.sh <version> to use this pom
                                 <version>${project.version}</version>
                                 <type>pom</type>
                             </artifactItem>
-                            <!--
-                            <artifactItem>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>kernel-cpp</artifactId>
-                                <version>${project.version}</version>
-                                <classifier>${setup.platform}</classifier>
-                                <type>jar</type>
-                            </artifactItem>
-                            -->
                         </artifactItems>
                     </configuration>
+                    -->
                 </execution>
             </executions>
         </plugin>
@@ -126,7 +119,22 @@ call prepare-setup.sh <version> to use this pom
         
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>jar</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+
+<!--
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>kernel</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>kernel.cppproxy-generated</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -134,6 +142,19 @@ call prepare-setup.sh <version> to use this pom
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>cppjava.runtime</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+      
+        <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>data</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>engine-job-api</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -150,6 +171,7 @@ call prepare-setup.sh <version> to use this pom
               </exclusion>
             </exclusions>
         </dependency>
+-->
 
         <dependency>
             <groupId>${project.groupId}</groupId>

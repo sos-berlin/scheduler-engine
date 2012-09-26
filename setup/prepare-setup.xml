@@ -65,6 +65,9 @@ to run without maven integration.
   	<fileset dir="${source.dir}" id="files.lib">
   		<include name="web-${version.number}*.jar"/>
   		<include name="data-${version.number}*.jar"/>
+  		<include name="engine-common-${version.number}*.jar"/>
+  		<include name="engine-job-api-${version.number}*.jar"/>
+  		<include name="engine-persistence-${version.number}*.jar"/>
   	</fileset>
   	<fileset dir="${source.dir}" id="plugins.lib">
   		<include name="jetty-${version.number}*.jar"/>
