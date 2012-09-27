@@ -3,7 +3,9 @@ package com.sos.scheduler.engine.tests.database
 import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.OrderId
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.settings.{SettingName, Settings}
 import com.sos.scheduler.engine.persistence.entities.{JobEntity, TaskHistoryEntity}
 import com.sos.scheduler.engine.test.Environment.schedulerId
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -12,26 +14,25 @@ import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import javax.persistence.EntityManager
 import org.joda.time.DateTime.now
-import org.joda.time.DateTimeZone.UTC
 import org.joda.time.Duration.{millis, standardSeconds}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 
 @RunWith(classOf[JUnitRunner])
 final class EntitiesIT extends ScalaSchedulerTest {
 
   import EntitiesIT._
 
-  private val testStartTime = now(UTC) withMillisOfSecond 0
+  private val testStartTime = now() withMillisOfSecond 0
   private lazy val jobSubsystem = controller.scheduler.instance[JobSubsystem]
   private lazy val orderJob = jobSubsystem.job(orderJobPath)
 
   override def checkedBeforeAll() {
     controller.useDatabase()
     controller.setLogCategories("java.stackTrace-")
+    //controller.setSettings(Settings.of(SettingName.useJavaPersistence, "true"))
     controller.activateScheduler()
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <order job_chain={jobChainPath.asString} id={orderId.asString}/>
@@ -50,7 +51,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     taskHistoryEntities(0) match { case e =>
       e should have (
         'getId (firstTaskHistoryEntityId),
-        'getSchedulerId (schedulerId),
+        'schedulerId (schedulerId),
         'getClusterMemberId (ClusterMemberId.empty),
         'getEndTime (null),
         'getJobPath (""),
@@ -60,7 +61,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
         'getErrorText ("")
       )
       assert(e.getStartTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be before testStartTime="+testStartTime)
-      now(UTC) match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
+      now() match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
     }
   }
 
@@ -68,7 +69,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     taskHistoryEntities(1) match { case e =>
       e should have (
         'getId (firstTaskHistoryEntityId + 1),
-        'getSchedulerId (schedulerId),
+        'schedulerId (schedulerId),
         'getClusterMemberId (ClusterMemberId.empty),
         'getJobPath (orderJobPath.asString),
         'getCause ("order"),
@@ -77,7 +78,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
         'getErrorText ("")
       )
       assert(e.getStartTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be before testStartTime="+testStartTime)
-      now(UTC) match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
+      now() match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
     }
   }
 
@@ -88,16 +89,16 @@ final class EntitiesIT extends ScalaSchedulerTest {
     fetchJobEntities() match { case entities =>
       entities should have size (1)
       entities(0) should have (
-        'getSchedulerId (schedulerId),
-        'getClusterMemberId (ClusterMemberId.empty),
-        'getJobPath (orderJobPath.asString),
+        'schedulerId (schedulerId),
+        'clusterMemberId (ClusterMemberId.empty),
+        'jobPath (Some(orderJobPath)),
         'stopped (true),
-        'nextStartTime (null)
+        'nextStartTime (None)
       )
     }
   }
 
-  private def fetchJobEntities() = fetch[JobEntity]("select j from JobEntity j order by j.schedulerId, j.clusterMemberId, j.jobPath")
+  private def fetchJobEntities() = fetch[JobEntity]("select j from JobEntity j order by j._schedulerId, j._clusterMemberId, j._jobPath")
 
   private def fetch[A](ql: String)(implicit m: Manifest[A]) =
     entityManager.createQuery(ql, m.erasure).getResultList.asInstanceOf[java.util.List[A]].toSeq
