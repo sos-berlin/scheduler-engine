@@ -195,6 +195,10 @@
     <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
+    
+    <ClCompile Include="com__sos__scheduler__engine__kernel__job__JobPersistentState.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h">

@@ -13,6 +13,7 @@
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { struct JobPersistentState; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -51,6 +52,9 @@ struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::so
     }
   public:
 
+    void deletePersistentState() const;
+    void persistState() const;
+    ::javaproxy::com::sos::scheduler::engine::kernel::job::JobPersistentState tryFetchPersistentState() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

@@ -56,6 +56,20 @@ final class JobCImpl
     private static native boolean is_file_based_reread__native(long cppReference);
 
 
+    @Override public boolean is_permanently_stopped() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_permanently_stopped__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_permanently_stopped__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -86,6 +100,20 @@ final class JobCImpl
     }
 
     private static native java.lang.String name__native(long cppReference);
+
+
+    @Override public long next_start_time_millis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return next_start_time_millis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native long next_start_time_millis__native(long cppReference);
 
 
     @Override public java.lang.String path() {

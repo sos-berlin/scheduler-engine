@@ -9,7 +9,9 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
+import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
@@ -55,7 +57,7 @@ import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
 
 @ForCpp
 public final class Scheduler implements Sister,
-        SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
+        SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule, HasInjector {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
@@ -86,6 +88,13 @@ public final class Scheduler implements Sister,
             return new AbstractModule() {
                 @Override protected void configure() {
                     bind(EventBus.class).toInstance(eventBus);
+                    bind(SchedulerInstanceId.class).toInstance(instanceId);
+                    bind(SchedulerId.class).toProvider(new Provider<SchedulerId>() {
+                        @Override public SchedulerId get() { return new SchedulerId(cppProxy.id()); }
+                    });
+                    bind(ClusterMemberId.class).toProvider(new Provider<ClusterMemberId>() {
+                        @Override public ClusterMemberId get() { return new ClusterMemberId(cppProxy.cluster_member_id()); }
+                    });
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
                     bind(EntityManager.class).toProvider(new Provider<EntityManager>(){

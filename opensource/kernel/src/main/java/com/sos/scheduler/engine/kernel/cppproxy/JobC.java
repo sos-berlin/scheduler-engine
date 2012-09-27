@@ -17,4 +17,6 @@ public interface JobC extends CppProxyWithSister<Job> {
     Prefix_logC log();
     String state_name();
     void set_state_cmd(String cmd);
+    boolean is_permanently_stopped();
+    long next_start_time_millis();
 }

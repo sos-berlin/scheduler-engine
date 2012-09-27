@@ -47,6 +47,7 @@ public class DatabaseSubsystem implements Subsystem {
             .put("javax.persistence.jdbc.url", v.get("path"))
             .put("javax.persistence.jdbc.user", v.get("user"))
             .put("javax.persistence.jdbc.password", v.get("password"))
+          //.put("hibernate.show_sql", "true")
             .build();
     }
 

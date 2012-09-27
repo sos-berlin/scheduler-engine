@@ -35,8 +35,10 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::event::CppEventFactory
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest SchedulerHttpRequestJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixLogJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::job::Job JobJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
+
 }} //namespaces
 
 using namespace ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy;
