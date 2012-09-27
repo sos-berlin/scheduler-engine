@@ -2469,7 +2469,7 @@ STDMETHODIMP Com_job::get_Script_code( BSTR* result )
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        hr = String_to_bstr( trim(_job->_module->_text_with_includes.read_text()), result );
+        hr = String_to_bstr( trim(_job->module()->_text_with_includes.read_text()), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
