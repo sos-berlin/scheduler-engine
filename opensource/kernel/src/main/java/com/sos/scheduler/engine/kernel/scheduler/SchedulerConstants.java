@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 
 import static com.google.common.base.Charsets.ISO_8859_1;
 
-public class SchedulerConstants {
+public final class SchedulerConstants {
     public static final Charset defaultEncoding = Charsets.UTF_8;
     public static final Charset schedulerEncoding = ISO_8859_1;
     public static final Charset logFileEncoding = schedulerEncoding;
@@ -16,6 +16,7 @@ public class SchedulerConstants {
     public static final String version = mavenProperties.getVersion();
     public static final String productName = "JobScheduler";
     public static final String productWithVersion = productName+" "+version;
+    public static final long eternalMillis = Integer.MAX_VALUE * 1000L;     // Wie C++ time::eternal
 
     private SchedulerConstants() {}
 }

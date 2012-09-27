@@ -144,6 +144,7 @@ public:
     double                      as_double                   () const;
     double                      as_double_or_never          () const;
     double                      as_utc_double               () const;
+    int64                       millis                      () const                        { return (int64)(as_double() * 1000); }
     Time                        time_of_day                 () const                        { return Time((*this - midnight()).as_double()); }
     Time                        midnight                    () const                        { return Time(day_nr() * 24*60*60); }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
