@@ -11,7 +11,7 @@ do_make zschimmer                  libzschimmer.a                               
 do_make kram                       all                                                 || exit
 #do_make kram                      libkram.a                 $BIN_DIR/sos.mail.jar     || exit
 do_make file                       libfile.a                                           || exit
-do_make fs                         libfs.a                                             || exit
+### do_make fs                         libfs.a                                             || exit
 do_make javaproxy                  libjavaproxy.a                                      || exit
 ### do_make scheduler                  $BIN_DIR/sos.spooler.jar  $BIN_DIR/scheduler        || exit
 do_make scheduler                  $BIN_DIR/scheduler        || exit
