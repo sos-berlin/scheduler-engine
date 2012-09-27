@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jobchain.max_order;
 
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
@@ -14,13 +15,14 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 public final class MaxOrderIT extends SchedulerTest {
     private static final int maxOrders = 3;         // Derselbe Wert wie <job_chain max_orders="">
     private static final int addedOrderCount = 9;   // Anzahl der <add_order>
+    public static final Time timeout = Time.of(30);
 
     private int runningOrderCount = 0;
     private int maxTouchedOrderCount = 0;
     private int finishedOrderCount = 0;
 
     @Test public void test() throws Exception {
-        controller().runScheduler(shortTimeout);
+        controller().runScheduler(timeout);
     }
 
     @EventHandler public void handleEvent(OrderTouchedEvent e) {
