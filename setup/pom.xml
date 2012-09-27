@@ -79,7 +79,7 @@ call prepare-setup.sh <version> to use this pom
                                 <artifactId>jar</artifactId>
                                 <version>${project.version}</version>
                                 <type>jar</type>
-                                <destFileName>engine-all-${project.version}.jar</destFileName>
+                                <destFileName>${project.groupId}-${project.version}.jar</destFileName>
                             </artifactItem>
                         </artifactItems>
                     </configuration>
