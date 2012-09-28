@@ -2,11 +2,11 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__job__JobPersistentState.h"
+#include "com__sos__scheduler__engine__data__job__JobPersistentState.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { 
 
 struct JobPersistentState__class : ::zschimmer::javabridge::Class
 {
@@ -18,7 +18,7 @@ struct JobPersistentState__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< JobPersistentState__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< JobPersistentState__class > JobPersistentState__class::class_factory ("com.sos.scheduler.engine.kernel.job.JobPersistentState");
+const ::zschimmer::javabridge::class_factory< JobPersistentState__class > JobPersistentState__class::class_factory ("com.sos.scheduler.engine.data.job.JobPersistentState");
 
 JobPersistentState__class::JobPersistentState__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)

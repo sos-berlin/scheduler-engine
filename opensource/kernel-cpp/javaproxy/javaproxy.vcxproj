@@ -236,7 +236,8 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils.cxx" />
   
-    <ClCompile Include="com__sos__scheduler__engine__kernel__job__JobPersistentState.cxx" />
+    
+    <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistentState.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

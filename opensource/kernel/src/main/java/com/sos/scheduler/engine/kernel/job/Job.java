@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.data.folder.FileBasedType;
 import com.sos.scheduler.engine.data.folder.JobPath;
+import com.sos.scheduler.engine.data.job.JobPersistentState;
 import com.sos.scheduler.engine.kernel.cppproxy.JobC;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.kernel.folder.FileBasedState;

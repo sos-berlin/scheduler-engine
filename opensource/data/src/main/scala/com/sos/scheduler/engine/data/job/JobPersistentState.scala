@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.job
+package com.sos.scheduler.engine.data.job
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.folder.JobPath

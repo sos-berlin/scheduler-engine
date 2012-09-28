@@ -4,8 +4,8 @@
 
 #include "com__sos__scheduler__engine__kernel__job__Job.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
+#include "com__sos__scheduler__engine__data__job__JobPersistentState.h"
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
-#include "com__sos__scheduler__engine__kernel__job__JobPersistentState.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { 
@@ -28,7 +28,7 @@ Job__class::Job__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_deletePersistentState____method(this, "deletePersistentState", "()V")
     ,_persistState____method(this, "persistState", "()V")
-    ,_tryFetchPersistentState____method(this, "tryFetchPersistentState", "()Lcom/sos/scheduler/engine/kernel/job/JobPersistentState;"){}
+    ,_tryFetchPersistentState____method(this, "tryFetchPersistentState", "()Lcom/sos/scheduler/engine/data/job/JobPersistentState;"){}
 
 Job__class::~Job__class() {}
 
@@ -60,10 +60,10 @@ void Job::persistState() const {
     cls->_persistState____method.call(get_jobject(), parameter_list);
 }
 
-::javaproxy::com::sos::scheduler::engine::kernel::job::JobPersistentState Job::tryFetchPersistentState() const {
+::javaproxy::com::sos::scheduler::engine::data::job::JobPersistentState Job::tryFetchPersistentState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Job__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::job::JobPersistentState result;
+    ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistentState result;
     result.steal_local_ref(cls->_tryFetchPersistentState____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }

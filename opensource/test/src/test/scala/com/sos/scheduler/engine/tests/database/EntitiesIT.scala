@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
-import javax.persistence.EntityManager
+import javax.persistence.EntityManagerFactory
 import org.joda.time.DateTime.now
 import org.joda.time.Duration.{millis, standardSeconds}
 import org.junit.runner.RunWith
@@ -32,14 +32,18 @@ final class EntitiesIT extends ScalaSchedulerTest {
   override def checkedBeforeAll() {
     controller.useDatabase()
     controller.setLogCategories("java.stackTrace-")
-    //controller.setSettings(Settings.of(SettingName.useJavaPersistence, "true"))
+    controller.setSettings(Settings.of(SettingName.useJavaPersistence, "true"))
     controller.activateScheduler()
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <order job_chain={jobChainPath.asString} id={orderId.asString}/>
     eventPipe.nextWithCondition[TaskClosedEvent] { e => e.getJobPath == orderJobPath}
   }
 
-  lazy val entityManager = controller.scheduler.instance[EntityManager]
+  lazy val entityManager = controller.scheduler.instance[EntityManagerFactory].createEntityManager()
+
+  override def afterAll() {
+    entityManager.close()
+  }
 
   private lazy val taskHistoryEntities = fetch[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
@@ -91,9 +95,9 @@ final class EntitiesIT extends ScalaSchedulerTest {
       entities(0) should have (
         'schedulerId (schedulerId),
         'clusterMemberId (ClusterMemberId.empty),
-        'jobPath (Some(orderJobPath)),
+        'jobPath (orderJobPath),
         'stopped (true),
-        'nextStartTime (None)
+        'nextStartTimeOption (None)
       )
     }
   }

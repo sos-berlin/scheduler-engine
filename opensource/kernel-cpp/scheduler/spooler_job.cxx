@@ -4,7 +4,7 @@
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__job__JobPersistentState.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__JobPersistentState.h"
 
 #ifndef Z_WINDOWS
 #   include <signal.h>

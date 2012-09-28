@@ -43,7 +43,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -97,8 +97,8 @@ public final class Scheduler implements Sister,
                     });
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
-                    bind(EntityManager.class).toProvider(new Provider<EntityManager>(){
-                        @Override public EntityManager get() { return databaseSubsystem.getEntityManager(); }
+                    bind(EntityManagerFactory.class).toProvider(new Provider<EntityManagerFactory>(){
+                        @Override public EntityManagerFactory get() { return databaseSubsystem.entityManagerFactory(); }
                     });
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  // Für JettyPlugin
