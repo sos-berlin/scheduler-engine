@@ -8,8 +8,8 @@ import scala.annotation.target.getter
 @ForCpp
 case class JobPersistentState(
     jobPath: JobPath,
-    nextStartTimeOption: Option[DateTime],
-    @(ForCpp @getter) isPermanentlyStopped: Boolean) {
+    @(ForCpp @getter) isPermanentlyStopped: Boolean,
+    nextStartTimeOption: Option[DateTime]) {
 
   def isDefault = nextStartTimeOption.isEmpty && !isPermanentlyStopped
 }

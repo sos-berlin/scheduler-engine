@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.database
 
 import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
-import com.sos.scheduler.engine.data.job.TaskClosedEvent
+import com.sos.scheduler.engine.data.job.{JobPersistentState, TaskClosedEvent}
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
@@ -93,11 +93,14 @@ final class EntitiesIT extends ScalaSchedulerTest {
     fetchJobEntities() match { case entities =>
       entities should have size (1)
       entities(0) should have (
+        '_schedulerId (schedulerId.asString),
+        '_clusterMemberId ("-"),
+        '_jobPath (orderJobPath.withoutStartingSlash),
+        'stopped (true),
+        '_nextStartTime (null),
         'schedulerId (schedulerId),
         'clusterMemberId (ClusterMemberId.empty),
-        'jobPath (orderJobPath),
-        'stopped (true),
-        'nextStartTimeOption (None)
+        'toObject (JobPersistentState(orderJobPath, nextStartTimeOption=None, isPermanentlyStopped=true))
       )
     }
   }

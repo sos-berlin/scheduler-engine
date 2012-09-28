@@ -99,8 +99,8 @@ public final class Job extends FileBased implements Sister, UnmodifiableJob {
         long nextStartTimeMillis = cppProxy.next_start_time_millis();
         return new JobPersistentState(
                 getPath(),
-                Option.apply(nextStartTimeMillis == eternalMillis? null : new DateTime(nextStartTimeMillis, UTC)),
-                isPermanentlyStopped());
+                isPermanentlyStopped(),
+                Option.apply(nextStartTimeMillis == eternalMillis? null : new DateTime(nextStartTimeMillis, UTC)));
     }
 
     public boolean isPermanentlyStopped() {

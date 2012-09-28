@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.JobPersistentState
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.persistence.entities.JobEntity
-import com.sos.scheduler.engine.persistence.entities.JobEntity.Key
+import com.sos.scheduler.engine.persistence.entities.JobEntity.PrimaryKey
 import javax.inject.{Inject, Singleton}
 import javax.persistence.EntityManagerFactory
 
@@ -15,7 +15,7 @@ class JobPersistentStateStore @Inject()(
     implicit protected val entityManagerFactory: EntityManagerFactory)
 extends AbstractObjectJPAStore[JobEntity, JobPersistentState, JobPath] {
 
-  protected final def toEntityKey(jobPath: JobPath) = Key(schedulerId, clusterMemberId, jobPath)
+  protected final def toEntityKey(jobPath: JobPath) = PrimaryKey(schedulerId, clusterMemberId, jobPath)
 
   protected final def toEntity(o: JobPersistentState) = JobEntity(schedulerId, clusterMemberId, o)
 

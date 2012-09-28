@@ -14,33 +14,32 @@ import org.joda.time.DateTimeZone.UTC
 
 @Entity
 @Table(name = "SCHEDULER_JOBS")
-@IdClass(classOf[JobEntity.Key])
+@IdClass(classOf[JobEntity.PrimaryKey])
 class JobEntity {
-  @Column(name = "spooler_id"       , nullable = false) @Id         private var _schedulerId    : String = _
-  @Column(name = "cluster_member_id", nullable = false) @Id         private var _clusterMemberId: String = _
-  @Column(name = "path"             , nullable = false) @Id         private var _jobPath        : String = _
-  @Column(name = "stopped"          , nullable = false)                     var isStopped       : Boolean = _
-  @Column(name = "next_start_time") @Temporal(TIMESTAMP) @Nullable  private var _nextStartTime  : JavaDate = _
+  @Column(name = "spooler_id"       , nullable = false) @Id         var _schedulerId    : String = _
+  @Column(name = "cluster_member_id", nullable = false) @Id         var _clusterMemberId: String = _
+  @Column(name = "path"             , nullable = false) @Id         var _jobPath        : String = _
+  @Column(name = "stopped"          , nullable = false)             var isStopped       : Boolean = _
+  @Column(name = "next_start_time") @Temporal(TIMESTAMP) @Nullable  var _nextStartTime  : JavaDate = _
 
-  def this(key: JobEntity.Key) {
+  def this(key: JobEntity.PrimaryKey) {
     this()
     _schedulerId = key._schedulerId
     _clusterMemberId = key._clusterMemberId
     _jobPath = key._jobPath
   }
 
-  def schedulerId = schedulerIdFromDatabase(_schedulerId)
+  final def schedulerId = schedulerIdFromDatabase(_schedulerId)
 
-  def clusterMemberId = _clusterMemberId match {
+  final def clusterMemberId = _clusterMemberId match {
     case "-" => ClusterMemberId.empty
     case s => new ClusterMemberId(s)
   }
 
-  final def toObject = JobPersistentState(jobPath, nextStartTimeOption, isStopped)
-
-  final def jobPath = JobPath.of("/"+ _jobPath)
-
-  final def nextStartTimeOption = Option(_nextStartTime) map { o => new DateTime(o.getTime, UTC) }
+  final def toObject = JobPersistentState(
+    jobPath = JobPath.of("/"+ _jobPath),
+    isPermanentlyStopped = isStopped,
+    nextStartTimeOption = Option(_nextStartTime) map { o => new DateTime(o.getTime, UTC) })
 
   final def nextStartTimeOption_=(o: Option[DateTime]) {
     o match {
@@ -52,18 +51,18 @@ class JobEntity {
 
 object JobEntity {
   def apply(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId, o: JobPersistentState) = {
-    val e = new JobEntity(Key(schedulerId, clusterMemberId, o.jobPath))
-    e.nextStartTimeOption = o.nextStartTimeOption
+    val e = new JobEntity(PrimaryKey(schedulerId, clusterMemberId, o.jobPath))
+    e.nextStartTimeOption_=(o.nextStartTimeOption)
     e.isStopped = o.isPermanentlyStopped
     e
   }
 
-  case class Key(var _schedulerId: String, var _clusterMemberId: String, var _jobPath: String) extends Serializable {
-    def this() = this(null: String, null: String, null: String)  // Für JPA
+  case class PrimaryKey(var _schedulerId: String, var _clusterMemberId: String, var _jobPath: String) extends Serializable {
+    def this() = this(null: String, null: String, null: String)
   }
 
-  object Key {
-    def apply(s: SchedulerId, clusterMemberId: ClusterMemberId, jobPath: JobPath) = new Key(
+  object PrimaryKey {
+    def apply(s: SchedulerId, clusterMemberId: ClusterMemberId, jobPath: JobPath) = new PrimaryKey(
         idForDatabase(s),
         if (clusterMemberId.isEmpty) "-" else clusterMemberId.asString,
         jobPath.withoutStartingSlash)
