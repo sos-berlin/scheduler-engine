@@ -1527,7 +1527,7 @@ void Spooler::read_command_line_arguments()
                 _variables->set_var( value.substr( 0, eq ), value.substr( eq + 1 ) );
             }
             else
-            if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); } //_directory = dir; }
+            if( opt.with_value( "cd"               ) )  {}  // Bereits von spooler_main() erledigt
             else
             if( opt.with_value( "id"               ) )  set_id( opt.value() );
             else
@@ -3934,6 +3934,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             if( opt.flag      ( "kill"             ) )  kill_pid_file = true;
             else
             if( opt.with_value( "kill"             ) )  kill_pid = opt.as_int();
+            else
+            if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if (chdir(dir.c_str())) throw_errno(errno, "chdir", dir.c_str()); }
             else
 #ifdef Z_WINDOWS
             if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
