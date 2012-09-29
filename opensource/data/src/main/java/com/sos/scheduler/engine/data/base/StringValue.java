@@ -11,6 +11,11 @@ public abstract class StringValue {
         string = x;
     }
 
+    public final String string() {
+        return string;
+    }
+
+    //@Deprecated  // Nimm string()
     public final String asString() {
         return string;
     }
