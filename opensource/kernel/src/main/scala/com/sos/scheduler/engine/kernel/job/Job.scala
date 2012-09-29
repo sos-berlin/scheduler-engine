@@ -9,15 +9,19 @@ import com.sos.scheduler.engine.data.job.JobPersistentState
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.folder.FileBasedState
+import com.sos.scheduler.engine.kernel.job.ScalaJPA._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.eternalMillis
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 import com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString
 import javax.annotation.Nullable
 import org.joda.time.DateTime
+import javax.persistence.EntityManagerFactory
 
 @ForCpp final class Job(cppProxy: JobC, injector: Injector) extends FileBased with Sister with UnmodifiableJob {
 
   import Job._
+
+  implicit private lazy val entityManagerFactory = injector.getInstance(classOf[EntityManagerFactory])
 
   def onCppProxyInvalidated() {}
 
@@ -48,23 +52,29 @@ import org.joda.time.DateTime
     cppProxy.set_state_cmd(c.cppValue)
   }
 
-  @ForCpp @Nullable def tryFetchPersistentState =  persistentStateStore.tryFetch(getPath).orNull
+  @ForCpp @Nullable def tryFetchPersistentState =
+    transaction { implicit entityManager =>
+      persistentStateStore.tryFetch(getPath).orNull
+    }
 
   @ForCpp def persistState() {
-    persistentStateStore.store(persistentState)
+    transaction { implicit entityManager =>
+      persistentStateStore.store(persistentState)
+    }
   }
 
   @ForCpp def deletePersistentState() {
-    persistentStateStore.delete(getPath)
+    transaction { implicit entityManager =>
+      persistentStateStore.delete(getPath)
+    }
   }
 
   private def persistentStateStore = injector.getInstance(classOf[JobPersistentStateStore])
 
-  private def persistentState: JobPersistentState =
-    new JobPersistentState(
-      getPath,
-      isPermanentlyStopped,
-      eternalMillisToNone(cppProxy.next_start_time_millis))
+  private def persistentState = new JobPersistentState(
+    getPath,
+    isPermanentlyStopped,
+    eternalMillisToNone(cppProxy.next_start_time_millis))
 
   def isPermanentlyStopped = cppProxy.is_permanently_stopped
 
