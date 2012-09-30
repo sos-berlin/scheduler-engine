@@ -34,6 +34,22 @@ static jstring JNICALL description(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL enqueue_1task__Lcom_sos_scheduler_engine_data_job_TaskObject_2(JNIEnv* jenv, jobject, jlong cppReference, jobject p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::enqueue_task()");
+        (o_->enqueue_task(::javaproxy::com::sos::scheduler::engine::data::job::TaskObject(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jstring JNICALL file_1based_1state_1name(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -153,6 +169,22 @@ static jstring JNICALL path(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static void JNICALL set_1force_1file_1reread(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::set_force_file_reread()");
+        (o_->set_force_file_reread());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static void JNICALL set_1state_1cmd__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
     Env env = jenv;
@@ -203,6 +235,7 @@ static jstring JNICALL state_1name(JNIEnv* jenv, jobject, jlong cppReference)
 
 const static JNINativeMethod native_methods[] = {
     { (char*)"description__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::description },
+    { (char*)"enqueue_task__native", (char*)"(JLcom/sos/scheduler/engine/data/job/TaskObject;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::enqueue_1task__Lcom_sos_scheduler_engine_data_job_TaskObject_2 },
     { (char*)"file_based_state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1state_1name },
     { (char*)"is_file_based_reread__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based_1reread },
     { (char*)"is_permanently_stopped__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1permanently_1stopped },
@@ -210,6 +243,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name },
     { (char*)"next_start_time_millis__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1start_1time_1millis },
     { (char*)"path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::path },
+    { (char*)"set_force_file_reread__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1force_1file_1reread },
     { (char*)"set_state_cmd__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1state_1cmd__Ljava_lang_String_2 },
     { (char*)"source_xml__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::source_1xml },
     { (char*)"state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::state_1name }
@@ -220,7 +254,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Job >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Job >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 11);
+        int ret = env->RegisterNatives(*cls, native_methods, 13);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

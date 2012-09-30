@@ -694,7 +694,7 @@ bool Job::on_load() // Transaction* ta )
             {
                 if( db()->opened() )  database_record_load( &ta );
                 _history.open( &ta );
-                if( db()->opened() )  load_tasks_from_db( &ta );
+                if( db()->opened() )  load_tasks( &ta );
             }
             catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
         }
@@ -1361,6 +1361,23 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     return create_task( params, name, force, start_at, _spooler->db()->get_task_id() );
 }
 
+//----------------------------------------------------------------------------------Job::load_tasks
+
+void Job::load_tasks(Read_transaction* ta)
+{
+    if (_spooler->settings()->_use_java_persistence) 
+        load_tasks_with_java();
+    else
+        load_tasks_from_db(ta);
+}
+
+//------------------------------------------------------------------------Job::load_tasks_with_java
+
+void Job::load_tasks_with_java()
+{
+    typed_java_sister().loadPersistentTasks();
+}
+
 //--------------------------------------------------------------------------Job::load_tasks_from_db
 
 void Job::load_tasks_from_db( Read_transaction* ta )
@@ -1441,44 +1458,52 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
     {
         try
         {
-            if( !task->_is_in_database  &&  _spooler->db()->opened() )
-            {
-                Transaction ta ( _spooler->db() );
-
-                Insert_stmt insert ( ta.database_descriptor() );
-                insert.set_table_name( _spooler->db()->_tasks_tablename );
-
-                insert             [ "TASK_ID"       ] = task->_id;
-                insert             [ "JOB_NAME"      ] = task->_job->path().without_slash();
-                insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
-
-                if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
-                insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
-
-                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
-
-                if( task->_start_at.not_zero() )
-                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
-
-                ta.execute( insert, Z_FUNCTION );
-
-                if( task->has_parameters() )
-                {
-                    Any_file blob;
-                    blob = ta.open_file( "-out " + _spooler->db()->db_name(), " -table=" + _spooler->db()->_tasks_tablename + " -clob='parameters'"
-                            "  where \"TASK_ID\"=" + as_string( task->_id ) );
-                    blob.put( xml_as_string( task->parameters_as_dom() ) );
-                    blob.close();
-                }
-
+            if( !task->_is_in_database) {
                 xml::Document_ptr task_document = task->dom( show_for_database_only );
                 xml::Element_ptr  task_element  = task_document.documentElement();
-                if( task_element.hasAttributes()  ||  task_element.firstChild() )
-                    ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
+                bool has_xml = task_element.hasAttributes()  ||  task_element.firstChild();
 
-                ta.commit( Z_FUNCTION );
+                if (_spooler->settings()->_use_java_persistence)
+                    _job->typed_java_sister().persistEnqueuedTask(task->_id, task->_enqueue_time.millis(), task->_start_at.millis(), 
+                        task->has_parameters()? xml_as_string(task->parameters_as_dom()) : "", 
+                        has_xml? xml_as_string(task_document.xml()) : "");
+                else
+                if (_spooler->db()->opened() ) {
+                    Transaction ta ( _spooler->db() );
 
-                task->_is_in_database = true;
+                    Insert_stmt insert ( ta.database_descriptor() );
+                    insert.set_table_name( _spooler->db()->_tasks_tablename );
+
+                    insert             [ "TASK_ID"       ] = task->_id;
+                    insert             [ "JOB_NAME"      ] = task->_job->path().without_slash();
+                    insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
+
+                    if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
+                    insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
+
+                    insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
+
+                    if( task->_start_at.not_zero() )
+                    insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
+
+                    ta.execute( insert, Z_FUNCTION );
+
+                    if( task->has_parameters() )
+                    {
+                        Any_file blob;
+                        blob = ta.open_file( "-out " + _spooler->db()->db_name(), " -table=" + _spooler->db()->_tasks_tablename + " -clob='parameters'"
+                                "  where \"TASK_ID\"=" + as_string( task->_id ) );
+                        blob.put( xml_as_string( task->parameters_as_dom() ) );
+                        blob.close();
+                    }
+
+                    if (has_xml)
+                        ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
+
+                    ta.commit( Z_FUNCTION );
+
+                    task->_is_in_database = true;
+                }
             }
             break;
         }
@@ -1500,6 +1525,9 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 
 void Job::Task_queue::remove_task_from_db( int task_id )
 {
+    if (_spooler->settings()->_use_java_persistence)
+        _job->typed_java_sister().deletePersistedTask(task_id);
+    else
     while(1)
     {
         try
@@ -1720,6 +1748,39 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 }
 
 //--------------------------------------------------------------------------------Job::enqueue_task
+
+void Job::enqueue_task(const TaskObjectJ& taskObjectJ) {
+
+    int task_id = taskObjectJ.taskId().value();
+
+    Time start_at = Time::of_millis(taskObjectJ.startTimeMillis());
+    _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
+
+    ptr<Com_variable_set> parameters = new Com_variable_set;
+    string parameters_xml = taskObjectJ.parametersXml();
+    if( !parameters_xml.empty() )  parameters->set_xml(parameters_xml);
+
+    xml::Document_ptr task_dom;
+    bool force_start = force_start_default;
+    string xml = taskObjectJ.xml();
+    if (!xml.empty()) {
+        task_dom = xml::Document_ptr(xml);
+        force_start = task_dom.documentElement().bool_getAttribute("force_start", force_start);
+    }
+
+    ptr<Task> task = create_task( +parameters, "", force_start, start_at, task_id );            
+    if( task_dom )  task->set_dom( task_dom.documentElement() );
+    task->_is_in_database = true;
+    task->_let_run        = true;
+    task->_enqueue_time = Time::of_millis(taskObjectJ.enqueueTime().getMillis());
+    
+    if (!start_at && !_schedule_use->period_follows(Time::now())) {
+        try { z::throw_xc( "SCHEDULER-143" ); } 
+        catch( const exception& x ) { _log->warn( x.what() ); }
+    }
+
+    _task_queue->enqueue_task( task );
+}
 
 void Job::enqueue_task( Task* task )
 {

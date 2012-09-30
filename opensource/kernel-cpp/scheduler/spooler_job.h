@@ -220,6 +220,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        database_record_store       ();
     void                        database_record_remove      ();
     void                        database_record_load        ( Read_transaction* );
+    void                        load_tasks                  ( Read_transaction* );
+    void                        load_tasks_with_java        ();
     void                        load_tasks_from_db          ( Read_transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
@@ -227,6 +229,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) );
     void                        enqueue_task                ( Task* );
+    void                        enqueue_task                (const TaskObjectJ&);
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     bool                        check_for_changed_directory ( const Time& now );

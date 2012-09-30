@@ -792,7 +792,7 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
 {
     xml::Element_ptr result = doc.createElement( element_name );
     result.setAttribute("count",count());
-    result.setAttribute("estimated_byte_count",estimated_byte_count());
+    //result.setAttribute("estimated_byte_count",estimated_byte_count());
 
     THREAD_LOCK( _lock )
     {

@@ -19,7 +19,6 @@ public final class SchedulerConstants {
     public static final String version = mavenProperties.getVersion();
     public static final String productName = "JobScheduler";
     public static final String productWithVersion = productName+" "+version;
-    public static final long eternalMillis = Integer.MAX_VALUE * 1000L;     // Wie C++ time::eternal
 
     private SchedulerConstants() {}
 }

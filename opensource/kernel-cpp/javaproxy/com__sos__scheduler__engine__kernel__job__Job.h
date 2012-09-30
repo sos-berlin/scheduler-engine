@@ -52,7 +52,10 @@ struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::so
     }
   public:
 
+    void deletePersistedTask(jint p0) const;
     void deletePersistentState() const;
+    void loadPersistentTasks() const;
+    void persistEnqueuedTask(jint p0, jlong p1, jlong p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p4) const;
     void persistState() const;
     ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistentState tryFetchPersistentState() const;
 

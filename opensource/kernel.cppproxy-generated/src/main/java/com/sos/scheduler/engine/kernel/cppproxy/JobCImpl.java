@@ -26,6 +26,20 @@ final class JobCImpl
     private static native java.lang.String description__native(long cppReference);
 
 
+    @Override public void enqueue_task(com.sos.scheduler.engine.data.job.TaskObject p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            enqueue_task__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void enqueue_task__native(long cppReference, com.sos.scheduler.engine.data.job.TaskObject p0);
+
+
     @Override public java.lang.String file_based_state_name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -130,6 +144,20 @@ final class JobCImpl
     }
 
     private static native java.lang.String path__native(long cppReference);
+
+
+    @Override public void set_force_file_reread() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_force_file_reread__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_force_file_reread__native(long cppReference);
 
 
     @Override public void set_state_cmd(java.lang.String p0) {

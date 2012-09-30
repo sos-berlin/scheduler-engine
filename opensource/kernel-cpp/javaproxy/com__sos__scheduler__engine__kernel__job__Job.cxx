@@ -15,7 +15,10 @@ struct Job__class : ::zschimmer::javabridge::Class
     Job__class(const string& class_name);
    ~Job__class();
 
+    ::zschimmer::javabridge::Method const _deletePersistedTask__I__method;
     ::zschimmer::javabridge::Method const _deletePersistentState____method;
+    ::zschimmer::javabridge::Method const _loadPersistentTasks____method;
+    ::zschimmer::javabridge::Method const _persistEnqueuedTask__IJJLjava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _persistState____method;
     ::zschimmer::javabridge::Method const _tryFetchPersistentState____method;
 
@@ -26,7 +29,10 @@ const ::zschimmer::javabridge::class_factory< Job__class > Job__class::class_fac
 
 Job__class::Job__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
+    ,_deletePersistedTask__I__method(this, "deletePersistedTask", "(I)V")
     ,_deletePersistentState____method(this, "deletePersistentState", "()V")
+    ,_loadPersistentTasks____method(this, "loadPersistentTasks", "()V")
+    ,_persistEnqueuedTask__IJJLjava_lang_String_2Ljava_lang_String_2__method(this, "persistEnqueuedTask", "(IJJLjava/lang/String;Ljava/lang/String;)V")
     ,_persistState____method(this, "persistState", "()V")
     ,_tryFetchPersistentState____method(this, "tryFetchPersistentState", "()Lcom/sos/scheduler/engine/data/job/JobPersistentState;"){}
 
@@ -48,10 +54,34 @@ Job::~Job() { assign_(NULL); }
 
 
 
+void Job::deletePersistedTask(jint p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].i = p0;
+    Job__class* cls = _class.get();
+    cls->_deletePersistedTask__I__method.call(get_jobject(), parameter_list);
+}
+
 void Job::deletePersistentState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Job__class* cls = _class.get();
     cls->_deletePersistentState____method.call(get_jobject(), parameter_list);
+}
+
+void Job::loadPersistentTasks() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Job__class* cls = _class.get();
+    cls->_loadPersistentTasks____method.call(get_jobject(), parameter_list);
+}
+
+void Job::persistEnqueuedTask(jint p0, jlong p1, jlong p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p4) const {
+    ::zschimmer::javabridge::raw_parameter_list<5> parameter_list;
+    parameter_list._jvalues[0].i = p0;
+    parameter_list._jvalues[1].j = p1;
+    parameter_list._jvalues[2].j = p2;
+    parameter_list._jvalues[3].l = p3.get_jobject();
+    parameter_list._jvalues[4].l = p4.get_jobject();
+    Job__class* cls = _class.get();
+    cls->_persistEnqueuedTask__IJJLjava_lang_String_2Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
 }
 
 void Job::persistState() const {

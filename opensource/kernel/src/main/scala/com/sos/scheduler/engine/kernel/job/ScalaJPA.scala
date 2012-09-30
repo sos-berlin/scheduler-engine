@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.job
 
 import javax.persistence.{EntityManagerFactory, EntityManager}
 import org.slf4j.LoggerFactory
+import scala.collection.JavaConversions._
 
 object ScalaJPA {
   private val logger = LoggerFactory.getLogger("com.sos.scheduler.engine.kernel.job.ScalaJPA")
@@ -41,5 +42,12 @@ object ScalaJPA {
   class RichEntityManager(entityManager: EntityManager) {
     def findOption[E](key: AnyRef)(implicit m: Manifest[E]): Option[E] =
       Option(entityManager.find(m.erasure, key).asInstanceOf[E])
+
+    def fetchSeq[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())
+        (implicit m: Manifest[A]): Seq[A] = {
+      val q = entityManager.createQuery(queryString, m.erasure)
+      for ((name, value) <- arguments) q.setParameter(name, value)
+      q.getResultList.asInstanceOf[java.util.List[A]].toSeq
+    }
   }
 }

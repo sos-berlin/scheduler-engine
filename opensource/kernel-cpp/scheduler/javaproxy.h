@@ -1,6 +1,9 @@
 #ifndef __SCHEDULER_JAVAPROXY_H_
 #define __SCHEDULER_JAVAPROXY_H_
 
+#include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__TaskId.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__TaskObject.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__Scheduler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__CppEventFactory.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__JobC.h"
@@ -21,11 +24,12 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
-#include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
+#include "../javaproxy/java__util__ArrayList.h"
 #include "../javaproxy/java__lang__Object.h"
 #include "../javaproxy/java__lang__String.h"
-#include "../javaproxy/java__util__ArrayList.h"
+#include "../javaproxy/org__joda__time__DateTime.h"
+#include "../javaproxy/org__joda__time__base__AbstractDateTime.h"
 
 namespace sos {
 namespace scheduler {
@@ -36,6 +40,7 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpReq
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixLogJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::job::Job JobJ;
+typedef ::javaproxy::com::sos::scheduler::engine::data::job::TaskObject TaskObjectJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 

@@ -18,6 +18,10 @@ abstract class AbstractObjectJPAStore[E <: AnyRef, OBJ <: AnyRef, KEY](implicit 
   def tryFetch(key: KEY)(implicit em: EntityManager) =
     em.findOption[E](toEntityKey(key))(entityManifest) map toObject
 
+  def insert(o: OBJ)(implicit em: EntityManager) {
+    em.persist(toEntity(o))
+  }
+
   def store(o: OBJ)(implicit em: EntityManager) {
     em.merge(toEntity(o))
   }
