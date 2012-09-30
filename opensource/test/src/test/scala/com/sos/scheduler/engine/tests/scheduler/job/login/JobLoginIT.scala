@@ -13,6 +13,7 @@ import scala.util.matching.Regex
 
 @RunWith(classOf[JUnitRunner])
 class JobLoginIT extends ScalaSchedulerTest {
+
   import JobLoginIT._
 
   private val noLoginJobPath = JobPath.of("/testNoLogin")
@@ -33,7 +34,7 @@ class JobLoginIT extends ScalaSchedulerTest {
   private def runJob(jobPath: JobPath) = {
     val eventPipe = controller.newEventPipe
     startJob(jobPath)
-    eventPipe.nextWithCondition[TaskEndedEvent] { _.getJobPath == jobPath }
+    eventPipe.nextWithCondition[TaskEndedEvent] { _.jobPath == jobPath }
     jobPropertyMap(jobPath)
   }
 

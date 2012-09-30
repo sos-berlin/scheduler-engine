@@ -36,7 +36,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     controller.activateScheduler()
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <order job_chain={jobChainPath.asString} id={orderId.asString}/>
-    eventPipe.nextWithCondition[TaskClosedEvent] { e => e.getJobPath == orderJobPath}
+    eventPipe.nextWithCondition[TaskClosedEvent] { e => e.jobPath == orderJobPath}
   }
 
   lazy val entityManager = controller.scheduler.instance[EntityManagerFactory].createEntityManager()

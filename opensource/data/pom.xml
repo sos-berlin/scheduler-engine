@@ -97,5 +97,9 @@
             <artifactId>scalatest_${scalatest.scala.version}</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>jackson-module-scala</artifactId>
+        </dependency>
     </dependencies>
 </project>

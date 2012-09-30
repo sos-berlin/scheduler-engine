@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
-public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageListener, TaskInfo {
+public class JMSTaskObserver extends JMSConnection implements MessageListener, TaskInfo {
 
 	private static final Logger logger = Logger.getLogger(JMSTaskObserver.class);
 
@@ -53,17 +54,17 @@ public class JMSTaskObserver extends JMSConnection implements javax.jms.MessageL
 		try {
 			TextMessage textMessage = (TextMessage) message;
 			jsonContent = textMessage.getText();
-            Event ev = mapper.readValue(jsonContent, com.sos.scheduler.engine.data.event.Event.class);
+            Event ev = mapper.readValue(jsonContent, Event.class);
             if (ev instanceof TaskStartedEvent) {
                 TaskStartedEvent te = (TaskStartedEvent)ev;
                 runningTasks++;
                 if (runningTasks > maxParallelTasks)
                     maxParallelTasks = runningTasks;
-                logger.debug("TASKSTART: " + te.getId());
+                logger.debug("TASKSTART: " + te.taskId());
             }
             if (ev instanceof TaskEndedEvent) {
                 TaskEndedEvent te = (TaskEndedEvent)ev;
-                logger.debug("TASKEND: " + te.getId());
+                logger.debug("TASKEND: " + te.taskId());
                 runningTasks--;
                 endedTasks++;
             }
