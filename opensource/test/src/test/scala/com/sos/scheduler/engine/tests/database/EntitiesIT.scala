@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.tests.database
 import com.sos.scheduler.engine.data.folder.{FileBasedActivatedEvent, JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.OrderId
-import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
@@ -22,6 +21,8 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import scala.xml.XML
+import org.joda.time.format.DateTimeFormat
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 
 @RunWith(classOf[JUnitRunner])
 final class EntitiesIT extends ScalaSchedulerTest {
@@ -43,7 +44,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
     scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
     scheduler executeXml <start_job job={simpleJobPath.string} at="2029-10-11 22:33:44"/>
-    scheduler executeXml <start_job job={simpleJobPath.string} at="period"><params><param name="myJobParameter" value="myValue"/></params></start_job>
+    scheduler executeXml <start_job job={simpleJobPath.string} at="2029-11-11 11:11:11"><params><param name="myJobParameter" value="myValue"/></params></start_job>
     simpleJob.forceFileReread()
     scheduler.instance[FolderSubsystem].updateFolders()
     //Warum geht das nicht: eventPipe.nextWithCondition[FileBasedRemovedEvent] { _.getTypedPath == simpleJobPath }
@@ -65,35 +66,35 @@ final class EntitiesIT extends ScalaSchedulerTest {
   test("First TaskHistoryEntity is from Scheduler start") {
     taskHistoryEntities(0) match { case e =>
       e should have (
-        'getId (firstTaskHistoryEntityId),
-        'schedulerId (schedulerId),
-        'getClusterMemberId (ClusterMemberId.empty),
-        'getEndTime (null),
-        'getJobPath (""),
-        'getCause (null),
-        'getSteps (null),
-        'getErrorCode (""),
-        'getErrorText ("")
+        'id (firstTaskHistoryEntityId),
+        'schedulerId (schedulerId.string),
+        'clusterMemberId (null),
+        'endTime (null),
+        'jobPath ("(Spooler)"),
+        'cause (null),
+        'steps (null),
+        'errorCode (null),
+        'errorText (null)
       )
-      assert(e.getStartTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be before testStartTime="+testStartTime)
-      now() match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
+      assert(e.startTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be before testStartTime="+testStartTime)
+      now() match { case n => assert(e.startTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be after now="+n) }
     }
   }
 
   test("Second TaskHistoryEntity is from "+orderJobPath) {
     taskHistoryEntities(1) match { case e =>
       e should have (
-        'getId (firstTaskHistoryEntityId + 1),
-        'schedulerId (schedulerId),
-        'getClusterMemberId (ClusterMemberId.empty),
-        'getJobPath (orderJobPath.asString),
-        'getCause ("order"),
-        'getSteps (1),
-        'getErrorCode (""),
-        'getErrorText ("")
+        'id (firstTaskHistoryEntityId + 1),
+        'schedulerId (schedulerId.string),
+        'clusterMemberId (null),
+        'jobPath (orderJobPath.withoutStartingSlash),
+        'cause ("order"),
+        'steps (1),
+        'errorCode (null),
+        'errorText (null)
       )
-      assert(e.getStartTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be before testStartTime="+testStartTime)
-      now() match { case n => assert(e.getStartTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.getStartTime+" should not be after now="+n) }
+      assert(e.startTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be before testStartTime="+testStartTime)
+      now() match { case n => assert(e.startTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be after now="+n) }
     }
   }
 
@@ -110,22 +111,32 @@ final class EntitiesIT extends ScalaSchedulerTest {
       'parameterXml (null)
     )
     XML.loadString(e(0).xml) should equal (<task force_start="no"/>)
-    assert(e(0).enqueueTime.getTime >= testStartTime.getMillis, "TaskEntity._enqueueTime="+e(0).enqueueTime+" should not be before testStartTime="+testStartTime)
-    assert(e(0).enqueueTime.getTime <= now().getMillis, "TaskEntity._enqueueTime="+e(0).enqueueTime+" should not be after now")
+    assert(e(0).enqueueTime.getTime >= testStartTime.getMillis, "TaskEntity._enqueueTime="+ e(0).enqueueTime +" should not be before testStartTime="+testStartTime)
+    assert(e(0).enqueueTime.getTime <= now().getMillis, "TaskEntity._enqueueTime="+ e(0).enqueueTime +" should not be after now")
 
     XML.loadString(e(1).xml) should equal (<task force_start="yes"/>)
     new DateTime(e(1).startTime) should equal (new DateTime(2029, 10, 11, 22, 33, 44))
 
-    XML.loadString(e(2).xml) should equal (<task force_start="no"/>)
+    XML.loadString(e(2).xml) should equal (<task force_start="yes"/>)
     XML.loadString(e(2).parameterXml) should equal (<sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>)
+    new DateTime(e(2).startTime) should equal (new DateTime(2029, 11, 11, 11, 11, 11))
   }
 
   test("TaskEntity is read as expected") {
-    val answerDoc = scheduler executeXml <show_job job={simpleJob.getPath.string}/>
-    val queuedTasksElem =  answerDoc \ "answer" \ "job" \ "queued_tasks"
+    val queuedTasksElem = (scheduler executeXml <show_job job={simpleJob.getPath.string} what="task_queue"/>) \ "answer" \ "job" \ "queued_tasks"
     (queuedTasksElem \ "@length").text.toInt should equal (3)
-    val t = queuedTasksElem \ "queued_task"
-    // (t(0) \ "@start_time") should equal (xx)
+    val queuedTaskElems = queuedTasksElem \ "queued_task"
+    queuedTaskElems should have size (3)
+    for (q <- queuedTaskElems) {
+      val enqueuedString = (q \ "@enqueued").text
+      val t = xmlDateTimeFormatter.parseDateTime(enqueuedString)
+      assert(!(t isBefore testStartTime), "<queued_task enqueued="+enqueuedString+"> should not be before testStartTime="+testStartTime)
+      assert(!(t isAfter now()), "<queued_task enqueued="+enqueuedString+"> should not be after now")
+    }
+    queuedTaskElems(0).attribute("start_at") should be ('empty)
+    queuedTaskElems(1).attribute("start_at").head.text should equal ("2029-10-11 20:33:44.000")
+    queuedTaskElems(2).attribute("start_at").head.text should equal ("2029-11-11 10:11:11.000")
+    (queuedTaskElems(2) \ "params").head should equal (<params count="1"><param value="myValue" name="myJobParameter"/></params>)
   }
 
   test("JobEntity is from "+orderJobPath) {
@@ -162,4 +173,5 @@ private object EntitiesIT {
   val orderJobPath = JobPath.of("/test-order-job")
   val simpleJobPath = JobPath.of("/test-simple-job")
   val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
+  val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS") withZone schedulerTimeZone
 }
