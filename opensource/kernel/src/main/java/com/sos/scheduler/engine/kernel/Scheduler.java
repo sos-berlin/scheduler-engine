@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
+import com.sos.scheduler.engine.data.scheduler.SchedulerClusterMemberKey;
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
@@ -94,6 +95,11 @@ public final class Scheduler implements Sister,
                     });
                     bind(ClusterMemberId.class).toProvider(new Provider<ClusterMemberId>() {
                         @Override public ClusterMemberId get() { return new ClusterMemberId(cppProxy.cluster_member_id()); }
+                    });
+                    bind(SchedulerClusterMemberKey.class).toProvider(new Provider<SchedulerClusterMemberKey>() {
+                        @Inject private SchedulerId schedulerId;
+                        @Inject private ClusterMemberId clusterMemberId;
+                        @Override public SchedulerClusterMemberKey get() { return new SchedulerClusterMemberKey(schedulerId, clusterMemberId); }
                     });
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
