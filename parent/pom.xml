@@ -15,13 +15,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> <!-- für maven-failsafe-plugin -->
-        <scala.version>2.9.1-1</scala.version>
+        <scala.version>2.9.2</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
-        <scalatest.scala.version>2.9.1</scalatest.scala.version>
+        <scalatest.scala.version>2.9.2</scalatest.scala.version>
         <jersey.version>1.10</jersey.version>
         <jetty.version>8.1.5.v20120716</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <slf4j.version>1.6.4</slf4j.version>
-        <jackson.version>1.9.4</jackson.version>
+        <jackson.version>1.9.7</jackson.version>
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
         <cplusplusVersion>${project.version}</cplusplusVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
@@ -391,7 +391,22 @@
             <dependency>
                 <groupId>com.fasterxml</groupId>
                 <artifactId>jackson-module-scala</artifactId>
-                <version>1.9.2</version>
+                <version>1.9.3</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scalatest</groupId>
+                        <artifactId>scalatest_2.9.1</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.9.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
