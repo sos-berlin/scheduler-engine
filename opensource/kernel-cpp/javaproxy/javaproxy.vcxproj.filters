@@ -197,12 +197,8 @@
     </ClCompile>
     
     
-    <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistentState.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
-    <ClCompile Include="com__sos__scheduler__engine__data__job__TaskObject.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
+    
+    
     <ClCompile Include="org__joda__time__DateTime.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -222,6 +218,12 @@
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     
+    <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistent.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__data__job__TaskPersistent.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h">

@@ -4,7 +4,7 @@
 
 #include "com__sos__scheduler__engine__kernel__job__Job.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
-#include "com__sos__scheduler__engine__data__job__JobPersistentState.h"
+#include "com__sos__scheduler__engine__data__job__JobPersistent.h"
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__String.h"
 
@@ -34,7 +34,7 @@ Job__class::Job__class(const string& class_name) :
     ,_loadPersistentTasks____method(this, "loadPersistentTasks", "()V")
     ,_persistEnqueuedTask__IJJLjava_lang_String_2Ljava_lang_String_2__method(this, "persistEnqueuedTask", "(IJJLjava/lang/String;Ljava/lang/String;)V")
     ,_persistState____method(this, "persistState", "()V")
-    ,_tryFetchPersistentState____method(this, "tryFetchPersistentState", "()Lcom/sos/scheduler/engine/data/job/JobPersistentState;"){}
+    ,_tryFetchPersistentState____method(this, "tryFetchPersistentState", "()Lcom/sos/scheduler/engine/data/job/JobPersistent;"){}
 
 Job__class::~Job__class() {}
 
@@ -90,10 +90,10 @@ void Job::persistState() const {
     cls->_persistState____method.call(get_jobject(), parameter_list);
 }
 
-::javaproxy::com::sos::scheduler::engine::data::job::JobPersistentState Job::tryFetchPersistentState() const {
+::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent Job::tryFetchPersistentState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Job__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistentState result;
+    ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent result;
     result.steal_local_ref(cls->_tryFetchPersistentState____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }

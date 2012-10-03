@@ -1,10 +1,5 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.JobPersistentState
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
-import com.sos.scheduler.engine.persistence.SchedulerDatabases._
-import com.sos.scheduler.engine.persistence.SchedulerDatabases.databaseToDateTime
 import java.io.Serializable
 import java.util.{Date => JavaDate}
 import javax.annotation.Nullable
@@ -27,55 +22,26 @@ import javax.persistence._
 @IdClass(classOf[JobEntity.PrimaryKey])
 class JobEntity {
 
-  @Column(name="\"SPOOLER_ID\"", nullable=false) @Id
-  var _schedulerId: String = _
+  @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
+  private [entities] var schedulerId: String = _
 
-  @Column(name="\"CLUSTER_MEMBER_ID\"", nullable=false) @Id
-  var _clusterMemberId: String = _
+  @Column(name=""""CLUSTER_MEMBER_ID"""", nullable=false) @Id
+  private [entities] var clusterMemberId: String = _
 
-  @Column(name="\"PATH\"", nullable=false) @Id
-  var _jobPath: String = _
+  @Column(name=""""PATH"""", nullable=false) @Id
+  private [entities] var jobPath: String = _
 
-  @Column(name="\"STOPPED\"" , nullable=false)
-  var isStopped: Boolean = _
+  @Column(name=""""STOPPED"""" , nullable=false)
+  private [entities] var isStopped: Boolean = _
 
-  @Column(name="\"NEXT_START_TIME\"") @Temporal(TIMESTAMP) @Nullable
-  var _nextStartTime: JavaDate = _
+  @Column(name=""""NEXT_START_TIME"""") @Temporal(TIMESTAMP) @Nullable
+  private [entities] var nextStartTime: JavaDate = _
 
-
-  def this(key: JobEntity.PrimaryKey) {
-    this()
-    _schedulerId = key._schedulerId
-    _clusterMemberId = key._clusterMemberId
-    _jobPath = key._jobPath
-  }
-
-  final def schedulerId = schedulerIdFromDatabase(_schedulerId)
-
-  final def clusterMemberId = if (_clusterMemberId == "-") ClusterMemberId.empty else new ClusterMemberId(_clusterMemberId)
-
-  final def toObject = JobPersistentState(
-    jobPath = JobPath.of("/"+ _jobPath),
-    isPermanentlyStopped = isStopped,
-    nextStartTimeOption = Option(_nextStartTime) map databaseToDateTime)
+  override def toString = "JobEntity"+ Seq(schedulerId, clusterMemberId, jobPath, isStopped, nextStartTime).mkString("(", ",", ")")
 }
 
 object JobEntity {
-  def apply(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId, o: JobPersistentState) = {
-    val e = new JobEntity(PrimaryKey(schedulerId, clusterMemberId, o.jobPath))
-    e.isStopped = o.isPermanentlyStopped
-    e._nextStartTime = (o.nextStartTimeOption map dateTimeToDatabase).orNull
-    e
-  }
-
-  case class PrimaryKey(var _schedulerId: String, var _clusterMemberId: String, var _jobPath: String) extends Serializable {
+  case class PrimaryKey(var schedulerId: String, var clusterMemberId: String, var jobPath: String) extends Serializable {
     def this() = this(null: String, null: String, null: String)
-  }
-
-  object PrimaryKey {
-    def apply(s: SchedulerId, clusterMemberId: ClusterMemberId, jobPath: JobPath) = new PrimaryKey(
-      idForDatabase(s),
-      if (clusterMemberId.isEmpty) "-" else clusterMemberId.asString,
-      jobPath.withoutStartingSlash)
   }
 }

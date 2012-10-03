@@ -6,11 +6,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.eternalMillis
 import com.sos.scheduler.engine.data.folder.FileBasedType
 import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.{TaskObject, TaskId, JobPersistentState}
+import com.sos.scheduler.engine.data.job.{TaskPersistent, TaskId, JobPersistent}
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.folder.FileBasedState
-import com.sos.scheduler.engine.kernel.job.ScalaJPA._
+import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
+import com.sos.scheduler.engine.kernel.persistence.{JobStore, TaskStore}
 import com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString
 import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
@@ -58,31 +59,31 @@ import org.joda.time.DateTime
 
   @ForCpp @Nullable def tryFetchPersistentState =
     transaction { implicit entityManager =>
-      persistentStateStore.tryFetch(getPath).orNull
+      jobStore.tryFetch(getPath).orNull
     }
 
   @ForCpp def persistState() {
     transaction { implicit entityManager =>
-      persistentStateStore.store(persistentState)
+      jobStore.store(persistentState)
     }
   }
 
   @ForCpp def deletePersistentState() {
     transaction { implicit entityManager =>
-      persistentStateStore.delete(getPath)
+      jobStore.delete(getPath)
     }
   }
 
-  private def persistentStateStore = injector.getInstance(classOf[JobPersistentStateStore])
+  private def jobStore = injector.getInstance(classOf[JobStore])
 
-  private def persistentState = new JobPersistentState(
+  private def persistentState = new JobPersistent(
     getPath,
     isPermanentlyStopped,
     eternalMillisToNone(cppProxy.next_start_time_millis))
 
   @ForCpp def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
     transaction { implicit entityManager =>
-      taskStore.insert(TaskObject(
+      taskStore.insert(TaskPersistent(
         TaskId(taskId),
         getPath,
         new DateTime(enqueueTimeMillis),
@@ -119,7 +120,6 @@ object Job {
     Some(millis) filter { _ != eternalMillis } map { o => new DateTime(o) }
   }
 
-  private def zeroMillisToNone(millis: Long): Option[DateTime] = {
+  private def zeroMillisToNone(millis: Long): Option[DateTime] =
     Some(millis) filter { _ != 0 } map { o => new DateTime(o) }
-  }
 }

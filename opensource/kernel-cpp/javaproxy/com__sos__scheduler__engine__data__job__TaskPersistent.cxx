@@ -2,7 +2,7 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__data__job__TaskObject.h"
+#include "com__sos__scheduler__engine__data__job__TaskPersistent.h"
 #include "com__sos__scheduler__engine__data__job__TaskId.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
@@ -10,10 +10,10 @@
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { 
 
-struct TaskObject__class : ::zschimmer::javabridge::Class
+struct TaskPersistent__class : ::zschimmer::javabridge::Class
 {
-    TaskObject__class(const string& class_name);
-   ~TaskObject__class();
+    TaskPersistent__class(const string& class_name);
+   ~TaskPersistent__class();
 
     ::zschimmer::javabridge::Method const _enqueueTime____method;
     ::zschimmer::javabridge::Method const _parametersXml____method;
@@ -21,12 +21,12 @@ struct TaskObject__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _taskId____method;
     ::zschimmer::javabridge::Method const _xml____method;
 
-    static const ::zschimmer::javabridge::class_factory< TaskObject__class > class_factory;
+    static const ::zschimmer::javabridge::class_factory< TaskPersistent__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< TaskObject__class > TaskObject__class::class_factory ("com.sos.scheduler.engine.data.job.TaskObject");
+const ::zschimmer::javabridge::class_factory< TaskPersistent__class > TaskPersistent__class::class_factory ("com.sos.scheduler.engine.data.job.TaskPersistent");
 
-TaskObject__class::TaskObject__class(const string& class_name) :
+TaskPersistent__class::TaskPersistent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_enqueueTime____method(this, "enqueueTime", "()Lorg/joda/time/DateTime;")
     ,_parametersXml____method(this, "parametersXml", "()Ljava/lang/String;")
@@ -34,70 +34,70 @@ TaskObject__class::TaskObject__class(const string& class_name) :
     ,_taskId____method(this, "taskId", "()Lcom/sos/scheduler/engine/data/job/TaskId;")
     ,_xml____method(this, "xml", "()Ljava/lang/String;"){}
 
-TaskObject__class::~TaskObject__class() {}
+TaskPersistent__class::~TaskPersistent__class() {}
 
 
 
 
-TaskObject::TaskObject(jobject jo) { if (jo) assign_(jo); }
+TaskPersistent::TaskPersistent(jobject jo) { if (jo) assign_(jo); }
 
-TaskObject::TaskObject(const TaskObject& o) { assign_(o.get_jobject()); }
+TaskPersistent::TaskPersistent(const TaskPersistent& o) { assign_(o.get_jobject()); }
 
 #ifdef Z_HAS_MOVE_CONSTRUCTOR
-    TaskObject::TaskObject(TaskObject&& o) { set_jobject(o.get_jobject());  o.set_jobject(NULL); }
+    TaskPersistent::TaskPersistent(TaskPersistent&& o) { set_jobject(o.get_jobject());  o.set_jobject(NULL); }
 #endif
 
-TaskObject::~TaskObject() { assign_(NULL); }
+TaskPersistent::~TaskPersistent() { assign_(NULL); }
 
 
 
 
-::javaproxy::org::joda::time::DateTime TaskObject::enqueueTime() const {
+::javaproxy::org::joda::time::DateTime TaskPersistent::enqueueTime() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    TaskObject__class* cls = _class.get();
+    TaskPersistent__class* cls = _class.get();
     ::javaproxy::org::joda::time::DateTime result;
     result.steal_local_ref(cls->_enqueueTime____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
-::javaproxy::java::lang::String TaskObject::parametersXml() const {
+::javaproxy::java::lang::String TaskPersistent::parametersXml() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    TaskObject__class* cls = _class.get();
+    TaskPersistent__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_parametersXml____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
-jlong TaskObject::startTimeMillis() const {
+jlong TaskPersistent::startTimeMillis() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    TaskObject__class* cls = _class.get();
+    TaskPersistent__class* cls = _class.get();
     return cls->_startTimeMillis____method.long_call(get_jobject(), parameter_list);
 }
 
-::javaproxy::com::sos::scheduler::engine::data::job::TaskId TaskObject::taskId() const {
+::javaproxy::com::sos::scheduler::engine::data::job::TaskId TaskPersistent::taskId() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    TaskObject__class* cls = _class.get();
+    TaskPersistent__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::data::job::TaskId result;
     result.steal_local_ref(cls->_taskId____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
-::javaproxy::java::lang::String TaskObject::xml() const {
+::javaproxy::java::lang::String TaskPersistent::xml() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    TaskObject__class* cls = _class.get();
+    TaskPersistent__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_xml____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
 
-::zschimmer::javabridge::Class* TaskObject::java_object_class_() const { return _class.get(); }
+::zschimmer::javabridge::Class* TaskPersistent::java_object_class_() const { return _class.get(); }
 
-::zschimmer::javabridge::Class* TaskObject::java_class_() { return TaskObject__class::class_factory.clas(); }
+::zschimmer::javabridge::Class* TaskPersistent::java_class_() { return TaskPersistent__class::class_factory.clas(); }
 
 
-void TaskObject::Lazy_class::initialize() const {
-    _value = TaskObject__class::class_factory.clas();
+void TaskPersistent::Lazy_class::initialize() const {
+    _value = TaskPersistent__class::class_factory.clas();
 }
 
 

@@ -1,19 +1,15 @@
-package com.sos.scheduler.engine.kernel.job
+package com.sos.scheduler.engine.kernel.persistence
 
-import com.sos.scheduler.engine.kernel.job.ScalaJPA._
+import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
+import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 import javax.persistence.EntityManager
 
 /** JPA-Operationen mit Konvertierung zwischen Entity und Objekt.
   * @tparam E Entity-Klasse, mit @Entity annotiert
   * @tparam OBJ Objektklasse
   * @tparam KEY Schlüsselklasse des Objekts */
-abstract class AbstractObjectJPAStore[E <: AnyRef, OBJ <: AnyRef, KEY](implicit entityManifest: Manifest[E]) {
-
-  protected def toEntityKey(key: KEY): AnyRef
-
-  protected def toEntity(o: OBJ): E
-
-  protected def toObject(e: E): OBJ
+abstract class AbstractObjectJPAStore[OBJ <: AnyRef, KEY, E <: AnyRef](implicit entityManifest: Manifest[E])
+extends ObjectEntityConverter[OBJ, KEY, E] {
 
   def tryFetch(key: KEY)(implicit em: EntityManager) =
     em.findOption[E](toEntityKey(key))(entityManifest) map toObject

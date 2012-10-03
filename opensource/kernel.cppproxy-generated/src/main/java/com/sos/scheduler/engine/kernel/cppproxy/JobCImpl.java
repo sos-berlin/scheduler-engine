@@ -26,7 +26,7 @@ final class JobCImpl
     private static native java.lang.String description__native(long cppReference);
 
 
-    @Override public void enqueue_task(com.sos.scheduler.engine.data.job.TaskObject p0) {
+    @Override public void enqueue_task(com.sos.scheduler.engine.data.job.TaskPersistent p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             enqueue_task__native(cppReference(), p0);
@@ -37,7 +37,7 @@ final class JobCImpl
         }
     }
 
-    private static native void enqueue_task__native(long cppReference, com.sos.scheduler.engine.data.job.TaskObject p0);
+    private static native void enqueue_task__native(long cppReference, com.sos.scheduler.engine.data.job.TaskPersistent p0);
 
 
     @Override public java.lang.String file_based_state_name() {

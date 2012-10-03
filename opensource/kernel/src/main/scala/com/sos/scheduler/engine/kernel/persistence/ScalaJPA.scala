@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.job
+package com.sos.scheduler.engine.kernel.persistence
 
 import javax.persistence.{EntityManagerFactory, EntityManager}
 import org.slf4j.LoggerFactory

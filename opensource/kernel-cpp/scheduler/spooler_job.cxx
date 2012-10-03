@@ -4,7 +4,7 @@
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
-#include "../javaproxy/com__sos__scheduler__engine__data__job__JobPersistentState.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__JobPersistent.h"
 
 #ifndef Z_WINDOWS
 #   include <signal.h>
@@ -1749,20 +1749,20 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 
 //--------------------------------------------------------------------------------Job::enqueue_task
 
-void Job::enqueue_task(const TaskObjectJ& taskObjectJ) {
+void Job::enqueue_task(const TaskPersistentJ& taskPersistentJ) {
 
-    int task_id = taskObjectJ.taskId().value();
+    int task_id = taskPersistentJ.taskId().value();
 
-    Time start_at = Time::of_millis(taskObjectJ.startTimeMillis());
+    Time start_at = Time::of_millis(taskPersistentJ.startTimeMillis());
     _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
 
     ptr<Com_variable_set> parameters = new Com_variable_set;
-    string parameters_xml = taskObjectJ.parametersXml();
+    string parameters_xml = taskPersistentJ.parametersXml();
     if( !parameters_xml.empty() )  parameters->set_xml(parameters_xml);
 
     xml::Document_ptr task_dom;
     bool force_start = force_start_default;
-    string xml = taskObjectJ.xml();
+    string xml = taskPersistentJ.xml();
     if (!xml.empty()) {
         task_dom = xml::Document_ptr(xml);
         force_start = task_dom.documentElement().bool_getAttribute("force_start", force_start);
@@ -1772,7 +1772,7 @@ void Job::enqueue_task(const TaskObjectJ& taskObjectJ) {
     if( task_dom )  task->set_dom( task_dom.documentElement() );
     task->_is_in_database = true;
     task->_let_run        = true;
-    task->_enqueue_time = Time::of_millis(taskObjectJ.enqueueTime().getMillis());
+    task->_enqueue_time = Time::of_millis(taskPersistentJ.enqueueTime().getMillis());
     
     if (!start_at && !_schedule_use->period_follows(Time::now())) {
         try { z::throw_xc( "SCHEDULER-143" ); } 

@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import scala.annotation.target.getter
 
 @ForCpp
-case class TaskObject(
+case class TaskPersistent(
   @(ForCpp @getter) taskId: TaskId,
                     jobPath: JobPath,
   @(ForCpp @getter) enqueueTime: DateTime,

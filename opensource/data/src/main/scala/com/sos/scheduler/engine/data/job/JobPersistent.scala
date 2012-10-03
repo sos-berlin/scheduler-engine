@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import scala.annotation.target.getter
 
 @ForCpp
-case class JobPersistentState(
+case class JobPersistent(
     jobPath: JobPath,
     @(ForCpp @getter) isPermanentlyStopped: Boolean,
     nextStartTimeOption: Option[DateTime]) {

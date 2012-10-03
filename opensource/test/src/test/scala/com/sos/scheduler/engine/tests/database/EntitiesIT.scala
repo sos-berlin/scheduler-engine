@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.tests.database
 
-import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, FileBasedActivatedEvent, JobChainPath, JobPath}
-import com.sos.scheduler.engine.data.job.{JobPersistentState, TaskClosedEvent}
+import com.sos.scheduler.engine.data.folder.{FileBasedActivatedEvent, JobChainPath, JobPath}
+import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
-import com.sos.scheduler.engine.kernel.job.ScalaJPA._
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
 import com.sos.scheduler.engine.kernel.settings.{SettingName, Settings}
 import com.sos.scheduler.engine.persistence.entities.{TaskEntity, JobEntity, TaskHistoryEntity}
 import com.sos.scheduler.engine.test.Environment.schedulerId
@@ -21,7 +22,6 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import scala.xml.XML
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 
 @RunWith(classOf[JUnitRunner])
 final class EntitiesIT extends ScalaSchedulerTest {
@@ -102,22 +102,22 @@ final class EntitiesIT extends ScalaSchedulerTest {
     e should have size (3)
 
     e(0) should have (
-      '_taskId (firstTaskHistoryEntityId + 2),
-      '_schedulerId (schedulerId.asString),
-      '_clusterMemberId (null),
-      '_jobPath (simpleJobPath.withoutStartingSlash),
-      '_startTime (null),
-      '_parameterXml (null)
+      'taskId (firstTaskHistoryEntityId + 2),
+      'schedulerId (schedulerId.asString),
+      'clusterMemberId (null),
+      'jobPath (simpleJobPath.withoutStartingSlash),
+      'startTime (null),
+      'parameterXml (null)
     )
-    XML.loadString(e(0)._xml) should equal (<task force_start="no"/>)
-    assert(e(0)._enqueueTime.getTime >= testStartTime.getMillis, "TaskEntity._enqueueTime="+e(0)._enqueueTime+" should not be before testStartTime="+testStartTime)
-    assert(e(0)._enqueueTime.getTime <= now().getMillis, "TaskEntity._enqueueTime="+e(0)._enqueueTime+" should not be after now")
+    XML.loadString(e(0).xml) should equal (<task force_start="no"/>)
+    assert(e(0).enqueueTime.getTime >= testStartTime.getMillis, "TaskEntity._enqueueTime="+e(0).enqueueTime+" should not be before testStartTime="+testStartTime)
+    assert(e(0).enqueueTime.getTime <= now().getMillis, "TaskEntity._enqueueTime="+e(0).enqueueTime+" should not be after now")
 
-    XML.loadString(e(1)._xml) should equal (<task force_start="yes"/>)
-    new DateTime(e(1)._startTime) should equal (new DateTime(2029, 10, 11, 22, 33, 44))
+    XML.loadString(e(1).xml) should equal (<task force_start="yes"/>)
+    new DateTime(e(1).startTime) should equal (new DateTime(2029, 10, 11, 22, 33, 44))
 
-    XML.loadString(e(2)._xml) should equal (<task force_start="no"/>)
-    XML.loadString(e(2)._parameterXml) should equal (<sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>)
+    XML.loadString(e(2).xml) should equal (<task force_start="no"/>)
+    XML.loadString(e(2).parameterXml) should equal (<sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>)
   }
 
   test("TaskEntity is read as expected") {
@@ -134,23 +134,20 @@ final class EntitiesIT extends ScalaSchedulerTest {
     stopJobAndWait(orderJobPath)
     fetchJobEntityOption(orderJobPath) match { case Some(e) =>
       e should have (
-        '_schedulerId (schedulerId.asString),
-        '_clusterMemberId ("-"),
-        '_jobPath (orderJobPath.withoutStartingSlash),
+        'schedulerId (schedulerId.asString),
+        'clusterMemberId ("-"),
+        'jobPath (orderJobPath.withoutStartingSlash),
         'stopped (true),
-        '_nextStartTime (null),
-        'schedulerId (schedulerId),
-        'clusterMemberId (ClusterMemberId.empty),
-        'toObject (JobPersistentState(orderJobPath, nextStartTimeOption=None, isPermanentlyStopped=true))
+        'nextStartTime (null)
       )
     }
   }
 
   private def fetchJobEntityOption(jobPath: JobPath) =
-    entityManager.findOption[JobEntity](JobEntity.PrimaryKey(schedulerId, ClusterMemberId.empty, jobPath))
+    entityManager.findOption[JobEntity](JobEntity.PrimaryKey(schedulerId.asString, "-", jobPath.withoutStartingSlash))
 
   private def fetchTaskEntities(jobPath: JobPath): Seq[TaskEntity] =
-    entityManager.fetchSeq("select t from TaskEntity t where t._jobPath=:jobPath order by t._taskId",
+    entityManager.fetchSeq("select t from TaskEntity t where t.jobPath=:jobPath order by t.taskId",
       Seq("jobPath" -> jobPath.withoutStartingSlash()))
 
   private def stopJobAndWait(jobPath: JobPath) {

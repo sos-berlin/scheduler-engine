@@ -229,7 +229,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) );
     void                        enqueue_task                ( Task* );
-    void                        enqueue_task                (const TaskObjectJ&);
+    void                        enqueue_task                (const TaskPersistentJ&);
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     bool                        check_for_changed_directory ( const Time& now );

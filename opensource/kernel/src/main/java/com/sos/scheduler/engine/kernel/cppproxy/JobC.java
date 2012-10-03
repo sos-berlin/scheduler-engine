@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
-import com.sos.scheduler.engine.data.job.TaskObject;
+import com.sos.scheduler.engine.data.job.TaskPersistent;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector;
 
@@ -28,5 +28,5 @@ public interface JobC extends CppProxyWithSister<Job> {
     void set_state_cmd(String cmd);
     boolean is_permanently_stopped();
     long next_start_time_millis();
-    void enqueue_task(TaskObject o);
+    void enqueue_task(TaskPersistent o);
 }

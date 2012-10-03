@@ -3,7 +3,7 @@
 
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "../javaproxy/com__sos__scheduler__engine__data__job__TaskId.h"
-#include "../javaproxy/com__sos__scheduler__engine__data__job__TaskObject.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__TaskPersistent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__Scheduler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__CppEventFactory.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__JobC.h"
@@ -40,7 +40,7 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpReq
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixLogJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::job::Job JobJ;
-typedef ::javaproxy::com::sos::scheduler::engine::data::job::TaskObject TaskObjectJ;
+typedef ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistent TaskPersistentJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 
