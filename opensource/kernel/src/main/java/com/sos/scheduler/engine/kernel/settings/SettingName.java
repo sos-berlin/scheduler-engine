@@ -8,7 +8,9 @@ public enum SettingName {
     jobJavaClassPath(2),
 
     /** Default für factory.ini [spooler] html_dir */
-    htmlDir(3);
+    htmlDir(3),
+
+    orderDistributedBalanced(7);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

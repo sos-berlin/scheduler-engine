@@ -254,7 +254,7 @@ struct Order : Com_order,
     void                        remove                  ( File_based::Remove_flag );
     void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack, Transaction* = NULL );
     void                        remove_from_job_chain_stack();
-    bool                        tip_own_job_for_new_distributed_order_state();
+    void                        tip_next_node_for_new_distributed_order_state();
     void                        move_to_node            ( job_chain::Node* );
 
     enum Postprocessing_mode { post_success, post_error, post_keep_state };
