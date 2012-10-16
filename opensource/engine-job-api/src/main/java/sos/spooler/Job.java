@@ -316,6 +316,8 @@ public class Job extends Idispatch implements HasBean<JobBean>
 
     public int              setback_max         ()                                  { return ((Integer) com_call( "<setback_max"     )).intValue(); }
 
+    public String           script_code         ()                                  { return (String)     com_call( "<script_code"                  ); }
+
     @Override public final JobBean toBean() {
         return new JobBean(this);
     }

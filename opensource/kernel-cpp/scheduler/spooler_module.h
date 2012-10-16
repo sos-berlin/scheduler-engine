@@ -81,9 +81,9 @@ struct Module : Object
         kind_java,
         kind_scripting_engine,
         kind_com,
-        kind_remote,            // Nur für Module_instance
+        kind_remote,            // Nur fï¿½r Module_instance
         kind_internal,
-        kind_scripting_engine_java           // JS-498: Scriptverarbeitung über JAVA interface
+        kind_scripting_engine_java           // JS-498: Scriptverarbeitung ï¿½ber JAVA interface
 
     };
 
@@ -97,7 +97,7 @@ struct Module : Object
     void                        set_folder_path             ( const Absolute_path& p )              { _folder_path = p; }
     void                        set_dom                     ( const xml::Element_ptr& );
     void                        set_xml_text_with_includes  ( const string& xml );
-    void                        set_process                 ();                                     // Für <process>
+    void                        set_process                 ();                                     // Fï¿½r <process>
     void                        init0                       ();
     void                        init                        ();
 
@@ -105,7 +105,6 @@ struct Module : Object
     virtual ptr<Module_instance> create_instance_impl       ();
     bool                        set                         ()                                      { return _set; }
     Kind                        kind                        () const                                { return _kind; }
-    bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     void                        set_checked_attribute       ( string*, const xml::Element_ptr&, const string&, bool modify_allowed = false );
     void                        set_priority                ( const string& );
 
@@ -144,14 +143,14 @@ struct Module : Object
     // Java
     ptr<javabridge::Vm>        _java_vm;
     string                     _java_class_name;            // <script java_class="...">
-    string                     _java_options;               // Gehört eigentlich nach Job
+    string                     _java_options;               // Gehï¿½rt eigentlich nach Job
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
     bool                       _compiled;
     string                     _java_class_path;            // JS-540
 
     // Process
     string                     _process_filename;           // Job ist ein externes Programm
-    string                     _process_param_raw;          // Parameter für das Programm, vor der Variablenersetzung
+    string                     _process_param_raw;          // Parameter fï¿½r das Programm, vor der Variablenersetzung
     string                     _process_log_filename;
     bool                       _process_ignore_error;
     bool                       _process_ignore_signal;
@@ -186,7 +185,7 @@ struct Module_instance : Object
 
         Module_instance*       _module_instance;
         Log_indent             _log_indent;
-        string                 _name;                       // Fürs Log
+        string                 _name;                       // Fï¿½rs Log
         bool                   _result_set;
         bool                   _result;
     };
@@ -204,7 +203,7 @@ struct Module_instance : Object
     typedef list<Object_list_entry>  Object_list;
 
 
-    Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
+    Z_GNU_ONLY(                 Module_instance             ();  )                                  // Fï¿½r gcc 3.2. Nicht implementiert.
                                 Module_instance             ( Module* );
     virtual                    ~Module_instance             ();
 
@@ -221,7 +220,7 @@ struct Module_instance : Object
     void                    set_log                         ( Prefix_log* );
     void                    set_log                         ( Has_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
-    void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schließen
+    void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schlieï¿½en
 
     virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();
@@ -278,16 +277,16 @@ struct Module_instance : Object
     virtual File_path           stderr_path                 ()                                      { return File_path(); }
     virtual bool                try_delete_files            ( Has_log* )                            { return true; }
     virtual std::list<File_path> undeleted_files            ()                                      { return std::list<File_path>(); }
-    virtual bool                process_has_signaled        ()                                      { return false; }       // Für Process_module_instance
+    virtual bool                process_has_signaled        ()                                      { return false; }       // Fï¿½r Process_module_instance
     virtual bool                is_kill_thread_running      ()                                      { return false; }
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }
 
 
     Fill_zero                  _zero_;
 
-    string                     _job_name;                   // Wird lokalem Objectserver als -job=... übergeben, für die Prozessliste (ps)
+    string                     _job_name;                   // Wird lokalem Objectserver als -job=... ï¿½bergeben, fï¿½r die Prozessliste (ps)
     Task*                      _task;
-    int                        _task_id;                    // Wird lokalem Objectserver als -task-id=... übergeben, für die Prozessliste (ps)
+    int                        _task_id;                    // Wird lokalem Objectserver als -task-id=... ï¿½bergeben, fï¿½r die Prozessliste (ps)
     Spooler*                   _spooler;
     Module::Kind               _kind;
     Delegated_log              _log;
@@ -309,8 +308,8 @@ struct Module_instance : Object
     bool                       _spooler_open_called;
     bool                       _spooler_close_called;
     In_call*                   _in_call;
-    string                     _call_method;                // Für Module_instance::call__start()
-    bool                       _spooler_process_result;     // Bisher nur für Process_module / Process_module_instance
+    string                     _call_method;                // Fï¿½r Module_instance::call__start()
+    bool                       _spooler_process_result;     // Bisher nur fï¿½r Process_module / Process_module_instance
 
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log

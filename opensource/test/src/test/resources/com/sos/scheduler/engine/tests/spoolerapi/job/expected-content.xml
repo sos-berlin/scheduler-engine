@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>opensource.plugins</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>jetty</module>
+    </modules>
+</project>
