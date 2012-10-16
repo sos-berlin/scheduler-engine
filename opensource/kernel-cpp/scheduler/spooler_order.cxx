@@ -21,10 +21,10 @@ const int    database_orders_read_ahead_count           = 1;
 //--------------------------------------------------------------------------------------------const
 
 // Datenbank-Feld distributed_next_time
-const string now_database_distributed_next_time         = "2000-01-01T00:00:00Z";        // Auftrag ist verteilt und ist sofort ausführbar
-const string never_database_distributed_next_time       = "3111-11-11T00:00:00Z";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
-const string blacklist_database_distributed_next_time   = "3111-11-11T00:01:00Z";        // Auftrag ist auf der schwarzen Liste
-const string replacement_database_distributed_next_time = "3111-11-11T00:02:00Z";        // <order replacement="yes">
+const string now_database_distributed_next_time         = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
+const string never_database_distributed_next_time       = "3111-11-11 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
+const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";        // Auftrag ist auf der schwarzen Liste
+const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
 // distributed_next_time is null => Auftrag ist nicht verteilt
 
 //--------------------------------------------------------------------------------------------const
@@ -831,7 +831,6 @@ void Order_subsystem_impl::count_finished_orders()
     _finished_orders_count++;
     _spooler->update_console_title( 2 );
 }
-
 
 //-----------------------------------------------------------------Order_subsystem_impl::dom_element
 
