@@ -103,6 +103,7 @@
                 <xsd:element ref="modify_job"/>
                 <xsd:element ref="modify_order"/>
                 <xsd:element ref="modify_spooler"/>
+                <xsd:element ref="job_chain.check_distributed"/>
                 <xsd:element ref="register_remote_scheduler"/>
                 <xsd:element ref="remove_job_chain"/>
                 <xsd:element ref="remove_order"/>
@@ -189,6 +190,7 @@
             <xsd:element ref="plugin.command"/>
             <xsd:element name="process_class" type="process_class"/>
             <xsd:element name="process_class.remove" type="process_class.remove"/>
+            <xsd:element ref="job_chain.check_distributed"/>
             <xsd:element ref="register_remote_scheduler"/>
             <xsd:element ref="remove_job_chain"/>
             <xsd:element ref="remove_order"/>
@@ -961,6 +963,12 @@
     <xsd:element name="job.why">
         <xsd:complexType>
             <xsd:attribute name="job" type="Path" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="job_chain.check_distributed">
+        <xsd:complexType>
+            <xsd:attribute name="job_chain" type="Path" use="required"/>
+            <xsd:attribute name="order_state" type="String" use="required"/>
         </xsd:complexType>
     </xsd:element>
     <xsd:element name="scheduler_log.log_categories.reset">

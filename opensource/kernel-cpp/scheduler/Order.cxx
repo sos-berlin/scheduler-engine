@@ -698,7 +698,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
     if( record_exists_error  &&  throw_exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path, record_exists_insertion );
 
-    if( insert_ok )  tip_own_job_for_new_distributed_order_state();
+    //if( insert_ok )  tip_next_node_for_new_distributed_order_state();
 
     return insert_ok;
 }
@@ -882,8 +882,6 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         _state_text_modified = false; 
         _title_modified      = false;
         _state_text_modified = false;
-
-        tip_own_job_for_new_distributed_order_state();
     }
     else
     if( db()->opened()  &&  _history_id )
@@ -2356,7 +2354,10 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
         {
-            if( db()->opened() )  is_new = db_try_insert( exists_exception );       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+            if( db()->opened() ) {
+                is_new = db_try_insert( exists_exception );       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+                tip_next_node_for_new_distributed_order_state();
+            }
         }
 
         if( is_new  &&  !_is_distributed )
@@ -2455,18 +2456,22 @@ bool Order::is_in_initial_state() {
     return false;
 }
 
-//-----------------------------------------------Order::tip_own_job_for_new_distributed_order_state
+//----------------------------------------------Order::tip_next_node_for_new_distributed_order_state
 
-bool Order::tip_own_job_for_new_distributed_order_state()
+void Order::tip_next_node_for_new_distributed_order_state()
 {
-    bool result = false;
-
-    if( is_processable() )
-    {
-        result = job_chain()->tip_for_new_distributed_order( _state, at() );
+    if( is_processable() ) {
+        bool ok = false;
+        if (at().is_zero() && _spooler->_cluster && _spooler->settings()->_order_distributed_balanced) {
+            string url = _spooler->_cluster->tip_for_new_distributed_order(*this);
+            if (url != "") {
+                log()->info(message_string("SCHEDULER-723", url));
+                ok = true;
+            }
+        }
+        if (!ok)
+            job_chain()->tip_for_new_distributed_order( _state, at() );
     }
-
-    return result;
 }
 
 //---------------------------------------------------------------------------------Order::job_chain
@@ -2807,6 +2812,7 @@ void Order::postprocessing2( Job* last_job )
             db_update( update_and_release_occupation );
         }
         catch( exception& x ) { _log->error( message_string( "SCHEDULER-313", x ) ); }
+        tip_next_node_for_new_distributed_order_state();
     }
 
     if( _is_distributed  &&  _job_chain )

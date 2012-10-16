@@ -10,7 +10,10 @@ public enum SettingName {
     /** Default für factory.ini [spooler] html_dir */
     htmlDir(3),
 
-    jobJavaOptions(4);
+    /** Grundeinstellung der Java-Optionen für alle Jobs. */
+    jobJavaOptions(4),
+
+    orderDistributedBalanced(6);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

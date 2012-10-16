@@ -2040,6 +2040,11 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
         return command_processor->_answer.createElement( "ok" );
     }
     else
+    if (element.nodeName_is("job_chain.check_distributed")) {
+        tip_for_new_distributed_order(element.getAttribute_mandatory("order_state"), Time(0));
+        return command_processor->_answer.createElement( "ok" );
+    }
+    else
     {
         //File_based::execute_xml( command_processor, element, show_what );  <job_chain.remove>, das ist nicht vorgesehen
         z::throw_xc( "SCHEDULER-105", element.nodeName() );

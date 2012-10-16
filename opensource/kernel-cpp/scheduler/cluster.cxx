@@ -86,6 +86,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                        set_command_for_scheduler            ( Transaction*, const string& command, const string& member_id );
     bool                        delete_dead_scheduler_record( const string& cluster_member_id );
     void                        show_active_schedulers      ( Transaction*, bool exclusive_only );
+    string                      tip_for_new_distributed_order(const Order&);
 
     string                      http_url_of_member_id       ( const string& cluster_member_id );
     void                        check                       ();
@@ -141,6 +142,7 @@ struct Cluster : Cluster_subsystem_interface
     Cluster_member*             exclusive_scheduler         ();                                     // NULL, wenn _exclusive_scheduler->is_empty_member()
     Cluster_member*             empty_member_record         ();
     void                        recommend_next_deadline_check_time( time_t );
+    string                      least_busy_member_id        () const;
 
     friend struct               Cluster_member;
     friend struct               Heart_beat_watchdog_thread;
@@ -2609,6 +2611,50 @@ void Cluster::show_active_schedulers( Transaction* outer_transaction, bool exclu
         if( !found )  _log->info( message_string( "SCHEDULER-805" ) );
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_clusters_tablename, x ), Z_FUNCTION ); }
+}
+
+//-----------------------------------------------------------Cluster::tip_for_new_distributed_order
+
+string Cluster::tip_for_new_distributed_order(const Order& order)
+{
+    try {
+        string member_id = least_busy_member_id();
+        if (member_id != _cluster_member_id) {
+            string url = http_url_of_member_id(member_id);
+            if (Regex_submatches m = Regex("http://([^:]+:[0-9]+)").match_subresults(url)) {
+                xml::Xml_string_writer xml_writer;
+                xml_writer.begin_element( "job_chain.check_distributed" );
+                xml_writer.set_attribute_optional( "job_chain", order.job_chain_path());
+                xml_writer.set_attribute_optional( "order_state", order.string_state());
+                xml_writer.end_element( "job_chain.check_distributed" );
+                send_udp_message(Host_and_port(m[1]), xml_writer.to_string());
+                return url;
+            }
+        }
+    } catch (exception& x) {
+        _log->error(string("Error ignored when adverting a cluster member for a processable order: ") + x.what());
+    }
+    return "";
+}
+
+//--------------------------------------------------------------------Cluster::least_busy_member_id
+
+string Cluster::least_busy_member_id() const {
+    Read_transaction ta (db());
+    string select_sql = S() << 
+        "select c.`member_id`, count(o.`occupying_cluster_member_id`)" <<
+        "  from " << db()->_clusters_tablename << " c" 
+        "  left join " << db()->_orders_tablename << " o " <<
+        "  on c.`member_id` = o.`occupying_cluster_member_id`" <<
+        "  where c.`active` is not null" <<
+        "  group by c.`member_id`" <<
+        "  order by count(o.`occupying_cluster_member_id`)";
+    Any_file result_set = ta.open_result_set(select_sql, Z_FUNCTION);
+    if (!result_set.eof()) {
+        Record r = result_set.get_record();
+        return r.as_string("member_id");
+    } else 
+        return "";
 }
 
 //---------------------------------------------------Cluster::scheduler_up_variable_name
