@@ -63,6 +63,7 @@ static Message_code_text error_codes[] =
 
 Vm*                             Vm::static_vm         = NULL;
 Cached_log_category             Vm::java_log_category ( "java" );
+static Cached_log_category      java_vprintf_log_category ( "java.log" );
 static Thread_data<Java_thread_data> thread_data;
 
 //-------------------------------------------------------------------------------------------Z_INIT
@@ -283,9 +284,8 @@ void Vm::set_options( const string& options )
 
 static jint JNICALL java_vfprintf( FILE*, const char *format, va_list args )
 {
-  //static string   line;
-    char            buf[1024+1];
-    int             ret;
+    char buf[1024+1];
+    int  ret;
 
 #   ifdef Z_WINDOWS
         ret = _vsnprintf_s( buf, sizeof buf - 1, _TRUNCATE, format, args );
@@ -295,20 +295,9 @@ static jint JNICALL java_vfprintf( FILE*, const char *format, va_list args )
         buf[ sizeof buf - 1 ] = '\0';
 #   endif
 
-    if( Vm::static_vm ) 
-    {
-        if( strcmp( buf, "\n" ) == 0 )  return ret;     // log macht sowieso einen Zeilenwechsel, das hier g�be also nur eine Leerzeile
-
-        if( Vm::static_vm->_log.log_level() <= log_debug3 )  Vm::static_vm->_log.debug3( buf );
-                                                       else  Z_LOG2( Vm::java_log_category, buf );
-    }
-    else
-    {
-        size_t len = strlen( buf );
-        if( len > 0  &&  buf[ len - 1 ] != '\n' )  buf[ len ] = '\n', buf[ len+1 ] = '\0';
-        Z_LOG2( Vm::java_log_category, buf );
-        fputs( buf, stderr );
-    }
+    size_t len = strlen( buf );
+    if( len > 0  &&  buf[ len - 1 ] != '\n' )  buf[ len ] = '\n', buf[ len+1 ] = '\0';
+    if (len > 0) Z_LOG2(java_vprintf_log_category, buf);
 
     return ret;
 }
@@ -473,6 +462,7 @@ void Vm::start()
 
     if( _debug )  set_log_category( "java", true );
             else  _debug = log_category_is_set( "java" );
+    set_log_category_default("java.log", true);
 
     if (_debug || Memory_allocator::debug_memory())
         _jobject_debug_register = Z_NEW(Jobject_debug_register);
@@ -522,7 +512,6 @@ void Vm::start()
 
 #       ifndef Z_AIX
             _options.push_back( Option( "-showversion"          ) );
-            _options.push_back( Option( "-verbose:class,gc,jni" ) );
 #       endif
     }
 
