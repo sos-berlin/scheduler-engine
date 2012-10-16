@@ -514,6 +514,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-720", "job_chain $1 is deactivated (set max_orders to activate it)" },
     { "SCHEDULER-721", "Scheduler is not responding quickly, a microstep took $1s" },
     { "SCHEDULER-722", "Preceding content truncated (field length is limited to $1 bytes)" },
+    { "SCHEDULER-723", "Cluster member '$1' has been advised for processing of this order" },
     {}
 };
 } //namespace sos
