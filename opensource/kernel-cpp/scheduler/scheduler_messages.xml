@@ -4402,12 +4402,18 @@
             </text>
         </message>
 
-       <message code="SCHEDULER-722" weight="warn" object="Scheduler">
-          <text xml:lang="en">
-             <title>Preceding content truncated (field length is limited to <p1/> bytes)</title>
-          </text>
-       </message>
-        
+        <message code="SCHEDULER-722" weight="warn" object="Scheduler">
+            <text xml:lang="en">
+                <title>Preceding content truncated (field length is limited to <p1/> bytes)</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-723" weight="info" object="Scheduler">
+            <text xml:lang="en">
+                <title>Cluster member '<p1/>' has been advised for processing of this order</title>
+            </text>
+        </message>
+
         <!-- HINWEIS FÜR NEUE MELDUNGEN: Das Attribut object= nur angeben, wenn die Objektklasse auch bekannt ist. Zschimmer 2009-11-05 -->
         <!-- <title>...</title> soll in einer Zeile liegen, sonst enthält die Fehlermeldungen die Zeilenwechsel. -->
         <!-- Meldungsnummern ab SCHEDULER-100 sind für Fehler, Nummern ab 700 (oder bald 600) sind für andere Meldungen. -->
