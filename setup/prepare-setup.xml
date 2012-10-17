@@ -45,9 +45,11 @@ to run without maven integration.
      <else>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
       		<exclude name="libspidermonkey.so"/>
+      		<exclude name="libjobscheduler-engine.so"/>
       	</fileset>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
       		<include name="libspidermonkey.so"/>
+      		<include name="libjobscheduler-engine.so"/>
       	</fileset>
      </else>
     </if>
