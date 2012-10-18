@@ -318,7 +318,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         if( _new_files_index < _new_files.size() )
         {
             xml::Element_ptr files_element = document.createElement( "files" );
-            files_element.setAttribute( "snapshot_time", _new_files_time.as_string() );
+            files_element.setAttribute( "snapshot_time", _new_files_time.xml_value() );
             files_element.setAttribute( "count"        , _new_files_count );
 
             if( show.is_set( show_order_source_files ) )
@@ -329,7 +329,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
                     if( f )
                     {
                         xml::Element_ptr file_element = document.createElement( "file" );
-                        file_element.setAttribute( "last_write_time", Time( f->last_write_time() ).xml_value( time::without_ms ) + "Z" );
+                        file_element.setAttribute( "last_write_time", xml_of_time_t(f->last_write_time()));
                         file_element.setAttribute( "path"           , f->path() );
 
                         files_element.appendChild( file_element );
@@ -640,7 +640,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task,
                     order->set_file_path( path );
                     order->set_state( _next_state );
 
-                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string( time::without_ms );   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string( time::without_ms );
 
 
                     bool ok = true;

@@ -1120,8 +1120,6 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
         if( is_in_folder() )    // Benanntes <schedule>?
         {
             result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
-            //ist schon korrekt: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( time::without_ms ) );
-            //ist schon korrekt: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( time::without_ms ) );
 
             if( file_based_state() == s_active )
             {

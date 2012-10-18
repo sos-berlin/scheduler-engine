@@ -1905,8 +1905,8 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
             task_element.setAttribute( "id"              , task_id );
             //task_element.setAttribute( "state"           , state_name() );
 
-            task_element.setAttribute( "start_time"      , record.as_string( "START_TIME" ) );      // Gibt es nicht in Task::dom_element()
-            task_element.setAttribute( "end_time"        , record.as_string( "END_TIME" ) );        // Gibt es nicht in Task::dom_element()
+            task_element.setAttribute( "start_time"      , Time(record.as_string("START_TIME")).xml_value(time::without_ms));      // Gibt es nicht in Task::dom_element()
+            task_element.setAttribute( "end_time"        , Time(record.as_string("END_TIME")).xml_value(time::without_ms));        // Gibt es nicht in Task::dom_element()
 
             task_element.setAttribute( "cause"           , record.as_string( "CAUSE" ) );
 

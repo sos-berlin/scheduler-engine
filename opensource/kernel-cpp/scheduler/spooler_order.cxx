@@ -3944,7 +3944,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
     xml::Element_ptr element = document.createElement( "order_queue" );
 
     element.setAttribute( "length"         , order_count( &ta ) );
-    element.setAttribute( "next_start_time", next_time().as_string() );
+    element.setAttribute( "next_start_time", next_time().xml_value() );
     
     if( !_next_announced_distributed_order_time.is_never() )
     element.setAttribute( "next_announced_distributed_order_time", _next_announced_distributed_order_time.xml_value() );

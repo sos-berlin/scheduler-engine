@@ -127,6 +127,7 @@ public:
     bool                     is_zero                        () const                        { return _time == 0; }
     bool                        not_zero                    () const                        { return _time != 0; }
     bool                     is_never                       () const                        { return _time == never_double; } 
+    bool                     is_valid_time                  () const                        { return !is_zero() && !is_never(); }
     bool                        has_date                    () const                        { return _time > 366*24*60*60; }   // Eigentlich nur bis ein Tag
     Time                        rounded_to_next_second      () const                        { return Time( floor( _time + 0.9995 ) ); }
 
@@ -186,11 +187,11 @@ xml::Element_ptr                new_calendar_dom_element    ( const xml::Documen
 //-------------------------------------------------------------------------------------------------
 
 inline string xml_of_time_t(time_t t) {
-    return Time( t, Time::is_utc ).xml_value();
+    return Time( t, Time::is_utc ).xml_value(without_ms);
 }
 
 inline string string_of_time_t(time_t t) {
-    return Time( t, Time::is_utc ).as_string();
+    return Time( t, Time::is_utc ).as_string(without_ms);
 }
 
 } //namespace time

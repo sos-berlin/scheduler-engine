@@ -646,7 +646,7 @@ xml::Element_ptr Communication::Connection::dom_element( const xml::Document_ptr
         xml::Element_ptr operation_element = result.append_new_element( "operation" );
         
         double gmtimeout_at = _operation->gmtimeout();
-        if( gmtimeout_at < double_time_max )  operation_element.setAttribute( "timeout_at", Time( localtime_from_gmtime( gmtimeout_at ) ).as_string() );
+        if( gmtimeout_at < double_time_max )  operation_element.setAttribute("timeout_at", Time(gmtimeout_at).xml_value());
 
         operation_element.appendChild( _operation->dom_element( document, what ) );
     }

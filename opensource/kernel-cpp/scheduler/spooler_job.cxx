@@ -3245,10 +3245,10 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         Time next = next_start_time();
         if( !next.is_never() )
-        result.setAttribute( "next_start_time", next.as_string() );
+        result.setAttribute( "next_start_time", next.xml_value() );
 
         if( _delay_until.not_zero() )
-        result.setAttribute( "delay_until", _delay_until.as_string() );
+        result.setAttribute( "delay_until", _delay_until.xml_value() );
 
         result.setAttribute( "in_period", is_in_period( now )? "yes" : "no" );
 
@@ -3332,12 +3332,12 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
                 
                 queued_task_element.setAttribute( "task"       , task->id() );
                 queued_task_element.setAttribute( "id"         , task->id() );                         // veraltet
-                queued_task_element.setAttribute( "enqueued"   , task->_enqueue_time.as_string() );
+                queued_task_element.setAttribute( "enqueued"   , task->_enqueue_time.xml_value() );
                 queued_task_element.setAttribute( "name"       , task->_name );
                 queued_task_element.setAttribute( "force_start", task->_force_start? "yes" : "no" );
 
                 if( task->_start_at.not_zero() )
-                    queued_task_element.setAttribute( "start_at", task->_start_at.as_string() );
+                    queued_task_element.setAttribute( "start_at", task->_start_at.xml_value() );
                 
                 if( task->has_parameters() )  queued_task_element.appendChild( task->_params->dom_element( document, "params", "param" ) );
 

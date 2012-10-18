@@ -1459,7 +1459,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     if( !show_what.is_set( show_for_database_only ) ) // &&  !show_what.is_set( show_id_only ) )
     {
         if( _setback.not_zero() )
-            result.setAttribute( "next_start_time", _setback.as_string() );
+            result.setAttribute( "next_start_time", _setback.xml_value() );
 
         if( _schedule_use->is_defined() )   // Wie in Job::dom_element(), besser nach Schedule_use::dom_element()  <schedule.use covering_schedule="..."/>
             if( Schedule* covering_schedule = _schedule_use->schedule()->active_schedule_at( Time::now() ) )  
@@ -1495,7 +1495,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _task )
         {
             result.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
-            result.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
+            result.setAttribute( "in_process_since", _task->last_process_start_time().xml_value() );
         }
 
         if( _state_text != "" )
@@ -1504,7 +1504,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         result.setAttribute( "priority"  , _priority );
 
         if( _created.not_zero() )
-            result.setAttribute( "created"   , _created.as_string() );
+            result.setAttribute( "created"   , _created.xml_value() );
 
         if( _log->is_active() )
             result.setAttribute( "log_file"  , _log->filename() );
@@ -1578,7 +1578,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     // Wenn die folgenden Werte sich ändern, _order_xml_modified = true setzen!
 
     if( _setback.not_zero() )
-    result.setAttribute( _setback_count == 0? "at" : "setback", _setback.as_string() );
+    result.setAttribute( _setback_count == 0? "at" : "setback", _setback.xml_value() );
 
     if( _setback_count > 0 )
     result.setAttribute( "setback_count", _setback_count );
@@ -1600,8 +1600,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
                             result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
     if( !_is_virgin      )  result.setAttribute( "touched"     , "yes" );
 
-    if( start_time().not_zero() )  result.setAttribute( "start_time", start_time().as_string() );
-    if( end_time().not_zero()   )  result.setAttribute( "end_time"  , end_time  ().as_string() );
+    if( start_time().not_zero() )  result.setAttribute( "start_time", start_time().xml_value() );
+    if( end_time().not_zero()   )  result.setAttribute( "end_time"  , end_time  ().xml_value() );
 
     if( _outer_job_chain_path != "" )
     {

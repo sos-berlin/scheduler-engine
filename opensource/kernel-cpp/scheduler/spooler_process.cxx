@@ -940,7 +940,7 @@ xml::Element_ptr Process::dom_element( const xml::Document_ptr& document, const 
         process_element.setAttribute( "callbacks", _connection->callback_count() );
     }
 
-    process_element.setAttribute( "running_since", _running_since.as_string() );
+    process_element.setAttribute( "running_since", _running_since.xml_value() );
 
     Async_operation* operation = _connection? _connection->current_super_operation() : NULL;
     if( operation )

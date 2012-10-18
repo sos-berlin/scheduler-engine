@@ -355,22 +355,22 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.setAttribute( "name"            , _name );
 
         if( _running_since.not_zero() )
-        task_element.setAttribute( "running_since"   , _running_since.as_string() );
+        task_element.setAttribute( "running_since"   , _running_since.xml_value() );
 
         if( _enqueue_time.not_zero() )
-        task_element.setAttribute( "enqueued"        , _enqueue_time.as_string() );
+        task_element.setAttribute( "enqueued"        , _enqueue_time.xml_value() );
 
         if( _start_at.not_zero() )
-        task_element.setAttribute( "start_at"        , _start_at.as_string() );
+        task_element.setAttribute( "start_at"        , _start_at.xml_value() );
 
         if( _idle_since.not_zero() )
-        task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
+        task_element.setAttribute( "idle_since"      , _idle_since.xml_value() );
 
         if( _cause )
         task_element.setAttribute( "cause"           , start_cause_name( _cause ) );
 
         if( _state == s_running  &&  _last_process_start_time.not_zero() )
-        task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
+        task_element.setAttribute( "in_process_since", _last_process_start_time.xml_value() );
 
         task_element.setAttribute( "steps"           , _step_count );
 
@@ -435,7 +435,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
 
                     if( p->_timeout_at != Time::never )
-                    subprocess_element.setAttribute( "timeout_at", p->_timeout_at.as_string() );
+                    subprocess_element.setAttribute( "timeout_at", p->_timeout_at.xml_value() );
 
                     if( p->_title != "" )
                     subprocess_element.setAttribute( "title", p->_title );
