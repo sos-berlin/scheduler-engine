@@ -1451,65 +1451,60 @@ void Job::load_tasks_from_db( Read_transaction* ta )
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
     _job->set_visible();
-
     if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
 
-    while(1)
-    {
-        try
-        {
-            if( !task->_is_in_database) {
-                xml::Document_ptr task_document = task->dom( show_for_database_only );
-                xml::Element_ptr  task_element  = task_document.documentElement();
-                bool has_xml = task_element.hasAttributes()  ||  task_element.firstChild();
+    if( !task->_is_in_database) {
+        xml::Document_ptr task_document = task->dom( show_for_database_only );
+        xml::Element_ptr  task_element  = task_document.documentElement();
+        bool has_xml = task_element.hasAttributes()  ||  task_element.firstChild();
 
-                if (_spooler->settings()->_use_java_persistence)
-                    _job->typed_java_sister().persistEnqueuedTask(task->_id, task->_enqueue_time.millis(), task->_start_at.millis(), 
-                        task->has_parameters()? xml_as_string(task->parameters_as_dom()) : "", 
-                        has_xml? xml_as_string(task_document.xml()) : "");
-                else
-                if (_spooler->db()->opened() ) {
-                    Transaction ta ( _spooler->db() );
+        if (_spooler->settings()->_use_java_persistence)
+            _job->typed_java_sister().persistEnqueuedTask(task->_id, task->_enqueue_time.millis(), task->_start_at.millis(), 
+                task->has_parameters()? xml_as_string(task->parameters_as_dom()) : "", 
+                has_xml? xml_as_string(task_document.xml()) : "");
+        else
+        if (_spooler->db()->opened() ) {
+            while(1) try {
+                Transaction ta ( _spooler->db() );
 
-                    Insert_stmt insert ( ta.database_descriptor() );
-                    insert.set_table_name( _spooler->db()->_tasks_tablename );
+                Insert_stmt insert ( ta.database_descriptor() );
+                insert.set_table_name( _spooler->db()->_tasks_tablename );
 
-                    insert             [ "TASK_ID"       ] = task->_id;
-                    insert             [ "JOB_NAME"      ] = task->_job->path().without_slash();
-                    insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
+                insert             [ "TASK_ID"       ] = task->_id;
+                insert             [ "JOB_NAME"      ] = task->_job->path().without_slash();
+                insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
 
-                    if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
-                    insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
+                if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
+                insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
 
-                    insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
+                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
 
-                    if( task->_start_at.not_zero() )
-                    insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
+                if( task->_start_at.not_zero() )
+                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
 
-                    ta.execute( insert, Z_FUNCTION );
+                ta.execute( insert, Z_FUNCTION );
 
-                    if( task->has_parameters() )
-                    {
-                        Any_file blob;
-                        blob = ta.open_file( "-out " + _spooler->db()->db_name(), " -table=" + _spooler->db()->_tasks_tablename + " -clob='parameters'"
-                                "  where \"TASK_ID\"=" + as_string( task->_id ) );
-                        blob.put( xml_as_string( task->parameters_as_dom() ) );
-                        blob.close();
-                    }
-
-                    if (has_xml)
-                        ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
-
-                    ta.commit( Z_FUNCTION );
-
-                    task->_is_in_database = true;
+                if( task->has_parameters() )
+                {
+                    Any_file blob;
+                    blob = ta.open_file( "-out " + _spooler->db()->db_name(), " -table=" + _spooler->db()->_tasks_tablename + " -clob='parameters'"
+                            "  where \"TASK_ID\"=" + as_string( task->_id ) );
+                    blob.put( xml_as_string( task->parameters_as_dom() ) );
+                    blob.close();
                 }
+
+                if (has_xml)
+                    ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
+
+                ta.commit( Z_FUNCTION );
+
+                task->_is_in_database = true;
+                break;
             }
-            break;
-        }
-        catch( exception& x )
-        {
-            _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
+            catch( exception& x )
+            {
+                _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
+            }
         }
     }
 
