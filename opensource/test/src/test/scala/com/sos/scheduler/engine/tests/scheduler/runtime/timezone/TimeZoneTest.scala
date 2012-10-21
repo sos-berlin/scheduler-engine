@@ -16,14 +16,14 @@ final class TimeZoneTest extends ScalaSchedulerTest {
   import TimeZoneTest._
 
   private lazy val now = new DateTime
-  private lazy val calendarEntryMap: Map[SchedulerObjectId, DateTime] = (fetchCalendarEntries() map { e => e.obj -> e.at }).toMap
+  private lazy val calendarEntryMap: Map[SchedulerObjectId, CalendarEntry] = (fetchCalendarEntries() map { e => e.obj -> e }).toMap
 
   // Die Tests kann während einer Sommerzeitverschiebung fehlschlagen.
   expectedTimes foreach { e =>
     val expected = e.nextDateTime(now)
     test(e.obj +" should have the start time "+ expected) {
       val t = calendarEntryMap(e.obj)
-      if (t.getMillis != expected.getMillis)  fail("<show_calendar> returns "+t)
+      if (t.at.getMillis != expected.getMillis)  fail("<show_calendar> returns "+t)
     }
   }
 
@@ -51,15 +51,15 @@ object TimeZoneTest {
     }
   }
 
-  private case class CalendarEntry(obj: SchedulerObjectId, at: DateTime)
+  private case class CalendarEntry(obj: SchedulerObjectId, at: DateTime, elem: Elem)
 
   private object CalendarEntry {
     def apply(atElem: Elem) = {
       def atDateTime = DateTime.parse(atElem.attribute("at").get.text)
       if (atElem.attribute("job").isDefined)
-        new CalendarEntry(JobPath.of(atElem.attribute("job").get.text), atDateTime)
+        new CalendarEntry(JobPath.of(atElem.attribute("job").get.text), atDateTime, atElem)
       else
-        new CalendarEntry(OrderKey.of(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime)
+        new CalendarEntry(OrderKey.of(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime, atElem)
     }
   }
 }

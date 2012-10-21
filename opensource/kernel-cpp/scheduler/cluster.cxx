@@ -370,13 +370,6 @@ struct Active_schedulers_watchdog : Async_operation, Scheduler_object, Has_alarm
     Cluster*                   _cluster;
 };
 
-//----------------------------------------------------------------------------my_string_from_time_t
-
-static string my_string_from_time_t( time_t time )
-{
-    return string_gmt_from_time_t( time ); // + " UTC";
-}
-
 //---------------------------------------------------------------------------is_heartbeat_operation
 
 bool is_heartbeat_operation( Async_operation* operation )
@@ -687,7 +680,7 @@ bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
 
 void Cluster_member::deactivate_and_release_orders_after_death()
 {
-    Z_LOGI2( "scheduler.cluster", Z_FUNCTION << "  _next_dead_orders_check_time=" << my_string_from_time_t( _next_dead_orders_check_time ) << "\n" );
+    Z_LOGI2( "scheduler.cluster", Z_FUNCTION << "  _next_dead_orders_check_time=" << string_of_time_t( _next_dead_orders_check_time ) << "\n" );
 
     assert( !its_me() );
 
@@ -968,14 +961,14 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
 
     if( _heart_beat_count )  
     {
-        result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.as_string( time::without_ms ) );
+        result.setAttribute( "last_detected_heart_beat"    , _last_heart_beat_detected_local_time.xml_value( time::without_ms ) );
         result.setAttribute( "last_detected_heart_beat_age", max( (time_t)0, ::time(NULL) - _last_heart_beat_detected ) );
         result.setAttribute( "heart_beat_quality"          , _is_dead? "dead" : _is_heart_beat_late? "late" : "good" );
         if( _late_heart_beat_count > 0 )  result.setAttribute( "late_heart_beat_count", _late_heart_beat_count );
     }
     else
     {
-        result.setAttribute( "database_last_heart_beat", my_string_from_time_t( _db_last_heart_beat ) );
+        result.setAttribute( "database_last_heart_beat", xml_of_time_t(_db_last_heart_beat) );
     }
 
     result.setAttribute_optional( "deactivating_member_id", _deactivating_member_id );
@@ -1103,7 +1096,7 @@ string Exclusive_scheduler_watchdog::async_state_text_() const
 
     //if( _set_exclusive_until )
     //{
-    //    result << " (becoming exclusive at " << my_string_from_time_t( _set_exclusive_until) << ")";
+    //    result << " (becoming exclusive at " << xml_of_time_t( _set_exclusive_until) << ")";
     //}
     //else
     //{
@@ -1175,7 +1168,7 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
         if( new_next_check - now >= active_heart_beat_minimum_check_period  &&  new_next_check < _next_check_time )
         {
             time_t diff = new_next_check - _next_check_time;
-            if( abs(diff) > 2 )  Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Synchronized with _db_next_heart_beat=" << my_string_from_time_t( watched_scheduler->_db_next_heart_beat ) << ": " << diff << "s\n" );
+            if( abs(diff) > 2 )  Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Synchronized with _db_next_heart_beat=" << string_of_time_t( watched_scheduler->_db_next_heart_beat ) << ": " << diff << "s\n" );
             _next_check_time = new_next_check;
         }
     }
@@ -1187,12 +1180,12 @@ void Exclusive_scheduler_watchdog::set_alarm()
 {
     //if( _cluster->_db_next_heart_beat < _next_check_time )
     //{
-    //    Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next heart beat at " << my_string_from_time_t( _cluster->_db_next_heart_beat ) << "\n" );
+    //    Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next heart beat at " << string_of_time_t( _cluster->_db_next_heart_beat ) << "\n" );
     //    set_async_next_gmtime( _cluster->_db_next_heart_beat );
     //}
     //else
     {
-        //Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
+        //Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next check at " << string_of_time_t( _next_check_time ) << "\n" );
 
         time_t t = _next_check_time;
 
@@ -1383,7 +1376,7 @@ void Active_schedulers_watchdog::calculate_next_check_time()
 
 void Active_schedulers_watchdog::set_alarm()
 {
-    Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next check at " << my_string_from_time_t( _next_check_time ) << "\n" );
+    Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next check at " << string_of_time_t( _next_check_time ) << "\n" );
 
     time_t t = _next_check_time;
 
@@ -1871,8 +1864,8 @@ bool Cluster::heartbeat_member_record()
         time_t new_db_last_heart_beat = now;
         time_t new_db_next_heart_beat = _next_heart_beat;
 
-        //Z_LOGI2( "scheduler.cluster", Z_FUNCTION << "  new_db_last_heart_beat=" << new_db_last_heart_beat << " (" << my_string_from_time_t( new_db_last_heart_beat ) << "), "
-        //                                                    "new_db_next_heart_beat=" << new_db_next_heart_beat << " (" << my_string_from_time_t( new_db_next_heart_beat ) << ")\n" );
+        //Z_LOGI2( "scheduler.cluster", Z_FUNCTION << "  new_db_last_heart_beat=" << new_db_last_heart_beat << " (" << string_of_time_t( new_db_last_heart_beat ) << "), "
+        //                                                    "new_db_next_heart_beat=" << new_db_next_heart_beat << " (" << string_of_time_t( new_db_next_heart_beat ) << ")\n" );
 
         sql::Update_stmt update ( ta.database_descriptor(), db()->_clusters_tablename );
         
@@ -2839,7 +2832,7 @@ xml::Element_ptr Cluster::my_member_dom_element( const xml::Document_ptr& docume
     result.setAttribute( "version"          , _spooler->_version );
     result.setAttribute( "host"             , _spooler->_complete_hostname );
     result.setAttribute( "pid"              , getpid() );
-    result.setAttribute( "running_since"    , Time::now().as_string() );
+    result.setAttribute( "running_since"    , Time::now().xml_value() );
     result.setAttribute( "backup_precedence", _backup_precedence );
 
 

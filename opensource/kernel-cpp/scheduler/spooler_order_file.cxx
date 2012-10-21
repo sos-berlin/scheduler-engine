@@ -268,7 +268,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _delay_after_error = Duration(element.int_getAttribute( "delay_after_error", int_cast(_delay_after_error.seconds())));
 
     if( element.getAttribute( "repeat" ) == "no" )  _repeat = Duration::eternal;
-                                              else  _repeat = Duration(element.int_getAttribute( "repeat", _repeat.seconds()));
+                                              else  _repeat = Duration(element.int_getAttribute( "repeat", int_cast(_repeat.seconds())));
 
     _max_orders = element.int_getAttribute( "max", _max_orders );
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
@@ -318,7 +318,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         if( _new_files_index < _new_files.size() )
         {
             xml::Element_ptr files_element = document.createElement( "files" );
-            files_element.setAttribute( "snapshot_time", _new_files_time.as_string() );
+            files_element.setAttribute( "snapshot_time", _new_files_time.xml_value() );
             files_element.setAttribute( "count"        , _new_files_count );
 
             if( show.is_set( show_order_source_files ) )
@@ -329,7 +329,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
                     if( f )
                     {
                         xml::Element_ptr file_element = document.createElement( "file" );
-                        file_element.setAttribute( "last_write_time", Time( f->last_write_time() ).xml_value( time::without_ms ) + "Z" );
+                        file_element.setAttribute( "last_write_time", xml_of_time_t(f->last_write_time()));
                         file_element.setAttribute( "path"           , f->path() );
 
                         files_element.appendChild( file_element );
@@ -640,7 +640,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task,
                     order->set_file_path( path );
                     order->set_state( _next_state );
 
-                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string( time::without_ms );   // localtime_from_gmtime() rechnet alte Sommerzeit-Daten in Winterzeit um
+                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string( time::without_ms );
 
 
                     bool ok = true;
@@ -1077,9 +1077,9 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
     if( _new_files_index < _new_files.size() )  _next_order_queue->tip_for_new_distributed_order();
 
 
-    int delay = _directory_error        ? delay_after_error().seconds() :
-                _expecting_request_order? INT_MAX                // N‰chstes request_order() abwarten
-                                        : _repeat.seconds();     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
+    int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
+                         _expecting_request_order? INT_MAX                 // N‰chstes request_order() abwarten
+                                                 : _repeat.seconds());     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
     set_async_delay( max( 1, delay ) );     // Falls ein Spaﬂvogel es geschafft hat, repeat="0" anzugeben
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );

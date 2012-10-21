@@ -479,14 +479,12 @@ string Time::as_string( With_ms with ) const
 
 string Time::xml_value( With_ms with ) const
 {
-    string str = as_string( with ) + "Z";   // Z: UTC-Zeit
-
-    if( str.length() > 10  &&  isdigit( (unsigned char)str[0] )  &&  str[10] == ' ' )
-    {
-        str[10] = 'T';                      // yyyy-mm-ddThh:mm:ss.mmm
+    string str = as_string(with);
+    if (is_valid_time()) {
+        if( str.length() > 10  &&  isdigit( (unsigned char)str[0] )  &&  str[10] == ' ' )
+            str[10] = 'T';                      // yyyy-mm-ddThh:mm:ss.mmm
+        str += "Z";   // Z: UTC-Zeit
     }
-
-    //if( string_ends_with( str, " UTC" ) )  str.replace( 23, 4, "Z" );
 
     return str;
 }

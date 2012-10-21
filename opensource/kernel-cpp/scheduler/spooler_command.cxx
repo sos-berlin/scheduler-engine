@@ -245,10 +245,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 {
     xml::Element_ptr e = document.createElement( "ERROR" );
 
-    //timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit ber�cksichtigt wird, h�ngt von der _aktuellen_ Zeit ab.
-    //ftime( &tm );  // Nicht sch�n, aber es funktioniert, weil der Spooler sowieso nicht w�hrend der Zeitumstellung laufen soll.
-    //e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
-    if( gm_time )  e.setAttribute( "time", Sos_optional_date_time( localtime_from_gmtime( gm_time ) ).as_string() );
+    if( gm_time )  e.setAttribute( "time", xml_of_time_t(gm_time));
 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 
@@ -543,7 +540,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         result.setAttribute( "categories", static_log_categories.to_string() );
 
         if( _spooler->_log_categories_reset_operation )  
-            result.setAttribute( "reset_at", Time().set_utc( _spooler->_log_categories_reset_operation->async_next_gmtime() ).xml_value() );
+            result.setAttribute( "reset_at", Time(_spooler->_log_categories_reset_operation->async_next_gmtime()).xml_value());
 
         Z_DEBUG_ONLY( result.setAttribute( "debug", static_log_categories.debug_string() ) );
 
@@ -2176,8 +2173,6 @@ void Command_processor::execute_commands( const xml::Element_ptr& commands_eleme
 
 void Command_processor::begin_answer()
 {
-    string now = Time::now().as_string();
-
     if( !_answer )
     {
         _answer.create();
@@ -2188,7 +2183,7 @@ void Command_processor::begin_answer()
         _answer.appendChild( _answer.createElement( "spooler" ) );
 
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
-        answer_element.setAttribute( "time", now );
+        answer_element.setAttribute( "time", Time::now().xml_value() );
     }
 }
 

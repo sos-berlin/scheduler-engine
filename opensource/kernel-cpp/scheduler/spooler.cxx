@@ -868,10 +868,10 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 {
     xml::Element_ptr state_element = dom.createElement( "state" );
  
-    state_element.setAttribute( "time"                 , Sos_optional_date_time::now().as_string() );   // Veraltet (<answer> hat time).
+    state_element.setAttribute( "time"                 , Time::now().xml_value());   // Veraltet (<answer> hat time).
     state_element.setAttribute( "id"                   , id() );
     state_element.setAttribute( "spooler_id"           , id() );
-    state_element.setAttribute( "spooler_running_since", start_time().as_string(time::without_ms));
+    state_element.setAttribute( "spooler_running_since", start_time().xml_value(time::without_ms));
     state_element.setAttribute( "state"                , state_name() );
     state_element.setAttribute( "log_file"             , _base_log.filename() );
     state_element.setAttribute( "version"              , version_string );
@@ -918,10 +918,10 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "waits"                , _wait_counter );
 
     if( _last_wait_until.not_zero() )
-    state_element.setAttribute( "wait_until", _last_wait_until.as_string() );
+        state_element.setAttribute( "wait_until", _last_wait_until.xml_value() );
 
     if( _last_resume_at.not_zero()  &&  !_last_resume_at.is_never() )
-    state_element.setAttribute( "resume_at", _last_resume_at.as_string() );
+        state_element.setAttribute( "resume_at", _last_resume_at.xml_value() );
 
 //#   ifdef Z_UNIX
 //    {
@@ -2032,7 +2032,7 @@ string Spooler::configuration_for_single_job_script()
 void Spooler::start()
 {
     static_log_categories.save_to( &_original_log_categories );
-    _max_micro_step_time = Duration(_variables->get_int64("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.seconds()));
+    _max_micro_step_time = Duration((double)_variables->get_int64("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.seconds()));
 
     _state_cmd = sc_none;
     set_state( s_starting );

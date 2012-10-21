@@ -45,9 +45,11 @@ to run without maven integration.
      <else>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
       		<exclude name="libspidermonkey.so"/>
+      		<exclude name="libjobscheduler-engine.so"/>
       	</fileset>
       	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
       		<include name="libspidermonkey.so"/>
+      		<include name="libjobscheduler-engine.so"/>
       	</fileset>
      </else>
     </if>
@@ -85,6 +87,7 @@ to run without maven integration.
   		<include name="jackson-*.jar"/>
   		<include name="jersey-*.jar"/>
   		<include name="scala-library-*.jar"/>
+  		<include name="h2-*.jar"/>
   		<!-- additional jars for jetty integration -->
   		<include name="jul-to-slf4j-*.jar" />
   		<include name="javax*.jar" />
