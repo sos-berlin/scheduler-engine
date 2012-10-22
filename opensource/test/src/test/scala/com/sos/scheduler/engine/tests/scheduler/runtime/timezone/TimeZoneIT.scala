@@ -4,21 +4,22 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import org.joda.time.{DateTimeZone, LocalTime, DateTime}
 import org.joda.time.DateTimeZone.UTC
 import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTimeZone, LocalTime, DateTime}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.xml.Elem
 
 @RunWith(classOf[JUnitRunner])
-final class TimeZoneTest extends ScalaSchedulerTest {
-  import TimeZoneTest._
+final class TimeZoneIT extends ScalaSchedulerTest {
+
+  import TimeZoneIT._
 
   private lazy val now = new DateTime
   private lazy val calendarEntryMap: Map[SchedulerObjectId, CalendarEntry] = (fetchCalendarEntries() map { e => e.obj -> e }).toMap
 
-  // Die Tests kann während einer Sommerzeitverschiebung fehlschlagen.
+  // Die Tests können während einer Sommerzeitverschiebung fehlschlagen.
   expectedTimes foreach { e =>
     val expected = e.nextDateTime(now)
     test(e.obj +" should have the start time "+ expected) {
@@ -34,7 +35,7 @@ final class TimeZoneTest extends ScalaSchedulerTest {
   }
 }
 
-object TimeZoneTest {
+object TimeZoneIT {
   type SchedulerObjectId = Any
 
   private val expectedTimes = List(
@@ -56,10 +57,10 @@ object TimeZoneTest {
   private object CalendarEntry {
     def apply(atElem: Elem) = {
       def atDateTime = DateTime.parse(atElem.attribute("at").get.text)
-      if (atElem.attribute("job").isDefined)
-        new CalendarEntry(JobPath.of(atElem.attribute("job").get.text), atDateTime, atElem)
-      else
-        new CalendarEntry(OrderKey.of(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime, atElem)
+      atElem.attribute("job") match {
+        case Some(a) => new CalendarEntry(JobPath.of(a.text), atDateTime, atElem)
+        case None => new CalendarEntry(OrderKey.of(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime, atElem)
+      }
     }
   }
 }

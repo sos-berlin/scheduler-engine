@@ -159,6 +159,7 @@ public:
     Time                        local_time                  (const string& time_zone) const;
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
+    string                      as_string                   (const string& time_zone_name, With_ms = with_ms ) const;                        
     string                      xml_value                   ( With_ms = with_ms ) const;                        
     void                        print                       ( ostream& s ) const            { s << as_string(); }
     friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }
