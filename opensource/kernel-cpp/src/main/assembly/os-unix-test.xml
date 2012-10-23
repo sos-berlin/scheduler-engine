@@ -19,6 +19,7 @@
                 <include>scheduler</include>
                 <include>libspidermonkey.so</include>
                 <include>javascript</include>
+                <include>setuid</include>
             </includes>
         </fileSet>
     </fileSets>
