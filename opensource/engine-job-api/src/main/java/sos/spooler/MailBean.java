@@ -9,8 +9,8 @@ public final class MailBean implements Bean<Mail> {
         this.delegate = delegate;
     }
 
-    public void setTo(String receipients) {
-        delegate.set_to(receipients);
+    public void setTo(String recipients) {
+        delegate.set_to(recipients);
     }
 
     public String getTo() {
@@ -25,16 +25,16 @@ public final class MailBean implements Bean<Mail> {
         return delegate.from();
     }
 
-    public void setCc(String receipients) {
-        delegate.set_cc(receipients);
+    public void setCc(String recipients) {
+        delegate.set_cc(recipients);
     }
 
     public String getCc() {
         return delegate.cc();
     }
 
-    public void setBcc(String receipients) {
-        delegate.set_bcc(receipients);
+    public void setBcc(String recipients) {
+        delegate.set_bcc(recipients);
     }
 
     public String getBcc() {
@@ -57,8 +57,8 @@ public final class MailBean implements Bean<Mail> {
         return delegate.body();
     }
 
-    public void add_file(String pathname, String mailFilename, String contentType, String encoding) {
-        delegate.add_file(pathname, mailFilename, contentType, encoding);
+    public void add_file(String pathName, String mailFilename, String contentType, String encoding) {
+        delegate.add_file(pathName, mailFilename, contentType, encoding);
     }
 
     public void add_file(String realFilename, String mailFilename, String contentType) {

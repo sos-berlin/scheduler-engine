@@ -11,7 +11,7 @@ public final class LockBean implements Bean<Lock> {
         delegate.set_name(name);
     }
 
-    public String getNname() {
+    public String getName() {
         return delegate.name();
     }
 

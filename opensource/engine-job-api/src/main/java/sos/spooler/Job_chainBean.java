@@ -63,7 +63,7 @@ public final class Job_chainBean implements Bean<Job_chain>{
         delegate.set_title(title);
     }
 
-    public String getIitle() {
+    public String getTitle() {
         return delegate.title();
     }
 
