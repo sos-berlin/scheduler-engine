@@ -62,13 +62,13 @@ struct Order : Com_order,
                javabridge::has_proxy<Order>
 {
     typedef Variant             Payload;
-    typedef int                 Priority;               // Höherer Wert bedeutet höhere Priorität
+    typedef int                 Priority;               // Hï¿½herer Wert bedeutet hï¿½here Prioritï¿½t
     typedef Variant             State;
     typedef Variant             Id;
 
 
 
-    Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
+    Z_GNU_ONLY(                 Order                   (); )                                       // Fï¿½r gcc 3.2. Nicht implementiert
                                 Order                   ( Standing_order_subsystem* );
                                ~Order                   ();
 
@@ -185,7 +185,7 @@ struct Order : Com_order,
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }
 
-    void                    set_file_path               ( const File_path& );                       // Für einen Dateiauftrag (file order)
+    void                    set_file_path               ( const File_path& );                       // Fï¿½r einen Dateiauftrag (file order)
     File_path                   file_path               ();
     bool                        is_file_order           ();
     
@@ -287,6 +287,7 @@ struct Order : Com_order,
     bool                        db_try_insert           ( bool throw_exists_exception = false );
     void                        db_insert_order_history_record( Transaction* );
     void                        db_update_order_history_record( Transaction* );
+    void                        db_update_order_history_record_and_begin_new_history( Transaction* );
     void                        db_insert_order_step_history_record( Transaction* );
     void                        db_update_order_step_history_record( Transaction* );
     bool                        db_occupy_for_processing();
@@ -335,7 +336,7 @@ struct Order : Com_order,
     State                      _state;
     bool                       _its_me_removing;
 
-    bool                       _is_success_state;       // Rückgabe des letzten Prozessschritts
+    bool                       _is_success_state;       // Rï¿½ckgabe des letzten Prozessschritts
     State                      _end_state;
 
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
@@ -351,17 +352,17 @@ struct Order : Com_order,
     Payload                    _payload;
     ptr<Com_variable_set>      _original_params;
     string                     _xml_payload;
-    State                      _initial_state;          // Für Wiederholung mit <run_time> oder <schedule>. Bei verschachtelten Jobkette in der übergeordneten Jobkette
+    State                      _initial_state;          // Fï¿½r Wiederholung mit <run_time> oder <schedule>. Bei verschachtelten Jobkette in der ï¿½bergeordneten Jobkette
     ptr<Web_service>           _web_service;
 
-    bool                       _is_virgin;              // Noch von keiner Task berührt
+    bool                       _is_virgin;              // Noch von keiner Task berï¿½hrt
     int                        _setback_count;
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
 
     ptr<Order_schedule_use>    _schedule_use;
     bool                       _schedule_modified;
-    Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
+    Time                       _setback;                // Bis wann der Auftrag zurï¿½ckgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     bool                       _order_xml_modified;     // Datenbankspalte xml neu schreiben!
     bool                       _is_replacement;         // _replacement_for != NULL => _is_replacement
 
@@ -372,25 +373,25 @@ struct Order : Com_order,
     bool                       _is_distributed;         // == scheduler_orders.distributed_next_time is not null
 
 
-    // Flüchtige Variablen, nicht für die Datenbank:
+    // Flï¿½chtige Variablen, nicht fï¿½r die Datenbank:
 
     Job_chain*                 _job_chain;              // Nur gesetzt, wenn !_is_distributed oder in Verarbeitung (_task). Sonst wird der Auftrag nur in der Datenbank gehalten
-    job_chain::Node*           _job_chain_node;         // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
+    job_chain::Node*           _job_chain_node;         // if( _job_chain)  Nï¿½chste Stelle, falls in einer Jobkette
 
     Absolute_path              _removed_from_job_chain_path; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
     Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
     string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id, zur Info
 
-    Period                     _period;                 // Bei _schedule.set(): Aktuelle oder nächste Periode
+    Period                     _period;                 // Bei _schedule.set(): Aktuelle oder nï¿½chste Periode
 
     bool                       _initial_state_set;
-    bool                       _is_in_order_queue;      // Auftrag ist in _job_chain_node->order_queue() eingehängt
+    bool                       _is_in_order_queue;      // Auftrag ist in _job_chain_node->order_queue() eingehï¿½ngt
 
     int                        _history_id;
     int                        _step_number;
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
-    bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
+    bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geï¿½ndert hat. Dann nicht automatisch in Jobkette weitersetzen
     bool                       _setback_called;
     Xc_copy                    _task_error;
 
@@ -399,10 +400,10 @@ struct Order : Com_order,
     bool                       _is_db_occupied;
     State                      _occupied_state;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
-    bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
+    bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, fï¿½r <file_order_sink>
   //Time                       _signaled_next_time;
     ptr<http::Operation>       _http_operation;
-    ptr<Com_log>               _com_log;                // COM-Hülle für Log
+    ptr<Com_log>               _com_log;                // COM-Hï¿½lle fï¿½r Log
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -590,7 +591,7 @@ struct Node : Com_job_chain_node,
     Type                       _type;
     State                      _state;
     bool                       _is_suspending_order;        // <job_chain_node suspend="yes"/>
-    Duration                   _delay;                      // <job_chain_node delay="..."/>  Verzögerung des Auftrags
+    Duration                   _delay;                      // <job_chain_node delay="..."/>  Verzï¿½gerung des Auftrags
     Action                     _action;
     int                        _node_index;
     int                        _priority;                   // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
@@ -760,7 +761,7 @@ struct Job_chain : Com_job_chain,
 
     //---------------------------------------------------------------------------------------------
 
-    Z_GNU_ONLY(                 Job_chain                   ();  )                                  // Für gcc 3.2. Nicht implementiert
+    Z_GNU_ONLY(                 Job_chain                   ();  )                                  // Fï¿½r gcc 3.2. Nicht implementiert
                                 Job_chain                   ( Scheduler* );
                                ~Job_chain                   ();
 
@@ -862,7 +863,7 @@ struct Job_chain : Com_job_chain,
 
     string                      db_where_condition          () const;
 
-    // Für verschachtelte Jobketten, deren Auftragskennungsräume verbunden sind:
+    // Fï¿½r verschachtelte Jobketten, deren Auftragskennungsrï¿½ume verbunden sind:
     void                        disconnect_nested_job_chains_and_rebuild_order_id_space();
     Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
     void                    set_order_id_space              ( Order_id_space* );
@@ -909,7 +910,7 @@ struct Job_chain : Com_job_chain,
     Order_id_space*            _order_id_space;
     Visibility                 _visible;
     bool                       _orders_are_recoverable;
-    bool                       _is_distributed;                 // Aufträge können vom verteilten Scheduler ausgeführt werden
+    bool                       _is_distributed;                 // Auftrï¿½ge kï¿½nnen vom verteilten Scheduler ausgefï¿½hrt werden
 
     bool                       _db_stopped;
 
@@ -943,7 +944,7 @@ struct Order_queue : Com_order_queue,
                      Scheduler_object,
                      javabridge::has_proxy<Order_queue>
 {
-    Z_GNU_ONLY(                 Order_queue                 ();  )                                  // Für gcc 3.2. Nicht implementiert
+    Z_GNU_ONLY(                 Order_queue                 ();  )                                  // Fï¿½r gcc 3.2. Nicht implementiert
                                 Order_queue                 ( job_chain::Order_queue_node* );
                                ~Order_queue                 ();
 
@@ -1002,7 +1003,7 @@ struct Order_queue : Com_order_queue,
     
     time_t                     _next_distributed_order_check_time;
     int                        _next_distributed_order_check_delay;
-    Time                       _next_announced_distributed_order_time;  // Gültig, wenn _is_distributed_order_requested
+    Time                       _next_announced_distributed_order_time;  // Gï¿½ltig, wenn _is_distributed_order_requested
     bool                       _has_tip_for_new_order;
 
     typedef list< Order_source* >  Order_source_list;
