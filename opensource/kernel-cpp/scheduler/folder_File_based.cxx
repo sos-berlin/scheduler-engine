@@ -107,6 +107,8 @@ void File_based::set_file_based_state( State state )
         State previous_state = _state;
         _state = state; 
 
+        _file_based_subsystem->increment_file_based_version();
+
         if( _state == s_incomplete )
         {
             list<Requisite_path> missings = missing_requisites();

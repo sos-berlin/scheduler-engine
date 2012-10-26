@@ -1134,18 +1134,6 @@ void Job::prepare_on_exit_commands()
                     _exit_code_commands_map[ exit_code ] = commands_element;
                 }
             }
-
-            {
-                // Vorabprüfung von <copy_params what="order"/>:
-
-                string from_condition = "@from='task'";
-                if( is_order_controlled() )  from_condition += " or @from='order'";
-            
-                if( xml::Element_ptr wrong_copy_params_element = commands_element.select_node( 
-                        "( start_job/params/copy_params | add_order/params/copy_params | add_order/payload/params/copy_params ) [ not( " + from_condition + ") ]" 
-                  ) )  
-                    throw_xc( "SCHEDULER-329", wrong_copy_params_element.getAttribute( "from" ) );
-            }
         }
     }
 }
@@ -2272,10 +2260,6 @@ void Job::set_next_start_time2(const Time& now, bool repeat) {
         if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
     }
     else
-    if( is_order_controlled()  &&  !_start_min_tasks ) {
-        next_start_time = Time::never;
-    }
-    else
     if( _state == s_pending && _max_tasks > 0 ) {
         if( !_period.is_in_time( _next_start_time ) ) {
             if( !_repeat )  _next_single_start = _schedule_use->next_single_start( now );
@@ -2332,16 +2316,11 @@ void Job::set_next_start_time2(const Time& now, bool repeat) {
 
 Time Job::next_start_time()
 {
-    Time result = Time::never;
-
-    if( _state == s_pending  ||  _state == s_running )
-    {
-        result = min( _next_start_time, _next_single_start );
-        if( !result.is_zero() &&  is_order_controlled() ) 
-            result = min( result, max( _combined_job_nodes->next_time(), _period.begin() ) );
-    }
-
-    return result;
+    if( _state == s_pending  ||  _state == s_running ) {
+        Time t = min( _next_start_time, _next_single_start );
+        return !is_in_job_chain() || t.is_zero()? t : min(t, max(_combined_job_nodes->next_time(), _period.begin()));
+    } else 
+        return Time::never;
 }
 
 //-------------------------------------------------------------------------Job::calculate_next_time
@@ -2382,11 +2361,10 @@ void Job::calculate_next_time( const Time& now )
                     next_time = min(next_time, _next_single_start);
                 }
 
-                if( next_time > now  &&  is_order_controlled() ) {
+                if (next_time > now && is_in_job_chain()) {
                     if (in_period) {
                         bool has_order = request_order( now, Z_FUNCTION );
-                        if( has_order )  next_time = Time(0);
-                        else next_time = min(next_time, _combined_job_nodes->next_time() );
+                        next_time = has_order? Time(0) : min(next_time, _combined_job_nodes->next_time() );
                     }
                     else
                         next_time = min(next_time, _period.begin());  // Zu Beginn der Periode mit request_order() erneut nachsehen, ob Auftrag vorliegt.
@@ -2406,7 +2384,7 @@ void Job::calculate_next_time( const Time& now )
 
 #ifdef Z_DEBUG
     Z_LOG2( "developer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
-                                                                                                   _next_time > old_next_time? " > " : " = " ) 
+                                                                                                    _next_time > old_next_time? " > " : " = " ) 
                                                                                              << "old " << old_next_time.as_string() << "\n" );
 #endif
 }
@@ -2440,7 +2418,7 @@ bool Job::connect_job_node( Job_node* job_node )
 {
     bool result = false;
 
-    if( !is_order_controlled() )  z::throw_xc( "SCHEDULER-147", obj_name() );
+    if( !is_order_controlled() && _module->kind() != Module::kind_process)  z::throw_xc( "SCHEDULER-147", obj_name() );
 
     if( _state >= s_initialized )
     {
@@ -2585,7 +2563,7 @@ ptr<Task> Job::task_to_start()
             cause = cause_min_tasks;
         }
 
-        if( is_order_controlled() && ( !cause || cause == cause_delay_after_error) )
+        if (!cause || cause == cause_delay_after_error)
         {
             has_order = request_order( now, obj_name() );
         }
@@ -2593,8 +2571,7 @@ ptr<Task> Job::task_to_start()
     else
     {
         assert( !is_in_period(now) );
-
-        if( is_order_controlled() )  withdraw_order_request();
+        withdraw_order_request();
     }
 
 
@@ -2763,7 +2740,7 @@ bool Job::do_something()
                 }
 
 
-                if( _state == s_running  &&  is_order_controlled() )     // Auftrag bereit und Tasks warten auf Aufträge?
+                if( _state == s_running  &&  is_in_job_chain())     // Auftrag bereit und Tasks warten auf Aufträge?
                 {
                     FOR_EACH( Task_list, _running_tasks, t )
                     {
@@ -3236,7 +3213,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( _temporary )
         result.setAttribute( "temporary", "yes" );
 
-        if( is_order_controlled() )
+        if( is_in_job_chain() )
         result.setAttribute( "job_chain_priority", _job_chain_priority );
 
         if( _warn_if_shorter_than_string != "" )
@@ -3329,11 +3306,9 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
             result.appendChild( _history.read_tail( document, -1, -show_what._max_task_history, show_what, true ) );
         }
 
-        if( is_order_controlled() )
-        {
+        if (is_in_job_chain()) {
             Show_what modified_show = show_what;
             if( modified_show.is_set( show_job_orders ) )  modified_show |= show_orders;
-
             result.appendChild( _combined_job_nodes->dom_element( document, modified_show, which_job_chain ) );
         }
 
@@ -3364,7 +3339,7 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
     result.appendChild(_combined_job_nodes->why_dom_element(doc, now));
 
     //boolean has_order = request_order( now, obj_name() );
-    if (_combined_job_nodes->is_empty()) {
+    if (!is_in_job_chain()) {
         if (is_order_controlled())
             append_obstacle_element(result, "order_controlled", as_bool_string(is_order_controlled()));
     } else {
