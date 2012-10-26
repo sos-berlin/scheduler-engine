@@ -2249,105 +2249,83 @@ bool Job::is_in_period( const Time& now )
 
 void Job::set_next_start_time( const Time& now, bool repeat )
 {
-    Time next_start_time     = Time::never;
-
     select_period( now );
     _next_single_start = Time::never;
 
-    if( !now.is_never()  &&  _state >= s_pending  &&  _schedule_use->is_defined() )
-    {
-        string msg;
+    if (!now.is_never()  &&  _state >= s_pending  &&  _schedule_use->is_defined())
+        set_next_start_time2(now, repeat);
+    else 
+        _next_start_time = Time::never;
 
-        if( _delay_until.not_zero() )
-        {
-            next_start_time = _period.next_try( _delay_until );
-            //if( next_start_time.is_never() )  next_start_time = _schedule_use->next_period( _delay_until, time::wss_next_period_or_single_start ).begin();   // Jira JS-137
-            if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
-        }
-        else
-        if( is_order_controlled()  &&  !_start_min_tasks  ) 
-        {
-            next_start_time = Time::never;
-        }
-        else
-        if( _state == s_pending  &&  _max_tasks > 0 )
-        {
-            if( !_period.is_in_time( _next_start_time ) )
-            {
-                if( !_repeat )  _next_single_start = _schedule_use->next_single_start( now );
+    calculate_next_time( now );
+    database_record_store();
+}
 
-                if( _start_once  ||  
-                    _start_min_tasks  ||  
-                    !repeat  &&  _period.has_repeat_or_once() )
-                {
-                    if( _period.begin() > now )
-                    {
-                        next_start_time = _period.begin();
-                        if( _spooler->_debug )  msg = message_string( "SCHEDULER-924", next_start_time );   // "Erster Start zu Beginn der Periode "
-                    }
-                    else
-                    {
-                        next_start_time = now;
-                    }
+//------------------------------------------------------------------------Job::set_next_start_time2
+
+void Job::set_next_start_time2(const Time& now, bool repeat) {
+    Time next_start_time = Time::never;
+    string msg;
+
+    if( _delay_until.not_zero() ) {
+        next_start_time = _period.next_try( _delay_until );
+        if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
+    }
+    else
+    if( is_order_controlled()  &&  !_start_min_tasks ) {
+        next_start_time = Time::never;
+    }
+    else
+    if( _state == s_pending && _max_tasks > 0 ) {
+        if( !_period.is_in_time( _next_start_time ) ) {
+            if( !_repeat )  _next_single_start = _schedule_use->next_single_start( now );
+            if( _start_once || _start_min_tasks || !repeat && _period.has_repeat_or_once() ) {
+                if( _period.begin() > now ) {
+                    next_start_time = _period.begin();
+                    if( _spooler->_debug )  msg = message_string( "SCHEDULER-924", next_start_time );   // "Erster Start zu Beginn der Periode "
+                } else {
+                    next_start_time = now;
+                }
+            }
+            else
+            if( repeat ) {
+                if( !_repeat.is_zero() ) {      // spooler_task.repeat
+                    next_start_time = _period.next_try( now + _repeat );
+                    if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
+                    _repeat = Duration(0);
                 }
                 else
-                if( repeat )
-                {
-                    if( !_repeat.is_zero() )       // spooler_task.repeat
-                    {
-                        next_start_time = _period.next_try( now + _repeat );
-                        if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
-                        _repeat = Duration(0);
-                    }
-                    else
-                    if( !_period.repeat().is_eternal() )
-                    {
-                        next_start_time = _period.next_repeated( now );
-
-                        if( _spooler->_debug && !next_start_time.is_never())  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
-
-                        if( next_start_time >= _period.end() )
+                if( !_period.repeat().is_eternal() ) {
+                    next_start_time = _period.next_repeated( now );
+                    if( _spooler->_debug && !next_start_time.is_never())  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
+                    if( next_start_time >= _period.end() ) {
+                        Period next_period = _schedule_use->next_period( _period.end() );
+                        if( _period.end()    == next_period.begin()  &&  
+                            _period.repeat() == next_period.repeat()  &&  
+                            _period.absolute_repeat().is_eternal() )
                         {
-                            Period next_period = _schedule_use->next_period( _period.end() );
-
-                            if( _period.end()    == next_period.begin()  &&  
-                                _period.repeat() == next_period.repeat()  &&  
-                                _period.absolute_repeat().is_eternal() )
-                            {
-                                if( _spooler->_debug )  msg += " (in the following period)";
-                            }
-                            else
-                            {
-                                next_start_time = Time::never;
-                                if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode "
-                                                  else  msg = "";
-                            }
+                            if( _spooler->_debug )  msg += " (in the following period)";
+                        } else {
+                            next_start_time = Time::never;
+                            if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode "
+                                              else  msg = "";
                         }
                     }
                 }
             }
         }
-        else
-        if( _state == s_running )
-        {
-            if( _start_min_tasks )  next_start_time = min( now, _period.begin() );
-        }
-        else
-        {
-            next_start_time = Time::never;
-        }
-
-        if( _spooler->_debug )
-        {
-            if( _next_single_start < next_start_time )  msg = message_string( "SCHEDULER-928", _next_single_start );
-            if( !msg.empty() )  _log->debug( msg );
-        }
     }
+    else
+    if( _state == s_running ) {
+        if( _start_min_tasks )  next_start_time = min( now, _period.begin() );
+    } else
+        next_start_time = Time::never;
 
+    if( _spooler->_debug ) {
+        if( _next_single_start < next_start_time )  msg = message_string( "SCHEDULER-928", _next_single_start );
+        if( !msg.empty() )  _log->debug( msg );
+    }
     _next_start_time = next_start_time;
-    calculate_next_time( now );
-
-    database_record_store();
 }
 
 //-----------------------------------------------------------------------------Job::next_start_time

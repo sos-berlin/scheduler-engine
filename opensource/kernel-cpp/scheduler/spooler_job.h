@@ -254,6 +254,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
     void                        reset_scheduling            ();
     void                        set_next_start_time         ( const Time& now, bool repeat = false );
+    void                        set_next_start_time2        (const Time& now, bool repeat);
     void                        set_next_time               ( const Time& );
     void                        calculate_next_time         ( const Time& now );
     void                        signal_earlier_order        ( Order* );

@@ -60,7 +60,7 @@ struct Period
 
     bool                        empty                       () const                                { return _begin.is_never(); }
     bool                        has_start                   () const                                { return is_single_start() || !repeat().is_eternal(); }
-    Time                        next_try                    ( const Time& );
+    Time                        next_try                    ( const Time& ) const;
     Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p += t; return p; }
     Period                      operator -                  ( const Duration& t ) const             { Period p = *this; p -= t; return p; }
     friend Period               operator +                  ( const Time& t, const Period& p )      { return p + t; }
@@ -76,7 +76,7 @@ struct Period
     bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //für set<>
     bool                        operator ==                 ( const Period& o ) const;
     bool                        operator !=                 ( const Period& o ) const               { return !( *this == o ); }
-    bool                        is_in_time                  ( const Time& t )                       { return t >= _begin && t < _end; }
+    bool                        is_in_time                  ( const Time& t ) const                 { return t >= _begin && t < _end; }
     bool                        is_coming                   ( const Time& time_of_day, With_single_start single_start ) const;
 
     Time                        begin                       () const                                { return _begin; }
