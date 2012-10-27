@@ -134,8 +134,8 @@ final class EntitiesIT extends ScalaSchedulerTest {
       assert(!(t isAfter now()), "<queued_task enqueued="+enqueuedString+"> should not be after now")
     }
     queuedTaskElems(0).attribute("start_at") should be ('empty)
-    queuedTaskElems(1).attribute("start_at").head.text should equal ("2029-10-11 20:33:44.000")
-    queuedTaskElems(2).attribute("start_at").head.text should equal ("2029-11-11 10:11:11.000")
+    queuedTaskElems(1).attribute("start_at").head.text should equal ("2029-10-11T20:33:44.000Z")
+    queuedTaskElems(2).attribute("start_at").head.text should equal ("2029-11-11T10:11:11.000Z")
     (queuedTaskElems(2) \ "params").head should equal (<params count="1"><param value="myValue" name="myJobParameter"/></params>)
   }
 
@@ -173,5 +173,5 @@ private object EntitiesIT {
   val orderJobPath = JobPath.of("/test-order-job")
   val simpleJobPath = JobPath.of("/test-simple-job")
   val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
-  val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS") withZone schedulerTimeZone
+  val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ") withZone schedulerTimeZone
 }
