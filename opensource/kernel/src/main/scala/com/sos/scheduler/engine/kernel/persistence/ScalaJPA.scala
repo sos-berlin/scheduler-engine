@@ -3,6 +3,13 @@ package com.sos.scheduler.engine.kernel.persistence
 import javax.persistence.{EntityManagerFactory, EntityManager}
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
+import org.hibernate.jdbc.Work
+import java.sql.{PreparedStatement, Connection}
+import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
+import scala.Some
+import com.sos.scheduler.engine.persistence.SchedulerDatabases._
+import scala.Some
+import org.joda.time.Duration
 
 object ScalaJPA {
   private val logger = LoggerFactory.getLogger("com.sos.scheduler.engine.kernel.job.ScalaJPA")
@@ -35,6 +42,25 @@ object ScalaJPA {
 
     try doTransaction()
     finally entityManager.close()
+  }
+
+  def useJDBCPreparedStatement[A](sql: String)(f: PreparedStatement => A)(implicit em: EntityManager) = {
+    useJDBCConnection { connection =>
+      val preparedStatement = connection.prepareStatement(sql)
+      try f(preparedStatement)
+      finally preparedStatement.close()
+    }
+  }
+
+  def useJDBCConnection[A](f: Connection => A)(implicit em: EntityManager): A = {
+    // Geht nicht mit Hibernate 4.1.7 (aber mit EclipseLink): f(em.unwrap(classOf[java.sql.Connection]))
+    var result: Option[A] = None
+    em.unwrap(classOf[org.hibernate.Session]).doWork(new Work {   // Hibernate 4
+      def execute(connection: Connection) {
+        result = Some(f(connection))
+      }
+    })
+    result.get
   }
 
   implicit def toRichEntityManager(e: EntityManager) = new RichEntityManager(e)

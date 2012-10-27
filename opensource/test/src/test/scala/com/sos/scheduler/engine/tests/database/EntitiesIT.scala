@@ -154,6 +154,12 @@ final class EntitiesIT extends ScalaSchedulerTest {
     }
   }
 
+  test("Job.tryFetchAverageStepDuration()") {
+    val duration = simpleJob.tryFetchAverageStepDuration().get
+    duration.getMillis should be >= (0L)
+    duration.getMillis should be <= (10*1000L)
+  }
+
   private def fetchJobEntityOption(jobPath: JobPath) =
     entityManager.findOption[JobEntity](JobEntity.PrimaryKey(schedulerId.asString, "-", jobPath.withoutStartingSlash))
 

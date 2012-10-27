@@ -75,6 +75,7 @@
                                 <argument>java.util.ArrayList</argument>
                                 <argument>java.util.HashMap</argument>
                                 <argument>org.joda.time.DateTime</argument>
+                                <argument>org.joda.time.Duration</argument>
                                 <argument>org.w3c.dom.Attr</argument>
                                 <argument>org.w3c.dom.CDATASection</argument>
                                 <argument>org.w3c.dom.CharacterData</argument>

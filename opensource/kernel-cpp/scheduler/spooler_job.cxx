@@ -1011,6 +1011,17 @@ Duration Job::get_step_duration_or_percentage( const string& value, const Durati
 
 Duration Job::average_step_duration( const Duration& deflt )
 {
+    if (_spooler->settings()->_use_java_persistence) {
+        auto duration_option = typed_java_sister().tryFetchAverageStepDuration();
+        return duration_option.isDefined()? Duration(javaproxy::org::joda::time::Duration(duration_option.get()).getMillis() / 1000.0) : deflt;
+    } else {
+        return db_average_step_duration(deflt);
+    }
+}
+//--------------------------------------------------------------------Job::db_average_step_duration
+
+Duration Job::db_average_step_duration( const Duration& deflt )
+{
     Duration result = deflt;
 
     if( _spooler->db()->opened() )

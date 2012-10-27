@@ -7,6 +7,7 @@
 #include "com__sos__scheduler__engine__data__job__JobPersistent.h"
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__String.h"
+#include "scala__Option.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { 
 
@@ -20,6 +21,7 @@ struct Job__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _loadPersistentTasks____method;
     ::zschimmer::javabridge::Method const _persistEnqueuedTask__IJJLjava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _persistState____method;
+    ::zschimmer::javabridge::Method const _tryFetchAverageStepDuration____method;
     ::zschimmer::javabridge::Method const _tryFetchPersistentState____method;
 
     static const ::zschimmer::javabridge::class_factory< Job__class > class_factory;
@@ -34,6 +36,7 @@ Job__class::Job__class(const string& class_name) :
     ,_loadPersistentTasks____method(this, "loadPersistentTasks", "()V")
     ,_persistEnqueuedTask__IJJLjava_lang_String_2Ljava_lang_String_2__method(this, "persistEnqueuedTask", "(IJJLjava/lang/String;Ljava/lang/String;)V")
     ,_persistState____method(this, "persistState", "()V")
+    ,_tryFetchAverageStepDuration____method(this, "tryFetchAverageStepDuration", "()Lscala/Option;")
     ,_tryFetchPersistentState____method(this, "tryFetchPersistentState", "()Lcom/sos/scheduler/engine/data/job/JobPersistent;"){}
 
 Job__class::~Job__class() {}
@@ -88,6 +91,14 @@ void Job::persistState() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Job__class* cls = _class.get();
     cls->_persistState____method.call(get_jobject(), parameter_list);
+}
+
+::javaproxy::scala::Option Job::tryFetchAverageStepDuration() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Job__class* cls = _class.get();
+    ::javaproxy::scala::Option result;
+    result.steal_local_ref(cls->_tryFetchAverageStepDuration____method.jobject_call(get_jobject(), parameter_list));
+    return result;
 }
 
 ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent Job::tryFetchPersistentState() const {

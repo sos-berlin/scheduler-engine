@@ -74,6 +74,11 @@ import org.joda.time.DateTime
     }
   }
 
+  @ForCpp def tryFetchAverageStepDuration() = {
+    transaction { implicit entityManager =>
+      jobStore.tryFetchAverageStepDuration(getPath)
+    }
+  }
   private def jobStore = injector.getInstance(classOf[JobStore])
 
   private def persistentState = new JobPersistent(

@@ -171,6 +171,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        set_dom                     ( const xml::Element_ptr& );
     Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
     Duration                    average_step_duration       ( const Duration& deflt );
+    Duration                    db_average_step_duration    ( const Duration& deflt );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
 
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
