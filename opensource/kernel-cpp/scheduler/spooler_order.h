@@ -53,8 +53,6 @@ enum Virgin_is_allowed {
     virgin_allowed = true
 };
 
-//inline Virgin_is_allowed        virgin_is_allowed       (bool b) { return b? virgin_allowed : virgin_not_allowed; }
-
 //--------------------------------------------------------------------------------------------Order
 
 struct Order : Com_order,
@@ -106,9 +104,6 @@ struct Order : Com_order,
     //
 
     Standing_order_folder*      standing_order_folder       () const                                { return typed_folder(); }
-  //string                      job_chain_name              () const                                { return _job_chain_name; }
-  //string                      order_id                    () const                                { return _order_id; }
-
     
     void                        load_record                 ( const Absolute_path&, const Record& );
     void                        load_blobs                  ( Read_transaction* );
@@ -580,8 +575,6 @@ struct Node : Com_job_chain_node,
     void                        set_state                   ( State state )                         { _state = state; }
 
     void                        database_record_store       ();
-  //void                        database_record_remove      ();
-  //void                        database_record_load        ( Read_transaction* );
 
     Order::State               _order_state;                // Bezeichnung des Zustands
     Order::State               _next_state;                 // Bezeichnung des Folgezustands
@@ -844,7 +837,6 @@ struct Job_chain : Com_job_chain,
     void                        remove_order                ( Order* );
     ptr<Order>                  order                       ( const Order::Id& );
     ptr<Order>                  order_or_null               ( const Order::Id& );
-    //Order*                      order_or_null_by_string_id  (const string&);
     bool                        has_order_id                ( Read_transaction*, const Order::Id& );
     int                         order_count                 ( Read_transaction* ) const;
     bool                        has_order                   () const;
@@ -856,7 +848,6 @@ struct Job_chain : Com_job_chain,
 
     void                        add_order_to_blacklist      ( Order* );
     void                        remove_order_from_blacklist ( Order* );
-  //bool                        order_is_on_blacklist       ( const string& order_id );
     Order*                      blacklisted_order_or_null   ( const string& order_id );
     stdext::hash_set<string>    db_get_blacklisted_order_id_set( const File_path& directory, const Regex& );
 
