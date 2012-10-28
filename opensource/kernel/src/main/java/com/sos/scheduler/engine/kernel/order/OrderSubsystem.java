@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.order;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
@@ -12,8 +13,6 @@ import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 
 import javax.annotation.Nullable;
 
-import static com.sos.scheduler.engine.kernel.order.jobchain.JobChains.jobChainHasJob;
-
 public class OrderSubsystem implements Subsystem {
     private final Order_subsystemC cppProxy;
 
@@ -25,8 +24,12 @@ public class OrderSubsystem implements Subsystem {
         return ImmutableList.copyOf(cppProxy.java_file_baseds());
     }
 
-    public final Iterable<JobChain> jobchainsOfJob(Job job) {
-        return Iterables.filter(jobChains(), jobChainHasJob(job));
+    public final Iterable<JobChain> jobchainsOfJob(final Job job) {
+        return Iterables.filter(jobChains(), new Predicate<JobChain>() {
+            @Override public boolean apply(JobChain jobChain) {
+                return jobChain.refersToJob(job);
+            }
+        });
     }
 
     public final JobChain jobChain(JobChainPath o) {
