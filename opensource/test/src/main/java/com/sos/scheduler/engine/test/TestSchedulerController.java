@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.nullToEmpty;
@@ -37,6 +38,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private static final Logger logger = LoggerFactory.getLogger(TestSchedulerController.class);
     private static final String workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory";
     public static final Time shortTimeout = Time.of(15);
+    private static final AtomicInteger instanceCount = new AtomicInteger(0);
 
     private final List<Runnable> closingRunnables = new ArrayList<Runnable>();
     private final SchedulerEventBus eventBus = getEventBus();
@@ -54,6 +56,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
         super(testClass.getName());
         logger.debug(testClass.getName());
+        instanceCount.addAndGet(1);
         environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")));
@@ -189,7 +192,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
     public final EventPipe newEventPipe() {
-        final EventPipe result = new EventPipe(shortTimeout);
+        EventPipe result = new EventPipe(shortTimeout);
         registerEventHandler(result);
         return result;
     }
@@ -206,8 +209,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final void useDatabase() {
-        File databaseFile = new File(environment.directory(), "scheduler-database");
-        String dbName = Hostware.h2DatabasePath(databaseFile);
+        String dbName = Hostware.h2DatabasePath("mem:scheduler-"+instanceCount);
         setSettings(Settings.of(SettingName.dbName, dbName));
     }
 
