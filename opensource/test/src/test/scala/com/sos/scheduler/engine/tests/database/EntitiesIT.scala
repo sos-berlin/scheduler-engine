@@ -5,7 +5,8 @@ import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
-import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
+import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 import com.sos.scheduler.engine.kernel.settings.{SettingName, Settings}
 import com.sos.scheduler.engine.persistence.entities.{TaskEntity, JobEntity, TaskHistoryEntity}
 import com.sos.scheduler.engine.test.Environment.schedulerId
@@ -17,12 +18,11 @@ import javax.persistence.EntityManagerFactory
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
 import org.joda.time.Duration.{millis, standardSeconds}
+import org.joda.time.format.DateTimeFormat
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import scala.xml.XML
-import org.joda.time.format.DateTimeFormat
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 
 @RunWith(classOf[JUnitRunner])
 final class EntitiesIT extends ScalaSchedulerTest {

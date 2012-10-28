@@ -10,8 +10,8 @@ import com.sos.scheduler.engine.data.job.{TaskPersistent, TaskId, JobPersistent}
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.folder.FileBasedState
-import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
-import com.sos.scheduler.engine.kernel.persistence.{JobStore, TaskStore}
+import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
+import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore, HibernateTaskStore}
 import com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString
 import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
@@ -79,7 +79,7 @@ import org.joda.time.DateTime
       jobStore.tryFetchAverageStepDuration(getPath)
     }
   }
-  private def jobStore = injector.getInstance(classOf[JobStore])
+  private def jobStore = injector.getInstance(classOf[HibernateJobStore])
 
   private def persistentState = new JobPersistent(
     getPath,
@@ -112,7 +112,7 @@ import org.joda.time.DateTime
     }
   }
 
-  private def taskStore = injector.getInstance(classOf[TaskStore])
+  private def taskStore = injector.getInstance(classOf[HibernateTaskStore])
 
   def isPermanentlyStopped = cppProxy.is_permanently_stopped
 

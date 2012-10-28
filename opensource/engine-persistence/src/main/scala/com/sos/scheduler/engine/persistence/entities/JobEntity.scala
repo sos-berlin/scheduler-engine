@@ -23,19 +23,19 @@ import javax.persistence._
 class JobEntity {
 
   @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
-  private [entities] var schedulerId: String = _
+  private[entities] var schedulerId: String = _
 
   @Column(name=""""CLUSTER_MEMBER_ID"""", nullable=false) @Id
-  private [entities] var clusterMemberId: String = _
+  private[entities] var clusterMemberId: String = _
 
   @Column(name=""""PATH"""", nullable=false) @Id
-  private [entities] var jobPath: String = _
+  private[entities] var jobPath: String = _
 
   @Column(name=""""STOPPED"""" , nullable=false)
-  private [entities] var isStopped: Boolean = _
+  private[entities] var isStopped: Boolean = _
 
   @Column(name=""""NEXT_START_TIME"""") @Temporal(TIMESTAMP) @Nullable
-  private [entities] var nextStartTime: JavaDate = _
+  private[entities] var nextStartTime: JavaDate = _
 
   override def toString = "JobEntity"+ Seq(schedulerId, clusterMemberId, jobPath, isStopped, nextStartTime).mkString("(", ",", ")")
 }

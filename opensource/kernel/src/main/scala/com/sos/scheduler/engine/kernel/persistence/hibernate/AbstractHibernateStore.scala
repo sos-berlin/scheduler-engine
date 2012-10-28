@@ -1,6 +1,7 @@
-package com.sos.scheduler.engine.kernel.persistence
+package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
+import com.sos.scheduler.engine.data.base.{HasKey, HasIsDefault}
+import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 import javax.persistence.EntityManager
 
@@ -8,7 +9,7 @@ import javax.persistence.EntityManager
   * @tparam E Entity-Klasse, mit @Entity annotiert
   * @tparam OBJ Objektklasse
   * @tparam KEY Schlüsselklasse des Objekts */
-abstract class AbstractObjectJPAStore[OBJ <: AnyRef, KEY, E <: AnyRef](implicit entityManifest: Manifest[E])
+abstract class AbstractHibernateStore[OBJ <: HasKey[KEY], KEY, E <: AnyRef](implicit entityManifest: Manifest[E])
 extends ObjectEntityConverter[OBJ, KEY, E] {
 
   def tryFetch(key: KEY)(implicit em: EntityManager) =
@@ -19,7 +20,12 @@ extends ObjectEntityConverter[OBJ, KEY, E] {
   }
 
   def store(o: OBJ)(implicit em: EntityManager) {
-    em.merge(toEntity(o))
+    o match {
+      case d: HasIsDefault if d.isDefault =>
+        delete(o.key)  // Den Default-Zustand speichern wir nicht
+      case _ =>
+        em.merge(toEntity(o))
+    }
   }
 
   def delete(key: KEY)(implicit em: EntityManager) {

@@ -1,18 +1,14 @@
-package com.sos.scheduler.engine.kernel.persistence
+package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import javax.persistence.{EntityManagerFactory, EntityManager}
-import org.slf4j.LoggerFactory
-import scala.collection.JavaConversions._
-import org.hibernate.jdbc.Work
 import java.sql.{PreparedStatement, Connection}
-import com.sos.scheduler.engine.kernel.persistence.ScalaJPA._
+import javax.persistence.{EntityManagerFactory, EntityManager}
+import org.hibernate.jdbc.Work
+import org.slf4j.LoggerFactory
 import scala.Some
-import com.sos.scheduler.engine.persistence.SchedulerDatabases._
-import scala.Some
-import org.joda.time.Duration
+import scala.collection.JavaConversions._
 
-object ScalaJPA {
-  private val logger = LoggerFactory.getLogger("com.sos.scheduler.engine.kernel.job.ScalaJPA")
+object ScalaHibernate {
+  private val logger = LoggerFactory.getLogger("com.sos.scheduler.engine.kernel.job.ScalaHibernate")
 
   def transaction[A](f : EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A = {
     val entityManager = entityManagerFactory.createEntityManager()
