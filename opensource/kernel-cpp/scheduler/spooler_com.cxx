@@ -580,7 +580,7 @@ int Com_variable_set::get_int(const string& name, int deflt) const {
 //----------------------------------------------------------------------Com_variable_set::get_int64
 
 int64 Com_variable_set::get_int64(const string& name, int64 deflt) const {
-    int result = deflt;
+    int64 result = deflt;
     string s = get_string(name);
     if (!s.empty()) 
         try { result = as_int64(s.c_str()); } 
