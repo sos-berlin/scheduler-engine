@@ -286,8 +286,9 @@ struct Order : Com_order,
     void                        db_insert               ();
     bool                        db_try_insert           ( bool throw_exists_exception = false );
     void                        db_insert_order_history_record( Transaction* );
-    void                        db_update_order_history_record( Transaction* );
     void                        db_update_order_history_record_and_begin_new_history( Transaction* );
+    void                        db_update_order_history_record( Transaction* );
+    void                        db_update_order_history_state( Transaction* );
     void                        db_insert_order_step_history_record( Transaction* );
     void                        db_update_order_step_history_record( Transaction* );
     bool                        db_occupy_for_processing();
