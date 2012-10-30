@@ -845,7 +845,8 @@ struct Folder_subsystem : Object,
 
     ptr<directory_observer::Directory> merged_cache_and_local_directories();
 
-    bool                        handle_folders              ( double minimum_age = 0 );
+    bool                        update_folders_now          ()                                      { return handle_folders(Duration(0), true); }
+    bool                        handle_folders              ( const Duration& minimum_age = Duration(0), bool update_now = false );
     xml::Element_ptr            execute_xml                 ( const xml::Element_ptr& );
 
     vector<string>              java_names                  (const string& path, const string& type_name) { return names(Absolute_path(path), type_name); }

@@ -398,18 +398,6 @@ void Show_what::set_what(const string& what) {
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
-/*
-        if( string_equals_prefix_then_skip( &p, "check_folders"    ) )  
-        {
-#           ifdef Z_UNIX    // Weil wir unter Unix nur periodisch die Verzeichnisse pr�fen
-                if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )
-                {
-                    _spooler->folder_subsystem()->handle_folders( 1 );  
-                }
-#           endif
-        }
-        else
-*/
             z::throw_xc( "SCHEDULER-164", what );
         if( *p != ','  &&  *p != ' '  &&  *p != '\0' )  z::throw_xc( "SCHEDULER-164", what );
 

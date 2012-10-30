@@ -177,7 +177,7 @@ xml::Element_ptr Folder_subsystem::execute_xml( const xml::Element_ptr& element 
 
 //-----------------------------------------------------------------Folder_subsystem::handle_folders
 
-bool Folder_subsystem::handle_folders( double minimum_age )
+bool Folder_subsystem::handle_folders(const Duration& minimum_age, bool update_now)
 {
     bool something_changed = false;
 
@@ -186,7 +186,7 @@ bool Folder_subsystem::handle_folders( double minimum_age )
     {
         double now = double_from_gmtime();
 
-        if( _last_change_at + minimum_age <= now )
+        if( _last_change_at + minimum_age.as_double() <= now )
         {
             ptr<Directory> directory;
             
@@ -194,8 +194,8 @@ bool Folder_subsystem::handle_folders( double minimum_age )
             {
                 directory = _configurations[ confdir_local ]._directory_observer->directory_tree()->root_directory();
 
-                Directory::Read_flags read_flags = subsystem_state() == subsys_active? Directory::read_subdirectories
-                                                                                     : Directory::read_subdirectories_suppress_aging;   // Beim ersten Mal neue Dateien nicht altern lassen, sondern sofort lesen
+                Directory::Read_flags read_flags = subsystem_state() == subsys_active && !update_now? Directory::read_subdirectories
+                                                                                                    : Directory::read_subdirectories_suppress_aging;   // Beim ersten Mal neue Dateien nicht altern lassen, sondern sofort lesen
                 directory->read( read_flags, 0.0 );     
             }
 

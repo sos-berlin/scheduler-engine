@@ -17,23 +17,6 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jboolean JNICALL handle_1folders__D(JNIEnv* jenv, jobject, jlong cppReference, jdouble p0)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::handle_folders()");
-        return (o_->handle_folders(p0));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jboolean();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
 static jobject JNICALL java_1names__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1)
 {
     Env env = jenv;
@@ -49,9 +32,26 @@ static jobject JNICALL java_1names__Ljava_lang_String_2Ljava_lang_String_2(JNIEn
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL update_1folders_1now(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::update_folders_now()");
+        return (o_->update_folders_now());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
-    { (char*)"handle_folders__native", (char*)"(JD)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::handle_1folders__D },
-    { (char*)"java_names__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1names__Ljava_lang_String_2Ljava_lang_String_2 }
+    { (char*)"java_names__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1names__Ljava_lang_String_2Ljava_lang_String_2 },
+    { (char*)"update_folders_now__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::update_1folders_1now }
 };
 
 namespace zschimmer { namespace javabridge { 

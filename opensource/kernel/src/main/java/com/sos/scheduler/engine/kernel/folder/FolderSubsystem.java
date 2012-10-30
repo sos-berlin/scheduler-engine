@@ -16,13 +16,13 @@ public final class FolderSubsystem implements FileBasedSubsystem {
         return ImmutableList.copyOf(cppProxy.java_names(path.asString(), cppTypeName));
     }
 
-    /** @see {@link #updateFolders(double)}. */
+    /** @return true, wenn ein {@link FileBased} geladen worden ist. */
     public boolean updateFolders() {
-        return cppProxy.handle_folders(0);
+        return cppProxy.update_folders_now();
     }
 
-    /** @return true, wenn ein {@link FileBased} geladen worden ist. */
-    public boolean updateFolders(double minimumAge) {
-        return cppProxy.handle_folders(minimumAge);
-    }
+//    /** @return true, wenn ein {@link FileBased} geladen worden ist. */
+//    public boolean updateFolders(double minimumAge) {
+//        return cppProxy.handle_folders(minimumAge);
+//    }
 }
