@@ -31,7 +31,7 @@ public final class SubprocessBean implements Bean<Subprocess> {
         return delegate.exit_code();
     }
 
-    public int getIermination_signal() {
+    public int getTermination_signal() {
         return delegate.termination_signal();
     }
 

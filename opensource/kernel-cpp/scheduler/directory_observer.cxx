@@ -62,28 +62,6 @@ Directory* Directory_tree::directory_or_null( const string& name )
     return result;
 }
 
-//-----------------------------------------------------------------------------Directory_tree::read
-
-//bool Directory_tree::read()
-//{
-//    bool directory_has_changed = false;
-//
-//    directory_has_changed = _root_directory->read_deep( 0.0 );
-//
-//    return directory_has_changed;
-//}
-
-//-------------------------------------------------------------Directory_tree::refresh_aged_entries
-
-//void Directory_tree::refresh_aged_entries()
-//{
-//    if( _refresh_aged_entries_at < double_time_max &&  _refresh_aged_entries_at >= double_from_gmtime() )
-//    {
-//        bool anything_is_refreshed = _root_directory->refresh_aged_entries();
-//        if( anything_is_refreshed )  _refresh_aged_entries_at = double_time_max;
-//    }
-//}
-
 //-------------------------------------------------------------------Directory_tree::withdraw_aging
 
 void Directory_tree::withdraw_aging()
@@ -125,26 +103,6 @@ Directory_entry Directory_entry::clone( Directory* new_parent ) const
 
     return result;
 }
-
-//------------------------------------------------------------------------------Directory::obj_name
-
-//string Directory::obj_name() const
-//{
-//    S result;
-//    result << Scheduler_object::obj_name();
-//    result << " " << path();
-//    return result;
-//}
-
-//-------------------------------------------------------------------------------------------------
-
-//bool file_filter( File_info* file_info )
-//{
-//    if( file_info->is_directory() )  return true;
-//    string extension = lcase( file_info->path()->extension() );
-//    if( extension == ".job.xml" )  return true;
-//    return false;
-//}
 
 //-----------------------------------------------------------------------------Directory::Directory
 
@@ -289,7 +247,8 @@ bool Directory::read( Read_flags read_what, double minimum_age )
                     if( e->_file_info->last_write_time() != (*fi)->last_write_time() ) 
                     {
                         e->_file_info = *fi;
-                        set_aging_until( &*e, now + file_timestamp_delay );
+                        if (!(read_what & read_suppress_aging))
+                            set_aging_until( &*e, now + file_timestamp_delay );
                     }
                     else
                     if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
@@ -354,14 +313,14 @@ bool Directory::read( Read_flags read_what, double minimum_age )
                     directory_has_changed = true;
                 }
                 else
-                if( !e->_is_removed )
+                if( !e->_is_removed && !(read_what & read_suppress_aging))
                 {
                     e->_is_removed = true;
                     set_aging_until( &*e, now + remove_delay );
                     e++;
                 }
                 else
-                if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
+                if( now < e->_is_aging_until && !(read_what & read_suppress_aging))      // Noch nicht genug gealtert?
                 {
                     _directory_tree->set_aging_until( e->_is_aging_until );
                     e++;
@@ -471,77 +430,6 @@ void Directory::assert_ordered_list()
 #   endif
 }
 
-//------------------------------------------------------------------Directory::refresh_aged_entries
-
-//bool Directory::refresh_aged_entries()
-//{
-//    bool   anything_is_refreshed = true;
-//    double now                   = double_from_gmtime();
-//
-//    for( list<Directory_entry>::iterator it = _ordered_list.begin(); it != _ordered_list.end(); )
-//    {
-//        Directory_entry* entry = &*it++;
-//
-//        if( entry->_subdirectory )  anything_is_refreshed &= entry->_subdirectory->refresh_aged_entries();
-//
-//        if( entry->_is_aging )
-//        {
-//            if( entry->_is_removed )
-//            {
-//                if( now < entry->_timestamp + remove_delay )
-//                {
-//                    anything_is_refreshed = false;
-//                }
-//                else
-//                {
-//                    ptr<file::File_info> new_file_info = Z_NEW( file::File_info );
-//                    
-//                    if( new_file_info->try_call_stat() )    // Gelöschte Datei ist wieder da?
-//                    {
-//                        entry->_file_info  = new_file_info;
-//                        entry->_is_removed = false;
-//                        entry->_timestamp  = now;
-//                    }
-//                    else   
-//                    if( entry->_is_removed )
-//                    {
-//                        --it;                               // it war schon weitergeschaltet
-//                        it = _ordered_list.erase( it );
-//                    }
-//                }
-//            }
-//            else
-//            if( now < entry->_timestamp + file_timestamp_delay )
-//            {
-//                anything_is_refreshed = false;
-//            }
-//            else
-//            {
-//                ptr<file::File_info> new_file_info = Z_NEW( file::File_info );
-//                
-//                if( new_file_info->try_call_stat() )  
-//                {
-//                    if( new_file_info->last_write_time() != entry->_file_info->last_write_time() )
-//                    {
-//                        entry->_file_info = new_file_info;
-//                        entry->_timestamp = now;
-//                    }
-//                    else
-//                    {
-//                        entry->_is_aging = false;
-//                    }
-//                }
-//                else   
-//                {
-//                    entry->_is_removed = true;
-//                    entry->_timestamp  = now;
-//                }
-//            }
-//        }
-//    }
-//
-//    return anything_is_refreshed;
-//}
 
 //-----------------------------------------------------------Directory_observer::Directory_observer
 

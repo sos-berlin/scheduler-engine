@@ -508,6 +508,8 @@ struct File_based_subsystem : Subsystem
     virtual int                 file_based_count            () const = 0;
     virtual int                 visible_file_based_count    () const = 0;
     Typed_folder*               typed_folder                ( const Absolute_path& ) const;
+    void                        increment_file_based_version()                                      { _file_based_version++; }
+    int                         file_based_version          () const                                { return _file_based_version; }
 
     enum                        Handle_attributes           { dont_remove_attributes, remove_attributes };
     string                      name_from_xml_attributes    ( const xml::Element_ptr&, Handle_attributes = dont_remove_attributes ) const;    // Aus name= oder, bei Auftrag, job_chain= und id=
@@ -542,6 +544,7 @@ struct File_based_subsystem : Subsystem
     void                        normalized_name             ( const Path& ) const;                  // Nicht implementiert! normalized_path() sollte aufgerufen werden?
 
     Dependencies               _dependencies;
+    int                        _file_based_version;
 };
 
 //---------------------------------------------------------------------------file_based_subsystem<>
@@ -569,7 +572,6 @@ struct file_based_subsystem : File_based_subsystem
     }
 
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
-    int                         file_based_map_version      () const                                { return _file_based_map_version; }
     ptr<File_based>             call_new_file_based         ()                                      { return +new_file_based(); }
     virtual ptr<FILE_BASED>     new_file_based              ()                                      = 0;
 
@@ -749,7 +751,7 @@ struct file_based_subsystem : File_based_subsystem
         if( !casted_file_based )  assert(0), z::throw_xc( Z_FUNCTION );
 
         _file_based_map[ file_based->normalized_path() ] = casted_file_based;
-        _file_based_map_version++;
+        increment_file_based_version();
     }
 
 
@@ -763,7 +765,7 @@ struct file_based_subsystem : File_based_subsystem
         //casted_file_based->log( subsystem_state() < subsys_stopped? log_info : log_debug9, message_string( "SCHEDULER-861", object_type_name() ) );
 
         _file_based_map.erase( casted_file_based->normalized_path() );
-        _file_based_map_version++;
+        increment_file_based_version();
     }
 
 
@@ -778,7 +780,7 @@ struct file_based_subsystem : File_based_subsystem
         if( !casted_new_file_based )  assert(0), z::throw_xc( Z_FUNCTION );
 
         _file_based_map[ casted_old_file_based->normalized_path() ] = casted_new_file_based;
-        _file_based_map_version++;
+        increment_file_based_version();
     }
 
 
@@ -786,9 +788,6 @@ struct file_based_subsystem : File_based_subsystem
     Fill_zero                  _zero_;
     typedef stdext::hash_map< string, ptr< FILE_BASED > >  File_based_map;
     File_based_map             _file_based_map;
-
-  private:
-    int                        _file_based_map_version;
 };
 
 //------------------------------------------------------------------------------------Configuration
@@ -845,7 +844,8 @@ struct Folder_subsystem : Object,
 
     ptr<directory_observer::Directory> merged_cache_and_local_directories();
 
-    bool                        handle_folders              ( double minimum_age = 0 );
+    bool                        update_folders_now          ()                                      { return handle_folders(Duration(0), true); }
+    bool                        handle_folders              ( const Duration& minimum_age = Duration(0), bool update_now = false );
     xml::Element_ptr            execute_xml                 ( const xml::Element_ptr& );
 
     vector<string>              java_names                  (const string& path, const string& type_name) { return names(Absolute_path(path), type_name); }

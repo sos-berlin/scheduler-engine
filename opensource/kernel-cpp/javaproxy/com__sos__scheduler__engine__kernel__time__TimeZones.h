@@ -50,6 +50,7 @@ struct TimeZones : ::zschimmer::javabridge::proxy_jobject< TimeZones >, ::javapr
   public:
 
     static jlong localToUtc(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jlong p1);
+    static ::javaproxy::java::lang::String toString(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jboolean p1, jlong p2);
     static jlong utcToLocal(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jlong p1);
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

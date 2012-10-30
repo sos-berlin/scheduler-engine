@@ -10,20 +10,6 @@ final class Folder_subsystemCImpl
         requireContextIsNull(context);
     }
 
-    @Override public boolean handle_folders(double p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return handle_folders__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native boolean handle_folders__native(long cppReference, double p0);
-
-
     @Override public String[] java_names(java.lang.String p0, java.lang.String p1) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -38,6 +24,20 @@ final class Folder_subsystemCImpl
     }
 
     private static native String[] java_names__native(long cppReference, java.lang.String p0, java.lang.String p1);
+
+
+    @Override public boolean update_folders_now() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return update_folders_now__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean update_folders_now__native(long cppReference);
 
 
 }

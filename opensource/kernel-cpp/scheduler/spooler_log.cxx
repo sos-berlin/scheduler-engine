@@ -485,7 +485,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
             Time now = Time::now();
             _last_time = now;
-            strcpy( time_buffer, now.as_string().c_str() );
+            strcpy( time_buffer, now.as_string(_spooler->_time_zone_name).c_str() );
         }
         
         switch( level )

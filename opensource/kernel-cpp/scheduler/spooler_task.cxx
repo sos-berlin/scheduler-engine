@@ -2263,7 +2263,6 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 // Wird auch von Job gerufen, wenn ein neuer Auftrag zum Start einer neuen Task führt
 
 {
-    assert( _job->is_order_controlled() );
     assert( !_operation );
     assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
 
@@ -2397,8 +2396,7 @@ void Task::finish()
             {
                 _job->_delay_until = Time::now() + delay;
 
-                if( !_job->is_order_controlled() )
-                {
+                if (_cause == cause_queue) {
                     try
                     {
                         ptr<Task> task = _job->start( +_params, _name );   // Keine Startzeit: Nach Periode und _delay_until richten
@@ -2483,11 +2481,8 @@ void Task::process_on_exit_commands()
             cp.set_log( _log );
             cp.set_variable_set( "task", _params );
             
-            if( _job->is_order_controlled() )
-            {
-                ptr<Com_variable_set> order_params = _order_for_task_end? _order_for_task_end->params_or_null() : NULL;
-                cp.set_variable_set( "order", order_params );
-            }
+            if (_order_for_task_end) 
+                cp.set_variable_set("order", _order_for_task_end->params_or_null());
 
             DOM_FOR_EACH_ELEMENT( commands_element, c )
             {

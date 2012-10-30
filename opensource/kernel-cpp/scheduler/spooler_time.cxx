@@ -438,41 +438,32 @@ double Time::cut_fraction( string* datetime_string )
 
 //----------------------------------------------------------------------------------Time::as_string
 
-string Time::as_string( With_ms with ) const
+string Time::as_string(With_ms w) const
 {
-    string result;
+    return as_string("", w);
+}
 
-    result.reserve( 23 );  // yyyy-mm-dd hh:mm:ss.mmm
+//----------------------------------------------------------------------------------Time::as_string
 
+string Time::as_string(const string& time_zone_name, With_ms w) const
+{
     if( is_never() )
-    {
-        result = never_name;
-    }
+        return never_name;
     else
     if( is_zero() )
-    {
-        result = immediately_name;
-    }
+        return immediately_name;
     else
-    {
-        char        buff [30];
-        const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
-                                           : "";
-
-        if( _time < 100*(24*60*60) )
-        {
+    if (time_zone_name == "") {
+        char buff [30];
+        const char* bruch = w == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4 : "";
+        if( _time < 100*(24*60*60) ) {
             char hhmmss [30];
             sprintf( hhmmss, "%02d:%02d:%02d%s", (int)(_time/(60*60)), abs( (int)(_time/60) ) % 60, (int)abs( (int64)_time % 60 ), bruch );
-            result = hhmmss;
-        }
-        else
-        {
-            result = Sos_optional_date_time( uint(_time) ).as_string() + bruch;
-            //if( _is_utc )  result += " UTC";    // xml_value() macht hieraus "Z"
-        }
-    }
-
-    return result;
+            return hhmmss;
+        } else
+            return Sos_optional_date_time( uint(_time) ).as_string() + bruch;
+    } else
+        return TimeZonesJ::toString(time_zone_name, w == with_ms, millis());
 }
 
 //----------------------------------------------------------------------------------Time::xml_value

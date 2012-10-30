@@ -1743,7 +1743,7 @@ bool Period::is_coming( const Time& time_of_day, With_single_start single_start 
 
 //---------------------------------------------------------------------------------Period::next_try
 
-Time Period::next_try( const Time& t )
+Time Period::next_try( const Time& t ) const
 {
     Time result = t;
 

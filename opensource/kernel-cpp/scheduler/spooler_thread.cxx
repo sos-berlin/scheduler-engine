@@ -46,23 +46,21 @@ void Task_subsystem::close()
 
 void Task_subsystem::build_prioritized_order_job_array()
 {
-    if( _prioritized_order_job_array_job_chain_map_version != _spooler->order_subsystem()->file_based_map_version() 
-     || _prioritized_order_job_array_job_map_version       != _spooler->job_subsystem  ()->file_based_map_version() )
+    if( _prioritized_order_job_array_job_chain_version != _spooler->order_subsystem()->file_based_version() 
+     || _prioritized_order_job_array_job_version       != _spooler->job_subsystem  ()->file_based_version() )
     {
         // Ist eine neue Jobkette oder Job hinzu- oder weggekommen?
 
         _prioritized_order_job_array.clear();
 
-        FOR_EACH_JOB( job )
-        {
-            // is_order_controlled() nicht einfach durch is_in_job_chain() ersetzen, denn wechselt erst beim Aktivieren des Jobs auf true, also nach file_based_map_version()
-            if( job->is_order_controlled() )  _prioritized_order_job_array.push_back( job );
+        FOR_EACH_JOB( job ) {
+            if( job->is_in_job_chain() )  _prioritized_order_job_array.push_back( job );
         }
 
         sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
 
-        _prioritized_order_job_array_job_chain_map_version = _spooler->order_subsystem()->file_based_map_version();
-        _prioritized_order_job_array_job_map_version       = _spooler->job_subsystem  ()->file_based_map_version();
+        _prioritized_order_job_array_job_chain_version = _spooler->order_subsystem()->file_based_version();
+        _prioritized_order_job_array_job_version       = _spooler->job_subsystem  ()->file_based_version();
         //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
     }
 }
@@ -163,7 +161,7 @@ bool Task_subsystem::step( const Time& now )
     {
         FOR_EACH_JOB( job )
         {
-            if( job->is_order_controlled() )
+            if( job->is_in_job_chain() )
             {
                 // Dieser Job ist in _prioritized_order_job_array und wird unten fortgesetzt.
             }
@@ -311,7 +309,7 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
 
     FOR_EACH_JOB( job )
     {
-        if( job->is_order_controlled() )  prioritized_order_job_array.push_back( job );
+        if( job->is_in_job_chain() )  prioritized_order_job_array.push_back( job );
     }
 
     sort( prioritized_order_job_array.begin(), prioritized_order_job_array.end(), Job::higher_job_chain_priority );

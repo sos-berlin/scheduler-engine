@@ -360,6 +360,14 @@ void Order::db_insert_order_history_record( Transaction* ta )
     }
 }
 
+//---------------------------------------Order::db_update_order_history_record_and_begin_new_history
+
+void Order::db_update_order_history_record_and_begin_new_history( Transaction* outer_transaction )
+{
+    db_update_order_history_record(outer_transaction);
+    _history_id = 0;        // Beim nächsten Start neue history_id ziehen
+}
+
 //------------------------------------------------------------Order::db_update_order_history_record
 
 void Order::db_update_order_history_record( Transaction* outer_transaction )
@@ -412,7 +420,31 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_order_history_tablename, x ), Z_FUNCTION ); }
     }
 
-    _history_id = 0;        // Beim nächsten Start neue history_id ziehen
+}
+//------------------------------------------------------------------Order::db_update_order_history_state
+
+void Order::db_update_order_history_state( Transaction* outer_transaction )
+{
+    if( _spooler->_order_history_yes  &&  db()->opened() )
+    {
+        if( !start_time() )  return;
+        assert( _history_id );
+
+        for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
+        {
+            sql::Update_stmt update ( ta.database_descriptor() );
+
+            update.set_table_name( db()->_order_history_tablename );
+            update.and_where_condition( "history_id", _history_id );
+            
+            update[ "state"      ] = state().as_string();
+            update[ "state_text" ] = state_text();
+
+            ta.execute( update, Z_FUNCTION );
+            ta.commit( Z_FUNCTION );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_order_history_tablename, x ), Z_FUNCTION ); }
+    }
 }
 
 //-------------------------------------------------------Order::db_insert_order_step_history_record
@@ -789,7 +821,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     if( update_option == update_and_release_occupation  &&  _step_number )
                         db_update_order_step_history_record( &ta );
 
-                    db_update_order_history_record( &ta );
+                    db_update_order_history_record_and_begin_new_history( &ta );
                 }
         
                 ta.commit( Z_FUNCTION );
@@ -824,6 +856,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 
                 if( update_option == update_and_release_occupation  &&  _history_id  &&  _step_number )
                     db_update_order_step_history_record( &ta );
+                db_update_order_history_state( &ta );
 
                 update_ok = ta.try_execute_single( update, Z_FUNCTION );
 
@@ -892,7 +925,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 db_update_order_step_history_record( &ta );
 
             if( finished() )  
-                db_update_order_history_record( &ta  );
+                db_update_order_history_record_and_begin_new_history( &ta  );
     
             ta.commit( Z_FUNCTION );
         }
@@ -966,7 +999,7 @@ void Order::close_log_and_write_history()
         for( Retry_nested_transaction ta ( db(), db()->transaction_or_null() ); ta.enter_loop(); ta++ ) try    // JS-461
         {
             if( _step_number )  db_update_order_step_history_record( &ta );
-            db_update_order_history_record( &ta );    // Historie schreiben, aber Auftrag beibehalten
+            db_update_order_history_record_and_begin_new_history( &ta );    // Historie schreiben, aber Auftrag beibehalten
             ta.commit( Z_FUNCTION );
         }
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", "order history", x ), Z_FUNCTION ); }

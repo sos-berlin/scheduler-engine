@@ -6,8 +6,12 @@ public final class Hostware {
     private Hostware() {}
 
     public static String h2DatabasePath(File file) {
+        return h2DatabasePath(file.toString());
+    }
+
+    public static String h2DatabasePath(String name) {
         String classOption = " -class=org.h2.Driver";
-        String jdbcUrl = quoted("jdbc:h2:"+file);
+        String jdbcUrl = quoted("jdbc:h2:"+name);
         return "jdbc" + classOption + " " + jdbcUrl;
     }
 

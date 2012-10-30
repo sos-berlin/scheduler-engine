@@ -260,6 +260,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
     void                        reset_scheduling            ();
     void                        set_next_start_time         ( const Time& now, bool repeat = false );
+    void                        set_next_start_time2        (const Time& now, bool repeat);
     void                        set_next_time               ( const Time& );
     void                        calculate_next_time         ( const Time& now );
     void                        signal_earlier_order        ( Order* );
@@ -317,7 +318,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                        connect_job_node            ( job_chain::Job_node* );
     void                        disconnect_job_node         ( job_chain::Job_node* );
     bool                        is_in_job_chain             () const                                { return _combined_job_nodes && !_combined_job_nodes->is_empty(); }
-    bool                     is_order_controlled            () const                                { return _is_order_controlled; }
+    bool                     is_order_controlled            () const                                { return _is_order_controlled; }    // Für shell-Jobs nicht mehr relevant. Nur für spooler_process()
     void                    set_order_controlled            ();
     void                    set_idle_timeout                ( const Duration& );
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
