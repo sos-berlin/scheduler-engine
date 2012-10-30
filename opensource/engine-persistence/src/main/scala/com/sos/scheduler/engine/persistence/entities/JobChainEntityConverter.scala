@@ -1,0 +1,27 @@
+package com.sos.scheduler.engine.persistence.entities
+
+import com.sos.scheduler.engine.data.folder.{AbsolutePath, JobChainPath}
+import com.sos.scheduler.engine.data.order.jobchain.JobChainPersistentState
+import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
+import com.sos.scheduler.engine.persistence.SchedulerDatabases._
+import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
+
+trait JobChainEntityConverter extends ObjectEntityConverter[JobChainPersistentState, JobChainPath, JobChainEntity] {
+  protected val schedulerId: SchedulerId
+  protected val clusterMemberId: ClusterMemberId
+
+  final def toObject(e: JobChainEntity) = JobChainPersistentState(
+    new JobChainPath(AbsolutePath.of(e.getJobChainPath)),
+    isStopped = e.isStopped)
+
+  final def toEntity(o: JobChainPersistentState) = {
+    val e = new JobChainEntity(toEntityKey(o.key))
+    e.setStopped(o.isStopped)
+    e
+  }
+
+  final def toEntityKey(path: JobChainPath) = JobChainEntity.Key(
+    idForDatabase(schedulerId),
+    if (clusterMemberId.isEmpty) "-" else clusterMemberId.asString,
+    path.withoutStartingSlash)
+}

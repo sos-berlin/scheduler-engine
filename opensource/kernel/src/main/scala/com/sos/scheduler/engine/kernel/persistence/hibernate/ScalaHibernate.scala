@@ -10,7 +10,10 @@ import scala.collection.JavaConversions._
 object ScalaHibernate {
   private val logger = LoggerFactory.getLogger("com.sos.scheduler.engine.kernel.job.ScalaHibernate")
 
-  def transaction[A](f : EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A = {
+  def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A =
+    transaction(entityManagerFactory)(f)
+
+  def transaction[A](entityManagerFactory: EntityManagerFactory)(f: EntityManager => A): A = {
     val entityManager = entityManagerFactory.createEntityManager()
     val transaction = entityManager.getTransaction
 
@@ -22,7 +25,7 @@ object ScalaHibernate {
         result
       } catch {
         case t: Throwable =>
-          tryRollback(t)
+          if (transaction.isActive) tryRollback(t)
           throw t
       }
     }
@@ -31,8 +34,8 @@ object ScalaHibernate {
       try transaction.rollback()
       catch {
         case xx: Exception =>
-          logger.error("Second error while rollback ignored: {}", xx)
-          logger.error("Original error: {}", t)
+          logger.error("Second error while rollback ignored:", xx)
+          logger.error("Original error:", t)
       }
     }
 
@@ -65,11 +68,16 @@ object ScalaHibernate {
     def findOption[E](key: AnyRef)(implicit m: Manifest[E]): Option[E] =
       Option(entityManager.find(m.erasure, key).asInstanceOf[E])
 
-    def fetchSeq[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())
-        (implicit m: Manifest[A]): Seq[A] = {
+    def fetchSeq[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit m: Manifest[A]): Seq[A] = {
       val q = entityManager.createQuery(queryString, m.erasure)
       for ((name, value) <- arguments) q.setParameter(name, value)
       q.getResultList.asInstanceOf[java.util.List[A]].toSeq
+    }
+
+    def fetchOption[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit m: Manifest[A]): Option[A] = {
+      val i = fetchSeq(queryString, arguments)(m).iterator
+      if (i.hasNext) Some(i.next()) ensuring { _ => !i.hasNext }
+      else None
     }
   }
 }

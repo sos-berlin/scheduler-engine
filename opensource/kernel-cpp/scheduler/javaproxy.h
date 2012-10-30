@@ -22,6 +22,8 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__Job.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__log__PrefixLog.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__JobChain.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__jobchain__Node.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
 #include "../javaproxy/com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
@@ -36,13 +38,15 @@
 namespace sos {
 namespace scheduler {
 
+typedef ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistent TaskPersistentJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler SchedulerJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::event::CppEventFactory CppEventFactoryJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest SchedulerHttpRequestJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse SchedulerHttpResponseJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixLogJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::job::Job JobJ;
-typedef ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistent TaskPersistentJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobChain JobChainJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Node NodeJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 

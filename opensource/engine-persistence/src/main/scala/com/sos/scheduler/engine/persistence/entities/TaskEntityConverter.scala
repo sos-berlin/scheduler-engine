@@ -9,20 +9,21 @@ import com.sos.scheduler.engine.persistence.SchedulerDatabases._
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 
 trait TaskEntityConverter extends ObjectEntityConverter[TaskPersistent, TaskId, TaskEntity] {
+
   import TaskEntityConverter._
 
   protected val schedulerId: SchedulerId
   protected val clusterMemberId: ClusterMemberId
-  protected lazy val schedulerIdString = idForDatabase(schedulerId)
-  protected lazy val clusterMemberIdString = emptyToNull(clusterMemberId.string)
+  protected lazy val schedulerIdDBString = idForDatabase(schedulerId)
+  protected lazy val clusterMemberIdDBString = emptyToNull(clusterMemberId.string)
 
   protected def toEntityKey(taskId: TaskId) = java.lang.Integer.valueOf(taskId.value)
 
   protected def toEntity(o: TaskPersistent) =  {
     val e = new TaskEntity(o.taskId.value)
-    e.schedulerId = schedulerIdString
-    e.clusterMemberId = clusterMemberIdString
-    e.jobPath = toFieldValue(o.jobPath)
+    e.schedulerId = schedulerIdDBString
+    e.clusterMemberId = clusterMemberIdDBString
+    e.jobPath = toDBString(o.jobPath)
     e.enqueueTime = dateTimeToDatabase(o.enqueueTime)
     e.startTime = (o.startTimeOption map dateTimeToDatabase).orNull
     e.parameterXml = emptyToNull(o.parametersXml)
@@ -41,5 +42,5 @@ trait TaskEntityConverter extends ObjectEntityConverter[TaskPersistent, TaskId, 
 }
 
 object TaskEntityConverter {
-  def toFieldValue(o: JobPath) = o.withoutStartingSlash
+  def toDBString(o: JobPath) = o.withoutStartingSlash
 }

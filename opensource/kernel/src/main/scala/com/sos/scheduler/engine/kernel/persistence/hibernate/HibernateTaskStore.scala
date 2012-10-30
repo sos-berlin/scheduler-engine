@@ -1,10 +1,9 @@
-package com.sos.scheduler.engine.kernel
-package persistence.hibernate
+package com.sos.scheduler.engine.kernel.persistence.hibernate
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.{TaskPersistent, TaskId}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
-import com.sos.scheduler.engine.persistence.entities.TaskEntityConverter.toFieldValue
+import com.sos.scheduler.engine.persistence.entities.TaskEntityConverter.toDBString
 import com.sos.scheduler.engine.persistence.entities.{TaskEntityConverter, TaskEntity}
 import javax.inject.Inject
 import javax.persistence.{EntityManager, EntityManagerFactory}
@@ -20,16 +19,16 @@ with TaskEntityConverter {
 
   private val queryString = "select t from TaskEntity t"+
     " where t.schedulerId = :schedulerId"+
-    " and t.clusterMemberId "+(if (clusterMemberIdString == null) "is null" else ":clusterMemberId")+
+    " and t.clusterMemberId "+(if (clusterMemberIdDBString == null) "is null" else "= :clusterMemberId")+
     " and t.jobPath = :jobPath"+
     " order by t.taskId"
 
   def fetchByJobOrderedByTaskId(jobPath: JobPath)(implicit em: EntityManager) = {
     val q = em.createQuery(queryString, classOf[TaskEntity])
-    q.setParameter("schedulerId", schedulerIdString)
-    if (clusterMemberIdString != null)
-      q.setParameter("clusterMemberId", clusterMemberIdString)
-    q.setParameter("jobPath", toFieldValue(jobPath))
+    q.setParameter("schedulerId", schedulerIdDBString)
+    if (clusterMemberIdDBString != null)
+      q.setParameter("clusterMemberId", clusterMemberIdDBString)
+    q.setParameter("jobPath", toDBString(jobPath))
     q.getResultList map toObject
   }
 }

@@ -547,6 +547,7 @@ struct Node : Com_job_chain_node,
     Node*                       next_node                   () const                                { return _next_node; }
     Node*                       error_node                  () const                                { return _error_node; }
     Job_chain*                  job_chain                   () const                                { return _job_chain; }
+    Absolute_path               job_chain_path              () const;
 
     Type                        type                        () const                                { return _type; }
     
@@ -555,13 +556,12 @@ struct Node : Com_job_chain_node,
     void                    set_delay                       (const Duration& d)                     { _delay = d; }
     Duration                    delay                       () const                                { return _delay; }
     Action                      action                      () const                                { return _action; }
-    string                      action_name                 () const                                { return string_from_action( _action ); }
+    virtual void                set_action                  ( const string& );
+    string               string_action                      () const                                { return string_from_action( _action ); }
     int                         priority                    () const                                { return _priority; }
     bool                        is_ready_for_order_processing() const;
     virtual bool                is_type                     ( Type ) const                          { return false; }
 
-    virtual void                set_action                  ( const string& );
-    string               string_action                      () const                                { return string_from_action( _action ); }
     virtual void                wake_orders                 ()                                      {}
 
 
@@ -578,6 +578,7 @@ struct Node : Com_job_chain_node,
 
     void                        database_record_store       ();
 
+    const NodeJ                _typed_java_sister;
     Order::State               _order_state;                // Bezeichnung des Zustands
     Order::State               _next_state;                 // Bezeichnung des Folgezustands
     Order::State               _error_state;                // Bezeichnung des Fehlerzustands
@@ -882,6 +883,7 @@ struct Job_chain : Com_job_chain,
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
     void                        check_max_orders            () const;
+    bool                        is_stopped                  () const                                { return _is_stopped; }
 
   private:
     void                        check_for_removing          ();
@@ -895,6 +897,7 @@ struct Job_chain : Com_job_chain,
     friend struct               Order;
 
     Fill_zero                  _zero_;
+    const JobChainJ            _typed_java_sister;
     State                      _state;
     bool                       _is_stopped;
     string                     _title;

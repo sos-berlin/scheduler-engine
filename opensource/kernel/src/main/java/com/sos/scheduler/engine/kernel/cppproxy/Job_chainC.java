@@ -21,7 +21,10 @@ public interface Job_chainC extends CppProxyWithSister<JobChain> {
     String name();
     String path();
     void set_force_file_reread();
+    String file();
     List<Node> java_nodes();
     OrderC order(String orderId);
     OrderC order_or_null(String orderID);
+    boolean is_stopped();
+    void set_stopped(boolean o);
 }

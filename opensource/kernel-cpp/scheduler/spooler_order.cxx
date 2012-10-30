@@ -929,6 +929,7 @@ Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )
     Scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
     javabridge::has_proxy<Node>(job_chain->spooler()),
     _zero_(this+1), 
+    _typed_java_sister(java_sister()),
     _job_chain(job_chain),
     _type(type),
     _order_state(order_state)
@@ -1081,8 +1082,6 @@ void Node::set_action( const string& action_string )
     {
         _action = action;
 
-        database_record_store();
-        
         if( _job_chain->state() >= Job_chain::s_active )
         {
             _job_chain->check_job_chain_node( this );
@@ -1099,7 +1098,10 @@ xml::Element_ptr Node::execute_xml( Command_processor* command_processor, const 
     if( element.nodeName_is( "job_chain_node.modify" ) )
     {
         string action = element.getAttribute( "action" );
-        if( action != "" )  set_action( action );
+        if( action != "" ) {
+            set_action( action );
+            database_record_store();
+        } 
 
         return command_processor->_answer.createElement( "ok" );
     }
@@ -1111,10 +1113,11 @@ xml::Element_ptr Node::execute_xml( Command_processor* command_processor, const 
 
 void Node::database_record_store()
 {
-    if( _state == s_active  &&  db()->opened() )
-    {
-        if( _db_action != _action )
-        {
+    if (_state == s_active) {
+        if (_spooler->settings()->_use_java_persistence)
+            _typed_java_sister.persistState();
+        else
+        if(db()->opened() && _db_action != _action) {
             for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
             {
                 sql::Update_stmt update ( &db()->_job_chain_nodes_table );
@@ -1123,7 +1126,7 @@ void Node::database_record_store()
                 update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
                 update[ "job_chain"         ] = _job_chain->path().without_slash();
                 update[ "order_state"       ] = _order_state.as_string();
-                update[ "action"            ] = _action == act_process? sql::Value() : action_name();
+                update[ "action"            ] = _action == act_process? sql::Value() : string_action();
 
                 ta.store( update, Z_FUNCTION );
                 ta.commit( Z_FUNCTION );
@@ -1180,12 +1183,19 @@ bool Node::is_ready_for_order_processing() const {
     return action() == Node::act_process;
 }
 
+//-----------------------------------------------------------------------------Node::job_chain_path
+
+Absolute_path Node::job_chain_path() const
+{
+    return _job_chain->path(); 
+}
+
 //----------------------------------------------------------------Order_queue_node::why_dom_element
 
 xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc, const Time& now) const {
     xml::Element_ptr result = doc.createElement("job_chain_node.why");
     result.setAttribute("order_state", _order_state.as_string());
-    if(action() != Node::act_process)  append_obstacle_element(result, "action", action_name());
+    if(action() != Node::act_process)  append_obstacle_element(result, "action", string_action());
     result.appendChild(_job_chain->why_dom_element(doc));
     result.appendChild(_order_queue->why_dom_element(doc, now));
     return result;
@@ -1603,6 +1613,7 @@ Job_chain::Job_chain( Scheduler* scheduler )
     Com_job_chain( this ),
     file_based<Job_chain,Job_chain_folder_interface,Order_subsystem>( scheduler->order_subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
     javabridge::has_proxy<Job_chain>(scheduler),
+    _typed_java_sister(java_sister()),
     _zero_(this+1),
     _orders_are_recoverable(true),
     _visible(visible_yes),
@@ -1863,7 +1874,6 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             {
                 node->set_suspending_order( e.bool_getAttribute( "suspend", node->is_suspending_order() ) );
                 node->set_delay(Duration(e.int_getAttribute( "delay", int_cast(node->delay().seconds()))));
-                //node->set_action( e.getAttribute( "action", node->string_action() ) );      // Hiernach _is_distributed nicht mehr setzen!
             }
         }
     }
@@ -1895,6 +1905,7 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
         else
             z::throw_xc( "SCHEDULER-391", "state", new_state, "running, stopped" );
 
+        database_record_store();
         return command_processor->_answer.createElement( "ok" );
     }
     else
@@ -2877,6 +2888,8 @@ Job_chain* Job_chain::on_replace_now()
     if( !replacement()         )  assert(0), z::throw_xc( Z_FUNCTION, obj_name() );
     if( !can_be_replaced_now() )  assert(0), z::throw_xc( Z_FUNCTION, obj_name(), "!can_be_removed_now" );
 
+    //2012-10-29 Sollte hier nicht der Zustand zurückgeladen werden? Etwa so: replacement()->database_record_load(...);
+
     Z_FOR_EACH( Node_list, replacement()->_node_list, it )
     {
         if( Order_queue_node* new_job_chain_node = Order_queue_node::try_cast( *it ) )
@@ -2912,26 +2925,28 @@ string Job_chain::db_where_condition() const
 
 void Job_chain::database_record_store()
 {
-    if( file_based_state() >= File_based::s_loaded  &&      // Vorher ist database_record_load() nicht aufgerufen worden
-        db()->opened() )
-    {
-        if( _db_stopped != _is_stopped )
-        {
-            for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-            {
-                sql::Update_stmt update ( &db()->_job_chains_table );
+    if (file_based_state() >= File_based::s_loaded) {    // Vorher ist database_record_load() nicht aufgerufen worden
+        if (_spooler->settings()->_use_java_persistence)
+            _typed_java_sister.persistState();
+        else
+        if (db()->opened()) {
+            if (_db_stopped != _is_stopped) {
+                for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
+                {
+                    sql::Update_stmt update ( &db()->_job_chains_table );
                 
-                update[ "spooler_id"        ] = _spooler->id_for_db();
-                update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
-                update[ "path"              ] = path().without_slash();
-                update[ "stopped"           ] = _is_stopped;
+                    update[ "spooler_id"        ] = _spooler->id_for_db();
+                    update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
+                    update[ "path"              ] = path().without_slash();
+                    update[ "stopped"           ] = _is_stopped;
 
-                ta.store( update, Z_FUNCTION );
-                ta.commit( Z_FUNCTION );
+                    ta.store( update, Z_FUNCTION );
+                    ta.commit( Z_FUNCTION );
+                }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_chains_table.name(), x ), Z_FUNCTION ); }
+
+                _db_stopped = _is_stopped;
             }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_chains_table.name(), x ), Z_FUNCTION ); }
-
-            _db_stopped = _is_stopped;
         }
     }
 }
@@ -2940,6 +2955,9 @@ void Job_chain::database_record_store()
 
 void Job_chain::database_record_remove()
 {
+    if (_spooler->settings()->_use_java_persistence)
+        _typed_java_sister.deletePersistentState();
+    else
     if( db()->opened() )
     {
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
@@ -2976,44 +2994,50 @@ void Job_chain::database_record_load( Read_transaction* ta )
 {
     assert( file_based_state() == File_based::s_initialized );
 
-    {
-        Any_file result_set = ta->open_result_set
-        ( 
-            S() << "select `stopped`"
-                << "  from " << db()->_job_chains_table.sql_name()
-                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
-                <<    " and `path`="              << sql::quoted( path().without_slash() ), 
-            Z_FUNCTION 
-        );
-        
-        if( !result_set.eof() )  
+    if (_spooler->settings()->_use_java_persistence) {
+        _typed_java_sister.loadPersistentState();
+    }  else {
         {
-            Record record  = result_set.get_record();
-            _db_stopped = record.as_int( "stopped" ) != 0;
-            set_stopped( _db_stopped );
-        }
-    }
-
-    {
-        Any_file result_set = ta->open_result_set
-        ( 
-            S() << "select `order_state`, `action`"
-                << "  from " << db()->_job_chain_nodes_table.sql_name()
-                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
-                <<    " and `job_chain`="         << sql::quoted( path().without_slash() ), 
-            Z_FUNCTION 
-        );
+            Any_file result_set = ta->open_result_set
+            ( 
+                S() << "select `stopped`"
+                    << "  from " << db()->_job_chains_table.sql_name()
+                    << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
+                    <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
+                    <<    " and `path`="              << sql::quoted( path().without_slash() ), 
+                Z_FUNCTION 
+            );
         
-        while( !result_set.eof() )  
-        {
-            Record record  = result_set.get_record();
-
-            if( Node* node = node_from_state_or_null( record.as_string( "order_state" ) ) )
+            if( !result_set.eof() )  
             {
-                if( !record.null( "action" ) )  node->set_action( record.as_string( "action" ) );
-                node->_db_action = node->_action;
+                Record record  = result_set.get_record();
+                _db_stopped = record.as_int( "stopped" ) != 0;
+                set_stopped( _db_stopped );
+            }
+        }
+
+        {
+            Any_file result_set = ta->open_result_set
+            ( 
+                S() << "select `order_state`, `action`"
+                    << "  from " << db()->_job_chain_nodes_table.sql_name()
+                    << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
+                    <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
+                    <<    " and `job_chain`="         << sql::quoted( path().without_slash() ), 
+                Z_FUNCTION 
+            );
+        
+            while( !result_set.eof() )  
+            {
+                Record record  = result_set.get_record();
+
+                if( Node* node = node_from_state_or_null( record.as_string( "order_state" ) ) )
+                {
+                    if( !record.null( "action" ) ) {
+                        node->set_action( record.as_string( "action" ) );
+                    }
+                    node->_db_action = node->_action;
+                }
             }
         }
     }
@@ -3031,7 +3055,6 @@ Order_subsystem_impl* Job_chain::order_subsystem() const
 void Job_chain::set_stopped( bool is_stopped )
 {
     _is_stopped = is_stopped;
-    database_record_store();
     wake_orders();
 }
 

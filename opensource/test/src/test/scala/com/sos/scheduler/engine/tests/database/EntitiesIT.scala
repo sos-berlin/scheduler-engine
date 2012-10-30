@@ -1,14 +1,16 @@
 package com.sos.scheduler.engine.tests.database
 
-import com.sos.scheduler.engine.data.folder.{FileBasedActivatedEvent, JobChainPath, JobPath}
+import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, FileBasedActivatedEvent, JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
-import com.sos.scheduler.engine.data.order.OrderId
+import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
+import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 import com.sos.scheduler.engine.kernel.settings.{SettingName, Settings}
-import com.sos.scheduler.engine.persistence.entities.{TaskEntity, JobEntity, TaskHistoryEntity}
+import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.Environment.schedulerId
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -40,18 +42,17 @@ final class EntitiesIT extends ScalaSchedulerTest {
     controller.setSettings(Settings.of(SettingName.useJavaPersistence, "true"))
     controller.activateScheduler()
     val eventPipe = controller.newEventPipe()
-    scheduler executeXml <order job_chain={jobChainPath.asString} id={orderId.asString}/>
+    scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
     eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
     scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
     scheduler executeXml <start_job job={simpleJobPath.string} at="2029-10-11 22:33:44"/>
     scheduler executeXml <start_job job={simpleJobPath.string} at="2029-11-11 11:11:11"><params><param name="myJobParameter" value="myValue"/></params></start_job>
     simpleJob.forceFileReread()
     scheduler.instance[FolderSubsystem].updateFolders()
-    //Warum geht das nicht: eventPipe.nextWithCondition[FileBasedRemovedEvent] { _.getTypedPath == simpleJobPath }
     eventPipe.nextWithCondition[FileBasedActivatedEvent] { _.getTypedPath == simpleJobPath }
   }
 
-  lazy val entityManager = controller.scheduler.instance[EntityManagerFactory].createEntityManager()
+  def entityManager = controller.scheduler.instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
 
   override def afterAll() {
     entityManager.close()
@@ -89,7 +90,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
         'clusterMemberId (null),
         'jobPath (orderJobPath.withoutStartingSlash),
         'cause ("order"),
-        'steps (1),
+        'steps (3),
         'errorCode (null),
         'errorText (null)
       )
@@ -104,7 +105,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
 
     e(0) should have (
       'taskId (firstTaskHistoryEntityId + 2),
-      'schedulerId (schedulerId.asString),
+      'schedulerId (schedulerId.string),
       'clusterMemberId (null),
       'jobPath (simpleJobPath.withoutStartingSlash),
       'startTime (null),
@@ -140,10 +141,10 @@ final class EntitiesIT extends ScalaSchedulerTest {
   }
 
   test("JobEntity is from "+orderJobPath) {
-    fetchJobEntityOption(orderJobPath) should be (None)
+    tryFetchJobEntity(orderJobPath) should be (None)
 
     stopJobAndWait(orderJobPath)
-    fetchJobEntityOption(orderJobPath) match { case Some(e) =>
+    tryFetchJobEntity(orderJobPath).get match { case e =>
       e should have (
         'schedulerId (schedulerId.asString),
         'clusterMemberId ("-"),
@@ -156,19 +157,89 @@ final class EntitiesIT extends ScalaSchedulerTest {
 
   test("Job.tryFetchAverageStepDuration()") {
     val duration = simpleJob.tryFetchAverageStepDuration().get
-    duration.getMillis should be >= (0L)
-    duration.getMillis should be <= (10*1000L)
+    duration.getMillis should (be >= (0L) and be <= (10*1000L))
   }
 
-  private def fetchJobEntityOption(jobPath: JobPath) =
-    entityManager.findOption[JobEntity](JobEntity.PrimaryKey(schedulerId.asString, "-", jobPath.withoutStartingSlash))
+  test("JobChainEntity") {
+    tryFetchJobChainEntity(jobChainPath) should be ('empty)
+
+    scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
+    tryFetchJobChainEntity(jobChainPath).get should have (
+      'schedulerId (schedulerId.string),
+      'clusterMemberId ("-"),
+      'jobChainPath (jobChainPath.withoutStartingSlash),
+      'stopped (true)
+    )
+
+    scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="running"/>
+    tryFetchJobChainEntity(jobChainPath) should be ('empty)
+  }
+
+  test("JobChainNodeEntity") {
+    fetchJobChainNodeEntities(jobChainPath) should be ('empty)
+
+    scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="next_state"/>
+    scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="300" action="stop"/>
+    fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
+      nodes should have size (2)
+      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
+      nodes(0) should have ('orderState ("200"), 'action ("next_state"))
+      nodes(1) should have ('orderState ("300"), 'action ("stop"))
+    }
+
+    scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
+    fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
+      nodes should have size (2)
+      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
+      nodes(0) should have ('orderState ("200"), 'action (null))
+      nodes(1) should have ('orderState ("300"), 'action ("stop"))
+    }
+  }
+
+  test("After re-read of JobChain its state should be restored - IGNORED, DOES NOT WORK") {
+    scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
+    scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
+    val eventPipe = controller.newEventPipe()
+    scheduler.instance[OrderSubsystem].jobChain(jobChainPath).forceFileReread()
+    scheduler.instance[FolderSubsystem].updateFolders()
+    eventPipe.nextWithCondition[FileBasedActivatedEvent] { _.getTypedPath == jobChainPath }
+    val jobChain = scheduler.instance[OrderSubsystem].jobChain(jobChainPath)
+    pendingUntilFixed {   // Der Scheduler stellt den Zustand wird nicht wieder her
+      jobChain should be ('stopped)
+      jobChain.nodeMap(new OrderState("100")).action should equal (JobChainNodeAction.nextState)
+      jobChain.nodeMap(new OrderState("200")).action should equal (JobChainNodeAction.process)
+      jobChain.nodeMap(new OrderState("300")).action should equal (JobChainNodeAction.stop)
+    }
+  }
+
+  test("After JobChain removal database should contain no record") {
+    scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>    // Macht einen Datenbanksatz
+    scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
+    val eventPipe = controller.newEventPipe()
+    scheduler.instance[OrderSubsystem].jobChain(jobChainPath).file.delete() || sys.error("JobChain configuration file could not be deleted")
+    scheduler.instance[FolderSubsystem].updateFolders()
+    eventPipe.nextWithCondition[FileBasedRemovedEvent] { _.getTypedPath == jobChainPath }
+    tryFetchJobChainEntity(jobChainPath) should be ('empty)
+    fetchJobChainNodeEntities(jobChainPath) should be ('empty)
+  }
+
+  private def tryFetchJobEntity(jobPath: JobPath) =
+    entityManager.findOption[JobEntity](JobEntity.PrimaryKey(schedulerId.string, "-", jobPath.withoutStartingSlash))
+
+  def tryFetchJobChainEntity(path: JobChainPath) =
+    entityManager.fetchOption[JobChainEntity]("select j from JobChainEntity j where j.jobChainPath = :jobChainPath",
+      Seq("jobChainPath" -> jobChainPath.withoutStartingSlash()))
+
+  private def fetchJobChainNodeEntities(path: JobChainPath) =
+    entityManager.fetchSeq[JobChainNodeEntity]("select n from JobChainNodeEntity n where n.jobChainPath = :jobChainPath order by n.orderState",
+      Seq("jobChainPath" -> jobChainPath.withoutStartingSlash()))
 
   private def fetchTaskEntities(jobPath: JobPath): Seq[TaskEntity] =
-    entityManager.fetchSeq("select t from TaskEntity t where t.jobPath=:jobPath order by t.taskId",
+    entityManager.fetchSeq("select t from TaskEntity t where t.jobPath = :jobPath order by t.taskId",
       Seq("jobPath" -> jobPath.withoutStartingSlash()))
 
   private def stopJobAndWait(jobPath: JobPath) {
-    scheduler executeXml <modify_job job={jobPath.asString} cmd="stop"/>
+    scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
     waitForCondition(TimeoutWithSteps(standardSeconds(3), millis(10))) { orderJob.state == JobState.stopped }
   }
 }

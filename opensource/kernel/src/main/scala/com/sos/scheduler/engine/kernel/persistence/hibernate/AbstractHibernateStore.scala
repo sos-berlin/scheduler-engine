@@ -10,7 +10,8 @@ import javax.persistence.EntityManager
   * @tparam OBJ Objektklasse
   * @tparam KEY Schlüsselklasse des Objekts */
 abstract class AbstractHibernateStore[OBJ <: HasKey[KEY], KEY, E <: AnyRef](implicit entityManifest: Manifest[E])
-extends ObjectEntityConverter[OBJ, KEY, E] {
+extends ObjectEntityConverter[OBJ, KEY, E]
+with JPAStore[OBJ, KEY] {
 
   def tryFetch(key: KEY)(implicit em: EntityManager) =
     em.findOption[E](toEntityKey(key))(entityManifest) map toObject

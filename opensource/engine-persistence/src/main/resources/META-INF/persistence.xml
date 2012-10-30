@@ -6,6 +6,8 @@
     version="2.0"
 >
     <persistence-unit name="JobScheduler-Engine">
+        <class>com.sos.scheduler.engine.persistence.entities.JobChainEntity</class>
+        <class>com.sos.scheduler.engine.persistence.entities.JobChainNodeEntity</class>
         <class>com.sos.scheduler.engine.persistence.entities.JobEntity</class>
         <class>com.sos.scheduler.engine.persistence.entities.TaskEntity</class>
         <class>com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity</class>
