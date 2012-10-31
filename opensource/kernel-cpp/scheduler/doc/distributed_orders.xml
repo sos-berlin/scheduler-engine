@@ -112,4 +112,29 @@
 			Eigenständige Jobs, die keine Aufträge verarbeiten, werden in einem Scheduler Cluster von dem Job Scheduler ausgeführt,
 			in dem sie konfiguriert werden.
 		</p>
+		
+		<h3>
+			Verteilungsalgorithmen
+		</h3>
+		<p>
+		  Die Art der Verteilung kann durch das Setzen des globalen Parameters <a href="xml/param.xml#scheduler.order.distributed.balanced">scheduler.order.distributed.balanced</a> eingestellt werden:
+		  <ul>
+		    <li>
+		      <b>Verteilung bei Überlast</b>:
+              <p>
+                Ein JobScheduler übernimmt die Ausführung eines verteilten Auftrages erst dann, wenn der derzeit ausführende JobScheduler ausgelastet ist, d.h. wenn die Anzahl
+                der zugelassenen Prozesse erreicht ist. Das ist das Standardverhalten des JobSchedulers.
+              </p>
+              <p>
+                  siehe auch <scheduler_element name="job" attribute="tasks"/> und <scheduler_element name="process_class" attribute="attribute_max_processes"/>.
+              </p><br/>
+		    </li>
+		    <li>
+		      <b>Gleichmässige Verteilung</b>:
+              <p>
+                Die Taks verteilter Aufträge werden gleichmässig auf die JobScheduler des Clusters verteilt.
+              </p>
+		    </li>
+		  </ul>
+		</p>
 	</description>
