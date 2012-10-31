@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: param.xml 13605 2008-07-08 08:14:29Z jz $-->
+<!--$Id$-->
 
 <!--         title    = "Ein Parameter"-->
 
@@ -10,7 +10,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2008-07-08 10:14:29 +0200 (Tue, 08 Jul 2008) $">
+             date     = "$Date: 2012-06-12 21:25:54 +0200 (Di, 12 Jun 2012) $">
 
     <description>
         <p>
@@ -19,9 +19,21 @@
         </p>
         <p>
             Defines the individual parameters for the <a href="#param_scheduler">Job Scheduler</a>, 
-						a <a href="#param_job">Job</a> or an <a href="#param_auftrag">Order</a>.
-        <!--Bestimmt einen einzelnen Parameter für den <a href="#param_scheduler">Scheduler</a>, 
-						einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.-->
+						a <a href="#param_job">Job</a> or an <a href="#param_auftrag">Order</a>. In general all parameters are available with the API calls 
+						<scheduler_method class="Spooler" object="spooler" method="variables"/>, <scheduler_method class="Task" method="params" /> respectively
+            <scheduler_method class="Order" method="payload" /> or in shell Jobs as environment variable (with leading <b>SCHEDULER_PARAM_</b>)
+        <!--Bestimmt einen einzelnen Parameter für den <a href="#param_scheduler">Scheduler</a>, einen <a href="#param_job">Job</a> oder einen <a href="#param_auftrag">Auftrag</a>.
+            Grundsätzlich sind alle Parameter über die API Aufrufe <scheduler_method class="Spooler" object="spooler" method="variables"/>, <scheduler_method class="Task" method="params" /> bzw.
+            <scheduler_method class="Order" method="payload" /> oder in shell Jobs als environment Variable (mit vorangestelltem <b>SCHEDULER_PARAM_</b>) verfügbar. -->
+        </p>
+        <p>
+            Correspondent parameter in the JobScheduler configuration, at the Job and at the order are valid in the following sequence:
+            <!--Gleichnamige Parameter in der JobScheduler Konfiguration, am Job und am Auftrag gelten in der folgenden Reihenfolge:-->
+            <ul>
+              <li>order</li>
+              <li>job</li>
+              <li>scheduler</li>
+            </ul>
         </p>
         <p>
             The use of individual parameters beginning with <b>scheduler.</b> is not recommended 
@@ -69,6 +81,14 @@
             <td><b><a href="#scheduler.order.keep_order_content_on_reschedule">scheduler.order.keep_order_content_on_reschedule</a></b></td>
             <td>TRUE</td>
             <td>Preserves the order parameters after the execution of the order.</td>
+          </tr>
+          <tr>
+              <td><b><a href="#scheduler.order.distributed.balanced">scheduler.order.distributed.balanced</a></b></td>
+              <td>FALSE</td>
+              <td>
+                  TRUE: distributed order tasks are allocated equally to the JobSchedulers in a cluster..<br/>
+                  FALSE: an additional JobScheduler of the cluster takes over the execution of a distributed order when the JobScheduler initially processing the order is working at maximum capacity - i.e. the allowed number of processes reaches a maximum value.
+              </td>
           </tr>
           <tr>
             <th width="30%"></th>
@@ -209,22 +229,40 @@ echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
 &lt;/params>
 </pre>
 
-        <a name="scheduler.order.keep_order_content_on_reschedule"/>
-        <li><b>scheduler.order.keep_order_content_on_reschedule</b></li>
-        <p>
-          To set this parameter to <i>false</i> you can reset the order parameters after order execution to its initial values given by the order definition.
-          <!-- Mit diesem Schalter kÃ¶nnen die Auftragsparameter nach AusfÃ¼hrung des Auftrages auf ihren initialen Wert (aus der Auftragsdefinition) zurÃ¼ck gesetzt werden. -->
-<pre>&lt;params>
-   &lt;param name="scheduler.order.keep_order_content_on_reschedule" value="false" />
-&lt;/params>
-</pre>
-        </p>
-        <p>
-          The default behaviour preserves the values of the order parameters after execution.
-          <!-- Das Standardverhalten behÃ¤lt die Werte der Auftragsparameter nach AusfÃ¼hrung des Auftrages bei. -->
-        </p>
+            <a name="scheduler.order.keep_order_content_on_reschedule"/>
+            <li><b>scheduler.order.keep_order_content_on_reschedule</b></li>
+            <p>
+              To set this parameter to <i>false</i> you can reset the order parameters after order execution to its initial values given by the order definition.
+              <!-- Mit diesem Schalter können die Auftragsparameter nach Ausführung des Auftrages auf ihren initialen Wert (aus der Auftragsdefinition) zurück gesetzt werden. -->
+    <pre>&lt;params>
+       &lt;param name="scheduler.order.keep_order_content_on_reschedule" value="false" />
+    &lt;/params>
+    </pre>
+            </p>
+            <p>
+              The default behaviour preserves the values of the order parameters after execution.
+              <!-- Das Standardverhalten behält die Werte der Auftragsparameter nach Ausführung des Auftrages bei. -->
+            </p>
 
-</ul>
+            <br/>
+            <a name="scheduler.order.distributed.balanced"/>
+            <li><b>scheduler.order.distributed.balanced</b></li>
+            <p>
+                This switch allows distributed orders to be distributed amongst the JobSchedulers in a cluster equally.
+                The JobScheduler in the cluster that has executed the least number of distributed orders is determined after every order step has been completed.
+                This JobScheduler is then given the instructions to execute the next order step.
+                <pre>&lt;params>
+   &lt;param name="scheduler.order.distributed.balanced" value="true" />
+&lt;/params></pre>
+            </p>
+            <p>
+                The standard load balancing method distributes orders mainly to the JobScheduler that initiates order execution and tends to cause this JobScheduler to work near to its allowed number of processes.
+                Order distribution only occurs when one JobScheduler is running at full capacity.
+            </p>
+            <br/>
+            see also: <a href="../distributed_orders.xml#use_option__distributed-orders">distributed orders</a>
+
+        </ul>
                 
         <a name="param_job" />
         <h3>Job Parameters</h3>

@@ -67,6 +67,14 @@
             <td>Behält den Zustand der Auftragsparameter nach dessen Ausführung.</td>
           </tr>
           <tr>
+            <td><b><a href="#scheduler.order.distributed.balanced">scheduler.order.distributed.balanced</a></b></td>
+            <td>FALSE</td>
+            <td>
+                TRUE: Verteilte Aufträge werden gleichmässig auf die JobScheduler des Clusters verteilt.<br/>
+                FALSE: Verteilte Aufträge werden auf einem JobScheduler des Clusters ausgeführt, bis dieser ausgelastet ist.
+            </td>
+          </tr>
+          <tr>
             <th width="30%"></th>
             <th width="10%"></th>
             <th width="70%"></th>
@@ -180,6 +188,22 @@ echo JOB_PARAM=%MYPREFIX_JOB_PARAM%
         <p>
           Das Standardverhalten behält die Werte der Auftragsparameter nach Ausführung des Auftrages bei.
         </p>
+
+        <br/>
+        <a name="scheduler.order.distributed.balanced"/>
+        <li><b>scheduler.order.distributed.balanced</b></li>
+        <p>
+          Mit diesem Schalter können verteilte Aufträge gleichmässig auf die JobScheduler des Clusters verteilt werden. Nach jedem Auftragsschritt wird der JobScheduler des Clusters ermittelt, der die wenigsten verteilten Aufträge ausführt. Dieser erhält dann das Kommando zur Ausführung des nächsten Auftragsschrittes.
+<pre>&lt;params>
+   &lt;param name="scheduler.order.distributed.balanced" value="true" />
+&lt;/params>
+</pre>
+        </p>
+        <p>
+          Das Standardverhalten verteilt die Aufträge vornehmlich auf den JobScheduler, der die Ausführung des Auftrages initiiert, führt also tendenziell dazu, dass ein JobScheduler sehr stark ausgelastet wird. Eine Verteilung von Auftragsschritten findet erst statt, wenn ein JobScheduler ausgelastet ist.
+        </p>
+        <br/>
+        siehe auch: <a href="../distributed_orders.xml#use_option__distributed-orders">Verteilte Aufträge</a>
 
         </ul>
                 

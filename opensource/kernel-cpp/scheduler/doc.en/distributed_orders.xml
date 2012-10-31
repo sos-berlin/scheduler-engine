@@ -162,4 +162,30 @@
 <!--Eigenständige Jobs, die keine Aufträge verarbeiten, werden in einem Scheduler Cluster nur von dem Job Scheduler ausgeführt,
 		in dem sie konfiguriert werden..-->
 	</p>
+
+    <h3>
+        Load balancing methods
+    </h3>
+    <p>
+        The method used for load balancing can be set using the <a href="xml/param.xml#scheduler.order.distributed.balanced">scheduler.order.distributed.balanced</a> global parameter:
+        <ul>
+            <li>
+                <b>Overload balancing</b>:
+                <p>
+                    With this method, an additional JobScheduler of the cluster takes over the execution of a distributed order when the JobScheduler initially processing the order is working at maximum capacity - i.e. the allowed number of processes reaches a maximum value.
+                    This is the standard balancing method used by the JobScheduler.
+                </p>
+                <p>
+                    see also <scheduler_element name="job" attribute="tasks"/> and <scheduler_element name="process_class" attribute="attribute_max_processes"/>.
+                </p><br/>
+            </li>
+            <li>
+                <b>Equal distribution</b>:
+                <p>
+                    With this method, distributed order tasks are allocated equally to the JobSchedulers in a cluster.
+                </p>
+            </li>
+        </ul>
+    </p>
+
 </description>
