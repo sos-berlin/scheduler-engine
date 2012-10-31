@@ -2162,16 +2162,13 @@ string Job::trigger_files( Task* task )
 void Job::database_record_store()
 {
     if( file_based_state() >= File_based::s_loaded ) {    // Vorher ist database_record_load() nicht aufgerufen worden
-        if (_spooler->settings()->_use_java_persistence) {
-            typed_java_sister().persistState();
-        }
-        else
-        if (db()->opened()) {
-            Time next_start_time = this->next_start_time();
-
-            if( next_start_time         != _db_next_start_time  ||
-                _is_permanently_stopped != _db_stopped            )
-            {
+        Time next_start_time = this->next_start_time();
+        if( next_start_time != _db_next_start_time  || _is_permanently_stopped != _db_stopped) {
+            if (_spooler->settings()->_use_java_persistence) {
+                typed_java_sister().persistState();
+            }
+            else
+            if (db()->opened()) {
                 for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
                 {
                     sql::Update_stmt update ( &db()->_jobs_table );
@@ -2187,11 +2184,10 @@ void Job::database_record_store()
                     ta.commit( Z_FUNCTION );
                 }
                 catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
-
-                _db_next_start_time = next_start_time;
-                _db_stopped         = _is_permanently_stopped;
             }
         }
+        _db_next_start_time = next_start_time;
+        _db_stopped         = _is_permanently_stopped;
     }
 }
 
