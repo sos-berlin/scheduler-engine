@@ -44,6 +44,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +92,9 @@ public final class Scheduler implements Sister,
                     bind(EventBus.class).toInstance(eventBus);
                     bind(SchedulerInstanceId.class).toInstance(instanceId);
                     bind(SchedulerId.class).toProvider(new Provider<SchedulerId>() {
-                        @Override public SchedulerId get() { return new SchedulerId(cppProxy.id()); }
+                        @Override public SchedulerId get() {
+                            return new SchedulerId(cppProxy.id());
+                        }
                     });
                     bind(ClusterMemberId.class).toProvider(new Provider<ClusterMemberId>() {
                         @Override public ClusterMemberId get() { return new ClusterMemberId(cppProxy.cluster_member_id()); }
@@ -103,9 +106,12 @@ public final class Scheduler implements Sister,
                     });
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
-                    bind(EntityManagerFactory.class).toProvider(new Provider<EntityManagerFactory>(){
+                    bind(EntityManagerFactory.class).toProvider(new Provider<EntityManagerFactory>() {
                         @Override public EntityManagerFactory get() { return databaseSubsystem.entityManagerFactory(); }
-                    });
+                    }).in(Scopes.SINGLETON);
+                    bind(EntityManager.class).toProvider(new Provider<EntityManager>(){
+                        @Override public EntityManager get() { return databaseSubsystem.entityManagerFactory().createEntityManager(); }
+                    }).in(Scopes.SINGLETON);
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  // Für JettyPlugin
                     bind(JobSubsystem.class).toInstance(jobSubsystem);

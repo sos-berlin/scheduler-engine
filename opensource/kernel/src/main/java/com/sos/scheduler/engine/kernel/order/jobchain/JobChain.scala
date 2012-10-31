@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
 import java.io.File
 import javax.annotation.Nullable
-import javax.persistence.EntityManagerFactory
+import javax.persistence.{EntityManager, EntityManagerFactory}
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 
@@ -23,43 +23,37 @@ final class JobChain(cppProxy: Job_chainC, injector: Injector)
 extends FileBased
 with UnmodifiableJobchain {
 
-  private var savedPersistentState: JobChainPersistentState = null
-
   def onCppProxyInvalidated() {}
 
   @ForCpp def loadPersistentState() {
-    transaction(entityManagerFactory) { implicit entityManager =>
+    transaction(entityManager) { implicit entityManager =>
       for (persistentState <- nodeStore.fetchAll(getPath); node <- nodeMap.get(persistentState.state)) {
         node.action = persistentState.action
       }
       for (persistentState <- persistentStateStore.tryFetch(getPath)) {
-        savedPersistentState = persistentState
         isStopped = persistentState.isStopped
       }
     }
   }
 
   @ForCpp def persistState() {
-    val p = persistentState
-    if (p != savedPersistentState) {
-      transaction(entityManagerFactory) { entityManager =>
-        persistentStateStore.store(p)(entityManager)
-      }
-      savedPersistentState = p
+    transaction(entityManager) { implicit entityManager =>
+      persistentStateStore.store(persistentState)
     }
   }
 
   @ForCpp def deletePersistentState() {
-    transaction(entityManagerFactory) { entityManager =>
-      persistentStateStore.delete(getPath)(entityManager)
-      nodeStore.deleteAll(getPath)(entityManager)
+    transaction(entityManager) { implicit entityManager =>
+      persistentStateStore.delete(getPath)
+      nodeStore.deleteAll(getPath)
     }
-    savedPersistentState = null
   }
 
   private def persistentState = JobChainPersistentState(getPath, isStopped)
 
-  private def entityManagerFactory = injector.getInstance(classOf[EntityManagerFactory])
+  private def entityManager = injector.getInstance(classOf[EntityManager])
+
+  //private def entityManagerFactory = injector.getInstance(classOf[EntityManagerFactory])
 
   private def persistentStateStore = injector.getInstance(classOf[HibernateJobChainStore])
 

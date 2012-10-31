@@ -10,37 +10,36 @@ import scala.collection.JavaConversions._
 object ScalaHibernate {
   private val logger = LoggerFactory.getLogger("com.sos.scheduler.engine.kernel.job.ScalaHibernate")
 
-  def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A =
-    transaction(entityManagerFactory)(f)
+  def transaction[A](f: EntityManager => A)(implicit entityManager: EntityManager): A =
+    transaction(entityManager)(f)
 
-  def transaction[A](entityManagerFactory: EntityManagerFactory)(f: EntityManager => A): A = {
-    val entityManager = entityManagerFactory.createEntityManager()
-    val transaction = entityManager.getTransaction
+//  def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A = {
+//    val entityManager = entityManagerFactory.createEntityManager()
+//    val result = transaction(entityManager)(f)
+//    entityManager.close()
+//    result
+//  }
 
-    def doTransaction() = {
-      transaction.begin()
-      try {
-        val result = f(entityManager)
-        transaction.commit()
-        result
-      } catch {
-        case t: Throwable =>
-          if (transaction.isActive) tryRollback(t)
-          throw t
-      }
-    }
+  def transaction[A](entityManager: EntityManager)(f: EntityManager => A): A = {
+    val ta = entityManager.getTransaction
 
     def tryRollback(t: Throwable) {
-      try transaction.rollback()
+      try ta.rollback()
       catch {
-        case xx: Exception =>
-          logger.error("Second error while rollback ignored:", xx)
-          logger.error("Original error:", t)
+        case x: Exception => logger.error("Second error in rollback ignored:", x)
       }
     }
 
-    try doTransaction()
-    finally entityManager.close()
+    ta.begin()
+    try {
+      val result = f(entityManager)
+      ta.commit()
+      result
+    } catch {
+      case t: Throwable if ta.isActive =>
+        tryRollback(t)
+        throw t
+    }
   }
 
   def useJDBCPreparedStatement[A](sql: String)(f: PreparedStatement => A)(implicit em: EntityManager) = {
@@ -54,7 +53,7 @@ object ScalaHibernate {
   def useJDBCConnection[A](f: Connection => A)(implicit em: EntityManager): A = {
     // Geht nicht mit Hibernate 4.1.7 (aber mit EclipseLink): f(em.unwrap(classOf[java.sql.Connection]))
     var result: Option[A] = None
-    em.unwrap(classOf[org.hibernate.Session]).doWork(new Work {   // Hibernate 4
+    em.unwrap(classOf[org.hibernate.Session]).doWork(new Work {
       def execute(connection: Connection) {
         result = Some(f(connection))
       }

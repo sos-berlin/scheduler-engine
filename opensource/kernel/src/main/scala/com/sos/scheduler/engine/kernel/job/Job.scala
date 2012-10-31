@@ -14,14 +14,12 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore, HibernateTaskStore}
 import com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString
 import javax.annotation.Nullable
-import javax.persistence.EntityManagerFactory
+import javax.persistence.{EntityManager, EntityManagerFactory}
 import org.joda.time.DateTime
 
 @ForCpp final class Job(cppProxy: JobC, injector: Injector) extends FileBased with Sister with UnmodifiableJob {
 
   import Job._
-
-  implicit private lazy val entityManagerFactory = injector.getInstance(classOf[EntityManagerFactory])
 
   def onCppProxyInvalidated() {}
 
@@ -58,28 +56,28 @@ import org.joda.time.DateTime
   }
 
   @ForCpp @Nullable def tryFetchPersistentState =
-    transaction { implicit entityManager =>
-      jobStore.tryFetch(getPath).orNull
+    transaction(entityManager) { implicit entityManager =>
+      persistentStateStore.tryFetch(getPath).orNull
     }
 
   @ForCpp def persistState() {
-    transaction { implicit entityManager =>
-      jobStore.store(persistentState)
+    transaction(entityManager) { implicit entityManager =>
+      persistentStateStore.store(persistentState)
     }
   }
 
   @ForCpp def deletePersistentState() {
-    transaction { implicit entityManager =>
-      jobStore.delete(getPath)
+    transaction(entityManager) { implicit entityManager =>
+      persistentStateStore.delete(getPath)
     }
   }
 
   @ForCpp def tryFetchAverageStepDuration() = {
-    transaction { implicit entityManager =>
-      jobStore.tryFetchAverageStepDuration(getPath)
+    transaction(entityManager) { implicit entityManager =>
+      persistentStateStore.tryFetchAverageStepDuration(getPath)
     }
   }
-  private def jobStore = injector.getInstance(classOf[HibernateJobStore])
+  private def persistentStateStore = injector.getInstance(classOf[HibernateJobStore])
 
   private def persistentState = new JobPersistent(
     getPath,
@@ -87,7 +85,7 @@ import org.joda.time.DateTime
     eternalMillisToNone(cppProxy.next_start_time_millis))
 
   @ForCpp def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
-    transaction { implicit entityManager =>
+    transaction(entityManager) { implicit entityManager =>
       taskStore.insert(TaskPersistent(
         TaskId(taskId),
         getPath,
@@ -99,18 +97,20 @@ import org.joda.time.DateTime
   }
 
   @ForCpp def deletePersistedTask(taskId: Int) {
-    transaction { implicit entityManager =>
+    transaction(entityManager) { implicit entityManager =>
       taskStore.delete(TaskId(taskId))
     }
   }
 
   @ForCpp def loadPersistentTasks() {
-    transaction { implicit entityManager =>
+    transaction(entityManager) { implicit entityManager =>
       for (t <- taskStore.fetchByJobOrderedByTaskId(getPath)) {
         cppProxy.enqueue_task(t)
       }
     }
   }
+
+  private def entityManager = injector.getInstance(classOf[EntityManager])
 
   private def taskStore = injector.getInstance(classOf[HibernateTaskStore])
 
