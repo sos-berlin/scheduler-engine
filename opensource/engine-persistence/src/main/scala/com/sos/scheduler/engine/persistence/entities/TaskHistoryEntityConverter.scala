@@ -12,7 +12,7 @@ trait TaskHistoryEntityConverter extends ObjectEntityConverter[TaskHistoryEntry,
   protected def toEntity(o: TaskHistoryEntry) = {
     val e = new TaskHistoryEntity
     e.id = o.id
-    e.schedulerId = idForDatabase(o.schedulerId)
+    e.schedulerId = schedulerIdToDatabase(o.schedulerId)
     e.clusterMemberId = emptyToNull(o.clusterMemberId.string)
     e.jobPath = o.jobPath.withoutStartingSlash
     e.startTime = new java.util.Date(o.startTime.getMillis)

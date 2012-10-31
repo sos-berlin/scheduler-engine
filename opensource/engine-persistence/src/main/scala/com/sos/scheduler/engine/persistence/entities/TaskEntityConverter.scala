@@ -14,7 +14,7 @@ trait TaskEntityConverter extends ObjectEntityConverter[TaskPersistent, TaskId, 
 
   protected val schedulerId: SchedulerId
   protected val clusterMemberId: ClusterMemberId
-  protected lazy val schedulerIdDBString = idForDatabase(schedulerId)
+  protected lazy val schedulerIdDBString = schedulerIdToDatabase(schedulerId)
   protected lazy val clusterMemberIdDBString = emptyToNull(clusterMemberId.string)
 
   protected def toEntityKey(taskId: TaskId) = java.lang.Integer.valueOf(taskId.value)

@@ -12,7 +12,7 @@ class SchedulerHistoryEntityConverter extends ObjectEntityConverter[SchedulerHis
   protected def toEntity(o: SchedulerHistoryEntry) = {
     val e = new TaskHistoryEntity
     e.id = o.id
-    e.schedulerId = idForDatabase(o.schedulerId)
+    e.schedulerId = schedulerIdToDatabase(o.schedulerId)
     e.clusterMemberId = emptyToNull(o.clusterMemberId.string)
     e.jobPath = schedulerDummyJobPath
     e.startTime = new java.util.Date(o.startTime.getMillis)

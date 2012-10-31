@@ -16,7 +16,7 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
-import static com.sos.scheduler.engine.persistence.SchedulerDatabases.idForDatabase;
+import static com.sos.scheduler.engine.persistence.SchedulerDatabases.schedulerIdToDatabase;
 
 class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowTaskHistoryCommand, TaskHistoryEntriesResult> {
     private final SchedulerId schedulerId;
@@ -60,7 +60,7 @@ class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowTaskHist
             result = entityManager.createQuery(sql, TaskHistoryEntity.class);
             result.setParameter("clusterMemberId", clusterMemberId);
         }
-        result.setParameter("schedulerId", idForDatabase(schedulerId));
+        result.setParameter("schedulerId", schedulerIdToDatabase(schedulerId));
         result.setParameter("schedulerDummyJobPath", TaskHistoryEntity$.MODULE$.schedulerDummyJobPath());
         return result;
     }

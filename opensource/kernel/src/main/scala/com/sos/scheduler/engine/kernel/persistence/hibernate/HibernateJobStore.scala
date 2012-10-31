@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.JobPersistent
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate.useJDBCPreparedStatement
-import com.sos.scheduler.engine.persistence.SchedulerDatabases.idForDatabase
+import com.sos.scheduler.engine.persistence.SchedulerDatabases.schedulerIdToDatabase
 import com.sos.scheduler.engine.persistence.entities.{JobEntityConverter, JobEntity}
 import javax.inject.{Inject, Singleton}
 import javax.persistence.{EntityManager, EntityManagerFactory}
@@ -22,7 +22,7 @@ with JobEntityConverter {
     val sql = """select sum({fn TIMESTAMPDIFF(SQL_TSI_SECOND, "START_TIME", "END_TIME")}) / sum("STEPS")"""+
         """ from SCHEDULER_HISTORY where "STEPS" > 0 and "SPOOLER_ID"=? and "JOB_NAME"=?"""
     useJDBCPreparedStatement(sql) { stmt =>
-      stmt.setString(1, idForDatabase(schedulerId))
+      stmt.setString(1, schedulerIdToDatabase(schedulerId))
       stmt.setString(2, jobPath.withoutStartingSlash)
       val resultSet = stmt.executeQuery()
       if (resultSet.next())

@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 trait JobChainNodeEntityConverter extends ObjectEntityConverter[JobChainNodePersistentState, JobChainNodePersistentStateKey, JobChainNodeEntity] {
   protected val schedulerId: SchedulerId
   protected val clusterMemberId: ClusterMemberId
-  protected lazy val schedulerIdDBString = idForDatabase(schedulerId)
+  protected lazy val schedulerIdDBString = schedulerIdToDatabase(schedulerId)
   protected lazy val clusterMemberIdDBString = if (clusterMemberId.isEmpty) "-" else clusterMemberId.asString
 
   final def toObject(e: JobChainNodeEntity) = JobChainNodePersistentState(
