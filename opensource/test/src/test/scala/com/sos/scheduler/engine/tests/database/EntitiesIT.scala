@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
-import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
+import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 import com.sos.scheduler.engine.kernel.settings.{SettingName, Settings}
 import com.sos.scheduler.engine.persistence.entities._

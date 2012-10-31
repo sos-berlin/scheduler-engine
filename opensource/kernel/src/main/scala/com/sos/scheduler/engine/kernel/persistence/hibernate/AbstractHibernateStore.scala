@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
 import com.sos.scheduler.engine.data.base.{HasKey, HasIsDefault}
-import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate.toRichEntityManager
+import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 import javax.persistence.EntityManager
 
