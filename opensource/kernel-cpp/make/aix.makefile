@@ -3,6 +3,7 @@
 
 
 include $(PROD_DIR)/make/gnu.makefile
+INCLUDES += -I$(PROD_DIR)/3rd_party/zlib
 
 CFLAGS += -O2
 CFLAGS += -fPIC
