@@ -10,7 +10,7 @@ abstract sealed class OrderStateExpectation {
 }
 
 case object InitialState extends OrderStateExpectation {
-  def matches(o: OrderState) = o.asString startsWith Setting.initialOrderStatePrefix
+  def matches(o: OrderState) = o.string startsWith Setting.initialOrderStatePrefix
 }
 
 case object SuccessState extends OrderStateExpectation {

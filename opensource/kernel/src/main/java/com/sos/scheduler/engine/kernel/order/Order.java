@@ -53,7 +53,7 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
     }
 
     public void setEndState(OrderState s) {
-        cppProxy.set_end_state(s.asString());
+        cppProxy.set_end_state(s.string());
     }
 
 //	public String getFilePath() {

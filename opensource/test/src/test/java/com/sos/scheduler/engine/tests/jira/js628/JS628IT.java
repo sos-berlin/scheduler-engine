@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class JS628IT extends SchedulerTest {
 
-    private final String[] JOB_CHAINS =
+    private static final String[] JOB_CHAINS =
             {
                     "js628-chain-success-1",
                     "js628-chain-success-2",
@@ -48,7 +48,7 @@ public class JS628IT extends SchedulerTest {
 
     @Test
     public void test() throws Exception {
-        final CommandBuilder commandBuilder = new CommandBuilder();
+        CommandBuilder commandBuilder = new CommandBuilder();
         controller().activateScheduler();
         for(String jobChain : JOB_CHAINS) { 
         String cmd = commandBuilder.addOrder(jobChain).getCommand();
@@ -62,7 +62,7 @@ public class JS628IT extends SchedulerTest {
 
     @HotEventHandler
     public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) throws InterruptedException {
-        String endState = order.getState().asString();
+        String endState = order.getState().string();
         if (endState.equals("error")) errorCount++;
         if (endState.equals("success")) successCount++;
         finishedOrderCount++;

@@ -31,11 +31,11 @@ class Node(cppProxy: NodeCI, injector: Injector) extends Sister {
 
   final def jobChainPath = JobChainPath.of(cppProxy.job_chain_path)
 
-  final def orderState = OrderState.of(cppProxy.string_order_state)
+  final def orderState = OrderState(cppProxy.string_order_state)
 
-  final def nextState = OrderState.of(cppProxy.string_next_state)
+  final def nextState = OrderState(cppProxy.string_next_state)
 
-  final def errorState = OrderState.of(cppProxy.string_error_state)
+  final def errorState = OrderState(cppProxy.string_error_state)
 
   final def action = JobChainNodeAction.ofCppName(cppProxy.string_action)
 
