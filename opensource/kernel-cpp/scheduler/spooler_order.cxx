@@ -612,6 +612,12 @@ ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* oute
 
     ptr<Order> result;
 
+    if (_spooler->settings()->_use_java_persistence) {
+
+        ptr<Order> result;
+        auto orderJ = _typed_java_sister.tryFetchOrder(job_chain_path, order_id.as_string(), flag);
+    }
+    else 
     for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
     {
         S select_sql;
