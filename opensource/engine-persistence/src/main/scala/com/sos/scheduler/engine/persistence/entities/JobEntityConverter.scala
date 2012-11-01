@@ -30,6 +30,6 @@ trait JobEntityConverter extends ObjectEntityConverter[JobPersistent, JobPath, J
   final def toEntityKey(jobPath: JobPath) =
     JobEntity.PrimaryKey(
       schedulerIdToDatabase(schedulerId),
-      if (clusterMemberId.isEmpty) "-" else clusterMemberId.asString,
+      if (clusterMemberId.isEmpty) "-" else clusterMemberId.string,
       jobPath.withoutStartingSlash)
 }

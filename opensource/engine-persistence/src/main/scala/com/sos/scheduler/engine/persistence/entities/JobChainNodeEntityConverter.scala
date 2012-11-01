@@ -11,7 +11,7 @@ trait JobChainNodeEntityConverter extends ObjectEntityConverter[JobChainNodePers
   protected val schedulerId: SchedulerId
   protected val clusterMemberId: ClusterMemberId
   protected lazy val schedulerIdDBString = schedulerIdToDatabase(schedulerId)
-  protected lazy val clusterMemberIdDBString = if (clusterMemberId.isEmpty) "-" else clusterMemberId.asString
+  protected lazy val clusterMemberIdDBString = if (clusterMemberId.isEmpty) "-" else clusterMemberId.string
 
   final def toObject(e: JobChainNodeEntity) = JobChainNodePersistentState(
     new JobChainPath(AbsolutePath.of(e.jobChainPath)),
