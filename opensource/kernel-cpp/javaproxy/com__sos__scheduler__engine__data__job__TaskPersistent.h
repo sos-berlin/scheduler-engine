@@ -13,7 +13,7 @@
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct TaskId; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
-namespace javaproxy { namespace org { namespace joda { namespace time { struct DateTime; }}}}
+namespace javaproxy { namespace org { namespace joda { namespace time { struct ReadableInstant; }}}}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { 
@@ -51,7 +51,7 @@ struct TaskPersistent : ::zschimmer::javabridge::proxy_jobject< TaskPersistent >
     }
   public:
 
-    ::javaproxy::org::joda::time::DateTime enqueueTime() const;
+    ::javaproxy::org::joda::time::ReadableInstant enqueueTime() const;
     ::javaproxy::java::lang::String parametersXml() const;
     jlong startTimeMillis() const;
     ::javaproxy::com::sos::scheduler::engine::data::job::TaskId taskId() const;

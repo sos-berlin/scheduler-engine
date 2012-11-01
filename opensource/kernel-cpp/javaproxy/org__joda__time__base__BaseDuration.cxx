@@ -4,6 +4,7 @@
 
 #include "org__joda__time__base__BaseDuration.h"
 #include "java__lang__String.h"
+#include "org__joda__time__ReadableInstant.h"
 #include "org__joda__time__base__AbstractDuration.h"
 
 namespace javaproxy { namespace org { namespace joda { namespace time { namespace base { 

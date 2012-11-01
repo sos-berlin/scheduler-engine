@@ -54,12 +54,9 @@ javaproxy_objects=\
  java__util__AbstractMap.o\
  java__util__ArrayList.o\
  java__util__HashMap.o\
- org__joda__time__DateTime.o\
  org__joda__time__Duration.o\
- org__joda__time__base__AbstractDateTime.o\
+ org__joda__time__ReadableInstant.o\
  org__joda__time__base__AbstractDuration.o\
- org__joda__time__base__AbstractInstant.o\
- org__joda__time__base__BaseDateTime.o\
  org__joda__time__base__BaseDuration.o\
  org__w3c__dom__Attr.o\
  org__w3c__dom__CDATASection.o\

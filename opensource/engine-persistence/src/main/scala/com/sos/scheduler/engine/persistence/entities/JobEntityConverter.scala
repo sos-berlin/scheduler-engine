@@ -14,7 +14,7 @@ trait JobEntityConverter extends ObjectEntityConverter[JobPersistent, JobPath, J
     JobPersistent(
       jobPath = JobPath.of("/"+ e.jobPath),
       isPermanentlyStopped = e.isStopped,
-      nextStartTimeOption = Option(e.nextStartTime) map databaseToDateTime)
+      nextStartTimeOption = Option(e.nextStartTime) map databaseToInstant)
 
   final def toEntity(o: JobPersistent) = {
     val k = toEntityKey(o.jobPath)

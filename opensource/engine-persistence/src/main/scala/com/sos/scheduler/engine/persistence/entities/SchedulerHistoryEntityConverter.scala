@@ -29,8 +29,8 @@ class SchedulerHistoryEntityConverter extends ObjectEntityConverter[SchedulerHis
     val id = e.id
     val schedulerId = schedulerIdFromDatabase(e.schedulerId)
     val clusterMemberId = new ClusterMemberId(nullToEmpty(e.clusterMemberId))
-    val startTime = databaseToDateTime(e.startTime)
-    val endTimeOption = Option(e.startTime) map databaseToDateTime
+    val startTime = databaseToInstant(e.startTime)
+    val endTimeOption = Option(e.startTime) map databaseToInstant
     val errorCode = nullToEmpty(e.errorCode)
     val errorText = nullToEmpty(e.errorText)
     val parameterXml = nullToEmpty(e.parameterXml)

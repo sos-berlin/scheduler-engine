@@ -6,7 +6,7 @@
 #include "com__sos__scheduler__engine__data__job__TaskId.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
-#include "org__joda__time__DateTime.h"
+#include "org__joda__time__ReadableInstant.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { 
 
@@ -28,7 +28,7 @@ const ::zschimmer::javabridge::class_factory< TaskPersistent__class > TaskPersis
 
 TaskPersistent__class::TaskPersistent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_enqueueTime____method(this, "enqueueTime", "()Lorg/joda/time/DateTime;")
+    ,_enqueueTime____method(this, "enqueueTime", "()Lorg/joda/time/ReadableInstant;")
     ,_parametersXml____method(this, "parametersXml", "()Ljava/lang/String;")
     ,_startTimeMillis____method(this, "startTimeMillis", "()J")
     ,_taskId____method(this, "taskId", "()Lcom/sos/scheduler/engine/data/job/TaskId;")
@@ -52,10 +52,10 @@ TaskPersistent::~TaskPersistent() { assign_(NULL); }
 
 
 
-::javaproxy::org::joda::time::DateTime TaskPersistent::enqueueTime() const {
+::javaproxy::org::joda::time::ReadableInstant TaskPersistent::enqueueTime() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     TaskPersistent__class* cls = _class.get();
-    ::javaproxy::org::joda::time::DateTime result;
+    ::javaproxy::org::joda::time::ReadableInstant result;
     result.steal_local_ref(cls->_enqueueTime____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }

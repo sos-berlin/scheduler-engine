@@ -30,9 +30,8 @@
 #include "../javaproxy/java__util__ArrayList.h"
 #include "../javaproxy/java__lang__Object.h"
 #include "../javaproxy/java__lang__String.h"
-#include "../javaproxy/org__joda__time__DateTime.h"
 #include "../javaproxy/org__joda__time__Duration.h"
-#include "../javaproxy/org__joda__time__base__AbstractDateTime.h"
+#include "../javaproxy/org__joda__time__ReadableInstant.h"
 #include "../javaproxy/scala__Option.h"
 
 namespace sos {

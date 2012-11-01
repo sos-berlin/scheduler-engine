@@ -5,6 +5,7 @@
 #include "org__joda__time__Duration.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
+#include "org__joda__time__ReadableInstant.h"
 #include "org__joda__time__base__BaseDuration.h"
 
 namespace javaproxy { namespace org { namespace joda { namespace time { 
@@ -17,6 +18,7 @@ struct Duration__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const __constructor__Ljava_lang_Object_2__method;
     ::zschimmer::javabridge::Method const __constructor__J__method;
     ::zschimmer::javabridge::Method const __constructor__JJ__method;
+    ::zschimmer::javabridge::Method const __constructor__Lorg_joda_time_ReadableInstant_2Lorg_joda_time_ReadableInstant_2__method;
     ::zschimmer::javabridge::Method const _getStandardDays____method;
     ::zschimmer::javabridge::Method const _getStandardHours____method;
     ::zschimmer::javabridge::Method const _getStandardMinutes____method;
@@ -43,6 +45,7 @@ Duration__class::Duration__class(const string& class_name) :
     ,__constructor__Ljava_lang_Object_2__method(this, "<init>", "(Ljava/lang/Object;)V")
     ,__constructor__J__method(this, "<init>", "(J)V")
     ,__constructor__JJ__method(this, "<init>", "(JJ)V")
+    ,__constructor__Lorg_joda_time_ReadableInstant_2Lorg_joda_time_ReadableInstant_2__method(this, "<init>", "(Lorg/joda/time/ReadableInstant;Lorg/joda/time/ReadableInstant;)V")
     ,_getStandardDays____method(this, "getStandardDays", "()J")
     ,_getStandardHours____method(this, "getStandardHours", "()J")
     ,_getStandardMinutes____method(this, "getStandardMinutes", "()J")
@@ -91,6 +94,17 @@ Duration Duration::new_instance(jlong p0, jlong p1) {
     parameter_list._jvalues[1].j = p1;
     Duration__class* cls = result._class.get();
     cls->__constructor__JJ__method.call(result.get_jobject(), parameter_list);
+    return result;
+}
+
+Duration Duration::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::joda::time::ReadableInstant >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::joda::time::ReadableInstant >& p1) {
+    Duration result;
+    result.java_object_allocate_();
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    parameter_list._jvalues[1].l = p1.get_jobject();
+    Duration__class* cls = result._class.get();
+    cls->__constructor__Lorg_joda_time_ReadableInstant_2Lorg_joda_time_ReadableInstant_2__method.call(result.get_jobject(), parameter_list);
     return result;
 }
 

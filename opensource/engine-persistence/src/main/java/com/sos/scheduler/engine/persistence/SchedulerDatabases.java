@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.persistence;
 
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
 import org.joda.time.ReadableInstant;
 
 import java.util.Date;
@@ -24,8 +24,8 @@ public final class SchedulerDatabases {
         return new SchedulerId(id.equals(emptyIdInDatabase)? "" : id);
     }
 
-    public static DateTime databaseToDateTime(Date o) {
-        return new DateTime(o.getTime(), databaseTimeZone);
+    public static ReadableInstant databaseToInstant(Date o) {
+        return new Instant(o.getTime());
     }
 
     public static Date instantToDatabase(ReadableInstant o) {

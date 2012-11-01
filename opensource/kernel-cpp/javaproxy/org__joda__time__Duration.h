@@ -15,6 +15,7 @@
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace org { namespace joda { namespace time { namespace base { struct BaseDuration; }}}}}
+namespace javaproxy { namespace org { namespace joda { namespace time { struct ReadableInstant; }}}}
 
 
 namespace javaproxy { namespace org { namespace joda { namespace time { 
@@ -26,6 +27,7 @@ struct Duration : ::zschimmer::javabridge::proxy_jobject< Duration >, ::javaprox
     static Duration new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
     static Duration new_instance(jlong p0);
     static Duration new_instance(jlong p0, jlong p1);
+    static Duration new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::joda::time::ReadableInstant >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::joda::time::ReadableInstant >& p1);
 
     Duration(jobject = NULL);
 

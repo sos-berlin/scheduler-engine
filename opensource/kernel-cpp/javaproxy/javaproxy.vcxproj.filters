@@ -199,18 +199,10 @@
     
     
     
-    <ClCompile Include="org__joda__time__DateTime.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
-    <ClCompile Include="org__joda__time__base__AbstractDateTime.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
-    <ClCompile Include="org__joda__time__base__AbstractInstant.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
-    <ClCompile Include="org__joda__time__base__BaseDateTime.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
+    
+    
+    
+    
     <ClCompile Include="scala__Option.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -239,6 +231,9 @@
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__Node.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="org__joda__time__ReadableInstant.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     </ItemGroup>

@@ -13,6 +13,7 @@
 
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace org { namespace joda { namespace time { namespace base { struct AbstractDuration; }}}}}
+namespace javaproxy { namespace org { namespace joda { namespace time { struct ReadableInstant; }}}}
 
 
 namespace javaproxy { namespace org { namespace joda { namespace time { namespace base { 
