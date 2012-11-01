@@ -18,48 +18,26 @@ import scala.reflect.BeanProperty
 @Table(name="SCHEDULER_JOB_CHAINS")
 @IdClass(classOf[JobChainEntity.Key])
 class JobChainEntity {
-  private var _schedulerId: String = _
-  private var _clusterMemberId: String = _
-  private var _jobChainPath: String = _
-  private var _isStopped: Boolean = _
-  private var _nodes: java.util.List[JobChainNodeEntity] = _
+  @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
+  private[entities] var schedulerId: String = _
+
+  @Column(name=""""CLUSTER_MEMBER_ID"""", nullable=false) @Id
+  private[entities] var clusterMemberId: String = _
+
+  @Column(name=""""PATH"""", nullable=false) @Id
+  private[entities] var jobChainPath: String = _
+
+  @Column(name=""""STOPPED"""" , nullable=false)
+  private[entities] var isStopped: Boolean = _
 
   def this(k: JobChainEntity.Key) {
     this()
-    _schedulerId = k.schedulerId
-    _clusterMemberId = k.clusterMemberId
-    _jobChainPath = k.jobChainPath
+    schedulerId = k.schedulerId
+    clusterMemberId = k.clusterMemberId
+    jobChainPath = k.jobChainPath
   }
 
-  @Column(name="`SPOOLER_ID`", nullable=false) @Id
-  private[entities] def getSchedulerId = _schedulerId
-
-  private[entities] def setSchedulerId(o: String) {
-    _schedulerId = o
-  }
-
-  @Column(name="`CLUSTER_MEMBER_ID`", nullable=false) @Id
-  private[entities] def getClusterMemberId = _clusterMemberId
-
-  private[entities] def setClusterMemberId(o: String) {
-    _clusterMemberId = o
-  }
-
-  @Column(name="`PATH`", nullable=false) @Id
-  private[entities] def getJobChainPath = _jobChainPath
-
-  private[entities] def setJobChainPath(o: String) {
-    _jobChainPath = o
-  }
-
-  @Column(name="`STOPPED`" , nullable=false)
-  private[entities] def isStopped = _isStopped
-
-  private[entities] def setStopped(o: Boolean) {
-    _isStopped = o
-  }
-
-  override def toString = "JobChainEntity"+ Seq(_schedulerId, _clusterMemberId, _jobChainPath, _isStopped).mkString("(", ",", ")")
+  override def toString = "JobChainEntity"+ Seq(schedulerId, clusterMemberId, jobChainPath, isStopped).mkString("(", ",", ")")
 }
 
 object JobChainEntity {
