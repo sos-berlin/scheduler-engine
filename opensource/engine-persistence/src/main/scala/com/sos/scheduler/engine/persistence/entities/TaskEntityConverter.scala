@@ -24,8 +24,8 @@ trait TaskEntityConverter extends ObjectEntityConverter[TaskPersistent, TaskId, 
     e.schedulerId = schedulerIdDBString
     e.clusterMemberId = clusterMemberIdDBString
     e.jobPath = toDBString(o.jobPath)
-    e.enqueueTime = dateTimeToDatabase(o.enqueueTime)
-    e.startTime = (o.startTimeOption map dateTimeToDatabase).orNull
+    e.enqueueTime = instantToDatabase(o.enqueueTime)
+    e.startTime = (o.startTimeOption map instantToDatabase).orNull
     e.parameterXml = emptyToNull(o.parametersXml)
     e.xml = emptyToNull(o.xml)
     e

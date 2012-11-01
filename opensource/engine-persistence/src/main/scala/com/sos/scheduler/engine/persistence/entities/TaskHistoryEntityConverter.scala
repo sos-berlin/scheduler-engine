@@ -16,7 +16,7 @@ trait TaskHistoryEntityConverter extends ObjectEntityConverter[TaskHistoryEntry,
     e.clusterMemberId = emptyToNull(o.clusterMemberId.string)
     e.jobPath = o.jobPath.withoutStartingSlash
     e.startTime = new java.util.Date(o.startTime.getMillis)
-    e.endTime = (o.endTimeOption map dateTimeToDatabase).orNull
+    e.endTime = (o.endTimeOption map instantToDatabase).orNull
     e.cause = o.cause
     e.steps = (o.stepsOption map Integer.valueOf).orNull
     e.errorCode = emptyToNull(o.errorCode)

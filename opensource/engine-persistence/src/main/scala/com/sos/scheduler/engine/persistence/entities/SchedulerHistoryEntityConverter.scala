@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.persistence.entities
 
 import com.google.common.base.Strings._
 import com.sos.scheduler.engine.data.job.SchedulerHistoryEntry
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.persistence.SchedulerDatabases._
 import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity.schedulerDummyJobPath
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
@@ -15,8 +15,8 @@ class SchedulerHistoryEntityConverter extends ObjectEntityConverter[SchedulerHis
     e.schedulerId = schedulerIdToDatabase(o.schedulerId)
     e.clusterMemberId = emptyToNull(o.clusterMemberId.string)
     e.jobPath = schedulerDummyJobPath
-    e.startTime = new java.util.Date(o.startTime.getMillis)
-    e.endTime = (o.endTimeOption map dateTimeToDatabase).orNull
+    e.startTime = instantToDatabase(o.startTime)
+    e.endTime = (o.endTimeOption map instantToDatabase).orNull
     e.errorCode = emptyToNull(o.errorCode)
     e.errorText = emptyToNull(o.errorText)
     e.processId = o.processId

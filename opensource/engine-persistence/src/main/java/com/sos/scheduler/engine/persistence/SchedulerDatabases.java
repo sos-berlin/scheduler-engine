@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.persistence;
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.ReadableInstant;
 
 import java.util.Date;
 
@@ -27,7 +28,7 @@ public final class SchedulerDatabases {
         return new DateTime(o.getTime(), databaseTimeZone);
     }
 
-    public static Date dateTimeToDatabase(DateTime o) {
+    public static Date instantToDatabase(ReadableInstant o) {
         return new Date(o.getMillis());
     }
 }

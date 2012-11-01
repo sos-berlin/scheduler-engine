@@ -23,7 +23,7 @@ trait JobEntityConverter extends ObjectEntityConverter[JobPersistent, JobPath, J
     e.clusterMemberId = k.clusterMemberId
     e.jobPath = k.jobPath
     e.isStopped = o.isPermanentlyStopped
-    e.nextStartTime = (o.nextStartTimeOption map dateTimeToDatabase).orNull
+    e.nextStartTime = (o.nextStartTimeOption map instantToDatabase).orNull
     e
   }
 
