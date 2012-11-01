@@ -1,0 +1,4 @@
+#! /bin/bash
+set -e
+mvn --no-snapshot-updates --threads 1C -pl :data,:engine-common,:engine-persistence,:kernel clean install
+mvn --no-snapshot-updates --threads 1C -pl :kernel.cppproxy-generated,:kernel-cpp generate-sources
