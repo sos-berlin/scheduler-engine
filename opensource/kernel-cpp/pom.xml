@@ -20,6 +20,31 @@
 
     <build>
         <plugins>
+        
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.sos.scheduler.enginedoc</groupId>
+                                    <artifactId>enginedoc-common</artifactId>
+                                    <version>${enginedoc.version}</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -259,6 +284,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sos.scheduler.enginedoc</groupId>
+            <artifactId>enginedoc-common</artifactId>
+            <version>${enginedoc.version}</version>
+        </dependency>
+    </dependencies>
 
     <profiles>
         <profile>

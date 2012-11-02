@@ -23,10 +23,11 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
   <property name="perl.copy"          value="${script.root}/copy_file_if_changed.pl" />
   <property name="xslt.messages"      value="${script.root}/messages_to_c++.xslt" />
   
-  <property name="base" value="${basedir}" />
   <propertyregex property="base" override="true" global="true" input="${basedir}" regexp="\\" replace="/" />  
-  <property name="work.dir" value="${base}/scheduler" />
-  <property name="target.dir" value="${base}/target/generated" />
+  <property name="work.dir" value="${basedir}/scheduler" />
+  <property name="generated.dir" value="${basedir}/target/generated" />
+	<property name="dependency.dir" value="${basedir}/target/dependency" />
+	<property name="doc.dir" value="${dependency.dir}/com/sos/scheduler/enginedoc/common" />
 
   <property name="scheduler.schema" value="scheduler.xsd" />
   <property name="output.e" value="spooler_embedded_files.cxx" />
@@ -34,18 +35,22 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
 
   <target name="all"
           description="generierung von c++ sourcen"
-          depends="prepare, embedded.files, keywords.to.register_data.xml, messages.to.cpp"
+          depends="prepare, embedded.files, messages.to.cpp"
   >
-    <copy verbose="true" file="${work.dir}/scheduler.xsd" todir="${work.dir}/doc" />
-    <copy verbose="true" file="${work.dir}/scheduler.xsd" todir="${work.dir}/doc.en" />
     <echo>DONE!</echo>
   </target>
 
   <target name="prepare"
           description="prepare the build"
   >
-    <echo>base=${base}</echo>
-    <mkdir dir="${target.dir}" />
+    <echo>base=${basedir}</echo>
+    <mkdir dir="${generated.dir}" />
+		<unzip dest="${dependency.dir}">
+	    <fileset dir="${dependency.dir}">
+	        <include name="enginedoc-common-*.jar"/>
+	    </fileset>
+		</unzip>
+
   </target>
 
   <target name="embedded.files"
@@ -54,72 +59,36 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
   >
 
     <echo message="generating ${output.e} ..." />
-    <exec executable="perl" dir="${work.dir}" output="${target.dir}/${output.e}">
+    <exec executable="perl" dir="${work.dir}" output="${generated.dir}/${output.e}">
       <arg value="${perl.embeddedfiles}" />
       <arg value="-trim" />
-      <arg value="${scheduler.schema}" />
-      <arg value="doc.en/log_categories.xml" />
+      <arg value="${doc.dir}/scheduler.xsd" />
+      <arg value="${doc.dir}/log_categories.xml" />
     </exec>
     
     <!-- copy spooler_embedded_files.cxx to scheduler -->
-    <macro_copy sourcefile="${target.dir}/${output.e}" targetfile="${work.dir}/${output.e}" />
-  </target>
-
-  <target name="keywords.to.register_data.xml"
-          description="generates register_data.xml"
-  >
-    <echo>generating register-data.xml ...</echo>
-
-<!--
-    Diese Variante funktioniert unter Linux nicht, auch dann nicht, wenn perl direkt aufgerufen wird
-    und nicht über bash
-    Die Variante über ein eigenes Script ist derzeit die einzige, die unter Windows und Linux funktioniert.
-    <exec executable="bash" dir="${work.dir}/doc" output="${target.dir}/${output.r}">
-      <arg value="-c" />
-      <arg value="&quot;" />
-      <arg value="perl" />
-      <arg value="../${perl.keywordtoxml}" />
-      <arg value="*.xml" />
-      <arg value="xml/*.xml" />
-      <arg value="xml/answer/*.xml" />
-      <arg value="api/*.xml" />
-      <arg value="&quot;" />
-    </exec>
--->    
-    <if>
-     <equals arg1="${operatingSystem}" arg2="windows" />
-     <then>
-        <exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.r}">
-          <arg value="-c" />
-          <arg value="&quot;" />
-          <arg value="${script.keywordtoxml}" />
-          <arg value="&quot;" />
-        </exec>
-     </then>
-     <else>
-        <exec executable="${script.keywordtoxml}" dir="${work.dir}" output="${target.dir}/${output.r}" />
-     </else>
-    </if>
-    
-    <macro_copy sourcefile="${target.dir}/${output.r}" targetfile="${work.dir}/doc/${output.r}" />
-    <macro_copy sourcefile="${target.dir}/${output.r}" targetfile="${work.dir}/doc.en/${output.r}" />
-
+    <macro_copy sourcefile="${generated.dir}/${output.e}" targetfile="${work.dir}/${output.e}" />
   </target>
 
   <target name="messages.to.cpp"
           description="generates cpp classes for xml message files"
   >
 
+    <!-- copy the message files for project zschimmer -->
     <foreach target="-messages.to.cpp.file" param="fullname">
       <path>
-        <fileset dir="./zschimmer" casesensitive="yes" includes="*.xml" />
+        <fileset dir="${doc.dir}" casesensitive="yes">
+          <include name="*messages*.xml" />
+          <exclude name="scheduler_messages.xml" />
+        </fileset>
       </path>
       <param name="project" value="zschimmer" />
     </foreach>
     
+    <!-- copy the message files for project scheduler -->
     <foreach target="-messages.to.cpp.file" param="fullname">
       <path>
-        <fileset dir="./scheduler" casesensitive="yes" includes="scheduler_messages.xml" />
+        <fileset dir="${doc.dir}" casesensitive="yes" includes="scheduler_messages.xml" />
       </path>
       <param name="project" value="scheduler" />
     </foreach>
@@ -135,24 +104,16 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
     <propertyregex property="fullname.norm" override="true" global="true" input="${fullname}" regexp="\\" replace="/" casesensitive="false" />  
     <echo>generating ${targetfile}.${targetext} ...</echo>
     <!-- <echo>fullname is ${fullname.norm}</echo> -->
-    <!--
-    <exec executable="xsltproc" dir="${work.dir}" output="${target.dir}/${targetfile}.${targetext}">
-      <arg value="${xslt.messages}" />
-      <arg value="${fullname.norm}" />
-    </exec>
-    -->
     <xslt
       in="${fullname}"
-      out="${target.dir}/${targetfile}.${targetext}"
+      out="${generated.dir}/${targetfile}.${targetext}"
       style="./make_internal/messages_to_c++.xslt"
       force="true"
     >
        <classpath location="${settings.localRepository}/net/sf/saxon/saxon/8.7/saxon-8.7.jar" />
     </xslt>
 
-    <macro_copy sourcefile="${target.dir}/${targetfile}.${targetext}" targetfile="${base}/${project}/${targetfile}.${targetext}" />
-    <macro_copy sourcefile="${fullname.norm}" targetfile="${work.dir}/doc/messages/${targetfile}.xml" />
-    <macro_copy sourcefile="${fullname.norm}" targetfile="${work.dir}/doc.en/messages/${targetfile}.xml" />
+    <macro_copy sourcefile="${generated.dir}/${targetfile}.${targetext}" targetfile="${basedir}/${project}/${targetfile}.${targetext}" />
 
   </target>
   
