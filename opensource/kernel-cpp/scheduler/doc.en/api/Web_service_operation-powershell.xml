@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- $Id$ -->
-<?xml-stylesheet href="api-powershell.xsl" type="text/xsl"?>
-<api.class name="Web_service_operation" base_dir="../" />
