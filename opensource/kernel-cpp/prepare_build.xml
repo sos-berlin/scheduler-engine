@@ -16,10 +16,8 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
 
   <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${env.USERPROFILE}/.m2/repository/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
   
-  <property name="script.root"        value="../make_internal" />
+  <property name="script.root"        value="${basedir}/src/main/scripts" />
   <property name="perl.embeddedfiles" value="${script.root}/files_to_c++.pl" />
-  <property name="perl.keywordtoxml"  value="${script.root}/scheduler_keyword_to_xml.pl" />
-  <property name="script.keywordtoxml"  value="${script.root}/scheduler_keyword_to_xml" />
   <property name="perl.copy"          value="${script.root}/copy_file_if_changed.pl" />
   <property name="xslt.messages"      value="${script.root}/messages_to_c++.xslt" />
   
@@ -107,7 +105,7 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
     <xslt
       in="${fullname}"
       out="${generated.dir}/${targetfile}.${targetext}"
-      style="./make_internal/messages_to_c++.xslt"
+      style="${xslt.messages}"
       force="true"
     >
        <classpath location="${settings.localRepository}/net/sf/saxon/saxon/8.7/saxon-8.7.jar" />
