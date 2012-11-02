@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js498;
+package com.sos.scheduler.engine.tests.jira.js498.rhino;
 
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
@@ -28,23 +28,23 @@ import static org.junit.Assert.assertTrue;
  * @author Stefan Schädlich
  * @version 1.0 - 16.12.2011 13:39:41
  */
-public class JS498OrderIT extends SchedulerTest {
+public class JS498RhinoOrderIT extends SchedulerTest {
 
-    private static final String jobchain = "chain_rhino";
+    private static final String jobchain = "chain";
 
     private final CommandBuilder util = new CommandBuilder();
     private HashMap<String,String> resultMap;
 
     @Test
     public void test() throws IOException {
-        //controller().activateScheduler("-e","-ignore-process-classes","-log-level=info","-log=" + logFile);
+        // controller().activateScheduler("-e","-log-level=info");
         controller().activateScheduler();
         File resultFile = prepareResultFile();
         controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
         controller().waitForTermination(shortTimeout);
         resultMap = getResultMap(resultFile);
-        checkJobRhinoObjects();
-        checkJobRhinoFunctions();
+        checkJobObjects();
+        checkJobFunctions();
     }
 
     private File prepareResultFile() {
@@ -71,21 +71,15 @@ public class JS498OrderIT extends SchedulerTest {
         controller().terminateScheduler();
     }
 
-    private void checkJobRhinoObjects() {
+    private void checkJobObjects() {
         assertObject("spooler.variables.count", "2");
-        assertObject("spooler_task.order.job_chain.name", "chain_rhino");
+        assertObject("spooler_task.order.job_chain.name", "chain");
         assertObject("spooler_task.params.names", "taskparam1;taskparam2");
         assertObject("spooler_job.order_queue.length", "1");
-        assertObject("spooler_task.order.id", "chain_rhino");
+        assertObject("spooler_task.order.id", "chain");
     }
 
-    // result of job rhino_objects
-    private void testObjectsJob() {
-        assertObject("spooler.variables.count", "2");
-        assertObject("spooler_task.params.names", "taskparam1;taskparam2");
-    }
-
-    private void checkJobRhinoFunctions() {
+    private void checkJobFunctions() {
         assertFunction("spooler_init");
         assertFunction("spooler_open");
         assertFunction("spooler_process");

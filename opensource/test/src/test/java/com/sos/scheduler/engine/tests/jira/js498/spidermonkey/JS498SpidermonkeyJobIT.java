@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js498;
+package com.sos.scheduler.engine.tests.jira.js498.spidermonkey;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
@@ -19,9 +19,13 @@ import static org.junit.Assert.assertTrue;
 /**
  * This is a test for scripting with the Rhino engine. The test starts different standalone jobs.
  */
-public final class JS498JobIT extends SchedulerTest {
+public final class JS498SpidermonkeyJobIT extends SchedulerTest {
 
-    private static final ImmutableList<String> jobs = ImmutableList.of("script_only", "rhino_objects_noorder", "rhino_functions_noorder");
+    private static final ImmutableList<String> jobs = ImmutableList.of(
+            "script_only",
+            "objects_noorder",
+            "functions_noorder"
+    );
 
     private final CommandBuilder util = new CommandBuilder();
     private HashMap<String,String> resultMap;
@@ -38,8 +42,8 @@ public final class JS498JobIT extends SchedulerTest {
         controller().waitForTermination(shortTimeout);
         resultMap = getResultMap(resultFile);
         checkScriptOnlyJob();
-        checkRhinoObjectsJob();
-        testRhinoFunctionsJob();
+        checkObjectsJob();
+        checkFunctionsJob();
     }
 
     private File prepareResultFile() {
@@ -72,12 +76,13 @@ public final class JS498JobIT extends SchedulerTest {
         assertObject("script_only", "script_only");
     }
 
-    private void checkRhinoObjectsJob() {
+    private void checkObjectsJob() {
         assertObject("spooler.variables.count", "2");
         assertObject("spooler_task.params.names", "taskparam1;taskparam2");
+        assertObject("spooler_job.name", "objects_noorder");
     }
 
-    private void testRhinoFunctionsJob() {
+    private void checkFunctionsJob() {
         assertObject("spooler_init","1");
         assertObject("spooler_open","1");
         assertObject("spooler_process","1");
