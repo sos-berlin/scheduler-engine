@@ -91,21 +91,21 @@ public class OrderBean implements Bean<Order> {
         return delegate.xml();
     }
 
-//    public Web_serviceBean getWeb_service() {
-//        return delegate.web_service().toBean();
-//    }
-//
-//    public Web_serviceBean getWeb_service_or_null() {
-//        return toBean(delegate.web_service_or_null());
-//    }
-//
-//    public Web_service_operationBean getWeb_service_operation() {
-//        return toBean(delegate.web_service_operation());
-//    }
-//
-//    public Web_service_operationBean getWeb_service_operation_or_null() {
-//        return toBean(delegate.web_service_operation_or_null());
-//    }
+    public Web_serviceBean getWeb_service() {
+        return delegate.web_service().toBean();
+    }
+
+    public Web_serviceBean getWeb_service_or_null() {
+        return toBean(delegate.web_service_or_null());
+    }
+
+    public Web_service_operationBean getWeb_service_operation() {
+        return toBean(delegate.web_service_operation());
+    }
+
+    public Web_service_operationBean getWeb_service_operation_or_null() {
+        return toBean(delegate.web_service_operation_or_null());
+    }
 
     public void setXml_payload(String xml) {
         delegate.set_xml_payload(xml);

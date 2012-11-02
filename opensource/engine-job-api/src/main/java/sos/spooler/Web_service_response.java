@@ -9,7 +9,7 @@ package sos.spooler;
 
 
 
-public class Web_service_response  extends Idispatch
+public class Web_service_response extends Idispatch implements HasBean<Web_service_responseBean>
 {
     private                 Web_service_response    ( long idispatch )             { super(idispatch); }
 
@@ -22,4 +22,9 @@ public class Web_service_response  extends Idispatch
     public void         set_string_content          ( String content )             {                   com_call( ">string_content", content ); }
     public void         set_binary_content          ( byte[] content )             {                   com_call( ">binary_content", content ); }
     public void              send                   ()                             {                   com_call( "send"         ); }
+
+    @Override
+    public Web_service_responseBean toBean() {
+        return new Web_service_responseBean(this);
+    }
 }

@@ -9,7 +9,7 @@ package sos.spooler;
 
 
 
-public class Web_service  extends Idispatch
+public class Web_service extends Idispatch implements HasBean<Web_serviceBean>
 {
     private                 Web_service         ( long idispatch )                  { super(idispatch); }
 
@@ -17,4 +17,9 @@ public class Web_service  extends Idispatch
     public String           name                ()                                  { return (String)   com_call( "<name" ); }
     public String           forward_xslt_stylesheet_path()                          { return (String)   com_call( "<forward_xslt_stylesheet_path" ); }
     public Variable_set     params              ()                                  { return (Variable_set)com_call( "<params" ); }
+
+    @Override
+    public Web_serviceBean toBean() {
+        return new Web_serviceBean(this);
+    }
 }

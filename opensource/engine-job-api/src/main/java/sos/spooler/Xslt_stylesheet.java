@@ -8,7 +8,7 @@ package sos.spooler;
  * @version $Revision: 3699 $
  */
 
-public class Xslt_stylesheet  extends Idispatch
+public class Xslt_stylesheet extends Idispatch implements HasBean<Xslt_stylesheetBean>
 {
     private                 Xslt_stylesheet     ( long idispatch )                  { super(idispatch); }
 
@@ -27,5 +27,11 @@ public class Xslt_stylesheet  extends Idispatch
     /*+ Wendet das Stylesheet auf den XML-String an.
       * @return Das transformierte XML-Dokument
       */
-    public String           apply_xml           ( String xml )                      { return (String)com_call( "apply_xml", xml ); }    
+    public String           apply_xml           ( String xml )                      { return (String)com_call( "apply_xml", xml ); }
+
+    @Override
+    public Xslt_stylesheetBean toBean() {
+        return new Xslt_stylesheetBean(this);
+    }
+
 }

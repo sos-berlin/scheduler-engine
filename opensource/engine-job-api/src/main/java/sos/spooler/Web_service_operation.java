@@ -9,7 +9,7 @@ package sos.spooler;
 
 
 
-public class Web_service_operation  extends Idispatch
+public class Web_service_operation extends Idispatch implements HasBean<Web_service_operationBean>
 {
     private                     Web_service_operation   ( long idispatch )          { super(idispatch); }
 
@@ -17,4 +17,9 @@ public class Web_service_operation  extends Idispatch
     public Web_service          web_service             ()                          { return (Web_service         )   com_call( "<web_service" ); }
     public Web_service_request  request                 ()                          { return (Web_service_request )   com_call( "<request"     ); }
     public Web_service_response response                ()                          { return (Web_service_response)   com_call( "<response"    ); }
+
+    @Override
+    public Web_service_operationBean toBean() {
+        return new Web_service_operationBean(this);
+    }
 }

@@ -114,13 +114,13 @@ public final class TaskBean implements Bean<Task> {
         return toBean(delegate.create_subprocess(filenameAndArguments));
     }
 
-//    public Web_serviceBean getWeb_service() {
-//        return toBean(delegate.web_service());
-//    }
-//
-//    public Web_serviceBean getWeb_service_or_null() {
-//        return toBean(delegate.web_service_or_null());
-//    }
+    public Web_serviceBean getWeb_service() {
+        return toBean(delegate.web_service());
+    }
+
+    public Web_serviceBean getWeb_service_or_null() {
+        return toBean(delegate.web_service_or_null());
+    }
 
     public void setPriority(int o) {
         delegate.set_priority(o);

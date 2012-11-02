@@ -154,17 +154,17 @@ public final class SpoolerBean implements Bean<Spooler> {
         return delegate.udp_port();
     }
 
-//    public Xslt_stylesheetBean create_xslt_stylesheet() {
-//        return delegate.create_xslt_stylesheet().toBean();
-//    }
-//
-//    public Xslt_stylesheetBean create_xslt_stylesheet(File file) {
-//        return delegate.create_xslt_stylesheet(file).toBean();
-//    }
-//
-//    public Xslt_stylesheetBean create_xslt_stylesheet(String xml) {
-//        return delegate.create_xslt_stylesheet(xml).toBean();
-//    }
+    public Xslt_stylesheetBean create_xslt_stylesheet() {
+        return delegate.create_xslt_stylesheet().toBean();
+    }
+
+    public Xslt_stylesheetBean create_xslt_stylesheet(java.io.File file) {
+        return delegate.create_xslt_stylesheet(file).toBean();
+    }
+
+    public Xslt_stylesheetBean create_xslt_stylesheet(String xml) {
+        return delegate.create_xslt_stylesheet(xml).toBean();
+    }
 
     public LocksBean getLocks() {
         return toBean(delegate.locks());
