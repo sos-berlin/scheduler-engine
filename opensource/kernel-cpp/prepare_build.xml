@@ -8,23 +8,20 @@ This buildfile is for generating some resource files for the JS.
 scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_categories.xml
 <li>register_data.xml with a lot of keywords collected from different xml documentation files</li>
 <li>copy scheduler.xsd to the xml documentation folders</li>
-
-\version 1.0
-\date 2011-09-22
 -->
 <project name="com.sos.scheduler.build" basedir=".">
 
   <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${env.USERPROFILE}/.m2/repository/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
-  
-  <property name="script.root"        value="${basedir}/src/main/scripts" />
+
+  <propertyregex property="base" override="true" global="true" input="${basedir}" regexp="\\" replace="/" defaultValue="${basedir}" />  
+  <property name="script.root" value="${base}/src/main/scripts" />
   <property name="perl.embeddedfiles" value="${script.root}/files_to_c++.pl" />
   <property name="perl.copy"          value="${script.root}/copy_file_if_changed.pl" />
   <property name="xslt.messages"      value="${script.root}/messages_to_c++.xslt" />
   
-  <propertyregex property="base" override="true" global="true" input="${basedir}" regexp="\\" replace="/" />  
-  <property name="work.dir" value="${basedir}/scheduler" />
-  <property name="generated.dir" value="${basedir}/target/generated" />
-	<property name="dependency.dir" value="${basedir}/target/dependency" />
+  <property name="work.dir" value="${base}/scheduler" />
+  <property name="generated.dir" value="${base}/target/generated" />
+	<property name="dependency.dir" value="${base}/target/dependency" />
 	<property name="doc.dir" value="${dependency.dir}/com/sos/scheduler/enginedoc/common" />
 
   <property name="scheduler.schema" value="scheduler.xsd" />
@@ -41,7 +38,7 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
   <target name="prepare"
           description="prepare the build"
   >
-    <echo>base=${basedir}</echo>
+    <echo>base=${base}</echo>
     <mkdir dir="${generated.dir}" />
 		<unzip dest="${dependency.dir}">
 	    <fileset dir="${dependency.dir}">
@@ -111,7 +108,7 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
        <classpath location="${settings.localRepository}/net/sf/saxon/saxon/8.7/saxon-8.7.jar" />
     </xslt>
 
-    <macro_copy sourcefile="${generated.dir}/${targetfile}.${targetext}" targetfile="${basedir}/${project}/${targetfile}.${targetext}" />
+    <macro_copy sourcefile="${generated.dir}/${targetfile}.${targetext}" targetfile="${base}/${project}/${targetfile}.${targetext}" />
 
   </target>
   
