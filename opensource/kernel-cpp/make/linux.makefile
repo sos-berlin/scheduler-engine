@@ -5,6 +5,7 @@ include $(PROD_DIR)/make/gnu.makefile
 
 ifeq ($(cpuArchitecture),x86)
 CFLAGS += -m32
+CFLAGS += -D_FILE_OFFSET_BITS=64
 LINK_FLAGS += -m32
 else
 CFLAGS += -m64
