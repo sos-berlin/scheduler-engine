@@ -14,6 +14,7 @@ COPTIMIZE += -O2
 #COPTIMIZE += -Wuninitialized
 
 CFLAGS += -m32
+CFLAGS += -D_FILE_OFFSET_BITS=64
 #CFLAGS += -fPIC
 
 # MAKE_UBUNTU setzen
