@@ -64,18 +64,10 @@ to run without maven integration.
   	<fileset dir="${source.dir}" id="spooler.lib">
   		<include name="com.sos.scheduler.engine-${version.number}*.jar"/>
   	</fileset>
-  	<!--
-  	<fileset dir="${source.dir}" id="files.lib">
-  		<include name="web-${version.number}*.jar"/>
-  		<include name="data-${version.number}*.jar"/>
-  		<include name="engine-common-${version.number}*.jar"/>
-  		<include name="engine-job-api-${version.number}*.jar"/>
-  		<include name="engine-persistence-${version.number}*.jar"/>
+  	
+  	<fileset dir="${source.dir}" id="doc.jar">
+  		<include name="com.sos.scheduler.enginedoc*.jar"/>
   	</fileset>
-  	<fileset dir="${source.dir}" id="plugins.lib">
-  		<include name="jetty-${version.number}*.jar"/>
-  	</fileset>
-  	-->
   	
   	<fileset dir="${source.dir}" id="files.jar">
   		<include name="guava*.jar"/>
@@ -122,24 +114,12 @@ to run without maven integration.
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="spooler.lib" />
 		</copy>
-		<!--
-		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="spooler.lib" />
-		  <mapper type="regexp" from="^jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
-		</copy>
-		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="files.lib" />
-		  <mapper type="regexp" from="^(.*)\.jar$" to="com.sos.scheduler.engine.\1.jar"/>
-		</copy>
-		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="plugins.lib" />
-		  <mapper type="regexp" from="^(.*)\.jar$" to="com.sos.scheduler.engine.plugins.\1.jar"/>
-		</copy>
-		-->
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="files.jar" />
 		</copy>
-		
+		<copy todir="${target.dir}/scheduler/doc">
+			<fileset refid="doc.jar" />
+		</copy>
 	</target>
 		
 	<target name="-copy.platform" description="copy the platform specific files" if="folder.name">
@@ -152,33 +132,6 @@ to run without maven integration.
 		<copy todir="${target.dir}/scheduler.${folder.name}/bin">
 			<fileset refid="files.bin.platform" />
 		</copy>
-
-    <!-- for compatibility reasons the old output directories scheduler.linux32 and scheduler.windows will be
-    created anymore. The code below should be deleted appr. 1/2013.
-    <if>
-     <equals arg1="${setup.platform}" arg2="linux-x86" />
-     <then>
-    		<copy todir="${target.dir}/scheduler.linux32/lib">
-    			<fileset refid="files.lib.platform" />
-    		</copy>
-    		<copy todir="${target.dir}/scheduler.linux32/bin">
-    			<fileset refid="files.bin.platform" />
-    		</copy>
-     </then>
-    </if>
-
-    <if>
-     <equals arg1="${setup.platform}" arg2="windows-x86" />
-     <then>
-    		<copy todir="${target.dir}/scheduler.windows/lib">
-    			<fileset refid="files.lib.platform" />
-    		</copy>
-    		<copy todir="${target.dir}/scheduler.windows/bin">
-    			<fileset refid="files.bin.platform" />
-    		</copy>
-     </then>
-    </if>
-    --> 
 
   </target>
 	
