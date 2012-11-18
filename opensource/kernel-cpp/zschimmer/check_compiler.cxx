@@ -89,7 +89,6 @@ bool check_compiler( ostream* log )
     }
 #   endif
 
-
 #   ifdef __GNUC__
         *log << "Compiler GNU gcc " << __GNUC__ << '.' << __GNUC_MINOR__ << '.' << __GNUC_PATCHLEVEL__;
 #   endif
@@ -98,7 +97,8 @@ bool check_compiler( ostream* log )
         *log << "Compiler Microsoft Visual C++ " <<  ( _MSC_VER - 600 ) / 100 << '.' << ( _MSC_VER % 100 ) << "  (" <<_MSC_VER << ")";
 #   endif
 
-    *log << ", " __DATE__ << "\n";
+    *log << ", " __DATE__;
+    *log << ", " << (8 * sizeof (void*)) << "bit\n";
 
     *log << "get_temp_path() => " << file::get_temp_path() << "\n";
 
