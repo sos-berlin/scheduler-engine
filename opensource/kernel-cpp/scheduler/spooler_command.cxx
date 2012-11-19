@@ -1771,7 +1771,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                                 if( e.nodeName_is( "log" ) )
                                 {
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Task und Log anlegen
-                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.nodeValue(), "text/plain; charset=" + scheduler_character_encoding ) ), base_url, title ) ) );
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.text(), "text/plain; charset=" + scheduler_character_encoding ) ), base_url, title ) ) );
                                     return;
                                 }
                             }

@@ -67,17 +67,6 @@ xml::Element_ptr single_element( const xml::Element_ptr& element, const string& 
         z::throw_xc( "SOS-1422", name );
 }
 
-//-----------------------------------------------------------------------------------single_element
-
-string optional_single_element_as_text( const xml::Element_ptr& element, const string& name )
-{
-    if (xml::Element_ptr result = optional_single_element( element, name )) {
-        if (xml::Element_ptr text_element = result.firstChild())
-            return text_element.nodeValue();
-    }    
-    return empty_string;
-}
-
 //-----------------------------------------------------------------------------Spooler::load_config
 
 void Spooler::load_config( const xml::Element_ptr& config_element, const string& source_filename, bool is_base )
