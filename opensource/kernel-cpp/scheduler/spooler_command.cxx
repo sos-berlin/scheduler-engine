@@ -1706,7 +1706,7 @@ string xml_as_string( const xml::Document_ptr& document, const string& indent_st
     try 
     {
         result = document.xml( "ASCII", indent_string );
-        if( indent_string != "" )  result = replace_regex( result, "\n", "\r\n" );      // F�r Windows-telnet
+        if( indent_string != "" && result.find('\r') == string::npos)  result = replace_regex( result, "\n", "\r\n" );      // F�r Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }

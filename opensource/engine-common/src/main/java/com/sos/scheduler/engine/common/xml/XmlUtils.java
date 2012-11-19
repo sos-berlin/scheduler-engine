@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -26,7 +27,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
-import static javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION;
+import static javax.xml.transform.OutputKeys.*;
 import static org.w3c.dom.Node.DOCUMENT_NODE;
 
 @ForCpp
@@ -65,11 +66,12 @@ public final class XmlUtils {
      }
 
     @ForCpp public static byte[] toXmlBytes(Node n, String encoding, boolean indent) {
-        //TODO indent berücksichtigen
-        return toXml(n).getBytes(Charset.forName(encoding));
+        ByteArrayOutputStream o = new ByteArrayOutputStream();
+        writeXmlTo(n, o, Charset.forName(encoding), indent);
+        return o.toByteArray();
     }
 
-    @ForCpp public static String toXml(Node n) {
+    public static String toXml(Node n) {
         StringWriter w = new StringWriter();
         writeXmlTo(n, w);
         String result = w.toString();
@@ -81,12 +83,25 @@ public final class XmlUtils {
         return xml.startsWith("<?")? xml.replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "") : xml;
     }
 
-    @ForCpp public static void writeXmlTo(Node n, Writer w) {
+    public static void writeXmlTo(Node n, OutputStream o, Charset encoding, boolean indent) {
+        writeXmlTo(n, new StreamResult(o), encoding, indent);
+    }
+
+    public static void writeXmlTo(Node n, Writer w) {
+        writeXmlTo(n, new StreamResult(w), null, false);
+    }
+
+    private static void writeXmlTo(Node n, Result r, @Nullable Charset encoding, boolean indent) {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            if (n.getNodeType() == DOCUMENT_NODE)
-                transformer.setOutputProperty(OMIT_XML_DECLARATION, "no");   //TODO Funktioniert nur mit org.jdom?
-            transformer.transform(new DOMSource(n), new StreamResult(w));
+            if (encoding != null)
+                transformer.setOutputProperty(ENCODING, encoding.name());
+            transformer.setOutputProperty(OMIT_XML_DECLARATION, n.getNodeType() == DOCUMENT_NODE? "no" : "yes");   //TODO Funktioniert nur mit org.jdom?
+            if (indent) {
+                transformer.setOutputProperty(INDENT, "yes");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            }
+            transformer.transform(new DOMSource(n), r);
         } catch (TransformerException x) { throw new XmlException(x); }
     }
 

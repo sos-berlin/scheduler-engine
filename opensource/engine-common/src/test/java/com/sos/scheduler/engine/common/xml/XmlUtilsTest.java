@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 
+import static com.google.common.base.Charsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -17,8 +18,27 @@ public final class XmlUtilsTest {
         assertThat(result.getDocumentElement().getNodeName(), equalTo("a"));
     }
 
+    @Test public void testToXmlBytes() {
+        String xml = "<a b=\"B\">Ä</a>";
+        Document doc = XmlUtils.loadXml(xml);
+        byte[] result = XmlUtils.toXmlBytes(doc, "ASCII", false);
+        String resultString = new String(result, US_ASCII);
+        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\" standalone=\"no\"?>" +  // Warum steht hier standalone?
+                "<a b=\"B\">&#196;</a>"));
+    }
+
+    @Test public void testToXmlBytesIndented() {
+        String xml = "<a><b>B</b></a>";
+        Document doc = XmlUtils.loadXml(xml);
+        byte[] result = XmlUtils.toXmlBytes(doc, "ASCII", true);
+        String resultString = new String(result, US_ASCII);
+        String nl = System.getProperty("line.separator");
+        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\" standalone=\"no\"?>" +
+                nl + "<a>"+nl+"    <b>B</b>"+nl+"</a>"+nl));
+    }
+
     @Test public void testToXml() {
-        String xml = "<a b=\"B\">A</a>";
+        String xml = "<a b=\"B\">Ä</a>";
         Document doc = XmlUtils.loadXml(xml);
         String result = XmlUtils.toXml(doc.getDocumentElement());
         assertThat(result, equalTo(xml));

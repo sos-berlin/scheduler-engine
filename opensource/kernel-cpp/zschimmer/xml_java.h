@@ -34,7 +34,7 @@ typedef ::javaproxy::org::w3c::dom::Text TextJ;
 
 //-------------------------------------------------------------------------------------------------
 
-const string                    default_character_encoding        = "ISO-8859-1";     // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
+const string                    default_character_encoding        = "ASCII";    // Damit sind wir auf der sicheren Seite
 
 //-------------------------------------------------------------------------------------------------
 

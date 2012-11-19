@@ -384,12 +384,7 @@ string Simple_node_ptr::xml_without_prolog( const string& encoding, bool indente
 
 string Simple_node_ptr::xml( const string& encoding, bool indented ) const
 { 
-    return XmlUtilsJ::toXml(_nodeJ);
-    //if( encoding != ""  &&  lcase(encoding) != "utf-8"  &&  result.length() > 5  &&  strnicmp( result.data(), "<?xml", 5 ) != 0 )
-    //{
-    //    return "<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>" + ( indented? "\n" : "" ) + result;
-    //}
-    //return result;
+    return XmlUtilsJ::toXmlBytes(Simple_node_ptr::ref(), encoding, indented);
 }
 
 //--------------------------------------------------------------------Simple_node_ptr::select_nodes
