@@ -283,7 +283,7 @@ void Time::set( const string& t )
         double fraction = cut_fraction( &my_t );
 
         Sos_optional_date_time dt;
-        dt.set_time( my_t);
+        dt.assign( my_t);
         set( dt.time_as_double() + fraction );
     }
 }
