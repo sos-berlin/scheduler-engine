@@ -96,7 +96,7 @@
             </AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <AssemblerOutput>All</AssemblerOutput>
-      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformation>false</BrowseInformation>
     </ClCompile>
     <Lib>
       <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
@@ -116,7 +116,7 @@
             </AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <AssemblerOutput>All</AssemblerOutput>
-      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformation>false</BrowseInformation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
