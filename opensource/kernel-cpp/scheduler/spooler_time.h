@@ -169,7 +169,6 @@ public:
 
   private:
     double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
-    bool                       _is_utc;
 
   public:
     static const Time           never;

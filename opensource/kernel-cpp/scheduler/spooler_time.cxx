@@ -271,7 +271,6 @@ Time Time::of_date_time_with_now( const string& time_string, const string& time_
 void Time::set( double t )
 {
     _time = round(t);
-    _is_utc = true; //t == 0 || t == never_double;
 
     if( _time > never_double )  assert( !"time > never" ),  _time = never_double;
 
@@ -294,16 +293,7 @@ int Time::month_nr() const
 
 int Time::compare(const Time& o) const 
 {
-    if (_is_utc == o._is_utc || 
-        is_zero() || 
-        is_never() ||
-        o.is_zero() || 
-        o.is_never()) {
-            return _time < o._time? -1 : _time > o._time? +1 : 0;
-    } else {
-        assert(!"INVALID-TIME-COMPARISON");
-        throw_xc("INVALID-TIME-COMPARISON", as_string(with_ms), o.as_string(with_ms));
-    }
+    return _time < o._time? -1 : _time > o._time? +1 : 0;
 }
 
 //----------------------------------------------------------------------------------Time::as_double
@@ -317,7 +307,6 @@ double Time::as_double() const
 
 double Time::as_double_or_never() const
 {
-    if (!_is_utc && !is_zero() && !is_never()) throw_xc("NO-UTC-TIME", as_string());
     return _time;
 }
 
@@ -325,7 +314,6 @@ double Time::as_double_or_never() const
 
 double Time::as_utc_double() const
 {
-    if (!_is_utc && !is_zero() && !is_never()) throw_xc("NO-UTC-TIME", as_string());
     return _time;
 }
 
@@ -334,8 +322,6 @@ double Time::as_utc_double() const
 Time& Time::set_utc( double t )
 {
     set( t );
-    //if( !is_zero()  &&  !is_never() )  
-    _is_utc = true;
     return *this;
 }
 
