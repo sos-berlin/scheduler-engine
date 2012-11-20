@@ -86,9 +86,6 @@ struct Time
 #endif
                                 Time                        ( time_t t, Is_utc )            { set_utc((double)t); }
     explicit                    Time                        ( int t )                       { set((double)t); }
-                              //Time                        ( uint t )                      { set((double)t); }
-    explicit                    Time                        ( const string& t )             { set(t); }
-    explicit                    Time                        ( const char* t   )             { set(t); }
     explicit                    Time                        ( const Sos_optional_date_time& dt ) { set_date_time(dt); }
 
     void                        operator +=                 (const Duration&);
@@ -139,7 +136,6 @@ public:
 #endif
     void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
-    void                        set                         ( const string& );
     Time&                       set_utc                     ( double );
     Time&                       set_utc                     ( time_t t )                    { set_utc( (double)t );  return *this; } // JS-457
     double                      as_double                   () const;

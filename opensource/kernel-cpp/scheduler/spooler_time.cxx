@@ -268,28 +268,6 @@ Time Time::of_date_time_with_now( const string& time_string, const string& time_
 
 //----------------------------------------------------------------------------------------Time::set
 
-void Time::set( const string& t )
-{
-    _is_utc = true;
-
-    if( t == never_name )
-    {
-        *this = Time::never;
-    }
-    else
-    {
-        string my_t = t;
-
-        double fraction = cut_fraction( &my_t );
-
-        Sos_optional_date_time dt;
-        dt.assign( my_t);
-        set( dt.time_as_double() + fraction );
-    }
-}
-
-//----------------------------------------------------------------------------------------Time::set
-
 void Time::set( double t )
 {
     _time = round(t);

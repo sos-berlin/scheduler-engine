@@ -1905,8 +1905,8 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
             task_element.setAttribute( "id"              , task_id );
             //task_element.setAttribute( "state"           , state_name() );
 
-            task_element.setAttribute( "start_time"      , Time(record.as_string("START_TIME")).xml_value(time::without_ms));      // Gibt es nicht in Task::dom_element()
-            task_element.setAttribute( "end_time"        , Time(record.as_string("END_TIME")).xml_value(time::without_ms));        // Gibt es nicht in Task::dom_element()
+            task_element.setAttribute( "start_time"      , Time::of_utc_date_time(record.as_string("START_TIME")).xml_value(time::without_ms));      // Gibt es nicht in Task::dom_element()
+            task_element.setAttribute( "end_time"        , Time::of_utc_date_time(record.as_string("END_TIME")).xml_value(time::without_ms));        // Gibt es nicht in Task::dom_element()
 
             task_element.setAttribute( "cause"           , record.as_string( "CAUSE" ) );
 
@@ -2217,6 +2217,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 if( use_task_schema  &&  name == "error_code" )  error_code = value;
                                 else
                                 if( use_task_schema  &&  name == "error_text" )  error_text = value;
+                                else
+                                if (name == "start_time" || name == "end_time")  history_entry.setAttribute(name, Time::of_utc_date_time(value).xml_value());
                                 else
                                 {
                                     history_entry.setAttribute( name, value );
