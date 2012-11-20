@@ -87,7 +87,7 @@ XS( XS_Zschimmer_destroy )
 
         if( !SvIOK(ST(0)) )  throw_xc( "Z-PERL-100", Z_PERL_IDISPATCH_PACKAGE_NAME "::__destroy()  First argument should be an integer" );
 
-        IDispatch* idispatch = (IDispatch*)(int)SvIV(ST(0));
+        IDispatch* idispatch = (IDispatch*)(int64)SvIV(ST(0));
 
         if( idispatch )  
         {
@@ -124,7 +124,7 @@ XS( XS_Zschimmer_resolve_name )
         if( !SvIOK(ST(0)) )  throw_xc( "Z-PERL-100", Z_PERL_IDISPATCH_PACKAGE_NAME "::__resolve_name()  First argument should be an integer" );
         if( !SvPOK(ST(1)) )  throw_xc( "Z-PERL-100", Z_PERL_IDISPATCH_PACKAGE_NAME "::__resolve_name()  Second argument should be a string" );
 
-        IActiveScriptSite* site = (IActiveScriptSite*)(int)SvIV(ST(0));
+        IActiveScriptSite* site = (IActiveScriptSite*)(int64)SvIV(ST(0));
         Bstr name_bstr;
         name_bstr.attach( bstr_from_pv( ST(1) ) );
 
@@ -134,7 +134,7 @@ XS( XS_Zschimmer_resolve_name )
         {
             int RETVAL;
             dXSTARG;
-            RETVAL = (int)result;
+            RETVAL = (int64)result;
             XSprePUSH; PUSHi((IV)RETVAL);
         }
     }
@@ -269,15 +269,15 @@ XS( XS_Zschimmer_call )
 
         if( !SvIOK(ST(0)) || !SvIOK(ST(1)) )  throw_xc( "Z-PERL-100", "Usage: " Z_PERL_IDISPATCH_PACKAGE_NAME "::__call( idispatch, flags, method, parameter, ... )" );
 
-        IDispatch* idispatch = (IDispatch*)(int)SvIV(ST(0));
+        IDispatch* idispatch = (IDispatch*)(int64)SvIV(ST(0));
 
         if( !idispatch )  throw_xc( "Z-PERL-100", "NULL-Pointer" );
 
-        int flags = (int)SvIV(ST(1));   // DISPATCH_METHOD, DISPATCH_PROPERTYPUT etc.
+        int flags = (int64)SvIV(ST(1));   // DISPATCH_METHOD, DISPATCH_PROPERTYPUT etc.
 
         if( SvIOK(ST(2)) )
         {
-            dispid = (int)SvIV(ST(2));
+            dispid = (int64)SvIV(ST(2));
         }
         else
         if( SvPOK(ST(2)) )  
@@ -324,7 +324,7 @@ XS( XS_Zschimmer_call )
                                 param_text << "reference to ";
                             }
                             
-                            param_text << "UNKNOWN TYPE CODE " << (int)SvTYPE( sv ) << "**";
+                            param_text << "UNKNOWN TYPE CODE " << (int64)SvTYPE( sv ) << "**";
                         }
                     }
                     catch( exception& x ) { param_text << x.what(); }
@@ -377,7 +377,7 @@ XS( XS_Zschimmer_call )
 
                 if( idispatch )
                 {
-                    string expression = "new " Z_PERL_IDISPATCH_PACKAGE_NAME "(" + as_string( (int)idispatch ) + ")";
+                    string expression = "new " Z_PERL_IDISPATCH_PACKAGE_NAME "(" + as_string( (int64)idispatch ) + ")";
                     sv_result = eval_pv( expression.c_str(), TRUE );
                     result_type = rt_sv;
 
