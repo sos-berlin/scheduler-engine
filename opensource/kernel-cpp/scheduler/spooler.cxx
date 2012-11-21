@@ -3823,6 +3823,25 @@ int object_server( int argc, char** argv )
 
 } //namespace scheduler
 
+//-----------------------------------------------------------------------redirect_stdout_and_stderr
+#ifdef Z_WINDOWS
+
+static void redirect_stdout_and_stderr() 
+{
+    // -cd sollte aufgerufen sein! Sonst landen die Dateien in c:\windwows\system32
+    #ifdef Z_DEBUG  // Erstmal nur Debug, solange -log-dir nicht schon beim Start bekannt ist.
+        if (windows::Handle stdout_file = CreateFile("stdout.log", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
+            SetStdHandle(STD_OUTPUT_HANDLE, stdout_file);
+            stdout_file.take();
+        }
+        if (windows::Handle stderr_file = CreateFile("stderr.log", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
+            SetStdHandle(STD_ERROR_HANDLE, stderr_file);
+            stderr_file.take();
+        }
+    #endif
+}
+
+#endif
 //-------------------------------------------------------------------------------------spooler_main
 
 int spooler_main( int argc, char** argv, const string& parameter_line, jobject java_main_context )
@@ -4048,6 +4067,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             // xsd_schema_content = sos::scheduler::file::xsd_from_file(use_external_schema);
             Z_LOG2( "scheduler", xsd_schema_content << "\n" );
         }
+
+        Z_WINDOWS_ONLY(if (is_service) redirect_stdout_and_stderr();) 
 
         if( is_scheduler_client )
         {

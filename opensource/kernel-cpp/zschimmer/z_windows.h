@@ -118,6 +118,7 @@ struct Handle
     virtual void                close                       ()                                      { close_handle(); }
     virtual void                close_handle                ();
     void                        convert_to_noninheritable    ();
+    HANDLE                      take                        ()                                      { HANDLE h = _handle; _handle = NULL; return h; }
 
     HANDLE                     _handle;
 
