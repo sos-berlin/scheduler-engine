@@ -3845,7 +3845,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
   //set_log_category_default ( "scheduler.file_order", true );
   //set_log_category_default ( "scheduler.cluster"   , true );      
 
-
     int     ret                = 0;
     bool    is_service         = false;
     bool    is_object_server   = false;
@@ -3935,8 +3934,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             else
             if( opt.with_value( "kill"             ) )  kill_pid = opt.as_int();
             else
-            if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if (chdir(dir.c_str())) throw_errno(errno, "chdir", dir.c_str()); }
-            else
 #ifdef Z_WINDOWS
             if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
             else
@@ -3964,7 +3961,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
             else
             {
+                // Hier Optionen, die für install-service relevant sind.
                 if( opt.with_value( "sos.ini"          ) )  ;  //schon in sos_main0() geschehen.  set_sos_ini_filename( opt.value() );
+                else
+                if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if (chdir(dir.c_str())) throw_errno(errno, "chdir", dir.c_str()); }
                 else
                 if( opt.with_value( "id"               ) )  id = opt.value();
                 else
