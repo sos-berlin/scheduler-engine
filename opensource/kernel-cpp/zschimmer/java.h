@@ -72,7 +72,7 @@ struct Env
     Vm*                         get_vm                      ();
 
     Z_NORETURN void             throw_java                  ( const string&, const string& = "" );
-    void                        log_stack_trace             (jthrowable);
+    string                      stack_trace_as_string       (jthrowable);
 
     string                      string_from_jstring         ( const jstring& );
     jstring                     jstring_from_string         ( const char*, int length );
@@ -503,6 +503,7 @@ struct Vm : Object              // Java virtual machine
         global_jobject<jclass> _java_lang_runtimeexception_class;
         global_jobject<jclass> _java_lang_nullpointerexception_class;
         global_jobject<jclass> _java_util_date_class;
+        global_jobject<jclass> _guava_throwables_class;
 
         jmethodID              _java_lang_short_constructor_id;
         jmethodID              _java_lang_integer_constructor_id;
@@ -512,6 +513,7 @@ struct Vm : Object              // Java virtual machine
         jmethodID              _java_lang_boolean_constructor_id;
         jmethodID              _java_lang_byte_constructor_id;
         jmethodID              _java_util_date_constructor_id;
+        jmethodID              _guava_throwables_getStackTraceAsString_method_id;
     };
 
                                 Vm                          ( bool do_start = true );

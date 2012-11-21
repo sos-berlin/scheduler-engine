@@ -462,7 +462,10 @@ void Vm::start()
 
     if( _debug )  set_log_category( "java", true );
             else  _debug = log_category_is_set( "java" );
-    set_log_category_default("java.log", true);
+    if (_debug) {
+        set_log_category_default("java.log", true);
+        set_log_category_default("java.stackTrace", true);
+    }
 
     if (_debug || Memory_allocator::debug_memory())
         _jobject_debug_register = Z_NEW(Jobject_debug_register);
@@ -788,6 +791,9 @@ void Vm::Standard_classes::load( JNIEnv* jenv )
     _java_lang_boolean_constructor_id = env->GetMethodID( _java_lang_boolean_class, "<init>", "(Z)V" );
     _java_lang_byte_constructor_id    = env->GetMethodID( _java_lang_byte_class   , "<init>", "(B)V" );
     _java_util_date_constructor_id    = env->GetMethodID( _java_util_date_class   , "<init>", "(J)V" );
+
+    _guava_throwables_class = env.find_class("com/google/common/base/Throwables");
+    _guava_throwables_getStackTraceAsString_method_id = env.get_static_method_id(_guava_throwables_class, "getStackTraceAsString", "(Ljava/lang/Throwable;)Ljava/lang/String;");
 }
 
 //-----------------------------------------------------------Vm::Standard_classes::Standard_classes
@@ -1168,9 +1174,6 @@ void Env::throw_java( const string& text1, const string& text2 )
         jthrowable x = jenv->ExceptionOccurred();
         if( x )
         {
-            if (log_category_is_set("java.stackTrace")) 
-                _jni_env->ExceptionDescribe();  // Provisorisch, schreibt nach stderr
-
             Z_LOG2( Vm::java_log_category, "Vm::static_vm=" << (void*)Vm::static_vm << "  _debug=" << ( Vm::static_vm? Vm::static_vm->_debug : false ) << "\n" );
             if( Vm::static_vm && Vm::static_vm->_debug )  { Z_LOG2( Vm::java_log_category, "jenv->ExceptionDescribe()\n" ); jenv->ExceptionDescribe(); }     // Ausgabe �ber java_vfprintf()
             jenv->ExceptionClear();
@@ -1217,7 +1220,7 @@ void Env::throw_java( const string& text1, const string& text2 )
                 jenv->DeleteLocalRef( c );
             }
 
-            log_stack_trace(x);
+            Z_LOG2("java.stackTrace", stack_trace_as_string(x) << "\n");
             if( x )  jenv->DeleteLocalRef( x );
         }
     }
@@ -1232,14 +1235,17 @@ void Env::throw_java( const string& text1, const string& text2 )
     throw xc;
 }
 
-//-----------------------------------------------------------------------------Env::log_stack_trace
+//-----------------------------------------------------------------------Env::stack_trace_as_string
 
-void Env::log_stack_trace(jthrowable) 
+string Env::stack_trace_as_string(jthrowable t) 
 {
-    //StringWriter w = new StringWriter();
-    //t.printStackTrace(new PrintWriter(w));
-    //String result = w.toString();
-    //Z_LOG2(Vm::java_log_category,result);
+    JNIEnv* jenv = jni_env();
+    Local_jstring s ((jstring)jenv->CallStaticObjectMethod(
+        Vm::static_vm->_standard_classes->_guava_throwables_class, 
+        Vm::static_vm->_standard_classes->_guava_throwables_getStackTraceAsString_method_id, 
+        t));
+    if( !s || jenv->ExceptionCheck() )  return "(error when fetching stack trace)";
+    return string_from_jstring(s);
 }
 
 //----------------------------------------------------------------------------------Env::find_class
