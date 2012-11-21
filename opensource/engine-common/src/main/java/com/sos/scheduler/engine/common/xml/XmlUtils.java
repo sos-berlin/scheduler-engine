@@ -34,6 +34,9 @@ import static org.w3c.dom.Node.DOCUMENT_NODE;
 
 @ForCpp
 public final class XmlUtils {
+    private static final Logger logger = LoggerFactory.getLogger(XmlUtils.class);
+    private static boolean xPathNullPointerLogged = false;
+
     @ForCpp public static Document newDocument() {
         return newDocumentBuilder().newDocument();
     }
@@ -227,7 +230,33 @@ public final class XmlUtils {
     }
 
     public static XPath newXPath() {
-        return XPathFactory.newInstance().newXPath();
+        return newXPathFactory().newXPath();
+    }
+
+    private static XPathFactory newXPathFactory() {
+        try {
+            return XPathFactory.newInstance();
+        } catch (NullPointerException e) {
+            return workaroundNewXPathFactory(e);
+        }
+    }
+
+    private static XPathFactory workaroundNewXPathFactory(NullPointerException e) {
+        // JSSIXFOUR-8: NullPointerException in javax.xml.xpath.XPathFactoryFinder, wenn Scheduler als Dienst läuft
+        String workAroundClassName = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
+        if (!xPathNullPointerLogged) {
+            logger.debug("Trying to use "+workAroundClassName+" as a workaround after {}", e, e);
+            xPathNullPointerLogged = true;
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            XPathFactory result = ((Class<XPathFactory>)Class.forName(workAroundClassName)).newInstance();
+            return result;
+        } catch (Throwable ee) {
+            logger.debug("Workaround failed", ee);
+            // Ab Java 7: e.addSuppressed(ee);
+            throw e;
+        }
     }
 
     public static String xmlQuoted(String value) {
