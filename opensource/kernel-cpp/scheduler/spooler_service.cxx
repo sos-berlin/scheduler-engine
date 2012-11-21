@@ -289,15 +289,15 @@ DWORD service_state( const string& service_name )
 
 void service_start( const string& service_name )
 {
-    BOOL            ok;
-    Service_handle  manager_handle;
-    Service_handle  service_handle;
-
-    manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );    if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
-    service_handle = OpenService( manager_handle, service_name.c_str(), SERVICE_START );            if( !service_handle )  throw_mswin_error( "OpenService" );
+    Service_handle manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
+    if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
+    
+    Service_handle service_handle = OpenService( manager_handle, service_name.c_str(), SERVICE_START );  
+    if( !service_handle )  throw_mswin_error( "OpenService" );
 
     Z_LOG2( "scheduler.service", "ServiceStart(\"" << service_name << "\")\n" );
-    ok = StartService( service_handle, 0, NULL );                                                   if( !ok )  throw_mswin_error( "StartService" );
+    BOOL ok = StartService( service_handle, 0, NULL );
+    if( !ok )  throw_mswin_error( "StartService" );
 }
 
 //---------------------------------------------------------------------------------------state_name
