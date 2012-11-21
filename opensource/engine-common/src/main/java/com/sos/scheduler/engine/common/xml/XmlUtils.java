@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.common.xml;
 
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -201,10 +203,6 @@ public final class XmlUtils {
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
-    public static XPath newXPath() {
-        return XPathFactory.newInstance().newXPath();
-    }
-
     public static ImmutableList<Element> childElements(Element element) {
         return ImmutableList.copyOf(new SiblingElementIterator(element.getFirstChild()));
     }
@@ -216,16 +214,20 @@ public final class XmlUtils {
 
     @ForCpp public static NodeList xpathNodeList(Node baseNode, String xpathExpression) {
         try {
-            XPath xpath = XPathFactory.newInstance().newXPath();
+            XPath xpath = newXPath();
             return (NodeList)xpath.evaluate( xpathExpression, baseNode, XPathConstants.NODESET );
         } catch (XPathExpressionException x) { throw new XmlException( x ); }   // Programmfehler
     }
 
     @ForCpp public static Node xpathNode(Node baseNode, String xpathExpression) {
         try {
-            XPath xpath = XPathFactory.newInstance().newXPath();
+            XPath xpath = newXPath();
             return (Node)xpath.evaluate(xpathExpression, baseNode, XPathConstants.NODE);
         } catch (XPathExpressionException x) { throw new XmlException( x ); }   // Programmfehler
+    }
+
+    public static XPath newXPath() {
+        return XPathFactory.newInstance().newXPath();
     }
 
     public static String xmlQuoted(String value) {
