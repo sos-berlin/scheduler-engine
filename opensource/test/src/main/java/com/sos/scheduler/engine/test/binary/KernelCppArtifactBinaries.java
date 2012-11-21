@@ -25,13 +25,14 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
     }
 
     private static File kernelCppDir() {
-        File dir = new File(".");
-        while (dir.exists()) {
+        File start = new File(".").getAbsoluteFile().getParentFile();
+        File dir = start;
+        while (dir != null && dir.exists()) {
             File result = new File(dir, kernelCppDirName);
             if (result.exists()) return result.getAbsoluteFile();
-            dir = new File(dir, "..");
+            dir = dir.getParentFile();
         }
-        throw new RuntimeException("No parent directory has a subdirectory '"+kernelCppDirName+"'");
+        throw new RuntimeException("No parent directory has a subdirectory '"+kernelCppDirName+"', starting form "+start);
     }
 
     @Override public File directory() {
