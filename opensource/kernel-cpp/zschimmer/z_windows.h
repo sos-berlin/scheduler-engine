@@ -28,6 +28,7 @@ double                   double_time_t_from_filetime        ( const FILETIME& );
 FILETIME                        filetime_from_time_t        ( double );
 FILETIME                        filetime_from_time_t        ( time_t );
 HANDLE                          convert_to_noninheritable_handle( HANDLE );
+void create_mini_dump_on_unhandled_exception();
 
 //----------------------------------------------------------------------------is_windows_xp_or_more
 

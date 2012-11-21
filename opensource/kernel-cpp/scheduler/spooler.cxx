@@ -3855,6 +3855,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
 #   ifdef Z_WINDOWS
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
+        #if defined Z_DEBUG
+            windows::create_mini_dump_on_unhandled_exception();
+        #endif
 #   endif
 
     Log_ptr::set_demo_version( sos_static_ptr()->_licence->is_demo_version() );

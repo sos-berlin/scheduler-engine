@@ -4,6 +4,7 @@
 
 #ifdef Z_WINDOWS
 
+#include <DbgHelp.h>
 #include "log.h"
 #include "z_windows.h"
 
@@ -199,6 +200,55 @@ void Handle::set_handle_noninheritable( HANDLE h )
     close(); 
     _handle = h; 
     convert_to_noninheritable(); 
+}
+
+//---------------------------------------------------------------------------------create_mini_dump
+
+typedef BOOL MiniDumpWriteDumpFunction(HANDLE, DWORD, HANDLE, MINIDUMP_TYPE, 
+        PMINIDUMP_EXCEPTION_INFORMATION, PMINIDUMP_USER_STREAM_INFORMATION, PMINIDUMP_CALLBACK_INFORMATION);
+static MiniDumpWriteDumpFunction* miniDumpWriteDumpFunction = NULL;
+
+static void create_mini_dump(EXCEPTION_POINTERS* exeption_pointers) 
+{
+    // Vorsicht! Wir sind in einem Interrupt.
+    if (Handle file = CreateFile("jobscheduler.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) { 
+        MINIDUMP_EXCEPTION_INFORMATION xcep_info; 
+        MINIDUMP_EXCEPTION_INFORMATION* xcep_info_ptr = NULL;
+        if (exeption_pointers) {
+            xcep_info.ThreadId  = GetCurrentThreadId(); 
+            xcep_info.ExceptionPointers = exeption_pointers; 
+            xcep_info.ClientPointers = TRUE; 
+            xcep_info_ptr = &xcep_info;
+        }
+        (*miniDumpWriteDumpFunction)(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, xcep_info_ptr, NULL, NULL);
+        Z_LOG("Mini dump written\n");  // Gefährlich im Interrupt. Aber jetzt ist sowieso Schluss.
+    }
+}
+
+//----------------------------------------------------------------create_mini_dump_exception_filter
+
+static LONG WINAPI create_mini_dump_exception_filter(struct _EXCEPTION_POINTERS *e) {
+    create_mini_dump(e);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+//----------------------------------------------------------create_mini_dump_on_unhandled_exception
+
+void create_mini_dump_on_unhandled_exception() 
+{
+    /* Wir laden die DLL vorab, um im unklaren Zustand einer Windows-Exception so wenige Windows-Funktionen wie möglich aufzurufen.
+        http://msdn.microsoft.com/en-us/library/windows/desktop/ms680360%28v=vs.85%29.aspx:
+        MiniDumpWriteDump should be called from a separate process if at all possible, rather than 
+        from within the target process being dumped. This is especially true when the target process is 
+        already not stable. For example, if it just crashed. A loader deadlock is one of many potential 
+        side effects of calling MiniDumpWriteDump from within the target process. */
+
+    if (HMODULE module = LoadLibrary("DbgHelp.dll")) {
+        miniDumpWriteDumpFunction = (MiniDumpWriteDumpFunction*)GetProcAddress(module, "MiniDumpWriteDump");
+        if (miniDumpWriteDumpFunction)
+            SetUnhandledExceptionFilter(create_mini_dump_exception_filter);
+            Z_LOG("SetUnhandledExceptionFilter() called to write a mini dump - just in case\n");
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
