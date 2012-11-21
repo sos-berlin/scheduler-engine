@@ -29,7 +29,6 @@ using namespace zschimmer::windows;
 
 static const char               std_service_name[]          = "sos_scheduler";    // Windows 2000 Service
 static const char               std_service_display_name[]  = "SOS Scheduler";    // Gezeigter Name
-//static const char             service_description[]       = "Hintergrund-Jobs der Document Factory";
 static const int                terminate_timeout           = 30;
 static const int                stop_timeout                = terminate_timeout + 5;        // Zeit lassen, um Datenbank zu schließen, dann abort_now() per Thread
 static const int                pending_timeout             = 60;
@@ -58,29 +57,48 @@ struct Service_handle
     void                        operator =                  ( const Service_handle& );      // Nicht implementiert
 };
 
-//-------------------------------------------------------------------------------------------static
+//-----------------------------------------------------------------------------My_scheduler_service
 
-static bool                     terminate_immediately       = false;
-static bool                     service_stop                = false;                        // STOP-Kommando von der Dienstesteuerung (und nicht von TCP-Schnittstelle)
-static Thread_id                self_destruction_thread_id;
+struct My_scheduler_service {
+    Fill_zero                  _zero_;
+    bool                       _terminate_immediately;
+    bool                       _service_stop;                                               // STOP-Kommando von der Dienstesteuerung (und nicht von TCP-Schnittstelle)
+    Thread_id                  _self_destruction_thread_id;
 
-SERVICE_STATUS_HANDLE           service_status_handle;
-Handle                          thread_handle;
-string                          spooler_service_name;
-int                             process_argc;
-char**                          process_argv;
+    SERVICE_STATUS_HANDLE      _service_status_handle;
+    Handle                     _thread_handle;
+    string                     _spooler_service_name;
+    int                        _process_argc;
+    char**                     _process_argv;
 
-// Zustände SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht länger als pending_timeout Sekunden:
-Thread_semaphore                set_service_lock            ( "set_service" );
-Thread_semaphore                ServiceMain_lock            ( "ServiceMain" );
-Handle                          pending_watchdog_signal;
-bool                            pending_timed_out;
-int                             current_state;
+    // Zustände SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht länger als pending_timeout Sekunden:
+    Thread_semaphore           _set_service_lock;
+    Thread_semaphore           _ServiceMain_lock;
+    Handle                     _pending_watchdog_signal;
+    bool                       _pending_timed_out;
+    int                        _current_state;
+
+    My_scheduler_service() : 
+        _zero_(this+1),
+        _set_service_lock("set_service"),
+        _ServiceMain_lock("ServiceMain")
+    {}
+
+    int                         spooler_service             ( const string& service_name, int argc, char** argv );
+    void                        set_service_status          ( int spooler_error, int state = 0 );
+    uint                        pending_watchdog_thread     (void*);
+    uint                        self_destruction_thread     (void*);
+    DWORD                       handle                      ( DWORD dwControl, DWORD event, void* event_data, void* );
+    uint                        service_thread              (void*);
+    void                        service_main                (DWORD argc, char** argv);
+};
+
+static My_scheduler_service* scheduler_service;    // Wird nicht freigeben. Destruktor braucht nicht aufgerufen zu werden, Prozess wird eh beendet.
 
 //-------------------------------------------------------------------------------------------------
 
 static void                     start_self_destruction      ();
-static uint __stdcall           pending_watchdog_thread     ( void* );
+static uint __stdcall           call_pending_watchdog_thread( void* );
 
 //-----------------------------------------------------------------------------Service_thread_param
 
@@ -299,17 +317,17 @@ static string state_name( int state )
 
 //----------------------------------------------------------------------------------service_handler
 
-static void set_service_status( int spooler_error, int state = 0 )
+void My_scheduler_service::set_service_status( int spooler_error, int state )
 {
     SERVICE_STATUS  service_status;
     string          state_nam;
 
-    if( !service_status_handle )  return;
+    if( !_service_status_handle )  return;
 
-    THREAD_LOCK( set_service_lock )
+    THREAD_LOCK( _set_service_lock )
     {
-        DWORD stop_pending = service_stop? SERVICE_STOP_PENDING    // Nur, wenn Dienstesteuerung den Spooler beendet 
-                                         : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopf "beenden" frei bleiben. Deshalb paused.
+        DWORD stop_pending = _service_stop? SERVICE_STOP_PENDING    // Nur, wenn Dienstesteuerung den Spooler beendet 
+                                          : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopf "beenden" frei bleiben. Deshalb paused.
 
         service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
@@ -339,30 +357,30 @@ static void set_service_status( int spooler_error, int state = 0 )
         // Nicht zu lange im Zustand xx_PENDING bleiben, weil die Knöpfe in der Diensteverwaltung gesperrt sind:
         if( service_status.dwCurrentState == SERVICE_START_PENDING )
         {
-            if( pending_timed_out )     // Uhr abgelaufen?
+            if( _pending_timed_out )     // Uhr abgelaufen?
             {
                 service_status.dwCurrentState = SERVICE_PAUSED;
             }
             else
-            if( !pending_watchdog_signal )
+            if( !_pending_watchdog_signal )
             {
                 Thread_id thread_id;
-                pending_watchdog_signal = convert_to_noninheritable_handle( CreateEvent( NULL, FALSE, FALSE, "" ) );
-                _beginthreadex( NULL, 0, pending_watchdog_thread, NULL, 0, &thread_id );   // Uhr aufziehen
+                _pending_watchdog_signal = convert_to_noninheritable_handle( CreateEvent( NULL, FALSE, FALSE, "" ) );
+                _beginthreadex( NULL, 0, call_pending_watchdog_thread, NULL, 0, &thread_id );   // Uhr aufziehen
             }
         }
         else
         {
-            pending_timed_out = false;
-            if( pending_watchdog_signal )  SetEvent( pending_watchdog_signal );
+            _pending_timed_out = false;
+            if( _pending_watchdog_signal )  SetEvent( _pending_watchdog_signal );
         }
 
 
-        current_state = service_status.dwCurrentState;
+        _current_state = service_status.dwCurrentState;
     }
 
     Z_LOG2( "scheduler.service", "SetServiceStatus " << state_name(service_status.dwCurrentState)  << '\n' );
-    BOOL ok = SetServiceStatus( service_status_handle, &service_status );
+    BOOL ok = SetServiceStatus( _service_status_handle, &service_status );
     if( !ok )
     {
         try { throw_mswin_error( "SetServiceStatus", state_name(service_status.dwCurrentState).c_str() ); }
@@ -371,20 +389,26 @@ static void set_service_status( int spooler_error, int state = 0 )
 
     if( service_status.dwCurrentState == SERVICE_STOPPED )
     {
-        service_status_handle = NULL;  // Sonst beim nächsten Mal: Fehler MSWIN-00000006  Das Handle ist ungültig. [SetServiceStatus] [SERVICE_STOPPED]
-        if( service_stop )  start_self_destruction();
+        _service_status_handle = NULL;  // Sonst beim nächsten Mal: Fehler MSWIN-00000006  Das Handle ist ungültig. [SetServiceStatus] [SERVICE_STOPPED]
+        if( _service_stop )  start_self_destruction();
     }
 }
 
-//--------------------------------------------------------------------------pending_watchdog_thread
+//---------------------------------------------------------------------call_pending_watchdog_thread
 
-static uint __stdcall pending_watchdog_thread( void* )
+static uint __stdcall call_pending_watchdog_thread(void* o)
 {
     Z_LOG2( "scheduler.service", "pending_watchdog_thread (Überwachung des Zustands SERVICE_START_PENDING) startet\n" );
+    return scheduler_service->pending_watchdog_thread(o);
+}
 
+//----------------------------------------------------My_scheduler_service::pending_watchdog_thread
+
+uint My_scheduler_service::pending_watchdog_thread( void* ) 
+{
     int64 wait_until = elapsed_msec() + pending_timeout*1000;
 
-    int state = current_state;
+    int state = _current_state;
 
     if( state == SERVICE_START_PENDING )
     {
@@ -393,20 +417,20 @@ static uint __stdcall pending_watchdog_thread( void* )
             int wait_time = (int)( wait_until - elapsed_msec() );
             if( wait_time <= 0 )  break;
 
-            int ret = WaitForSingleObject( pending_watchdog_signal, wait_time );
+            int ret = WaitForSingleObject( _pending_watchdog_signal, wait_time );
             if( ret != WAIT_TIMEOUT )  break;
         }
 
-        THREAD_LOCK( set_service_lock )
+        THREAD_LOCK( _set_service_lock )
         {
-            if( current_state == state )   
+            if( _current_state == state )   
             {
                 Z_LOG2( "scheduler.service", "Weil der Dienst zu lange im Zustand " + state_name(state) + " ist, wird der Dienst-Zustand geändert\n" );
-                pending_timed_out = true;
-                set_service_status( 0, current_state );
+                _pending_timed_out = true;
+                set_service_status( 0, _current_state );
             }
 
-            pending_watchdog_signal.close();
+            _pending_watchdog_signal.close();
         }
     }
 
@@ -417,22 +441,28 @@ static uint __stdcall pending_watchdog_thread( void* )
 
 //--------------------------------------------------------------------------self_destruction_thread
 
-static uint __stdcall self_destruction_thread( void* )
+static uint __stdcall call_self_destruction_thread(void* o)
 {
+    return scheduler_service->self_destruction_thread(o);
+}
+
+//----------------------------------------------------My_scheduler_service::self_destruction_thread
+
+uint My_scheduler_service::self_destruction_thread(void*) {
     SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
 
     Z_LOG2( "scheduler.service", "Selbstzerstörung in " << stop_timeout << " Sekunden (ohne weitere Ankündigung) ...\n" );
 
     sos_sleep( stop_timeout );      // exit() sollte diesen Thread abbrechen. 25.11.2002
     {
-        terminate_immediately = true;
+        _terminate_immediately = true;
 
 /*      Lieber kein Log, denn das hat eine Sempahore.
         try 
         { 
             Z_LOG2( "scheduler.service", "... Selbstzerstörung. Weil der Scheduler nicht zum Ende kommt, wird der Prozess jetzt abgebrochen\n" ); 
 
-            //BOOL ok = TerminateThread( thread_handle, 999 );
+            //BOOL ok = TerminateThread( _thread_handle, 999 );
             //if( ok )  sos_sleep( 3 );
             Z_LOG2( "scheduler.service", "TerminateProcess()\n" ); 
         } 
@@ -447,7 +477,7 @@ static uint __stdcall self_destruction_thread( void* )
         TerminateProcess( GetCurrentProcess(), 1 );
     }
 
-    self_destruction_thread_id = 0;
+    _self_destruction_thread_id = 0;
     return 0;
 }
 
@@ -455,12 +485,12 @@ static uint __stdcall self_destruction_thread( void* )
 
 static void start_self_destruction()
 {
-    if( !self_destruction_thread_id )  
+    if( !scheduler_service->_self_destruction_thread_id )  
     {
-        _beginthreadex( NULL, 0, self_destruction_thread, NULL, 0, &self_destruction_thread_id );
+        _beginthreadex( NULL, 0, call_self_destruction_thread, NULL, 0, &scheduler_service->_self_destruction_thread_id );
 
 /* Erst ab Windows 2000:
-        HANDLE h = OpenThread( THREAD_QUERY_INFORMATION, false, self_destruction_thread_id  );
+        HANDLE h = OpenThread( THREAD_QUERY_INFORMATION, false, _self_destruction_thread_id  );
         SetThreadPriority( h, THREAD_PRIORITY_HIGHEST );
         SwitchToThread();
         CloseThread( h );
@@ -510,7 +540,14 @@ static string string_from_power_event( DWORD e )
 
 //----------------------------------------------------------------------------------------HandlerEx
 
-static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, void* )
+static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, void* p)
+{
+    return scheduler_service->handle(dwControl, event, event_data, p);
+}
+
+//---------------------------------------------------------------------My_scheduler_service::handle
+
+DWORD My_scheduler_service::handle( DWORD dwControl, DWORD event, void* event_data, void* )
 {
     Z_LOGI2( "scheduler.service", "Service HandlerEx(" << string_from_handler_control(dwControl) << "," << 
              ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) << "," <<
@@ -533,8 +570,8 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
         {
             case SERVICE_CONTROL_STOP:              // Requests the service to stop.  
             {
-                pending_timed_out = false;
-                service_stop = true;
+                _pending_timed_out = false;
+                _service_stop = true;
                 static_service_spooler->cmd_terminate( false, terminate_timeout );    // Shutdown des Clusters
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
@@ -542,15 +579,15 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             }
 
             case SERVICE_CONTROL_PAUSE:             // Requests the service to pause.  
-                pending_timed_out = false;
-                service_stop = false;
+                _pending_timed_out = false;
+                _service_stop = false;
                 static_service_spooler->cmd_pause();
                 result = NO_ERROR;  
                 break;
 
             case SERVICE_CONTROL_CONTINUE:          // Requests the paused service to resume.  
-                pending_timed_out = false;
-                service_stop = false;
+                _pending_timed_out = false;
+                _service_stop = false;
                 static_service_spooler->cmd_continue();
                 result = NO_ERROR;  
                 break;
@@ -561,7 +598,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
 
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
                 // Wir haben nicht mehr als 20s: Das ist eigentlich zu kurz. STOP_PENDING gibt eine kleine Gnadenfrist. 2006-06-19
-                pending_timed_out = false;
+                _pending_timed_out = false;
                 static_service_spooler->cmd_terminate( false, terminate_timeout );   // Shutdown des Clusters  (nicht mehr: // Kein shutdown des Clusters, ein anderer Rechner soll übernehmen.)
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
@@ -637,12 +674,19 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
 
 static void spooler_state_changed( Spooler*, void* )
 {
-    set_service_status( 0 );
+    scheduler_service->set_service_status( 0 );
 }
 
 //-----------------------------------------------------------------------------------service_thread
 
-static uint __stdcall service_thread( void* param )
+static uint __stdcall call_service_thread( void* param )
+{
+    return scheduler_service->service_thread(param);
+}
+
+//-------------------------------------------------------------My_scheduler_service::service_thread
+
+uint My_scheduler_service::service_thread(void* param) 
 {
     Z_LOGI2( "scheduler.service", "service_thread\n" );
 
@@ -660,6 +704,7 @@ static uint __stdcall service_thread( void* param )
         spooler._is_service = true;
         spooler.set_state_changed_handler( spooler_state_changed );
         set_service_status( 0 );
+
 
         try
         {
@@ -695,7 +740,14 @@ static uint __stdcall service_thread( void* param )
 
 static void __stdcall ServiceMain( DWORD argc, char** argv )
 {
-    THREAD_LOCK( ServiceMain_lock )
+    scheduler_service->service_main(argc, argv);
+}
+
+//---------------------------------------------------------------My_scheduler_service::service_main
+
+void My_scheduler_service::service_main(DWORD argc, char** argv) 
+{
+    THREAD_LOCK( _ServiceMain_lock )
     {
         Z_LOGI2( "scheduler.service", "ServiceMain(argc=" << argc << ")\n" );
     
@@ -712,21 +764,21 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
             }
 
             if( argc > 1 )  param._argc = argc, param._argv = argv;                 // Parameter des Dienstes (die sind wohl nur zum Test)
-                      else  param._argc = process_argc, param._argv = process_argv; // Parameter des Programmaufrufs
+                      else  param._argc = _process_argc, param._argv = _process_argv; // Parameter des Programmaufrufs
 
 
             Z_LOG2( "scheduler.service", "RegisterServiceCtrlHandlerEx\n" );
-            service_status_handle = RegisterServiceCtrlHandlerEx( spooler_service_name.c_str(), &HandlerEx, NULL );
-            if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
+            _service_status_handle = RegisterServiceCtrlHandlerEx( _spooler_service_name.c_str(), &HandlerEx, NULL );
+            if( !_service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
 
             Z_LOG2( "scheduler.service", "CreateThread\n" );
-            thread_handle.set_handle_noninheritable( (HANDLE)_beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id ) );
-            if( !thread_handle )  throw_mswin_error( "CreateThread" );
+            _thread_handle.set_handle_noninheritable( (HANDLE)_beginthreadex( NULL, 0, call_service_thread, &param, 0, &thread_id ) );
+            if( !_thread_handle )  throw_mswin_error( "CreateThread" );
 
             while(1)
             {
                 Z_LOG2( "scheduler.service", "MsgWaitForMultipleObjects()\n" );
-                ret = MsgWaitForMultipleObjects( 1, &thread_handle._handle, FALSE, INT_MAX, QS_ALLINPUT ); 
+                ret = MsgWaitForMultipleObjects( 1, &_thread_handle._handle, FALSE, INT_MAX, QS_ALLINPUT ); 
             
                 if( ret == WAIT_TIMEOUT )  continue;
                 else
@@ -735,9 +787,9 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
                     break;
             }
 
-            if( terminate_immediately )  { Z_LOG2( "scheduler.service", "TerminateProcess()\n" ); TerminateProcess( GetCurrentProcess(), 1 ); }   // Gesetzt vom self_destruction_thread
+            if( _terminate_immediately )  { Z_LOG2( "scheduler.service", "TerminateProcess()\n" ); TerminateProcess( GetCurrentProcess(), 1 ); }   // Gesetzt vom self_destruction_thread
 
-            TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
+            TerminateThread( _thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
         
             Z_LOG2( "scheduler.service", "ServiceMain ok\n" );
         }
@@ -747,21 +799,29 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
 
 //----------------------------------------------------------------------------------spooler_service
 
-int spooler_service( const string& service_name, int argc, char** argv )
+int spooler_service( const string& service_name, int argc, char** argv ) {
+    assert(scheduler_service == NULL);
+    scheduler_service = new My_scheduler_service();
+    return scheduler_service->spooler_service(service_name, argc, argv);
+}
+
+//------------------------------------------------------------My_scheduler_service::spooler_service
+
+int My_scheduler_service::spooler_service( const string& service_name, int argc, char** argv )
 {
     Z_LOGI2( "scheduler.service", "spooler_service(argc=" << argc << ")\n" );
 
-    process_argc = argc;
-    process_argv = argv;
+    _process_argc = argc;
+    _process_argv = argv;
 
     try 
     {                          
-        spooler_service_name = service_name;
+        _spooler_service_name = service_name;
         SERVICE_TABLE_ENTRY ste[2];
 
         memset( ste, 0, sizeof ste );
 
-        ste[0].lpServiceName = (char*)spooler_service_name.c_str();
+        ste[0].lpServiceName = (char*)_spooler_service_name.c_str();
         ste[0].lpServiceProc = ServiceMain;
 
         Z_LOGI2( "scheduler.service", "StartServiceCtrlDispatcher(" << ste[0].lpServiceName << ")\n" );
@@ -771,9 +831,9 @@ int spooler_service( const string& service_name, int argc, char** argv )
 
         Z_LOG2( "scheduler.service", "StartServiceCtrlDispatcher() OK\n" );
 
-        THREAD_LOCK( ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu früh gerufen)
+        THREAD_LOCK( _ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu früh gerufen)
 
-        spooler_service_name = "";
+        _spooler_service_name = "";
     }
     catch( const exception& x )
     {
