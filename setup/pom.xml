@@ -2,9 +2,10 @@
 <!--
 call prepare-setup.sh <version> to use this pom
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>engine</artifactId>
@@ -12,26 +13,23 @@ call prepare-setup.sh <version> to use this pom
     </parent>
 
     <properties>
-      <setup.platform>${osArch}</setup.platform>
+        <setup.platform>${osArch}</setup.platform>
     </properties>
-    
+
     <artifactId>setup</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    
+
     <profiles>
-    
-      <!-- this profile is for preparing the setup for a given version on a given platform, e.g.
-            mvn install -Pprepare-platform -Dengine.platform=windows-x86
-      -->
-      <profile>
-        <id>prepare-platform</id>
-        <properties>
-          <setup.platform>${engine.platform}</setup.platform>
-        </properties>
-        <!--
+        <!-- this profile is for preparing the setup for a given version on a given platform, e.g.
+              mvn install -Pprepare-platform -Dengine.platform=windows-x86
         -->
-      </profile>
+        <profile>
+            <id>prepare-platform</id>
+            <properties>
+                <setup.platform>${engine.platform}</setup.platform>
+            </properties>
+        </profile>
     </profiles>
 
     <repositories>
@@ -53,72 +51,71 @@ call prepare-setup.sh <version> to use this pom
                 <!-- updatePolicy>always</updatePolicy -->
             </snapshots>
             <releases>
-              <enabled>false</enabled>
+                <enabled>false</enabled>
             </releases>
         </repository>
     </repositories>
 
     <build>
-      <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>copy</id>
-                    <phase>install</phase>
-                    <goals>
-                        <goal>copy-dependencies</goal>
-                        <goal>copy</goal>
-                    </goals>
-                    <configuration>
-                        <artifactItems>
-                            <!-- fat jar mit allen benötigten jars der JobScheduler engine (derzeit nicht ausgeliefert) -->
-                            <artifactItem>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>jar</artifactId>
-                                <version>${project.version}</version>
-                                <type>jar</type>
-                                <destFileName>${project.groupId}-${project.version}.jar</destFileName>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>com.sos.scheduler.enginedoc</groupId>
-                                <artifactId>enginedoc-kernel</artifactId>
-                                <version>${enginedoc.version}</version>
-                                <type>jar</type>
-                                <destFileName>com.sos.scheduler.enginedoc-kernel-${enginedoc.version}.jar</destFileName>
-                            </artifactItem>
-                        </artifactItems>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-        <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <configuration>
-                <target>
-                    <ant antfile="prepare-setup.xml" target="setup.platform">
-                       <property name="setup.platform" value="${setup.platform}" />
-                       <property name="setup.version" value="${project.version}" />
-                       <property name="settings.localRepository" value="${settings.localRepository}" />
-                    </ant>
-                </target>
-            </configuration>
-            <executions>
-                <execution>
-                    <phase>install</phase>
-                    <goals>
-                        <goal>run</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <!-- fat jar mit allen benötigten jars der JobScheduler engine (derzeit nicht ausgeliefert) -->
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>jar</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <destFileName>${project.groupId}-${project.version}.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sos.scheduler.enginedoc</groupId>
+                                    <artifactId>enginedoc-kernel</artifactId>
+                                    <version>${enginedoc.version}</version>
+                                    <type>jar</type>
+                                    <destFileName>com.sos.scheduler.enginedoc-kernel-${enginedoc.version}.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <configuration>
+                    <target>
+                        <ant antfile="prepare-setup.xml" target="setup.platform">
+                            <property name="setup.platform" value="${setup.platform}"/>
+                            <property name="setup.version" value="${project.version}"/>
+                            <property name="settings.localRepository" value="${settings.localRepository}"/>
+                        </ant>
+                    </target>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencies>
-
-        <!-- liefert alle benötigten jars für die engine aus dem Artifakt jar und deren Abhängige -->        
+        <!-- Liefert alle benötigten jars für die engine aus dem Artefakt jar und deren Abhängige -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jar</artifactId>
@@ -126,7 +123,7 @@ call prepare-setup.sh <version> to use this pom
             <type>jar</type>
         </dependency>
 
-        <!-- plattformspezifischer C++ Kern -->        
+        <!-- plattformspezifischer C++ Kern -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>kernel-cpp</artifactId>
@@ -140,7 +137,5 @@ call prepare-setup.sh <version> to use this pom
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-
     </dependencies>
-
 </project>

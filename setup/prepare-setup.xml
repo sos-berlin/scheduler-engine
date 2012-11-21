@@ -14,133 +14,136 @@ to run without maven integration.
 -->
 <project name="com.sos.scheduler.setup.prepare" basedir=".">
 
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${settings.localRepository}/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
-	
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+             classpath="${settings.localRepository}/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
 
-	<property name="setup.platform" value="linux-i386" />
-	<property name="package.name" value="com.sos.scheduler" />
-	<property name="source.dir" value="${basedir}/target/dependency" />
-	<property name="target.dir" value="${basedir}/target/setup" />
-	<property name="archive.root" value="/com/sos/scheduler/engine/kernelcpp" />
-	
-	<target name="setup.platform" depends="-init, -unzip, -copy, -copy.platform, -versioninfo"	description="platform specific setup preparation">
-    <echo message="DONE !!" />
-  </target>
 
-	<target name="-init" description="initialize the platform specific settings">
+    <property name="setup.platform" value="linux-i386"/>
+    <property name="package.name" value="com.sos.scheduler"/>
+    <property name="source.dir" value="${basedir}/target/dependency"/>
+    <property name="target.dir" value="${basedir}/target/setup"/>
+    <property name="archive.root" value="/com/sos/scheduler/engine/kernelcpp"/>
 
-    <echo message="${settings.localRepository}" />
+    <target name="setup.platform" depends="-init, -unzip, -copy, -copy.platform, -versioninfo"
+            description="platform specific setup preparation">
+        <echo message="DONE !!"/>
+    </target>
 
-    <property name="folder.name" value="${setup.platform}" />
-    <echo message="the folder name is ${folder.name}" />
-  	<propertyregex property="os.architecture" input="${setup.platform}" regexp="^([^-]*)-.*" replace="\1" />
-    <if>
-     <equals arg1="${os.architecture}" arg2="windows" />
-     <then>
-      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform" />
-      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
-      		<exclude name="**"/>
-      	</fileset>
-     </then>
-     <else>
-      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
-      		<exclude name="libspidermonkey.so"/>
-      		<exclude name="libjobscheduler-engine.so"/>
-      	</fileset>
-      	<fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
-      		<include name="libspidermonkey.so"/>
-      		<include name="libjobscheduler-engine.so"/>
-      	</fileset>
-     </else>
-    </if>
-  	
-  	<fileset dir="${source.dir}/${folder.name}/${archive.root}" id="files.config">
-  		<include name="scheduler.xsd"/>
-  	</fileset>
-  	
-  	<!-- it points to the jar built in the artifact jar -->
-  	<propertyregex property="version.number" input="${setup.version}" regexp="-SNAPSHOT" replace="" defaultValue="${setup.version}" />
-  	<echo>version is ${version.number}</echo>
-  	<fileset dir="${source.dir}" id="spooler.lib">
-  		<include name="com.sos.scheduler.engine-${version.number}*.jar"/>
-  	</fileset>
-  	
-  	<fileset dir="${source.dir}" id="doc.jar">
-  		<include name="com.sos.scheduler.enginedoc*.jar"/>
-  	</fileset>
-  	
-  	<fileset dir="${source.dir}" id="files.jar">
-  		<include name="guava*.jar"/>
-  		<include name="guice*.jar"/>
-  		<include name="log4j-*.jar"/>
-  		<include name="geronimo*.jar"/>
-  		<include name="activemq*.jar"/>
-  		<include name="slf4j*.jar"/>
-  		<include name="jackson-*.jar"/>
-  		<include name="jersey-*.jar"/>
-  		<include name="scala-library-*.jar"/>
-  		<include name="h2-*.jar"/>
-  		<!-- additional jars for jetty integration -->
-  		<include name="jul-to-slf4j-*.jar" />
-  		<include name="javax*.jar" />
-  		<include name="jetty-*.jar" />
-  		<include name="servlet-api-*.jar" />
-  		<include name="aopalliance-*.jar"/>
-  		<exclude name="jetty-${version.number}*.jar" />
-  	</fileset>
+    <target name="-init" description="initialize the platform specific settings">
 
-  </target>
-	
-	<target name="-unzip" description="unzip the necessary binary files (except the jars)">
-	
-		<unzip dest="${source.dir}/${folder.name}">
-	    <patternset>
-	        <exclude name="**/*.map"/>
-	        <exclude name="**/*.pdb"/>
-	    </patternset>
-	    <fileset dir="${source.dir}">
-	        <include name="*${setup.platform}*.jar"/>
-	    </fileset>
-		</unzip>
-		
-	</target>
-	
-	<target name="-copy" description="copy all setup files for the scheduler kernel into a directory">
+        <echo message="${settings.localRepository}"/>
 
-		<!-- copy the sos specific jar files to the target directory and normalize theirs names -->
-		<copy todir="${target.dir}/scheduler/config">
-			<fileset refid="files.config" />
-		</copy>
-		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="spooler.lib" />
-		</copy>
-		<copy todir="${target.dir}/scheduler/lib">
-			<fileset refid="files.jar" />
-		</copy>
-		<copy todir="${target.dir}/scheduler/doc">
-			<fileset refid="doc.jar" />
-		</copy>
-	</target>
-		
-	<target name="-copy.platform" description="copy the platform specific files" if="folder.name">
+        <property name="folder.name" value="${setup.platform}"/>
+        <echo message="the folder name is ${folder.name}"/>
+        <propertyregex property="os.architecture" input="${setup.platform}" regexp="^([^-]*)-.*" replace="\1"/>
+        <if>
+            <equals arg1="${os.architecture}" arg2="windows"/>
+            <then>
+                <fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform"/>
+                <fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
+                    <exclude name="**"/>
+                </fileset>
+            </then>
+            <else>
+                <fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.bin.platform">
+                    <exclude name="libspidermonkey.so"/>
+                    <exclude name="libjobscheduler-engine.so"/>
+                </fileset>
+                <fileset dir="${source.dir}/${folder.name}/${archive.root}/bin" id="files.lib.platform">
+                    <include name="libspidermonkey.so"/>
+                    <include name="libjobscheduler-engine.so"/>
+                </fileset>
+            </else>
+        </if>
 
-    <echo message="the folder name is ${folder.name}" />
-		<copy todir="${target.dir}/scheduler.${folder.name}/lib">
-			<fileset refid="files.lib.platform" />
-		</copy>
+        <fileset dir="${source.dir}/${folder.name}/${archive.root}" id="files.config">
+            <include name="scheduler.xsd"/>
+        </fileset>
 
-		<copy todir="${target.dir}/scheduler.${folder.name}/bin">
-			<fileset refid="files.bin.platform" />
-		</copy>
+        <!-- it points to the jar built in the artifact jar -->
+        <propertyregex property="version.number" input="${setup.version}" regexp="-SNAPSHOT" replace=""
+                       defaultValue="${setup.version}"/>
+        <echo>version is ${version.number}</echo>
+        <fileset dir="${source.dir}" id="spooler.lib">
+            <include name="com.sos.scheduler.engine-${version.number}*.jar"/>
+        </fileset>
 
-  </target>
-	
-	<target name="-versioninfo" description="creates a file with version information">
-    <propertyfile file="${target.dir}/scheduler.${folder.name}/.version-engine" comment="build information">
-      <entry  key="version" type="string" value="${setup.version}" />
-      <entry  key="platform" type="string" value="${setup.platform}" />
-      <entry  key="builddate" type="date" value="now" pattern="yyyy-MM-dd HH:mm:ss" />
-    </propertyfile>
-  </target>
+        <fileset dir="${source.dir}" id="doc.jar">
+            <include name="com.sos.scheduler.enginedoc*.jar"/>
+        </fileset>
+
+        <fileset dir="${source.dir}" id="files.jar">
+            <include name="guava*.jar"/>
+            <include name="guice*.jar"/>
+            <include name="log4j-*.jar"/>
+            <include name="geronimo*.jar"/>
+            <include name="activemq*.jar"/>
+            <include name="slf4j*.jar"/>
+            <include name="jackson-*.jar"/>
+            <include name="jersey-*.jar"/>
+            <include name="scala-library-*.jar"/>
+            <include name="h2-*.jar"/>
+            <!-- additional jars for jetty integration -->
+            <include name="jul-to-slf4j-*.jar"/>
+            <include name="javax*.jar"/>
+            <include name="jetty-*.jar"/>
+            <include name="servlet-api-*.jar"/>
+            <include name="aopalliance-*.jar"/>
+            <exclude name="jetty-${version.number}*.jar"/>
+        </fileset>
+
+    </target>
+
+    <target name="-unzip" description="unzip the necessary binary files (except the jars)">
+
+        <unzip dest="${source.dir}/${folder.name}">
+            <patternset>
+                <exclude name="**/*.map"/>
+                <exclude name="**/*.pdb"/>
+            </patternset>
+            <fileset dir="${source.dir}">
+                <include name="*${setup.platform}*.jar"/>
+            </fileset>
+        </unzip>
+
+    </target>
+
+    <target name="-copy" description="copy all setup files for the scheduler kernel into a directory">
+
+        <!-- copy the sos specific jar files to the target directory and normalize theirs names -->
+        <copy todir="${target.dir}/scheduler/config">
+            <fileset refid="files.config"/>
+        </copy>
+        <copy todir="${target.dir}/scheduler/lib">
+            <fileset refid="spooler.lib"/>
+        </copy>
+        <copy todir="${target.dir}/scheduler/lib">
+            <fileset refid="files.jar"/>
+        </copy>
+        <copy todir="${target.dir}/scheduler/doc">
+            <fileset refid="doc.jar"/>
+        </copy>
+    </target>
+
+    <target name="-copy.platform" description="copy the platform specific files" if="folder.name">
+
+        <echo message="the folder name is ${folder.name}"/>
+        <copy todir="${target.dir}/scheduler.${folder.name}/lib">
+            <fileset refid="files.lib.platform"/>
+        </copy>
+
+        <copy todir="${target.dir}/scheduler.${folder.name}/bin">
+            <fileset refid="files.bin.platform"/>
+        </copy>
+
+    </target>
+
+    <target name="-versioninfo" description="creates a file with version information">
+        <propertyfile file="${target.dir}/scheduler.${folder.name}/.version-engine" comment="build information">
+            <entry key="version" type="string" value="${setup.version}"/>
+            <entry key="platform" type="string" value="${setup.platform}"/>
+            <entry key="builddate" type="date" value="now" pattern="yyyy-MM-dd HH:mm:ss"/>
+        </propertyfile>
+    </target>
 
 </project>
