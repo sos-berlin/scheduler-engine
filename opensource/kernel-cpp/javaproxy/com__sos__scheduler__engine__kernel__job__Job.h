@@ -12,8 +12,10 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct JobPersistent; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
+namespace javaproxy { namespace scala { struct Option; }}
 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace job { 
@@ -51,6 +53,13 @@ struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::so
     }
   public:
 
+    void deletePersistedTask(jint p0) const;
+    void deletePersistentState() const;
+    void loadPersistentTasks() const;
+    void persistEnqueuedTask(jint p0, jlong p1, jlong p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p4) const;
+    void persistState() const;
+    ::javaproxy::scala::Option tryFetchAverageStepDuration() const;
+    ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent tryFetchPersistentState() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

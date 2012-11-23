@@ -99,6 +99,8 @@
                                 <argument>java.net.URL</argument>
                                 <argument>java.util.ArrayList</argument>
                                 <argument>java.util.HashMap</argument>
+                                <argument>org.joda.time.Duration</argument>
+                                <argument>org.joda.time.ReadableInstant</argument>
                                 <argument>org.w3c.dom.Attr</argument>
                                 <argument>org.w3c.dom.CDATASection</argument>
                                 <argument>org.w3c.dom.CharacterData</argument>
@@ -108,6 +110,7 @@
                                 <argument>org.w3c.dom.Node</argument>
                                 <argument>org.w3c.dom.NodeList</argument>
                                 <argument>org.w3c.dom.Text</argument>
+                                <argument>scala.Option</argument>
                             </arguments>
                         </configuration>
                     </execution>

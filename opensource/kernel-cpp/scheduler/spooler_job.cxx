@@ -4,6 +4,7 @@
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__JobPersistent.h"
 
 #ifndef Z_WINDOWS
 #   include <signal.h>
@@ -362,7 +363,6 @@ void Combined_job_nodes::close()
     withdraw_order_requests();
 
     while (!_job_node_set.empty()) {
-        Job_node_set::iterator it = _job_node_set.begin();
         Job_node* job_node = *_job_node_set.begin();
         job_node->disconnect_job();     // Ruft disconnect_job_node() und der löscht den Eintrag
     }
@@ -513,6 +513,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     file_based<Job,Job_folder,Job_subsystem>( scheduler->job_subsystem(), this, Scheduler_object::type_job ),
     javabridge::has_proxy<Job>(scheduler),
     _zero_(this+1),
+    _typed_java_sister(java_sister()),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
     _stop_on_error(true),
@@ -693,7 +694,7 @@ bool Job::on_load() // Transaction* ta )
             {
                 if( db()->opened() )  database_record_load( &ta );
                 _history.open( &ta );
-                if( db()->opened() )  load_tasks_from_db( &ta );
+                if( db()->opened() )  load_tasks( &ta );
             }
             catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
         }
@@ -1009,6 +1010,17 @@ Duration Job::get_step_duration_or_percentage( const string& value, const Durati
 //-----------------------------------------------------------------------Job::average_step_duration
 
 Duration Job::average_step_duration( const Duration& deflt )
+{
+    if (_spooler->settings()->_use_java_persistence) {
+        auto duration_option = typed_java_sister().tryFetchAverageStepDuration();
+        return duration_option.isDefined()? Duration(javaproxy::org::joda::time::Duration(duration_option.get()).getMillis() / 1000.0) : deflt;
+    } else {
+        return db_average_step_duration(deflt);
+    }
+}
+//--------------------------------------------------------------------Job::db_average_step_duration
+
+Duration Job::db_average_step_duration( const Duration& deflt )
 {
     Duration result = deflt;
 
@@ -1348,6 +1360,23 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     return create_task( params, name, force, start_at, _spooler->db()->get_task_id() );
 }
 
+//----------------------------------------------------------------------------------Job::load_tasks
+
+void Job::load_tasks(Read_transaction* ta)
+{
+    if (_spooler->settings()->_use_java_persistence) 
+        load_tasks_with_java();
+    else
+        load_tasks_from_db(ta);
+}
+
+//------------------------------------------------------------------------Job::load_tasks_with_java
+
+void Job::load_tasks_with_java()
+{
+    typed_java_sister().loadPersistentTasks();
+}
+
 //--------------------------------------------------------------------------Job::load_tasks_from_db
 
 void Job::load_tasks_from_db( Read_transaction* ta )
@@ -1421,15 +1450,20 @@ void Job::load_tasks_from_db( Read_transaction* ta )
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
     _job->set_visible();
-
     if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
 
-    while(1)
-    {
-        try
-        {
-            if( !task->_is_in_database  &&  _spooler->db()->opened() )
-            {
+    if( !task->_is_in_database) {
+        xml::Document_ptr task_document = task->dom( show_for_database_only );
+        xml::Element_ptr  task_element  = task_document.documentElement();
+        bool has_xml = task_element.hasAttributes()  ||  task_element.firstChild();
+
+        if (_spooler->settings()->_use_java_persistence)
+            _job->typed_java_sister().persistEnqueuedTask(task->_id, task->_enqueue_time.millis(), task->_start_at.millis(), 
+                task->has_parameters()? xml_as_string(task->parameters_as_dom()) : "", 
+                has_xml? xml_as_string(task_document.xml()) : "");
+        else
+        if (_spooler->db()->opened() ) {
+            while(1) try {
                 Transaction ta ( _spooler->db() );
 
                 Insert_stmt insert ( ta.database_descriptor() );
@@ -1458,20 +1492,18 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                     blob.close();
                 }
 
-                xml::Document_ptr task_document = task->dom( show_for_database_only );
-                xml::Element_ptr  task_element  = task_document.documentElement();
-                if( task_element.hasAttributes()  ||  task_element.firstChild() )
+                if (has_xml)
                     ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
 
                 ta.commit( Z_FUNCTION );
 
                 task->_is_in_database = true;
+                break;
             }
-            break;
-        }
-        catch( exception& x )
-        {
-            _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
+            catch( exception& x )
+            {
+                _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
+            }
         }
     }
 
@@ -1487,6 +1519,9 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 
 void Job::Task_queue::remove_task_from_db( int task_id )
 {
+    if (_spooler->settings()->_use_java_persistence)
+        _job->typed_java_sister().deletePersistedTask(task_id);
+    else
     while(1)
     {
         try
@@ -1707,6 +1742,39 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 }
 
 //--------------------------------------------------------------------------------Job::enqueue_task
+
+void Job::enqueue_task(const TaskPersistentJ& taskPersistentJ) {
+
+    int task_id = taskPersistentJ.taskId().value();
+
+    Time start_at = Time::of_millis(taskPersistentJ.startTimeMillis());
+    _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
+
+    ptr<Com_variable_set> parameters = new Com_variable_set;
+    string parameters_xml = taskPersistentJ.parametersXml();
+    if( !parameters_xml.empty() )  parameters->set_xml(parameters_xml);
+
+    xml::Document_ptr task_dom;
+    bool force_start = force_start_default;
+    string xml = taskPersistentJ.xml();
+    if (!xml.empty()) {
+        task_dom = xml::Document_ptr(xml);
+        force_start = task_dom.documentElement().bool_getAttribute("force_start", force_start);
+    }
+
+    ptr<Task> task = create_task( +parameters, "", force_start, start_at, task_id );            
+    if( task_dom )  task->set_dom( task_dom.documentElement() );
+    task->_is_in_database = true;
+    task->_let_run        = true;
+    task->_enqueue_time = Time::of_millis(taskPersistentJ.enqueueTime().getMillis());
+    
+    if (!start_at && !_schedule_use->period_follows(Time::now())) {
+        try { z::throw_xc( "SCHEDULER-143" ); } 
+        catch( const exception& x ) { _log->warn( x.what() ); }
+    }
+
+    _task_queue->enqueue_task( task );
+}
 
 void Job::enqueue_task( Task* task )
 {
@@ -2093,33 +2161,33 @@ string Job::trigger_files( Task* task )
 
 void Job::database_record_store()
 {
-    if( file_based_state() >= File_based::s_loaded  &&      // Vorher ist database_record_load() nicht aufgerufen worden
-        db()->opened() )
-    {
+    if( file_based_state() >= File_based::s_loaded ) {    // Vorher ist database_record_load() nicht aufgerufen worden
         Time next_start_time = this->next_start_time();
-
-        if( next_start_time         != _db_next_start_time  ||
-            _is_permanently_stopped != _db_stopped            )
-        {
-            for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
-            {
-                sql::Update_stmt update ( &db()->_jobs_table );
-                    
-                update[ "spooler_id"        ] = _spooler->id_for_db();
-                update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
-                update[ "path"              ] = path().without_slash();
-
-                if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
-                update[ "stopped" ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
-
-                ta.store( update, Z_FUNCTION );
-                ta.commit( Z_FUNCTION );
+        if( next_start_time != _db_next_start_time  || _is_permanently_stopped != _db_stopped) {
+            if (_spooler->settings()->_use_java_persistence) {
+                typed_java_sister().persistState();
             }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
+            else
+            if (db()->opened()) {
+                for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
+                {
+                    sql::Update_stmt update ( &db()->_jobs_table );
+                    
+                    update[ "spooler_id"        ] = _spooler->id_for_db();
+                    update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
+                    update[ "path"              ] = path().without_slash();
 
-            _db_next_start_time = next_start_time;
-            _db_stopped         = _is_permanently_stopped;
+                    if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
+                    update[ "stopped" ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
+
+                    ta.store( update, Z_FUNCTION );
+                    ta.commit( Z_FUNCTION );
+                }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
+            }
         }
+        _db_next_start_time = next_start_time;
+        _db_stopped         = _is_permanently_stopped;
     }
 }
 
@@ -2127,6 +2195,10 @@ void Job::database_record_store()
 
 void Job::database_record_remove()
 {
+    if (_spooler->settings()->_use_java_persistence) {
+        typed_java_sister().deletePersistentState();
+    }
+    else
     if( db()->opened() )
     {
         for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
@@ -2150,22 +2222,28 @@ void Job::database_record_load( Read_transaction* ta )
 {
     assert( file_based_state() == File_based::s_initialized );
 
-// lesen aus Tabelle scheduler_jobs
-    Any_file result_set = ta->open_result_set
-    ( 
-        S() << "select `stopped`, `next_start_time`"
-            << "  from " << db()->_jobs_table.sql_name()
-            << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-            <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
-            <<    " and `path`="              << sql::quoted( path().without_slash() ), 
-        Z_FUNCTION 
-    );
+    if (_spooler->settings()->_use_java_persistence) {
+        if (auto persistentState = typed_java_sister().tryFetchPersistentState())
+            _is_permanently_stopped = persistentState.isPermanentlyStopped();
+    }
+    else {
+        // Lesen aus Tabelle scheduler_jobs
+        Any_file result_set = ta->open_result_set
+        ( 
+            S() << "select `stopped`, `next_start_time`"
+                << "  from " << db()->_jobs_table.sql_name()
+                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
+                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
+                <<    " and `path`="              << sql::quoted( path().without_slash() ), 
+            Z_FUNCTION 
+        );
     
-    if( !result_set.eof() )  
-    {
-        Record record  = result_set.get_record();
-        _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
-        _db_next_start_time = record.null( "next_start_time" )? Time::never :  Time::of_utc_date_time( record.as_string( "next_start_time" ) );
+        if( !result_set.eof() )  
+        {
+            Record record  = result_set.get_record();
+            _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
+            _db_next_start_time = record.null( "next_start_time" )? Time::never :  Time::of_utc_date_time( record.as_string( "next_start_time" ) );
+        }
     }
 }
 
@@ -2314,7 +2392,7 @@ void Job::set_next_start_time2(const Time& now, bool repeat) {
 
 //-----------------------------------------------------------------------------Job::next_start_time
 
-Time Job::next_start_time()
+Time Job::next_start_time() const
 {
     if( _state == s_pending  ||  _state == s_running ) {
         Time t = min( _next_start_time, _next_single_start );

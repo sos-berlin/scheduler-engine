@@ -22,14 +22,11 @@ struct Order_id_space : Object, Scheduler_object
                                 Order_id_space              ( Order_subsystem_impl* );
 
     void                        close                       ();
-  //void                        connect_job_chain           ( Job_chain* );
-  //void                        disconnect_job_chain        ( Job_chain* );
     int                         number_of_job_chains        () const                                { return int_cast(_job_chain_set.size()); }
     void                        check_for_unique_order_ids_of( Job_chain* ) const;
     Job_chain*                  job_chain_by_order_id_or_null( const string& order_id ) const;
     ptr<Order>                  order_or_null               ( const string& order_id ) const;
     bool                        has_order_id                ( const string& order_id ) const        { return job_chain_by_order_id_or_null( order_id ) != NULL; }
-  //void                        complete_and_add            ( Job_chain* causing_job_chain );
     int                         index                       () const                                { return _index; }
     string                      name                        () const;
     string                      path                        () const                                { return name(); }

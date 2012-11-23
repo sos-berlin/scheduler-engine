@@ -792,7 +792,7 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
 {
     xml::Element_ptr result = doc.createElement( element_name );
     result.setAttribute("count",count());
-    result.setAttribute("estimated_byte_count",estimated_byte_count());
+    //result.setAttribute("estimated_byte_count",estimated_byte_count());
 
     THREAD_LOCK( _lock )
     {
@@ -5179,6 +5179,7 @@ STDMETHODIMP Com_job_chain_node::put_Action( BSTR action_bstr )
     try
     {
         set_action( string_from_bstr( action_bstr ) );
+        database_record_store();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 

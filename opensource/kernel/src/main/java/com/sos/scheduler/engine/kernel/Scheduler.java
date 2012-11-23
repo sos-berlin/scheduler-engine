@@ -9,7 +9,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
+import com.sos.scheduler.engine.data.scheduler.SchedulerClusterMemberKey;
+import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
@@ -42,6 +45,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -55,7 +59,7 @@ import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
 
 @ForCpp
 public final class Scheduler implements Sister,
-        SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule {
+        SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule, HasInjector {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
@@ -86,11 +90,28 @@ public final class Scheduler implements Sister,
             return new AbstractModule() {
                 @Override protected void configure() {
                     bind(EventBus.class).toInstance(eventBus);
+                    bind(SchedulerInstanceId.class).toInstance(instanceId);
+                    bind(SchedulerId.class).toProvider(new Provider<SchedulerId>() {
+                        @Override public SchedulerId get() {
+                            return new SchedulerId(cppProxy.id());
+                        }
+                    });
+                    bind(ClusterMemberId.class).toProvider(new Provider<ClusterMemberId>() {
+                        @Override public ClusterMemberId get() { return new ClusterMemberId(cppProxy.cluster_member_id()); }
+                    });
+                    bind(SchedulerClusterMemberKey.class).toProvider(new Provider<SchedulerClusterMemberKey>() {
+                        @Inject private SchedulerId schedulerId;
+                        @Inject private ClusterMemberId clusterMemberId;
+                        @Override public SchedulerClusterMemberKey get() { return new SchedulerClusterMemberKey(schedulerId, clusterMemberId); }
+                    });
                     bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
                     bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
+                    bind(EntityManagerFactory.class).toProvider(new Provider<EntityManagerFactory>() {
+                        @Override public EntityManagerFactory get() { return databaseSubsystem.entityManagerFactory(); }
+                    }).in(Scopes.SINGLETON);
                     bind(EntityManager.class).toProvider(new Provider<EntityManager>(){
-                        @Override public EntityManager get() { return databaseSubsystem.getEntityManager(); }
-                    });
+                        @Override public EntityManager get() { return databaseSubsystem.entityManagerFactory().createEntityManager(); }
+                    }).in(Scopes.SINGLETON);
                     bind(FolderSubsystem.class).toInstance(folderSubsystem);
                     bind(HasGuiceModule.class).toInstance(Scheduler.this);  // Für JettyPlugin
                     bind(JobSubsystem.class).toInstance(jobSubsystem);

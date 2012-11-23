@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DefaultTargets="Build" ToolsVersion="4.0" xsi:schemaLocation="http://schemas.microsoft.com/developer/msbuild/2003 ">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -235,7 +235,28 @@
     <ClCompile Include="java__net__URL.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils.cxx" />
-  </ItemGroup>
+  
+    
+    
+    
+    
+    
+    
+    
+    <ClCompile Include="scala__Option.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__data__job__TaskId.cxx" />
+    
+    <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistent.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__data__job__TaskPersistent.cxx" />
+    <ClCompile Include="org__joda__time__Duration.cxx" />
+    <ClCompile Include="org__joda__time__base__AbstractDuration.cxx" />
+    <ClCompile Include="org__joda__time__base__BaseDuration.cxx" />
+    
+    
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__JobChain.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__Node.cxx" />
+    <ClCompile Include="org__joda__time__ReadableInstant.cxx" />
+    </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />
   </ItemGroup>

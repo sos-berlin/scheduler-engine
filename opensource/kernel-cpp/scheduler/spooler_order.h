@@ -53,8 +53,6 @@ enum Virgin_is_allowed {
     virgin_allowed = true
 };
 
-//inline Virgin_is_allowed        virgin_is_allowed       (bool b) { return b? virgin_allowed : virgin_not_allowed; }
-
 //--------------------------------------------------------------------------------------------Order
 
 struct Order : Com_order,
@@ -106,9 +104,6 @@ struct Order : Com_order,
     //
 
     Standing_order_folder*      standing_order_folder       () const                                { return typed_folder(); }
-  //string                      job_chain_name              () const                                { return _job_chain_name; }
-  //string                      order_id                    () const                                { return _order_id; }
-
     
     void                        load_record                 ( const Absolute_path&, const Record& );
     void                        load_blobs                  ( Read_transaction* );
@@ -552,6 +547,7 @@ struct Node : Com_job_chain_node,
     Node*                       next_node                   () const                                { return _next_node; }
     Node*                       error_node                  () const                                { return _error_node; }
     Job_chain*                  job_chain                   () const                                { return _job_chain; }
+    Absolute_path               job_chain_path              () const;
 
     Type                        type                        () const                                { return _type; }
     
@@ -560,13 +556,12 @@ struct Node : Com_job_chain_node,
     void                    set_delay                       (const Duration& d)                     { _delay = d; }
     Duration                    delay                       () const                                { return _delay; }
     Action                      action                      () const                                { return _action; }
-    string                      action_name                 () const                                { return string_from_action( _action ); }
+    virtual void                set_action                  ( const string& );
+    string               string_action                      () const                                { return string_from_action( _action ); }
     int                         priority                    () const                                { return _priority; }
     bool                        is_ready_for_order_processing() const;
     virtual bool                is_type                     ( Type ) const                          { return false; }
 
-    virtual void                set_action                  ( const string& );
-    string               string_action                      () const                                { return string_from_action( _action ); }
     virtual void                wake_orders                 ()                                      {}
 
 
@@ -582,9 +577,8 @@ struct Node : Com_job_chain_node,
     void                        set_state                   ( State state )                         { _state = state; }
 
     void                        database_record_store       ();
-  //void                        database_record_remove      ();
-  //void                        database_record_load        ( Read_transaction* );
 
+    const NodeJ                _typed_java_sister;
     Order::State               _order_state;                // Bezeichnung des Zustands
     Order::State               _next_state;                 // Bezeichnung des Folgezustands
     Order::State               _error_state;                // Bezeichnung des Fehlerzustands
@@ -846,7 +840,6 @@ struct Job_chain : Com_job_chain,
     void                        remove_order                ( Order* );
     ptr<Order>                  order                       ( const Order::Id& );
     ptr<Order>                  order_or_null               ( const Order::Id& );
-    //Order*                      order_or_null_by_string_id  (const string&);
     bool                        has_order_id                ( Read_transaction*, const Order::Id& );
     int                         order_count                 ( Read_transaction* ) const;
     bool                        has_order                   () const;
@@ -858,7 +851,6 @@ struct Job_chain : Com_job_chain,
 
     void                        add_order_to_blacklist      ( Order* );
     void                        remove_order_from_blacklist ( Order* );
-  //bool                        order_is_on_blacklist       ( const string& order_id );
     Order*                      blacklisted_order_or_null   ( const string& order_id );
     stdext::hash_set<string>    db_get_blacklisted_order_id_set( const File_path& directory, const Regex& );
 
@@ -891,6 +883,7 @@ struct Job_chain : Com_job_chain,
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
     void                        check_max_orders            () const;
+    bool                        is_stopped                  () const                                { return _is_stopped; }
 
   private:
     void                        check_for_removing          ();
@@ -904,6 +897,7 @@ struct Job_chain : Com_job_chain,
     friend struct               Order;
 
     Fill_zero                  _zero_;
+    const JobChainJ            _typed_java_sister;
     State                      _state;
     bool                       _is_stopped;
     string                     _title;

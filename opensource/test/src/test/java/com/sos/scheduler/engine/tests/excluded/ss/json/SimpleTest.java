@@ -57,23 +57,23 @@ public class SimpleTest extends SchedulerTest {
 
         // serialize the event into JSON
         mapper.writeValue(outputStream, e);
-        assertEquals("{\"TYPE\":\"TaskStartedEvent\",\"id\":\"1\",\"jobPath\":\"/job1\"}",outputStream.toString());
+        assertEquals("{\"TYPE\":\"TaskStartedEvent\",\"taskId\":1,\"jobPath\":\"/job1\"}", outputStream.toString());
 
         // deserialize the event from JSON into the TaskStartEvent object
         TaskStartedEvent ev = mapper.readValue(outputStream.toString(), TaskStartedEvent.class);
-        assertEquals(jobPath, ev.getJobPath());
+        assertEquals(jobPath, ev.jobPath());
 
         // deserialize the event from JSON into a JsonNode
         JsonNode n = mapper.readTree(outputStream.toString());
         assertEquals(TaskStartedEvent.class.getSimpleName(),n.get("TYPE").asText());
-        assertEquals("1",n.get("id").asText());
+        assertEquals("1",n.get("taskId").asText());
         assertEquals(jobPath.asString(), n.get("jobPath").asText());
 	}
     
 	@HotEventHandler
 	/**
 	 * Das Objekt t.getOrder() ist hier null.
-	 * 
+	 *
 	 * @param e
 	 * @param t
 	 * @throws java.io.IOException

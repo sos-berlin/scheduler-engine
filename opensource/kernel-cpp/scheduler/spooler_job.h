@@ -138,6 +138,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job>::java_sister(); }
+    const JobJ&                 typed_java_sister           () const                                { return _typed_java_sister; }
 
     // Scheduler_object:
     virtual string              obj_name                    () const                                { return "Job " + path().without_slash(); }
@@ -170,6 +171,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        set_dom                     ( const xml::Element_ptr& );
     Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
     Duration                    average_step_duration       ( const Duration& deflt );
+    Duration                    db_average_step_duration    ( const Duration& deflt );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
 
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
@@ -192,6 +194,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
+    bool                        is_permanently_stopped      () const                                { return _is_permanently_stopped; }
     string                      job_state                   ();
     string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
@@ -218,6 +221,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        database_record_store       ();
     void                        database_record_remove      ();
     void                        database_record_load        ( Read_transaction* );
+    void                        load_tasks                  ( Read_transaction* );
+    void                        load_tasks_with_java        ();
     void                        load_tasks_from_db          ( Read_transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
@@ -225,6 +230,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) );
     void                        enqueue_task                ( Task* );
+    void                        enqueue_task                (const TaskPersistentJ&);
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     bool                        check_for_changed_directory ( const Time& now );
@@ -261,7 +267,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
 
     Time                        next_time                   ()                                      { return _next_time; }
-    Time                        next_start_time             ();
+    Time                        next_start_time             () const;
+    int64                       next_start_time_millis      () const                                { return next_start_time().millis(); }
     bool                        has_next_start_time         ()                                      { return !next_start_time().is_never(); }
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
@@ -347,6 +354,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
   protected:
     friend struct               Job_history;
+
+    const JobJ                 _typed_java_sister;
 
     string                     _title;                      // <job title="">
     string                     _state_text;                 // spooler_job.state_text = "..."

@@ -10,6 +10,7 @@
 #include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct TaskPersistent; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Prefix_logC; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}

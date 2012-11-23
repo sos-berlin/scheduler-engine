@@ -77,6 +77,7 @@ struct Time
     static Time                 of_utc_date_time            (const string& s)               { return of_date_time(s, "UTC"); }
     static Time                 of_local_date_time          (const string&);
     static Time                 of_date_time                (const string& date_time, const string& time_zone_name);
+    static Time                 of_millis                   (int64 millis)                  { return Time(millis / 1000.0); }
 
 
     explicit                    Time                        ( double t = 0.0 )              { set(t); }

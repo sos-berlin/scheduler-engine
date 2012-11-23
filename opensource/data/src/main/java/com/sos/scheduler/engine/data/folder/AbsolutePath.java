@@ -22,6 +22,11 @@ public class AbsolutePath extends Path {
         return result.endsWith("/")? result : result +"/";
     }
 
+    public final String withoutStartingSlash() {
+        assert(asString().startsWith("/"));
+        return asString().substring(1);
+    }
+
     /** @param path ist absolut oder relativ zur Wurzel. */
     public static AbsolutePath of(String path) {
         return new AbsolutePath(path.startsWith("/")? path : "/" + path);

@@ -13,6 +13,9 @@ public enum SettingName {
     /** Grundeinstellung der Java-Optionen für alle Jobs. */
     jobJavaOptions(4),
 
+    /** Datenbank über neue Java-Schnittstelle statt über die alte Hostware. */
+    useJavaPersistence(5),
+
     orderDistributedBalanced(7);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */

@@ -48,7 +48,7 @@ public class GetSourceCodeIT extends SchedulerTest {
 
     @EventHandler
     public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
-        String jobName = e.getJobPath().getName();
+        String jobName = e.jobPath().getName();
         String scriptCode = controller().scheduler().getVariables().get(jobName).trim();
         resultMap.put(jobName,scriptCode);
         taskCount++;

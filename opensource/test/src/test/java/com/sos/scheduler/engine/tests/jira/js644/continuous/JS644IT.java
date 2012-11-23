@@ -16,6 +16,7 @@ import com.sos.scheduler.engine.test.TestSchedulerController;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
 import org.apache.log4j.Logger;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
@@ -29,6 +30,7 @@ import static org.junit.Assert.fail;
 /** Der Test lässt einen Auftrag kontinuierlich durch eine Jobkette laufen.
  * Der Thread {@link FilesModifierRunnable} ändert zu zufälligen Zeitpunkten einen Job
  */
+@Ignore //slowTestRule greift nicht mehr - 2012-09-29
 public final class JS644IT extends SchedulerTest {
     @ClassRule public static final TestRule slowTestRule = SlowTestRule.singleton;
 

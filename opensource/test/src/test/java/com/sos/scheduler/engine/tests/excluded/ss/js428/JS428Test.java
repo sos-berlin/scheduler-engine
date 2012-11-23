@@ -94,14 +94,14 @@ public class JS428Test extends SchedulerTest {
 
     @HotEventHandler
     public void handleStepStart(OrderStepStartedEvent e, Order order) throws IOException, InterruptedException {
-        logger.debug("STEP_START=" + order.getState().asString());
+        logger.debug("STEP_START=" + order.getState().string());
         setStepParameter(order, order.getState());
         showOrderParameter(order, order.getState());
     }
 
     @HotEventHandler
     public void handleStepEnd(OrderStepEndedEvent e, Order order) throws IOException, InterruptedException {
-        logger.debug("STEP_END=" + order.getState().asString());
+        logger.debug("STEP_END=" + order.getState().string());
     }
 
     @HotEventHandler
@@ -118,7 +118,7 @@ public class JS428Test extends SchedulerTest {
     }
 
     private void setStepParameter(Order order, OrderState setForState) {
-        String step = setForState.asString();
+        String step = setForState.string();
         String stepId = step + DELIMITER;
         for (String orderParam : orderParams.getNames()) {
             String orderParamValue = orderParams.get(orderParam);

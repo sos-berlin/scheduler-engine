@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
+import com.sos.scheduler.engine.data.job.TaskHistoryEntry;
 import com.sos.scheduler.engine.kernel.command.GenericResultXmlizer;
-import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,32 +17,29 @@ class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHistoryEn
     @Override protected final Element doToElement(TaskHistoryEntriesResult r) {
         Document doc = newDocument();
         Element result = doc.createElement("myResult");
-        for (TaskHistoryEntity e: r.getTaskHistoryEntries())
+        for (TaskHistoryEntry e: r.getTaskHistoryEntries())
             result.appendChild(elementOfTaskHistoryEntity(doc, e));
         return result;
     }
 
-    private static Element elementOfTaskHistoryEntity(Document doc, TaskHistoryEntity e) {
+    private static Element elementOfTaskHistoryEntity(Document doc, TaskHistoryEntry o) {
         Element result = doc.createElement("row");
-        if (!e.getClusterMemberId().isEmpty())
-            result.setAttribute("clusterMemberId", e.getClusterMemberId().asString());
-        if (!e.getSchedulerId().isEmpty())
-            result.setAttribute("schedulerId", e.getSchedulerId().asString());
-        if (!e.getJobPath().isEmpty())
-            result.setAttribute("job", e.getJobPath());
-        if (e.getCause() != null)
-            result.setAttribute("cause", e.getCause());
-        if (e.getSteps() != null)
-            result.setAttribute("steps", e.getSteps().toString());
-        if (e.getStartTime() != null)
-            result.setAttribute("startedAt", e.getStartTime().toString());
-        if (e.getEndTime() != null)
-            result.setAttribute("endedAt", e.getEndTime().toString());
-        if (e.getErrorCode() != null)
-            result.setAttribute("errorCode", e.getErrorCode());
-        if (e.getErrorText() != null)
-            result.setAttribute("errorText", e.getErrorText());
-
+        setAttributeOptional(result, "clusterMemberId", o.clusterMemberId().string());
+        setAttributeOptional(result, "schedulerId", o.schedulerId().string());
+        setAttributeOptional(result, "job", o.jobPath().string());
+        setAttributeOptional(result, "cause", o.cause());
+        if (o.stepsOption().isDefined())
+            result.setAttribute("steps", o.stepsOption().get().toString());
+        result.setAttribute("startedAt", o.startTime().toString());
+        if (o.endTimeOption().isDefined())
+            result.setAttribute("endedAt", o.endTimeOption().get().toString());
+        setAttributeOptional(result, "errorCode", o.errorCode());
+        setAttributeOptional(result, "errorText", o.errorText());
         return result;
+    }
+
+    private static void setAttributeOptional(Element e, String name, String value) {
+        if (!value.isEmpty())
+            e.setAttribute(name, value);
     }
 }

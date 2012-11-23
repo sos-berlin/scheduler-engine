@@ -11,6 +11,7 @@ import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 class JavaOptionsIT extends ScalaSchedulerTest {
+
   import JavaOptionsIT._
 
   override def checkedBeforeAll() {
@@ -32,7 +33,7 @@ class JavaOptionsIT extends ScalaSchedulerTest {
 
   private def runJob(j: JobPath) {
     scheduler executeXml <start_job job={j.asString}/>
-    eventPipe.nextWithCondition { e: TaskClosedEvent => e.getJobPath == j }
+    eventPipe.nextWithCondition { e: TaskClosedEvent => e.jobPath == j }
     scheduler.getVariables.get(j.getName +".myJavaOption") should equal ("TEST")
   }
 }

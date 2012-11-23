@@ -11,18 +11,21 @@ namespace com_objects {
 }
 
 struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
+                                Settings                    ();
     virtual                    ~Settings                    ();
     void                        set_defaults                (Spooler*);
     void                        set_from_variables          (const com_objects::Com_variable_set&);
     void                        set                         (int number, const string& value);
     string                      get                         (int number) const;
 
+    Fill_zero                  _zero_;
     string                     _db_name;
     string                     _job_java_options;
     string                     _job_java_classpath;
     string                     _html_dir;
     bool                       _keep_order_content_on_reschedule;
     int                        _max_length_of_blob_entry;
+    bool                       _use_java_persistence;
     bool                       _order_distributed_balanced;
 };
 
