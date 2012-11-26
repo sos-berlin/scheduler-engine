@@ -36,6 +36,7 @@ import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
+import com.sos.scheduler.engine.kernel.time.TimeZones;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.childElements;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
+import static org.joda.time.DateTimeZone.UTC;
 
 @ForCpp
 public final class Scheduler implements Sister,
@@ -132,7 +134,10 @@ public final class Scheduler implements Sister,
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         enableJavaUtilLoggingOverSLF4J();
-        TimeZone.setDefault(TimeZone.getTimeZone("Etc/UTC"));       // Für Hibernate @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
+
+        TimeZones.initialize();
+        //DateTimeZone.setDefault(UTC);
+        TimeZone.setDefault(UTC.toTimeZone());       // Für JPA @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
 
         this.cppProxy = cppProxy;
         configuration = new SchedulerConfiguration(cppProxy);
