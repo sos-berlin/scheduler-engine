@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+>
+    <config>
+        <params>
+            <param name="scheduler_script" value="*"/>
+        </params>
+        <scheduler_script>
+            <script language="javascript">
+                function spooler_init() {
+                    add("spooler_init")
+                    return true;
+                }
+
+                function add(name) {
+                    spooler.variables.set_value("scheduler_script", spooler.variables.value("scheduler_script") + "("+ name +")")
+                }
+            </script>
+        </scheduler_script>
+    </config>
+</spooler>

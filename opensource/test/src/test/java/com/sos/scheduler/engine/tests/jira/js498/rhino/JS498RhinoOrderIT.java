@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
@@ -33,7 +34,7 @@ public class JS498RhinoOrderIT extends SchedulerTest {
     private static final String jobchain = "chain";
 
     private final CommandBuilder util = new CommandBuilder();
-    private HashMap<String,String> resultMap;
+    private Map<String,String> resultMap;
 
     @Test
     public void test() throws IOException {
@@ -54,8 +55,8 @@ public class JS498RhinoOrderIT extends SchedulerTest {
         return resultFile;
     }
 
-    private HashMap<String,String> getResultMap(File resultFile) throws IOException {
-        HashMap<String,String> result = new HashMap<String, String>();
+    private Map<String,String> getResultMap(File resultFile) throws IOException {
+        Map<String,String> result = new HashMap<String, String>();
         List<String> lines = Files.readLines(resultFile, Charset.defaultCharset());
         for(String line : lines) {
             String[] arr = line.split("=");
@@ -72,7 +73,7 @@ public class JS498RhinoOrderIT extends SchedulerTest {
     }
 
     private void checkJobObjects() {
-        assertObject("spooler.variables.count", "2");
+        assertObject("spooler.variables.count", "3");
         assertObject("spooler_task.order.job_chain.name", "chain");
         assertObject("spooler_task.params.names", "taskparam1;taskparam2");
         assertObject("spooler_job.order_queue.length", "1");

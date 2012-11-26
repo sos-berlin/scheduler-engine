@@ -14,29 +14,28 @@ public class ScriptAdapterJob extends Job_impl {
     private static final String spidermonkeyAdapterLanguageId = "javascript";
     private final JobScriptInstanceAdapter adapter;
 
-    //TODO Was passiert, wenn der Scriptcode fehlerhaft ist
-    //TODO funktioniert das Scripting auch bei remote jobs? sos.spooler und com.sos.scheduler.engine.scripting in eigenes Artefakt auslagern, das von Taskprozessen verwendet wird -> com.sos.scheduler.task
-
     public ScriptAdapterJob(String language, String script) throws Exception {
         final Parameters p = parseLanguageParameter(language);
         adapter = new JobScriptInstanceAdapter(
                 p.language,
                 new Lazy<ImmutableMap<String,Object>>() {
                     @Override protected ImmutableMap<String,Object> compute() {
-                        return ImmutableMap.of(
-                                "spooler", conditionalToBean(p.isUsingBean, spooler),
-                                "spooler_task", conditionalToBean(p.isUsingBean, spooler_task),
-                                "spooler_job", conditionalToBean(p.isUsingBean, spooler_job),
-                                "spooler_log", conditionalToBean(p.isUsingBean, spooler_log));
+                        ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
+                        if (spooler != null)
+                            result.put("spooler", conditionalToBean(p.isUsingBean, spooler));
+                        if (spooler_task != null)
+                            result.put("spooler_task", conditionalToBean(p.isUsingBean, spooler_task));
+                        if (spooler_job != null)
+                            result.put("spooler_job", conditionalToBean(p.isUsingBean, spooler_job));
+                        if (spooler_log != null)
+                            result.put("spooler_log", conditionalToBean(p.isUsingBean, spooler_log));
+                        return result.build();
                     }},
                 script);
     }
 
     private static Parameters parseLanguageParameter(String languageString) {
-        boolean isBeanCall = true;
-        if (!languageString.toLowerCase().equals(spidermonkeyAdapterLanguageId)) {
-            isBeanCall = false;
-        }
+        boolean isBeanCall = languageString.toLowerCase().equals(spidermonkeyAdapterLanguageId);
         return new Parameters(languageString, isBeanCall);
     }
 
