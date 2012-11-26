@@ -13,7 +13,7 @@ import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {
     private static final Logger logger = Logger.getLogger(KernelCppArtifactBinaries.class);
-    private static final String kernelCppDirName = "opensource/kernel-cpp";
+    private static final String kernelCppDirName = "engine/opensource/kernel-cpp";
     private static final String bin = isWindows? cpuArchitecture.visualStudioName() +"/Debug" :
                                                  cpuArchitecture.officialName() +"/Release";
 
