@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sos.scheduler.engine</groupId>
@@ -129,7 +130,7 @@
             <properties>
                 <operatingSystem>solaris</operatingSystem>
                 <osArch>solaris-${os.arch}</osArch>
-		        <cpuArchitecture>${os.arch}</cpuArchitecture>
+                <cpuArchitecture>${os.arch}</cpuArchitecture>
             </properties>
         </profile>
 
@@ -586,33 +587,33 @@
                     <groupId>org.scala-tools</groupId>
                     <artifactId>maven-scala-plugin</artifactId>
                     <version>${scala.plugin.version}</version>
-	                <executions>
-	                    <execution>
-	                        <id>scala-compile-first</id>
-	                        <phase>process-resources</phase>
-	                        <goals>
-	                            <goal>add-source</goal>
-	                            <goal>compile</goal>
-	                        </goals>
-	                    </execution>
-	                    <execution>
-	                        <id>scala-test-compile</id>
-	                        <phase>process-test-resources</phase>
-	                        <goals>
-	                            <goal>testCompile</goal>
-	                        </goals>
-	                    </execution>
-	                </executions>
-	                <configuration>
-	                    <jvmArgs>
-	                        <!-- Vermeidet StackOverflowError auf manchen Linux-Rechnern: -->
-	                        <jvmArg>-Xss1M</jvmArg>
-	                    </jvmArgs>
-	                    <args>
-	                        <arg>-deprecation</arg>
-	                    </args>
-	                </configuration>
-	            </plugin>
+                    <executions>
+                        <execution>
+                            <id>scala-compile-first</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>scala-test-compile</id>
+                            <phase>process-test-resources</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <jvmArgs>
+                            <!-- Vermeidet StackOverflowError auf manchen Linux-Rechnern: -->
+                            <jvmArg>-Xss1M</jvmArg>
+                        </jvmArgs>
+                        <args>
+                            <arg>-deprecation</arg>
+                        </args>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
                     <version>2.3.1</version>
@@ -656,7 +657,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -669,7 +670,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -686,7 +687,7 @@
     </issueManagement-->
 
     <repositories>
-       <repository>
+        <repository>
             <id>sos-os</id>
             <name>SOS snapshot Repository (${osArch})</name>
             <url>http://archiva.sos:8080/archiva/repository/sos-os-${osArch}</url>
@@ -713,8 +714,8 @@
             <url>http://archiva.sos:8080/archiva/repository/sos-release</url>
         </repository>
         <snapshotRepository>
-          <id>snapshots</id>
-          <url>http://archiva.sos:8080/archiva/repository/snapshots/</url>
+            <id>snapshots</id>
+            <url>http://archiva.sos:8080/archiva/repository/snapshots/</url>
         </snapshotRepository>
         <!--site>
             <id>sos-http</id>
@@ -725,14 +726,13 @@
     <reporting>
         <plugins>
             <plugin>
-              <groupId>org.scala-tools</groupId>
-              <artifactId>maven-scala-plugin</artifactId>
-              <version>${scala.plugin.version}</version>
-              <configuration>
-                  <scalaVersion>${scala.version}</scalaVersion>
-              </configuration>
-          </plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>${scala.plugin.version}</version>
+                <configuration>
+                    <scalaVersion>${scala.version}</scalaVersion>
+                </configuration>
+            </plugin>
         </plugins>
     </reporting>
-    
 </project>
