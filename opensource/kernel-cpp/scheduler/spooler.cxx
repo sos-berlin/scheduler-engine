@@ -1610,6 +1610,8 @@ void Spooler::read_command_line_arguments()
             else
             if (opt.with_value("job-java-classpath")) { modifiable_settings()->_job_java_classpath = opt.value(); }
             else
+            if (opt.with_value("time-zone")) { _time_zone_name = opt.value(); }
+            else
                 throw_sos_option_error( opt );
         }
 
