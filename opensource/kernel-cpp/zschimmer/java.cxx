@@ -1239,16 +1239,18 @@ void Env::throw_java( const string& text1, const string& text2 )
 
 string Env::stack_trace_as_string(jthrowable t) 
 {
-    if (jclass c = Vm::static_vm->_standard_classes->_guava_throwables_class) {
-        if (jmethodID m = Vm::static_vm->_standard_classes->_guava_throwables_getStackTraceAsString_method_id) {
-            JNIEnv* jenv = jni_env();
-            Local_jstring s ((jstring)jenv->CallStaticObjectMethod(c, m,  t));
-            if( !s || jenv->ExceptionCheck() )  {
-                jenv->ExceptionClear();
-                return "(Error when fetching stack trace)";
-            }
-            return string_from_jstring(s);
+    if (Vm* vm = Vm::static_vm) 
+    if (Vm::Standard_classes* st = vm->_standard_classes) 
+    if (jclass c = Vm::static_vm->_standard_classes->_guava_throwables_class) 
+    if (jmethodID m = Vm::static_vm->_standard_classes->_guava_throwables_getStackTraceAsString_method_id) {
+        JNIEnv* jenv = jni_env();
+        Local_jstring s ((jstring)jenv->CallStaticObjectMethod(c, m,  t));
+        if( !s || jenv->ExceptionCheck() )  {
+            jenv->ExceptionClear();
+            return "(Error when fetching stack trace)";
         }
+        else
+            return string_from_jstring(s);
     }
     return "(Stack trace requested before java initialisation has been completed)";
 }
