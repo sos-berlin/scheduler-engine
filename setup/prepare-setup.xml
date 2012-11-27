@@ -30,7 +30,6 @@ to run without maven integration.
     </target>
 
     <target name="-init" description="initialize the platform specific settings">
-
         <echo message="${settings.localRepository}"/>
 
         <property name="folder.name" value="${setup.platform}"/>
@@ -73,31 +72,29 @@ to run without maven integration.
         </fileset>
 
         <fileset dir="${source.dir}" id="files.jar">
+            <include name="activemq*.jar"/>
+            <include name="geronimo*.jar"/>
             <include name="guava*.jar"/>
             <include name="guice*.jar"/>
-            <include name="log4j-*.jar"/>
-            <include name="geronimo*.jar"/>
-            <include name="activemq*.jar"/>
-            <include name="slf4j*.jar"/>
+            <include name="h2-*.jar"/>
             <include name="jackson-*.jar"/>
             <include name="jersey-*.jar"/>
             <include name="joda-convert-*.jar"/>
             <include name="joda-time-*.jar"/>
+            <include name="log4j-*.jar"/>
             <include name="scala-library-*.jar"/>
-            <include name="h2-*.jar"/>
+            <include name="slf4j*.jar"/>
             <!-- additional jars for jetty integration -->
-            <include name="jul-to-slf4j-*.jar"/>
+            <include name="aopalliance-*.jar"/>
             <include name="javax*.jar"/>
             <include name="jetty-*.jar"/>
-            <include name="servlet-api-*.jar"/>
-            <include name="aopalliance-*.jar"/>
             <exclude name="jetty-${version.number}*.jar"/>
+            <include name="jul-to-slf4j-*.jar"/>
+            <include name="servlet-api-*.jar"/>
         </fileset>
-
     </target>
 
     <target name="-unzip" description="unzip the necessary binary files (except the jars)">
-
         <unzip dest="${source.dir}/${folder.name}">
             <patternset>
                 <exclude name="**/*.map"/>
@@ -107,11 +104,9 @@ to run without maven integration.
                 <include name="*${setup.platform}*.jar"/>
             </fileset>
         </unzip>
-
     </target>
 
     <target name="-copy" description="copy all setup files for the scheduler kernel into a directory">
-
         <!-- copy the sos specific jar files to the target directory and normalize theirs names -->
         <copy todir="${target.dir}/scheduler/config">
             <fileset refid="files.config"/>
@@ -128,7 +123,6 @@ to run without maven integration.
     </target>
 
     <target name="-copy.platform" description="copy the platform specific files" if="folder.name">
-
         <echo message="the folder name is ${folder.name}"/>
         <copy todir="${target.dir}/scheduler.${folder.name}/lib">
             <fileset refid="files.lib.platform"/>
@@ -137,7 +131,6 @@ to run without maven integration.
         <copy todir="${target.dir}/scheduler.${folder.name}/bin">
             <fileset refid="files.bin.platform"/>
         </copy>
-
     </target>
 
     <target name="-versioninfo" description="creates a file with version information">
@@ -147,5 +140,4 @@ to run without maven integration.
             <entry key="builddate" type="date" value="now" pattern="yyyy-MM-dd HH:mm:ss"/>
         </propertyfile>
     </target>
-
 </project>
