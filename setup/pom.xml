@@ -115,16 +115,15 @@ call prepare-setup.sh <version> to use this pom
     </build>
 
     <dependencies>
-        <!-- Liefert alle benötigten jars für die engine aus dem Artefakt jar und deren Abhängige -->
         <dependency>
+            <!-- Liefert alle benötigten jars für die engine aus dem Artefakt jar und deren Abhängige -->
             <groupId>${project.groupId}</groupId>
             <artifactId>jar</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
 
-        <!-- plattformspezifischer C++ Kern -->
         <dependency>
+            <!-- Plattformspezifischer C++ Kern -->
             <groupId>${project.groupId}</groupId>
             <artifactId>kernel-cpp</artifactId>
             <version>${project.version}</version>
