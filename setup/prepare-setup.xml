@@ -77,6 +77,8 @@ to run without maven integration.
             <include name="guava*.jar"/>
             <include name="guice*.jar"/>
             <include name="h2-*.jar"/>
+            <include name="javax.inject-*.jar"/>
+            <include name="javax.persistence-*.jar"/>
             <include name="jackson-*.jar"/>
             <include name="jersey-*.jar"/>
             <include name="joda-convert-*.jar"/>
@@ -86,7 +88,7 @@ to run without maven integration.
             <include name="slf4j*.jar"/>
             <!-- additional jars for jetty integration -->
             <include name="aopalliance-*.jar"/>
-            <include name="javax*.jar"/>
+            <include name="javax.servlet-*.jar"/>
             <include name="jetty-*.jar"/>
             <exclude name="jetty-${version.number}*.jar"/>
             <include name="jul-to-slf4j-*.jar"/>
