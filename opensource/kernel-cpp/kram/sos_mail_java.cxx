@@ -39,7 +39,7 @@ Java_message::Java_message( zschimmer::javabridge::Vm* vm )
     //Global_jobject(vm), 
     _zero_(this+1),
     _java_vm                    ( vm ),
-    _java_class                 ( "sos/mail/Message" ),
+    _java_class                 ( "com/sos/scheduler/engine/kernel/mail/MailMessage" ),
     _close_method               ( &_java_class, "close"           , "()V" ),
     _set_property_method        ( &_java_class, "set_property"    , "(Ljava/lang/String;Ljava/lang/String;)V" ),
     _set_method                 ( &_java_class, "set"             , "(Ljava/lang/String;[B)V" ),

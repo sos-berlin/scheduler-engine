@@ -110,5 +110,9 @@
             <groupId>org.joda</groupId>
             <artifactId>joda-convert</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+        </dependency>
     </dependencies>
 </project>
