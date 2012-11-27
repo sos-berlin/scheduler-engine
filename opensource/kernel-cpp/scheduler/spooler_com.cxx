@@ -5798,7 +5798,7 @@ STDMETHODIMP Com_order::get_String_next_start_time( BSTR* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = String_to_bstr( _order->at().as_string(), result );
+        hr = String_to_bstr( _order->at().without_timezone_string(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 

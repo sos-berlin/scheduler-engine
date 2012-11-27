@@ -2297,7 +2297,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
                 if( tasks.length() > 0 )  tasks << ", ";
                 tasks << task->obj_name() << " " << task->state_name();
                 Time next_time = task->next_time();
-                if( !next_time.is_never() )  tasks << " until " << next_time;
+                if( !next_time.is_never() )  tasks << " until " << next_time.as_string(_time_zone_name);
             }
         }
         if( tasks.length() == 0 )  tasks << "no tasks";
@@ -2308,7 +2308,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
             if( jobs.length() > 0 )  jobs << ", ";
             jobs << job->obj_name() << " " << job->state_name();
             Time next_time = job->next_time();
-            if( !next_time.is_never() )  jobs << " until " << next_time; 
+            if( !next_time.is_never() )  jobs << " until " << next_time.as_string(_time_zone_name); 
             if( !job->is_in_period( Time::now() ) )  jobs << " (not in period)";
             if( job->_waiting_for_process )  jobs << " (waiting for process)";
         }
@@ -2697,7 +2697,7 @@ void Spooler::run()
                 {
                     S line;
                     line << "-------------scheduler loop " << _loop_counter << "-------------> " << 
-                            catched_event_string << "  wait_until=" << wait_until;
+                            catched_event_string << "  wait_until=" << wait_until.as_string(_time_zone_name);
                     if( wait_until_object )  line << "  for " << wait_until_object->obj_name();
                     line << ", something_done=" << something_done << "\n";  
                     log << line;

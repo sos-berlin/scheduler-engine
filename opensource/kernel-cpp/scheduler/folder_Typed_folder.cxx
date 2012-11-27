@@ -213,12 +213,12 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         t.set_utc( changed_file_info->last_write_time() );
 
                         if( old_file_based ) {
-                            old_file_based->log()->info( message_string( "SCHEDULER-892", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
+                            old_file_based->log()->info( message_string( "SCHEDULER-892", changed_file_info->path(), t.as_string(_spooler->_time_zone_name), subsystem()->object_type_name() ) );
                             old_file_based->handle_event( File_based::bfevt_modified ); 
                             old_file_based->set_replacement( file_based );
                             current_file_based = NULL;
                         } else {
-                            file_based->log()->info( message_string( "SCHEDULER-891", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
+                            file_based->log()->info( message_string( "SCHEDULER-891", changed_file_info->path(), t.as_string(_spooler->_time_zone_name), subsystem()->object_type_name() ) );
                             file_based->handle_event( File_based::bfevt_added );
                             add_file_based( file_based );
                         }
@@ -285,7 +285,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
             Time t;
             t.set_utc( directory_entry->_file_info->last_write_time() );
 
-            msg = message_string( "SCHEDULER-428", directory_entry->_file_info->path(), t.as_string(), x );
+            msg = message_string( "SCHEDULER-428", directory_entry->_file_info->path(), t.as_string(_spooler->_time_zone_name), x );
         }
         else
         {

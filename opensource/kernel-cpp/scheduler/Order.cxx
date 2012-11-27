@@ -353,7 +353,7 @@ void Order::db_insert_order_history_record( Transaction* ta )
         insert[ "state"      ] = state().as_string();
         insert[ "state_text" ] = state_text();
         insert[ "spooler_id" ] = _spooler->id_for_db();
-        insert.set_datetime( "start_time", start_time().as_string(time::without_ms) );
+        insert.set_datetime( "start_time", start_time().db_string(time::without_ms) );
         //insert.set_datetime( "end_time"  , "0000-00-00 00:00:00" );
 
         ta->execute( insert, Z_FUNCTION );
@@ -387,7 +387,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
             update[ "state"      ] = state().as_string();
             update[ "state_text" ] = state_text();
             update[ "title"      ] = title();
-            update.set_datetime( "end_time"  , ( end_time().not_zero()? end_time() : Time::now() ).as_string(time::without_ms) );
+            update.set_datetime( "end_time"  , ( end_time().not_zero()? end_time() : Time::now() ).db_string(time::without_ms) );
 
             ta.execute( update, Z_FUNCTION );
 
@@ -475,7 +475,7 @@ void Order::db_insert_order_step_history_record( Transaction* ta )
         insert[ "step"       ] = _step_number;
         insert[ "state"      ] = state().as_string();
         insert[ "task_id"    ] = _task->id();
-        insert[ "start_time" ].set_datetime( Time::now().as_string( time::without_ms ) );
+        insert[ "start_time" ].set_datetime( Time::now().db_string( time::without_ms ) );
 
         ta->execute( insert, Z_FUNCTION );
     }
@@ -496,7 +496,7 @@ void Order::db_update_order_step_history_record( Transaction* ta )
         update.and_where_condition( "history_id", _history_id  );
         update.and_where_condition( "step"      , _step_number );
         
-        update[ "end_time"   ].set_datetime( Time::now().as_string( time::without_ms ) );
+        update[ "end_time"   ].set_datetime( Time::now().db_string( time::without_ms ) );
       //update[ "state_text" ] = state_text();
         update[ "error"      ] = _task_error != NULL;
 
@@ -664,7 +664,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
         db_fill_stmt( &insert );
 
-        insert.set_datetime( "created_time", _created.as_string(time::without_ms) );
+        insert.set_datetime( "created_time", _created.db_string(time::without_ms) );
 
         for( int insert_race_retry_count = 1; !insert_ok; insert_race_retry_count++ )
         {
@@ -981,7 +981,7 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
 
 void Order::db_fill_stmt( sql::Write_stmt* stmt )
 {
-    stmt->set_datetime( "mod_time", Time::now().as_string(time::without_ms) );
+    stmt->set_datetime( "mod_time", Time::now().db_string(time::without_ms) );
 
     string t = calculate_db_distributed_next_time();
     if( stmt->is_update()  ||  t != "" )  stmt->set_datetime( "distributed_next_time", t );
@@ -1025,7 +1025,7 @@ string Order::calculate_db_distributed_next_time()
 
             result = next_time.is_zero ()? now_database_distributed_next_time :
                      next_time.is_never()? never_database_distributed_next_time 
-                                         : next_time.as_string( time::without_ms );
+                                         : next_time.db_string( time::without_ms );
         }
     }
 
@@ -2108,7 +2108,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
             if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) ) log_line += ", Job " + job_node->job_path();
             if( is_error_state )  log_line += ", error state";
 
-            if( _setback.not_zero() )  log_line += ", at=" + _setback.as_string();
+            if( _setback.not_zero() )  log_line += ", at=" + _setback.as_string(_schedule_use->time_zone_name());
 
             if( _suspended )  log_line += ", suspended";
 

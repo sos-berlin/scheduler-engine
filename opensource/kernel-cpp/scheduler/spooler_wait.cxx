@@ -242,7 +242,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         if( z::Log_ptr log = _spooler->_scheduler_wait_log_category )
         {
             *log << Z_FUNCTION << " ";
-            *log << " until=" << until << ", ";
+            *log << " until=" << until.as_string(_spooler->_time_zone_name) << ", ";
             if( wait_for_object )  *log << "  for " << wait_for_object->obj_name() << ", ";
             *log << *this << "\n";
         }
@@ -273,7 +273,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             gmtime.QuadPart = -(int64)( ( resume_until - now ).as_double() * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
             if( gmtime.QuadPart < 0 )
             {
-                Z_LOG2( _spooler->_scheduler_wait_log_category, "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
+                Z_LOG2( _spooler->_scheduler_wait_log_category, "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string(_spooler->_time_zone_name) << ")"  
                         << ( resume_object? " for " + resume_object->obj_name() : "" ) << "\n" );
 
                 ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, TRUE );   // Weckt den Rechner
@@ -310,7 +310,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         }
 
 #       ifdef Z_DEBUG
-            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (" << wait_time << "s, bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
+            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s "
+                "(" << wait_time << "s, bis " << until.as_string(_spooler->_time_zone_name) << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
 #       endif
 
         handles = new HANDLE [ _handles.size()+1 ];
@@ -344,7 +345,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 t = (int)ceil( min( (double)max_sleep_time_ms, rest.as_double() * 1000.0 ) );
 
                 S console_line;
-                console_line << Time::now().as_string( time::without_ms );
+                console_line << Time::now().as_string(_spooler->_time_zone_name, time::without_ms);
                 
                 if( !until.is_never() ||  wait_for_object )
                 {
@@ -353,8 +354,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                         Time r = Time(rest.as_double());
                         int days = r.day_nr();
                         if( days > 0 )  console_line << days << "d+";
-                        console_line << r.time_of_day().as_string( time::without_ms ) << "s";
-                        if( days > 0 )  console_line << " until " << Time( until ).as_string();
+                        console_line << r.time_of_day().as_string(_spooler->_time_zone_name, time::without_ms) << "s";
+                        if( days > 0 )  console_line << " until " << Time(until).as_string(_spooler->_time_zone_name);
                     }
                     if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
                     console_line << ")";
@@ -440,7 +441,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         Time now = Time::now();
 
         //if( until > now )
-            Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (until.as_double() - now.as_double()) << "s)" <<
+            Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string(_spooler->_time_zone_name) << " (" << (until.as_double() - now.as_double()) << "s)" <<
                 ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
         ptr<Socket_wait> wait = _spooler->_connection_manager->create_wait();
@@ -547,7 +548,8 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
         int blockCount = ( nCount + max_handles - 1 ) / max_handles;
         int remainingCount = nCount;
 #       ifdef Z_DEBUG
-            Z_LOG2( "scheduler.wait", "performing MsgWaitForMultipleObjects for " << blockCount << " blocks until " << until << " is reached (steptimeout=" << stepTimeout << ").\n" );
+            Z_LOG2( "scheduler.wait", "performing MsgWaitForMultipleObjects for " << blockCount << 
+                " blocks until " << until.as_string(_spooler->_time_zone_name) << " is reached (steptimeout=" << stepTimeout << ").\n" );
 #       endif
 
         for (int i=0; i < blockCount; i++ ) {  // MAXIMUM_WAIT_OBJECTS handles pro block

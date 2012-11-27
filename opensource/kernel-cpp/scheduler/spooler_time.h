@@ -155,11 +155,12 @@ public:
     Time                        utc_from_time_zone          (const string&) const;
     Time                        local_time                  (const string& time_zone) const;
 
-    string                      as_string                   ( With_ms = with_ms ) const;                        
+    string                      db_string                   ( With_ms = with_ms ) const;    // Für Datenbank
+    string                      utc_string                  ( With_ms = with_ms ) const;
+    string                      without_timezone_string     ( With_ms = with_ms ) const;
     string                      as_string                   (const string& time_zone_name, With_ms = with_ms ) const;                        
     string                      xml_value                   ( With_ms = with_ms ) const;                        
-    void                        print                       ( ostream& s ) const            { s << as_string(); }
-    friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }
+    friend ostream&             operator <<                 ( ostream& s, const Time& o );
 
     static Time                 now                         ();
     static Time                 local_now                   ();
@@ -188,7 +189,7 @@ inline string xml_of_time_t(time_t t) {
 }
 
 inline string string_of_time_t(time_t t) {
-    return Time( t, Time::is_utc ).as_string(without_ms);
+    return Time( t, Time::is_utc ).utc_string(without_ms);
 }
 
 } //namespace time

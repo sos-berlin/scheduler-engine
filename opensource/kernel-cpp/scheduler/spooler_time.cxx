@@ -84,7 +84,7 @@ xml::Element_ptr new_calendar_dom_element( const xml::Document_ptr& dom_document
 
 void insert_into_message( Message_string* m, int index, const Time& time ) throw()
 {
-    m->insert( index, time.as_string() );
+    m->insert( index, time.utc_string() );
 }
 
 //------------------------------------------------------------------------------insert_into_message
@@ -131,7 +131,7 @@ Duration Duration::of(const string& s)
 
 string Duration::as_string(With_ms w) const 
 {
-    return Time(as_double()).as_string(w);
+    return Time(as_double()).without_timezone_string(w);
 }
 
 //--------------------------------------------------------------------------------------Time::round
@@ -278,7 +278,7 @@ void Time::set( double t )
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
                     else  _time_as_string = _time == never_double? time::never_name
-                                                                 : as_string();
+                                                                 : utc_string();
 #   endif
 }
 
@@ -400,9 +400,23 @@ double Time::cut_fraction( string* datetime_string )
     return result;
 }
 
-//----------------------------------------------------------------------------------Time::as_string
+//---------------------------------------------------------------------------------Time::utc_string
 
-string Time::as_string(With_ms w) const
+string Time::db_string(With_ms w) const
+{
+    return without_timezone_string(w);
+}
+
+//---------------------------------------------------------------------------------Time::utc_string
+
+string Time::utc_string(With_ms w) const
+{
+    return without_timezone_string(w) +"Z";
+}
+
+//----------------------------------------------------------------Time::without_timezone_string
+
+string Time::without_timezone_string(With_ms w) const
 {
     //return as_string("", w);
     char buff [30];
@@ -442,11 +456,10 @@ string Time::as_string(const string& time_zone_name, With_ms w) const
 
 string Time::xml_value( With_ms with ) const
 {
-    string str = as_string(with);
+    string str = utc_string(with);
     if (is_valid_time()) {
         if( str.length() > 10  &&  isdigit( (unsigned char)str[0] )  &&  str[10] == ' ' )
-            str[10] = 'T';                      // yyyy-mm-ddThh:mm:ss.mmm
-        str += "Z";   // Z: UTC-Zeit
+            str[10] = 'T';                      // yyyy-mm-ddThh:mm:ss.mmmZ
     }
 
     return str;

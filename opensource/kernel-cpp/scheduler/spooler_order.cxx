@@ -363,8 +363,8 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
     Time t = order_queue->next_announced_distributed_order_time();
     assert( t );
 
-    string before = !t.is_never()? t.as_string( time::without_ms ) 
-                                  : never_database_distributed_next_time;
+    string before = !t.is_never()? t.db_string( time::without_ms ) 
+                                   : never_database_distributed_next_time;
     result << " and " << db_text_distributed_next_time() << " < " << sql::quoted( before );
 
     return result;
@@ -553,8 +553,8 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
                    << order_select_database_columns << ", `job_chain`"
                       "  from " << db()->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db());
-        if(  options->_from.not_zero()   )  select_sql << " and " << db_text_distributed_next_time() << " >= " << sql::quoted( options->_from  .as_string(time::without_ms) );
-        if( !options->_before.is_never() )  select_sql << " and " << db_text_distributed_next_time() << " < "  << sql::quoted( options->_before.as_string(time::without_ms) );
+        if(  options->_from.not_zero()   )  select_sql << " and " << db_text_distributed_next_time() << " >= " << sql::quoted( options->_from  .db_string(time::without_ms) );
+        if( !options->_before.is_never() )  select_sql << " and " << db_text_distributed_next_time() << " < "  << sql::quoted( options->_before.db_string(time::without_ms) );
         else
         if( !options->_from              )  select_sql << " and `distributed_next_time` is not null ";
         
@@ -4031,7 +4031,8 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
 { 
     if( _next_announced_distributed_order_time != t  &&  !is_now )
     {
-        Z_LOG2( "scheduler.order", obj_name() << "  " << Z_FUNCTION << "(" << t << ( is_now? ",is_now" : "" ) << ")  vorher: " << _next_announced_distributed_order_time << "\n" );
+        Z_LOG2( "scheduler.order", obj_name() << "  " << Z_FUNCTION << "(" << t.as_string(_spooler->_time_zone_name) << ( is_now? ",is_now" : "" ) << ")"
+            "  vorher: " << _next_announced_distributed_order_time.as_string(_spooler->_time_zone_name) << "\n" );
     }
 
     _next_announced_distributed_order_time = t; 
@@ -4208,7 +4209,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* o
 
     select_sql << "select %limit(1)  `job_chain`, " << db_text_distributed_next_time() << " as distributed_next_time, " << order_select_database_columns <<
                 "  from " << db()->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
-                "  where `distributed_next_time` <= " << db()->database_descriptor()->timestamp_string( now.as_string( time::without_ms ) ) <<
+                "  where `distributed_next_time` <= " << db()->database_descriptor()->timestamp_string( now.db_string( time::without_ms ) ) <<
                    " and `occupying_cluster_member_id` is null" << 
                    " and " << w <<
                 "  order by `distributed_next_time`, `priority`, `ordering`";

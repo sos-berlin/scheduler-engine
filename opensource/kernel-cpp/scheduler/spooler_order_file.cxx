@@ -640,7 +640,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task,
                     order->set_file_path( path );
                     order->set_state( _next_state );
 
-                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string( time::without_ms );
+                    string date = Time( new_file->last_write_time(), Time::is_utc).as_string(_spooler->_time_zone_name, time::without_ms );
 
 
                     bool ok = true;

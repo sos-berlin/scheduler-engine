@@ -529,7 +529,7 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
                 else
                     z::throw_xc( Z_FUNCTION, "invalid <content>-encoding" );
 
-                log()->info( message_string( "SCHEDULER-701", path, last_write_time.as_string() ) );
+                log()->info( message_string( "SCHEDULER-701", path, last_write_time.as_string(_spooler->_time_zone_name) ) );
 
                 File_path temporary_path = file_path + "~";
                 //if( temporary_path.exists() )  temporary_path.unlink();     // Löschen, damit Dateirechte gesetzt werden können (Datei sollte nicht vorhanden sein)

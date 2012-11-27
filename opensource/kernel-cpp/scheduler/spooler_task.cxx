@@ -852,8 +852,8 @@ void Task::set_state_direct( State new_state )
         if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
         {
             S details;
-            if( _next_time.not_zero() )  details << " (" << _next_time << ")";
-            if( new_state == s_starting  &&  _start_at.not_zero() )  details << " (at=" << _start_at << ")";
+            if( _next_time.not_zero() )  details << " (" << _next_time.as_string(_job->time_zone_name()) << ")";
+            if( new_state == s_starting  &&  _start_at.not_zero() )  details << " (at=" << _start_at.as_string(_job->time_zone_name()) << ")";
             if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
 
             _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
@@ -1687,7 +1687,8 @@ bool Task::do_something()
                                 {
                                     _idle_timeout_at = now + _job->_idle_timeout;
                                     set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
-                                    Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
+                                    Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << 
+                                        now.as_string(_job->time_zone_name()) << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     something_done = true;
                                 }
@@ -2047,12 +2048,12 @@ bool Task::do_something()
 
             if( _next_time <= now )
             {
-                Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time << ", delayed\n" );
+                Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << ", delayed\n" );
                 _next_time = Time::now() + Duration(0.1);
             }
             else
             {
-                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin << "\n" );
+                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin.as_string(_job->time_zone_name()) << "\n" );
             }
         }
     }  // if( _operation &&  !_operation->async_finished() )
@@ -2514,7 +2515,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         bool is_error = has_error();
 
         S body;
-        body << Sos_optional_date_time::now().as_string() << "\n\nJob " << _job->name() << "  " << _job->title() << "\n";
+        body << Time::now().as_string(_job->time_zone_name()) << "\n\nJob " << _job->name() << "  " << _job->title() << "\n";
         body << "Task-Id " << as_string(id()) << ", " << as_string(_step_count) << " steps\n";
         if( _order )  body << _order->obj_name() << "\n";
         body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_complete_hostname << "\n\n";

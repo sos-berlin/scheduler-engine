@@ -2214,7 +2214,7 @@ void Command_response::begin_standard_response()
     _xml_writer.write_prolog();
 
     write( "<spooler><answer time=\"" );
-    write( Time::now().as_string() );
+    write( Time::now().xml_value() );
     write( "\">" );
 }
 

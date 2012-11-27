@@ -1256,7 +1256,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _covered_schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "substitute" ) );
     _covered_schedule_begin = Time::of_date_time( element.getAttribute( "valid_from"          ), "(NO-TIME-ZONE)" );
     _covered_schedule_end   = Time::of_date_time( element.getAttribute( "valid_to"  , "never" ), "(NO-TIME-ZONE)" );
-    if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.as_string(), _covered_schedule_end.as_string() );
+    if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.utc_string(), _covered_schedule_end.utc_string() );
 
     if( _covered_schedule_path == "" )
     {
@@ -1508,7 +1508,7 @@ Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_
         try
         {
 
-            string            date_string      = requested_beginning.as_string( time::without_ms );
+            string            date_string      = requested_beginning.utc_string( time::without_ms );
             string            param2           = use->name_for_function();
             Scheduler_script* scheduler_script = _spooler->scheduler_script_subsystem()->default_scheduler_script();
             string            function_name    = _start_time_function;
@@ -1702,7 +1702,7 @@ void Period::check( With_or_without_date w ) const
     return;
 
   FEHLER:
-    z::throw_xc( "SCHEDULER-104", _begin.as_string(), _end.as_string() );
+    z::throw_xc( "SCHEDULER-104", _begin.without_timezone_string(), _end.without_timezone_string() );
 }
 
 //-------------------------------------------------------------------------------Period::is_coming
@@ -1810,7 +1810,7 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
 
 void Period::print( ostream& s ) const
 {
-    s << "Period(" << _begin << ".." << _end;
+    s << "Period(" << _begin.utc_string() << ".." << _end.utc_string();
     if( _single_start )  s << " single_start";
     if( !_repeat.is_eternal() )  s << " repeat=" << _repeat;
     if( !_absolute_repeat.is_eternal() )  s << " absolute_repeat=" << _absolute_repeat;
@@ -1853,8 +1853,8 @@ string Period::to_xml() const
     S result;
 
     result << "<period";
-    result << " begin=\"" << _begin.as_string() << "\"";
-    result << " end=\""   << _end  .as_string() << "\"";
+    result << " begin=\"" << _begin.without_timezone_string() << "\"";
+    result << " end=\""   << _end  .without_timezone_string() << "\"";
     if( !_repeat         .is_eternal() )  result << " repeat=\""          << _repeat         .as_string() << "\"";
     if( !_absolute_repeat.is_eternal() )  result << " absolute_repeat=\"" << _absolute_repeat.as_string() << "\"";
     result << "/>";
@@ -2298,7 +2298,7 @@ void At_set::print( ostream& s ) const
 
     FOR_EACH_CONST( set<Time>, _at_set, it )
     {
-        s << *it << " ";
+        s << it->utc_string() << " ";
     }
 
     s << ")";

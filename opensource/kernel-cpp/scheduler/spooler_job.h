@@ -336,6 +336,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     void                        count_task                  ()                                      { InterlockedIncrement( &_tasks_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
+    string                      time_zone_name              () const;
 
 
     friend struct               Object_set;

@@ -389,6 +389,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     virtual bool                on_schedule_to_be_removed   ()                                      = 0;
   //virtual void                on_schedule_removed         ()                                      = 0;
     virtual string              name_for_function           () const                                = 0;
+    string                      time_zone_name              () const                               { return _time_zone_name; }
 
   private:
     Fill_zero                  _zero_;

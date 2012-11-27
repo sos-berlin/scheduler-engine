@@ -1405,7 +1405,7 @@ void Job::load_tasks_from_db( Read_transaction* ta )
             bool                    force_start = force_start_default;
 
             start_at = Time::of_utc_date_time( record.as_string( "start_at_time" ) );
-            _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
+            _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string(time_zone_name()) : "period" ) );
 
             string parameters_xml = file_as_string( "-binary " + _spooler->db()->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
                                                                                        " where \"TASK_ID\"=" + as_string( task_id ), 
@@ -1476,10 +1476,10 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
                 insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
 
-                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( time::without_ms ) );
+                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.db_string( time::without_ms ) );
 
                 if( task->_start_at.not_zero() )
-                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( time::without_ms ) );
+                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.db_string( time::without_ms ) );
 
                 ta.execute( insert, Z_FUNCTION );
 
@@ -1748,7 +1748,7 @@ void Job::enqueue_task(const TaskPersistentJ& taskPersistentJ) {
     int task_id = taskPersistentJ.taskId().value();
 
     Time start_at = Time::of_millis(taskPersistentJ.startTimeMillis());
-    _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string() : "period" ) );
+    _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string(time_zone_name()) : "period" ) );
 
     ptr<Com_variable_set> parameters = new Com_variable_set;
     string parameters_xml = taskPersistentJ.parametersXml();
@@ -1780,7 +1780,7 @@ void Job::enqueue_task( Task* task )
 {
     Time now = Time::now();
 
-    if( _spooler->_debug )  _log->debug( "start(at=" + task->_start_at.as_string() + ( task->_name == ""? "" : ",name=\"" + task->_name + '"' ) + ")" );
+    if( _spooler->_debug )  _log->debug( "start(at=" + task->_start_at.as_string(time_zone_name()) + ( task->_name == ""? "" : ",name=\"" + task->_name + '"' ) + ")" );
 
     if( _state > s_loaded )
     {
@@ -2177,7 +2177,7 @@ void Job::database_record_store()
                     update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
                     update[ "path"              ] = path().without_slash();
 
-                    if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
+                    if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.db_string();
                     update[ "stopped" ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
 
                     ta.store( update, Z_FUNCTION );
@@ -2461,9 +2461,10 @@ void Job::calculate_next_time( const Time& now )
     _next_time = next_time;
 
 #ifdef Z_DEBUG
-    Z_LOG2( "developer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
-                                                                                                    _next_time > old_next_time? " > " : " = " ) 
-                                                                                             << "old " << old_next_time.as_string() << "\n" );
+    Z_LOG2( "developer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string(time_zone_name()) << 
+            ( _next_time < old_next_time? " < " :
+              _next_time > old_next_time? " > " : " = " ) 
+          << "old " << old_next_time.as_string(time_zone_name()) << "\n" );
 #endif
 }
 
@@ -2480,7 +2481,7 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
 {
     if( !next_time.is_never() )
     {
-        Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << obj_name() << "  " << order_name << " " << next_time.as_string() << "\n" );
+        Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << obj_name() << "  " << order_name << " " << next_time.as_string(time_zone_name()) << "\n" );
 
         if( !_next_time.is_zero()  &&  _next_time > next_time )
         {
@@ -2624,7 +2625,7 @@ ptr<Task> Job::task_to_start()
             if( now >= _next_start_time )  
                 if( _delay_until.not_zero() && now >= _delay_until )
                                            cause = cause_delay_after_error,                     log_line += "Task starts due to delay_after_error\n";
-                                      else cause = cause_period_repeat,                         log_line += "Task starts, because start time is reached: " + _next_start_time.as_string();
+                                      else cause = cause_period_repeat,                         log_line += "Task starts, because start time is reached: " + _next_start_time.as_string(time_zone_name());
 
             if( _start_once_for_directory )
             {
@@ -2880,11 +2881,11 @@ bool Job::do_something()
                 calculate_next_time( now );
 
                 Z_LOG2( _next_time <= now? "scheduler" : "scheduler.nothing_done", 
-                        obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin <<
-                        " _next_time=" << _next_time <<
-                        " _next_start_time=" << _next_start_time <<
-                        " _next_single_start=" << _next_single_start <<
-                        " _directory_watcher_next_time=" << _directory_watcher_next_time <<
+                        obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin.as_string(time_zone_name()) <<
+                        " _next_time=" << _next_time.as_string(time_zone_name()) <<
+                        " _next_start_time=" << _next_start_time.as_string(time_zone_name()) <<
+                        " _next_single_start=" << _next_single_start.as_string(time_zone_name()) <<
+                        " _directory_watcher_next_time=" << _directory_watcher_next_time.as_string(time_zone_name()) <<
                         " _period=" << _period.obj_name() <<
                         " _repeat=" << _repeat <<
                         " _waiting_for_process=" << _waiting_for_process <<
@@ -3304,7 +3305,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( show_what.is_set( show_job_params )  &&  _default_params )  result.appendChild( _default_params->dom_element( document, "params", "param" ) );
 
-        if( show_what.is_set( show_schedule ) )  result.appendChild( _schedule_use->dom_element( document, show_what ) ),
+        if( show_what.is_set( show_schedule ) )  result.appendChild( dom_element( document, show_what ) ),
                                                  dom_append_nl( result );
 
         if( _schedule_use->is_defined() )   // Wie in Order::dom_element(), besser nach Schedule_use::dom_element()  <schedule.use covering_schedule="..."/>
@@ -3553,6 +3554,13 @@ void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_ca
 
         _task_queue->append_calendar_dom_elements( element, options );
     }
+}
+
+//------------------------------------------------------------------------------Job::time_zone_name
+
+string Job::time_zone_name() const
+{ 
+    return _schedule_use->time_zone_name(); 
 }
 
 //---------------------------------------------------------------------------------kill_queued_task
