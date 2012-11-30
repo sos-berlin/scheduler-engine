@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>opensource</artifactId>
-        <version>1.5.2264-SNAPSHOT</version>
+        <version>1.5.2334-beta-ux</version>
     </parent>
     
     <name>${project.artifactId}</name>
@@ -28,7 +28,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <quiet/>
+                    <quiet />
                 </configuration>
                 <executions>
                     <execution>
