@@ -84,6 +84,7 @@ to run without maven integration.
             <include name="joda-convert-*.jar"/>
             <include name="joda-time-*.jar"/>
             <include name="log4j-*.jar"/>
+            <include name="mail-*.jar"/>
             <include name="scala-library-*.jar"/>
             <include name="slf4j*.jar"/>
             <!-- additional jars for jetty integration -->
