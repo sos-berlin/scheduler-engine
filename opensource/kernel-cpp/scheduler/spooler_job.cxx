@@ -1012,7 +1012,7 @@ Duration Job::get_step_duration_or_percentage( const string& value, const Durati
 Duration Job::average_step_duration( const Duration& deflt )
 {
     if (_spooler->settings()->_use_java_persistence) {
-        auto duration_option = typed_java_sister().tryFetchAverageStepDuration();
+        ::javaproxy::scala::Option duration_option = typed_java_sister().tryFetchAverageStepDuration();
         return duration_option.isDefined()? Duration(javaproxy::org::joda::time::Duration(duration_option.get()).getMillis() / 1000.0) : deflt;
     } else {
         return db_average_step_duration(deflt);
@@ -2223,7 +2223,7 @@ void Job::database_record_load( Read_transaction* ta )
     assert( file_based_state() == File_based::s_initialized );
 
     if (_spooler->settings()->_use_java_persistence) {
-        if (auto persistentState = typed_java_sister().tryFetchPersistentState())
+        if (::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent persistentState = typed_java_sister().tryFetchPersistentState())
             _is_permanently_stopped = persistentState.isPermanentlyStopped();
     }
     else {
