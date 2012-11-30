@@ -133,16 +133,12 @@ public final class Scheduler implements Sister,
     };
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
-        enableJavaUtilLoggingOverSLF4J();
-
-        TimeZones.initialize();
-        //DateTimeZone.setDefault(UTC);
-        TimeZone.setDefault(UTC.toTimeZone());       // Für JPA @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
+        staticInitialize();
 
         this.cppProxy = cppProxy;
+        this.cppProxy.setSister(this);
         configuration = new SchedulerConfiguration(cppProxy);
         controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
-        cppProxy.setSister(this);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
 
         _log = cppProxy.log().getSister();
@@ -158,7 +154,27 @@ public final class Scheduler implements Sister,
         pluginSubsystem = new PluginSubsystem(this, injectorLazy, eventBus);
         commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
 
+        initialize();
+    }
+
+    private static void staticInitialize() {
+        enableJavaUtilLoggingOverSLF4J();
+
+        TimeZones.initialize();
+        //DateTimeZone.setDefault(UTC);
+        TimeZone.setDefault(UTC.toTimeZone());       // Für JPA @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
+    }
+
+    private void initialize() {
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());   // http://stackoverflow.com/questions/1969667
         initializeThreadLock();
+    }
+
+    private void initializeThreadLock() {
+        if (!isStartedByJava()) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
+            threadLock();
+            threadInitiallyLocked = true;
+        }
     }
 
     public Injector getInjector() {
@@ -236,13 +252,6 @@ public final class Scheduler implements Sister,
             cppProxy.cmd_terminate();
         } catch (CppProxyInvalidatedException x) {
             logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed", x);
-        }
-    }
-
-    private void initializeThreadLock() {
-        if (!isStartedByJava()) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
-            threadLock();
-            threadInitiallyLocked = true;
         }
     }
 
