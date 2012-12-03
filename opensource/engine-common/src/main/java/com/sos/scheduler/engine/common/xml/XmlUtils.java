@@ -29,13 +29,14 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static javax.xml.transform.OutputKeys.*;
 import static org.w3c.dom.Node.DOCUMENT_NODE;
 
 @ForCpp
 public final class XmlUtils {
     private static final Logger logger = LoggerFactory.getLogger(XmlUtils.class);
-    private static boolean xPathNullPointerLogged = false;
+    private static boolean static_xPathNullPointerLogged = false;
 
     @ForCpp public static Document newDocument() {
         return newDocumentBuilder().newDocument();
@@ -195,8 +196,7 @@ public final class XmlUtils {
     public static String stringXPath(Node baseNode, String xpathExpression, String deflt) {
         try {
             String result = (String)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.STRING);
-            if (result == null)  result = deflt;
-            return result;
+            return firstNonNull(result, deflt);
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
@@ -244,9 +244,9 @@ public final class XmlUtils {
     private static XPathFactory workaroundNewXPathFactory(NullPointerException e) {
         // JSSIXFOUR-8: NullPointerException in javax.xml.xpath.XPathFactoryFinder, wenn Scheduler als Dienst läuft
         String workAroundClassName = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
-        if (!xPathNullPointerLogged) {
+        if (!static_xPathNullPointerLogged) {
             logger.debug("Trying to use "+workAroundClassName+" as a workaround after {}", e, e);
-            xPathNullPointerLogged = true;
+            static_xPathNullPointerLogged = true;
         }
         try {
             @SuppressWarnings("unchecked")
