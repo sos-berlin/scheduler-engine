@@ -2,12 +2,13 @@ package com.sos.scheduler.engine.tests.jira.js887;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.BeforeClass;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
