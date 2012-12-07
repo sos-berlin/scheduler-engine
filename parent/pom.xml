@@ -27,7 +27,7 @@
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
         <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
         <failsafe.threadCount>2</failsafe.threadCount>
-        <enginedoc.version>1.5.2305-SNAPSHOT</enginedoc.version>
+        <enginedoc.version>1.5.2334-beta-ux</enginedoc.version>
     </properties>
 
     <profiles>
