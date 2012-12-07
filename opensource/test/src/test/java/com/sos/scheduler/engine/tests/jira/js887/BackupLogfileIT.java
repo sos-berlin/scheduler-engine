@@ -20,6 +20,7 @@ public class BackupLogfileIT extends SchedulerTest {
     private static final CommandBuilder cmd = new CommandBuilder();
     private static final File tempDir = new File(Files.createTempDir(),"log");
     private static final File tempDirWithDot = new File(Files.createTempDir(),"log.dir");
+    private static final Time timeout = Time.of(30);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -60,7 +61,7 @@ public class BackupLogfileIT extends SchedulerTest {
         Files.touch(logFile);
         controller().activateScheduler("-log-dir=" + logDir.getAbsolutePath(), "-log=" + logFile.getAbsolutePath());
         controller().scheduler().executeXml(cmd.startJobImmediately("test").getCommand());
-        controller().waitForTermination(shortTimeout);
+        controller().waitForTermination(timeout);
         assertTrue("Backup file " + expectedName + " does not exist in " + logDir.getAbsolutePath(),expectedFile.exists());
         String content = Files.toString(expectedFile, Charsets.UTF_8);
         assertTrue("No content of backupfile is allowed.", content.isEmpty());
