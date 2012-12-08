@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>cppjava</artifactId>
-        <version>1.5.2341-beta-ux</version>
+        <version>1.5.2342-SNAPSHOT</version>
     </parent>
     
     <artifactId>cppjava.runtime</artifactId>
