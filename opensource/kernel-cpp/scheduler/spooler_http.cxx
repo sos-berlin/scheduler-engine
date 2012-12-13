@@ -1335,44 +1335,8 @@ STDMETHODIMP Response::Send() // VARIANT* content, BSTR content_type_bstr )
 
     HRESULT hr = S_OK;
     
-    //if( !content )  return E_POINTER;
-
-    try
-    {
+    try {
         send();
-
-        /*
-        string                  content_type = string_from_bstr( content_type_bstr );
-        ptr<http::Chunk_reader> chunk_reader;
-
-
-        if( content->vt == VT_BSTR )
-        {
-            const Charset*  charset      = Charset::for_name( http::get_content_type_parameter( content_type, "charset" ) );
-            const BSTR      content_bstr = V_BSTR( content );
-
-            chunk_reader = Z_NEW( http::String_chunk_reader( charset->encoded_from_bstr( content_bstr ), content_type ) );
-        }
-        else
-        if( content->vt == VT_ARRAY )
-        {
-            SAFEARRAY* safearray = V_ARRAY( content );
-            VARTYPE    vartype   = 0;
-
-            hr = z_SafeArrayGetVartype( safearray, &vartype );
-            if( FAILED(hr) )  return hr;
-            if( vartype != VT_UI1 )  return DISP_E_TYPEMISMATCH;
-
-            Locked_safearray<Byte> a ( safearray );
-
-            chunk_reader = Z_NEW( http::Byte_chunk_reader( &a[0], a.count(), content_type ) );
-        }
-        else
-            return DISP_E_TYPEMISMATCH;
-
-
-        http_response()->set_chunk_reader( chunk_reader );
-        */
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
