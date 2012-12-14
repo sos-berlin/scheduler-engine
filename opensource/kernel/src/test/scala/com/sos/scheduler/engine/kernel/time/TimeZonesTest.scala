@@ -1,32 +1,32 @@
 package com.sos.scheduler.engine.kernel.time
 
-import org.joda.time.{DateTimeZone, LocalDateTime, DateTime}
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeZone.UTC
+import org.joda.time.{DateTimeZone, LocalDateTime, DateTime}
 import org.scalatest.FunSuite
 import org.scalatest.matchers.ShouldMatchers._
+import scala.collection.immutable
 
 final class TimeZonesTest extends FunSuite {
+
   import TimeZonesTest._
 
-  private val springHelsinkiToUtc =
-      Helsinki(2012,  3, 25, 2, 30) -> Utc(2012,  3, 25,  0, 30) -> Some(2) ::    // Noch Winterzeit
-      Helsinki(2012,  3, 25, 3,  0) -> Utc(2012,  3, 25,  1,  0) -> Some(2) ::    // Beginn der Sommerzeit, Sprung von 3 auf 4 Uhr
-      Helsinki(2012,  3, 25, 3, 30) -> Utc(2012,  3, 25,  1,  0) -> None ::       // Diese lokale Zeit gibt es nicht, die Stunde fehlt
-      Helsinki(2012,  3, 25, 4,  0) -> Utc(2012,  3, 25,  1,  0) -> Some(3) ::
-      Helsinki(2012,  3, 25, 4, 30) -> Utc(2012,  3, 25,  1, 30) -> Some(3) ::
-      Nil
-  private val fallHelsinkiToUtc =
-      Helsinki(2012, 10, 28, 2, 30) -> Utc(2012, 10, 27, 23, 30) -> Some(3) ::    // +3h Noch Sommerzeit
-      Helsinki(2012, 10, 28, 3,  0) -> Utc(2012, 10, 28,  0,  0) -> Some(3) ::    // +3h 2 bis 3 Uhr lokaler Zeit ist doppelt
-      Helsinki(2012, 10, 28, 3, 30) -> Utc(2012, 10, 28,  0, 30) -> Some(3) ::    // +3h
-      Helsinki(2012, 10, 28, 4,  0) -> Utc(2012, 10, 28,  2,  0) -> Some(2) ::    // +2h Ende der Sommerzeit, Sprung von 4 auf 3 Uhr
-      Helsinki(2012, 10, 28, 4, 30) -> Utc(2012, 10, 28,  2, 30) -> Some(2) ::    // +2h Winterzeit
-      Nil
+  private val springHelsinkiToUtc = immutable.Seq(
+      Helsinki(2012,  3, 25, 2, 30) -> Utc(2012,  3, 25,  0, 30) -> 120,   // Noch Winterzeit
+      Helsinki(2012,  3, 25, 3,  0) -> Utc(2012,  3, 25,  1,  0) -> 120,   // Beginn der Sommerzeit, Sprung von 3 auf 4 Uhr
+      Helsinki(2012,  3, 25, 3, 30) -> Utc(2012,  3, 25,  1,  0) -> 150,   // Diese lokale Zeit gibt es nicht, die Stunde fehlt
+      Helsinki(2012,  3, 25, 4,  0) -> Utc(2012,  3, 25,  1,  0) -> 180,
+      Helsinki(2012,  3, 25, 4, 30) -> Utc(2012,  3, 25,  1, 30) -> 180)
+  private val fallHelsinkiToUtc = immutable.Seq(
+      Helsinki(2012, 10, 28, 2, 30) -> Utc(2012, 10, 27, 23, 30) -> 180,   // +3h Noch Sommerzeit
+      Helsinki(2012, 10, 28, 3,  0) -> Utc(2012, 10, 28,  0,  0) -> 180,   // +3h 2 bis 3 Uhr lokaler Zeit ist doppelt
+      Helsinki(2012, 10, 28, 3, 30) -> Utc(2012, 10, 28,  0, 30) -> 180,   // +3h
+      Helsinki(2012, 10, 28, 4,  0) -> Utc(2012, 10, 28,  2,  0) -> 120,   // +2h Ende der Sommerzeit, Sprung von 4 auf 3 Uhr
+      Helsinki(2012, 10, 28, 4, 30) -> Utc(2012, 10, 28,  2, 30) -> 120)   // +2h Winterzeit
 
-  for (((local, utc), offsetHoursOption) <- springHelsinkiToUtc ++ fallHelsinkiToUtc) {
+  for (((local, utc), offsetMinutes) <- springHelsinkiToUtc ++ fallHelsinkiToUtc) {
     test(local +" should yield "+ utc) {
-      offsetHoursOption foreach { h => local.millis - utc.millis should equal (h*MILLIS_PER_HOUR) }
+      local.millis - utc.millis should equal (offsetMinutes *MILLIS_PER_MINUTE)
       val diff = TimeZones.localToUtc(testZoneName, local.millis) - utc.millis
       if (diff != 0)  fail("Calculated time differs "+ (diff / MILLIS_PER_MINUTE) +" minutes")
     }
