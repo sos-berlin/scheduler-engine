@@ -7,7 +7,7 @@
 #
 # in a windows environment you can use 'bash -c "./prepare-setup.sh"' if cygwin is installed.
 # ---------------------------------------------------------------------------------------------------------------
-mvn clean
+mvn clean -Ppurge-local-repo
 mvn install -U -Pprepare-platform -Dengine.platform=windows-x86
 mvn install -U -Pprepare-platform -Dengine.platform=linux-x86
 mvn install -U -Pprepare-platform -Dengine.platform=windows-x64
