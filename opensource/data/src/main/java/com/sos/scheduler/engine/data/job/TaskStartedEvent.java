@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.job;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sos.scheduler.engine.data.folder.JobPath;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 public class TaskStartedEvent extends AbstractTaskEvent {
     public TaskStartedEvent(

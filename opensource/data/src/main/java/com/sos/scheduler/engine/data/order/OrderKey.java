@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.data.order;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import static com.google.common.base.Objects.equal;
 

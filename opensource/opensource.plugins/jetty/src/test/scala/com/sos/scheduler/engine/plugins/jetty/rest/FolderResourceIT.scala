@@ -5,9 +5,9 @@ import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.Reader
 import javax.ws.rs.core.MediaType._
-import org.codehaus.jackson.map.ObjectMapper
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import com.fasterxml.jackson.databind.ObjectMapper
 
 @RunWith(classOf[JUnitRunner])
 final class FolderResourceIT extends ScalaSchedulerTest {

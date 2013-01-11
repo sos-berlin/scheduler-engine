@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.excluded.ss.json;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
@@ -11,8 +13,6 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -52,7 +52,6 @@ public class SimpleTest extends SchedulerTest {
 	
 	@HotEventHandler
 	public void handleTaskStartedEvent(TaskStartedEvent e, UnmodifiableTask t) throws IOException {
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // serialize the event into JSON
@@ -70,16 +69,9 @@ public class SimpleTest extends SchedulerTest {
         assertEquals(jobPath.asString(), n.get("jobPath").asText());
 	}
     
+	/** Das Objekt t.getOrder() ist hier null. */
 	@HotEventHandler
-	/**
-	 * Das Objekt t.getOrder() ist hier null.
-	 *
-	 * @param e
-	 * @param t
-	 * @throws java.io.IOException
-	 */
 	public void handleTaskEndedEvent(TaskEndedEvent e, UnmodifiableTask t) throws IOException {
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // serialize the event into JSON
@@ -96,7 +88,6 @@ public class SimpleTest extends SchedulerTest {
 	
 	@HotEventHandler
 	public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // serialize the event into JSON
@@ -115,7 +106,5 @@ public class SimpleTest extends SchedulerTest {
 
 		if (order.getId().asString().equals("jobchain1"))
 			controller().terminateScheduler();
-
 	}
-
 }

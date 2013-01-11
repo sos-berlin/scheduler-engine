@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.base
 
-import org.codehaus.jackson.map.annotate.JsonSerialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import javax.annotation.Nullable
 
 @JsonSerialize(using = classOf[IsStringSerializer])

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
-import org.codehaus.jackson.JsonGenerator
-import org.codehaus.jackson.map.{SerializerProvider, JsonSerializer}
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.{SerializerProvider, JsonSerializer}
 
 class RootViewSerializer extends JsonSerializer[RootView] {
   def serialize(o: RootView, j: JsonGenerator, provider: SerializerProvider) {

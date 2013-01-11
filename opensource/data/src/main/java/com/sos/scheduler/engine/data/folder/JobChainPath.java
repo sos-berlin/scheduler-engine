@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.folder;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JobChainPath extends TypedPath {
     public JobChainPath(@JsonProperty("absolutePath") AbsolutePath path) {

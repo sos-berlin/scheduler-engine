@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import com.fasterxml.jackson.core.Version
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.sos.scheduler.engine.common.xml.XmlUtils._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
@@ -10,9 +13,6 @@ import com.sos.scheduler.engine.plugins.jetty.rest.{ObjectMapperJacksonJsonProvi
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.io.File
-import org.codehaus.jackson.Version
-import org.codehaus.jackson.map.ObjectMapper
-import org.codehaus.jackson.map.module.SimpleModule
 import org.w3c.dom.Element
 
 class Config(pluginElement: Element, conf: SchedulerConfiguration) {
@@ -56,7 +56,6 @@ object Config {
     result.registerModule(DefaultScalaModule)
     result
   }
-
 
   //  val gzipContentTypes = List(
   //    "application/javascript",

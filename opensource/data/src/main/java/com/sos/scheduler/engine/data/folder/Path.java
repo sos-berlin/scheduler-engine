@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.folder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sos.scheduler.engine.data.base.StringValue;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class Path extends StringValue {
     public Path(String p) {

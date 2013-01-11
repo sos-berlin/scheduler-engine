@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.order;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This event fired if the order of a job chain changed the state (next state starts)

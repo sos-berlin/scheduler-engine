@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.job
 
+import com.fasterxml.jackson.annotation.{JsonCreator, JsonValue}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import org.codehaus.jackson.annotate.{JsonCreator, JsonValue}
 import scala.annotation.target.getter
 
 @ForCpp case class TaskId(

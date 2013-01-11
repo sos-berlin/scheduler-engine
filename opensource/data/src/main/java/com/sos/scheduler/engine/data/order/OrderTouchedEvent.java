@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.data.order;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sos.scheduler.engine.data.event.ModifiableSourceEvent;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * This event fired if an order scheduled by the JS

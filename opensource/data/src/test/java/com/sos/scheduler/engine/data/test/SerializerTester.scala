@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.test
 
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 
 /** @author Joacim Zschimmer */
 final class SerializerTester(mapper: ObjectMapper) {

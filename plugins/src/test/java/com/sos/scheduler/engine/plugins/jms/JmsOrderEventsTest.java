@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sos.scheduler.engine.data.EventList;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
@@ -9,7 +10,6 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.jms.JMSException;

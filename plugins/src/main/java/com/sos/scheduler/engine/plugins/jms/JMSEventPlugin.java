@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -7,7 +8,6 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;

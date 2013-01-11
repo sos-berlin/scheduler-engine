@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.sos.scheduler.engine.data.folder.AbsolutePath
 import java.net.URI
 import javax.ws.rs.core.UriBuilder
-import org.codehaus.jackson.annotate.JsonProperty
 
 class FolderView(_folderPath: AbsolutePath, _typeName: String, _entries: Iterable[FolderView.Entry]) {
   @JsonProperty def folderPath = _folderPath

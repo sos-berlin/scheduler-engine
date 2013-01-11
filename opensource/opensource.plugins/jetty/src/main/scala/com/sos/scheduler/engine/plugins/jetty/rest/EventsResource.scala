@@ -10,8 +10,8 @@ import javax.inject.{Inject, Singleton}
 import javax.ws.rs._
 import javax.ws.rs.core.{StreamingOutput, MediaType, Response}
 import org.slf4j.LoggerFactory
-import org.codehaus.jackson.map.ObjectMapper
-import org.codehaus.jackson.JsonGenerator
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.JsonGenerator
 
 @Path("TESTONLY/events")
 @Singleton

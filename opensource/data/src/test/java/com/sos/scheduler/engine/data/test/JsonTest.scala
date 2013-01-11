@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.data.test
 
-import org.codehaus.jackson.map.ObjectMapper
-import org.junit.Test
-import org.scalatest.FunSuite
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import org.scalatest.FunSuite
 
 /** Zum Test von JSON-Serialisierungen.
   * @author Joacim Zschimmer */

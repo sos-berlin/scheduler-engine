@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.folder;
 
-import org.codehaus.jackson.annotate.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class JobPath extends TypedPath {
     public JobPath(AbsolutePath path) {

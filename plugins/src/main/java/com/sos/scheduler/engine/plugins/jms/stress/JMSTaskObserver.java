@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sos.scheduler.engine.data.EventList;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
@@ -7,7 +8,6 @@ import com.sos.scheduler.engine.data.job.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.plugins.jms.JMSConnection;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
