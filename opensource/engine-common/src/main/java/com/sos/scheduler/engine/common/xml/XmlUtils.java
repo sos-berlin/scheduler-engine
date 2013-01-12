@@ -39,7 +39,9 @@ public final class XmlUtils {
     private static boolean static_xPathNullPointerLogged = false;
 
     @ForCpp public static Document newDocument() {
-        return newDocumentBuilder().newDocument();
+        Document result = newDocumentBuilder().newDocument();
+        postInitializeDocument(result);
+        return result;
     }
 
     @ForCpp public static Document loadXml(byte[] xml) {
@@ -48,7 +50,9 @@ public final class XmlUtils {
 
     public static Document loadXml(InputStream in) {
         try {
-            return newDocumentBuilder().parse(in);
+            Document result = newDocumentBuilder().parse(in);
+            postInitializeDocument(result);
+            return result;
         }
         catch (IOException x) { throw new XmlException(x); }
         catch (SAXException x) { throw new XmlException(x); }
@@ -56,7 +60,9 @@ public final class XmlUtils {
 
     public static Document loadXml(String xml) {
         try {
-            return newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+            Document result = newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+            postInitializeDocument(result);
+            return result;
         }
         catch (IOException x) { throw new XmlException(x); }
         catch (SAXException x) { throw new XmlException(x); }
@@ -69,7 +75,11 @@ public final class XmlUtils {
             return factory.newDocumentBuilder();
         }
         catch (ParserConfigurationException x) { throw new XmlException(x); }
-     }
+    }
+
+    private static void postInitializeDocument(Document doc) {
+        doc.setXmlStandalone(true);
+    }
 
     @ForCpp public static byte[] toXmlBytes(Node n, String encoding, boolean indent) {
         ByteArrayOutputStream o = new ByteArrayOutputStream();

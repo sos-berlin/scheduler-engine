@@ -23,7 +23,7 @@ public final class XmlUtilsTest {
         Document doc = XmlUtils.loadXml(xml);
         byte[] result = XmlUtils.toXmlBytes(doc, "ASCII", false);
         String resultString = new String(result, US_ASCII);
-        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\" standalone=\"no\"?>" +  // Warum steht hier standalone?
+        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" +  // Warum steht hier standalone?
                 "<a b=\"B\">&#196;</a>"));
     }
 
@@ -33,8 +33,8 @@ public final class XmlUtilsTest {
         byte[] result = XmlUtils.toXmlBytes(doc, "ASCII", true);
         String resultString = new String(result, US_ASCII);
         String nl = System.getProperty("line.separator");
-        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\" standalone=\"no\"?>" +
-                nl + "<a>"+nl+"    <b>B</b>"+nl+"</a>"+nl));
+        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" + //nl +
+                "<a>"+nl+"    <b>B</b>"+nl+"</a>"+nl));
     }
 
     @Test public void testToXml() {
