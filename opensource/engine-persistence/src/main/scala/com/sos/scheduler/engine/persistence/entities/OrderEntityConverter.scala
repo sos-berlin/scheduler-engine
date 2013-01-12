@@ -46,7 +46,7 @@ trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistent, OrderK
     e
   }
 
-  final def toEntityKey(k: OrderKey) = OrderEntity.PrimaryKey(
+  final def toEntityKey(k: OrderKey) = OrderEntityKey(
     schedulerIdToDatabase(schedulerId),
     k.getJobChainPath.withoutStartingSlash,
     k.getId.string)

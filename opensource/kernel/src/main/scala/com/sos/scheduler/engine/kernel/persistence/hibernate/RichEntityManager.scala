@@ -5,21 +5,31 @@ import javax.persistence.EntityManager
 import org.hibernate.jdbc.Work
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.immutable
+import scala.reflect.ClassTag
 
 class RichEntityManager(entityManager: EntityManager) {
-  def findOption[E](key: AnyRef)(implicit m: Manifest[E]): Option[E] =
-    Option(entityManager.find(m.erasure, key).asInstanceOf[E])
+  def findOption[E](key: AnyRef)(implicit c: ClassTag[E]): Option[E] =
+    findOption(key, c.runtimeClass.asInstanceOf[Class[E]])
 
-  def fetchSeq[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit m: Manifest[A]): immutable.Seq[A] = {
-    val q = entityManager.createQuery(queryString, m.erasure)
-    for ((name, value) <- arguments) q.setParameter(name, value)
-    immutable.Seq() ++ q.getResultList.asInstanceOf[java.util.List[A]]
-  }
+  def findOption[E](key: AnyRef, clas: Class[E]): Option[E] =
+    Option(entityManager.find(clas, key))
 
-  def fetchOption[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit m: Manifest[A]): Option[A] = {
-    val i = fetchSeq(queryString, arguments)(m).iterator
+  def fetchOption[E <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit c: ClassTag[E]): Option[E] =
+    fetchOption[E](queryString, c.runtimeClass.asInstanceOf[Class[E]], arguments)
+
+  def fetchOption[E <: AnyRef](queryString: String, clas: Class[E], arguments: Iterable[(String, AnyRef)] = Iterable()): Option[E] = {
+    val i = fetchSeq(queryString, clas, arguments).iterator
     if (i.hasNext) Some(i.next()) ensuring { _ => !i.hasNext }
     else None
+  }
+
+  def fetchSeq[A <: AnyRef](queryString: String, arguments: Iterable[(String, AnyRef)] = Iterable())(implicit c: ClassTag[A]): immutable.Seq[A] =
+    fetchSeq[A](queryString, c.runtimeClass.asInstanceOf[Class[A]], arguments)
+
+  def fetchSeq[A <: AnyRef](queryString: String, clas: Class[A], arguments: Iterable[(String, AnyRef)] = Iterable()): immutable.Seq[A] = {
+    val q = entityManager.createQuery(queryString, clas)
+    for ((name, value) <- arguments) q.setParameter(name, value)
+    immutable.Seq() ++ q.getResultList
   }
 
   def useJDBCPreparedStatement[A](sql: String)(f: PreparedStatement => A) = {

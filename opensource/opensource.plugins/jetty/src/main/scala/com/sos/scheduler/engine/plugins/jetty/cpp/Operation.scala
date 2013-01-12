@@ -56,7 +56,7 @@ class Operation(
   def tryClose() {
     try close()
     catch {
-      case x => if (schedulerIsClosed.isClosed) logger.error(x.toString) else logger.error(x.toString, x)
+      case x: Throwable => if (schedulerIsClosed.isClosed) logger.error(x.toString) else logger.error(x.toString, x)
     }
   }
 
@@ -80,10 +80,9 @@ class Operation(
   }
 
   private def startAsync() {
-    val result = request.startAsync(request, response)
-    result.setTimeout(0)  // Nie
-    result.addListener(asyncListener)
-    result
+    val asyncConcext = request.startAsync(request, response)
+    asyncConcext.setTimeout(0)  // Nie
+    asyncConcext.addListener(asyncListener)
   }
 
   def serveChunks() {
@@ -100,7 +99,7 @@ class Operation(
       if (request.isAsyncStarted)
         request.getAsyncContext.dispatch()
     catch {
-      case x => logger.error(x.toString, x)
+      case x: Throwable => logger.error(x.toString, x)
     }
   }
 

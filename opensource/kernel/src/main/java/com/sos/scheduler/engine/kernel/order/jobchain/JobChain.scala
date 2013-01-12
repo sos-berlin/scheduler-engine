@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
 import java.io.File
 import javax.annotation.Nullable
-import javax.persistence.{EntityManager, EntityManagerFactory}
+import javax.persistence.EntityManager
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 

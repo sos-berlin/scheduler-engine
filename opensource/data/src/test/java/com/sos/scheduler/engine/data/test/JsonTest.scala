@@ -9,14 +9,14 @@ import org.scalatest.FunSuite
 trait JsonTest {
   this: FunSuite =>
 
-  private lazy val defaultObjectMapper = {
+  def addJsonTests[A <: AnyRef](obj: A, json: String) {
+    addJsonTests(newDefaultObjectMapper(), obj, json)
+  }
+
+  private def newDefaultObjectMapper() = {
     val o = new ObjectMapper
     o.registerModule(DefaultScalaModule)
     o
-  }
-
-  def addJsonTests[A <: AnyRef](obj: A, json: String) {
-    addJsonTests(defaultObjectMapper, obj, json)
   }
 
   def addJsonTests[A <: AnyRef](objectMapper: ObjectMapper, obj: A, json: String) {

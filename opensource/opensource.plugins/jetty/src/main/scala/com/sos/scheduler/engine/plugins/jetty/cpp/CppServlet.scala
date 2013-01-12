@@ -31,13 +31,13 @@ class CppServlet @Inject()(
     def startOperation() {
       val operation = new Operation(request, response, schedulerHttpService, cppProxyRegister, schedulerIsClosed)
       try operation.start()
-      catch { case x => operation.tryClose(); throw x }
+      catch { case x: Throwable => operation.tryClose(); throw x }
       if (!operation.isClosed) request.setAttribute(attributeName, operation)
     }
 
     def continueOperation(operation: Operation) {
       try operation.continue()
-      catch { case x => operation.tryClose(); throw x }
+      catch { case x: Throwable => operation.tryClose(); throw x }
       finally if (operation.isClosed) request.removeAttribute(attributeName)
     }
 

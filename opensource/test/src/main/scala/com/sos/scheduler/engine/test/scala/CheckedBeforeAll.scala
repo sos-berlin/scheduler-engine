@@ -9,7 +9,7 @@ trait CheckedBeforeAll {
   override protected final def beforeAll(configMap: Map[String, Any]) {
     try checkedBeforeAll(configMap)
     catch {
-      case x =>
+      case x: Throwable =>
         ignoreException { afterAll(configMap) }
         throw x
     }

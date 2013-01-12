@@ -49,7 +49,7 @@ object Parameters
     }
 
 
-    def usage = "java ... " + classOf[Main].getName + "\n"
+    def usage = "java ... " + classOf[Main].getName + "\n" +
         "    -?\n" +
         "    -version | -V\n" +
         "    -cpp-output-directory=\n" +

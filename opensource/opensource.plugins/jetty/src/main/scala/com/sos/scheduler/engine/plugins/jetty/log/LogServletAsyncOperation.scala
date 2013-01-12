@@ -11,7 +11,7 @@ import org.apache.log4j.Logger
 object LogServletAsyncOperation {
   private val logger = Logger.getLogger(getClass)
 
-  def apply(request: HttpServletRequest, response: HttpServletResponse, log: PrefixLog) = {
+  def apply(request: HttpServletRequest, response: HttpServletResponse, log: PrefixLog): FileServletAsyncOperation = {
     val operation = new FileServletAsyncOperation(request, response)
 
     val logSubscription = new LogSubscription {

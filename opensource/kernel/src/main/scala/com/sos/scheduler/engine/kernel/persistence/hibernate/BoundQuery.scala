@@ -1,24 +1,11 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import javax.persistence.{TypedQuery, EntityManager}
+import javax.persistence.EntityManager
 
-case class BoundQuery(queryString: String, bindings: Seq[(String, Any)] = Nil) {
+final case class BoundQuery(override val queryString: String, override val bindings: Seq[(String, Any)] = Nil)
+    extends AbstractBoundQuery {
 
-  def typedQuery[A](implicit em: EntityManager, m: Manifest[A]) = {
-    val q = em.createQuery(queryString, m.erasure).asInstanceOf[TypedQuery[A]]
-    for ((name, value) <- bindings) q.setParameter(name, value)
-    q
-  }
-
-  def query[A](implicit em: EntityManager) = {
-    val q = em.createQuery(queryString)
-    for ((name, value) <- bindings) q.setParameter(name, value)
-    q
-  }
-
-  def getResultList[A](implicit em: EntityManager, m: Manifest[A]) = typedQuery(em, m).getResultList
-
-  def executeUpdate[A]()(implicit em: EntityManager) = query(em).executeUpdate()
+  def executeUpdate()(implicit em: EntityManager) = query(em).executeUpdate()
 
   def ++(o: BoundQuery) = BoundQuery(queryString + o.queryString, bindings ++ o.bindings)
 }

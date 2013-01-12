@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import OrderEntity._
-import java.io.Serializable
 import javax.annotation.Nullable
 import javax.persistence.TemporalType.TIMESTAMP
 import javax.persistence._
@@ -30,7 +28,7 @@ import javax.persistence._
   * </pre> */
 @Entity
 @Table(name="SCHEDULER_ORDES")
-@IdClass(classOf[OrderEntity.PrimaryKey])
+@IdClass(classOf[OrderEntityKey])
 class OrderEntity {
   @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
   private[entities] var schedulerId: String = _
@@ -80,17 +78,11 @@ class OrderEntity {
   @Column(name=""""ORDER_XML"""") @Nullable
   private[entities] var xml: String = _
 
-  private[entities] def this(k: PrimaryKey) {
+  private[entities] def this(k: OrderEntityKey) {
     this()
     schedulerId = k.schedulerId
     jobChainPath = k.jobChainPath
     orderId = k.orderId
-  }
-}
-
-object OrderEntity {
-  case class PrimaryKey(var schedulerId: String, var jobChainPath: String, var orderId: String) extends Serializable {
-    def this() = this(null: String, null: String, null: String)
   }
 }
 

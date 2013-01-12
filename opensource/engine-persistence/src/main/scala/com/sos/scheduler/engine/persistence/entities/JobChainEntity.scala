@@ -1,8 +1,6 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import java.io.Serializable
 import javax.persistence._
-import scala.reflect.BeanProperty
 
 /** JPA-Entity für einen Jobkettenzustand.
   * <pre>
@@ -16,7 +14,7 @@ import scala.reflect.BeanProperty
   * </pre>*/
 @Entity
 @Table(name="SCHEDULER_JOB_CHAINS")
-@IdClass(classOf[JobChainEntity.Key])
+@IdClass(classOf[JobChainEntityKey])
 class JobChainEntity {
   @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
   private[entities] var schedulerId: String = _
@@ -30,7 +28,7 @@ class JobChainEntity {
   @Column(name=""""STOPPED"""" , nullable=false)
   private[entities] var isStopped: Boolean = _
 
-  def this(k: JobChainEntity.Key) {
+  def this(k: JobChainEntityKey) {
     this()
     schedulerId = k.schedulerId
     clusterMemberId = k.clusterMemberId
@@ -38,14 +36,4 @@ class JobChainEntity {
   }
 
   override def toString = "JobChainEntity"+ Seq(schedulerId, clusterMemberId, jobChainPath, isStopped).mkString("(", ",", ")")
-}
-
-object JobChainEntity {
-  case class Key(
-      @BeanProperty var schedulerId: String,
-      @BeanProperty var clusterMemberId: String,
-      @BeanProperty var jobChainPath: String)
-  extends Serializable {
-    def this() = this(null: String, null: String, null: String)
-  }
 }

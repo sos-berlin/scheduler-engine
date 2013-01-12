@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import java.io.Serializable
-import java.util.{Date => JavaDate}
 import javax.annotation.Nullable
 import javax.persistence._
 
@@ -18,7 +16,7 @@ import javax.persistence._
   * </pre> */
 @Entity
 @Table(name="SCHEDULER_JOB_CHAIN_NODES")
-@IdClass(classOf[JobChainNodeEntity.Key])
+@IdClass(classOf[JobChainNodeEntityKey])
 class JobChainNodeEntity {
   @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
   private[entities] var schedulerId: String = _
@@ -35,7 +33,7 @@ class JobChainNodeEntity {
   @Column(name=""""ACTION"""") @Nullable
   private[entities] var action: String= _
 
-  def this(k: JobChainNodeEntity.Key) {
+  def this(k: JobChainNodeEntityKey) {
     this()
     schedulerId = k.schedulerId
     clusterMemberId = k.clusterMemberId
@@ -44,10 +42,4 @@ class JobChainNodeEntity {
   }
 
   override def toString = "JobChainEntity"+ Seq(schedulerId, clusterMemberId, jobChainPath, orderState, action).mkString("(", ",", ")")
-}
-
-object JobChainNodeEntity {
-  case class Key(var schedulerId: String, var clusterMemberId: String, var jobChainPath: String, orderState: String) extends Serializable {
-    def this() = this(null: String, null: String, null: String, null: String)
-  }
 }

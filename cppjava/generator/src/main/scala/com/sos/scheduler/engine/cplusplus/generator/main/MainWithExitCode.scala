@@ -4,7 +4,7 @@ package com.sos.scheduler.engine.cplusplus.generator.main
 object MainWithExitCode {
     def main(args: Array[String]) {
         try Main.main(args)
-        catch { case x =>
+        catch { case x: Throwable =>
             showException(x)
             System.exit(1)
         }

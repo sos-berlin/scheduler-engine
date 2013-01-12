@@ -58,7 +58,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     entityManager.close()
   }
 
-  private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq("select t from TaskHistoryEntity t order by t.id")
+  private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
   test("TaskHistoryEntity") {
     taskHistoryEntities should have size (2)
@@ -224,7 +224,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
   }
 
   private def tryFetchJobEntity(jobPath: JobPath) =
-    entityManager.findOption[JobEntity](JobEntity.PrimaryKey(schedulerId.string, "-", jobPath.withoutStartingSlash))
+    entityManager.findOption[JobEntity](JobEntityKey(schedulerId.string, "-", jobPath.withoutStartingSlash))
 
   def tryFetchJobChainEntity(path: JobChainPath) =
     entityManager.fetchOption[JobChainEntity]("select j from JobChainEntity j where j.jobChainPath = :jobChainPath",
@@ -235,7 +235,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
       Seq("jobChainPath" -> jobChainPath.withoutStartingSlash()))
 
   private def fetchTaskEntities(jobPath: JobPath): Seq[TaskEntity] =
-    entityManager.fetchSeq("select t from TaskEntity t where t.jobPath = :jobPath order by t.taskId",
+    entityManager.fetchSeq[TaskEntity]("select t from TaskEntity t where t.jobPath = :jobPath order by t.taskId",
       Seq("jobPath" -> jobPath.withoutStartingSlash()))
 
   private def stopJobAndWait(jobPath: JobPath) {

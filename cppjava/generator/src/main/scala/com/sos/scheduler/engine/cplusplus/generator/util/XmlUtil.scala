@@ -9,7 +9,7 @@ object XmlUtil {
   def replaceNodes(node: Node)(f: PartialFunction[Node, NodeSeq]): NodeSeq = {
     def t(node: Node): NodeSeq = node match {
       case n if (f isDefinedAt n) => f(n)
-      case e: Elem if e.descendant exists f.isDefinedAt => e.copy(e.prefix, e.label, e.attributes, e.scope, e.child flatMap t)
+      case e: Elem if e.descendant exists f.isDefinedAt => e.copy(e.prefix, e.label, e.attributes, e.scope, true, e.child flatMap t)
       case n => n
     }
     t(node)

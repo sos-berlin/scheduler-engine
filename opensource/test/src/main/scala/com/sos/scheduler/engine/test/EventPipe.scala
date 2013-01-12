@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.test
 
+import _root_.scala.reflect.ClassTag
 import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.eventbus._
@@ -14,16 +15,16 @@ class EventPipe(defaultTimeout: Time) extends EventHandlerAnnotated {
     queue.add(e)
   }
 
-  def next[E <: Event](implicit m: ClassManifest[E]): E = nextEvent[E](defaultTimeout, {e: E => true}, m)
+  def next[E <: Event](implicit c: ClassTag[E]): E = nextEvent[E](defaultTimeout, {e: E => true}, c)
 
-  def nextWithCondition[E <: Event](condition: E => Boolean = {e: E => true})(implicit m: ClassManifest[E]) =
-    nextEvent[E](defaultTimeout, condition, m)
+  def nextWithCondition[E <: Event](condition: E => Boolean = {e: E => true})(implicit c: ClassTag[E]) =
+    nextEvent[E](defaultTimeout, condition, c)
 
-  def nextWithTimeoutAndCondition[E <: Event](timeout: Time)(condition: E => Boolean = {e: E => true})(implicit m: ClassManifest[E]) =
-    nextEvent[E](timeout, condition, m)
+  def nextWithTimeoutAndCondition[E <: Event](timeout: Time)(condition: E => Boolean = {e: E => true})(implicit c: ClassTag[E]) =
+    nextEvent[E](timeout, condition, c)
 
-  private def nextEvent[E <: Event](t: Time, predicate: E => Boolean, manifest: ClassManifest[E]): E =
-    nextEvent[E](t, predicate, manifest.erasure.asInstanceOf[Class[E]])
+  private def nextEvent[E <: Event](t: Time, predicate: E => Boolean, classTag: ClassTag[E]): E =
+    nextEvent[E](t, predicate, classTag.runtimeClass.asInstanceOf[Class[E]])
 
   private def nextEvent[E <: Event](t: Time, predicate: E => Boolean, expectedEventClass: Class[E]): E = {
     def expectedName = expectedEventClass.getSimpleName

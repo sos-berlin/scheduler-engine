@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import java.io.Serializable
 import java.util.{Date => JavaDate}
 import javax.annotation.Nullable
 import javax.persistence.TemporalType.TIMESTAMP
@@ -19,7 +18,7 @@ import javax.persistence._
   * </pre>*/
 @Entity
 @Table(name = "SCHEDULER_JOBS")
-@IdClass(classOf[JobEntity.PrimaryKey])
+@IdClass(classOf[JobEntityKey])
 class JobEntity {
 
   @Column(name=""""SPOOLER_ID"""", nullable=false) @Id
@@ -38,10 +37,4 @@ class JobEntity {
   private[entities] var nextStartTime: JavaDate = _
 
   override def toString = "JobEntity"+ Seq(schedulerId, clusterMemberId, jobPath, isStopped, nextStartTime).mkString("(", ",", ")")
-}
-
-object JobEntity {
-  case class PrimaryKey(var schedulerId: String, var clusterMemberId: String, var jobPath: String) extends Serializable {
-    def this() = this(null: String, null: String, null: String)
-  }
 }

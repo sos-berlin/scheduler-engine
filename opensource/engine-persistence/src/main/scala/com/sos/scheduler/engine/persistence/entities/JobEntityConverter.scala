@@ -28,7 +28,7 @@ trait JobEntityConverter extends ObjectEntityConverter[JobPersistent, JobPath, J
   }
 
   final def toEntityKey(jobPath: JobPath) =
-    JobEntity.PrimaryKey(
+    JobEntityKey(
       schedulerIdToDatabase(schedulerId),
       if (clusterMemberId.isEmpty) "-" else clusterMemberId.string,
       jobPath.withoutStartingSlash)

@@ -26,7 +26,7 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
       checkedBeforeAll(configMap)
     }
     catch {
-      case x =>
+      case x: Throwable =>
         ignoreException { afterAll(configMap) }
         throw x
     }

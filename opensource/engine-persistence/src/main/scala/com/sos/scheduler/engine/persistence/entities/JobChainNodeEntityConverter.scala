@@ -24,7 +24,7 @@ trait JobChainNodeEntityConverter extends ObjectEntityConverter[JobChainNodePers
     e
   }
 
-  final def toEntityKey(key: JobChainNodePersistentStateKey) = JobChainNodeEntity.Key(
+  final def toEntityKey(key: JobChainNodePersistentStateKey) = JobChainNodeEntityKey(
     schedulerIdDBString,
     clusterMemberIdDBString,
     key.jobChainPath.withoutStartingSlash,

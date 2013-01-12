@@ -17,9 +17,8 @@ class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServ
         val orderIdString = Option(request.getParameter("order")).get
         val jobChain = orderSubsystem.jobChain(jobChainPath)
         val order = jobChain.order(new OrderId(orderIdString))
-        val result = LogServletAsyncOperation(request, response, order.getLog)
-        request.setAttribute(attributeName, result)
-        result
+        val asyncOperation = LogServletAsyncOperation(request, response, order.getLog)
+        request.setAttribute(attributeName, asyncOperation)
       case Some(operation) =>
         operation.continue()
     }

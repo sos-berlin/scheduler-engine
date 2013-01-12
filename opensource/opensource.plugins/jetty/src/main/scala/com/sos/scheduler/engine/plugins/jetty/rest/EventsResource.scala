@@ -38,7 +38,7 @@ class EventsResource @Inject()(eventBus: EventBus){
       try writeEvents(out)
       catch {
         case x: InterruptedException =>
-        case x => logger.error(x.toString); throw x
+        case x: Throwable => logger.error(x.toString); throw x
       } finally {
         eventBus.unregisterAnnotated(eventCollector)
       }

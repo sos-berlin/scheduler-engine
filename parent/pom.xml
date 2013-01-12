@@ -15,9 +15,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> <!-- für maven-failsafe-plugin -->
-        <scala.version>2.9.2</scala.version>
+        <scala.version>2.10.0</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
-        <scalatest.scala.version>2.9.2</scalatest.scala.version>
+        <scalatest.scala.version>2.10</scalatest.scala.version>
         <jersey.version>1.10</jersey.version>
         <jetty.version>8.1.5.v20120716</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <slf4j.version>1.6.4</slf4j.version>
@@ -239,7 +239,7 @@
             <dependency>
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest_${scalatest.scala.version}</artifactId>
-                <version>1.8</version>
+                <version>1.9.1</version>
             </dependency>
 
             <dependency>
@@ -287,6 +287,16 @@
             <dependency>
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-actors</artifactId>
                 <version>${scala.version}</version>
             </dependency>
             <dependency>
@@ -396,8 +406,8 @@
             </dependency-->
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-scala</artifactId>
-                <version>${jackson.version}</version>
+                <artifactId>jackson-module-scala_2.10</artifactId>
+                <version>2.1.3</version>
                 <exclusions>
                     <exclusion>
                         <groupId>junit</groupId>
