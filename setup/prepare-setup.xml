@@ -86,6 +86,7 @@ to run without maven integration.
             <include name="log4j-*.jar"/>
             <include name="mail-*.jar"/>
             <include name="scala-library-*.jar"/>
+            <include name="scala-reflect-*.jar"/>
             <include name="slf4j*.jar"/>
             <!-- additional jars for jetty integration -->
             <include name="aopalliance-*.jar"/>
