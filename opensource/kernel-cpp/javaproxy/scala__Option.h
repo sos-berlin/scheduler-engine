@@ -52,6 +52,7 @@ struct Option : ::zschimmer::javabridge::proxy_jobject< Option >, ::javaproxy::j
     ::javaproxy::java::lang::Object get() const;
     bool isDefined() const;
     bool isEmpty() const;
+    bool nonEmpty() const;
     ::javaproxy::java::lang::String productPrefix() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;

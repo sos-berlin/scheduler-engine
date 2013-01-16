@@ -19,6 +19,7 @@ struct Option__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _get____method;
     ::zschimmer::javabridge::Method const _isDefined____method;
     ::zschimmer::javabridge::Method const _isEmpty____method;
+    ::zschimmer::javabridge::Method const _nonEmpty____method;
     ::zschimmer::javabridge::Method const _productPrefix____method;
 
     static const ::zschimmer::javabridge::class_factory< Option__class > class_factory;
@@ -34,6 +35,7 @@ Option__class::Option__class(const string& class_name) :
     ,_get____method(this, "get", "()Ljava/lang/Object;")
     ,_isDefined____method(this, "isDefined", "()Z")
     ,_isEmpty____method(this, "isEmpty", "()Z")
+    ,_nonEmpty____method(this, "nonEmpty", "()Z")
     ,_productPrefix____method(this, "productPrefix", "()Ljava/lang/String;"){}
 
 Option__class::~Option__class() {}
@@ -98,6 +100,12 @@ bool Option::isEmpty() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Option__class* cls = _class.get();
     return 0 != cls->_isEmpty____method.bool_call(get_jobject(), parameter_list);
+}
+
+bool Option::nonEmpty() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Option__class* cls = _class.get();
+    return 0 != cls->_nonEmpty____method.bool_call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::String Option::productPrefix() const {
