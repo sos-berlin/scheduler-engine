@@ -2361,7 +2361,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                         clause << " where `job_name`="        << sql_quoted( _job_path.without_slash() );
                         clause << " and `spooler_id`="        << sql_quoted( _spooler->id_for_db() );
-                        clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
+                        if (_spooler->is_cluster() && !_spooler->_cluster_configuration._is_backup_member)
+                          clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
                         
                         if( id != -1 )
                         {
