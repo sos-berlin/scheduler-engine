@@ -126,7 +126,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     friend struct Read_transaction;
     friend struct Transaction;
 
-    void                        open2                   ( const string& db_name );
+    void                        open2                   ();
     void                        open_history_table      ( Read_transaction* );
   //void                        get_history_table_table ();
     bool                        add_column              ( Transaction*, const string& table_name, const string& column_name, const string add_clause );
