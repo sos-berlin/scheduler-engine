@@ -28,7 +28,7 @@ final class WaitForConditionTest extends FunSuite {
 
   test("waitForCondition(TimeoutWithSteps) 0 steps (time-critical test)") {
     val elapsed = meterElapsedTime { waitForCondition(TimeoutWithSteps(millis(2000), millis(1000)))(true) }
-    elapsed.toInt should be < (50)
+    elapsed.toInt should be < (80)
   }
 
   test("waitForCondition(TimeoutWithSteps) all steps (time-critical test)") {
