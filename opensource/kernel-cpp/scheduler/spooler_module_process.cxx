@@ -619,7 +619,8 @@ bool Process_module_instance::begin__end()
             zschimmer::Log_ptr::disable_logging(); // fork() kann gesperrte Mutex übernehmen, was zum Deadlock führt (stimmt das?)
             // Z_LOG() ist jetzt wirkunglos. Kann cerr auch gesperrt sein? Wenigstens ist es unwahrscheinlich, weil cerr kaum benutzt wird.
 
-            setpgid(0,0);   // Neue Prozessgruppe
+            // Alle Prozesse einer Task in einer Prozessgruppe starten, ausser der Prozess wird vom Hauptscheduler gestartet (vgl. JS-930)
+            if (_spooler) setpgid(0,0);   // Neue Prozessgruppe
 
             if( _module->_priority != "" ) 
             {

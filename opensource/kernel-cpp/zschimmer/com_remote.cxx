@@ -1410,6 +1410,8 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
             Log_ptr::disable_logging(); // fork() kann gesperrte Mutex übernehmen, was zum Deadlock führt (stimmt das?)
             // Z_LOG() ist jetzt wirkunglos. Kann cerr auch gesperrt sein? Wenigstens ist es unwahrscheinlich, weil cerr kaum benutzt wird.
 
+            setpgid(0,0);   // Neue Prozessgruppe für den API Prozess vgl. JS-930
+
             if( _priority != "" ) 
             {
                 try
@@ -1542,7 +1544,11 @@ bool Connection_to_own_server_process::kill_process()
     {
         try
         {
-            kill_process_immediately( _pid, Z_FUNCTION );
+#           ifdef Z_UNIX
+                posix::try_kill_process_group_immediately( _pid );    // alle Prozesse der Task beenden (vgl. JS-930)
+#           else
+              kill_process_immediately( _pid, Z_FUNCTION );
+#           endif
             is_killed = true;
         }
         catch( const exception& x ) 
