@@ -104,7 +104,7 @@ xml::Document_ptr Scheduler_event::dom()
             scheduler_event_element.setAttribute( "path"    , job->path() );
             scheduler_event_element.setAttribute( "job"     , job->name() );
             state_show |= show_jobs | show_tasks;
-            state_show._job_name = job->name();
+            state_show._job_name = job->path();
             break;
         }
 
@@ -115,7 +115,7 @@ xml::Document_ptr Scheduler_event::dom()
             scheduler_event_element.setAttribute( "path"    , task->job()->path() );
             scheduler_event_element.setAttribute( "job"     , task->job()->name() );
             state_show |= show_jobs | show_tasks;
-            state_show._job_name = task->job()->name();
+            state_show._job_name = task->job()->path();
             state_show._task_id  = task->id();
             break;
         }
