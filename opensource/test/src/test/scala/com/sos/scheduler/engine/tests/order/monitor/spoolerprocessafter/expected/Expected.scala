@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected
 
 import com.sos.scheduler.engine.kernel.job.JobState
-import com.sos.scheduler.engine.data.log.LogLevel
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 
 case class Expected(orderStateExpectation: OrderStateExpectation, details: ExpectedDetail*) {
   import Expected._
@@ -10,8 +10,8 @@ case class Expected(orderStateExpectation: OrderStateExpectation, details: Expec
 
   def spoolerProcessAfterParameterOption: Option[Boolean] = details collectFirst { case SpoolerProcessAfterParameter(o) => o }
 
-  def messageCodes: Iterable[(LogLevel, Iterable[String])] = {
-    def messages(level: LogLevel) = details collect { case MessageCode(`level`, code) => code }
+  def messageCodes: Iterable[(SchedulerLogLevel, Iterable[String])] = {
+    def messages(level: SchedulerLogLevel) = details collect { case MessageCode(`level`, code) => code }
     logLevels map { level => level -> messages(level).toSet } filter { !_._2.isEmpty }
   }
 
@@ -19,5 +19,5 @@ case class Expected(orderStateExpectation: OrderStateExpectation, details: Expec
 }
 
 object Expected {
-  val logLevels = List(LogLevel.error, LogLevel.warning)
+  val logLevels = List(SchedulerLogLevel.error, SchedulerLogLevel.warning)
 }

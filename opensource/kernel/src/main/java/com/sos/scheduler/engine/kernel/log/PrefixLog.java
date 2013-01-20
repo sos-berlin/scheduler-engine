@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.log;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
 import com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC;
 import org.apache.log4j.Logger;
 
@@ -115,7 +116,7 @@ public final class PrefixLog implements Sister, SchedulerLogger {
 
     /** @return "", wenn für den Level keine Meldung vorliegt. */
     public String lastByLevel(SchedulerLogLevel level) {
-        return cppProxy.java_last(level.getCppName());
+        return cppProxy.java_last(level.cppName());
     }
 
     public boolean isStarted() {

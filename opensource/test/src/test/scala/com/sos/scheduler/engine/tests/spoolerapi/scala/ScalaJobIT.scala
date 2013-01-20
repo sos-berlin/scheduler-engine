@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.tests.spoolerapi.scala
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
-import com.sos.scheduler.engine.kernel.log.SchedulerLogLevel
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.scala._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConversions._
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 
 /** Prüft, ob alle Methoden eines Scala-Jobs aufgerufen werden.
  * Der Scala-Job wird mit den Log-Levels info und error gerufen, um den Aufruf von spooler_on_success() und spooler_on_error()
@@ -35,7 +35,7 @@ final class ScalaJobIT extends ScalaSchedulerTest {
 
   private def checkMethodCallCounters(logLevel: SchedulerLogLevel) {
     // Der Job schreibt in scheduler.variables, wie oft der Scheduler jede Methode aufgerufen hat.
-    val LevelString = logLevel.getNumber.toString
+    val LevelString = logLevel.cppNumber.toString
     val result = scheduler.getVariables.toMap collect {
         case (VariableNamePattern(LevelString, call), value) => call -> value.toInt
     }
@@ -66,7 +66,7 @@ object ScalaJobIT {
   private def startJobElem(logLevel: SchedulerLogLevel) =
     <start_job job={jobPath.asString}>
       <params>
-          <param name="logLevel" value={logLevel.getNumber.toString}/>
+          <param name="logLevel" value={logLevel.cppNumber.toString}/>
       </params>
     </start_job>
 }

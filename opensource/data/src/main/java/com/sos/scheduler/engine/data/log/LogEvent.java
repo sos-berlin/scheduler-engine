@@ -9,10 +9,10 @@ import java.util.regex.Pattern;
 public class LogEvent extends AbstractEvent {
     private static final Pattern codePattern = Pattern.compile("([A-Z]+(-[0-9A-Z]+)+)( .*)?");
 
-    private final LogLevel level;
+    private final SchedulerLogLevel level;
     private final String line;
 
-    protected LogEvent(LogLevel level, String message) {
+    protected LogEvent(SchedulerLogLevel level, String message) {
         this.level = level;
         this.line = message;
     }
@@ -21,7 +21,7 @@ public class LogEvent extends AbstractEvent {
         return messageCodeFromLineOrNull(line);
     }
 
-    public final LogLevel level() {
+    public final SchedulerLogLevel level() {
         return level;
     }
 
@@ -38,7 +38,7 @@ public class LogEvent extends AbstractEvent {
         return m.matches()? m.group(1) : null;
     }
 
-    public static LogEvent of(LogLevel level, String line) {
+    public static LogEvent of(SchedulerLogLevel level, String line) {
         switch (level) {
             case info: return new InfoLogEvent(line);
             case warning: return new WarningLogEvent(line);

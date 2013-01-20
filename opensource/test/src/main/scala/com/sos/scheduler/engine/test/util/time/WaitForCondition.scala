@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test.util.time
 
 import java.lang.Thread.sleep
+import org.joda.time.DateTimeUtils
 import org.joda.time.Instant.now
 
 object WaitForCondition {
@@ -24,7 +25,7 @@ object WaitForCondition {
     instants.toIterator map sleepUntil // toIterator führt dazu, das now() erst bei next() oder hasNext lazy aufgerufen wird.
 
   private[time] def sleepUntil(until: Long) {
-    val w = until - now().getMillis
+    val w = until - DateTimeUtils.currentTimeMillis()
     if (w > 0) sleep(w)
   }
 }

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 import com.google.common.base.Strings.emptyToNull
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{TaskId, TaskClosedEvent}
-import com.sos.scheduler.engine.data.log.{LogEvent, LogLevel}
+import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
@@ -27,7 +27,7 @@ final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
 
   private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
   private lazy val orderSubsystem = scheduler.instance[OrderSubsystem]
-  private val messageCodes = new MyMutableMultiMap[LogLevel, String]
+  private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
 
   controller.setTerminateOnError(false)
 

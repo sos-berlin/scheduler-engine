@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.job.TaskClosedEvent;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
 import com.sos.scheduler.engine.data.log.LogEvent;
-import com.sos.scheduler.engine.data.log.LogLevel;
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
 import com.sos.scheduler.engine.data.order.*;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.kernel.folder.FileBased;
@@ -63,7 +63,7 @@ public class CppEventFactory {
     }
 
     @ForCpp public static AbstractEvent newLogEvent(int cppLevel, String message) {
-        return LogEvent.of(LogLevel.ofCpp(cppLevel), message);
+        return LogEvent.of(SchedulerLogLevel.ofCpp(cppLevel), message);
     }
 
     @ForCpp public static AbstractEvent newOrderStateChangedEvent(String jobChainPath, String orderId, String previousState) {
