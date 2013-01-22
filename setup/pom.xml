@@ -43,9 +43,11 @@ call prepare-setup.sh <version> to use this pom
                             <goal>run</goal>
                         </goals>
 									      <configuration>
-									        <tasks>
-									          <delete dir="${settings.localRepository}/com/sos/scheduler/engine" />
-									        </tasks>
+                    <target>
+                        <ant antfile="prepare-setup.xml" target="purge.local">
+                            <property name="settings.localRepository" value="${settings.localRepository}" />
+                        </ant>
+                    </target>
 									      </configuration>
 									    </execution>
 	                </executions>

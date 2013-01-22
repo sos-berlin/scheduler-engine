@@ -24,6 +24,10 @@ to run without maven integration.
     <property name="target.dir" value="${basedir}/target/setup"/>
     <property name="archive.root" value="/com/sos/scheduler/engine/kernelcpp"/>
 
+    <target name="purge.local">
+    	<delete dir="${settings.localRepository}/com/sos/scheduler/engine" />
+    </target>
+
     <target name="setup.platform" depends="-init, -unzip, -copy, -copy.platform, -versioninfo"
             description="platform specific setup preparation">
         <echo message="DONE !!"/>
