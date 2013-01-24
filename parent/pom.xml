@@ -20,7 +20,7 @@
         <scalatest.scala.version>2.10</scalatest.scala.version>
         <jersey.version>1.10</jersey.version>
         <jetty.version>8.1.5.v20120716</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
-        <slf4j.version>1.6.4</slf4j.version>
+        <slf4j.version>1.7.2</slf4j.version>
         <jackson.version>2.1.2</jackson.version>
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
         <cplusplusVersion>${project.version}</cplusplusVersion>
@@ -380,6 +380,11 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>2.0.0</version>
@@ -423,6 +428,11 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>1.9.0</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
