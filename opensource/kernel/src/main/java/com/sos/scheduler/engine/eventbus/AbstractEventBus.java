@@ -4,18 +4,17 @@ import com.google.common.collect.*;
 import com.sos.scheduler.engine.eventbus.annotated.EventSourceMethodEventSubscription;
 import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactory;
 import com.sos.scheduler.engine.data.event.Event;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.apache.log4j.Level.*;
 
 public abstract class AbstractEventBus implements EventBus {
-    private static final Logger logger = Logger.getLogger(AbstractEventBus.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractEventBus.class);
 
     private final Multimap<Class<? extends Event>, EventSubscription> subscribers = HashMultimap.create();
     private final AnnotatedHandlerFinder handlerFinder;
@@ -92,8 +91,10 @@ public abstract class AbstractEventBus implements EventBus {
             call.apply();
             return true;
         } catch (Throwable t) {   // Der C++-Code soll wirklich keine Exception bekommen.
-            Level level = t instanceof Error? t.getClass().getSimpleName().equals("TestError")? DEBUG : FATAL : ERROR;
-                logger.log(level, call+": "+t, t);
+            if (t instanceof Error && t.getClass().getSimpleName().equals("TestError"))
+                logger.debug("{}", call, t);
+            else
+                logger.error("{}", call, t);
             //Löst ein rekursives Event aus: log().error(s+": "+x);
             if (call.getEvent().getClass() == EventHandlerFailedEvent.class) {
                 return false;

@@ -8,7 +8,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.Settings;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -16,7 +17,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 /** Steuert den {@link SchedulerThread}. */
 public class SchedulerThreadController implements SchedulerController {
-    private static final Logger logger = Logger.getLogger(SchedulerThreadController.class);
+    private static final Logger logger = LoggerFactory.getLogger(SchedulerThreadController.class);
     private static final Time terminationTimeout = Time.of(5);
 
     private final String name;
@@ -83,7 +84,7 @@ public class SchedulerThreadController implements SchedulerController {
         try {
             controllerBridge.terminate();
         } catch (CppProxyInvalidatedException x) {
-            logger.debug(x);
+            logger.debug("controllerBridge.terminate()", x);
         }
     }
 

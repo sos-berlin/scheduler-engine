@@ -9,7 +9,8 @@ import com.sos.scheduler.engine.test.util.Sockets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +23,7 @@ import static org.junit.Assert.assertThat;
 
 public class IPAuthorizationIT extends SchedulerTest {
 
-	@SuppressWarnings("unused")
-	private static Logger logger = Logger.getLogger(IPAuthorizationIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(IPAuthorizationIT.class);
 
     private static final String xmlCommand = "<show_state />";
     private static final int tcpPort = Sockets.findAvailablePort();
@@ -52,7 +52,7 @@ public class IPAuthorizationIT extends SchedulerTest {
         Client c = Client.create();
         WebResource webResource = c.resource(uri);
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
-        logger.info("Response for " + uri.toASCIIString() + "/" + xmlCommand + ": " + response.getClientResponseStatus());
+        logger.debug("Response for " + uri.toASCIIString() + "/" + xmlCommand + ": " + response.getClientResponseStatus());
         c.destroy();
         // logResult(response);
         return response;

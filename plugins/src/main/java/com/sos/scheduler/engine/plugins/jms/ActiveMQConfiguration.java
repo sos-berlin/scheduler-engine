@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Properties;
 import javax.jms.Topic;
 import javax.jms.TopicConnectionFactory;
@@ -7,10 +10,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
-
 public class ActiveMQConfiguration {
-    private static final Logger logger = Logger.getLogger(ActiveMQConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(ActiveMQConfiguration.class);
     public static final String brokerName = "localhost"; //"com.sos.scheduler";
     public static final String initialContextFactoryName = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     public static final String topicConnectionFactoryName = "TopicCF";

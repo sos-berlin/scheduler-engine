@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.test.util.What;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -25,7 +24,6 @@ import static org.junit.Assert.assertTrue;
  */
 public final class JS804IT extends SchedulerTest {
 
-	private static final Logger logger = Logger.getLogger(JS804IT.class);
 	private static final int ONE_DAY = 86400;
 	private static final String order_setback = "js804";		// to be started via the test
 	private static final String order_simple = "js804-1";		// not started but scheduled
@@ -58,7 +56,6 @@ public final class JS804IT extends SchedulerTest {
     	showCalendarAnswer = loadXml(scheduler().executeXml(util.showCalendar(ONE_DAY, What.orders).getCommand()));
         StringWriter sw = new StringWriter();
         writeXmlTo(showCalendarAnswer.getFirstChild(),sw);
-        logger.debug(sw.toString());
     }
 
     private boolean isSetback(String order) {

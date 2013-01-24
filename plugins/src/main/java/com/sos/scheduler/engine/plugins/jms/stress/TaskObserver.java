@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class TaskObserver extends TimerTask {
 
-	private static final Logger logger = Logger.getLogger(TaskObserver.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskObserver.class);
 	
 	private final Long start;
 	private final TaskInfo testClass;

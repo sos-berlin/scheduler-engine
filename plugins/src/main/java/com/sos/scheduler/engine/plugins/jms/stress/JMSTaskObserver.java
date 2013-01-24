@@ -7,7 +7,8 @@ import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.plugins.jms.JMSConnection;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -21,9 +22,9 @@ import static java.util.Arrays.asList;
 
 public class JMSTaskObserver extends JMSConnection implements MessageListener, TaskInfo {
 
-	private static final Logger logger = Logger.getLogger(JMSTaskObserver.class);
+	private static final Logger logger = LoggerFactory.getLogger(JMSTaskObserver.class);
 
-    private static final List<String> eventsToListen = asList("TaskStartedEvent","TaskEndedEvent");
+    private static final List<String> eventsToListen = asList("TaskStartedEvent", "TaskEndedEvent");
     private final List<TaskInfoListener> listener = new ArrayList<TaskInfoListener>();
 
 	private int endedTasks = 0;
@@ -70,9 +71,9 @@ public class JMSTaskObserver extends JMSConnection implements MessageListener, T
             }
 			textMessage.acknowledge();
         } catch (IOException e) {
-			throw new SchedulerException("could not desesrialize " + jsonContent,e);
+			throw new SchedulerException("could not desesrialize " + jsonContent, e);
 		} catch (JMSException e) {
-            throw new SchedulerException("could not acknowledge message",e);
+            throw new SchedulerException("could not acknowledge message", e);
         }
     }
 

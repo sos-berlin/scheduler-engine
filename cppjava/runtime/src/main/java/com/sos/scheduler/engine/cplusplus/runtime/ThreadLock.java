@@ -1,20 +1,20 @@
 package com.sos.scheduler.engine.cplusplus.runtime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import javax.annotation.Nullable;
 
 public class ThreadLock {
     private static final int logTimeoutMillis = 30*1000;     // Wenn's länger dauert, Meldung loggen
-    private static final Level logLevel = Level.WARN;
-    private static final Logger logger = Logger.getLogger(ThreadLock.class);
+    private static final Logger logger = LoggerFactory.getLogger(ThreadLock.class);
 
-    private final SimpleLock myLock = logger.isEnabledFor(logLevel)? new LoggingLock() : new SimpleLock();
+    private final SimpleLock myLock = logger.isWarnEnabled()? new LoggingLock() : new SimpleLock();
 
     public final void lock() {
         myLock.lock();
@@ -60,7 +60,7 @@ public class ThreadLock {
             if (!locked) {
                 callersData.logBefore();
                 super.lock();
-                logger.log(logLevel, "Scheduler ThreadLock acquired");
+                logger.warn("Scheduler ThreadLock acquired");
             }
             callersData.remember();
         }
@@ -85,7 +85,7 @@ public class ThreadLock {
                 w.write(", stack trace was:\n");
                 if (x != null)  x.printStackTrace(w);
                 w.flush();
-                logger.log(logLevel, stringWriter.toString());
+                logger.warn(stringWriter.toString());
             }
 
             private synchronized void remember() {

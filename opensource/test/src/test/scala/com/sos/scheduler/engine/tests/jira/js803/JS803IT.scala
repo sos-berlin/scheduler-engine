@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.test.SchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import org.apache.log4j.Logger
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.joda.time.DateTime
@@ -16,6 +15,7 @@ import org.junit.Test
 import scala.collection.mutable
 import scala.xml.Elem
 import scala.xml.Utility.trim
+import org.slf4j.LoggerFactory
 
 /** Ticket JS-803.
  * @see <a href='http://www.sos-berlin.com/jira/browse/JS-803'>JS-803</a>
@@ -47,7 +47,7 @@ final class JS803IT extends SchedulerTest {
   }
 
   private def execute(command: Elem) {
-    logger.debug(trim(command))
+    logger.debug("{}", trim(command))
     controller.scheduler.executeXml(command)
   }
 
@@ -66,7 +66,7 @@ final class JS803IT extends SchedulerTest {
 }
 
 object JS803IT {
-  private val logger = Logger.getLogger(classOf[JS803IT])
+  private val logger = LoggerFactory.getLogger(classOf[JS803IT])
   private val shortTimeout = SchedulerTest.shortTimeout
   private val orderDelay = 3+1
   private val jobChainPath = JobChainPath.of("/super")

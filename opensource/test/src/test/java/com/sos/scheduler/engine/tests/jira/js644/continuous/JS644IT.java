@@ -14,11 +14,12 @@ import com.sos.scheduler.engine.test.Environment;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.TestSchedulerController;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
-import org.apache.log4j.Logger;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -34,7 +35,7 @@ import static org.junit.Assert.fail;
 public final class JS644IT extends SchedulerTest {
     @ClassRule public static final TestRule slowTestRule = SlowTestRule.singleton;
 
-    private static final Logger logger = Logger.getLogger(JS644IT.class);
+    private static final Logger logger = LoggerFactory.getLogger(JS644IT.class);
     private static final TypedPath jobChainPath = jobChain.typedPath("/A");
     private static final ImmutableList<String> jobPaths = ImmutableList.of("/a", "/b", "/c");
     private static final Time orderTimeout = Time.of(60);

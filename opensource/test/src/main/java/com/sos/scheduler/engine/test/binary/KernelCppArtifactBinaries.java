@@ -2,7 +2,8 @@ package com.sos.scheduler.engine.test.binary;
 
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -12,7 +13,7 @@ import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {
-    private static final Logger logger = Logger.getLogger(KernelCppArtifactBinaries.class);
+    private static final Logger logger = LoggerFactory.getLogger(KernelCppArtifactBinaries.class);
     private static final String kernelCppDirName = "engine/opensource/kernel-cpp";
     private static final String bin = isWindows? cpuArchitecture.visualStudioName() +"/Debug" :
                                                  cpuArchitecture.officialName() +"/Release";
@@ -21,7 +22,7 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
 
     KernelCppArtifactBinaries() {
         checkArgument(directory.isDirectory(), "%s does not exist or is not a directory", directory);
-        logger.warn("Using JobScheduler binaries detected in artifact directory " + directory);
+        logger.warn("Using JobScheduler binaries detected in artifact directory {}", directory);
     }
 
     private static File kernelCppDir() {

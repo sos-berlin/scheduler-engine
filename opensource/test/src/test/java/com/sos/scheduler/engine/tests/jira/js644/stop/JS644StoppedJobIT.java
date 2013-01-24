@@ -10,8 +10,9 @@ import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +21,9 @@ import static com.sos.scheduler.engine.tests.jira.js644.stop.JS644StoppedJobIT.M
 
 /** Testet ob ein gestoppter und veränderter Job wieder korrekt in die Jobkette eingehängt wird und erneut anläuft. */
 public final class JS644StoppedJobIT extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(JS644StoppedJobIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(JS644StoppedJobIT.class);
     private static final TypedPath jobPath = FileBasedType.job.typedPath("/a");
+
     enum M { taskEnded, orderStateChanged, terminated }
     private final Gate<M> threadGate = new Gate<M>();
 
@@ -38,7 +40,8 @@ public final class JS644StoppedJobIT extends SchedulerTest {
         try {
             threadGate.expect(taskEnded, shortTimeout);
         } catch(Exception x) {
-            logger.warn(scheduler().executeXml("<job.why job='"+ jobPath.asString() +"'/>"));
+            String s = scheduler().executeXml("<job.why job='"+ jobPath.asString() +"'/>");
+            logger.warn(s);
             throw x;
         }
     }

@@ -8,10 +8,11 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -19,10 +20,10 @@ import static org.junit.Assert.assertTrue;
 
 public class JS428Test extends SchedulerTest {
 
-    private static final Logger logger = Logger.getLogger(JS428Test.class);
-    private final CommandBuilder util = new CommandBuilder();
+    private static final Logger logger = LoggerFactory.getLogger(JS428Test.class);
     private static final String DELIMITER = "/";
 
+    private final CommandBuilder util = new CommandBuilder();
     private UnmodifiableVariableSet orderParams;
     private ImmutableMap<String,String> resultSet;
 

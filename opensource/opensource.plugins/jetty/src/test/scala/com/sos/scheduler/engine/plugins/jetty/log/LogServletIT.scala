@@ -7,9 +7,9 @@ import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import org.apache.log4j.Logger
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.slf4j.LoggerFactory
 
 //TODO Wechsel der Datei bei Log.start_new_file() und instance_number berücksichtigen
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
@@ -52,7 +52,7 @@ final class LogServletIT extends ScalaSchedulerTest {
 }
 
 object LogServletIT {
-  private val logger = Logger.getLogger(classOf[LogServletIT])
+  private val logger = LoggerFactory.getLogger(classOf[LogServletIT])
 
   private def logReader(reader: Reader) {
     val r = new BufferedReader(reader)

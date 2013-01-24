@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.kernel;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,7 +14,7 @@ import static com.google.common.collect.Iterables.toArray;
 
 /** Schnittstelle zum Start des C++-Teils des JobScheduler über JNI. */
 public class CppScheduler {
-    private static final Logger logger = Logger.getLogger(CppScheduler.class);
+    private static final Logger logger = LoggerFactory.getLogger(CppScheduler.class);
     private static final AtomicReference<CppScheduler> onlyInstance = new AtomicReference<CppScheduler>();
     private String name = null;
 
@@ -48,12 +49,12 @@ public class CppScheduler {
 
     private int run2(ImmutableList<String> arguments, String argumentLine, SchedulerControllerBridge controllerBridge) {
         CppProxy.threadLock.lock();
-        logger.trace(this +" starts");
+        if (logger.isTraceEnabled()) logger.trace(this +" starts");
         try {
             return runNative(toArray(arguments, String.class), argumentLine, controllerBridge);
         }
         finally {
-            logger.trace(this +" has ended");
+            if (logger.isTraceEnabled()) logger.trace(this +" has ended");
             CppProxy.threadLock.unlock();
         }
     }

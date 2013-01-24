@@ -5,16 +5,12 @@ import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 public class OrderResetIT extends SchedulerTest {
 
 	private final String JOB_CHAIN = "chain";
 
-	@SuppressWarnings("unused")
-	private static final Logger logger = Logger.getLogger(OrderResetIT.class);
-    
     private int touchedCount = 0;
 
 	@Test

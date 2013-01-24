@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.common.sync;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,23 +10,14 @@ import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Throwables.propagate;
 
 public class ThrowableMailbox<T extends Throwable> {
-    private static final Logger logger = Logger.getLogger(ThrowableMailbox.class);
+    private static final Logger logger = LoggerFactory.getLogger(ThrowableMailbox.class);
     
     private final AtomicReference<T> throwableAtom = new AtomicReference<T>();
     
     public final void setIfFirst(T o) {
-        setIfFirst(o, Level.ERROR);
-    }
-
-    public final void setIfFirst(T o, Level logLevel) {
         boolean isFirst = throwableAtom.compareAndSet(null, o);
-        if (!isFirst  &&  logger.isEnabledFor(logLevel)) logger.log(logLevel, "Second exception ignored: " + o, o);
+        if (!isFirst  &&  logger.isErrorEnabled()) logger.error("Second exception ignored: " + o, o);
     }
-
-//    public final void throwIfSet() throws T {
-//        T o = fetch();
-//        if (o != null)  throw o;
-//    }
 
     public final void throwUncheckedIfSet() {
         T throwable = fetch();

@@ -11,20 +11,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** JS-707 "If JS terminates caused by an exception a potentially existent backup scheduler should do the scheduling". */
 public class JS707Test extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(JS707Test.class);
+    private static final Logger logger = LoggerFactory.getLogger(JS707Test.class);
     private static final String schedulerId = "testScheduler";
     private static final int portNumber = 47523;
     private static final int backupPortNumber = portNumber + 1;
     private static final int databasePortNumber = portNumber + 2;
+
     private final SchedulerH2DatabaseServer database = SchedulerH2DatabaseServer.newTcpServer(databasePortNumber);
 
     @Ignore     // Test ist nur ein Entwurf

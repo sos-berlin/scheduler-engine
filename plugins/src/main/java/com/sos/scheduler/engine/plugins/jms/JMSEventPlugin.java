@@ -7,7 +7,8 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
@@ -23,7 +24,7 @@ import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
  */
 public class JMSEventPlugin extends AbstractPlugin {
 	
-	private static final Logger logger = Logger.getLogger(JMSEventPlugin.class);
+	private static final Logger logger = LoggerFactory.getLogger(JMSEventPlugin.class);
 
     private final Scheduler scheduler;
 	private final Connector connector;

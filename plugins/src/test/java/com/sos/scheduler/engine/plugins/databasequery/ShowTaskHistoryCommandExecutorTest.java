@@ -11,9 +11,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 
 public final class ShowTaskHistoryCommandExecutorTest {
-    private final EntityManagerFactory entityManagerFactory = null;  // TOOO Wir brauchen eine Attrappe unserer Datenbank
     private static final SchedulerId schedulerId = new SchedulerId("SCHEDULER_ID");
     private static final ClusterMemberId clusterMemberId = new ClusterMemberId("CLUSTER_MEMBER_ID");
+
+    private final EntityManagerFactory entityManagerFactory = null;  // TOOO Wir brauchen eine Attrappe unserer Datenbank
     private final ShowTaskHistoryCommandExecutor executor = new ShowTaskHistoryCommandExecutor(schedulerId, clusterMemberId, entityManagerFactory);
 
     @Ignore @Test public void testDoExecute() {

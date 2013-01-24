@@ -12,9 +12,10 @@ import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SimpleTest extends SchedulerTest {
     private static final JobPath jobPath = JobPath.of("/job1");
-	private static final Logger logger = Logger.getLogger(SimpleTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimpleTest.class);
 	
 	private final CommandBuilder util = new CommandBuilder();
 

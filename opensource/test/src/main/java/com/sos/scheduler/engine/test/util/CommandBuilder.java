@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test.util;
 
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -8,9 +7,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import java.util.HashMap;
 
 public class CommandBuilder {
-	
-	@SuppressWarnings("unused")
-	private static final Logger logger = Logger.getLogger(CommandBuilder.class);
 	
 	private DateTime lastBegin = null;
 	private DateTime lastEnd = null;

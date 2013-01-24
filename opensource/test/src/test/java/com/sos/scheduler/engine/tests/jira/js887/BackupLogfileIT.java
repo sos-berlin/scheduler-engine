@@ -19,8 +19,8 @@ import static junit.framework.Assert.assertTrue;
 public class BackupLogfileIT extends SchedulerTest {
 
     private static final CommandBuilder cmd = new CommandBuilder();
-    private static final File tempDir = new File(Files.createTempDir(),"log");
-    private static final File tempDirWithDot = new File(Files.createTempDir(),"log.dir");
+    private static final File tempDir = new File(Files.createTempDir(), "log");
+    private static final File tempDirWithDot = new File(Files.createTempDir(), "log.dir");
     private static final Time timeout = Time.of(30);
 
     @BeforeClass

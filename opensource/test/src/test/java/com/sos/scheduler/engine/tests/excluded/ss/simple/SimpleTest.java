@@ -9,15 +9,16 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.data.event.Event;
-import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class SimpleTest extends SchedulerTest {
 
-	private static final Logger logger = Logger.getLogger(SimpleTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimpleTest.class);
 	
 	private final CommandBuilder util = new CommandBuilder();
 	
@@ -44,14 +45,14 @@ public class SimpleTest extends SchedulerTest {
 		logger.debug("TASKEVENT: " + t.getOrderOrNull().getId().asString());
 	}
 	
-	@HotEventHandler
 	/**
 	 * Das Objekt t.getOrder() ist hier null.
-	 * 
+	 *
 	 * @param e
 	 * @param t
 	 * @throws IOException
 	 */
+	@HotEventHandler
 	public void handleTaskEndedEvent(TaskEndedEvent e, UnmodifiableTask t) throws IOException {
 		logger.debug("TASKEVENT: " + t.getJob().getName());
 	}
@@ -61,7 +62,5 @@ public class SimpleTest extends SchedulerTest {
 		logger.debug("ORDERFINISHED: " + order.getId().asString());
 		if (order.getId().asString().equals("jobchain1"))
 			controller().terminateScheduler();
-		
 	}
-
 }

@@ -1,21 +1,21 @@
 package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.Math.random;
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Files;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
-import com.google.common.io.Files;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.Math.random;
 
 final class FilesModifier {
     private static final Charset encoding = Charsets.UTF_8;
-    private static final Logger logger = Logger.getLogger(FilesModifier.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilesModifier.class);
 
     private final ImmutableList<File> files;
 

@@ -3,13 +3,13 @@ package com.sos.scheduler.engine.plugins.jetty.log
 import javax.servlet.{AsyncEvent, AsyncListener}
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import com.sos.scheduler.engine.kernel.log.{PrefixLog, LogSubscription}
-import org.apache.log4j.Logger
+import org.slf4j.LoggerFactory
 
 //TODO Datei erst nach unsubscribe() löschen.
 //Weil Prefix_log zerstört ist, kann vielleicht die Verantwortung fürs Löschen an Java übergehen.
 
 object LogServletAsyncOperation {
-  private val logger = Logger.getLogger(getClass)
+  private val logger = LoggerFactory.getLogger(getClass)
 
   def apply(request: HttpServletRequest, response: HttpServletResponse, log: PrefixLog): FileServletAsyncOperation = {
     val operation = new FileServletAsyncOperation(request, response)
@@ -44,7 +44,7 @@ object LogServletAsyncOperation {
       def onTimeout(event: AsyncEvent) { close() }
 
       def onError(event: AsyncEvent) {
-        logger.error(event.getThrowable, event.getThrowable)
+        logger.error("onError", event.getThrowable)
         close()
       }
 

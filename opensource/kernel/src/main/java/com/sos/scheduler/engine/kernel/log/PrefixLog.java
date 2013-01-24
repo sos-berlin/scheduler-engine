@@ -5,7 +5,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
 import com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @ForCpp
 public final class PrefixLog implements Sister, SchedulerLogger {
-    private static final Logger logger = Logger.getLogger(PrefixLog.class);
+    private static final Logger logger = LoggerFactory.getLogger(PrefixLog.class);
 
     private final Prefix_logC cppProxy;
     private final List<LogSubscription> subscriptions = new ArrayList<LogSubscription>();

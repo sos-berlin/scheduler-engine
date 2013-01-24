@@ -3,10 +3,11 @@ package com.sos.scheduler.engine.tests.xmlcommand.job_why;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.sos.scheduler.engine.test.TestSchedulerController;
-import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -18,7 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public final class JobWhyIT {
-    private static final Logger logger = Logger.getLogger(JobWhyIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(JobWhyIT.class);
 
     private static final TestSchedulerController controller = TestSchedulerController.of(JobWhyIT.class);
     private static Map<String,Element> results = null;

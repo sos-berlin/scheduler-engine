@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.excluded.ss.js746;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.apache.log4j.Logger;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.joda.time.DateTime;
@@ -9,6 +8,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -36,11 +37,11 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("deprecation")
 public class JS746Test extends SchedulerTest {
 
-    private static final Logger logger = Logger.getLogger(JS746Test.class);
+    private static final Logger logger = LoggerFactory.getLogger(JS746Test.class);
 
-    private static DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;
-    private static DateTimeFormatter dateISO = DateTimeFormat.forPattern("yyyy-MM-dd");;
-    private static DateTimeFormatter formatISO = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private static final DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;
+    private static final DateTimeFormatter dateISO = DateTimeFormat.forPattern("yyyy-MM-dd");;
+    private static final DateTimeFormatter formatISO = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

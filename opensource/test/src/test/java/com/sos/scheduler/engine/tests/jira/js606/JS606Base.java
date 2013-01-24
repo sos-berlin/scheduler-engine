@@ -5,7 +5,8 @@ import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class JS606Base extends SchedulerTest {
 
-	private static final Logger logger = Logger.getLogger(JS606Base.class);
+	private static final Logger logger = LoggerFactory.getLogger(JS606Base.class);
 	
 	private File resultfile;
 	private String jobchainName;

@@ -10,8 +10,9 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 public class UserRealmIT extends SchedulerTest {
 
-	private static Logger logger = Logger.getLogger(UserRealmIT.class);
+	private static Logger logger = LoggerFactory.getLogger(UserRealmIT.class);
 
     private static final String packageName = "com/sos/scheduler/engine/plugins/jetty/userrealm/";
     private static final String jettyXmlTemplateResourcePath = packageName + "jetty-template.xml";
@@ -45,13 +46,13 @@ public class UserRealmIT extends SchedulerTest {
 
     private ClientResponse doHttpRequest(String user, String password) throws Exception {
         URI uri = new URI("http://localhost:"+ tcpPort + Config.contextPath() + Config.cppPrefixPath() );
-        logger.debug(uri.toASCIIString() + "/" + xmlCommand);
+        logger.debug("{}/{}", uri.toASCIIString(), xmlCommand);
         Client c = Client.create();
         // c.addFilter( new LoggingFilter(System.out));
         c.addFilter( new HTTPBasicAuthFilter(user, password));
         WebResource webResource = c.resource(uri);
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
-        logger.debug("Response_code: " + response.getClientResponseStatus());
+        logger.debug("Response_code: {}", response.getClientResponseStatus());
         // logResult(response);
         c.destroy();
         return response;

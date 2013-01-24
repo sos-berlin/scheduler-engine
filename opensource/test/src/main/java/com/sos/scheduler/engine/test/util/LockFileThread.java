@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test.util;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +12,7 @@ import java.util.Observable;
 
 public class LockFileThread extends Observable implements Runnable  {
 
-	private final static Logger logger = Logger.getLogger(LockFileThread.class);
+	private static final Logger logger = LoggerFactory.getLogger(LockFileThread.class);
 	
 	private final File file;
 	private final int duration;
@@ -20,7 +21,7 @@ public class LockFileThread extends Observable implements Runnable  {
 	public LockFileThread(File fileToLock, int durationInSeconds) {
 		file = fileToLock;
 		duration = durationInSeconds;
-		logger.debug("file " + file.getName() + " will be locked for " + duration + " seconds");
+		logger.debug("File {} will be locked for {} seconds", file, duration);
 	}
 	
 	@Override
@@ -54,7 +55,7 @@ public class LockFileThread extends Observable implements Runnable  {
 			    	tellObserver(message, e);
 				}
 		}
-		logger.debug("file " + file.getName() + " unlocked.");
+		logger.debug("File {} unlocked", file);
 	}
 	
 	private void tellObserver(String message, Exception e) {

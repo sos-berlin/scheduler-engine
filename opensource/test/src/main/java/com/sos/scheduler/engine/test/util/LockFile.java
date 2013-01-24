@@ -1,15 +1,11 @@
 package com.sos.scheduler.engine.test.util;
 
 import java.io.File;
-import java.nio.channels.OverlappingFileLockException;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.log4j.Logger;
-
 public class LockFile extends Observable implements Observer {
 	
-	private final static Logger logger = Logger.getLogger(LockFile.class);
 	private final LockFileThread lock;
 	private Thread t;
 

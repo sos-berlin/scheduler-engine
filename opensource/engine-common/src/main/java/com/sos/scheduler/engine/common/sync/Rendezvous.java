@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.common.sync;
 
 import com.sos.scheduler.engine.common.time.Time;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.BlockingQueue;
@@ -19,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <RESULT> Rückgabe des Rendevous' an den rufenden Thread
  */
 public class Rendezvous<ARG,RESULT> {
-    private static final Logger logger = Logger.getLogger(Rendezvous.class);
+    private static final Logger logger = LoggerFactory.getLogger(Rendezvous.class);
 
     @Nullable private volatile Thread servingThread = null;
     private volatile boolean inRendezvous = false;
@@ -35,7 +36,7 @@ public class Rendezvous<ARG,RESULT> {
 
             if (inRendezvous) {
                 RendezvousServerClosedException x = new RendezvousServerClosedException();
-                logger.error(x, x);
+                logger.error("{}", x);
                 leaveException(x);
                 throw x;
             }

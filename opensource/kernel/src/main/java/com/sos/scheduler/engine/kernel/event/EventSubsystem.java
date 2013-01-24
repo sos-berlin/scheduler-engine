@@ -6,14 +6,15 @@ import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.EventSource;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmodifiableEventSource;
 
 @ForCpp
 public class EventSubsystem implements Subsystem {
-    private static final Logger logger = Logger.getLogger(EventSubsystem.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventSubsystem.class);
 
     private final SchedulerEventBus eventBus;
 
@@ -43,7 +44,7 @@ public class EventSubsystem implements Subsystem {
             Event e = CppEventFactory.newInstance(CppEventCode.values()[cppEventCode], o);
             eventBus.publish(e, tryUnmodifiableEventSource(e, o));
         } catch (Exception x) {
-            logger.error("EventSubsystem.reportEventClass("+cppEventCode+"): "+x, x);
+            logger.error("EventSubsystem.reportEventClass("+cppEventCode+"):", x);
         }
     }
 

@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.common.system;
 
 import com.google.common.base.Joiner;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -17,7 +18,7 @@ public abstract class OperatingSystem {
     public static final Windows windows = new Windows();
     public static final OperatingSystem operatingSystem = isWindows? windows : unix;
     public static final String javaLibraryPathPropertyName = "java.library.path";
-    private static final Logger log = Logger.getLogger(OperatingSystem.class);
+    private static final Logger logger = LoggerFactory.getLogger(OperatingSystem.class);
     
     public final String makeModuleFilename(String path) {
         File file = new File(path);
@@ -98,7 +99,7 @@ public abstract class OperatingSystem {
         String c = concatFileAndPathChain(f, nullToEmpty(a));
         if (!c.equals(a)) {
             System.setProperty(javaLibraryPathPropertyName, c);
-            log.debug("Property " + javaLibraryPathPropertyName + "=" + c);
+            logger.debug("Property " + javaLibraryPathPropertyName + "=" + c);
         }
     }
 

@@ -7,8 +7,9 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -27,14 +28,13 @@ public class JmsEventFilterTest extends JMSConnection {
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
-    private final static String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
+    private static final String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
 //  private static final String providerUrl = "tcp://w2k3.sos:61616";  // in scheduler.xml einstellen
-    private static final Logger logger = Logger.getLogger(JmsEventFilterTest.class);
-    
-    private final CommandBuilder util = new CommandBuilder();
-
+    private static final Logger logger = LoggerFactory.getLogger(JmsEventFilterTest.class);
     private static final List<String> eventsToListen = asList("OrderTouchedEvent");
-    private final static String jobchain = "jmstest";
+    private static final String jobchain = "jmstest";
+
+    private final CommandBuilder util = new CommandBuilder();
     private int orderFinished = 0;
     
     // Queue for collecting the fired eventsToListen in the listener thread

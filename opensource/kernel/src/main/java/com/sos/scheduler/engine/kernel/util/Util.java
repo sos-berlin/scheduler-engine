@@ -4,12 +4,12 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import javax.annotation.Nullable;
 
-import org.apache.log4j.Logger;
-
 import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Util {
-    private static final Logger logger = Logger.getLogger(Util.class);
+    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
     private Util() {}
 
@@ -42,7 +42,7 @@ public final class Util {
             Thread.sleep(ms);
             return false;
         } catch (InterruptedException x) {
-            logger.trace(x, x);
+            logger.trace("sleep({})", ms, x);
             return true;
         }
     }

@@ -6,9 +6,10 @@ import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -23,18 +24,17 @@ import static org.junit.Assert.assertEquals;
  */
 public class StressTest extends SchedulerTest implements TaskInfoListener {
 
-    private static final Logger logger = Logger.getLogger(StressTest.class);
-    private final CommandBuilder util = new CommandBuilder();
-
+    private static final Logger logger = LoggerFactory.getLogger(StressTest.class);
 	private static final String jobName = OperatingSystem.isWindows ? "job_windows" : "job_unix";
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";
     private static final String providerUrl = "vm://localhost";
-
-    private int taskFinished = 0;
-	
 	private static final int ESTIMATED_TASKS = 100;
 	private static final int JOB_RUNTIME_IN_SECONDS = 1;
 	private static final Time MAX_RUNTIME = Time.of(60);
+
+    private final CommandBuilder util = new CommandBuilder();
+    private int taskFinished = 0;
+
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -75,5 +75,4 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	public void onInterval(TaskInfo info) {
 		logger.info(info.currentlyRunningTasks() + " tasks running");
 	}
-    
 }

@@ -4,15 +4,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.jms.*;
-import org.apache.log4j.Logger;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 //import com.sos.scheduler.engine.test.util.CommandBuilder;
 
 
 public class JMSConnection extends SchedulerTest {
 
-    private static final Logger logger = Logger.getLogger(JMSConnection.class);
+    private static final Logger logger = LoggerFactory.getLogger(JMSConnection.class);
 //    private static final CommandBuilder util = CommandBuilder.getInstance();
 
 	/** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
@@ -30,7 +31,6 @@ public class JMSConnection extends SchedulerTest {
     private final TopicSubscriber topicSubscriber;
     
     public JMSConnection(String providerUrl, List<String> eventFilter) throws Exception {
-    	super();
     	this.providerUrl = providerUrl;
     	this.conf = ActiveMQConfiguration.newInstance(providerUrl);
     	this.topic = conf.topic;
@@ -50,7 +50,6 @@ public class JMSConnection extends SchedulerTest {
     }
     
     public JMSConnection(String providerUrl) throws Exception {
-    	super();
     	this.providerUrl = providerUrl;
     	this.conf = ActiveMQConfiguration.newInstance(providerUrl);
     	this.topic = conf.topic;

@@ -9,8 +9,9 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -29,18 +30,15 @@ public class JmsOrderEventsTest extends JMSConnection {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
-    private final static String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
+    private static final String providerUrl = System.getProperty("jms.providerUrl", ActiveMQConfiguration.vmProviderUrl);
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";  // in scheduler.xml einstellen
-    private final static Logger logger = Logger.getLogger(JmsOrderEventsTest.class);
-    private final CommandBuilder util = new CommandBuilder();
-    private final static String jobchain = "jmstest";
-
-    
-    // Queue for collecting the fired events in the listener thread
-    private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
-
+    private static final Logger logger = LoggerFactory.getLogger(JmsOrderEventsTest.class);
+    private static final String jobchain = "jmstest";
     private static final List<String> eventsToListen = asList("OrderTouchedEvent","OrderStateChangedEvent","OrderFinishedEvent");
 
+    private final CommandBuilder util = new CommandBuilder();
+    // Queue for collecting the fired events in the listener thread
+    private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
     private int orderFinished = 0;
     
     public JmsOrderEventsTest() throws Exception {
@@ -88,7 +86,7 @@ public class JmsOrderEventsTest extends JMSConnection {
         // This object is needed for serializing and deserializing of the event objects
         private final ObjectMapper mapper;
 
-        public JmsListener() {
+        private JmsListener() {
             mapper = new ObjectMapper();
             mapper.registerSubtypes(EventList.eventClassArray());
         }
@@ -129,5 +127,4 @@ public class JmsOrderEventsTest extends JMSConnection {
             }
         }
     }
-    
 }

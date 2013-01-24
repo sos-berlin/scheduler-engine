@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.jira.js674;
 
 import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.apache.log4j.Logger;
 
 
 //FIXME Test wiederbeleben!
@@ -11,7 +10,6 @@ import org.apache.log4j.Logger;
  * @author Joacim Zschimmer
  */
 public class Js674IT extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(Js674IT.class);
     private static final Time myTimeout = Time.of(10+5);   // Länger als der Job im Fehlerfall läuft. Siehe blockedSignal.job.xml
 
 

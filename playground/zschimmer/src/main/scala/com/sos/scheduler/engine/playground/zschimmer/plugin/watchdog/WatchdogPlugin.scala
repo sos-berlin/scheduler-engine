@@ -4,10 +4,10 @@ import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.plugin.Plugin
 import com.sos.scheduler.engine.playground.zschimmer._
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
-import org.apache.log4j.Logger
 import javax.inject.Inject
 import javax.annotation.Nullable
 import org.w3c.dom.Element
+import org.slf4j.LoggerFactory
 
 /**Nicht für Produktion. Spielwiese für Scala-Rendezvous.
  * Prüft periodisch, ob der Scheduler reagiert, also ob er die große Scheduler-Schleife durchläuft und dabei einen API-Aufruf annimmt.
@@ -41,7 +41,7 @@ class WatchdogPlugin @Inject()(scheduler: Scheduler, @Nullable confElement: Elem
     override def run() {
       untilInterruptedEvery(conf.checkEvery) {
         thread2.callImpatient((), conf.timeout, conf.warnEvery) {
-          t => logger.warn("Scheduler does not respond after " + t)
+          t => logger.warn("Scheduler does not respond after {}", t)
         }
       }
     }
@@ -54,7 +54,7 @@ class WatchdogPlugin @Inject()(scheduler: Scheduler, @Nullable confElement: Elem
           acceptCall { arg =>
               val t = new Timer(conf.timeout)
               scheduler.callCppAndDoNothing()
-              if (t.isElapsed) logger.warn("Scheduler response time was " + t)
+              if (t.isElapsed) logger.warn("Scheduler response time was {}", t)
           }
         }
       }
@@ -64,5 +64,5 @@ class WatchdogPlugin @Inject()(scheduler: Scheduler, @Nullable confElement: Elem
 }
 
 object WatchdogPlugin {
-  private val logger = Logger.getLogger(classOf[WatchdogPlugin])
+  private val logger = LoggerFactory.getLogger(classOf[WatchdogPlugin])
 }

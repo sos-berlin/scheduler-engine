@@ -5,12 +5,13 @@ import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class OrderParallelIT extends SchedulerTest {
 
-    private static final Logger logger = Logger.getLogger(OrderParallelIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(OrderParallelIT.class);
 
     // In Maven setzen mit -DargLine=-DOrderParallelTest.limit=26 -DOrderParallelTest.runtime=5 (Surefire plugin 2.6), 2010-11-28
     // Zum Beispiel: mvn test -Dtest=ExtractResourcesTest -DargLine="-DOrderParallelTest.limit=26  -DOrderParallelTest.runtime=5"
@@ -38,7 +39,7 @@ public final class OrderParallelIT extends SchedulerTest {
     public void handleOrderEnd(OrderFinishedEvent e) {
         finishedOrdersCount++;
         if (finishedOrdersCount > 1)
-            logger.info("order " + (finishedOrdersCount-1) + " of " + testLimit + " finished." );
+            logger.info("Order " + (finishedOrdersCount-1) + " of " + testLimit + " finished");
         if (finishedOrdersCount == total)
             controller().terminateScheduler();
     }
