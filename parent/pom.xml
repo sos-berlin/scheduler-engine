@@ -80,6 +80,21 @@
                 <os>
                     <family>unix</family>
                     <name>Linux</name>
+                    <arch>x86</arch>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>linux</operatingSystem>
+                <osArch>linux-x86</osArch>
+                <cpuArchitecture>x86</cpuArchitecture>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-i386</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
                     <arch>i386</arch>
                 </os>
             </activation>
