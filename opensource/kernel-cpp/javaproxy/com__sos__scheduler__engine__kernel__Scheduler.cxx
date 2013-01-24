@@ -20,6 +20,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
+    ::zschimmer::javabridge::Method const _log__Ljava_lang_String_2ILjava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _onActivate____method;
     ::zschimmer::javabridge::Method const _onActivated____method;
     ::zschimmer::javabridge::Method const _onClose____method;
@@ -38,6 +39,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/main/SchedulerControllerBridge;)V")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
+    ,_log__Ljava_lang_String_2ILjava_lang_String_2__method(this, "log", "(Ljava/lang/String;ILjava/lang/String;)V")
     ,_onActivate____method(this, "onActivate", "()V")
     ,_onActivated____method(this, "onActivated", "()V")
     ,_onClose____method(this, "onClose", "()V")
@@ -90,6 +92,15 @@ Scheduler::~Scheduler() { assign_(NULL); }
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_javaExecuteXml__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
     return result;
+}
+
+void Scheduler::log(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const {
+    ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    parameter_list._jvalues[1].i = p1;
+    parameter_list._jvalues[2].l = p2.get_jobject();
+    Scheduler__class* cls = _class.get();
+    cls->_log__Ljava_lang_String_2ILjava_lang_String_2__method.call(get_jobject(), parameter_list);
 }
 
 void Scheduler::onActivate() const {

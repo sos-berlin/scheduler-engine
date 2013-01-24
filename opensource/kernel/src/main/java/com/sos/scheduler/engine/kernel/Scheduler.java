@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
 import com.sos.scheduler.engine.data.scheduler.SchedulerClusterMemberKey;
@@ -29,10 +30,7 @@ import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest;
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
-import com.sos.scheduler.engine.kernel.log.LogCategory;
-import com.sos.scheduler.engine.kernel.log.LogSubsystem;
-import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.engine.kernel.log.SchedulerLog;
+import com.sos.scheduler.engine.kernel.log.*;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
@@ -333,6 +331,10 @@ public final class Scheduler implements Sister,
 
     public void callCppAndDoNothing() {
         cppProxy.tcp_port();
+    }
+
+    @ForCpp public void log(String prefix, int level, String line) {
+        CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line);
     }
 
     /** @param text Sollte auf \n enden */

@@ -728,7 +728,7 @@ void Prefix_log::close()
     _inhibit_caching_request = NULL;
     if (_started)  
         finish_log();
-    if (_spooler->_log_file_cache)  // Bei Programmende kann der Cache weg sein.
+    if (_spooler && _spooler->_log_file_cache)  // Bei Programmende kann der Cache weg sein.
         _spooler->_log_file_cache->remove(this);
     close_file();
     if (!_closed && typed_java_sister()) typed_java_sister().onClosed();
@@ -1109,11 +1109,14 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
         _last_level = level;
         _last[ level ] = line;
 
-        bool log_to_files = level >= log_level();
+        string my_prefix = _task? _task->obj_name() : _prefix;
+        if (_spooler && _spooler->schedulerJ())
+            _spooler->schedulerJ().log(my_prefix, level, line_par);
 
         {
             ptr<cache::Request> request = _spooler->_log_file_cache->request(this);
-            _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
+            bool log_to_files = level >= log_level();
+            _log->log2( level, log_to_files, my_prefix, line, this, _order_log );
         }
     }
 
