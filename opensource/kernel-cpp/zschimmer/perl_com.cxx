@@ -87,7 +87,7 @@ XS( XS_Zschimmer_destroy )
 
         if( !SvIOK(ST(0)) )  throw_xc( "Z-PERL-100", Z_PERL_IDISPATCH_PACKAGE_NAME "::__destroy()  First argument should be an integer" );
 
-        IDispatch* idispatch = (IDispatch*)(int64)SvIV(ST(0));
+        IDispatch* idispatch = (IDispatch*)SvIV(ST(0));
 
         if( idispatch )  
         {
@@ -124,7 +124,7 @@ XS( XS_Zschimmer_resolve_name )
         if( !SvIOK(ST(0)) )  throw_xc( "Z-PERL-100", Z_PERL_IDISPATCH_PACKAGE_NAME "::__resolve_name()  First argument should be an integer" );
         if( !SvPOK(ST(1)) )  throw_xc( "Z-PERL-100", Z_PERL_IDISPATCH_PACKAGE_NAME "::__resolve_name()  Second argument should be a string" );
 
-        IActiveScriptSite* site = (IActiveScriptSite*)(int64)SvIV(ST(0));
+        IActiveScriptSite* site = (IActiveScriptSite*)SvIV(ST(0));
         Bstr name_bstr;
         name_bstr.attach( bstr_from_pv( ST(1) ) );
 
@@ -132,9 +132,9 @@ XS( XS_Zschimmer_resolve_name )
         if( FAILED(hr) )  throw_com( hr, "GetItemInfo", string_from_bstr(name_bstr).c_str() );
 
         {
-            int RETVAL;
+            size_t RETVAL;
             dXSTARG;
-            RETVAL = (int64)result;
+            RETVAL = (size_t)result;
             XSprePUSH; PUSHi((IV)RETVAL);
         }
     }
@@ -269,15 +269,15 @@ XS( XS_Zschimmer_call )
 
         if( !SvIOK(ST(0)) || !SvIOK(ST(1)) )  throw_xc( "Z-PERL-100", "Usage: " Z_PERL_IDISPATCH_PACKAGE_NAME "::__call( idispatch, flags, method, parameter, ... )" );
 
-        IDispatch* idispatch = (IDispatch*)(int64)SvIV(ST(0));
+        IDispatch* idispatch = (IDispatch*)SvIV(ST(0));
 
         if( !idispatch )  throw_xc( "Z-PERL-100", "NULL-Pointer" );
 
-        int flags = (int64)SvIV(ST(1));   // DISPATCH_METHOD, DISPATCH_PROPERTYPUT etc.
+        int flags = (int)SvIV(ST(1));   // DISPATCH_METHOD, DISPATCH_PROPERTYPUT etc.
 
         if( SvIOK(ST(2)) )
         {
-            dispid = (int64)SvIV(ST(2));
+            dispid = (int)SvIV(ST(2));
         }
         else
         if( SvPOK(ST(2)) )  
@@ -367,7 +367,7 @@ XS( XS_Zschimmer_call )
                                     throw_com( result.scode, "IDispatch::Invoke (result)", method_name.c_str() );
                                 break;
 
-            case VT_UNKNOWN:    string_result = printf_string( "IUnknown(0x%X)", (long)V_UNKNOWN(&result) );
+            case VT_UNKNOWN:    string_result = printf_string( "IUnknown(0x%lX)", (long)V_UNKNOWN(&result) );
                                 result_type = rt_string; 
                                 break;
 
@@ -377,7 +377,7 @@ XS( XS_Zschimmer_call )
 
                 if( idispatch )
                 {
-                    string expression = "new " Z_PERL_IDISPATCH_PACKAGE_NAME "(" + as_string( (int64)idispatch ) + ")";
+                    string expression = "new " Z_PERL_IDISPATCH_PACKAGE_NAME "(" + as_string((size_t)idispatch) + ")";
                     sv_result = eval_pv( expression.c_str(), TRUE );
                     result_type = rt_sv;
 
@@ -416,10 +416,7 @@ XS( XS_Zschimmer_call )
     catch( const exception&  x ) { error = true;  error_text = x.what(); }
     catch( const _com_error& x ) { error = true;  error_text = string_from_bstr( x.Description() ); }
 
-    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zurück!
-    //if( error )  result_type = rt_string, string_result = ERROR_ID + error_text;
-
-    //dXSTARG;
+    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zurï¿½ck!
 
     switch( result_type )
     {
@@ -427,21 +424,12 @@ XS( XS_Zschimmer_call )
             XSRETURN_UNDEF;
 
         case rt_double:
-            //XSprePUSH; 
-            //PUSHn( double_result );
-            //XSRETURN( 1 );
             XSRETURN_NV( double_result );
 
         case rt_int:
-            //XSprePUSH; 
-            //PUSHi( int_result );
-            //XSRETURN( 1 );
             XSRETURN_IV( int_result );
 
         case rt_string:
-            //XSprePUSH; 
-            //PUSHp( string_result.c_str(), string_result.length() );
-            //XSRETURN( 1 );
             XSRETURN_PVN( string_result.c_str(), string_result.length() );
 
         case rt_sv:

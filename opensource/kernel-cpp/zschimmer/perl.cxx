@@ -167,7 +167,7 @@ void Perl::parse( const string& script_text, VARIANT* result )
     
         args[2] = script_text.c_str();
 
-        fprintf( stderr, "perl_parse _perl=%X  %s,%s,%s\n", (int64)PERL, args[0], args[1], args[2] );
+        fprintf( stderr, "perl_parse _perl=%lX  %s,%s,%s\n", (long)PERL, args[0], args[1], args[2] );
 Z_LOG2( "", "perl_parse(): " << args[2] << "\n" );
         err = perl_parse( PERL, xs_init, 3, (char**)args, NULL );    if(err)  throw_perl( err, "perl_parse" );
 Z_LOG2( "", "perl_parse() OK\n" );
@@ -257,9 +257,7 @@ void Perl::call( const string& function_name, const list<Variant>& params, VARIA
 {
     PERL_SET_CONTEXT( PERL );
 
-    string       error;
-  //Variant      result;
-  //list<string> strings;           // Anker für String-Parameter
+    string error;
 
     dSP;                            // initialize stack pointer      
     ENTER;                          // everything created after here 

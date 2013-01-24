@@ -250,7 +250,7 @@ HRESULT Perl_scripting_engine::SetScriptSite( IActiveScriptSite* site )
     try
     {
         _site = site; 
-        _perl->parse( "$" Z_PERL_IDISPATCH_PACKAGE_NAME "::site=" + as_string((int64)(IActiveScriptSite*)_site) + ";" );
+        _perl->parse( "$" Z_PERL_IDISPATCH_PACKAGE_NAME "::site=" + as_string((size_t)(IActiveScriptSite*)_site) + ";" );
     }
     catch( const exception&  x ) { hr = Com_set_error( x, "Perl_scripting_engine::SetScriptSite" ); }
     catch( const _com_error& x ) { hr = Com_set_error( x, "Perl_scripting_engine::SetScriptSite" ); }
@@ -356,7 +356,7 @@ HRESULT Perl_scripting_engine::InitNew()
     catch( const exception&  x ) { hr = Com_set_error( x, "Perl_scripting_engine::InitNew" ); }
     catch( const _com_error& x ) { hr = Com_set_error( x, "Perl_scripting_engine::InitNew" ); }
 
-    if( FAILED(hr) )  fprintf( stderr, "Perl_scripting_engine::InitNew() hr=%X\n", (int64)hr );
+    if( FAILED(hr) )  fprintf( stderr, "Perl_scripting_engine::InitNew() hr=%X\n", (int)hr );
     return hr;
 }
 
