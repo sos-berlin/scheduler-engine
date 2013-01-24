@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.common.xml;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Charsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,20 +24,21 @@ public final class XmlUtilsTest {
         Document doc = XmlUtils.loadXml(xml);
         byte[] result = XmlUtils.toXmlBytes(doc, "ASCII", false);
         String resultString = new String(result, US_ASCII);
-        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" +  // Warum steht hier standalone?
+        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" +
                 "<a b=\"B\">&#196;</a>"));
     }
 
-    // Test zunächst deaktiviert, da er unter Unix fehlschlägt. SS 18.01.2013
-    @Ignore
-    public void testToXmlBytesIndented() {
+    @Test public void testToXmlBytesIndented() {
         String xml = "<a><b>B</b></a>";
         Document doc = XmlUtils.loadXml(xml);
         byte[] result = XmlUtils.toXmlBytes(doc, "ASCII", true);
         String resultString = new String(result, US_ASCII);
+        String normalizedResultString = resultString.replaceAll(Pattern.quote("<?\n"), "<?");   // Nicht alle Maschinen setzen <?xml ...?> in eine eigene Zeile.
         String nl = System.getProperty("line.separator");
-        assertThat(resultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" + //nl +
-                "<a>"+nl+"    <b>B</b>"+nl+"</a>"+nl));
+        assertThat(normalizedResultString, equalTo("<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" + //nl +
+                "<a>"+nl+
+                "    <b>B</b>"+nl+
+                "</a>"+nl));
     }
 
     @Test public void testToXml() {
