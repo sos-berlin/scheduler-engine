@@ -162,5 +162,20 @@ call prepare-setup.sh <version> to use this pom
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+	    <dependency>
+	        <groupId>${project.groupId}</groupId>
+	        <artifactId>jetty</artifactId>
+	        <version>${project.version}</version>
+	        <scope>runtime</scope>
+		     <exclusions>
+			        <exclusion>
+	              <groupId>${project.groupId}</groupId>
+	              <artifactId>kernel-cpp-${osArch}</artifactId>
+			        </exclusion>
+	      </exclusions>
+	    </dependency>
+
     </dependencies>
+
 </project>

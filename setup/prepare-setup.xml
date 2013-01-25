@@ -76,6 +76,7 @@ to run without maven integration.
         </fileset>
 
         <fileset dir="${source.dir}" id="files.jar">
+        
             <include name="activemq*.jar"/>
             <include name="geronimo*.jar"/>
             <include name="guava*.jar"/>
@@ -92,13 +93,16 @@ to run without maven integration.
             <include name="scala-library-*.jar"/>
             <include name="scala-reflect-*.jar"/>
             <include name="slf4j*.jar"/>
+            
             <!-- additional jars for jetty integration -->
             <include name="aopalliance-*.jar"/>
             <include name="javax.servlet-*.jar"/>
             <include name="jetty-*.jar"/>
-            <exclude name="jetty-${version.number}*.jar"/>
             <include name="jul-to-slf4j-*.jar"/>
             <include name="servlet-api-*.jar"/>
+            <!-- this is always a part of the fat jar (see fileset spooler.lib) -->
+            <exclude name="jetty-${version.number}*.jar"/>
+
         </fileset>
     </target>
 
