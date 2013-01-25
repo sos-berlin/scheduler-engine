@@ -6,6 +6,7 @@
 #
 # in a windows environment you can use 'bash -c "./prepare-setup.sh <version>"' if cygwin is installed.
 # ---------------------------------------------------------------------------------------------------------------
+set -e
 if [ $# != 1 ]
 then
   echo "usage: prepare-setup.sh <version>"
@@ -16,3 +17,4 @@ version=$1
 mvn clean
 mvn install -Pprepare -Dengine.version=$version -Dengine.platform=windows-x86
 mvn install -Pprepare -Dengine.version=$version -Dengine.platform=linux-i386
+exit
