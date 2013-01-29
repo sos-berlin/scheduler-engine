@@ -475,8 +475,7 @@ void Database::open( const string& db_name )
 {
     try
     {
-        set_db_name(db_name);
-        open2();
+        open2( db_name );
     }
     catch( exception& x )
     {
@@ -494,17 +493,31 @@ void Database::open( const string& db_name )
 
 //----------------------------------------------------------------------------------Database::open2
 
-void Database::open2()
+void Database::open2( const string& db_name )
 {
     Z_MUTEX( _lock )
     {
-        string my_db_name = _db_name;
+        string my_db_name = db_name;
 
+        _db_name = db_name;
+    
         if( _db_name != "" )
         {
+            if( _db_name.find(' ') == string::npos  &&  _db_name.find( ':', 1 ) == string::npos )
+            {
+                if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
+                {
+                    if( _spooler->_need_db )  z::throw_xc( "SCHEDULER-142", _db_name );
+                    return;
+                }
 
-            if( _db_name.substr(0,5) == "jdbc ")
-              my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
+                  _db_name = "odbc "         + make_absolute_filename( _spooler->log_directory(),   _db_name );
+                my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
+            }
+
+            if( _db_name.substr(0,5) == "odbc " 
+             || _db_name.substr(0,5) == "jdbc ")   _db_name = _db_name.substr(0,5) + " -id=spooler " +   _db_name.substr(5),
+                                                 my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
 
             _log->info( message_string( "SCHEDULER-907", my_db_name ) );     // Datenbank wird geöffnet
 
@@ -527,7 +540,7 @@ void Database::open2()
 
                 _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geöffnet
 
-                // _db_name += " ";
+                _db_name += " ";
                 _email_sent_after_db_error = false;
             }
             catch( exception& x )  
@@ -1363,7 +1376,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
             {
                 try
                 {
-                    open2();
+                    open2(_db_name);
                     //open_history_table();
                     THREAD_LOCK( _error_lock )  _error = "";
  
@@ -1446,7 +1459,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
             
             scheduler_event.send_mail( mail_defaults );
 
-            set_db_name("");     // Umschalten auf dateibasierte Historie
+            open2( "" );     // Umschalten auf dateibasierte Historie
         }
 
         if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->assert_is_still_active( Z_FUNCTION );
