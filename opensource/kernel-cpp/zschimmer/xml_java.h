@@ -32,10 +32,6 @@ typedef ::javaproxy::org::w3c::dom::Text TextJ;
 
 //-------------------------------------------------------------------------------------------------
 
-const string                    default_character_encoding        = "ASCII";    // Damit sind wir auf der sicheren Seite
-
-//-------------------------------------------------------------------------------------------------
-
 struct Implementation_ptr;
 struct ImplementationSource_ptr;
 struct DocumentType_ptr;
@@ -135,7 +131,7 @@ struct Simple_node_ptr
     void                        setTexContent              ( const string& textContent ) const;
     string                      xml_without_prolog          ( const string& encoding, bool indented = false ) const;
     string                      xml                         ( const string& encoding, bool indented = false ) const;
-    string                      xml                         () const                                { return xml( default_character_encoding, false ); }
+    string                      xml                         () const                                { return xml( string_encoding, false ); }
 
     int                         line_number                 () const;
     Node_list                   select_nodes                ( const string& xpath_expression ) const;
@@ -156,7 +152,7 @@ struct Document_ptr : Simple_node_ptr
 {
                                 Document_ptr                ( const DocumentJ& doc = NULL )         { assign( doc ); }
                                 Document_ptr                ( const Document_ptr& doc )             { assign( doc.ref() ); }
-                                Document_ptr                ( const string& xml, const string& encoding = "" ) { load_xml( xml, encoding ); }
+                                Document_ptr                ( const string& xml, const string& encoding = string_encoding ) { load_xml( xml, encoding ); }
                                 Document_ptr                ( const BSTR xml )                      { load_xml( xml ); }
 
     Document_ptr&               operator =                  ( const Document_ptr& doc )             { assign( doc.ref() );  return *this; }
@@ -171,12 +167,12 @@ struct Document_ptr : Simple_node_ptr
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == DOCUMENT_NODE || Simple_node_ptr::is_type( type ); }
 
     Document_ptr&               create                      ();
-    bool                        try_load_xml                ( const string& text, const string& encoding = "" );
+    bool                        try_load_xml                ( const string& text, const string& encoding = string_encoding);
     bool                        try_load_xml                ( const BSTR text );
-    void                        load_xml                    ( const string& text, const string& encoding = "" );
+    void                        load_xml                    ( const string& text, const string& encoding = string_encoding );
     void                        load_xml                    ( const BSTR text );
     string                      xml                         ( const string& encoding, const string& indent_string = "" ) const;
-    string                      xml                         () const                                { return xml( default_character_encoding ); }
+    string                      xml                         () const                                { return xml( string_encoding ); }
 
     Element_ptr                 createElement               ( const string& tagName ) const;
     Text_ptr                    createTextNode              ( const string& data ) const;

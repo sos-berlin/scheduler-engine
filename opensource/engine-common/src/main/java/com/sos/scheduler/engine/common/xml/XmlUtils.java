@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import static com.google.common.base.Objects.firstNonNull;
+import static com.google.common.base.Throwables.propagate;
 import static javax.xml.transform.OutputKeys.*;
 import static org.w3c.dom.Node.DOCUMENT_NODE;
 
@@ -44,13 +45,22 @@ public final class XmlUtils {
         return result;
     }
 
-    @ForCpp public static Document loadXml(byte[] xml) {
-        return loadXml(new ByteArrayInputStream(xml));
+    @ForCpp public static Document loadXml(byte[] xml, String encoding) {
+        String s;
+        try {
+            Reader in = new InputStreamReader(new ByteArrayInputStream(xml), Charset.forName(encoding));
+            s = com.google.common.io.CharStreams.toString(in);
+        } catch (Exception x) { throw propagate(x); }
+        return loadXml(new InputStreamReader(new ByteArrayInputStream(xml), Charset.forName(encoding)));
     }
 
-    public static Document loadXml(InputStream in) {
+    public static Document loadXml(String xml) {
+        return loadXml(new StringReader(xml));
+    }
+
+    public static Document loadXml(Reader in) {
         try {
-            Document result = newDocumentBuilder().parse(in);
+            Document result = newDocumentBuilder().parse(new InputSource(in));
             postInitializeDocument(result);
             return result;
         }
@@ -58,9 +68,9 @@ public final class XmlUtils {
         catch (SAXException x) { throw new XmlException(x); }
     }
 
-    public static Document loadXml(String xml) {
+    public static Document loadXml(InputStream in) {
         try {
-            Document result = newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+            Document result = newDocumentBuilder().parse(in);
             postInitializeDocument(result);
             return result;
         }

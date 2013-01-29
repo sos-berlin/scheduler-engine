@@ -1553,7 +1553,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     {
         Message_string m ( "SCHEDULER-965" );
         //m.set_max_insertion_length( INT_MAX );
-        m.insert( 1, element.xml( scheduler_character_encoding ) );
+        m.insert( 1, element.xml(string_encoding) );
         _log->info( m );
     }
 
@@ -1705,7 +1705,7 @@ string xml_as_string( const xml::Document_ptr& document, const string& indent_st
 
     try 
     {
-        result = document.xml( "ASCII", indent_string );
+        result = document.xml( string_encoding, indent_string );
         if( indent_string != "" && result.find('\r') == string::npos)  result = replace_regex( result, "\n", "\r\n" );      // Fï¿½r Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
@@ -1771,7 +1771,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                                 if( e.nodeName_is( "log" ) )
                                 {
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Task und Log anlegen
-                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.text(), "text/plain; charset=" + scheduler_character_encoding ) ), base_url, title ) ) );
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( e.text(), "text/plain; charset=" + string_encoding) ), base_url, title ) ) );
                                     return;
                                 }
                             }
@@ -1800,7 +1800,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                                 if( order )
                                 {
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben
-                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( order->log()->as_string(), "text/plain; charset=" + scheduler_character_encoding ) ), base_url, order->log()->title() ) ) );
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( order->log()->as_string(), "text/plain; charset=" + string_encoding)), base_url, order->log()->title() ) ) );
                                     return;
                                 }
                             }
@@ -2095,7 +2095,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
 {
     try 
     {
-        if( !_dont_log_command )  Z_LOG2( "scheduler", "Execute " << replace_regex( command_doc.xml( scheduler_character_encoding ), "\\?\\>\n", "?>", 1 ) );  // XML endet mit \n
+        if( !_dont_log_command )  Z_LOG2( "scheduler", "Execute " << replace_regex( command_doc.xml(string_encoding), "\\?\\>\n", "?>", 1 ) );  // XML endet mit \n
 
         if( _spooler->_validate_xml  &&  _validate )  
         {
@@ -2107,7 +2107,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
     // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
-    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml( scheduler_character_encoding ) );
+    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml(string_encoding));
 }
 
 //---------------------------------------------------------------------Command_processor::execute_2
@@ -2206,7 +2206,7 @@ void Command_processor::append_error_to_answer( const Xc& x )
 
 void Command_response::begin_standard_response()
 {
-    _xml_writer.set_encoding( scheduler_character_encoding );
+    _xml_writer.set_encoding( string_encoding );
     _xml_writer.write_prolog();
 
     write( "<spooler><answer time=\"" );

@@ -421,7 +421,7 @@ string Process_module_instance::step_result()
     io::String_writer string_writer;
     xml::Xml_writer   xml_writer   ( &string_writer );
 
-    xml_writer.set_encoding( scheduler_character_encoding );
+    xml_writer.set_encoding( string_encoding );
     xml_writer.write_prolog();
 
     xml_writer.begin_element( "process.result" );

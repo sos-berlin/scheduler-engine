@@ -330,7 +330,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "environment"      )  
                 {
-                    xml::Document_ptr dom_document ( value, scheduler_character_encoding );
+                    xml::Document_ptr dom_document ( value, string_encoding);
                     _server->_module->_process_environment = new Com_variable_set();
                     _server->_module->_process_environment->set_dom( dom_document.documentElement(), (Variable_set_map*)NULL, "variable" );
                 }

@@ -37,16 +37,12 @@
 using ::std::string;
 using ::std::exception;
 
-//--------------------------------------------------------------------------------ostream << size_t
-#ifdef Z_WINDOWS
-
-//? inline std::ostream&             operator <<                 ( std::ostream& s, size_t value )      { s << (zschimmer::uint64)value; }
-
-#endif
 //------------------------------------------------------------------------------namespace zschimmer
 
 namespace zschimmer
 {
+
+extern const string             string_encoding;
 
 //----------------------------------------------------------------------------------------exception
 
@@ -60,8 +56,6 @@ inline std::ostream& operator << ( std::ostream& s, const std::exception& x )
 #ifndef Z_WINDOWS
     extern int                  main_pid;               // Für pthreads (im Spooler). Bei Hostjava etc. kann das die pid des aktuellen Threads sein.
 #endif
-
-//Mutex                           zschimmer_mutex;
 
 //---------------------------------------------------------------------------------z_malloc, z_free
 

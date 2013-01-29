@@ -325,7 +325,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
                 ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );
 
-                xml_writer->set_encoding( scheduler_character_encoding );
+                xml_writer->set_encoding( string_encoding );
                 xml_writer->write_prolog();
 
                 xml_writer->begin_element( "register_remote_scheduler" );
@@ -374,7 +374,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
                 ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );
 
-                xml_writer->set_encoding( scheduler_character_encoding );
+                xml_writer->set_encoding( string_encoding );
                 xml_writer->write_prolog();
 
                 xml_writer->begin_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );

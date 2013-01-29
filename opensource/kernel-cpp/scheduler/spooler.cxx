@@ -53,7 +53,6 @@ namespace scheduler {
 
 const char*                     default_factory_ini                 = "factory.ini";
 const string                    xml_schema_path                     = "scheduler.xsd";
-const string                    scheduler_character_encoding        = xml::default_character_encoding; // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
 const int                       max_open_log_files                  = 50;               // Anzahl der offenzuhaltenden Log-Dateien. Wenn's mehr wird, wird die älteste geschlossen.
 const int                       windows_maxstdio                    = 2048;             // Anzahl stdio-Handles für Windows
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
@@ -2097,7 +2096,7 @@ void Spooler::execute_config_commands()
             {
                 Message_string m ( "SCHEDULER-966" );
                 m.set_max_insertion_length( INT_MAX );
-                m.insert( 1, result.xml( scheduler_character_encoding, true ) );
+                m.insert( 1, result.xml( string_encoding, true ) );
                 _log->info( m );
             }
         }

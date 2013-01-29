@@ -1593,7 +1593,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
         try
         {
-            xml::Document_ptr doc ( _xml_payload, scheduler_character_encoding );
+            xml::Document_ptr doc (_xml_payload, string_encoding);
 
             if( doc.documentElement() )
             {
@@ -1988,7 +1988,7 @@ void Order::set_xml_payload( const string& xml_string )
     }
     else
     {
-        xml::Document_ptr doc ( xml_string, scheduler_character_encoding );
+        xml::Document_ptr doc ( xml_string, string_encoding);
 
         set_xml_payload( doc.documentElement() );
     }

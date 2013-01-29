@@ -1427,7 +1427,7 @@ string String_chunk_reader::read_from_chunk( int recommended_size )
 
 Log_chunk_reader::Log_chunk_reader( Prefix_log* log )
 : 
-    Chunk_reader( "text/html; charset=" + scheduler_character_encoding ),
+    Chunk_reader( "text/html; charset=" + string_encoding),
     _zero_(this+1), 
     _log(log) 
 {

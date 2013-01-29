@@ -77,7 +77,7 @@ bool Document_ptr::try_load_xml( const BSTR xml_text_bstr ) {
 
 bool Document_ptr::try_load_xml( const string& xml_text, const string& encoding ) {
     try {
-        load_xml(xml_text);
+        load_xml(xml_text, encoding);
         return true;
     } catch (exception&x) {
         Z_LOG("try_load_xml() ==> " << x.what() << "\n");
@@ -90,7 +90,7 @@ bool Document_ptr::try_load_xml( const string& xml_text, const string& encoding 
 void Document_ptr::load_xml(const string& xml_text, const string& encoding) 
 {
     javabridge::Local_java_byte_array array (xml_text);
-    assign(XmlUtilsJ::loadXml(array));        //TOOD encoding berücksichtigen
+    assign(XmlUtilsJ::loadXml(array, encoding));        //TOOD encoding berücksichtigen
 }
 
 //---------------------------------------------------------------------------Document_ptr::load_xml

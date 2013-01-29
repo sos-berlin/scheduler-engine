@@ -58,6 +58,7 @@ static Message_code_text*         error_code_text_list = NULL;
 static Zschimmer_static         zschimmer_static;
 bool                            unloading_module        = false;        // True zu setzen bei DllMain( DLL_PROCESS_DETACH )
 char                            check_initialized_data[]= "CHECK_INITIALIZED_DATA";
+const string                    string_encoding         = "ISO-8859-1";
 
 //static Thread_data<Zschimmer_thread_data> thread_data;    Bindet Threads mit ein. Die sollten aber nur bei Bedarf eingebunden werden. => Extra Modul! Vielleicht com.cxx
 

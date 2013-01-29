@@ -490,7 +490,7 @@ void Process::fill_connection( object_server::Connection* connection )
 {
     xml::Xml_string_writer stdin_xml_writer;
 
-    stdin_xml_writer.set_encoding( scheduler_character_encoding );
+    stdin_xml_writer.set_encoding( string_encoding );
     stdin_xml_writer.write_prolog();
 
     stdin_xml_writer.begin_element( "task_process" );
@@ -604,7 +604,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
             xml::Xml_string_writer xml_writer;
-            xml_writer.set_encoding( scheduler_character_encoding );
+            xml_writer.set_encoding( string_encoding );
             xml_writer.write_prolog();
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
             xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );

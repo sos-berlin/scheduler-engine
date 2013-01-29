@@ -65,7 +65,7 @@ struct Chunk_reader : Object, javabridge::has_proxy<Chunk_reader>
 
 struct String_chunk_reader : Chunk_reader
 {
-                                String_chunk_reader         ( const string& text, const string& content_type = "text/plain; charset=" + scheduler_character_encoding ) 
+                                String_chunk_reader         ( const string& text, const string& content_type = "text/plain; charset=" + string_encoding ) 
                                                                                                     : Chunk_reader( content_type ), _zero_(this+1), _text(text) {}
 
     bool                        next_chunk_is_ready         ()                                      { return true; }

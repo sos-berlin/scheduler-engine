@@ -15,7 +15,7 @@ final class CommandResourceIT extends ScalaSchedulerTest {
   private lazy val commandResource = javaResource(injector).path("command")
 
   test("Execute a command via POST") {
-    val result = commandResource.accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
+    val result = commandResource.accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], "<show_state><!--äöü--></show_state>")
     checkCommandResult(result)
   }
 
