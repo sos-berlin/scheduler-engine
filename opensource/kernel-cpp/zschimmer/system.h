@@ -278,12 +278,6 @@ using std::exception;
 #   define Z_PRINTF_UINT64 "I64u"
 #endif
 
-//------------------------------------------------------------------------------------Z_USE_JAVAXML
-
-//#if defined Z_64
-#   define Z_USE_JAVAXML
-//#endif
-
 //----------------------------------------------------------------------------------------uint etc.
 
 namespace zschimmer {

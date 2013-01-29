@@ -1,5 +1,4 @@
 #include "zschimmer.h"
-#if defined Z_USE_JAVAXML
 
 #include "../javaproxy/java__lang__String.h"
 #include "xslt_java.h"
@@ -173,5 +172,3 @@ Document_ptr Xslt_stylesheet::apply( const Document_ptr& document, const Xslt_pa
 
 } //namespace xml
 } //namespace
-
-#endif

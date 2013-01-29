@@ -2164,10 +2164,6 @@ void Command_processor::begin_answer()
     if( !_answer )
     {
         _answer.create();
-
-#ifndef Z_USE_JAVAXML
-        _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"" + scheduler_character_encoding + "\"" ) );
-#endif
         _answer.appendChild( _answer.createElement( "spooler" ) );
 
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );

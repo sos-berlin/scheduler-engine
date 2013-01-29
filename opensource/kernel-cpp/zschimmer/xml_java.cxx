@@ -1,5 +1,4 @@
 #include "zschimmer.h"
-#if defined Z_USE_JAVAXML
 
 #include "xml_java.h"
 #include "mutex.h"
@@ -704,5 +703,3 @@ void Schema_ptr::validate( const Document_ptr& document )
 
 } //namespace xml
 } //namespace zschimmer
-
-#endif

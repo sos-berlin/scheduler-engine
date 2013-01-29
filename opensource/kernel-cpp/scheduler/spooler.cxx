@@ -1591,9 +1591,7 @@ void Spooler::read_command_line_arguments()
 #           endif
             else
             if( opt.with_value( "use-xml-schema"        ) ) {
-#ifdef Z_USE_JAVAXML
                 _xml_schema_url = javaproxy::java::io::File::new_instance(opt.value()).toURI().toURL().toExternalForm();
-#endif
             }
             else
             if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
@@ -1721,9 +1719,6 @@ void Spooler::load()
     read_xml_configuration();
     _db = Z_NEW(Database(this));
 
-    #if !defined Z_USE_JAVAXML
-        initialize_java_subsystem();
-    #endif
     new_subsystems();
     _java_subsystem->initialize_java_sister();
     modifiable_settings()->set_defaults(this);
@@ -1788,22 +1783,6 @@ void Spooler::read_xml_configuration()
 
 void Spooler::initialize_java_subsystem()
 {
-    #if !defined Z_USE_JAVAXML
-        // Java-Optionen und classpath sind nicht in <base> möglich, siehe Meldung SCHEDULER-475.
-        const string& options = _java_options +" "+ subst_env(_config_element_to_load.getAttribute("java_options"));
-        const string& classpath = _java_classpath + Z_PATH_SEPARATOR + 
-                                  subst_env(read_profile_string(_factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + 
-                                  subst_env(_config_element_to_load.getAttribute("java_class_path" ));
-        _java_subsystem = new_java_subsystem(this);        
-        if (_spooler->_ignore_process_classes) {    // Die Java-Jobs laufen mit unserer JVM
-            ptr<javabridge::Vm> java_vm = get_java_vm(false);
-            string java_work_dir = this->java_work_dir();
-            java_vm->set_work_dir(java_work_dir);
-            java_vm->prepend_class_path(java_work_dir);
-        }
-        start_java(options, classpath);
-    #endif
-
     _java_subsystem = new_java_subsystem(this);
     _java_subsystem->switch_subsystem_state( subsys_initialized );
 }
@@ -3386,24 +3365,10 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     _argv = argv;
     _parameter_line = parameter_line;
 
-    #if defined Z_USE_JAVAXML
-        initialize_java_subsystem();
-    #endif
+    initialize_java_subsystem();
 
     if( _validate_xml ) {
-#ifdef Z_USE_JAVAXML
         _schema = xml::Schema_ptr(_xml_schema_url);
-#else
-        _schema.read( xml::Document_ptr( 
-
-            /**
-            * \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden, falls geladen
-            * \detail
-            */
-    //        embedded_files.string_from_embedded_file( xml_schema_path ) 
-            sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path)
-            ) );
-#endif
     }
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
@@ -4074,17 +4039,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
         if( is_scheduler_client )
         {
-            #if defined Z_USE_JAVAXML
-                start_java(java_options, java_classpath);
-            #endif
+            start_java(java_options, java_classpath);
             ret = scheduler::scheduler_client_main( argc, argv );
         }
         else
         if( is_object_server )
         {
-            #if defined Z_USE_JAVAXML
-                start_java(java_options, java_classpath);
-            #endif
+            start_java(java_options, java_classpath);
             ret = scheduler::object_server( argc, argv );   // Ruft _exit()
         }
         else
@@ -4140,9 +4101,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 else
                 if( call_scheduler || need_call_scheduler )
                 {
-                    #if defined Z_USE_JAVAXML
-                        start_java(java_options, java_classpath);
-                    #endif
+                    start_java(java_options, java_classpath);
 
                     _beginthread( scheduler::delete_new_spooler, 50000, NULL );
 
@@ -4168,9 +4127,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                         scheduler::be_daemon();
                     }
 
-                    #if defined Z_USE_JAVAXML
-                        start_java(java_options, java_classpath);
-                    #endif
+                    start_java(java_options, java_classpath);
 
                     ret = scheduler::spooler_main( argc, argv, command_line, java_main_context );
                 }

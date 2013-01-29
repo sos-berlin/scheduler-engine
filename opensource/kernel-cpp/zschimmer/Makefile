@@ -46,8 +46,6 @@ xml_objects = \
  xml.o\
  xml_end_finder.o\
  xml_java.o\
- xml_libxml2.o\
- xslt_libxslt.o\
  xslt_java.o
 
 com_server_objects = \

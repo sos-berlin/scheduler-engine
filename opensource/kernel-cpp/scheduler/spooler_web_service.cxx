@@ -764,12 +764,7 @@ void Web_service_operation::execute_stylesheets()
 
         bool ok = request_document.try_load_xml( http_request()->body(), http_request()->charset_name() );
         if( !ok )
-        {
-#ifndef Z_USE_JAVAXML
-            _log->error( request_document.error_text() );
-#endif
             throw http::Http_exception( http::status_404_bad_request );
-        }
     }
 
 
