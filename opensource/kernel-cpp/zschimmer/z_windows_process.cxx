@@ -107,10 +107,12 @@ void try_kill_process_with_descendants_immediately( pid_t pid, Has_log* log, con
     BOOL ok = TerminateProcess( handle, 99 );
     if( ok )  {
         Z_FOR_EACH( vector<Process_entry>, descendants, d ) {
+          if(log && msg) {
             Message_string m = *msg;
             m.insert_string( 1, as_string( d->_pid ) );
             m.insert_string( 2, d->_path );
-            if( log && msg ) log->log( msg->log_level(), m );
+            log->log( msg->log_level(), m );
+          }
 
             zschimmer::try_kill_process_immediately( d->_pid, debug_string );
         }

@@ -1535,7 +1535,7 @@ bool Connection_to_own_server_process::kill_process()
 #           ifdef Z_UNIX
                 posix::try_kill_process_group_immediately( _pid );    // alle Prozesse der Task beenden (vgl. JS-930)
 #           else
-              kill_process_immediately( _pid, Z_FUNCTION );
+                windows::try_kill_process_with_descendants_immediately( _pid, (Has_log*)NULL, (Message_string*)NULL, Z_FUNCTION );
 #           endif
             is_killed = true;
         }
