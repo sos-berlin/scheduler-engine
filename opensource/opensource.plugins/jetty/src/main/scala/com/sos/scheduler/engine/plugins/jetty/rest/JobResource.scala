@@ -12,9 +12,11 @@ import javax.ws.rs.core.Response.Status.NOT_FOUND
 import javax.ws.rs.core._
 
 @Path("job")
-class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: SchedulerInstanceId,
-    @QueryParam("job") @DefaultValue("") pathString: String) {
-
+class JobResource @Inject private(
+    jobSubsystem: JobSubsystem,
+    schedulerInstanceId: SchedulerInstanceId,
+    @QueryParam("job") @DefaultValue("") pathString: String)
+{
   private lazy val path = new JobPath(AbsolutePath.of(pathString))
 
   private lazy val job =
@@ -27,7 +29,7 @@ class JobResource @Inject()(jobSubsystem: JobSubsystem, schedulerInstanceId: Sch
 
   @GET
   @Produces(Array(APPLICATION_JSON))
-  def get(@Context u: UriInfo) = JobView(path, UriBuilder.fromUri(u.getBaseUri).path("job").queryParam("job", path).build())
+  def get(@Context u: UriInfo) = JobView(path, UriBuilder.fromUri(u.getBaseUri).path("job").queryParam("job", path.string).build())
 
   @GET @Path("configuration")
   @Produces(Array(TEXT_XML))
