@@ -224,6 +224,13 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                         if( !content_xc.is_empty() )  throw content_xc;
 
+                        // Bei XML-Namensraum eines Plugins XML vom Plugin konvertieren lassen.
+                        /*
+                            if (FileBasedCompanionFactory* f = fileBasedCompanionFactoryByXmlNamespaceOrNull(...)) {
+                                f->newCompanion(file_based->java_sister(), source_xml)
+                            }
+                        */
+
                         xml::Document_ptr dom_document ( source_xml );
                         xml::Element_ptr  element      = dom_document.documentElement();
                         subsystem()->assert_xml_element_name( element );
