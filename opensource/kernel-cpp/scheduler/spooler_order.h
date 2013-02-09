@@ -159,6 +159,7 @@ struct Order : Com_order,
     Job*                        job                     () const;
 
     void                    set_job_chain_node          ( job_chain::Node*, bool is_error_state = false );
+    void                    set_state_string            (const string& o)                           { set_state(State(o)); }
     void                    set_state                   ( const State&, const Time& );
     void                    set_state                   ( const State& );
     void                    set_state1                  ( const State& );

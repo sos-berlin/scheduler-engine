@@ -16,8 +16,8 @@ public interface OrderC extends CppProxyWithSister<Order> {
     void set_id(String id);
     String title();
     Variable_setC params();
-    //    Node job_chain_node();
     String string_state();
+    void set_state_string(String string);
     void set_end_state(String order_state);
     String string_end_state();
     Prefix_logC log();

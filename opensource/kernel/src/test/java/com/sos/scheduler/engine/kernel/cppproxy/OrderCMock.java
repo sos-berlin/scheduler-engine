@@ -30,6 +30,10 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC {
 
     @Override public String string_state() { return state; }
 
+    @Override public void set_state_string(String string) {
+        state = string;
+    }
+
     @Override public void set_end_state(String state) { endState = state; }
 
     @Override public String string_end_state() { return endState; }
