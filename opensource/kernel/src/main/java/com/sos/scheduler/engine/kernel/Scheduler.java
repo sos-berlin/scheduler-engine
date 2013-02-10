@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.sos.scheduler.engine.common.xml.NamedChildElements;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
@@ -48,14 +47,13 @@ import static org.joda.time.DateTimeZone.UTC;
 
 @ForCpp
 public final class Scheduler
-implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule, HasInjector {
+implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasInjector {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
     private boolean threadInitiallyLocked = false;
     private boolean closed = false;
-    private final Module guiceModule;
     private final Injector injector;
     private final PrefixLog _log;
     private final DisposableCppProxyRegister disposableCppProxyRegister;
@@ -70,8 +68,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         this.cppProxy.setSister(this);
         this.controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
-        guiceModule = new SchedulerModule(cppProxy, controllerBridge, this);
-        injector = createInjector(guiceModule);
+        injector = createInjector(new SchedulerModule(cppProxy, controllerBridge, this));
         _log = injector.getInstance(PrefixLog.class);
         disposableCppProxyRegister = injector.getInstance(DisposableCppProxyRegister.class);
         eventBus = injector.getInstance(SchedulerEventBus.class);
@@ -102,10 +99,6 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
 
     public Injector getInjector() {
         return injector;
-    }
-
-    @Override public Module getGuiceModule() {
-        return guiceModule;
     }
 
     @Override public void onCppProxyInvalidated() {}

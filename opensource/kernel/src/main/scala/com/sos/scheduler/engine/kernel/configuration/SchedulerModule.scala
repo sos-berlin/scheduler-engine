@@ -20,7 +20,6 @@ import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.util.UUID.randomUUID
 import scala.collection.JavaConversions._
-import scala.reflect.ClassTag
 
 class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, scheduler: Scheduler) extends AbstractModule {
 
@@ -46,7 +45,6 @@ class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerB
     bind(classOf[DatabaseSubsystem]).toInstance(databaseSubsystem)
     bind(classOf[DisposableCppProxyRegister]).toInstance(disposableCppProxyRegister)
     bind(classOf[FolderSubsystem]).toInstance(folderSubsystem)
-    bind(classOf[HasGuiceModule]).toInstance(scheduler)
     bind(classOf[JobSubsystem]).toInstance(jobSubsystem)
     bind(classOf[OrderSubsystem]).toInstance(orderSubsystem)
     bind(classOf[EventSubsystem]).toInstance(eventSubsystem)
@@ -59,6 +57,7 @@ class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerB
     bind(classOf[SchedulerInstanceId]).toInstance(instanceId)
     bind(classOf[SchedulerIsClosed]).toInstance(scheduler)
     bind(classOf[SchedulerXmlCommandExecutor]).toInstance(scheduler)
+    bind(classOf[SchedulerModule]).toInstance(this)  // Nur für JettyPlugin, bis es unseren Injector nutzen kann (setzt Jetty-Initialisierung vor Guice voraus)
   }
 
 //  private def provide[A <: AnyRef](provider: => A)(implicit c: ClassTag) = {

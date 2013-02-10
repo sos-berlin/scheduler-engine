@@ -1,16 +1,17 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.sos.scheduler.engine.kernel.scheduler.{SchedulerConfiguration, HasGuiceModule}
+import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import javax.inject.Inject
-import org.w3c.dom.Element
 import org.eclipse.jetty.server.Server
+import org.w3c.dom.Element
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
-final class JettyPlugin @Inject()(pluginElement: Element, hasGuiceModule: HasGuiceModule, schedulerConf: SchedulerConfiguration)
+final class JettyPlugin @Inject()(pluginElement: Element, schedulerModule: SchedulerModule, schedulerConf: SchedulerConfiguration)
   extends AbstractPlugin {
 
-  private val server: Server = new ServerBuilder(pluginElement, hasGuiceModule, schedulerConf).build()
+  private val server: Server = new ServerBuilder(pluginElement, schedulerModule, schedulerConf).build()
   private var started = false
 
   /** Der Port des ersten Connector */

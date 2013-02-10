@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import com.google.inject.Guice._
-import com.google.inject.Injector
-import com.google.inject.servlet.{GuiceFilter, GuiceServletContextListener}
+import com.google.inject.servlet.GuiceFilter
 import com.sos.scheduler.engine.common.xml.XmlUtils.childElementOrNull
-import com.sos.scheduler.engine.kernel.scheduler.{SchedulerConfiguration, HasGuiceModule}
+import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.Config._
 import java.net.{URL, ServerSocket, BindException}
 import javax.servlet.Filter
@@ -20,17 +20,16 @@ import org.eclipse.jetty.xml.XmlConfiguration
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Element
 
-class ServerBuilder(pluginElement: Element, hasGuiceModule: HasGuiceModule, schedulerConfiguration: SchedulerConfiguration) {
+class ServerBuilder(pluginElement: Element, schedulerModule: SchedulerModule, schedulerConfiguration: SchedulerConfiguration) {
 
   import ServerBuilder._
 
   private val config = new Config(pluginElement, schedulerConfiguration)
 
   private val server = {
-    val schedulerModule = hasGuiceModule.getGuiceModule
     val loginServiceOption = childElementOption(pluginElement, "loginService") map PluginLoginService.apply
-    val myInjector = createInjector(schedulerModule, Config.newServletModule())
-    val contextHandler = jobSchedulerContextHandler(contextPath, myInjector, loginServiceOption)
+    val myInjector = createInjector(schedulerModule, Config.newServletModule())  //TODO Besser ist, den original Scheduler-Injector zu nehmen. Der muss dann aber beim Start schon das Servlet-Guice-Module des Plugins kennen
+    val contextHandler = jobSchedulerContextHandler(contextPath, loginServiceOption)
     newServer(
       config.tryUntilPortOption map { until => findFreePort(config.portOption.get, until) } orElse config.portOption,
       config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
@@ -42,7 +41,7 @@ class ServerBuilder(pluginElement: Element, hasGuiceModule: HasGuiceModule, sche
         new DefaultHandler())))
   }
 
-  private def jobSchedulerContextHandler(contextPath: String, injector: Injector, loginService: Option[LoginService]) = {
+  private def jobSchedulerContextHandler(contextPath: String, loginService: Option[LoginService]) = {
     val result = newWebAppContext(resourceBaseURL)
 
     def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
@@ -50,7 +49,7 @@ class ServerBuilder(pluginElement: Element, hasGuiceModule: HasGuiceModule, sche
     }
 
     result.setContextPath(contextPath)
-    result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
+    //result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
     addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
     // GuiceFilter (Guice 3.0) kann nur einmal verwendet werden, siehe http://code.google.com/p/google-guice/issues/detail?id=635
     result.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
