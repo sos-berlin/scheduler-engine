@@ -18,7 +18,7 @@
         <scala.version>2.10.0</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <scalatest.scala.version>2.10</scalatest.scala.version>
-        <jersey.version>1.10</jersey.version>
+        <jersey.version>1.17</jersey.version>
         <jetty.version>8.1.5.v20120716</jetty.version> <!--jetty.version NullPointerException in putHexInt https://bugs.eclipse.org/bugs/show_bug.cgi?id=362468 >8.0.4.v20111024</jetty.version-->
         <slf4j.version>1.7.2</slf4j.version>
         <jackson.version>2.1.2</jackson.version>
