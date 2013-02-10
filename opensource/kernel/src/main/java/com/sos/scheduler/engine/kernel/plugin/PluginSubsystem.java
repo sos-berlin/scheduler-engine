@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.kernel.plugin;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
@@ -13,6 +12,8 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,18 +21,19 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.elementXPathOrNull;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.elementsXPath;
 
+@Singleton
 public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
     private final CommandHandler[] commandHandlers = {
             new PluginCommandExecutor(this),
             new PluginCommandCommandXmlParser(this),
             new PluginCommandResultXmlizer(this) };
-    private final Lazy<Injector> lazyInjector;
+    private final Injector injector;
     private final Map<String,PluginAdapter> plugins = new HashMap<String,PluginAdapter>();
     private final EventBus eventBus;
     private final PrefixLog log;
 
-    public PluginSubsystem(Scheduler scheduler, Lazy<Injector> injector, EventBus eventBus) {
-        this.lazyInjector = injector;
+    @Inject private PluginSubsystem(Scheduler scheduler, Injector injector, EventBus eventBus) {
+        this.injector = injector;
         this.eventBus = eventBus;
         this.log = scheduler.log();
     }
@@ -59,7 +61,7 @@ public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
     }
 
     void activatePluginAdapter(PluginAdapter p) {
-        p.activate(lazyInjector.get());
+        p.activate(injector);
         eventBus.registerAnnotated(p.getPlugin());
     }
 

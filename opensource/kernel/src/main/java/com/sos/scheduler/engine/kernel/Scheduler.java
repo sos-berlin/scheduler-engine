@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.*;
-import com.sos.scheduler.engine.common.Lazy;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.sos.scheduler.engine.common.xml.NamedChildElements;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
@@ -10,27 +9,21 @@ import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
-import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
-import com.sos.scheduler.engine.data.scheduler.SchedulerClusterMemberKey;
-import com.sos.scheduler.engine.data.scheduler.SchedulerId;
-import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
-import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
+import com.sos.scheduler.engine.kernel.configuration.SchedulerModule;
 import com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.event.OperationExecutor;
-import com.sos.scheduler.engine.kernel.event.OperationQueue;
-import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest;
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
-import com.sos.scheduler.engine.kernel.log.*;
+import com.sos.scheduler.engine.kernel.log.CppLogger;
+import com.sos.scheduler.engine.kernel.log.LogCategory;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
@@ -43,121 +36,53 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.inject.Guice.createInjector;
 import static com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.childElements;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
 import static org.joda.time.DateTimeZone.UTC;
 
 @ForCpp
-public final class Scheduler implements Sister,
-        SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule, HasInjector {
+public final class Scheduler
+implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasGuiceModule, HasInjector {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
-    private final SchedulerInstanceId instanceId = new SchedulerInstanceId(UUID.randomUUID().toString());
     private final SpoolerC cppProxy;
-    private final SchedulerConfiguration configuration;
     private final SchedulerControllerBridge controllerBridge;
-    private final PrefixLog _log;   // Unterstrich dem Scala-IntelliJ-Plugin zuliebe. Zschimmer 10.12.2011
-    private final SchedulerEventBus eventBus;
-    private final OperationExecutor operationExecutor;
-
-    private final LogSubsystem logSubsystem;
-    private final DatabaseSubsystem databaseSubsystem;
-    private final PluginSubsystem pluginSubsystem;
-    private final FolderSubsystem folderSubsystem;
-    private final JobSubsystem jobSubsystem;
-    private final OrderSubsystem orderSubsystem;
-    private final EventSubsystem eventSubsystem;
-    private final CommandSubsystem commandSubsystem;
     private boolean threadInitiallyLocked = false;
-    private final DisposableCppProxyRegister disposableCppProxyRegister = new DisposableCppProxyRegister();
     private boolean closed = false;
-    private final Lazy<Injector> injectorLazy = new Lazy<Injector>() {
-        @Override protected Injector compute() { return Guice.createInjector(guiceModule.get()); }
-    };
-
-    private final Lazy<Module> guiceModule = new Lazy<Module>() {
-        @Override protected Module compute() {
-            return new AbstractModule() {
-                @Override protected void configure() {
-                    bind(EventBus.class).toInstance(eventBus);
-                    bind(SchedulerInstanceId.class).toInstance(instanceId);
-                    bind(SchedulerId.class).toProvider(new Provider<SchedulerId>() {
-                        @Override public SchedulerId get() {
-                            return new SchedulerId(cppProxy.id());
-                        }
-                    });
-                    bind(ClusterMemberId.class).toProvider(new Provider<ClusterMemberId>() {
-                        @Override public ClusterMemberId get() { return new ClusterMemberId(cppProxy.cluster_member_id()); }
-                    });
-                    bind(SchedulerClusterMemberKey.class).toProvider(new Provider<SchedulerClusterMemberKey>() {
-                        @Inject private SchedulerId schedulerId;
-                        @Inject private ClusterMemberId clusterMemberId;
-                        @Override public SchedulerClusterMemberKey get() { return new SchedulerClusterMemberKey(schedulerId, clusterMemberId); }
-                    });
-                    bind(DatabaseSubsystem.class).toInstance(databaseSubsystem);
-                    bind(DisposableCppProxyRegister.class).toInstance(disposableCppProxyRegister);
-                    bind(EntityManagerFactory.class).toProvider(new Provider<EntityManagerFactory>() {
-                        @Override public EntityManagerFactory get() { return databaseSubsystem.entityManagerFactory(); }
-                    }).in(Scopes.SINGLETON);
-                    bind(EntityManager.class).toProvider(new Provider<EntityManager>(){
-                        @Override public EntityManager get() { return databaseSubsystem.entityManagerFactory().createEntityManager(); }
-                    }).in(Scopes.SINGLETON);
-                    bind(FolderSubsystem.class).toInstance(folderSubsystem);
-                    bind(HasGuiceModule.class).toInstance(Scheduler.this);  // Für JettyPlugin
-                    bind(JobSubsystem.class).toInstance(jobSubsystem);
-                    bind(OrderSubsystem.class).toInstance(orderSubsystem);
-                    bind(OperationQueue.class).toInstance(operationExecutor);
-                    bind(PluginSubsystem.class).toInstance(pluginSubsystem);
-                    bind(PrefixLog.class).toInstance(_log);
-                    bind(Scheduler.class).toInstance(Scheduler.this);
-                    bind(SchedulerConfiguration.class).toInstance(configuration);
-                    bind(SchedulerHttpService.class).toInstance(Scheduler.this);
-                    bind(SchedulerInstanceId.class).toInstance(instanceId);
-                    bind(SchedulerIsClosed.class).toInstance(Scheduler.this);
-                    bind(SchedulerXmlCommandExecutor.class).toInstance(Scheduler.this);
-                }
-            };
-        }
-    };
+    private final Module guiceModule;
+    private final Injector injector;
+    private final PrefixLog _log;
+    private final DisposableCppProxyRegister disposableCppProxyRegister;
+    private final SchedulerEventBus eventBus;
+    private final PluginSubsystem pluginSubsystem;
+    private final CommandSubsystem commandSubsystem;
+    private final OperationExecutor operationExecutor;
 
     @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         staticInitialize();
-
         this.cppProxy = cppProxy;
         this.cppProxy.setSister(this);
-        configuration = new SchedulerConfiguration(cppProxy);
-        controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
+        this.controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
-
-        _log = cppProxy.log().getSister();
-        eventBus = controllerBridge.getEventBus();
-        operationExecutor = new OperationExecutor(_log);
-
-        logSubsystem = new LogSubsystem(new SchedulerLog(this.cppProxy));
-        eventSubsystem = new EventSubsystem(eventBus);
-        databaseSubsystem = new DatabaseSubsystem(this.cppProxy.db());
-        folderSubsystem = new FolderSubsystem(this.cppProxy.folder_subsystem());
-        jobSubsystem = new JobSubsystem(this.cppProxy.job_subsystem());
-        orderSubsystem = new OrderSubsystem(this.cppProxy.order_subsystem());
-        pluginSubsystem = new PluginSubsystem(this, injectorLazy, eventBus);
-        commandSubsystem = new CommandSubsystem(getCommandHandlers(ImmutableList.of(pluginSubsystem)));
-
+        guiceModule = new SchedulerModule(cppProxy, controllerBridge, this);
+        injector = createInjector(guiceModule);
+        _log = injector.getInstance(PrefixLog.class);
+        disposableCppProxyRegister = injector.getInstance(DisposableCppProxyRegister.class);
+        eventBus = injector.getInstance(SchedulerEventBus.class);
+        pluginSubsystem = injector.getInstance(PluginSubsystem.class);
+        commandSubsystem = injector.getInstance(CommandSubsystem.class);
+        operationExecutor = injector.getInstance(OperationExecutor.class);
         initialize();
     }
 
     private static void staticInitialize() {
         enableJavaUtilLoggingOverSLF4J();
-
         TimeZones.initialize();
         //DateTimeZone.setDefault(UTC);
         TimeZone.setDefault(UTC.toTimeZone());       // Für JPA @Temporal(TIMESTAMP), damit Date wirklich UTC enthält. Siehe http://stackoverflow.com/questions/508019
@@ -176,19 +101,11 @@ public final class Scheduler implements Sister,
     }
 
     public Injector getInjector() {
-        return injectorLazy.get();
+        return injector;
     }
 
     @Override public Module getGuiceModule() {
-        return guiceModule.get();
-    }
-
-    private static Iterable<CommandHandler> getCommandHandlers(Iterable<?> objects) {
-        List<CommandHandler> result = new ArrayList<CommandHandler>();
-        for (Object o : objects)
-            if (o instanceof HasCommandHandlers)
-                result.addAll(((HasCommandHandlers)o).getCommandHandlers());
-        return result;
+        return guiceModule;
     }
 
     @Override public void onCppProxyInvalidated() {}
@@ -202,11 +119,6 @@ public final class Scheduler implements Sister,
                 pluginSubsystem.close();
             } catch (Exception x) {
                 log().error("pluginSubsystem.close(): " + x);
-            }
-            try {
-                logSubsystem.close();
-            } catch (Exception x) {
-                log().error("logSubsystem.close(): " + x);
             }
         } finally {
             if (threadInitiallyLocked) {
@@ -227,7 +139,6 @@ public final class Scheduler implements Sister,
     }
 
     private void onLoad(Element configElement) {
-        logSubsystem.activate();
         pluginSubsystem.load(configElement);
         controllerBridge.onSchedulerStarted(this);
     }
@@ -300,19 +211,19 @@ public final class Scheduler implements Sister,
     }
 
     public SchedulerConfiguration getConfiguration() {
-        return configuration;
+        return injector.getInstance(SchedulerConfiguration.class);
     }
 
     @ForCpp public EventSubsystem getEventSubsystem() {
-        return eventSubsystem;
+        return injector.getInstance(EventSubsystem.class);
     }
 
     public JobSubsystem getJobSubsystem() {
-        return jobSubsystem;
+        return injector.getInstance(JobSubsystem.class);
     }
 
     public OrderSubsystem getOrderSubsystem() {
-        return orderSubsystem;
+        return injector.getInstance(OrderSubsystem.class);
     }
 
     public String getHttpUrl() {
