@@ -2,22 +2,24 @@ package com.sos.scheduler.engine.kernel.scheduler;
 
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
-import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.settings.SettingName;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sos.scheduler.engine.kernel.settings.SettingName.htmlDir;
 
+@Singleton
 public final class SchedulerConfiguration {
     private static final File workingDirectory = new File(".");
 
     private final SpoolerC spoolerC;
 
-    public SchedulerConfiguration(SpoolerC spoolerC) {
+    @Inject private SchedulerConfiguration(SpoolerC spoolerC) {
         this.spoolerC = spoolerC;
     }
 

@@ -4,9 +4,12 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.LinkedList;
 import java.util.Queue;
 
+@Singleton
 public final class OperationExecutor implements OperationQueue {
     private static final Logger logger = LoggerFactory.getLogger(OperationExecutor.class);
 
@@ -14,7 +17,7 @@ public final class OperationExecutor implements OperationQueue {
     private final PrefixLog log;
     private boolean isEmpty = true;
 
-    public OperationExecutor(PrefixLog log) {
+    @Inject private OperationExecutor(PrefixLog log) {
         this.log = log;     // TODO Eigenes PrefixLog
     }
 

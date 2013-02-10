@@ -24,7 +24,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct Scheduler__class;
 
 struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javaproxy::java::lang::Object {
-    static Scheduler new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1);
+  private:
+    static Scheduler new_instance();  // Not implemented
+  public:
 
     Scheduler(jobject = NULL);
 
@@ -54,6 +56,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem() const;
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void log(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;
+    static ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1);
     void onActivate() const;
     void onActivated() const;
     void onClose() const;

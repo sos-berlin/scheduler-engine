@@ -17,10 +17,10 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     Scheduler__class(const string& class_name);
    ~Scheduler__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _log__Ljava_lang_String_2ILjava_lang_String_2__method;
+    ::zschimmer::javabridge::Static_method const _of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method;
     ::zschimmer::javabridge::Method const _onActivate____method;
     ::zschimmer::javabridge::Method const _onActivated____method;
     ::zschimmer::javabridge::Method const _onClose____method;
@@ -36,10 +36,10 @@ const ::zschimmer::javabridge::class_factory< Scheduler__class > Scheduler__clas
 
 Scheduler__class::Scheduler__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/main/SchedulerControllerBridge;)V")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
     ,_log__Ljava_lang_String_2ILjava_lang_String_2__method(this, "log", "(Ljava/lang/String;ILjava/lang/String;)V")
+    ,_of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method(this, "of", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/main/SchedulerControllerBridge;)Lcom/sos/scheduler/engine/kernel/Scheduler;")
     ,_onActivate____method(this, "onActivate", "()V")
     ,_onActivated____method(this, "onActivated", "()V")
     ,_onClose____method(this, "onClose", "()V")
@@ -51,17 +51,6 @@ Scheduler__class::Scheduler__class(const string& class_name) :
 Scheduler__class::~Scheduler__class() {}
 
 
-
-Scheduler Scheduler::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1) {
-    Scheduler result;
-    result.java_object_allocate_();
-    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
-    parameter_list._jvalues[0].l = p0.get_jobject();
-    parameter_list._jvalues[1].l = p1.get_jobject();
-    Scheduler__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method.call(result.get_jobject(), parameter_list);
-    return result;
-}
 
 
 Scheduler::Scheduler(jobject jo) { if (jo) assign_(jo); }
@@ -101,6 +90,16 @@ void Scheduler::log(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::j
     parameter_list._jvalues[2].l = p2.get_jobject();
     Scheduler__class* cls = _class.get();
     cls->_log__Ljava_lang_String_2ILjava_lang_String_2__method.call(get_jobject(), parameter_list);
+}
+
+::javaproxy::com::sos::scheduler::engine::kernel::Scheduler Scheduler::of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1) {
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    parameter_list._jvalues[1].l = p1.get_jobject();
+    Scheduler__class* cls = Scheduler__class::class_factory.clas();
+    ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler result;
+    result.steal_local_ref(cls->_of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2__method.jobject_call(cls->get_jclass(), parameter_list));
+    return result;
 }
 
 void Scheduler::onActivate() const {

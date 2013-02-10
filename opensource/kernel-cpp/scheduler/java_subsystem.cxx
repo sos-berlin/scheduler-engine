@@ -94,7 +94,7 @@ bool Java_subsystem::subsystem_initialize()
 //-----------------------------------------------------------Java_subsystem::initialize_java_sister
 
 void Java_subsystem::initialize_java_sister() {
-    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j(), _spooler->java_main_context()));
+    _schedulerJ.assign_(SchedulerJ::of(_spooler->j(), _spooler->java_main_context()));
 }
 
 //-------------------------------------------------------------------Java_subsystem::subsystem_load

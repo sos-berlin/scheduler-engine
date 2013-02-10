@@ -9,16 +9,20 @@ import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmodifiableEventSource;
 
 @ForCpp
+@Singleton
 public class EventSubsystem implements Subsystem {
     private static final Logger logger = LoggerFactory.getLogger(EventSubsystem.class);
 
     private final SchedulerEventBus eventBus;
 
-    public EventSubsystem(SchedulerEventBus eventBus) {
+    @Inject private EventSubsystem(SchedulerEventBus eventBus) {
         this.eventBus = eventBus;
     }
 

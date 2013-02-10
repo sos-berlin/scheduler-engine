@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import com.sos.scheduler.engine.eventbus.EventBus;
-import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
@@ -32,10 +31,10 @@ public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
     private final EventBus eventBus;
     private final PrefixLog log;
 
-    @Inject private PluginSubsystem(Scheduler scheduler, Injector injector, EventBus eventBus) {
+    @Inject private PluginSubsystem(PrefixLog prefixLog, Injector injector, EventBus eventBus) {
         this.injector = injector;
         this.eventBus = eventBus;
-        this.log = scheduler.log();
+        this.log = prefixLog;
     }
 
     public void load(Element root) {

@@ -35,6 +35,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.TimeZone;
 
 import static com.google.common.base.Objects.firstNonNull;
@@ -46,35 +48,38 @@ import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
 import static org.joda.time.DateTimeZone.UTC;
 
 @ForCpp
+@Singleton
 public final class Scheduler
 implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasInjector {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private final SpoolerC cppProxy;
     private final SchedulerControllerBridge controllerBridge;
-    private boolean threadInitiallyLocked = false;
-    private boolean closed = false;
-    private final Injector injector;
-    private final PrefixLog _log;
+    private final PrefixLog prefixLog;
     private final DisposableCppProxyRegister disposableCppProxyRegister;
-    private final SchedulerEventBus eventBus;
     private final PluginSubsystem pluginSubsystem;
     private final CommandSubsystem commandSubsystem;
     private final OperationExecutor operationExecutor;
+    private final SchedulerEventBus eventBus;
+    private final Injector injector;
+    private boolean threadInitiallyLocked = false;
+    private boolean closed = false;
 
-    @ForCpp public Scheduler(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
+    @Inject private Scheduler(SpoolerC cppProxy, SchedulerControllerBridge controllerBridge, PrefixLog prefixLog,
+            DisposableCppProxyRegister disposableCppProxyRegister,
+            PluginSubsystem pluginSubsystem, CommandSubsystem commandSubsystem, OperationExecutor operationExecutor,
+            SchedulerEventBus eventBus, Injector injector) {
         staticInitialize();
         this.cppProxy = cppProxy;
         this.cppProxy.setSister(this);
-        this.controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
-        controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
-        injector = createInjector(new SchedulerModule(cppProxy, controllerBridge, this));
-        _log = injector.getInstance(PrefixLog.class);
-        disposableCppProxyRegister = injector.getInstance(DisposableCppProxyRegister.class);
-        eventBus = injector.getInstance(SchedulerEventBus.class);
-        pluginSubsystem = injector.getInstance(PluginSubsystem.class);
-        commandSubsystem = injector.getInstance(CommandSubsystem.class);
-        operationExecutor = injector.getInstance(OperationExecutor.class);
+        this.controllerBridge = controllerBridge;
+        this.prefixLog = prefixLog;
+        this.disposableCppProxyRegister = disposableCppProxyRegister;
+        this.pluginSubsystem = pluginSubsystem;
+        this.commandSubsystem = commandSubsystem;
+        this.operationExecutor = operationExecutor;
+        this.eventBus = eventBus;
+        this.injector = injector;
         initialize();
     }
 
@@ -198,7 +203,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         try {
             return commandSubsystem.executeXml(xml);
         } catch (UnknownCommandException x) {
-            _log.warn(x.toString());
+            prefixLog.warn(x.toString());
             return "UNKNOWN_COMMAND";   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
         }
     }
@@ -251,6 +256,13 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
     }
 
     public PrefixLog log() {
-        return _log;
+        return prefixLog;
+    }
+
+    @ForCpp public static Scheduler of(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
+        SchedulerControllerBridge controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
+        controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
+        Injector injector = createInjector(new SchedulerModule(cppProxy, controllerBridge));
+        return injector.getInstance(Scheduler.class);
     }
 }

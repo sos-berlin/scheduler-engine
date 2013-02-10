@@ -5,7 +5,9 @@ import com.google.common.collect.ImmutableSet;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ public class JMSEventPlugin extends AbstractPlugin {
 	private static final Logger logger = LoggerFactory.getLogger(JMSEventPlugin.class);
 
     private final Scheduler scheduler;
+    private final SchedulerConfiguration configuration;
 	private final Connector connector;
     private final ObjectMapper mapper;
     
@@ -37,13 +40,14 @@ public class JMSEventPlugin extends AbstractPlugin {
     );
 
 	@Inject
-	public JMSEventPlugin(Scheduler scheduler, Element pluginElement) {
+	private JMSEventPlugin(Scheduler scheduler, PrefixLog prefixLog,  SchedulerConfiguration configuration, Element pluginElement) {
         this.scheduler = scheduler;
+        this.configuration = configuration;
 		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", ActiveMQConfiguration.vmProviderUrl);
 		String persistenceDir = stringXPath(pluginElement, "jms/connection/@persistenceDirectory", ActiveMQConfiguration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
 		logger.info( getClass().getName() + ": providerUrl=" + providerUrl);
-		scheduler.log().info("providing messages to " + providerUrl);
+		prefixLog.info("Providing messages to " + providerUrl);
         mapper = new ObjectMapper();
         registerDefaultEventPackages();
 	}
@@ -135,6 +139,6 @@ public class JMSEventPlugin extends AbstractPlugin {
         message.setStringProperty("eventFullName", event.getClass().getName()); // for filtering
 		message.setStringProperty("hostname", scheduler.getHostname());         //TODO warum deprecated? Was ist die Alternative
 		message.setStringProperty("port", Integer.toString(scheduler.getTcpPort()));
-		message.setStringProperty("id", scheduler.getConfiguration().schedulerId().asString());
+		message.setStringProperty("id", configuration.schedulerId().asString());
 	}
 }
