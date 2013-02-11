@@ -14,7 +14,7 @@ public interface NodeC extends NodeCI, CppProxyWithSister<Node> {
             NodeCI nodeCI = proxy;
             return nodeCI instanceof Order_queue_nodeC?
                     Order_queue_nodeC.sisterType.sister((Order_queue_nodeC)nodeCI, context)
-                    : new Node(proxy, ((HasInjector)context).getInjector());
+                    : new Node(proxy, ((HasInjector)context).injector());
         }
     };
 }

@@ -19,7 +19,7 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
       .build
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
-  def injector = scheduler.getInjector
+  def injector = scheduler.injector
 
   override protected final def beforeAll(configMap: Map[String, Any]) {
     try {
@@ -56,7 +56,7 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
   }
 
   protected final def instance[A](implicit c: ClassTag[A]) =
-    scheduler.getInjector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
+    scheduler.injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
 
   /** Zur Bequemlichkeit.
    * @see com.sos.scheduler.engine.test.TestSchedulerController#scheduler(). */

@@ -22,7 +22,7 @@ public class OrderQueueNode extends Node {
 
     public static class Type implements SisterType<OrderQueueNode, Order_queue_nodeC> {
         @Override public final OrderQueueNode sister(Order_queue_nodeC proxy, Sister context) { 
-            return new OrderQueueNode(proxy, ((HasInjector)context).getInjector());
+            return new OrderQueueNode(proxy, ((HasInjector)context).injector());
         }
     }
 }

@@ -21,7 +21,7 @@ public class JobNode extends OrderQueueNode {
 
     public static class Type implements SisterType<JobNode, Job_nodeC> {
         @Override public final JobNode sister(Job_nodeC proxy, Sister context) {
-            return new JobNode(proxy, ((HasInjector)context).getInjector());
+            return new JobNode(proxy, ((HasInjector)context).injector());
         }
     }
 }

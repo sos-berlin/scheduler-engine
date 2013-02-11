@@ -9,6 +9,6 @@ object SchedulerTestImplicits {
 
   class ScaledScheduler(scheduler: Scheduler) {
     def executeXml(e: Elem): Elem = xml.XML.loadString(scheduler.executeXml(e.toString()))
-    def instance[A](implicit c: ClassTag[A]): A = scheduler.getInjector.getInstance(c.runtimeClass).asInstanceOf[A]
+    def instance[A](implicit c: ClassTag[A]): A = scheduler.injector.getInstance(c.runtimeClass).asInstanceOf[A]
   }
 }

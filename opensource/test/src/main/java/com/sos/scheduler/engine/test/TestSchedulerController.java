@@ -165,7 +165,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     private void checkForErrorLogLine() {
-        String lastErrorLine = _scheduler.getInjector().getInstance(PrefixLog.class).lastByLevel(SchedulerLogLevel.error);
+        String lastErrorLine = _scheduler.injector().getInstance(PrefixLog.class).lastByLevel(SchedulerLogLevel.error);
         if (!lastErrorLine.isEmpty())
             throw new RuntimeException("Test terminated after error log line: "+ lastErrorLine);
     }

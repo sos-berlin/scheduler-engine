@@ -14,7 +14,7 @@ import java.util.List;
 public interface Job_chainC extends CppProxyWithSister<JobChain> {
     SisterType<JobChain, Job_chainC> sisterType = new SisterType<JobChain, Job_chainC>() {
         public JobChain sister(Job_chainC proxy, Sister context) {
-            return new JobChain(proxy, ((HasInjector)context).getInjector());
+            return new JobChain(proxy, ((HasInjector)context).injector());
         }
     };
 

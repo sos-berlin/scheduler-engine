@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector;
 public interface JobC extends CppProxyWithSister<Job> {
     SisterType<Job, JobC> sisterType = new SisterType<Job, JobC>() {
         public Job sister(JobC proxy, Sister context) {
-            return new Job(proxy, ((HasInjector)context).getInjector());
+            return new Job(proxy, ((HasInjector)context).injector());
         }
     };
 

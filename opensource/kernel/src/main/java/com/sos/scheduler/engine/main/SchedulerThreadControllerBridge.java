@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.main;
 
+import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;

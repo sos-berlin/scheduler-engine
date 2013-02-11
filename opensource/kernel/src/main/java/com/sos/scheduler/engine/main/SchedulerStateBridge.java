@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.main;
 
-import static com.sos.scheduler.engine.main.SchedulerState.closed;
-import static com.sos.scheduler.engine.main.SchedulerState.started;
-import static com.sos.scheduler.engine.main.SchedulerState.starting;
+import com.sos.scheduler.engine.kernel.Scheduler;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.sos.scheduler.engine.kernel.Scheduler;
+import static com.sos.scheduler.engine.main.SchedulerState.closed;
+import static com.sos.scheduler.engine.main.SchedulerState.started;
+import static com.sos.scheduler.engine.main.SchedulerState.starting;
 
 final class SchedulerStateBridge {
     private final AtomicReference<Scheduler> schedulerAtom = new AtomicReference<Scheduler>();
