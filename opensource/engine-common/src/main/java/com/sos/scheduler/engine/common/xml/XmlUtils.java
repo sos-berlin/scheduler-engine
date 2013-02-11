@@ -30,7 +30,6 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import static com.google.common.base.Objects.firstNonNull;
-import static com.google.common.base.Throwables.propagate;
 import static javax.xml.transform.OutputKeys.*;
 import static org.w3c.dom.Node.DOCUMENT_NODE;
 
@@ -46,11 +45,6 @@ public final class XmlUtils {
     }
 
     @ForCpp public static Document loadXml(byte[] xml, String encoding) {
-        String s;
-        try {
-            Reader in = new InputStreamReader(new ByteArrayInputStream(xml), Charset.forName(encoding));
-            s = com.google.common.io.CharStreams.toString(in);
-        } catch (Exception x) { throw propagate(x); }
         return loadXml(new InputStreamReader(new ByteArrayInputStream(xml), Charset.forName(encoding)));
     }
 
