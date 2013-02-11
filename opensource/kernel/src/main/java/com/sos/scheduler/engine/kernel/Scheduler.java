@@ -181,9 +181,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
 
     /** Stellt XML-Prolog voran und löst bei einem ERROR-Element eine Exception aus. */
     @Override public String executeXml(String xml) {
-        checkArgument(!xml.startsWith("<?"), "executeXml() does not accept XML with a prolog");  // Blanks und Kommentare vereiteln diese Prüfung.
-        String prolog = "<?xml version='1.0' encoding='iso-8859-1'?>";   // Für libxml2, damit Umlaute korrekt erkant werden.
-        String result = uncheckedExecuteXml(prolog + xml);
+        String result = uncheckedExecuteXml(xml);
         if (result.contains("<ERROR")) {
             Document doc = loadXml(result);
             for (Element e: childElements(doc.getDocumentElement()))
