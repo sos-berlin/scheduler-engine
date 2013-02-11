@@ -55,18 +55,18 @@ import org.joda.time.DateTime
     cppProxy.set_state_cmd(c.cppValue)
   }
 
-  @ForCpp @Nullable def tryFetchPersistentState =
+  @ForCpp @Nullable private def tryFetchPersistentState =
     transaction(entityManager) { implicit entityManager =>
       persistentStateStore.tryFetch(getPath).orNull
     }
 
-  @ForCpp def persistState() {
+  @ForCpp private def persistState() {
     transaction(entityManager) { implicit entityManager =>
       persistentStateStore.store(persistentState)
     }
   }
 
-  @ForCpp def deletePersistentState() {
+  @ForCpp private def deletePersistentState() {
     transaction(entityManager) { implicit entityManager =>
       persistentStateStore.delete(getPath)
     }
@@ -84,7 +84,7 @@ import org.joda.time.DateTime
     isPermanentlyStopped,
     eternalMillisToNone(cppProxy.next_start_time_millis))
 
-  @ForCpp def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
+  @ForCpp private def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
     transaction(entityManager) { implicit entityManager =>
       taskStore.insert(TaskPersistent(
         TaskId(taskId),
@@ -96,13 +96,13 @@ import org.joda.time.DateTime
     }
   }
 
-  @ForCpp def deletePersistedTask(taskId: Int) {
+  @ForCpp private def deletePersistedTask(taskId: Int) {
     transaction(entityManager) { implicit entityManager =>
       taskStore.delete(TaskId(taskId))
     }
   }
 
-  @ForCpp def loadPersistentTasks() {
+  @ForCpp private def loadPersistentTasks() {
     transaction(entityManager) { implicit entityManager =>
       for (t <- taskStore.fetchByJobOrderedByTaskId(getPath)) {
         cppProxy.enqueue_task(t)

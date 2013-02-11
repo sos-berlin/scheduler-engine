@@ -44,11 +44,10 @@ object ClassOps {
 
   def validMethods(c: JavaClass) = withoutOverriddenVariantMethods(c.getDeclaredMethods.toList filter memberIsValid)
 
-  private def memberIsValid(m: Member) = Modifier.isPublic(m.getModifiers) && memberIsForCppAnnotated(m)
-
   /** Wenn die Klasse mit {@link ForCpp} annotiert ist, werden nur ebenso annotierte Member für C++ übernommen. */
-  private def memberIsForCppAnnotated(m: Member) =
-    memberIsAnnotated(m, classOf[ForCpp]) || !classIsAnnotated(m.getDeclaringClass, classOf[ForCpp])
+  private def memberIsValid(m: Member) =
+    memberIsAnnotated(m, classOf[ForCpp]) ||
+        !classIsAnnotated(m.getDeclaringClass, classOf[ForCpp]) && Modifier.isPublic(m.getModifiers)
 
   private def classIsAnnotated(c: Class[_], a: Class[_ <: Annotation]) = c.getAnnotation(a) != null
 

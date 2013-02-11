@@ -17,7 +17,7 @@ import static com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmo
 
 @ForCpp
 @Singleton
-public class EventSubsystem implements Subsystem {
+public final class EventSubsystem implements Subsystem {
     private static final Logger logger = LoggerFactory.getLogger(EventSubsystem.class);
 
     private final SchedulerEventBus eventBus;
@@ -27,22 +27,22 @@ public class EventSubsystem implements Subsystem {
     }
 
     /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-    @ForCpp public final void report(AbstractEvent e) {
+    @ForCpp private void report(AbstractEvent e) {
         eventBus.publish(e);
     }
 
     /** @param e {@link AbstractEvent} statt {@link com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig.
      * @param eventSource {@link Object} statt {@link EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
-    @ForCpp public final void report(AbstractEvent e, Object eventSource) {
+    @ForCpp private void report(AbstractEvent e, Object eventSource) {
         EventSource o = (EventSource)eventSource;
         eventBus.publish(e, o);
     }
 
-    @ForCpp public final void checkNumberOfEventCodes(int count) {
+    @ForCpp private void checkNumberOfEventCodes(int count) {
         checkArgument(count == CppEventCode.values().length, "C++-Event_code does not match CppEventCode");
     }
 
-    @ForCpp public final void reportEventClass(int cppEventCode, Object eventSource) {
+    @ForCpp private void reportEventClass(int cppEventCode, Object eventSource) {
         try {
             EventSource o = (EventSource)eventSource;
             Event e = CppEventFactory.newInstance(CppEventCode.values()[cppEventCode], o);
@@ -52,7 +52,7 @@ public class EventSubsystem implements Subsystem {
         }
     }
 
-    @Override public final String toString() {
+    @Override public String toString() {
         return getClass().getSimpleName();
     }
 }

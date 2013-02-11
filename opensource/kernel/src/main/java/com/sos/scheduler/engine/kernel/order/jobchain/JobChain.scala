@@ -25,7 +25,7 @@ with UnmodifiableJobchain {
 
   def onCppProxyInvalidated() {}
 
-  @ForCpp def loadPersistentState() {
+  @ForCpp private def loadPersistentState() {
     transaction(entityManager) { implicit entityManager =>
       for (persistentState <- nodeStore.fetchAll(getPath); node <- nodeMap.get(persistentState.state)) {
         node.action = persistentState.action
@@ -36,13 +36,13 @@ with UnmodifiableJobchain {
     }
   }
 
-  @ForCpp def persistState() {
+  @ForCpp private def persistState() {
     transaction(entityManager) { implicit entityManager =>
       persistentStateStore.store(persistentState)
     }
   }
 
-  @ForCpp def deletePersistentState() {
+  @ForCpp private def deletePersistentState() {
     transaction(entityManager) { implicit entityManager =>
       persistentStateStore.delete(getPath)
       nodeStore.deleteAll(getPath)

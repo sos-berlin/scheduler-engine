@@ -17,7 +17,7 @@ class Node(cppProxy: NodeCI, injector: Injector) extends Sister {
 
   def onCppProxyInvalidated() {}
 
-  @ForCpp def persistState() {
+  @ForCpp private def persistState() {
     transaction(entityManager) { implicit entityManager =>
       persistentStateStore.store(persistentState)
     }

@@ -9,12 +9,12 @@ import javax.xml.validation.SchemaFactory
 import org.w3c.dom.Document
 
 @ForCpp
-class CppXmlSchemaValidator @ForCpp()(urlString: String) {
+final class CppXmlSchemaValidator @ForCpp()(urlString: String) {
   import CppXmlSchemaValidator._
   private val url = if (urlString.isEmpty) schedulerXmlSchemaUrl else new URL(urlString)
   private val validator = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(url).newValidator
 
-  @ForCpp def validate(document: Document) {
+  @ForCpp private[xml] def validate(document: Document) {
     validator.validate(new DOMSource(document))
   }
 }

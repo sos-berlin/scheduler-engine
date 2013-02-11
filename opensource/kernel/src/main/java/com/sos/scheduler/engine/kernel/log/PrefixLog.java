@@ -29,7 +29,7 @@ public final class PrefixLog implements Sister, SchedulerLogger {
 
     @Override public void onCppProxyInvalidated() {}
 
-    @ForCpp public void onStarted() {
+    @ForCpp private void onStarted() {
         for (LogSubscription o: subscriptionsSnapshot()) {
             try {
                 o.onStarted();
@@ -37,7 +37,7 @@ public final class PrefixLog implements Sister, SchedulerLogger {
         }
     }
 
-    @ForCpp public void onClosed() {
+    @ForCpp private void onClosed() {
         for (LogSubscription o: subscriptionsSnapshot()) {
             try {
                 o.onClosed();
@@ -46,7 +46,7 @@ public final class PrefixLog implements Sister, SchedulerLogger {
         subscriptions.clear();
     }
 
-    @ForCpp public void onLogged() {
+    @ForCpp private void onLogged() {
         for (LogSubscription o: subscriptionsSnapshot()) {
             try {
                 o.onLogged();

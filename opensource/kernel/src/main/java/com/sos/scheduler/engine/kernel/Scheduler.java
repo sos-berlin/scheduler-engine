@@ -108,7 +108,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
 
     @Override public void onCppProxyInvalidated() {}
 
-    @ForCpp public void onClose() {
+    @ForCpp private void onClose() {
         closed = true;
         try {
             eventBus.publish(new SchedulerCloseEvent());
@@ -132,7 +132,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         return closed;
     }
 
-    @ForCpp public void onLoad(String configurationXml) {
+    @ForCpp private void onLoad(String configurationXml) {
         onLoad(loadXml(configurationXml).getDocumentElement());
     }
 
@@ -141,15 +141,15 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         controllerBridge.onSchedulerStarted(this);
     }
 
-    @ForCpp public void onActivate() {
+    @ForCpp private void onActivate() {
         pluginSubsystem.activate();
     }
 
-    @ForCpp public void onActivated() {
+    @ForCpp private void onActivated() {
         controllerBridge.onSchedulerActivated();
     }
 
-    @ForCpp public void onEnteringSleepState() {    //TODO Name ändern in onSchedulerStep(), wird bei jedem Schleifendurchlauf aufgerufen.
+    @ForCpp private void onEnteringSleepState() {    //TODO Name ändern in onSchedulerStep(), wird bei jedem Schleifendurchlauf aufgerufen.
         eventBus.dispatchEvents();
         operationExecutor.execute();
     }
@@ -166,11 +166,11 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         return controllerBridge != EmptySchedulerControllerBridge.singleton;
     }
 
-    @ForCpp public void threadLock() {
+    @ForCpp private void threadLock() {
         CppProxy.threadLock.lock();
     }
 
-    @ForCpp public void threadUnlock() {
+    @ForCpp private void threadUnlock() {
         CppProxy.threadLock.unlock();
     }
 
@@ -199,7 +199,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
     }
 
     /** Nur für C++, zur Ausführung eines Kommandos in Java */
-    @ForCpp public String javaExecuteXml(String xml) {
+    @ForCpp private String javaExecuteXml(String xml) {
         try {
             return commandSubsystem.executeXml(xml);
         } catch (UnknownCommandException x) {
@@ -212,7 +212,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         return injector.getInstance(SchedulerConfiguration.class);
     }
 
-    @ForCpp public EventSubsystem getEventSubsystem() {
+    @ForCpp private EventSubsystem getEventSubsystem() {
         return injector.getInstance(EventSubsystem.class);
     }
 
@@ -242,7 +242,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         cppProxy.tcp_port();
     }
 
-    @ForCpp public void log(String prefix, int level, String line) {
+    @ForCpp private void log(String prefix, int level, String line) {
         CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line);
     }
 
@@ -259,7 +259,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         return prefixLog;
     }
 
-    @ForCpp public static Scheduler of(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
+    @ForCpp private static Scheduler of(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         SchedulerControllerBridge controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);
         controllerBridge.getSettings().setSettingsInCpp(cppProxy.modifiable_settings());
         Injector injector = createInjector(new SchedulerModule(cppProxy, controllerBridge));

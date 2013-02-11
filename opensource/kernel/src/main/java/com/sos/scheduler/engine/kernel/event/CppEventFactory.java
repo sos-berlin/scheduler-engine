@@ -17,7 +17,7 @@ import com.sos.scheduler.engine.kernel.job.Task;
 import com.sos.scheduler.engine.kernel.order.Order;
 
 @ForCpp
-public class CppEventFactory {
+public final class CppEventFactory {
     
     static Event newInstance(CppEventCode cppEventCode, EventSource o) {
         switch (cppEventCode) {
@@ -62,15 +62,15 @@ public class CppEventFactory {
         throw new RuntimeException("Not implemented cppEventCode="+cppEventCode);
     }
 
-    @ForCpp public static AbstractEvent newLogEvent(int cppLevel, String message) {
+    @ForCpp private static AbstractEvent newLogEvent(int cppLevel, String message) {
         return LogEvent.of(SchedulerLogLevel.ofCpp(cppLevel), message);
     }
 
-    @ForCpp public static AbstractEvent newOrderStateChangedEvent(String jobChainPath, String orderId, String previousState) {
+    @ForCpp private static AbstractEvent newOrderStateChangedEvent(String jobChainPath, String orderId, String previousState) {
         return new OrderStateChangedEvent(OrderKey.of(jobChainPath, orderId), new OrderState(previousState));
     }
 
-    @ForCpp public static AbstractEvent newOrderStepEndedEvent(String jobChainPath, String orderId, int orderStateTransitionCpp) {
+    @ForCpp private static AbstractEvent newOrderStepEndedEvent(String jobChainPath, String orderId, int orderStateTransitionCpp) {
         return new OrderStepEndedEvent(OrderKey.of(jobChainPath, orderId), OrderStateTransition.ofCppCode(orderStateTransitionCpp));
     }
 
