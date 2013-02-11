@@ -41,6 +41,7 @@ class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerB
     provideSingleton { new JobSubsystem(cppProxy.job_subsystem) }
     provideSingleton { new OrderSubsystem(cppProxy.order_subsystem) }
     provideSingleton { new DatabaseSubsystem(cppProxy.db) }
+    provideSingleton { cppProxy.variables.getSister }
   }
 
   @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem) =

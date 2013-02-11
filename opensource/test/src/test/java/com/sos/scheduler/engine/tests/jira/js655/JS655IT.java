@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.system.Files;
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
@@ -35,7 +36,8 @@ public final class JS655IT extends SchedulerTest {
 
     public JS655IT() throws Exception {
         controller().activateScheduler();
-        URI uri = new URI("http://localhost:"+ scheduler().getTcpPort() +"/myService");
+        int port = instance(SchedulerConfiguration.class).tcpPort();
+        URI uri = new URI("http://localhost:"+ port +"/myService");
         webResource = Client.create().resource(uri);
     }
 

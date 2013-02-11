@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.test.schedulertest;
 
-import static org.junit.Assert.fail;
-
-import org.junit.Test;
-
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.fail;
 
 /** Testet {@link com.sos.scheduler.engine.test.SchedulerTest} */
 public final class ErrorLogIT extends SchedulerTest {
@@ -14,13 +14,13 @@ public final class ErrorLogIT extends SchedulerTest {
 
     @Test public void infoLogLineShouldNotThrowException() {
         controller().activateScheduler();
-        scheduler().log().info("TEST-INFO");
+        instance(PrefixLog.class).info("TEST-INFO");
         controller().close();
     }
 
     @Test public void errorLogLineShouldThrowException() {
         controller().activateScheduler();
-        scheduler().log().error("TEST-ERROR");
+        instance(PrefixLog.class).error("TEST-ERROR");
         try {
             controller().close();
             fail("Missing Exception for error log line");

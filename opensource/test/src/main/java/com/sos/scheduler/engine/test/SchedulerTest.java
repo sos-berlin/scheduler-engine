@@ -36,6 +36,10 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
         return controller;
     }
 
+    public final <T> T instance(Class<T> c) {
+        return scheduler().getInjector().getInstance(c);
+    }
+
     /** Zur Bequemlichkeit; dasselbe wie {@link com.sos.scheduler.engine.test.TestSchedulerController#scheduler()}. */
     protected final Scheduler scheduler() {
         return controller().scheduler();

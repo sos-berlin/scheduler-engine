@@ -50,6 +50,14 @@ public final class SchedulerConfiguration {
         return new SchedulerId(spoolerC.id());
     }
 
+//    public URL httpUrl() {
+//        return new URL(spoolerC.http_url());
+//    }
+
+    public int tcpPort() {
+        return spoolerC.tcp_port();
+    }
+
     String setting(SettingName name) {
         return spoolerC.setting(name.getNumber());
     }

@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.system.OperatingSystem;
 import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.BeforeClass;
@@ -45,7 +46,7 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
 	public void eventTest() throws Exception {
 //        controller().activateScheduler("-e -log-level=debug"));
         controller().activateScheduler();
-        File resultFile = new File (scheduler().getConfiguration().logDirectory() + "/result.csv");
+        File resultFile = new File(instance(SchedulerConfiguration.class).logDirectory() + "/result.csv");
         logger.info("resultfile is " + resultFile);
         JMSTaskObserver l = new JMSTaskObserver(providerUrl);
         TaskObserverWriter w = new TaskObserverWriter(resultFile.getAbsolutePath(),l,ESTIMATED_TASKS);

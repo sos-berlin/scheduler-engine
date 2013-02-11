@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.job.login
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.util.regex.Pattern
@@ -45,7 +46,7 @@ class JobLoginIT extends ScalaSchedulerTest {
   private def jobPropertyMap(jobPath: JobPath) = {
     val namePrefix = jobPath.getName +"."
     val NamePattern = new Regex(Pattern.quote(namePrefix) +"(.*)")
-    scheduler.getVariables.toMap collect { case (NamePattern(propertyName), v) => propertyName -> v }
+    instance[VariableSet].toMap collect { case (NamePattern(propertyName), v) => propertyName -> v }
   }
 }
 

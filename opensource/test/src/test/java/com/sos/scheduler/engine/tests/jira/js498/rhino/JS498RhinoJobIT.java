@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.Test;
@@ -42,7 +44,7 @@ public final class JS498RhinoJobIT extends SchedulerTest {
         for (String jobName : jobNames) {
             controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
         }
-        assertThat(scheduler().getVariables().get("scheduler_script"), equalTo("*(spooler_init)"));
+        assertThat(instance(VariableSet.class).get("scheduler_script"), equalTo("*(spooler_init)"));
         controller().waitForTermination(shortTimeout);
         resultMap = getResultMap(resultFile);
         checkScriptOnlyJob();
@@ -51,7 +53,7 @@ public final class JS498RhinoJobIT extends SchedulerTest {
     }
 
     private File prepareResultFile() {
-        String resultFileName = scheduler().getConfiguration().localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
+        String resultFileName = instance(SchedulerConfiguration.class).localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
         File resultFile = new File(resultFileName);
         resultFile.delete();
         return resultFile;

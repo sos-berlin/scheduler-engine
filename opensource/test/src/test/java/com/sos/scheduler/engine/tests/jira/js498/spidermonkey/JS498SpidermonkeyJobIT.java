@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public final class JS498SpidermonkeyJobIT extends SchedulerTest {
     }
 
     private File prepareResultFile() {
-        String resultFileName = scheduler().getConfiguration().localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
+        String resultFileName = instance(SchedulerConfiguration.class).localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
         File resultFile = new File(resultFileName);
         resultFile.delete();
         return resultFile;

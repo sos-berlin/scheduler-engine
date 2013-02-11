@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.BeforeClass;
@@ -108,7 +109,7 @@ public class JS428Test extends SchedulerTest {
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
         logger.debug("ORDERFINISHED: " + order.getId().asString());
-        resultSet = scheduler().getVariables().toMap();
+        resultSet = instance(VariableSet.class).toMap();
         controller().terminateScheduler();
     }
 

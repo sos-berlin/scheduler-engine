@@ -1,14 +1,16 @@
 package com.sos.scheduler.engine.tests.jira.js856
 
+import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order._
+import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.data.folder.JobChainPath
 
 /** JS-856 */
 abstract class JS856IT(testNamePrefix: String) extends ScalaSchedulerTest {
+
   import JS856IT._
 
   val finallyExpectedParameters: Map[String, String]
@@ -67,7 +69,7 @@ abstract class JS856IT(testNamePrefix: String) extends ScalaSchedulerTest {
 
     final def orderParameters = mapAsScalaMap(order.getParameters.toMap).toMap filterKeys { _ != suspendedParameterName }
 
-    final def order = scheduler.getOrderSubsystem.order(orderKey)
+    final def order = instance[OrderSubsystem].order(orderKey)
   }
 
   class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(new OrderKey(jobChainPath, new OrderId("1"))) {

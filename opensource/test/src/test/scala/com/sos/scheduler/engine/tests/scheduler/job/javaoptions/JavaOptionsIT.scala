@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.tests.scheduler.job.javaoptions
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
+import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.Sockets.findAvailablePort
@@ -26,7 +28,7 @@ class JavaOptionsIT extends ScalaSchedulerTest {
   }
 
   test("Remote job should respect java_options") {
-    val h = "localhost:"+ scheduler.getTcpPort
+    val h = "localhost:"+ instance[SchedulerConfiguration].tcpPort
     scheduler executeXml <process_class name="remote" remote_scheduler={h}/>
     runJob(remoteJobPath)
   }
@@ -34,7 +36,7 @@ class JavaOptionsIT extends ScalaSchedulerTest {
   private def runJob(j: JobPath) {
     scheduler executeXml <start_job job={j.asString}/>
     eventPipe.nextWithCondition { e: TaskClosedEvent => e.jobPath == j }
-    scheduler.getVariables.get(j.getName +".myJavaOption") should equal ("TEST")
+    instance[VariableSet].get(j.getName +".myJavaOption") should equal ("TEST")
   }
 }
 

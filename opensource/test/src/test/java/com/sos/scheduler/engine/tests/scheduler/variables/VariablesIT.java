@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 public final class VariablesIT extends SchedulerTest {
     @Test public void test() {
         controller().startScheduler();
-        VariableSet variables = scheduler().getVariables();
+        VariableSet variables = instance(VariableSet.class);
         Collection<String> names = variables.getNames();
         assertThat(names, containsInAnyOrder("Ä", "Bb", "Ccc"));
         assertThat(variables.get("Ä"), equalTo("ä"));

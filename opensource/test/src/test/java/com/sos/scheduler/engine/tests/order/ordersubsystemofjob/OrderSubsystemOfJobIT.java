@@ -20,8 +20,8 @@ public final class OrderSubsystemOfJobIT extends SchedulerTest {
     }
 
     private void doTest() {
-        JobSubsystem jobSubsystem = scheduler().getJobSubsystem();
-        OrderSubsystem orderSubsystem = scheduler().getOrderSubsystem();
+        JobSubsystem jobSubsystem = instance(JobSubsystem.class);
+        OrderSubsystem orderSubsystem = instance(OrderSubsystem.class);
 
         Job aJob = jobSubsystem.job(JobPath.of("/A"));
         Job bJob = jobSubsystem.job(JobPath.of("/B"));

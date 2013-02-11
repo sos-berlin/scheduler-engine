@@ -1,19 +1,21 @@
 package com.sos.scheduler.engine.tests.stress.showstate
 
-import java.io._
-import java.net._
 import com.google.common.base.Charsets
 import com.sos.scheduler.engine.cplusplus.scalautil.io.Util._
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.test.SchedulerTest
+import java.io._
+import java.net._
 import org.junit._
 
 final class ShowStateStressIT extends SchedulerTest {
+
   import ShowStateStressIT._
 
   @Ignore //TODO Test kann versagen, wenn Portnummer in scheduler.xml schon vergegeben ist.
   @Test def test1() {
     controller.startScheduler("-e", "-log-level=warn")
-    closingFinally(new Connection(new InetSocketAddress("localhost", scheduler.getTcpPort))) { connection =>
+    closingFinally(new Connection(new InetSocketAddress("localhost", instance(classOf[SchedulerConfiguration]).tcpPort))) { connection =>
         for (i <- 1 to 1000) connection.sendAndReceive(emptyCommand)
     }
     controller.terminateScheduler()

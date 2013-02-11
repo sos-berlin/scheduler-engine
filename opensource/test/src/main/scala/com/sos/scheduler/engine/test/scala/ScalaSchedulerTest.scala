@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.test.scala.Utils._
 import com.sos.scheduler.engine.test.{ResourceToFileTransformer, TestSchedulerController, SchedulerTest}
 import org.scalatest.{FunSuite, BeforeAndAfterAll}
 import scala.collection.JavaConversions._
+import scala.reflect.ClassTag
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
   val configurationPackage = getClass.getPackage
@@ -53,6 +54,9 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
     }
     finally super.afterAll(configMap)
   }
+
+  protected final def instance[A](implicit c: ClassTag[A]) =
+    scheduler.getInjector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
 
   /** Zur Bequemlichkeit.
    * @see com.sos.scheduler.engine.test.TestSchedulerController#scheduler(). */

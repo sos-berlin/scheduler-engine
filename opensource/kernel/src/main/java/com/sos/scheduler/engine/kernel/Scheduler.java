@@ -13,21 +13,14 @@ import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule;
-import com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.event.OperationExecutor;
-import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest;
-import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse;
-import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.log.CppLogger;
-import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem;
 import com.sos.scheduler.engine.kernel.scheduler.*;
 import com.sos.scheduler.engine.kernel.time.TimeZones;
-import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +33,6 @@ import javax.inject.Singleton;
 import java.util.TimeZone;
 
 import static com.google.common.base.Objects.firstNonNull;
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.inject.Guice.createInjector;
 import static com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.childElements;
@@ -50,7 +42,7 @@ import static org.joda.time.DateTimeZone.UTC;
 @ForCpp
 @Singleton
 public final class Scheduler
-implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttpService, HasInjector {
+implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, HasInjector {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private final SpoolerC cppProxy;
@@ -102,10 +94,6 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         }
     }
 
-    public Injector getInjector() {
-        return injector;
-    }
-
     @Override public void onCppProxyInvalidated() {}
 
     @ForCpp private void onClose() {
@@ -116,7 +104,7 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
             try {
                 pluginSubsystem.close();
             } catch (Exception x) {
-                log().error("pluginSubsystem.close(): " + x);
+                prefixLog.error("pluginSubsystem.close(): " + x);
             }
         } finally {
             if (threadInitiallyLocked) {
@@ -128,16 +116,8 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         disposableCppProxyRegister.tryDisposeAll();
     }
 
-    @Override public boolean isClosed() {
-        return closed;
-    }
-
     @ForCpp private void onLoad(String configurationXml) {
-        onLoad(loadXml(configurationXml).getDocumentElement());
-    }
-
-    private void onLoad(Element configElement) {
-        pluginSubsystem.load(configElement);
+        pluginSubsystem.load(loadXml(configurationXml).getDocumentElement());
         controllerBridge.onSchedulerStarted(this);
     }
 
@@ -154,16 +134,22 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         operationExecutor.execute();
     }
 
-    public void terminate() {
+    /** Nur für C++, zur Ausführung eines Kommandos in Java */
+    @ForCpp private String javaExecuteXml(String xml) {
         try {
-            cppProxy.cmd_terminate();
-        } catch (CppProxyInvalidatedException x) {
-            logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed", x);
+            return commandSubsystem.executeXml(xml);
+        } catch (UnknownCommandException x) {
+            prefixLog.warn(x.toString());
+            return "UNKNOWN_COMMAND";   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
         }
     }
 
-    private boolean isStartedByJava() {
-        return controllerBridge != EmptySchedulerControllerBridge.singleton;
+    @ForCpp private EventSubsystem getEventSubsystem() {
+        return injector.getInstance(EventSubsystem.class);
+    }
+
+    @ForCpp private void log(String prefix, int level, String line) {
+        CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line);
     }
 
     @ForCpp private void threadLock() {
@@ -174,9 +160,16 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         CppProxy.threadLock.unlock();
     }
 
-    /** @return {@link HttpResponseC#close()} MUSS aufgerufen werden! */
-    @Override public HttpResponseC executeHttpRequest(SchedulerHttpRequest request, SchedulerHttpResponse response) {
-        return cppProxy.java_execute_http(request, response);
+    public void terminate() {
+        try {
+            cppProxy.cmd_terminate();
+        } catch (CppProxyInvalidatedException x) {
+            logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed", x);
+        }
+    }
+
+    private boolean isStartedByJava() {
+        return controllerBridge != EmptySchedulerControllerBridge.singleton;
     }
 
     /** Stellt XML-Prolog voran und löst bei einem ERROR-Element eine Exception aus. */
@@ -196,66 +189,22 @@ implements Sister, SchedulerIsClosed, SchedulerXmlCommandExecutor, SchedulerHttp
         return cppProxy.execute_xml(xml);
     }
 
-    /** Nur für C++, zur Ausführung eines Kommandos in Java */
-    @ForCpp private String javaExecuteXml(String xml) {
-        try {
-            return commandSubsystem.executeXml(xml);
-        } catch (UnknownCommandException x) {
-            prefixLog.warn(x.toString());
-            return "UNKNOWN_COMMAND";   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
-        }
+    @Override public Injector getInjector() {
+        return injector;
     }
 
-    public SchedulerConfiguration getConfiguration() {
-        return injector.getInstance(SchedulerConfiguration.class);
-    }
-
-    @ForCpp private EventSubsystem getEventSubsystem() {
-        return injector.getInstance(EventSubsystem.class);
-    }
-
-    public JobSubsystem getJobSubsystem() {
-        return injector.getInstance(JobSubsystem.class);
-    }
-
-    public OrderSubsystem getOrderSubsystem() {
-        return injector.getInstance(OrderSubsystem.class);
-    }
-
-    public String getHttpUrl() {
-        return cppProxy.http_url();
-    }
-
-    public int getTcpPort() {
-        return cppProxy.tcp_port();
-    }
-
-    /** Das ist einfach der C-Systemaufruf gethostname(). */
-    @Deprecated
-    public String getHostname() {
-        return cppProxy.hostname();
+    @Override public boolean isClosed() {
+        return closed;
     }
 
     public void callCppAndDoNothing() {
         cppProxy.tcp_port();
     }
 
-    @ForCpp private void log(String prefix, int level, String line) {
-        CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line);
-    }
-
-    /** @param text Sollte auf \n enden */
-    public void writeToSchedulerLog(LogCategory category, String text) {
-        cppProxy.write_to_scheduler_log(category.asString(), text);
-    }
-
-    public VariableSet getVariables() {
-        return cppProxy.variables().getSister();
-    }
-
-    public PrefixLog log() {
-        return prefixLog;
-    }
+//    /** @param text Sollte auf \n enden */
+//    public void writeToSchedulerLog(LogCategory category, String text) {
+//        cppProxy.write_to_scheduler_log(category.asString(), text);
+//    }
 
     @ForCpp private static Scheduler of(SpoolerC cppProxy, @Nullable SchedulerControllerBridge controllerBridgeOrNull) {
         SchedulerControllerBridge controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton);

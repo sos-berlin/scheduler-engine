@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.log.ErrorLogEvent;
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
 import com.sos.scheduler.engine.eventbus.*;
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.settings.SettingName;
 import com.sos.scheduler.engine.kernel.settings.Settings;
 import com.sos.scheduler.engine.kernel.util.Hostware;
@@ -164,7 +165,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     private void checkForErrorLogLine() {
-        String lastErrorLine = _scheduler.log().lastByLevel(SchedulerLogLevel.error);
+        String lastErrorLine = _scheduler.getInjector().getInstance(PrefixLog.class).lastByLevel(SchedulerLogLevel.error);
         if (!lastErrorLine.isEmpty())
             throw new RuntimeException("Test terminated after error log line: "+ lastErrorLine);
     }

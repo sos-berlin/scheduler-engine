@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.Job;
+import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public final class JS644PluginIT extends SchedulerTest {
     }
 
     private void modifyJobFile() throws IOException {
-        File jobFile = fileBasedFile(scheduler().getJobSubsystem().job(jobPath));
+        File jobFile = fileBasedFile(instance(JobSubsystem.class).job(jobPath));
         assertThat(jobFile + " does not exist", jobFile.exists());
         OutputStream out = new FileOutputStream(jobFile, true);
         try {

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class GetSourceCodeIT extends SchedulerTest {
     @EventHandler
     public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
         String jobName = e.jobPath().getName();
-        String scriptCode = controller().scheduler().getVariables().get(jobName).trim();
+        String scriptCode = instance(VariableSet.class).get(jobName).trim();
         resultMap.put(jobName,scriptCode);
         taskCount++;
         if (taskCount == jobs.size())

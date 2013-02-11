@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.plugins.jetty.rest
 
-import com.sun.jersey.api.client.WebResource
-import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sun.jersey.api.client.WebResource
 import java.io.{BufferedReader, IOException, Reader}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory
 
 @RunWith(classOf[JUnitRunner])
 final class EventsResourceIT extends ScalaSchedulerTest {
+
   import EventsResourceIT._
 
   override val configurationPackage = classOf[JettyPlugin].getPackage
@@ -26,8 +28,8 @@ final class EventsResourceIT extends ScalaSchedulerTest {
     try {
       Thread.sleep(500)  // Warten, bis Reader liest
       for (i <- range) {
-        controller.scheduler.log.info(testString +" "+ i)
-        controller.getEventBus.dispatchEvents()
+        instance[PrefixLog].info(testString +" "+ i)
+        instance[SchedulerEventBus].dispatchEvents()
         Thread.sleep(100)
       }
       controller.terminateScheduler()

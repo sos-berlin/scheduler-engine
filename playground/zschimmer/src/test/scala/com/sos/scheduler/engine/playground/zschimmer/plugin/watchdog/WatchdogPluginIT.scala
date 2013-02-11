@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
 import com.sos.scheduler.engine.common.time.Time
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent
 import com.sos.scheduler.engine.eventbus.HotEventHandler
+import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.test.SchedulerTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.junit._
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 
 class WatchdogPluginIT extends SchedulerTest {
     private val schedulerTimeout = Time.of(15)
@@ -16,7 +17,7 @@ class WatchdogPluginIT extends SchedulerTest {
     @Test def test() {
         controller.activateScheduler()
         Thread.sleep(schedulerTimeout.getMillis)
-        assertThat(scheduler.log.lastByLevel(SchedulerLogLevel.warning), Matchers.startsWith("SCHEDULER-721"))
+        assertThat(instance(classOf[PrefixLog]).lastByLevel(SchedulerLogLevel.warning), Matchers.startsWith("SCHEDULER-721"))
         controller.terminateScheduler()
     }
 

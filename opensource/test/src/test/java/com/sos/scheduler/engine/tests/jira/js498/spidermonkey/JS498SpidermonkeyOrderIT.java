@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js498.spidermonkey;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
@@ -48,7 +49,7 @@ public class JS498SpidermonkeyOrderIT extends SchedulerTest {
     }
 
     private File prepareResultFile() {
-        String resultFileName = scheduler().getConfiguration().localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
+        String resultFileName = instance(SchedulerConfiguration.class).localConfigurationDirectory().getAbsolutePath() + "/resultfile.txt";
         File resultFile = new File(resultFileName);
         resultFile.delete();
         return resultFile;
