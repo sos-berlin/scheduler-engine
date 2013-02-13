@@ -3,9 +3,6 @@ Release/
 *.vcproj.*.user
 *.vcxproj.user
 /*.v11.suo
-/.classpath
-/.project
-/.settings
 /target/
 /ipch/
 /scheduler-vs2010.opensdf
@@ -26,3 +23,12 @@ Release/
 /scripting_engine/spidermonkey.aps
 /zschimmer/java_h.h
 /zschimmer/java_i.c
+
+# Visual Studio symbol files
+/ntdll.pdb/
+/pingme.txt
+
+# Eclipse
+/.classpath
+/.project
+/.settings
