@@ -2269,7 +2269,7 @@ void Job::reset_scheduling()
         if( period            != _period            ||
             next_single_start != _next_single_start )
         {
-            _period = period;
+            set_period(period);
             set_next_start_time( now );
         }
     }
@@ -2290,7 +2290,7 @@ void Job::select_period( const Time& now )
         {
             _schedule_use->log_changed_active_schedule( now );
 
-            _period = _schedule_use->next_period( now );  
+            set_period(_schedule_use->next_period( now ));  
 
             if( !_period.begin().is_never() )
             {
@@ -2303,6 +2303,13 @@ void Job::select_period( const Time& now )
     }
 
     _start_once = _tasks_count == 0  &&  _schedule_use->is_defined()  &&  _schedule_use->schedule()->active_schedule_at( now )->once();
+}
+
+//----------------------------------------------------------------------------------Job::set_period
+
+void Job::set_period(const Period& p) 
+{
+    _period = p;
 }
 
 //--------------------------------------------------------------------------------Job::is_in_period

@@ -237,8 +237,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        update_changed_directories  ( Directory_watcher* );
     string                      trigger_files               ( Task* task = NULL );
     void                        interrupt_script            ();
-    void                        select_period               ( const Time& );
-    bool                        is_in_period                ( const Time& );
     bool                        queue_filled                ()                                      { return !_task_queue->empty(); }
     
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
@@ -258,7 +256,11 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        stop_simply                 ( bool end_all_tasks );
     void                        stop_after_task_error       ( const string& error_message );   // _ignore_error verhindert stop()
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
+
     void                        reset_scheduling            ();
+    void                        select_period               ( const Time& );
+    void                        set_period                  (const Period& p);
+    bool                        is_in_period                ( const Time& );
     void                        set_next_start_time         ( const Time& now, bool repeat = false );
     void                        set_next_start_time2        (const Time& now, bool repeat);
     void                        set_next_time               ( const Time& );
@@ -353,7 +355,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>
 
-  protected:
+  private:
     friend struct               Job_history;
 
     const JobJ                 _typed_java_sister;
