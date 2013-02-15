@@ -28,6 +28,14 @@ const Duration max_task_time_out           = Duration(365*24*3600);
 const Duration directory_watcher_intervall = Duration(10.0);          // Nur für Unix (Windows gibt ein asynchrones Signal)
 const bool   Job::force_start_default      = true;
 
+//--------------------------------------------------------------------------------------------Calls
+
+namespace job {
+    DEFINE_SIMPLE_CALL(Job, Wake_call)
+}
+
+using namespace job;
+
 //-------------------------------------------------------------------------------Job_subsystem_impl
 
 struct Job_subsystem_impl : Job_subsystem
@@ -515,6 +523,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     javabridge::has_proxy<Job>(scheduler),
     _zero_(this+1),
     _typed_java_sister(java_sister()),
+    _call_register(this),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
     _stop_on_error(true),
@@ -2290,7 +2299,11 @@ void Job::select_period( const Time& now )
         {
             _schedule_use->log_changed_active_schedule( now );
 
-            set_period(_schedule_use->next_period( now ));  
+            Period next_period = _schedule_use->next_period(now);
+            if (_period.end() < _period.begin())    // Folgende Periode schließt sich nicht nahtlos an?
+                _wake_when_in_period = false;
+
+            set_period(next_period);  
 
             if( !_period.begin().is_never() )
             {
@@ -2499,6 +2512,14 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
     }
 }
 
+//--------------------------------------------------------------------------Job::on_call(Wake_call)
+
+void Job::on_call(const Wake_call&) 
+{
+    //if (_wake_when_in_period && (_state == s_pending || _state == s_running) && _tasks_count < _max_tasks)
+    do_something();
+}
+
 //----------------------------------------------------------------------------Job::connect_job_node
 
 bool Job::connect_job_node( Job_node* job_node )
@@ -2613,7 +2634,7 @@ ptr<Task> Job::task_to_start()
     Start_cause     cause     = cause_none;
     ptr<Task>       task      = NULL;
     bool            has_order = false;
-    string          log_line;
+    string          log_lines;
 
     
     task = get_task_from_queue( now );
@@ -2621,19 +2642,19 @@ ptr<Task> Job::task_to_start()
         
     if( _state == s_pending  &&  _max_tasks > 0  &&  now >= _next_single_start )  
     {
-                                           cause = cause_period_single,                         log_line += "Task starts due to <period single_start=\"...\">\n";
+                                           cause = cause_period_single,                         log_lines += "Task starts due to <period single_start=\"...\">\n";
     }
     else
     if( is_in_period(now) )
     {
         if( _state == s_pending  &&  _max_tasks > 0 )
         {
-            if( _start_once )              cause = cause_period_once,                           log_line += "Task starts due to <run_time once=\"yes\">\n";
+            if( _start_once )              cause = cause_period_once,                           log_lines += "Task starts due to <run_time once=\"yes\">\n";
             else
             if( now >= _next_start_time )  
                 if( _delay_until.not_zero() && now >= _delay_until )
-                                           cause = cause_delay_after_error,                     log_line += "Task starts due to delay_after_error\n";
-                                      else cause = cause_period_repeat,                         log_line += "Task starts, because start time is reached: " + _next_start_time.as_string(time_zone_name());
+                                           cause = cause_delay_after_error,                     log_lines += "Task starts due to delay_after_error\n";
+                                      else cause = cause_period_repeat,                         log_lines += "Task starts, because start time is reached: " + _next_start_time.as_string(time_zone_name()) + "\n";
 
             if( _start_once_for_directory )
             {
@@ -2641,13 +2662,16 @@ ptr<Task> Job::task_to_start()
                 if( !_directory_changed  &&  trigger_files() != "" )  _directory_changed = true;   // Einmal starten, wenn bereits Dateien vorhanden sind 2006-09-11
             }
                 
-            if( _directory_changed )       cause = cause_directory,                             log_line += "Task starts due to an event for watched directory " + _changed_directories;
+            if( _directory_changed )       cause = cause_directory,                             log_lines += "Task starts due to an event for watched directory " + _changed_directories + "\n";
         }
+
+        if (_wake_when_in_period && (_state == s_pending || _state == s_running) && _tasks_count < _max_tasks)
+            cause = cause_wake, log_lines += "Task starts due to wake_when_in_period\n";
 
         if( _start_min_tasks )
         {
             assert( not_ending_tasks_count() < _min_tasks );
-            cause = cause_min_tasks;
+            cause = cause_min_tasks, log_lines = "Task starts due to min_tasks\n";
         }
 
         if (!cause || cause == cause_delay_after_error)
@@ -2746,7 +2770,7 @@ ptr<Task> Job::task_to_start()
                     }
                     else 
                     {
-                        log_line += "Task starts for " + order->obj_name();
+                        log_lines += "Task starts for " + order->obj_name() + "\n";
                         if( !cause )  cause = cause_order;
                     }
                 }
@@ -2754,7 +2778,7 @@ ptr<Task> Job::task_to_start()
 
             if( task )
             {
-                if( !log_line.empty() )  _log->debug( log_line );
+                if( !log_lines.empty() )  _log->debug(log_lines);
 
                 task->_cause = cause;
                 task->_changed_directories = _changed_directories;  
@@ -2783,7 +2807,6 @@ ptr<Task> Job::task_to_start()
     if( task )  _start_once = false;
 
     return task;
-    //return cause? task : NULL;
 }
 
 //--------------------------------------------------------------------------------Job::do_something
@@ -2877,6 +2900,7 @@ bool Job::do_something()
                             task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
 
                             task_started = true;
+                            _wake_when_in_period = false;
                             something_done = true;
                         }
                     }
@@ -3088,6 +3112,15 @@ void Job::set_state_cmd( State_cmd cmd )
                                 signal( state_cmd_name(cmd) );
                                 break;
 
+            case sc_wake_when_in_period: {
+                if (is_in_period(Time::now())) {
+                    _wake_when_in_period = true;
+                    if (_state == s_pending || _state == s_running)
+                        _call_register.call<Wake_call>();
+                }
+                break;
+            }
+
             case sc_end:        ok = true; // _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_suspended;  if( !ok )  return;
                                 _state_cmd = cmd;
                                 signal( state_cmd_name(cmd) );
@@ -3195,6 +3228,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_unstop:   return "unstop";
         case Job::sc_start:    return "start";
         case Job::sc_wake:     return "wake";
+        case Job::sc_wake_when_in_period: return "wake_when_in_period";
         case Job::sc_end:      return "end";
         case Job::sc_suspend:  return "suspend";
         case Job::sc_continue: return "continue";

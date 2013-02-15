@@ -25,7 +25,7 @@ enum Start_cause
     cause_signal                = 8,
     cause_delay_after_error     = 9,
     cause_order                 = 10,
-    cause_wake                  = 11,   // sc_wake
+    cause_wake                  = 11,   // sc_wake oder sc_wake_when_in_period
     cause_min_tasks             = 12
 };
 

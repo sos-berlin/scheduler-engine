@@ -13,6 +13,10 @@ struct Module_task;
 struct Job_folder;
 struct Job_schedule_use;
 
+namespace job {
+    struct Wake_call;
+}
+
 //------------------------------------------------------------------------------Combined_job_nodes
 
 struct Combined_job_nodes : Object
@@ -75,6 +79,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         sc_unstop,              // s_stopped                 -> s_pending
         sc_start,               // s_pending                 -> s_running
         sc_wake,                // s_pending || s_running    -> s_running
+        sc_wake_when_in_period,
         sc_end,                 // s_running                 -> s_pending
         sc_suspend,             // s_running                 -> s_suspended
         sc_continue,            // s_suspended               -> s_running
@@ -275,6 +280,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
+    void                        on_call                     (const job::Wake_call&);
+
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
   //void                        on_removing_lock            ( lock::Lock* );
 
@@ -359,6 +366,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     friend struct               Job_history;
 
     const JobJ                 _typed_java_sister;
+    typed_call_register<Job>   _call_register;
 
     string                     _title;                      // <job title="">
     string                     _state_text;                 // spooler_job.state_text = "..."
@@ -368,6 +376,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     State                      _state;
     State_cmd                  _state_cmd;
+    bool                       _wake_when_in_period;
     bool                       _is_permanently_stopped;     // s_stopped wird zum Beenden verwendet und gilt nicht dauerhaft. Das sollte vereinfacht werden!
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
     Duration                   _task_timeout;               // Frist für einen Schritt einer Task
