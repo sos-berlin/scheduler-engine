@@ -2,12 +2,22 @@ package com.sos.scheduler.engine.common.async
 
 import scala.collection.mutable
 import scala.sys.error
+import java.lang.System.currentTimeMillis
+import java.util.concurrent.Callable
 
 final class CallQueue {
-  protected val queue = mutable.UnrolledBuffer[TimedCall[_]]()
+  private val queue = mutable.UnrolledBuffer[TimedCall[_]]()
 
   def add[A](f: => A) {
     add(ShortTermCall[A](f))
+  }
+
+  def add(r: Runnable) {
+    add(ShortTermCall(r))
+  }
+
+  def add(r: Callable[_]) {
+    add(ShortTermCall(r))
   }
 
   def add(o: TimedCall[_]) {
@@ -36,16 +46,16 @@ final class CallQueue {
 
   def isEmpty = synchronized { queue.isEmpty }
 
-  def popMature(): Option[TimedCall[_]] = synchronized {
-    queue.headOption collect { case o if o.at <= System.currentTimeMillis() => queue.remove(0) ensuring { _ == o } }
-  }
-
   private def indexOf(o: TimedCall[_]) =
     queue indexWhere { _ eq o }
 
   private def positionAfter(at: Long) = queue indexWhere { _.at > at } match {
     case -1 => queue.size
     case i => i
+  }
+
+  def popMature(): Option[TimedCall[_]] = synchronized {
+    queue.headOption collect { case o if o.at <= currentTimeMillis() => queue.remove(0) ensuring { _ == o } }
   }
 
   override def toString = s"${getClass.getSimpleName} with ${queue.size} operations, next=${queue.headOption}"

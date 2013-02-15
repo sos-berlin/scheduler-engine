@@ -8,8 +8,8 @@ import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class CallDispatcherTest extends FunSuite with OneInstancePerTest {
-  private val callDispatcher = new CallDispatcher(new CallQueue)
+class CallRunnerTest extends FunSuite with OneInstancePerTest {
+  private val callDispatcher = new CallRunner(new CallQueue)
 
   test("X") {
     var a = 0

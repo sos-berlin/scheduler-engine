@@ -27,7 +27,7 @@ trait TimedCall[A] extends Callable[A] {
     }
   }
 
-  override def toString = Seq(toStringPrefix, s"at=$atString") mkString " "
+  override def toString = Seq(Try(toStringPrefix) getOrElse "(?)", s"at=$atString") mkString " "
 
   final def atString = if (at == shortTerm) "short-term" else ISODateTimeFormat.dateTime.print(at)
 

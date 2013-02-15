@@ -2,16 +2,16 @@ package com.sos.scheduler.engine.kernel.configuration
 
 import com.google.inject.Provides
 import com.google.inject.Scopes.SINGLETON
-import com.sos.scheduler.engine.common.async.{CallQueue, CallDispatcher}
+import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.data.scheduler.SchedulerClusterMemberKey
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
+import com.sos.scheduler.engine.kernel.async.SchedulerCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers, CommandSubsystem}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
-import com.sos.scheduler.engine.kernel.event.OperationExecutor
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
@@ -31,12 +31,10 @@ class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerB
     bindInstance(cppProxy)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
-    bind(classOf[CallQueue]) in SINGLETON
-    bind(classOf[CallDispatcher]) in SINGLETON
+    provideSingleton[SchedulerCallQueue] { new SchedulerCallQueue(new CallQueue) }
     bindInstance(controllerBridge.getEventBus)
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
-    bind(classOf[com.sos.scheduler.engine.kernel.event.OperationQueue]) to classOf[OperationExecutor] in SINGLETON
     bindInstance(cppProxy.log.getSister)
     bindInstance(this) // Nur für JettyPlugin, bis es unseren Injector nutzen kann (setzt Jetty-Initialisierung vor Guice voraus)
     provideSingleton { new SchedulerId(cppProxy.id) }

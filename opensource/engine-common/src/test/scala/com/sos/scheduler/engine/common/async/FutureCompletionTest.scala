@@ -12,7 +12,7 @@ import scala.util.Success
 class FutureCompletionTest extends FunSuite with OneInstancePerTest {
 
   private lazy val queue = new CallQueue
-  private lazy val dispatcher = new CallDispatcher(queue)
+  private lazy val dispatcher = new CallRunner(queue)
 
   test("Success") {
     val call = futureCall(currentTimeMillis() + 100) { "Hej!" }
