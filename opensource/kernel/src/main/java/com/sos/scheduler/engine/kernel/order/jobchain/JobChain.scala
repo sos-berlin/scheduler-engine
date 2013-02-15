@@ -70,11 +70,6 @@ with UnmodifiableJobchain {
     case o => new File(o)
   }
 
-  @Deprecated
-  def setForceFileReread() {
-    forceFileReread()
-  }
-
   /** Markiert, dass das [[com.sos.scheduler.engine.kernel.folder.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
   def forceFileReread() {
     cppProxy.set_force_file_reread()
