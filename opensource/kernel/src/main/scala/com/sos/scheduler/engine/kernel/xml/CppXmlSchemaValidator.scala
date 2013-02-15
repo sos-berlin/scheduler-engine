@@ -20,5 +20,5 @@ final class CppXmlSchemaValidator @ForCpp()(urlString: String) {
 }
 
 object CppXmlSchemaValidator {
-  private lazy val schedulerXmlSchemaUrl = getResource("com/sos/scheduler/engine/kernel/xml/scheduler.xsd")
+  private lazy val schedulerXmlSchemaUrl = getResource("com/sos/scheduler/enginedoc/common/scheduler.xsd")
 }
