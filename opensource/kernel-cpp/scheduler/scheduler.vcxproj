@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -374,6 +374,7 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="folder_Typed_folder.cxx" />
     <ClCompile Include="log_cache_Request.cxx" />
     <ClCompile Include="log_cache_Request_cache.cxx" />
+    <ClCompile Include="Timed_call.cxx" />
     <ClCompile Include="Settings.cxx" />
     <ClCompile Include="_precompiled_headers.cxx">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -485,12 +486,16 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="jni__sos__scheduler__http__Java_response.cxx" />
     <ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx" />
     <ClCompile Include="jni__sos__scheduler__Spooler.cxx" />
-  </ItemGroup>
+    
+  
+    <ClCompile Include="jni__sos__scheduler__Timed_call.cxx" />
+    </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event_code.h" />
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />
     <ClInclude Include="log_cache_Request_cache.h" />
+    <ClInclude Include="Timed_call.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="spooler_xslt_stylesheet.h" />
     <ClInclude Include="cluster.h" />

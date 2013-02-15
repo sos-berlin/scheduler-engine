@@ -1,6 +1,7 @@
 // $Id: spooler_job.cxx 15019 2011-08-24 16:47:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
+#include "Timed_call.h"
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"

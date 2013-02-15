@@ -9,6 +9,8 @@ import javax.inject.Singleton;
 import java.util.LinkedList;
 import java.util.Queue;
 
+//TODO Mit OperationDispatcher verschmelzen
+
 @Singleton
 public final class OperationExecutor implements OperationQueue {
     private static final Logger logger = LoggerFactory.getLogger(OperationExecutor.class);

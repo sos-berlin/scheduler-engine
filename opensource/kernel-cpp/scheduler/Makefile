@@ -17,6 +17,7 @@ objects = \
  Module_monitor_instances.o\
  Order.o\
  Settings.o\
+ Timed_call.o\
  cluster.o\
  database.o\
  directory_observer.o\

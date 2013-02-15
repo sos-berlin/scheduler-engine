@@ -280,6 +280,7 @@ typedef stdext::hash_set<string> String_set;
 #include "register.h"
 #include "lock.h"
 #include "schedule.h"
+#include "Timed_call.h"
 #include "scheduler_script.h"
 #include "spooler_communication.h"
 #include "spooler_http.h"
@@ -409,6 +410,9 @@ struct Spooler : Object,
     string                      home_directory              () const                            { return _home_directory; }
     string                      local_configuration_directory() const                           { return _configuration_directories[confdir_local]; }
     string                      string_need_db              () const;
+
+    Timed_call*                 enqueue_call                (Timed_call*);
+    void                        cancel_call                 (Timed_call*);
 
     void                        log_show_state              ( Prefix_log* log = NULL );
     int                         launch                      ( int argc, char** argv, const string& params );

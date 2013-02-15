@@ -33,6 +33,7 @@
 #include "../javaproxy/java__io__File.h"
 #include "../javaproxy/java__net__URI.h"
 #include "../javaproxy/java__net__URL.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
 
 using namespace std;
 using namespace zschimmer::file;
@@ -3352,6 +3353,19 @@ void Spooler::log_show_state( Prefix_log* log )
         if( !log )  Z_LOG2( "scheduler", "\n\n" << xml << "\n\n" );
     } 
     catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
+}
+
+//----------------------------------------------------------------------------Spooler::enqueue_call
+
+Timed_call* Spooler::enqueue_call(Timed_call* call) {
+    schedulerJ().enqueueCall(call->java_sister());
+    return call;
+}
+
+//-----------------------------------------------------------------------------Spooler::cancel_call
+
+void Spooler::cancel_call(Timed_call* call) {
+    if (call) schedulerJ().cancelCall(call->java_sister());
 }
 
 //----------------------------------------------------------------------------------Spooler::launch

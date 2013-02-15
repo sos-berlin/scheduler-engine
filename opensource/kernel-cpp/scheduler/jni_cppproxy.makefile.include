@@ -10,6 +10,7 @@ jni_cppproxy_objects=\
  jni__sos__scheduler__Settings.o\
  jni__sos__scheduler__Spooler.o\
  jni__sos__scheduler__Task.o\
+ jni__sos__scheduler__Timed_call.o\
  jni__sos__scheduler__com_objects__Com_variable_set.o\
  jni__sos__scheduler__http__Chunk_reader.o\
  jni__sos__scheduler__http__Java_response.o\

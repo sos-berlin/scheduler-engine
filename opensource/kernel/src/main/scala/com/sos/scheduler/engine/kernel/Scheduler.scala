@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel
 import com.google.common.base.Objects.firstNonNull
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.async.{CallQueue, CallDispatcher}
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.childElements
@@ -15,6 +16,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.kernel.async.CppCall
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -43,6 +45,8 @@ final class Scheduler @Inject private(
     pluginSubsystem: PluginSubsystem,
     commandSubsystem: CommandSubsystem,
     operationExecutor: OperationExecutor,
+    callQueue: CallQueue,
+    callDispatcher: CallDispatcher,
     eventBus: SchedulerEventBus,
     val injector: Injector)
 extends Sister
@@ -104,6 +108,7 @@ with HasInjector {
   @ForCpp private def onEnteringSleepState() {
     eventBus.dispatchEvents()
     operationExecutor.execute()
+    callDispatcher.execute()
   }
 
   /** Nur für C++, zur Ausführung eines Kommandos in Java */
@@ -122,6 +127,14 @@ with HasInjector {
 
   @ForCpp private def log(prefix: String, level: Int, line: String) {
     CppLogger.log(prefix, SchedulerLogLevel.ofCpp(level), line)
+  }
+
+  @ForCpp private def enqueueCall(o: CppCall) {
+    callQueue.add(o)
+  }
+
+  @ForCpp private def cancelCall(o: CppCall) {
+    callQueue.tryRemove(o)
   }
 
   @ForCpp private def threadLock() {
