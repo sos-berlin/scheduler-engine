@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.data.log;
 
 public enum SchedulerLogLevel {
     none(-10, "none"),
-    @Deprecated debug9(-9, "debug9"),
+    debug9(-9, "debug9"),
     @Deprecated debug8(-8, "debug8"),
     @Deprecated debug7(-7, "debug7"),
     @Deprecated debug6(-6, "debug6"),

@@ -17,7 +17,10 @@ object CppLogger {
       case SchedulerLogLevel.error   => logger.error(line)
       case SchedulerLogLevel.warning => logger.warn(line)
       case SchedulerLogLevel.info    => logger.info(line)
-      case _ => logger.debug(line)
+      case SchedulerLogLevel.debug9  => logger.trace(line)
+      case _ =>
+        if (level.cppNumber <= SchedulerLogLevel.debug3.cppNumber) logger.trace(line)
+        else logger.debug(line)
     }
   }
 }
