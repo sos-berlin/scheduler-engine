@@ -4,16 +4,17 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import org.joda.time._
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import java.lang.Thread.sleep
 import org.joda.time.DateTimeConstants.MILLIS_PER_DAY
+import org.joda.time._
 import org.joda.time.format.DateTimeFormat
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import scala.collection.mutable
-import java.lang.Thread.sleep
 
+/** JS-948 */
 @RunWith(classOf[JUnitRunner])
 class WakeWhenNotInPeriodIT extends ScalaSchedulerTest {
 
@@ -21,7 +22,7 @@ class WakeWhenNotInPeriodIT extends ScalaSchedulerTest {
 
   private val startTimes = mutable.Buffer[LocalTime]()
 
-  test(s"X") {
+  test("wake_when_in_period") {
     val now = new LocalTime()
     val minimumTimeUntilMidnight = 10000
     if (now isAfter now.withMillisOfDay(MILLIS_PER_DAY - minimumTimeUntilMidnight))
@@ -31,12 +32,14 @@ class WakeWhenNotInPeriodIT extends ScalaSchedulerTest {
     val a = Period(t plusSeconds 1, t plusSeconds 2)
     val b = Period(t plusSeconds 3, t plusSeconds 4)
     scheduler executeXml jobElem(List(a, b))
+
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Vor der Periode: unwirksam
     sleepUntil(a.begin plusMillis 100)
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // In der Periode: wirksam
     sleepUntil(a.end plusMillis 100)
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Nach der Periode: unwirksam
     sleepUntil(b.begin plusMillis 500)
+
     startTimes should have size(1)
     assert(a contains startTimes(0))
   }
