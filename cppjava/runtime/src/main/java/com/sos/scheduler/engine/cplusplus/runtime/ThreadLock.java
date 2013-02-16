@@ -3,18 +3,22 @@ package com.sos.scheduler.engine.cplusplus.runtime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.annotation.Nullable;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.currentThread;
 
 public class ThreadLock {
     private static final int logTimeoutMillis = 30*1000;     // Wenn's länger dauert, Meldung loggen
     private static final Logger logger = LoggerFactory.getLogger(ThreadLock.class);
 
-    private final SimpleLock myLock = logger.isWarnEnabled()? new LoggingLock() : new SimpleLock();
+    private final SimpleLock myLock = new LoggingLock();
+//    private final AtomicInteger counter = new AtomicInteger(0);
 
     public final void lock() {
         myLock.lock();
@@ -28,19 +32,25 @@ public class ThreadLock {
         return myLock.toString();
     }
 
-    private static class SimpleLock {
+    private class SimpleLock {
         private final ReentrantLock lock = new ReentrantLock();
 
         void lock() {
             lock.lock();
+            onLocked();
         }
 
         final boolean tryLock(int time, TimeUnit unit) {
             try {
-                return lock.tryLock(time, unit);
+                boolean locked = lock.tryLock(time, unit);
+                if (locked)
+                    onLocked();
+                return locked;
             }
             catch (InterruptedException x) { throw new RuntimeException(x); }
         }
+
+        protected void onLocked() {}
 
         void unlock() {
             lock.unlock();
@@ -52,62 +62,75 @@ public class ThreadLock {
     }
 
 
-    private static final class LoggingLock extends SimpleLock {
-        private final CallersData callersData = new CallersData();
+    private final class LoggingLock extends SimpleLock {
+        @Nullable private final AtomicReference<Thread> lockingThread = new AtomicReference<Thread>();  // Ungenau wegen race condition
+//        private Locked locked = null;
+//        private final WatchdogThread watchdogThread = new WatchdogThread(this);
 
         @Override void lock() {
+            long t = currentTimeMillis();
             boolean locked = tryLock(logTimeoutMillis, TimeUnit.MILLISECONDS);
             if (!locked) {
-                callersData.logBefore();
+                logger.warn("Waiting for Scheduler ThreadLock, currently acquired by "+lockingThreadString());
                 super.lock();
-                logger.warn("Scheduler ThreadLock acquired");
+                logger.warn("Scheduler ThreadLock acquired after waiting {}ms", t - currentTimeMillis());
             }
-            callersData.remember();
+        }
+
+        private String lockingThreadString() {
+            Thread t = lockingThread.get();
+            if (t == null) {
+                return "(unknown)";
+            } else {
+                StringWriter stringWriter = new StringWriter();
+                PrintWriter w = new PrintWriter(stringWriter);
+                w.print(t.toString());
+                w.print(", current stack trace:\n");
+                Exception x = new Exception() {};
+                x.setStackTrace(t.getStackTrace());
+                x.printStackTrace(w);
+                w.flush();
+                return stringWriter.toString();
+            }
+        }
+
+        protected void onLocked() {
+            lockingThread.set(currentThread());
+            //locked = new Locked(counter.addAndGet(1));
         }
 
         @Override void unlock() {
-//            logger.log(logLevel, "Releasing Scheduler ThreadLock");
+            lockingThread.set(null);
             super.unlock();
-            callersData.forget();
         }
 
-        private static class CallersData {
-            @Nullable private volatile Thread lockingThread = null;
-            @Nullable private volatile Exception lockingStackTrace = null;
-        
-            private synchronized void logBefore() {
-                Thread t = lockingThread;
-                Exception x = lockingStackTrace;
-                StringWriter stringWriter = new StringWriter();
-                PrintWriter w = new PrintWriter(stringWriter);
-                w.print("Waiting for Scheduler ThreadLock, currently acquired of ");
-                w.print(t);
-                w.write(", stack trace was:\n");
-                if (x != null)  x.printStackTrace(w);
-                w.flush();
-                logger.warn(stringWriter.toString());
-            }
+//        private class Locked {
+//            private final int id;
+//            private final long since;
+//
+//            private Locked(int id) {
+//                this.id = id;
+//                since = currentTimeMillis();
+//            }
+//        }
 
-            private synchronized void remember() {
-                lockingThread = Thread.currentThread();
-                lockingStackTrace = new Exception();
-                lockingStackTrace.fillInStackTrace();
-            }
-
-            private synchronized void forget() {
-                lockingThread = null;
-                lockingStackTrace = null;
-            }
-        }
-
-//    private static void log(String s) {
-//        // Nicht genau, weil synchronize fehlt
-//        System.err.println(ThreadLock.class +
-//          " " + Thread.currentThread() +
-//          " holdCount=" + lock.getHoldCount() +
-//          " hasQueuedThread=" + lock.hasQueuedThreads() +
-//          " " + s);
-//        System.err.flush();
-//    }
+//        private final class WatchdogThread extends Thread {
+//            private final LoggingLock loggingLock;
+//
+//            private WatchdogThread(LoggingLock l) {
+//                loggingLock = l;
+//            }
+//
+//            @Override public void run() {
+//                try {
+//                    while (true) {
+//                        sleep(1000);
+//                        Locked locked = loggingLock.locked;
+//                        if (locked != null && locked.since + logTimeoutMillis > currentTimeMillis())
+//                            logger.warn("Scheduler ThreadLock acquired since {}ms by {}", currentTimeMillis() - locked.since, loggingLock.callersData);
+//                    }
+//                } catch (InterruptedException ignore) {}
+//            }
+//        }
     }
 }
