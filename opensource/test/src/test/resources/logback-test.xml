@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{dd HH:mm:ss.SSS} [%thread] %-5level %logger{60} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="OFF">
+        <appender-ref ref="STDERR" />
+    </root>
+</configuration>
