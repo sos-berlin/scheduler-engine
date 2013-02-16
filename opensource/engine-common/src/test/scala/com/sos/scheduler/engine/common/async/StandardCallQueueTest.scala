@@ -8,12 +8,12 @@ import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class CallQueueTest extends FunSuite with OneInstancePerTest {
-  private val callQueue = new CallQueue
+class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
+  private val callQueue = new StandardCallQueue
 
   test("add(=>A)") {
     var a = 0
-    callQueue add { a += 1 }
+    callQueue add { () => a += 1 }
     val call = callQueue.popMature().get
     call.at should equal (0)
     call()

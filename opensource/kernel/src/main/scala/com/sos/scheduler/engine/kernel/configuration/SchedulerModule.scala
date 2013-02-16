@@ -2,13 +2,13 @@ package com.sos.scheduler.engine.kernel.configuration
 
 import com.google.inject.Provides
 import com.google.inject.Scopes.SINGLETON
-import com.sos.scheduler.engine.common.async.CallQueue
+import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.data.scheduler.SchedulerClusterMemberKey
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
-import com.sos.scheduler.engine.kernel.async.SchedulerCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers, CommandSubsystem}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
@@ -23,7 +23,7 @@ import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import scala.collection.JavaConversions._
 
-class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge) extends ScalaAbstractModule {
+class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread) extends ScalaAbstractModule {
 
   import SchedulerModule._
 
@@ -31,7 +31,7 @@ class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerB
     bindInstance(cppProxy)
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
-    provideSingleton[SchedulerCallQueue] { new SchedulerCallQueue(new CallQueue) }
+    provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
     bindInstance(controllerBridge.getEventBus)
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }

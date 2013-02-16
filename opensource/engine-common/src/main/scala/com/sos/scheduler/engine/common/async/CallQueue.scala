@@ -1,62 +1,29 @@
 package com.sos.scheduler.engine.common.async
 
-import scala.collection.mutable
-import scala.sys.error
-import java.lang.System.currentTimeMillis
+import com.google.inject.ImplementedBy
 import java.util.concurrent.Callable
+import scala.sys._
 
-final class CallQueue {
-  private val queue = mutable.UnrolledBuffer[TimedCall[_]]()
-
-  def add[A](f: => A) {
-    add(ShortTermCall[A](f))
+@ImplementedBy(classOf[PoppableCallQueue])
+trait CallQueue {
+  final def add[A](f: () => A) {
+    add(ShortTermCall(f))
   }
 
-  def add(r: Runnable) {
-    add(ShortTermCall(r))
+  final def add(o: Runnable) {
+    add(ShortTermCall(o))
   }
 
-  def add(r: Callable[_]) {
-    add(ShortTermCall(r))
+  final def add(o: Callable[_]) {
+    add(ShortTermCall(o))
   }
 
-  def add(o: TimedCall[_]) {
-    synchronized {
-      val i = positionAfter(o.at)
-      if (i < queue.size) queue.insert(i, o)
-      else queue.append(o)  // Scala 2.10.0: queue.insert(queue.size, x) geht in eine Schleife
-    }
-  }
+  def add(o: TimedCall[_])
 
-  def remove(o: TimedCall[_]) {
+  final def remove(o: TimedCall[_]) {
     val removed = tryRemove(o)
     if (!removed) error(s"Unknown TimedCall '$o'")
   }
 
-  def tryRemove(o: TimedCall[_]): Boolean = {
-    synchronized {
-      indexOf(o) match {
-        case -1 => false
-        case i => queue.remove(i); true
-      }
-    }
-  }
-
-  def nonEmpty = !isEmpty
-
-  def isEmpty = synchronized { queue.isEmpty }
-
-  private def indexOf(o: TimedCall[_]) =
-    queue indexWhere { _ eq o }
-
-  private def positionAfter(at: Long) = queue indexWhere { _.at > at } match {
-    case -1 => queue.size
-    case i => i
-  }
-
-  def popMature(): Option[TimedCall[_]] = synchronized {
-    queue.headOption collect { case o if o.at <= currentTimeMillis() => queue.remove(0) ensuring { _ == o } }
-  }
-
-  override def toString = s"${getClass.getSimpleName} with ${queue.size} operations, next=${queue.headOption}"
+  def tryRemove(o: TimedCall[_]): Boolean
 }

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel
 import com.google.common.base.Objects.firstNonNull
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
+import com.sos.scheduler.engine.common.async.CallRunner
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.childElements
@@ -16,7 +16,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
-import com.sos.scheduler.engine.kernel.async.{SchedulerCallQueue, CppCall}
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.kernel.async.{SchedulerThreadCallQueue, CppCall}
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
@@ -28,6 +29,7 @@ import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
+import java.lang.Thread.currentThread
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
@@ -43,7 +45,7 @@ final class Scheduler @Inject private(
     disposableCppProxyRegister: DisposableCppProxyRegister,
     pluginSubsystem: PluginSubsystem,
     commandSubsystem: CommandSubsystem,
-    callQueue: SchedulerCallQueue,
+    implicit private val schedulerThreadCallQueue: SchedulerThreadCallQueue,
     eventBus: SchedulerEventBus,
     val injector: Injector)
 extends Sister
@@ -55,7 +57,7 @@ with HasInjector {
 
   private var closed = false
   private var onCloseFunction: Option[() => Unit] = None
-  private val callRunner = new CallRunner(callQueue.delegate)
+  private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
 
   enableJavaUtilLoggingOverSLF4J()
   TimeZones.initialize()
@@ -127,11 +129,11 @@ with HasInjector {
   }
 
   @ForCpp private def enqueueCall(o: CppCall) {
-    callQueue.add(o)
+    schedulerThreadCallQueue.add(o)
   }
 
   @ForCpp private def cancelCall(o: CppCall) {
-    callQueue.tryRemove(o)
+    schedulerThreadCallQueue.tryRemove(o)
   }
 
   @ForCpp private def threadLock() {
@@ -151,7 +153,7 @@ with HasInjector {
     }
   }
 
-  /** Stellt XML-Prolog voran und löst bei einem ERROR-Element eine Exception aus. */
+  /** Löst bei einem ERROR-Element eine Exception aus. */
   def executeXml(xml: String): String = {
     val result: String = uncheckedExecuteXml(xml)
     if (result.contains("<ERROR")) {
@@ -163,9 +165,8 @@ with HasInjector {
   }
 
   /** execute_xml() der C++-Klasse Spooler */
-  def uncheckedExecuteXml(xml: String): String = {
-    cppProxy.execute_xml(xml)
-  }
+  def uncheckedExecuteXml(xml: String): String =
+    inSchedulerThread { cppProxy.execute_xml(xml) }
 
   //    /** @param text Sollte auf \n enden */
   //    public void writeToSchedulerLog(LogCategory category, String text) {
@@ -186,7 +187,7 @@ object Scheduler {
   @ForCpp def of(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
     controllerBridge.getSettings.setSettingsInCpp(cppProxy.modifiable_settings)
-    val injector = createInjector(new SchedulerModule(cppProxy, controllerBridge))
+    val injector = createInjector(new SchedulerModule(cppProxy, controllerBridge, currentThread()))
     injector.getInstance(classOf[Scheduler])
   }
 }

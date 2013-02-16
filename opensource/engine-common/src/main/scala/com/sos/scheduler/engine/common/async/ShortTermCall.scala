@@ -7,15 +7,17 @@ trait ShortTermCall[A] extends TimedCall[A] {
 }
 
 object ShortTermCall {
-  def apply[A](f: => A) = new ShortTermCall[A] {
-    def call() = f
+  def apply[A](f: () => A) = new ShortTermCall[A] {
+    def call() = f()
   }
 
-  def apply(r: Runnable) = new ShortTermCall[Unit] {
-    def call() = r.run()
-  }
+  def apply(r: Runnable): ShortTermCall[Unit] =
+    new ShortTermCall[Unit] {
+      def call() = r.run()
+    }
 
-  def apply[A](r: Callable[A]) = new ShortTermCall[A] {
-    def call() = r.call()
-  }
+  def apply[A](r: Callable[A]): ShortTermCall[A] =
+    new ShortTermCall[A] {
+      def call() = r.call()
+    }
 }

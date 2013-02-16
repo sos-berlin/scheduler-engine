@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.async
 
-final class CallRunner(val queue: CallQueue) {
+final class CallRunner(val queue: PoppableCallQueue) {
 
   def execute() {
     while (true) {

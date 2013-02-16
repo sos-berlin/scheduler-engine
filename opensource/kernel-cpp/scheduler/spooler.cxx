@@ -2486,6 +2486,8 @@ void Spooler::run()
 
         if( something_done )  wait_until = Time(0);   // Nicht warten, wir drehen noch eine Runde
 
+        schedulerJ().onEnteringSleepState();
+
         //----------------------------------------------------------------------------NICHTS GETAN?
 
         if( something_done )
@@ -2558,19 +2560,9 @@ void Spooler::run()
         {
             Wait_handles wait_handles ( this );
 
-            /**
-             * \change  JS-471 - TCP und UDP-Verbindungen am Anfang der Handles
-             * \version 1.3.8
-             * \author  Stefan Schädlich
-             * \date    2010-04-01
-             *
-             * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
-             *
-             * \b newcode from 2010-04-01
-             * \code */
             // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
             vector<System_event*> events;
-            _connection_manager->get_events( &events );
+            _connection_manager->get_events( &events );  // JS-471 TCP und UDP-Verbindungen am Anfang der Handles
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
             /* \endcode */
 
@@ -2611,26 +2603,6 @@ void Spooler::run()
                 }
             }
 
-/**
- * \change  JS-471 - TCP und UDP-Verbindungen am Anfang der Handles
- * \version 1.3.8
- * \author  Stefan Schädlich
- * \date    2010-04-01
- * \detail
- * TCP und UDP-Verbindungen am Anfang des Handles-Array, weil der erste Block (die ersten 63 handles) bevorzugt behandelt wird.
- *
- * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
- *
- * \b oldcode from 2010-04-01
- * \code
-   // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
-            vector<System_event*> events;
-            _connection_manager->get_events( &events );
-            FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
-   \endcode
- */
-
-
             {
                 Time n = Time::now();
                 if (n >= micro_step_start_time + _max_micro_step_time)  _log->warn(message_string("SCHEDULER-721", (n - micro_step_start_time).as_string()));
@@ -2639,8 +2611,6 @@ void Spooler::run()
             //-------------------------------------------------------------------------------WARTEN
 
             wait_handles += _wait_handles;
-
-            schedulerJ().onEnteringSleepState();
 
             if( nothing_done_count > 0  ||  !wait_handles.signaled() )   // Wenn "nichts_getan" (das ist schlecht), dann wenigstens alle Ereignisse abfragen, damit z.B. ein TCP-Verbindungsaufbau erkannt wird.
             {

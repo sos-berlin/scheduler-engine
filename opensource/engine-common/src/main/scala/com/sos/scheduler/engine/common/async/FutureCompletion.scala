@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.async
 
-import scala.concurrent.Promise
+import scala.concurrent.{Future, Promise}
 import scala.util.Try
 
 trait FutureCompletion[A] {
@@ -16,11 +16,22 @@ trait FutureCompletion[A] {
 }
 
 object FutureCompletion {
-  def futureCall[A](at: Long = TimedCall.shortTerm)(f: => A) = new AbstractTimedCall[A](at) with FutureCompletion[A] {
-    def call() = f
-  }
+  type FutureCall[A] = TimedCall[A] with FutureCompletion[A]
 
-//  def futureCall[A]()(f: => A) = new ShortTermCall[A] with FutureCompletion[A] {
-//    def call() = f
-//  }
+  def futureCall[A](f: => A): FutureCall[A] =
+    futureTimedCall(TimedCall.shortTerm)(f)
+
+  def futureTimedCall[A](at: Long)(f: => A): FutureCall[A] =
+    new AbstractTimedCall[A](at) with FutureCompletion[A] {
+      def call() = f
+    }
+
+  def callFuture[A](f: => A)(implicit callQueue: CallQueue): Future[A] =
+    timedCallFuture(TimedCall.shortTerm)(f)
+
+  def timedCallFuture[A](at: Long)(f: => A)(implicit callQueue: CallQueue): Future[A] = {
+    val call = futureTimedCall(at)(f)
+    callQueue add call
+    call.future
+  }
 }
