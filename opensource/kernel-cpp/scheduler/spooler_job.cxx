@@ -31,7 +31,10 @@ const bool   Job::force_start_default      = true;
 //--------------------------------------------------------------------------------------------Calls
 
 namespace job {
-    DEFINE_SIMPLE_CALL(Job, Wake_call)
+    struct State_cmd_call : object_call<Job, State_cmd_call> {
+        Job::State_cmd const _cmd;
+        State_cmd_call(Job* job, Job::State_cmd cmd) : object_call(job), _cmd(cmd) {}
+    };
 }
 
 using namespace job;
@@ -865,7 +868,7 @@ void Job::set_dom( const xml::Element_ptr& element )
         _warn_if_shorter_than_string = element.getAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );
         _warn_if_longer_than_string  = element.getAttribute( "warn_if_longer_than" , _warn_if_longer_than_string  );
         _enabled                     = element.bool_getAttribute( "enabled" , _enabled  );  // JS-551
-        _enabled ? _state_cmd = Job::sc_enable : _state_cmd = Job::sc_disable;   // JS-551
+        _call_register.call(Z_NEW(State_cmd_call(this, _enabled? Job::sc_enable : Job::sc_disable)));
 
         if( order )  set_order_controlled();
 
@@ -1861,116 +1864,108 @@ void Job::end_tasks( const string& task_warning )
     }
 }
 
-//---------------------------------------------------------------------------Job::execute_state_cmd
+//-------------------------------------------------------------------------------------Job::on_call
 
-bool Job::execute_state_cmd()
+void Job::on_call(const State_cmd_call& call) {
+    set_state_cmd(call._cmd);
+}
+
+//-------------------------------------------------------------------------------Job::set_state_cmd
+
+void Job::set_state_cmd(State_cmd state_cmd)
 {
-    bool something_done = false;
+    switch( state_cmd ) {
+        case sc_disable: // JS-551
+        case sc_stop:       if( _state != s_stopping && _state != s_stopped  ) {
+                                stop( true );
+                                if(state_cmd == sc_disable) // JS-551
+                                    _enabled = false;       // JS-551
+                            }
+                            break;
 
-    {
-        State_cmd state_cmd = _state_cmd;
-        _state_cmd = sc_none;
+        case sc_enable: // JS-551
+        case sc_unstop:     if( _state == s_stopping
+                             || _state == s_stopped
+                             || _state == s_error      )
+                            {
+                                if( is_to_be_removed() ) {
+                                    _log->error( message_string( "SCHEDULER-284", "unstop" ) );
+                                } else {
+                                    if (state_cmd == sc_unstop) set_state( s_pending );  // JS-671
+                                    check_min_tasks( "job has been unstopped" );
+                                    set_next_start_time( Time::now() );
+                                    if(state_cmd == sc_enable) _enabled = true;        // JS-551
+                                }
+                            }
+                            break;
 
-        if( state_cmd )
-        {
-            switch( state_cmd )
-            {
-                case sc_disable: // JS-551
-                case sc_stop:       if( _state != s_stopping && _state != s_stopped  ) 
-                                    {
-                                        stop( true );
-                                        if(state_cmd == sc_disable) // JS-551
-                                            _enabled = false;       // JS-551
-                                         something_done = true;
-                                    }
-                                    break;
+        case sc_end:        Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+                            break;
 
-                case sc_enable: // JS-551
-                case sc_unstop:     if( _state == s_stopping
-                                     || _state == s_stopped
-                                     || _state == s_error      )
-                                    {
-                                        if( is_to_be_removed() )
-                                        {
-                                            _log->error( message_string( "SCHEDULER-284", "unstop" ) );
-                                        }
-                                        else
-                                        {
-                                            if (state_cmd == sc_unstop) set_state( s_pending );  // JS-671
-                                            check_min_tasks( "job has been unstopped" );
-                                            set_next_start_time( Time::now() );
-                                            if(state_cmd == sc_enable) _enabled = true;        // JS-551
-                                            something_done = true;
-                                        }
-                                    }
-                                    break;
-
-                case sc_end:        Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
-                                    break;
-
-                case sc_suspend:    
-                {
-                    if( _state == s_running )
-                    {
-                        Z_FOR_EACH( Task_list, _running_tasks, t ) 
-                        {
-                            Task* task = *t;
-                            if( task->_state == Task::s_running 
-                             || task->_state == Task::s_running_delayed
-                             || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
-                        }
-
-                        something_done = true;
-                    }
-                    break;
+        case sc_suspend: {
+            if( _state == s_running ) {
+                Z_FOR_EACH( Task_list, _running_tasks, t ) {
+                    Task* task = *t;
+                    if( task->_state == Task::s_running 
+                     || task->_state == Task::s_running_delayed
+                     || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
                 }
-
-                case sc_continue:   
-                {
-                    Z_FOR_EACH( Task_list, _running_tasks, t ) 
-                    {
-                        Task* task = *t;
-                        if( task->_state == Task::s_suspended 
-                         || task->_state == Task::s_running_delayed
-                         || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
-                    }
-                    
-                    set_state( _running_tasks.size() > 0? s_running : s_pending );
-                    check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
-                    something_done = true;
-                    break;
-                }
-
-                case sc_wake:
-                {
-                    if( _state == s_pending
-                     || _state == s_stopped )
-                    {
-                        if( is_to_be_removed() )
-                        {
-                            _log->error( message_string( "SCHEDULER-284", "wake" ) );
-                        }
-                        else
-                        {
-                            ptr<Task> task = create_task( NULL, "", 0 ); 
-                            
-                            set_state( s_pending );
-                            check_min_tasks( "job has been unstopped with cmd=\"wake\"" );
-
-                            task->_cause = cause_wake;
-                            task->_let_run = true;
-                            task->init();
-                        }
-                    }
-                    break;
-                }
-
-                default: ;
             }
+            break;
         }
-    }
 
-    return something_done;
+        case sc_continue: {
+            Z_FOR_EACH( Task_list, _running_tasks, t ) {
+                Task* task = *t;
+                if( task->_state == Task::s_suspended 
+                 || task->_state == Task::s_running_delayed
+                 || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
+            }
+                    
+            set_state( _running_tasks.size() > 0? s_running : s_pending );
+            check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
+            break;
+        }
+
+        case sc_wake: {
+            if( _state == s_pending
+             || _state == s_stopped )
+            {
+                if( is_to_be_removed() ) {
+                    _log->error( message_string( "SCHEDULER-284", "wake" ) );
+                } else {
+                    ptr<Task> task = create_task( NULL, "", 0 ); 
+                            
+                    set_state( s_pending );
+                    check_min_tasks( "job has been unstopped with cmd=\"wake\"" );
+
+                    task->_cause = cause_wake;
+                    task->_let_run = true;
+                    task->init();
+                }
+            }
+            break;
+        }
+
+        case sc_wake_when_in_period: {
+            if (is_in_period(Time::now())) {
+                _wake_when_in_period = true;
+                if (_state == s_pending || _state == s_running)
+                    do_something();
+            }
+            return;
+        }
+
+        case sc_start:
+            start( NULL, "", Time::now() );
+            break;
+
+        case sc_remove:     
+            remove( File_based::rm_base_file_too );
+            break;
+
+        default: ;
+    }
 }
 
 //----------------------------------------------------------------Job::start_when_directory_changed
@@ -2512,14 +2507,6 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
     }
 }
 
-//--------------------------------------------------------------------------Job::on_call(Wake_call)
-
-void Job::on_call(const Wake_call&) 
-{
-    //if (_wake_when_in_period && (_state == s_pending || _state == s_running) && _tasks_count < _max_tasks)
-    do_something();
-}
-
 //----------------------------------------------------------------------------Job::connect_job_node
 
 bool Job::connect_job_node( Job_node* job_node )
@@ -2813,32 +2800,19 @@ ptr<Task> Job::task_to_start()
 
 bool Job::do_something()
 {
-  //Z_DEBUG_ONLY( _log->debug9( "do_something() state=" + state_name() ); )
-
     bool something_done     = false;       
     bool task_started       = false;
     Time now                = Time::now();
 
     something_done |= check_for_changed_directory( now );         // Hier prüfen, damit Signal zurückgesetzt wird
 
-
-    if( _state == s_error )
-    {
-        //
-    }
-    else
-    try
-    {
-        try
-        {
+    if (_state != s_error)
+    try {
+        try {
             Time next_time_at_begin = _next_time;
 
             if( _state > s_loaded )  
             {
-                something_done |= execute_state_cmd();
-
-              //if( _reread )  _reread = false,  reread(),  something_done = true;
-
                 if( now > _period.end() )
                 {
                     select_period( now );
@@ -3082,83 +3056,11 @@ void Job::set_state_cmd(const string& cmd)
     set_state_cmd(as_state_cmd(cmd));
 }
 
-//-------------------------------------------------------------------------------Job::set_state_cmd
-
-void Job::set_state_cmd( State_cmd cmd )
-{ 
-    bool ok = false;
-
-    {
-        switch( cmd )
-        {
-            case sc_disable:    // JS-551
-            case sc_stop:       ok = true; 
-                                _state_cmd = cmd;
-                                signal( state_cmd_name(cmd) );
-                                break;
-
-            case sc_enable:     // JS-551
-            case sc_unstop:     ok = _state == s_stopped;       if( !ok )  return;
-                                _state_cmd = cmd;
-                                signal( state_cmd_name(cmd) );
-                                break;
-
-            case sc_start:      {
-                                    start( NULL, "", Time::now() );
-                                    break;
-                                }
-
-            case sc_wake:       _state_cmd = cmd;
-                                signal( state_cmd_name(cmd) );
-                                break;
-
-            case sc_wake_when_in_period: {
-                if (is_in_period(Time::now())) {
-                    _wake_when_in_period = true;
-                    if (_state == s_pending || _state == s_running)
-                        _call_register.call<Wake_call>();
-                }
-                break;
-            }
-
-            case sc_end:        ok = true; // _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_suspended;  if( !ok )  return;
-                                _state_cmd = cmd;
-                                signal( state_cmd_name(cmd) );
-                                break;
-
-            case sc_suspend:    ok = true; //_state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order;   if( !ok )  return;
-                                _state_cmd = cmd;
-                                signal( state_cmd_name(cmd) );
-                                break;
-
-            case sc_continue:   ok = true; //_state == s_suspended || _state == s_running_delayed;  if( !ok )  return;
-                                _state_cmd = cmd;
-                                signal( state_cmd_name(cmd) );
-                                break;
-
-            case sc_reread:     ok = true;  break;      // Jira JS-208
-            //case sc_reread:     _reread = true, ok = true;  
-            //                    signal( state_cmd_name(cmd) );
-            //                    break;
-
-            case sc_remove:     remove( File_based::rm_base_file_too );
-                                // this ist möglicherweise ungültig
-                                return;
-
-            default:            ok = false;
-        }
-    }
-}
-
 //-----------------------------------------------------------------------------------Job::job_state
 
 string Job::job_state()
 {
-    string st;
-
-    st = "state=" + state_name();
-
-    return st;
+    return "state=" + state_name();
 }
 
 //--------------------------------------------------------------------------------Job::include_path
@@ -3316,8 +3218,6 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
 
         if( _description != "" )  result.setAttribute( "has_description", "yes" );
-
-        if( _state_cmd         )  result.setAttribute( "cmd"    , state_cmd_name()  );
 
         Time next = next_start_time();
         if( !next.is_never() )

@@ -1,12 +1,15 @@
 package com.sos.scheduler.engine.kernel.job
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.eternalMillis
 import com.sos.scheduler.engine.data.folder.FileBasedType
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.{TaskPersistent, TaskId, JobPersistent}
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.folder.FileBasedState
@@ -14,7 +17,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore, HibernateTaskStore}
 import com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString
 import javax.annotation.Nullable
-import javax.persistence.{EntityManager, EntityManagerFactory}
+import javax.persistence.EntityManager
 import org.joda.time.DateTime
 
 @ForCpp final class Job(cppProxy: JobC, injector: Injector) extends FileBased with Sister with UnmodifiableJob {
@@ -22,6 +25,8 @@ import org.joda.time.DateTime
   import Job._
 
   def onCppProxyInvalidated() {}
+
+  implicit private def schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
 
   def getFileBasedType = FileBasedType.job
 
@@ -52,7 +57,7 @@ import org.joda.time.DateTime
   }
 
   def setStateCommand(c: JobStateCommand) {
-    cppProxy.set_state_cmd(c.cppValue)
+    schedulerThreadFuture { cppProxy.set_state_cmd(c.cppValue) }
   }
 
   @ForCpp @Nullable private def tryFetchPersistentState =

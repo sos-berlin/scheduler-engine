@@ -14,7 +14,7 @@ struct Job_folder;
 struct Job_schedule_use;
 
 namespace job {
-    struct Wake_call;
+    struct State_cmd_call;
 }
 
 //------------------------------------------------------------------------------Combined_job_nodes
@@ -197,7 +197,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
   //void                        on_schedule_removed         ();
 
 
-    State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
     bool                        is_permanently_stopped      () const                                { return _is_permanently_stopped; }
     string                      job_state                   ();
@@ -280,12 +279,11 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                     is_machine_resumable           () const                                { return _machine_resumable; }
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
-    void                        on_call                     (const job::Wake_call&);
+    void                        on_call                     (const job::State_cmd_call&);
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
   //void                        on_removing_lock            ( lock::Lock* );
 
-    bool                        execute_state_cmd           ();
     ptr<Task>                   task_to_start               ();
     bool                        do_something                ();
 
@@ -295,6 +293,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
     void                        set_state_cmd               (const string&);
+    bool                        execute_state_cmd           (State_cmd);
     void                        end_tasks                   ( const string& task_warning );
     void                        kill_task                   ( int task_id, bool immediately = false );
     void                        kill_queued_task            ( int task_id );
@@ -303,7 +302,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     static string               state_name                  ( State );
     static State                as_state                    ( const string& );
     
-    string                      state_cmd_name              ()                                      { return state_cmd_name( _state_cmd ); }
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
@@ -375,7 +373,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     long32                     _step_count;                 // Anzahl spooler_process() aller Tasks
 
     State                      _state;
-    State_cmd                  _state_cmd;
     bool                       _wake_when_in_period;
     bool                       _is_permanently_stopped;     // s_stopped wird zum Beenden verwendet und gilt nicht dauerhaft. Das sollte vereinfacht werden!
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen

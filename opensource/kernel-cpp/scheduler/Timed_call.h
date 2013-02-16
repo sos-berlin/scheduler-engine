@@ -28,7 +28,7 @@ struct Timed_call : Object, javabridge::has_proxy<Timed_call>
 
 struct Object_call : Timed_call {
   protected: 
-    Object_call(const Time& at) : Timed_call(at) {}
+    Object_call(const Time& at = Time(0)) : Timed_call(at) {}
 
     string obj_name() const { return S() << object()->obj_name() << " " << call_name(); }
 
@@ -60,6 +60,7 @@ struct object_call : Object_call {
     OBJECT* const _object;
 
   protected:
+    object_call(OBJECT* o) : _object(o) {}
     object_call(const Time& at, OBJECT* o) : Object_call(at), _object(o) {}
 
     Scheduler_object* object() const { return _object; }
@@ -78,7 +79,6 @@ struct object_call : Object_call {
 #define DEFINE_SIMPLE_CALL(OBJECT_TYPE, CALL) \
     struct CALL : object_call<OBJECT_TYPE, CALL> { \
         CALL(const Time& at, OBJECT_TYPE* o) : object_call(at, o) {} \
-        /*virtual string call_name() const { return #OBJECT_TYPE "." #CALL; }*/ \
     };
 
 
@@ -164,12 +164,22 @@ struct typed_call_register : Typed_call_register {
     template<typename CALL>
     void call_at(const Time& at) {
         if (at.is_never()) cancel<CALL>();
-        else enqueue_id(CALL::type_id(), Z_NEW(CALL(at, _object)));
+        else call<CALL>(Z_NEW(CALL(at, _object)));
     }
     
     template<typename CALL>
     void call() {
-        enqueue_id(CALL::type_id(), Z_NEW(CALL(Time(0), _object)));
+        call<CALL>(Z_NEW(CALL(Time(0), _object)));
+    }
+    
+    template<typename CALL>
+    void call(CALL* call) {
+        enqueue_id(CALL::type_id(), call);
+    }
+
+    template<typename CALL>
+    void call(const ptr<CALL>& call) {
+        enqueue_id(CALL::type_id(), call);
     }
 };
 
