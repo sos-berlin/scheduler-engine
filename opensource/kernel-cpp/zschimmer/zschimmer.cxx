@@ -1434,32 +1434,30 @@ void sleep( double seconds )
 #   endif
 }
 
-//----------------------------------------------------------------------------name_of_type_info_gcc
-#ifdef __GNUC__
+//--------------------------------------------------------------------------------name_of_type_info
 
-string name_of_type_info_gcc( const type_info& ti )
+string name_of_type_info( const type_info& ti )
 {
-    //return "Kein Typ in GCC 3.3.3";         // ti.name() stürzt ab, wenn über java/jni gerufen (in libhostjava.so)
-
-    string      result;
-    const char* name      = ti.name();
-    int         status    = 0;
-    char*       demangled = abi::__cxa_demangle( ti.name(), 0, 0, &status );
-
-    if( demangled ) 
-    {
-        result = demangled;
+#ifdef __GNUC__
+    int status = 0;
+    if (char* demangled = abi::__cxa_demangle( ti.name(), 0, 0, &status)) {
+        string result = demangled;
         free( demangled );
+        return result;
+    } else  {
+        return ti.name();
     }
-    else 
-    {
-        result = name;
-    }
-
+#else
+    const char* result = ti.name();
+    if (strncmp(result, "struct ", 7) == 0)
+        result += 7;
+    else
+    if (strncmp(result, "class ", 6) == 0)
+        result += 6;
     return result;
+#endif
 }
 
-#endif
 //-------------------------------------------------------------------------set_environment_variable
 
 void set_environment_variable( const string& name, const string& value )

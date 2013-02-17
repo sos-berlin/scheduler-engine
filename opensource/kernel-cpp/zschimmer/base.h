@@ -228,13 +228,12 @@ namespace io
 #endif
 //---------------------------------------------------------------------------------name_of_typeinfo
 #ifdef __GNUC__
-    std::string                 name_of_type_info_gcc   ( const std::type_info& );
-    inline string               name_of_type_info       ( const std::type_info& ti )                     { return name_of_type_info_gcc( ti ); }
     inline string               id_of_type_info         ( const std::type_info& ti )                     { return ti.name(); }
 #else
-    inline std::string          name_of_type_info       ( const std::type_info& ti )                     { return ti.name(); }
     inline string               id_of_type_info         ( const std::type_info& ti )                     { return ti.raw_name(); }
 #endif
+
+std::string                     name_of_type_info       ( const std::type_info&ti);
 //-------------------------------------------------------------------------------------name_of_type
 
 template< class TYPE >
