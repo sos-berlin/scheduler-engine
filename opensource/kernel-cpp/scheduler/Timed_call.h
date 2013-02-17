@@ -16,9 +16,9 @@ struct Timed_call : Object, javabridge::has_proxy<Timed_call>
     Timed_call(const Time& at) : _at(at) {}
 
   public:
-    int64 at_millis() { return at().millis(); }
+    int64 at_millis() const { return at().millis(); }
     
-    Time at() { return _at; }
+    Time at() const { return _at; }
 
     virtual void call() const = 0;
 };

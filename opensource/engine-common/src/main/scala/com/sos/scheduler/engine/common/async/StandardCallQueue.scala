@@ -33,9 +33,19 @@ final class StandardCallQueue extends PoppableCallQueue {
     case i => i
   }
 
+  def nextTime = headOption map { _.at } getOrElse Long.MaxValue
+
+  def isMature = matureHeadOption.nonEmpty
+
   def popMature(): Option[TimedCall[_]] = synchronized {
-    queue.headOption collect { case o if o.at <= currentTimeMillis() => queue.remove(0) ensuring { _ == o } }
+    matureHeadOption map { o => queue.remove(0) ensuring { _ == o } }
   }
+
+  private def matureHeadOption = headOption filter timedCallIsMature
+
+  private def headOption = synchronized( queue.headOption )
+
+  private def timedCallIsMature(o: TimedCall[_]) = o.at <= currentTimeMillis()
 
   override def toString = s"${getClass.getSimpleName} with ${queue.size} operations, next=${queue.headOption}"
 }

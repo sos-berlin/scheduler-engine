@@ -86,8 +86,8 @@ void Typed_call_register::cancel_entry(ptr<Timed_call>* entry) {
 Time Typed_call_register::next_time() const {
     Time result = Time::never;
     Z_FOR_EACH_CONST(Map, _map, i) {
-        const Time& at = i->second->at();
-        if (result < at) result = at;
+        if (const Timed_call* t = i->second)
+            if (result < t->at()) result = t->at();
     }
     return result;
 }

@@ -6,5 +6,7 @@ trait PoppableCallQueue extends CallQueue {
 
   def isEmpty: Boolean
 
+  def isMature: Boolean
+
   def popMature(): Option[TimedCall[_]]
 }

@@ -26,4 +26,6 @@ trait CallQueue {
   }
 
   def tryRemove(o: TimedCall[_]): Boolean
+
+  def nextTime: Long
 }

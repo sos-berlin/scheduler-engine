@@ -63,7 +63,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     void onActivate() const;
     void onActivated() const;
     void onClose() const;
-    void onEnteringSleepState() const;
+    jlong onEnteringSleepState() const;
     void onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void threadLock() const;
     void threadUnlock() const;

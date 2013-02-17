@@ -2486,7 +2486,9 @@ void Spooler::run()
 
         if( something_done )  wait_until = Time(0);   // Nicht warten, wir drehen noch eine Runde
 
-        schedulerJ().onEnteringSleepState();
+        int64 next_millis = schedulerJ().onEnteringSleepState();
+        something_done |= next_millis < 0;  // negativ
+        wait_until = min(wait_until, Time(min(abs(next_millis) / 1000.0, Time::never.as_double())));
 
         //----------------------------------------------------------------------------NICHTS GETAN?
 

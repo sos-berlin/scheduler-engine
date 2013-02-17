@@ -11,6 +11,8 @@ class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, cppProxy: Spoole
 
   def tryRemove(o: TimedCall[_]) = delegate.tryRemove(o)
 
+  def nextTime = delegate.nextTime
+
   private def wakeCppScheduler() {
     cppProxy.signal("TimedCall")
   }
