@@ -10,17 +10,20 @@ import java.io.File;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.sos.scheduler.engine.common.system.OperatingSystem.cpuArchitecture;
 import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
+import static com.sos.scheduler.engine.test.binary.CppBinariesDebugMode.debug;
 
 /** Liefert die Binärdateien des Maven-Artefakts kernel-cpp, das in einem Oberverzeichnis stehen muss. */
 public final class KernelCppArtifactBinaries implements CppBinaries {
     private static final Logger logger = LoggerFactory.getLogger(KernelCppArtifactBinaries.class);
     private static final String kernelCppDirName = "engine/opensource/kernel-cpp";
-    private static final String bin = isWindows? cpuArchitecture.visualStudioName() +"/Debug" :
-                                                 cpuArchitecture.officialName() +"/Release";
 
-    private final File directory = new File(kernelCppDir(), bin);
+    private final File directory;
 
-    KernelCppArtifactBinaries() {
+    KernelCppArtifactBinaries(CppBinariesDebugMode debugMode) {
+        String bin = isWindows?
+                cpuArchitecture.visualStudioName() +"/"+ (debugMode == debug? "Debug" : "Release") :
+                cpuArchitecture.officialName() +"/Release";
+        directory = new File(kernelCppDir(), bin);
         checkArgument(directory.isDirectory(), "%s does not exist or is not a directory", directory);
         logger.warn("Using JobScheduler binaries detected in artifact directory {}", directory);
     }

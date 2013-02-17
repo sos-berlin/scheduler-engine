@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath;
 import com.sos.scheduler.engine.main.CppBinaries;
 import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.main.SchedulerState;
+import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode;
 import com.sos.scheduler.engine.test.binary.TestCppBinaries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,17 +50,20 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private boolean terminateOnError = true;
     private boolean isPrepared = false;
     private String logCategories = "";
+    private CppBinariesDebugMode debugMode;
     private Scheduler _scheduler = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
     public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath,
             @Nullable ImmutableMap<String,String> nameMap,
             @Nullable ResourceToFileTransformer fileTransformer,
-            Predicate<ErrorLogEvent> expectedErrorLogEventPredicate) {
+            Predicate<ErrorLogEvent> expectedErrorLogEventPredicate,
+            CppBinariesDebugMode debugMode) {
         super(testClass.getName());
         logger.debug(testClass.getName());
         instanceCount.addAndGet(1);
         environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
+        this.debugMode = debugMode;
         setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")));
     }
 
@@ -219,7 +223,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final CppBinaries cppBinaries() {
-        return TestCppBinaries.cppBinaries();
+        return TestCppBinaries.cppBinaries(debugMode);
     }
 
     /** @param testClass Test-Klasse, für Benennung des Scheduler-Arbeitsverzeichnisses und Ort der Konfigurationsresourcen. */

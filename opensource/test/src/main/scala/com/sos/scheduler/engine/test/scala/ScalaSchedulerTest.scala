@@ -7,15 +7,18 @@ import com.sos.scheduler.engine.test.{ResourceToFileTransformer, TestSchedulerCo
 import org.scalatest.{FunSuite, BeforeAndAfterAll}
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
+import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
   val configurationPackage = getClass.getPackage
   val schedulerResourceToFileTransformer: ResourceToFileTransformer = null
   val schedulerResourceNameMap: Iterable[(String,String)] = List()
+  val binariesDebugMode = CppBinariesDebugMode.debug
   lazy val controller = TestSchedulerController.builder(getClass)
       .resourcesPackage(configurationPackage)
       .nameMap(ImmutableMap.copyOf(mapAsJavaMap(schedulerResourceNameMap.toMap)))
       .resourceToFileTransformer(schedulerResourceToFileTransformer)
+      .debugMode(binariesDebugMode)
       .build
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung

@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.data.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.util.ResourcePath;
+import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode;
 
 import javax.annotation.Nullable;
 
@@ -15,6 +16,7 @@ public class TestSchedulerControllerBuilder {
     private final Class<?> testClass;
     private ResourcePath resourcePath;
     private Predicate<ErrorLogEvent> expectedErrorLogEventPredicate = defaultExpectedErrorLogEventPredicate;
+    private CppBinariesDebugMode debugMode = CppBinariesDebugMode.release;
     @Nullable private ImmutableMap<String,String> nameMap = null;
     @Nullable private ResourceToFileTransformer fileTransformer = null;
 
@@ -43,7 +45,12 @@ public class TestSchedulerControllerBuilder {
         return this;
     }
 
+    public final TestSchedulerControllerBuilder debugMode(CppBinariesDebugMode debugMode) {
+        this.debugMode = debugMode;
+        return this;
+    }
+
     public final TestSchedulerController build() {
-        return new TestSchedulerController(testClass, resourcePath, nameMap, fileTransformer, expectedErrorLogEventPredicate);
+        return new TestSchedulerController(testClass, resourcePath, nameMap, fileTransformer, expectedErrorLogEventPredicate, debugMode);
     }
 }

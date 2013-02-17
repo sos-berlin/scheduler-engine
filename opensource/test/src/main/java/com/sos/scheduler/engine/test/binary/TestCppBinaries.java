@@ -26,26 +26,29 @@ public final class TestCppBinaries {
 
     private TestCppBinaries() {}
 
-    public static CppBinaries cppBinaries() {
-        return cppBinaries.get();
+    public static CppBinaries cppBinaries(CppBinariesDebugMode debugMode) {
+        return debugMode == CppBinariesDebugMode.debug? debugCppBinaries.get() : releaseCppBinaries.get();
     }
 
-    private static final Lazy<CppBinaries> cppBinaries = new Lazy<CppBinaries>() {
-        @Override protected CppBinaries compute() { return newCppBinaries(); }
+    private static final Lazy<CppBinaries> debugCppBinaries = new Lazy<CppBinaries>() {
+        @Override protected CppBinaries compute() { return newCppBinaries(CppBinariesDebugMode.debug); }
+    };
+    private static final Lazy<CppBinaries> releaseCppBinaries = new Lazy<CppBinaries>() {
+        @Override protected CppBinaries compute() { return newCppBinaries(CppBinariesDebugMode.release); }
     };
 
-    private static CppBinaries newCppBinaries() {
+    private static CppBinaries newCppBinaries(CppBinariesDebugMode debugMode) {
         ImmutableList<Resource> resources = resources();
         if (resources.isEmpty()) {
             // Das passiert, wenn ohne Maven gebaut wird. So unter der IntelliJ-IDE. Dann greifen wir eben direkt auf die binaries im Dateisystem zu.
             if (System.getProperty("com.sos.scheduler.engine.test.underMaven") != null)
                 throw new RuntimeException("Missing kernel-cpp resources while running under Maven");  // Denn nur bei den Ressourcen sind wir über deren Stand sicher.
-            return new KernelCppArtifactBinaries();
+            return new KernelCppArtifactBinaries(debugMode);
         } else {
             // Wir packen die binaries aus den Ressourcen aus
             String d = System.getProperty(binariesTmpdirPropertyName);
-            return isNullOrEmpty(d)? newTemporaryCppBinaries(resources)
-                    : newExistingCppBinaries(resources, new File(d));   // Wir recyceln die vorher mal oder von einem parallel laufenden Test ausgepacken Ressourcen.
+            return isNullOrEmpty(d)? newTemporaryCppBinaries(resources, debugMode)
+                    : newExistingCppBinaries(resources, new File(d), debugMode);   // Wir recyceln die vorher mal oder von einem parallel laufenden Test ausgepacken Ressourcen.
         }
     }
 
@@ -55,19 +58,21 @@ public final class TestCppBinaries {
         } catch (IOException x) { throw new RuntimeException(x); }
     }
 
-    private static CppBinaries newTemporaryCppBinaries(ImmutableList<Resource> resources) {
+    private static CppBinaries newTemporaryCppBinaries(ImmutableList<Resource> resources, CppBinariesDebugMode debugMode) {
         File dir = makeTemporaryDirectory();
-        ResourceCppBinaries result = newExistingCppBinaries(resources, dir);
+        ResourceCppBinaries result = newExistingCppBinaries(resources, dir, debugMode);
         if (result.someResourceHasBeenCopied()) warnUndeletable(dir);
         result.removeCopiesOnExit();
         dir.deleteOnExit();
         return result;
     }
 
-    private static ResourceCppBinaries newExistingCppBinaries(ImmutableList<Resource> resources, File dir) {
+    private static ResourceCppBinaries newExistingCppBinaries(ImmutableList<Resource> resources, File dir, CppBinariesDebugMode debugMode) {
         ignore(dir.mkdir());
-        checkArgument(dir.isDirectory(), "%s must exist and must be a directory", dir);
-        return new ResourceCppBinaries(resources, dir);
+        File subDir = new File(dir, debugMode.name());
+        ignore(subDir.mkdir());
+        checkArgument(subDir.isDirectory(), "%s must exist and must be a directory", subDir);
+        return new ResourceCppBinaries(resources, subDir);
     }
 
     private static void warnUndeletable(File dir) {
