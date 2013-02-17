@@ -30,7 +30,7 @@ struct Object_call : Timed_call {
   protected: 
     Object_call(const Time& at = Time(0)) : Timed_call(at) {}
 
-    string obj_name() const { return S() << object()->obj_name() << " " << call_name(); }
+    string obj_name() const;
 
   protected:
     virtual Scheduler_object* object() const = 0;

@@ -9,6 +9,13 @@ using namespace std;
 Type_int_map Type_int_map::static_singleton;
 
 
+
+string Object_call::obj_name() const 
+{ 
+    return S() << "(" << object()->obj_name() << ") <- " << call_name(); 
+}
+
+
 int Type_int_map::type_to_int(const type_info& t) {
     // Registriert den Typ, wenn nicht schon bekannt, und liefert eine ID
     Z_MUTEX(_mutex) {

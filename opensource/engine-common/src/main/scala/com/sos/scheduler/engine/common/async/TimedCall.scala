@@ -15,6 +15,8 @@ trait TimedCall[A] extends Callable[A] {
   def call(): A
 
   final def apply() {
+    if (logger.isDebugEnabled) logger.debug(s"Calling $toString")
+
     val result = Try(call())
     try onComplete(result)
     catch { case NonFatal(t) => logger.error(s"Error in onComplete() ignored: $t ($toString)", t) }
@@ -27,7 +29,10 @@ trait TimedCall[A] extends Callable[A] {
     }
   }
 
-  override def toString = Seq(Try(toStringPrefix) getOrElse "(?)", s"at=$atString") mkString " "
+  override def toString = Seq(
+    Some(Try(toStringPrefix) getOrElse "toString error"),
+    Some(s"at=$atString") filter { _ => at != shortTerm })
+    .flatten mkString " "
 
   final def atString = if (at == shortTerm) "short-term" else ISODateTimeFormat.dateTime.print(at)
 
