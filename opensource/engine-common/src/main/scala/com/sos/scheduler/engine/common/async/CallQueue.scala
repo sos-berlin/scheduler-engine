@@ -1,10 +1,8 @@
 package com.sos.scheduler.engine.common.async
 
-import com.google.inject.ImplementedBy
 import java.util.concurrent.Callable
 import scala.sys._
 
-@ImplementedBy(classOf[PoppableCallQueue])
 trait CallQueue {
   final def add[A](f: () => A) {
     add(ShortTermCall(f))
