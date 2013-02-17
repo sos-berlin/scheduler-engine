@@ -51,13 +51,16 @@ int Type_int_map::type_to_int(const type_info& t) {
 //}
 //
 
+
 Typed_call_register::Typed_call_register(Spooler* spooler) 
     : _spooler(spooler) {}
+
 
 Typed_call_register::~Typed_call_register() {
     Z_FOR_EACH(Map, _map, i) 
         cancel_entry(&i->second);
 }
+
 
 void Typed_call_register::enqueue_id(int id, Timed_call* o) {
     cancel_id(id);
@@ -77,6 +80,16 @@ void Typed_call_register::cancel_entry(ptr<Timed_call>* entry) {
         _spooler->cancel_call(o);
         *entry = (Timed_call*)NULL;
     }
+}
+
+
+Time Typed_call_register::next_time() const {
+    Time result = Time::never;
+    Z_FOR_EACH_CONST(Map, _map, i) {
+        const Time& at = i->second->at();
+        if (result < at) result = at;
+    }
+    return result;
 }
 
 }}

@@ -140,6 +140,8 @@ struct Typed_call_register {
   public:
     ~Typed_call_register();
 
+    Time next_time() const;
+
   protected:
     void enqueue_id(int id, Timed_call* o);
     void cancel_id(int id);
