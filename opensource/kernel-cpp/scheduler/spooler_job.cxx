@@ -33,7 +33,7 @@ const bool   Job::force_start_default      = true;
 namespace job {
     struct State_cmd_call : object_call<Job, State_cmd_call> {
         Job::State_cmd const _cmd;
-        State_cmd_call(Job* job, Job::State_cmd cmd) : object_call(job), _cmd(cmd) {}
+        State_cmd_call(Job* job, Job::State_cmd cmd) : object_call<Job, State_cmd_call>(job), _cmd(cmd) {}
     };
 }
 

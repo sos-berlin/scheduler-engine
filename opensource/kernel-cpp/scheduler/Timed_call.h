@@ -78,7 +78,7 @@ struct object_call : Object_call {
 
 #define DEFINE_SIMPLE_CALL(OBJECT_TYPE, CALL) \
     struct CALL : object_call<OBJECT_TYPE, CALL> { \
-        CALL(const Time& at, OBJECT_TYPE* o) : object_call(at, o) {} \
+        CALL(const Time& at, OBJECT_TYPE* o) : object_call<OBJECT_TYPE, CALL>(at, o) {} \
     };
 
 
@@ -131,7 +131,7 @@ struct object_call : Object_call {
 struct Typed_call_register {
   private:
     Spooler* _spooler;
-    typedef stdext::hash_map<int, ptr<Timed_call>> Map;
+    typedef stdext::hash_map<int, ptr<Timed_call> > Map;
     Map _map;
 
   protected:
