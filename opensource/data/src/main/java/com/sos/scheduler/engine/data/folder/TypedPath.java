@@ -5,7 +5,7 @@ import java.io.File;
 public class TypedPath extends AbsolutePath {
     private final FileBasedType typ;
 
-    public TypedPath(FileBasedType typ, AbsolutePath path) {
+    protected TypedPath(FileBasedType typ, AbsolutePath path) {
         super(path);
         this.typ = typ;
     }
@@ -35,6 +35,20 @@ public class TypedPath extends AbsolutePath {
     }
 
     public static TypedPath of(FileBasedType t, String absolutePath) {
-        return new TypedPath(t, new AbsolutePath(absolutePath));
+        return of(t, new AbsolutePath(absolutePath));
+    }
+
+    public static TypedPath of(FileBasedType t, AbsolutePath absolutePath) {
+        switch (t) {
+            case job: return new JobPath(absolutePath);
+            case jobChain: return new JobChainPath(absolutePath);
+            case folder:
+            case lock:
+            case order:
+            case processClass:
+            case schedule:
+                return new TypedPath(t, absolutePath);  // Bis die anderen ...Path implementiert sind.
+        }
+        throw new IllegalArgumentException();  // Javac will das
     }
 }

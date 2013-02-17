@@ -19,7 +19,7 @@ public abstract class FileBased implements Sister, EventSource {
     }
 
     public final TypedPath getTypedPath() {
-        return new TypedPath(getFileBasedType(), getPath());
+        return TypedPath.of(getFileBasedType(), getPath());
     }
 
     public abstract FileBasedType getFileBasedType();
