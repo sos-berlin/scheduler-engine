@@ -1,10 +1,16 @@
 package com.sos.scheduler.engine.test.util.time
 
 import java.lang.Thread.sleep
-import org.joda.time.DateTimeUtils
 import org.joda.time.Instant.now
+import org.joda.time.{Duration, DateTimeUtils}
 
 object WaitForCondition {
+
+  /** Wartet längstens t.timeout in Schritten von t.step, bis condition wahr wird.
+    * condition wird bei t.timeout > 0 wenigsten zweimal aufgerufen: am Anfang und am Ende.
+    * @return letztes Ergebnis von condition */
+  def waitForCondition(timeout: Duration, step: Duration)(condition: => Boolean): Boolean =
+    waitForCondition(TimeoutWithSteps(timeout, step))(condition)
 
   /** Wartet längstens t.timeout in Schritten von t.step, bis condition wahr wird.
     * condition wird bei t.timeout > 0 wenigsten zweimal aufgerufen: am Anfang und am Ende.
