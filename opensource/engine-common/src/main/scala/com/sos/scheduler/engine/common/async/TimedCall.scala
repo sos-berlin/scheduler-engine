@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.common.async
 
 import java.util.concurrent.Callable
+import org.joda.time.Instant
 import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
 import scala.util.control.NonFatal
@@ -10,7 +11,9 @@ trait TimedCall[A] extends Callable[A] {
 
   import TimedCall._
 
-  def at: Long
+  def instant = new Instant(epochMillis)
+
+  def epochMillis: Long
 
   def call(): A
 
@@ -31,19 +34,22 @@ trait TimedCall[A] extends Callable[A] {
 
   override def toString = Seq(
     Some(Try(toStringPrefix) getOrElse "toString error"),
-    Some(s"at=$atString") filter { _ => at != shortTerm })
+    Some(s"at=$atString") filter { _ => epochMillis != shortTermMillis })
     .flatten mkString " "
 
-  final def atString = if (at == shortTerm) "short-term" else ISODateTimeFormat.dateTime.print(at)
+  final def atString = if (epochMillis == shortTermMillis) "short-term" else ISODateTimeFormat.dateTime.print(epochMillis)
 
   def toStringPrefix = getClass.getSimpleName
 }
 
 object TimedCall {
-  private[async] val shortTerm = 0L
+  private[async] val shortTermMillis = 0
+  private[async] val shortTerm = new Instant(0)
   private val logger = LoggerFactory.getLogger(classOf[TimedCall[_]])
 
-  def apply[A](at: Long)(f: => A) = new AbstractTimedCall[A](at){
-    def call() = f
-  }
+  def apply[A](at: Instant)(f: => A): TimedCall[A] =
+    new TimedCall[A] {
+      def epochMillis = at.getMillis
+      def call() = f
+    }
 }

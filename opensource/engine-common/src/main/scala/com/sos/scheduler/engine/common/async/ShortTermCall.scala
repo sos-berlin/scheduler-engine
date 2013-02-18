@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.common.async
 import java.util.concurrent.Callable
 
 trait ShortTermCall[A] extends TimedCall[A] {
-  final def at = TimedCall.shortTerm
+  final def epochMillis = TimedCall.shortTermMillis
 }
 
 object ShortTermCall {

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.common.async
 
-import java.lang.System.currentTimeMillis
-import java.lang.Thread.sleep
+import com.sos.scheduler.engine.common.time.ScalaJoda.{DurationRichInt, RichInstant, sleep}
+import org.joda.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
@@ -15,7 +15,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     var a = 0
     callQueue add { () => a += 1 }
     val call = callQueue.popMature().get
-    call.at should equal (0)
+    call.epochMillis should equal (0)
     call()
     a should equal (1)
     callQueue.popMature() should equal (None)
@@ -34,12 +34,12 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
 
   test("add(at, TimedCall)") {
     var a = 0
-    val call = TimedCall(currentTimeMillis() + 50) { a += 1 }
+    val call = TimedCall(now() + 50.ms) { a += 1 }
     callQueue.add(call)
     callQueue.popMature() should equal (None)
-    sleep(10)
+    sleep(10.ms)
     callQueue.popMature() should equal (None)
-    sleep(42)
+    sleep(42.ms)
     val c = callQueue.popMature().get
     c should be theSameInstanceAs (call)
     c()
@@ -48,7 +48,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
   }
 
   test("remove") {
-    val call = TimedCall(currentTimeMillis() + 50) {}
+    val call = TimedCall(now() + 50.ms) {}
     callQueue.add(call)
     callQueue.remove(call)
     callQueue.tryRemove(call) should equal (false)

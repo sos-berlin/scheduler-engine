@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.kernel.cppproxy.Timed_callC
 final class CppCall(cppProxy: Timed_callC)
 extends TimedCall[Unit] with Sister {
 
-  lazy val at = cppProxy.at_millis()
+  lazy val epochMillis = cppProxy.at_millis()
 
   def call() = cppProxy.call()
 

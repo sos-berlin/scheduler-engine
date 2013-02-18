@@ -2,6 +2,7 @@
 
  import com.sos.scheduler.engine.common.async.FutureCompletion.{callFuture, timedCallFuture}
  import java.lang.Thread.currentThread
+ import org.joda.time.Instant
  import scala.concurrent.duration.Duration
  import scala.concurrent.{Await, Future}
 
@@ -14,6 +15,6 @@
   def schedulerThreadFuture[A](f: => A)(implicit callQueue: SchedulerThreadCallQueue): Future[A] =
     callFuture(f)
 
-  def timedSchedulerThreadFuture[A](at: Long)(f: => A)(implicit q: SchedulerThreadCallQueue): Future[A] =
+  def timedSchedulerThreadFuture[A](at: Instant)(f: => A)(implicit q: SchedulerThreadCallQueue): Future[A] =
     timedCallFuture(at)(f)
 }

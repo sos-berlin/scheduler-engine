@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.common.async
 
 import com.sos.scheduler.engine.common.async.FutureCompletion.{futureCall, futureTimedCall, callFuture}
-import java.lang.System.currentTimeMillis
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import org.joda.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
@@ -15,25 +16,25 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
   private lazy val dispatcher = new CallRunner(queue)
 
   test("Success") {
-    val call = futureTimedCall(currentTimeMillis() + 100) { "Hej!" }
+    val call = futureTimedCall(now() + 100.ms) { "Hej!" }
     queue.add(call)
     val future = call.future
     (future.isCompleted, future.value) should be (false, None)
     dispatcher.execute()
     (future.isCompleted, future.value) should be (false, None)
-    Thread.sleep(100+1)
+    sleep(101.ms)
     dispatcher.execute()
     (future.isCompleted, future.value) should be (true, Some(Success("Hej!")))
   }
 
   test("Failure") {
-    val call = futureTimedCall(currentTimeMillis() + 100) { throw new TestException }
+    val call = futureTimedCall(now() + 100.ms) { throw new TestException }
     queue.add(call)
     val future = call.future
     (future.isCompleted, future.value) should be (false, None)
     dispatcher.execute()
     (future.isCompleted, future.value) should be (false, None)
-    Thread.sleep(100+1)
+    sleep(101.ms)
     dispatcher.execute()
     future.isCompleted should be (true)
     intercept[TestException] { future.value.get.get }
