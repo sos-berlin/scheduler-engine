@@ -11,6 +11,12 @@ import org.scalatest.{OneInstancePerTest, FunSuite}
 class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
   private val callQueue = new StandardCallQueue
 
+  test("warm-up") {
+    callQueue add { () => }
+    callQueue add TimedCall(now() + 50.ms) {}
+    callQueue.popMature()
+  }
+
   test("add(=>A)") {
     var a = 0
     callQueue add { () => a += 1 }
