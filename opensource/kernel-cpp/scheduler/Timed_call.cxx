@@ -71,7 +71,8 @@ Typed_call_register::~Typed_call_register() {
 
 void Typed_call_register::enqueue_id(int id, Timed_call* o) {
     cancel_id(id);
-    _map[id] = _spooler->enqueue_call(o);
+    _map[id] = o;
+    _spooler->enqueue_call(o);
 }
 
 

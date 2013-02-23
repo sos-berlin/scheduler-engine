@@ -212,6 +212,9 @@
     <ClCompile Include="xslt_java.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
+    <ClCompile Include="Call.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async.h">
@@ -377,6 +380,9 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="Login.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Call.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
   </ItemGroup>

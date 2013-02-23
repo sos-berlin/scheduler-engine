@@ -239,6 +239,7 @@
     <ClCompile Include="async_io.cxx" />
     <ClCompile Include="async_socket.cxx" />
     <ClCompile Include="base64.cxx" />
+    <ClCompile Include="Call.cxx" />
     <ClCompile Include="charset.cxx" />
     <ClCompile Include="charset_messages.cxx" />
     <ClCompile Include="check_compiler.cxx">
@@ -527,6 +528,7 @@
     <ClInclude Include="rtf\rtf.h" />
     <ClInclude Include="rtf\rtf_doc.h" />
     <ClInclude Include="rtf\rtf_parser.h" />
+    <ClInclude Include="Call.h" />
     <ClInclude Include="xml\sax.h" />
     <ClInclude Include="string_list.h" />
     <ClInclude Include="string_stream.h" />

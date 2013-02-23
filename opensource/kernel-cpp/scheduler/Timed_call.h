@@ -1,5 +1,7 @@
-#ifndef __SCHEDULER_OPERATION_H
-#define __SCHEDULER_OPERATION_H
+#ifndef __SCHEDULER_TIMED_CALL_H
+#define __SCHEDULER_TIMED_CALL_H
+
+#include "../zschimmer/Call.h"
 
 namespace sos {
 namespace scheduler {
@@ -7,7 +9,7 @@ namespace scheduler {
 //---------------------------------------------------------------------------------------Timed_call
 // Ein Aufruf zu einer bestimmten Zeit
 
-struct Timed_call : Object, javabridge::has_proxy<Timed_call> 
+struct Timed_call : z::Call, javabridge::has_proxy<Timed_call> 
 {
   private:
     Time _at;
@@ -78,6 +80,7 @@ struct object_call : Object_call {
 
 #define DEFINE_SIMPLE_CALL(OBJECT_TYPE, CALL) \
     struct CALL : object_call<OBJECT_TYPE, CALL> { \
+        CALL(OBJECT_TYPE* o) : object_call<OBJECT_TYPE, CALL>(Time(0), o) {} \
         CALL(const Time& at, OBJECT_TYPE* o) : object_call<OBJECT_TYPE, CALL>(at, o) {} \
     };
 
