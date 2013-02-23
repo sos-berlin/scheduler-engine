@@ -47,10 +47,11 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private final Thread thread = Thread.currentThread();
     private final Environment environment;
     private final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate;
+    private final CppBinariesDebugMode debugMode;
+
     private boolean terminateOnError = true;
     private boolean isPrepared = false;
     private String logCategories = "";
-    private CppBinariesDebugMode debugMode;
     private Scheduler _scheduler = null;   // Unterstrich, damit IntelliJ-Scala-Plugin scheduler() findet, Zschimmer 9.12.2011
 
     public TestSchedulerController(Class<?> testClass, ResourcePath configurationResourcePath,
