@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.playground.mq;
 
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,15 @@ public final class JmsPluginTest extends SchedulerTest {
 
     public JmsPluginTest() throws JMSException {
         newTopicSubscriber().setMessageListener(new MyListener());
+    }
+
+    @Before public void before() throws JMSException {
         topicConnection.start();
+    }
+
+    @After public void after() throws JMSException {
+        topicSession.close();
+        topicConnection.close();
     }
 
     private TopicSubscriber newTopicSubscriber() throws JMSException {
