@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.cplusplus.runtime;
 
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.currentThread;
 
 public class ThreadLock {
-    private static final int logTimeoutMillis = 30*1000;     // Wenn's länger dauert, Meldung loggen
+    private static final int logTimeoutMillis = 15*1000;     // Wenn's länger dauert, Meldung loggen
     private static final Logger logger = LoggerFactory.getLogger(ThreadLock.class);
 
     private final SimpleLock myLock = new LoggingLock();
@@ -26,6 +27,10 @@ public class ThreadLock {
 
     public final void unlock() {
         myLock.unlock();
+    }
+
+    public final void requireUnlocked() {
+        Preconditions.checkState(!myLock.lock.isLocked(), "ThreadLock should not be locked at JobScheduler start");
     }
 
     @Override public String toString() {

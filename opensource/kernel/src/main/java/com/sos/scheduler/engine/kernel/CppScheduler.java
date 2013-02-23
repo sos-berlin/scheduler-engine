@@ -48,6 +48,7 @@ public class CppScheduler {
     }
 
     private int run2(ImmutableList<String> arguments, String argumentLine, SchedulerControllerBridge controllerBridge) {
+        CppProxy.threadLock.requireUnlocked();
         CppProxy.threadLock.lock();
         if (logger.isTraceEnabled()) logger.trace(this +" starts");
         try {
