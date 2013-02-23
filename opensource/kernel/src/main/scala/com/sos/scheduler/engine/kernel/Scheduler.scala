@@ -35,6 +35,9 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
+import scala.util.Try
+import scala.util.control.NonFatal
 
 @ForCpp
 @Singleton
@@ -45,6 +48,7 @@ final class Scheduler @Inject private(
     disposableCppProxyRegister: DisposableCppProxyRegister,
     pluginSubsystem: PluginSubsystem,
     commandSubsystem: CommandSubsystem,
+    databaseSubsystem: DatabaseSubsystem,
     implicit private val schedulerThreadCallQueue: SchedulerThreadCallQueue,
     eventBus: SchedulerEventBus,
     val injector: Injector)
@@ -83,8 +87,8 @@ with HasInjector {
     try {
       eventBus.publish(new SchedulerCloseEvent)
       eventBus.dispatchEvents()
-      try pluginSubsystem.close()
-      catch { case x: Exception => prefixLog.error("pluginSubsystem.close(): " + x) }
+      try databaseSubsystem.close() catch { case NonFatal(x) => prefixLog.error(s"databaseSubsystem.close(): $x") }
+      try pluginSubsystem.close() catch { case NonFatal(x)=> prefixLog.error(s"pluginSubsystem.close(): $x") }
     }
     finally for (o <- onCloseFunction) o()
     eventBus.dispatchEvents()

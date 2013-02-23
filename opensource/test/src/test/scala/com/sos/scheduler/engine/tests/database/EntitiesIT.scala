@@ -54,10 +54,6 @@ final class EntitiesIT extends ScalaSchedulerTest {
 
   def entityManager = controller.scheduler.instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
 
-  override def afterAll() {
-    entityManager.close()
-  }
-
   private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
   test("TaskHistoryEntity") {
