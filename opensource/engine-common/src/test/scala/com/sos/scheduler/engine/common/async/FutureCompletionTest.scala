@@ -15,6 +15,14 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
   private lazy val queue: PoppableCallQueue = new StandardCallQueue
   private lazy val dispatcher = new CallRunner(queue)
 
+  test("warm-up") {
+    val call = futureTimedCall(now()) {}
+    queue.add(call)
+    val future = call.future
+    dispatcher.execute()
+    future.isCompleted
+  }
+
   test("Success") {
     val call = futureTimedCall(now() + 100.ms) { "Hej!" }
     queue.add(call)
