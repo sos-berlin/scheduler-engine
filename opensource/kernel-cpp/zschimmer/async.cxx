@@ -147,6 +147,9 @@ bool Async_operation::async_continue( Continue_flags flags )
                 log << " => nothing done!\n";
             }
         }
+
+        if (async_finished()) 
+            if (Call* c = _call) c->call();
     }
     catch( const Xc& x )
     {

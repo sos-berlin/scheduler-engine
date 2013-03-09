@@ -4,6 +4,7 @@
 #define __Z_ASYNC_H
 
 #include "threads.h"
+#include "Call.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -63,6 +64,7 @@ struct Async_operation : Object
     void                        async_clear_signaled    ()                                          { async_clear_signaled_(); }
   //void                        async_on_signal_from_child( Async_operation* op )                   { async_on_signal_from_child_( op ); }
   //virtual Socket_event*       async_event             ()                                          { throw_xc( "NO ASYNC_EVENT" ); }
+    void                    set_async_call              (Call* o)                                   { _call = o; }
 
   protected:
     void                        async_check_error       ( const string& text, bool check_finished );
@@ -91,6 +93,7 @@ struct Async_operation : Object
     ptr<Async_manager>         _manager;
     ptr<Async_operation>       _child;
     Async_operation*           _parent;                 // Diese Operation (this) kann Bestandteil einer komplexeren (_parent) sein
+    ptr<Call>                  _call;
 
     double                     _next_gmtime;
     bool                       _async_warning_issued;   // Um mehrfache Warnungen zu vermeiden, wenn Operation wartet, obwohl Verbindung asynchron ist
