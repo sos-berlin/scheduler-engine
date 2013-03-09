@@ -77,6 +77,7 @@ libzschimmer_objects = \
  $(remote_objects) \
  $(thread_objects) \
  $(xml_objects) \
+ Call.o\
  base64.o\
  argv.o\
  async.o\
