@@ -16,7 +16,7 @@ public class TestSchedulerControllerBuilder {
     private final Class<?> testClass;
     private ResourcePath resourcePath;
     private Predicate<ErrorLogEvent> expectedErrorLogEventPredicate = defaultExpectedErrorLogEventPredicate;
-    private CppBinariesDebugMode debugMode = CppBinariesDebugMode.release;
+    private CppBinariesDebugMode debugMode = CppBinariesDebugMode.debug;
     @Nullable private ImmutableMap<String,String> nameMap = null;
     @Nullable private ResourceToFileTransformer fileTransformer = null;
 
