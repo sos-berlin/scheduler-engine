@@ -80,19 +80,19 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>scheduler</TargetName>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>scheduler</TargetName>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>scheduler</TargetName>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>scheduler</TargetName>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

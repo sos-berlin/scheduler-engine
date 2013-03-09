@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -89,20 +89,20 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>jobscheduler-engine</TargetName>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>jobscheduler-engine</TargetName>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>jobscheduler-engine</TargetName>
-    <IncludePath>$(JAVA6_HOME)/include/win32;$(JAVA6_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
@@ -486,10 +486,8 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="jni__sos__scheduler__http__Java_response.cxx" />
     <ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx" />
     <ClCompile Include="jni__sos__scheduler__Spooler.cxx" />
-    
-  
     <ClCompile Include="jni__sos__scheduler__Timed_call.cxx" />
-    </ItemGroup>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event_code.h" />
     <ClInclude Include="Java_thread_unlocker.h" />
