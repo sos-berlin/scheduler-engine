@@ -328,13 +328,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 double remaining = (until - Time::now()).as_double();
                 if( remaining < 0.7 )  break;
 
-                /**
-                 * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
-                 * \b oldcode from 2010-04-01
-                 * \code
-                    ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT ); 
-                   \endcode
-                 */
                 ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, (int)( ceil( min( step, remaining ) * 1000 ) ) ); 
                 if( ret != SOS_WAIT_TIMEOUT )  break;
 
@@ -370,13 +363,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             if( ret == SOS_WAIT_TIMEOUT )
             {
                 if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
-                /**
-                 * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
-                 * \b oldcode from 2010-04-01
-                 * \code
-                    ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
-                   \endcode
-                 */
                 ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, max( 0, t ) ); 
             }
 
@@ -384,14 +370,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         // normale Bearbeitung von scheduler-Prozessen
         } else {
-        /**
-         * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
-         * \b oldcode from 2010-04-01
-         * \code
-           ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
-           \endcode
-         */
-         ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, t ); 
+            ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, t ); 
         }
         
         delete [] handles;  handles = NULL;
@@ -407,6 +386,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 {
                     if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
                     if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );            // signal für "event" gesetzt
+                    if (const Call* c = event->call())
+                        c->call();
                 }
                 else
                     if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );

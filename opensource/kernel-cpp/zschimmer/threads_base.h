@@ -3,6 +3,8 @@
 #ifndef ZSCHIMMER_THREADS_BASE_H
 #define ZSCHIMMER_THREADS_BASE_H
 
+#include "Call.h"
+
 namespace zschimmer {
 
 
@@ -34,6 +36,8 @@ struct Event_base : Object//, Has_set_signaled
     void                    set_signaled                    ( const string& name )                  { _signaled = true; _signal_name = name; }
     virtual void                reset                       () = 0;
   //virtual bool                signaled_after_check        ()                                      { return _signaled; }
+    void                    set_call                        (Call* o)                               { _call = o; }
+    const Call*                 call                        () const                                { return _call; }
 
     void                    set_waiting_thread_id           ( Thread_id id )                        { _waiting_thread_id = id; }  // Wenn nur dieser Thread wartet
 
@@ -55,6 +59,8 @@ struct Event_base : Object//, Has_set_signaled
   private:
                                 Event_base                  ( const Event_base& );                   // Nicht implementiert. CRITICAL_SECTION darf nicht kopiert oder verschoben werden
     void                        operator =                  ( const Event_base& );                   // Nicht implementiert.
+
+    ptr<Call>                  _call;
 };
 
 //--------------------------------------------------------------------------------------Thread_base
