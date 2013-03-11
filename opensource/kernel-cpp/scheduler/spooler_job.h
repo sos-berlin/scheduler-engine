@@ -15,6 +15,9 @@ struct Job_schedule_use;
 
 namespace job {
     struct State_cmd_call;
+    struct Period_begin_call;
+    struct Period_end_call;
+    struct Calculated_next_time_do_something_call;
 }
 
 //------------------------------------------------------------------------------Combined_job_nodes
@@ -272,7 +275,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        signal_earlier_order        ( Order* );
     void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
 
-    Time                        next_time                   ()                                      { return _next_time; }
+    Time                        next_time                   () const;
     Time                        next_start_time             () const;
     int64                       next_start_time_millis      () const                                { return next_start_time().millis(); }
     bool                        has_next_start_time         ()                                      { return !next_start_time().is_never(); }
@@ -280,6 +283,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
     void                        on_call                     (const job::State_cmd_call&);
+    void                        on_call                     (const job::Period_begin_call&);
+    void                        on_call                     (const job::Period_end_call&);
+    void                        on_call                     (const job::Calculated_next_time_do_something_call&);
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
   //void                        on_removing_lock            ( lock::Lock* );

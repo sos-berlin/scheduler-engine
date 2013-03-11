@@ -35,6 +35,10 @@ namespace job {
         Job::State_cmd const _cmd;
         State_cmd_call(Job* job, Job::State_cmd cmd) : object_call<Job, State_cmd_call>(job), _cmd(cmd) {}
     };
+
+    DEFINE_SIMPLE_CALL(Job, Period_begin_call)
+    DEFINE_SIMPLE_CALL(Job, Period_end_call)
+    DEFINE_SIMPLE_CALL(Job, Calculated_next_time_do_something_call)
 }
 
 using namespace job;
@@ -868,7 +872,7 @@ void Job::set_dom( const xml::Element_ptr& element )
         _warn_if_shorter_than_string = element.getAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );
         _warn_if_longer_than_string  = element.getAttribute( "warn_if_longer_than" , _warn_if_longer_than_string  );
         _enabled                     = element.bool_getAttribute( "enabled" , _enabled  );  // JS-551
-        _call_register.call(Z_NEW(State_cmd_call(this, _enabled? Job::sc_enable : Job::sc_disable)));
+        _call_register.call(Z_NEW(State_cmd_call(this, _enabled? sc_enable : sc_disable)));
 
         if( order )  set_order_controlled();
 
@@ -1870,37 +1874,59 @@ void Job::on_call(const State_cmd_call& call) {
     set_state_cmd(call._cmd);
 }
 
+void Job::on_call(const Period_begin_call&) {
+    calculate_next_time(Time::now());
+}
+
+void Job::on_call(const Period_end_call&) {
+    Time now = Time::now();
+    select_period(now);
+    if( !_period.is_in_time(_next_start_time)  &&
+        _next_single_start.is_never() ) // Wenn aus absolute_repeat errechnet, stimmt _period vielleicht nicht, dann nicht set_next_start_time() rufen
+    {
+        set_next_start_time(now);
+    }
+}
+
+void Job::on_call(const Calculated_next_time_do_something_call&) {
+    do_something();
+}
+
 //-------------------------------------------------------------------------------Job::set_state_cmd
 
 void Job::set_state_cmd(State_cmd state_cmd)
 {
     switch( state_cmd ) {
         case sc_disable: // JS-551
-        case sc_stop:       if( _state != s_stopping && _state != s_stopped  ) {
-                                stop( true );
-                                if(state_cmd == sc_disable) // JS-551
-                                    _enabled = false;       // JS-551
-                            }
-                            break;
+        case sc_stop:
+            if (_state != s_stopping && _state != s_stopped) {
+                stop( true );
+                if(state_cmd == sc_disable) // JS-551
+                    _enabled = false;       // JS-551
+            }
+            break;
 
         case sc_enable: // JS-551
-        case sc_unstop:     if( _state == s_stopping
-                             || _state == s_stopped
-                             || _state == s_error      )
-                            {
-                                if( is_to_be_removed() ) {
-                                    _log->error( message_string( "SCHEDULER-284", "unstop" ) );
-                                } else {
-                                    if (state_cmd == sc_unstop) set_state( s_pending );  // JS-671
-                                    check_min_tasks( "job has been unstopped" );
-                                    set_next_start_time( Time::now() );
-                                    if(state_cmd == sc_enable) _enabled = true;        // JS-551
-                                }
-                            }
-                            break;
+        case sc_unstop:    
+            if( _state == s_stopping
+             || _state == s_stopped
+             || _state == s_error)
+            {
+                if( is_to_be_removed() ) {
+                    _log->error( message_string( "SCHEDULER-284", "unstop" ) );
+                } else {
+                    if (state_cmd == sc_unstop) set_state( s_pending );  // JS-671
+                    if (state_cmd == sc_enable) _enabled = true;         // JS-551
+                    check_min_tasks( "job has been unstopped" );
+                    set_next_start_time( Time::now() );
+                    do_something();
+                }
+            }
+            break;
 
-        case sc_end:        Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
-                            break;
+        case sc_end:        
+            Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+            break;
 
         case sc_suspend: {
             if( _state == s_running ) {
@@ -1924,6 +1950,7 @@ void Job::set_state_cmd(State_cmd state_cmd)
                     
             set_state( _running_tasks.size() > 0? s_running : s_pending );
             check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
+            do_something();
             break;
         }
 
@@ -1942,6 +1969,7 @@ void Job::set_state_cmd(State_cmd state_cmd)
                     task->_cause = cause_wake;
                     task->_let_run = true;
                     task->init();
+                    do_something();
                 }
             }
             break;
@@ -1958,6 +1986,7 @@ void Job::set_state_cmd(State_cmd state_cmd)
 
         case sc_start:
             start( NULL, "", Time::now() );
+            do_something();
             break;
 
         case sc_remove:     
@@ -2318,6 +2347,8 @@ void Job::select_period( const Time& now )
 void Job::set_period(const Period& p) 
 {
     _period = p;
+    _call_register.call_at<Period_begin_call>(_period.begin());
+    _call_register.call_at<Period_end_call>(_period.end());       //? + Duration::epsilon);
 }
 
 //--------------------------------------------------------------------------------Job::is_in_period
@@ -2406,6 +2437,13 @@ void Job::set_next_start_time2(const Time& now, bool repeat) {
     _next_start_time = next_start_time;
 }
 
+//-----------------------------------------------------------------------------------Job::next_time
+
+Time Job::next_time() const
+{
+    return min(_next_time, _call_register.next_time());
+}
+
 //-----------------------------------------------------------------------------Job::next_start_time
 
 Time Job::next_start_time() const
@@ -2428,8 +2466,7 @@ void Job::calculate_next_time( const Time& now )
 
     Time next_time = Time::never;
 
-    if( _state == s_running || _state == s_pending )
-    {
+    if( _state == s_running || _state == s_pending ) {
         if( _lock_requestor  &&  
             ( _lock_requestor->is_enqueued()  ||  !_lock_requestor->locks_are_known() ) )
         {
@@ -2455,13 +2492,9 @@ void Job::calculate_next_time( const Time& now )
                     next_time = min(next_time, _next_single_start);
                 }
 
-                if (next_time > now && is_in_job_chain()) {
-                    if (in_period) {
-                        bool has_order = request_order( now, Z_FUNCTION );
-                        next_time = has_order? Time(0) : min(next_time, _combined_job_nodes->next_time() );
-                    }
-                    else
-                        next_time = min(next_time, _period.begin());  // Zu Beginn der Periode mit request_order() erneut nachsehen, ob Auftrag vorliegt.
+                if (next_time > now && is_in_job_chain() && in_period) {
+                    bool has_order = request_order( now, Z_FUNCTION );
+                    next_time = has_order? Time(0) : min(next_time, _combined_job_nodes->next_time() );
                 }
             }
 
@@ -2469,19 +2502,21 @@ void Job::calculate_next_time( const Time& now )
                 next_time = min(next_time, _directory_watcher_next_time);
 #           endif
         }
-         
-        next_time = min(next_time, _period.end() );     // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
     }
 
-    Time old_next_time = _next_time;
-    _next_time = next_time;
+    if (_next_time != next_time) {
+        Time old_next_time = _next_time;
+        _next_time = next_time;
+        //_log->info(S() << "*********************** calculate_next_time=" << _next_time.as_string(_spooler->_time_zone_name));
+        _call_register.call_at<Calculated_next_time_do_something_call>(_next_time);
 
-#ifdef Z_DEBUG
-    Z_LOG2( "developer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string(time_zone_name()) << 
-            ( _next_time < old_next_time? " < " :
-              _next_time > old_next_time? " > " : " = " ) 
-          << "old " << old_next_time.as_string(time_zone_name()) << "\n" );
-#endif
+        #ifdef Z_DEBUG
+            Z_LOG2( "developer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string(time_zone_name()) << 
+                ( _next_time < old_next_time? " < " :
+                  _next_time > old_next_time? " > " : " = " ) 
+              << "old " << old_next_time.as_string(time_zone_name()) << "\n" );
+        #endif
+    }
 }
 
 //------------------------------------------------------------------------Job::signal_earlier_order
@@ -2806,111 +2841,78 @@ bool Job::do_something()
 
     something_done |= check_for_changed_directory( now );         // Hier pr¸fen, damit Signal zur¸ckgesetzt wird
 
-    if (_state != s_error)
+    if (_state > s_loaded && _state != s_error)
     try {
-        try {
-            Time next_time_at_begin = _next_time;
+        Time next_time_at_begin = _next_time;
 
-            if( _state > s_loaded )  
-            {
-                if( now > _period.end() )
-                {
-                    select_period( now );
-                    if( !_period.is_in_time( _next_start_time )  &&
-                        _next_single_start.is_never() ) // Wenn aus absolute_repeat errechnet, stimmt _period vielleicht nicht, dann nicht set_next_start_time() rufen
-                    {
-                        set_next_start_time( now );
+        if( _state == s_running  &&  is_in_job_chain()) {    // Auftrag bereit und Tasks warten auf Auftr‰ge?
+            FOR_EACH( Task_list, _running_tasks, t ) {
+                Task* task = *t;
+                if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) {
+                    if( task->fetch_and_occupy_order( now, Z_FUNCTION ) ) {
+                        something_done |= task->do_something();
                     }
-                }
-
-
-                if( _state == s_running  &&  is_in_job_chain())     // Auftrag bereit und Tasks warten auf Auftr‰ge?
-                {
-                    FOR_EACH( Task_list, _running_tasks, t )
-                    {
-                        Task* task = *t;
-                        if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) 
-                        {
-                            if( task->fetch_and_occupy_order( now, Z_FUNCTION ) )
-                            {
-                                something_done |= task->do_something();
-                                //break;   Jetzt m¸ssten wir doch fertig sein. 2007-01-31
-                            }
-                        }
-                    }
-                }
-
-
-                if( _state == s_pending  &&  _max_tasks > 0                         // Jira JS-55: tasks="0" soll keine Task starten
-                 || _state == s_running  &&  _running_tasks.size() < _max_tasks )
-                {
-                    if( !_waiting_for_process  ||  
-                        _waiting_for_process_try_again )
-                        //!_module_process->process_class_or_null() ||  _module->process_class()->process_available( this ) )    // Optimierung
-                    {
-                        ptr<Task> task = task_to_start();
-                        if( task )
-                        {
-                            _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
-
-                            reset_error();
-                            _repeat = Duration(0);
-                            _delay_until = Time(0);
-
-                            _running_tasks.push_back( task );
-                            set_state( s_running );
-
-                            _next_start_time = Time::never;
-                            calculate_next_time( now );
-
-                            task->init();
-
-                            string c = task->cause() == cause_order && task->order()? task->order()->obj_name()
-                                                                                    : start_cause_name( task->cause() );
-                            _log->info( message_string( "SCHEDULER-930", task->id(), c ) );
-
-                            if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
-
-                            task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiﬂ
-
-                            task_started = true;
-                            _wake_when_in_period = false;
-                            something_done = true;
-                        }
-                    }
-                }
-            }
-
-
-            if( !something_done  &&  _next_time <= now )    // Obwohl _next_time erreicht, ist nichts getan?
-            {
-                calculate_next_time( now );
-
-                Z_LOG2( _next_time <= now? "scheduler" : "scheduler.nothing_done", 
-                        obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin.as_string(time_zone_name()) <<
-                        " _next_time=" << _next_time.as_string(time_zone_name()) <<
-                        " _next_start_time=" << _next_start_time.as_string(time_zone_name()) <<
-                        " _next_single_start=" << _next_single_start.as_string(time_zone_name()) <<
-                        " _directory_watcher_next_time=" << _directory_watcher_next_time.as_string(time_zone_name()) <<
-                        " _period=" << _period.obj_name() <<
-                        " _repeat=" << _repeat <<
-                        " _waiting_for_process=" << _waiting_for_process <<
-                        "\n" );
-
-                if( _next_time <= now )
-                {
-                    _next_time = Time::now() + Duration(1);
                 }
             }
         }
-        catch( const _com_error& x )  { throw_com_error( x ); }
-    }
-    catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
-    if( !task_started  &&  _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() )
-    {
-        _lock_requestor->dequeue_lock_requests();
+        if( _state == s_pending  &&  _max_tasks > 0                         // Jira JS-55: tasks="0" soll keine Task starten
+         || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+        {
+            if (!_waiting_for_process || _waiting_for_process_try_again ) {
+                if (ptr<Task> task = task_to_start()) {
+                    _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+
+                    reset_error();
+                    _repeat = Duration(0);
+                    _delay_until = Time(0);
+
+                    _running_tasks.push_back( task );
+                    set_state( s_running );
+
+                    _next_start_time = Time::never;
+                    calculate_next_time( now );
+
+                    task->init();
+
+                    string c = task->cause() == cause_order && task->order()? task->order()->obj_name()
+                                                                            : start_cause_name( task->cause() );
+                    _log->info( message_string( "SCHEDULER-930", task->id(), c ) );
+
+                    if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
+
+                    task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiﬂ
+
+                    task_started = true;
+                    _wake_when_in_period = false;
+                    something_done = true;
+                }
+            }
+        }
+
+
+        if( !something_done  &&  _next_time <= now ) {  // Obwohl _next_time erreicht, ist nichts getan?
+            calculate_next_time( now );
+
+            Z_LOG2( _next_time <= now? "scheduler" : "scheduler.nothing_done", 
+                    obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin.as_string(time_zone_name()) <<
+                    " _next_time=" << _next_time.as_string(time_zone_name()) <<
+                    " _next_start_time=" << _next_start_time.as_string(time_zone_name()) <<
+                    " _next_single_start=" << _next_single_start.as_string(time_zone_name()) <<
+                    " _directory_watcher_next_time=" << _directory_watcher_next_time.as_string(time_zone_name()) <<
+                    " _period=" << _period.obj_name() <<
+                    " _repeat=" << _repeat <<
+                    " _waiting_for_process=" << _waiting_for_process <<
+                    "\n" );
+
+            if( _next_time <= now )
+                _next_time = Time::now() + Duration(1);
+        }
     }
+    catch( const exception& x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
+
+    if( !task_started  &&  _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() ) 
+        _lock_requestor->dequeue_lock_requests();
 
     return something_done;
 }
