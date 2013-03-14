@@ -18,7 +18,7 @@ public final class FolderSubsystem implements FileBasedSubsystem {
 
     /** @return true, wenn ein {@link FileBased} geladen worden ist. */
     public boolean updateFolders() {
-        return cppProxy.update_folders_now();
+        return cppProxy.update_folders_now();  //TODO inSchedulerThread, siehe EntitiesIT
     }
 
 //    /** @return true, wenn ein {@link FileBased} geladen worden ist. */

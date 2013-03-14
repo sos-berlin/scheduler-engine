@@ -214,6 +214,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     val eventPipe = controller.newEventPipe()
     scheduler.instance[OrderSubsystem].jobChain(jobChainPath).file.delete() || sys.error("JobChain configuration file could not be deleted")
     scheduler.instance[FolderSubsystem].updateFolders()
+    controller.getEventBus.dispatchEvents()   // Weil updateFolders() (noch) nicht über Scheduler-Scheife läuft  (inSchedulerThread wäre gut)
     eventPipe.nextWithCondition[FileBasedRemovedEvent] { _.getTypedPath == jobChainPath }
     tryFetchJobChainEntity(jobChainPath) should be ('empty)
     fetchJobChainNodeEntities(jobChainPath) should be ('empty)
