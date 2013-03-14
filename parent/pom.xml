@@ -405,11 +405,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>2.0.0</version>
@@ -517,7 +512,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12</version>
+                <version>2.14</version>
                 <configuration>
                     <printSummary>false</printSummary>
                     <!-- Soll ab Version 2.13 gehen. http://jira.codehaus.org/browse/SUREFIRE-827
@@ -529,26 +524,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.12.3</version>
+                <version>2.14</version>
                 <configuration>
                     <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
-                    <systemProperties>
-                        <property>
-                            <name>java.io.tmpdir</name>
-                            <value>${basedir}/target</value>
-                        </property>
-                        <property>
-                            <name>com.sos.scheduler.engine.test.underMaven</name>
-                        </property>
-                        <property>
-                            <name>com.sos.scheduler.engine.test.binary.tmpdir</name>
-                            <value>${basedir}/target/scheduler-test-binaries</value>
-                        </property>
-                        <property>
-                            <name>com.sos.scheduler.engine.test.directory</name>
-                            <value>${basedir}/target/failsafe-reports</value>
-                        </property>
-                    </systemProperties>
+                    <systemPropertyVariables>
+                        <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
+                        <com.sos.scheduler.engine.test.underMaven/>
+                        <com.sos.scheduler.engine.test.binary.tmpdir>${project.basedir}/target/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
+                        <com.sos.scheduler.engine.test.directory>${project.basedir}/target/failsafe-reports</com.sos.scheduler.engine.test.directory>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
