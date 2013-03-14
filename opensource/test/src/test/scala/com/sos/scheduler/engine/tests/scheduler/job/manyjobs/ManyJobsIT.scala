@@ -45,7 +45,7 @@ class ManyJobsIT extends ScalaSchedulerTest {
   }
 
   @EventHandler def handle(e: FileBasedActivatedEvent) {
-    e.getTypedPath collect { case p: JobPath if jobStatistics.keySet contains p => activatedJobCount += 1 }
+    Some(e.getTypedPath) collect { case p: JobPath if jobStatistics.keySet contains p => activatedJobCount += 1 }
   }
 
   @EventHandler def handle(e: TaskStartedEvent) {
