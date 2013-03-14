@@ -44,6 +44,12 @@ public final class XmlUtils {
         return result;
     }
 
+    public static String prettyXml(String xml) {
+        StringWriter w = new StringWriter();
+        writeXmlTo(loadXml(xml), new StreamResult(w), null, true);
+        return w.toString();
+    }
+
     @ForCpp public static Document loadXml(byte[] xml, String encoding) {
         return loadXml(new InputStreamReader(new ByteArrayInputStream(xml), Charset.forName(encoding)));
     }
