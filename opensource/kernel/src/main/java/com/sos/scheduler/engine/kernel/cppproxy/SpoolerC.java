@@ -107,7 +107,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
 //    Process_id                  get_next_process_id         ()                                  { return _next_process_id++; }
     //void wait();
 //--    void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
-    void signal(String signal_name);
+    @CppThreadSafe void signal(String signal_name);
     boolean signaled();
     void send_cmd();
 //--    void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
