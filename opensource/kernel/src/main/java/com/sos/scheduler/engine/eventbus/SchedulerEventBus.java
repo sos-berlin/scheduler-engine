@@ -1,8 +1,12 @@
 package com.sos.scheduler.engine.eventbus;
 
 import com.sos.scheduler.engine.data.event.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SchedulerEventBus implements EventBus {
+    private static final Logger logger = LoggerFactory.getLogger(SchedulerEventBus.class);
+
     private final HotEventBus hotEventBus = new HotEventBus();
     private final ColdEventBus coldEventBus = new ColdEventBus();
 
@@ -37,6 +41,7 @@ public class SchedulerEventBus implements EventBus {
     }
 
     @Override public final void publish(Event e) {
+        logger.trace("publish {}", e);
         hotEventBus.publish(e);
         coldEventBus.publish(e instanceof EventSourceEvent? ((EventSourceEvent)e).getEvent() : e);
     }
@@ -46,7 +51,6 @@ public class SchedulerEventBus implements EventBus {
     }
 
     public final void dispatchEvents() {
-        //hotEventBus.dispatchEvents();
         coldEventBus.dispatchEvents();
     }
 }

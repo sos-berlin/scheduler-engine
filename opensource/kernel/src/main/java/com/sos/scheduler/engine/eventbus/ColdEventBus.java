@@ -2,12 +2,16 @@ package com.sos.scheduler.engine.eventbus;
 
 import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory;
 import com.sos.scheduler.engine.data.event.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ColdEventBus extends AbstractEventBus {
+    private static final Logger logger = LoggerFactory.getLogger(ColdEventBus.class);
+
     private final Queue<Call> callQueue = new ConcurrentLinkedQueue<Call>();
 
     public ColdEventBus() {
@@ -26,6 +30,7 @@ public class ColdEventBus extends AbstractEventBus {
         while (true) {
             Call call = callQueue.poll();
             if (call == null) break;
+            logger.trace("dispatch "+call);
             dispatchCall(call);
         }
     }
