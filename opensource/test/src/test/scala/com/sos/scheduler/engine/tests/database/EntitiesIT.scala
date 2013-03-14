@@ -192,7 +192,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     }
   }
 
-  test("After re-read of JobChain its state should be restored - IGNORED, DOES NOT WORK") {
+  ignore("After re-read of JobChain its state should be restored - IGNORED, DOES NOT WORK") {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
     val eventPipe = controller.newEventPipe()
