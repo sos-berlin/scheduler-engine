@@ -4,7 +4,8 @@ import org.joda.time.DateTimeUtils.currentTimeMillis
 import scala.collection.mutable
 
 final class StandardCallQueue extends PoppableCallQueue {
-  private val queue = mutable.UnrolledBuffer[TimedCall[_]]()
+  private val queue = mutable.Buffer[TimedCall[_]]()
+//private val queue = mutable.UnrolledBuffer[TimedCall[_]]()    Scala 2.10.0 insert() terminiert nicht
 
   def add(o: TimedCall[_]) {
     synchronized {
@@ -43,7 +44,7 @@ final class StandardCallQueue extends PoppableCallQueue {
 
   def matureHeadOption = headOption filter timedCallIsMature
 
-  private def headOption = synchronized( queue.headOption )
+  private def headOption = synchronized { queue.headOption }
 
   private def timedCallIsMature(o: TimedCall[_]) = o.epochMillis <= currentTimeMillis()
 
