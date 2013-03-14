@@ -41,7 +41,7 @@ final class StandardCallQueue extends PoppableCallQueue {
     matureHeadOption map { o => queue.remove(0) ensuring { _ == o } }
   }
 
-  private def matureHeadOption = headOption filter timedCallIsMature
+  def matureHeadOption = headOption filter timedCallIsMature
 
   private def headOption = synchronized( queue.headOption )
 
