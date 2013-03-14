@@ -33,7 +33,6 @@ public class JS428Test extends SchedulerTest {
         logger.debug("starting test for " + JS428Test.class.getName());
     }
 
-    @Ignore
     /**
      * Dieser Test funktioniert nicht, weil die StepStartedEvent für shell jobs nicht ausgelöst wird.
      * Hier sind noch Änderungen im C++ code vorzunehmen.
@@ -42,6 +41,7 @@ public class JS428Test extends SchedulerTest {
      *
      * @throws InterruptedException
      */
+    @Ignore
     public void mixedTest() throws InterruptedException {
         controller().setTerminateOnError(false);
         String resultFile = getTempFile("scheduler.log").getAbsolutePath();
@@ -77,8 +77,7 @@ public class JS428Test extends SchedulerTest {
             .addParam("100/param1", "step 100")
             .addParam("200/param1", "step 200")
             .addParam("300/param1", "step 300")
-            .addParam("param2", "all steps")
-        ;
+            .addParam("param2", "all steps");
         controller().scheduler().executeXml( util.getCommand() );
         controller().waitForTermination(shortTimeout);
         testSpoolerVariable("job-api-1_param1", "step 100");
