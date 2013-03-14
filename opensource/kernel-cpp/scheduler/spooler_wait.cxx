@@ -162,7 +162,6 @@ bool Wait_handles::signaled()
         {
             if( *it  &&  (*it)->signaled() )  
             { 
-                _catched_event = *it;
                 //Z_LOG2( _spooler->_scheduler_wait_log_category, **it << " signaled!\n" );  
                 return true; 
             }
@@ -214,27 +213,26 @@ void Wait_handles::remove( System_event* event )
 {
     if( !event )  return;
 
-        // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
+    // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
 
-            Event_vector::iterator it = _events.begin();
+    Event_vector::iterator it = _events.begin();
 
-            while( it != _events.end() )
-            {
-                if( *it == event )  break;
-                it++;
-            }
+    while( it != _events.end() )
+    {
+        if( *it == event )  break;
+        it++;
+    }
 
-            if( it == _events.end() ) {
-                _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
-                return;
-            }
+    if( it == _events.end() ) {
+        _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+        return;
+    }
 
-            Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
-            _events.erase( it );
+    Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
+    _events.erase( it );
 }
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
-// Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
 bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
 {
@@ -250,7 +248,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
 
     // until kann 0 sein
-    _catched_event = NULL;
 
     //2006-06-18: Nicht gut bei "nichts_getan": Wir brauchen auch neue Ereignisse, v.a. TCP.    if( signaled() )  return true;
 
@@ -317,9 +314,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         handles = new HANDLE [ _handles.size()+1 ];
         for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
 
-        // Regelmässige Ausgabe von Text auf der Konsole
-        if( _spooler  &&  _spooler->_print_time_every_second )
-        {
+        if( _spooler  &&  _spooler->_print_time_every_second ) {
+            // Regelmässige Ausgabe von Text auf der Konsole
             size_t  console_line_length = 0;
             double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
             
@@ -367,8 +363,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             }
 
             if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
-
-        // normale Bearbeitung von scheduler-Prozessen
         } else {
             ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, t ); 
         }
@@ -389,8 +383,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             }
             else
                 if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
-
-            _catched_event = event;
 
             if( event != &_spooler->_waitable_timer )  result = true;                // PC aufwecken
             break;

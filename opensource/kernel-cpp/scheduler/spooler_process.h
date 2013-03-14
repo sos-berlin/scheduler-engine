@@ -293,6 +293,7 @@ struct Process_class : Process_class_configuration
   public:
     typedef stdext::hash_set< ptr<Process> >  Process_set;
     Process_set                _process_set;
+    int                        _process_set_version;
 };
 
 //-----------------------------------------------------------------------------Process_class_folder

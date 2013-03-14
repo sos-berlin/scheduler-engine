@@ -76,175 +76,19 @@ ptr<Task> Task_subsystem::get_task_or_null( int task_id )
     return result;
 }
 
-//---------------------------------------------------------------------Task_subsystem::do_something
-
-bool Task_subsystem::do_something( Task* task, const Time& now )
-{
-    bool something_done = false;
-
-    if( !_spooler->_zschimmer_mode || task->next_time() <= now )
-    {
-        something_done = task->do_something();
-        
-        _task_closed |= task->state() == Task::s_closed;
-    }
-
-    return something_done;
-}
-
 //---------------------------------------------------------------Task_subsystem::remove_ended_tasks
 
-void Task_subsystem::remove_ended_tasks()
-{
-    if( _task_closed )
-    {
-        Task_list::iterator t = _task_list.begin();
-        while( t != _task_list.end() )
-        {
-            Task* task = *t;
-            if( task->state() == Task::s_closed )
-            {
-                task->job()->remove_running_task( task );
-                t = _task_list.erase( t );
-                continue;
-            }
-
-            t++;
+void Task_subsystem::remove_task(Task* task) {
+    for (Task_list::iterator i = _task_list.begin(); i != _task_list.end();) {
+        if (*i == task) {
+            task->job()->remove_running_task(task);
+            _task_list.erase(i);
+            if (is_ready_for_termination())
+                _spooler->signal("is_ready_for_termination");
+            return;
         }
-
-        _task_closed = false;
-
-
-//#       if defined Z_DEBUG && defined Z_WINDOWS
-//        // Könnte eine hübsche Klasse werden.
-//        if( _spooler->_check_memory_leak )
-//        {
-//            static bool         first = true;
-//            static _CrtMemState memory_state;
-//
-//            if( !_spooler->has_any_task()  &&  !_spooler->has_any_order() )     // Scheduler im Leerlauf?
-//            {
-//                if( first ) 
-//                {
-//                    first = false;
-//                    _CrtMemCheckpoint( &memory_state );
-//                }
-//                else
-//                {
-//                    Z_LOGI2( "scheduler", "Checking for memory leak\n" );
-//                    _CrtMemState new_memory_state;
-//                    _CrtMemState memory_state_difference;
-//
-//                    _CrtMemCheckpoint( &new_memory_state );
-//                    int are_significantly_different = _CrtMemDifference( &memory_state_difference, &memory_state, &new_memory_state );
-//                    if( are_significantly_different )
-//                    {
-//                        _CrtMemDumpStatistics( &memory_state_difference );
-//                        _CrtMemDumpAllObjectsSince( &memory_state );
-//                        _CrtMemCheckpoint( &memory_state );
-//                    }
-//                }
-//            }
-//        }
-//#       endif
+        i++;
     }
-}
-
-//-----------------------------------------------------------------------------Task_subsystem::step
-
-bool Task_subsystem::step( const Time& now )
-{
-    bool something_done = false;
-
-
-    if( !something_done )
-    {
-        FOR_EACH_JOB( job )
-        {
-            if( job->is_in_job_chain() )
-            {
-                // Dieser Job ist in _prioritized_order_job_array und wird unten fortgesetzt.
-            }
-            else
-            //2007-01-27 War der Versuch einer Optimierung, funktioniert nicht mit start_when_directory_changed:   if( job->next_time() <= now )
-            {
-                something_done = job->do_something();
-            }
-
-            if( something_done )  break;
-        }
-    }
-
-
-    // Jetzt sehen wir zu, dass die Jobs, die hinten in einer Jobkette stehen, ihre Aufträge los werden.
-    // Damit sollen die fortgeschrittenen Aufträge vorrangig bearbeitet werden, um sie so schnell wie
-    // möglich abzuschließen.
-
-    if( !something_done )
-    {
-        build_prioritized_order_job_array();
-
-
-        // ERSTMAL DIE ORDER-JOBS
-
-        FOR_EACH( vector<Job*>, _prioritized_order_job_array, j )
-        {
-            Job* job = *j;
-            if( job->next_time() <= now )
-            {
-                something_done = job->do_something();
-                if( something_done )  break;
-            }
-        }
-
-
-        // DANN DIE TASKS
-
-        if( !something_done )
-        {
-            bool stepped;
-            {
-                stepped = false;
-
-                FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
-                {
-                    Job* job = *it;
-
-                    FOR_EACH_TASK( it, task )
-                    {
-                        if( task->job() == job )
-                        {
-                            if( _spooler->_event.signaled() )  return true;  
-
-                            stepped = do_something( task, now );
-
-                            something_done |= stepped;
-                            if( stepped )  break;
-                        }
-                    }
-
-                    remove_ended_tasks();
-                    if( stepped )  break;
-                } 
-            }
-        }
-    }
-
-
-    if( !something_done )
-    {
-        FOR_EACH_TASK( it, task )
-        {
-            if( _spooler->_event.signaled() )  return true;      // Das ist _my_event oder _spooler->_event
-
-            something_done |= do_something( task, now );
-        }
-
-        remove_ended_tasks();
-    }
-
-
-    return something_done;
 }
 
 //---------------------------------------------------------Task_subsystem::is_ready_for_termination
@@ -271,10 +115,9 @@ bool Task_subsystem::is_ready_for_termination()
 
 bool Task_subsystem::process( const Time& now )
 {
-    bool something_done = step( now );
     _spooler->job_subsystem()->remove_temporary_jobs();
 
-    return something_done;
+    return false;
 }
 
 //--------------------------------------------------------------Task_subsystem::try_to_free_process

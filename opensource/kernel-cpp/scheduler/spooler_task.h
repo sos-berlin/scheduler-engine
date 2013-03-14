@@ -10,6 +10,35 @@ namespace scheduler {
 
 struct Task_lock_requestor;
 
+namespace job {
+    struct Task_closed_call;
+    struct Task_starting_completed_call;
+    struct Task_opening_completed_call;
+    struct Task_step_completed_call;
+    struct Try_next_step_call;
+    struct Task_end_completed_call;
+    struct Next_spooler_process_call;
+    struct Next_order_step_call;
+    struct Task_idle_timeout_call;
+    struct Task_end_with_period_call;
+    struct Task_locks_are_available_call;
+    struct Task_check_for_order_call;
+    struct Task_on_success_completed_call;
+    struct Task_on_error_completed_call;
+    struct Task_exit_completed_call;
+    struct Task_release_completed_call;
+    struct Task_wait_for_subprocesses_completed_call;
+    struct Task_ended_completed_call;
+    DEFINE_SIMPLE_CALL(Task, Task_process_ended_call);
+    struct Remote_task_running_call;
+    struct End_task_call;
+    struct Warn_longer_than_call;
+    struct Task_timeout_call;
+    struct Subprocess_timeout_call;
+    struct Try_deleting_files_call;
+    struct Killing_task_call;
+}
+
 //--------------------------------------------------------------------------------------Start_cause
 
 enum Start_cause
@@ -141,7 +170,34 @@ struct Task : Object,
 
     Job*                        job                         ();
     Time                        calculated_start_time       ( const Time& now );
-    Time                        next_time                   ();
+  //Time                        next_time                   ();
+    void                        on_remote_task_running      ();
+    void                        on_call                     (const job::Task_starting_completed_call&);
+    void                        on_call                     (const job::Task_opening_completed_call&);
+    void                        on_call                     (const job::Task_step_completed_call& );
+    void                        on_call                     (const job::Next_spooler_process_call& );
+    void                        on_call                     (const job::Try_next_step_call& );
+    void                        on_call                     (const job::Next_order_step_call& );
+    void                        on_call                     (const job::Task_end_completed_call&);
+    void                        on_call                     (const job::Task_idle_timeout_call&);
+    void                        on_call                     (const job::Remote_task_running_call&);
+    void                        on_call                     (const job::Task_end_with_period_call&);
+    void                        on_call                     (const job::Task_locks_are_available_call&);
+    void                        on_call                     (const job::Task_check_for_order_call&);
+    void                        on_call                     (const job::Task_on_success_completed_call&);
+    void                        on_call                     (const job::Task_on_error_completed_call&);
+    void                        on_call                     (const job::Task_exit_completed_call&);
+    void                        on_call                     (const job::Task_release_completed_call&);
+    void                        on_call                     (const job::Task_process_ended_call&);
+    void                        on_call                     (const job::Task_ended_completed_call&);
+    void                        on_call                     (const job::Task_wait_for_subprocesses_completed_call&);
+    void                        on_call                     (const job::End_task_call&);
+    void                        on_call                     (const job::Warn_longer_than_call&);
+    void                        on_call                     (const job::Task_timeout_call&);
+    void                        on_call                     (const job::Subprocess_timeout_call&);
+    void                        on_call                     (const job::Try_deleting_files_call&);
+    void                        on_call                     (const job::Killing_task_call&);
+
     Task_subsystem*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
@@ -163,7 +219,6 @@ struct Task : Object,
     void                        merge_environment           ( const Com_variable_set* e )           { _environment->merge( e ); }
     Com_variable_set*           environment_or_null         () const                                { return _environment; }
 
-    void                        signal                      ( const string& signal_name );
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const zschimmer::Xc& );
     void                    set_error_xc_only               ( const Xc& );
@@ -232,6 +287,7 @@ struct Task : Object,
     xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom( Com_variable_set::xml_element_name(), "variable" ); }
 
 
+    void                        wake_when_longer_than       ();
     bool                        check_timeout               ( const Time& now );
     void                        check_if_shorter_than       ( const Time& now );
     bool                        check_if_longer_than        ( const Time& now );
@@ -255,7 +311,7 @@ struct Task : Object,
     void                        set_error                   ( const _com_error& );
     void                        reset_error                 ()                                      { _error = NULL,  _non_connection_reset_error = NULL,  _is_connection_reset_error = false,  _log->reset_highest_level(); }
 
-    void                    set_next_time                   ( const Time& );
+  //void                    set_next_time                   ( const Time& );
 
 
   
@@ -314,6 +370,7 @@ struct Task : Object,
     Job*                       _job;
     Task_subsystem*            _thread;
     Task_history               _history;
+    typed_call_register<Task>  _call_register;
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;
@@ -328,9 +385,7 @@ struct Task : Object,
     End_mode                   _end;
     bool                       _scheduler_815_logged;
     bool                       _closed;
-    bool                       _signaled;
     int                        _delayed_after_error_task_id;
-
 
     Time                       _enqueue_time;
     bool                       _force_start;                // Auch um _start_at starten, wenn gerade keine <run_time>-Periode vorliegt
@@ -340,7 +395,7 @@ struct Task : Object,
     Time                       _last_process_start_time;
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
-    Time                       _next_time;
+  //Time                       _next_time;
     Duration                   _timeout;                    // Frist für eine Operation (oder INT_MAX)
     Time                       _last_warn_if_longer_operation_time;
     Time                       _idle_since;

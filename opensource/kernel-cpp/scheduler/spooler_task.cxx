@@ -28,6 +28,37 @@ namespace scheduler {
 static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
+//--------------------------------------------------------------------------------------------Calls
+
+namespace job {
+    DEFINE_SIMPLE_CALL(Task, Task_starting_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_opening_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_step_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Try_next_step_call)
+    DEFINE_SIMPLE_CALL(Task, Task_end_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Next_spooler_process_call)
+    DEFINE_SIMPLE_CALL(Task, Next_order_step_call)
+    DEFINE_SIMPLE_CALL(Task, Task_idle_timeout_call)
+    DEFINE_SIMPLE_CALL(Task, Task_end_with_period_call)
+    DEFINE_SIMPLE_CALL(Task, Task_locks_are_available_call)
+    DEFINE_SIMPLE_CALL(Task, Task_check_for_order_call)
+    DEFINE_SIMPLE_CALL(Task, Remote_task_running_call)
+    DEFINE_SIMPLE_CALL(Task, Task_on_success_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_on_error_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_exit_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_release_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_wait_for_subprocesses_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_ended_completed_call)
+    DEFINE_SIMPLE_CALL(Task, End_task_call)
+    DEFINE_SIMPLE_CALL(Task, Warn_longer_than_call)
+    DEFINE_SIMPLE_CALL(Task, Task_timeout_call)
+    DEFINE_SIMPLE_CALL(Task, Try_deleting_files_call)
+    DEFINE_SIMPLE_CALL(Task, Killing_task_call)
+    DEFINE_SIMPLE_CALL(Task, Subprocess_timeout_call)
+}
+
+using namespace job;
+
 //------------------------------------------------------------------------------Task_lock_requestor
 
 struct Task_lock_requestor : lock::Requestor
@@ -167,6 +198,7 @@ Task::Task( Job* job )
     javabridge::has_proxy<Task>(job->_spooler),
     _zero_(this+1),
     _job(job),
+    _call_register(this),
     _history(&job->_history,this),
     _timeout(Duration::eternal),
     _lock_requestors( 1+lock_level__max ),
@@ -248,6 +280,7 @@ void Task::close()
             }
             catch( exception& x )  { Z_LOG2( "scheduler", "Task::close() _operation->async_kill() ==> " << x.what() << "\n" ); }
 
+            _operation->set_async_call(NULL);
             _operation = NULL;
         }
 
@@ -526,25 +559,25 @@ void Task::cmd_end( End_mode end_mode )
 {
     assert( end_mode != end_none );
 
-        //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-        if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
+    //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+    if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
-        if( _end != end_kill_immediately )  _end = end_mode;
-        if( !_ending_since )  _ending_since = Time::now();
+    if( _end != end_kill_immediately )  _end = end_mode;
+    if( !_ending_since )  _ending_since = Time::now();
 
-        if( end_mode == end_kill_immediately  &&  !_kill_tried )
-        {
-            //_log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-            try_kill();
-        }
+    if( end_mode == end_kill_immediately  &&  !_kill_tried )
+    {
+        //_log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+        try_kill();
+    }
 
-        if( end_mode != end_kill_immediately )  signal( "end" );
-
-        if( _state == s_none )
-        {
-            if( _job )  _job->kill_queued_task( _id );
-            // this ist hier möglicherweise ungültig!
-        }
+    if( _state == s_none )
+    {
+        if( _job )  _job->kill_queued_task( _id );
+        // this ist hier möglicherweise ungültig!
+    }
+    else
+        _call_register.call<End_task_call>();
 }
 
 //-------------------------------------------------------------------------------Task::cmd_nice_end
@@ -768,68 +801,59 @@ void Task::set_state_direct( State new_state )
 
     if( new_state != s_running_waiting_for_order )  _idle_since = Time(0);
 
-    if( new_state != _state )
-    {
-        switch( _state )
-        {
+    if( new_state != _state ) {
+        switch( _state ) {
             case s_running:
-                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )  
-                {
+                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )   {
                     _lock_holder->release_locks( lock_requestor );
                     lock_requestor->dequeue_lock_requests();
                 }
-
                 break;
 
-            default:
+            case s_waiting_for_process:
                 break;
+
+            default: ;
         }
-    }
 
-    switch( new_state )
-    {
-        case s_waiting_for_process:
-            _next_time = Time::never;
-            break;
+        switch( new_state ) {
+            case s_opening_waiting_for_locks:
+                break;
 
-        case s_opening_waiting_for_locks:
-            _next_time = Time::never;
-            break;
+            case s_running_process:
+                break;
 
-        case s_running_process:
-            _next_time = Time::never;
-            break;
+            case s_running_delayed:
+                _call_register.call_at<Next_spooler_process_call>(_next_spooler_process);
+                break;
 
-        case s_running_delayed:
-            _next_time = _next_spooler_process;
-            break;
+            case s_running_waiting_for_locks:
+                break;
 
-        case s_running_waiting_for_locks:
-            _next_time = Time::never;
-            break;
-
-        case s_running_waiting_for_order:
-        {
-            _next_time  = _job->combined_job_nodes()->next_time();
-
-            if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
-
-            if( _idle_timeout_at != Time::never )
-            {
-                _next_time = min( _next_time, _idle_timeout_at );
+            case s_running_waiting_for_order: {
+                _call_register.call_at<Next_order_step_call>(_job->combined_job_nodes()->next_time());
+                if (_state != s_running_waiting_for_order)  
+                    _idle_since = Time::now();
+                if (_idle_timeout_at != Time::never)
+                    _call_register.call_at<Task_idle_timeout_call>(_idle_timeout_at);
+                break;
             }
 
-            break;
-        }
+            case s_closed: {
+                report_event_code(taskClosedEvent, java_sister());
+                _call_register.call(Z_NEW(Task_closed_call(this)));
+                break;
+            }
 
-        default:
-            _next_time = Time(0);
+            default:
+                ;//t = Time(0);
+        }
     }
 
+    //if( _end )  t = Time(0);   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
 
-    if( _next_time.not_zero() && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
-
-    if( _end )  _next_time = Time(0);   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
+    //if (new_state != s_closed)
+    //    set_next_time(t);
 
     if( new_state != _state )
     {
@@ -847,17 +871,15 @@ void Task::set_state_direct( State new_state )
         if( is_idle()  &&  _job )
             if( Process_class* process_class = _job->_module->process_class_or_null() )  process_class->notify_a_process_is_idle();
 
-
         Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
         if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
         {
             S details;
-            if( _next_time.not_zero() )  details << " (" << _next_time.as_string(_job->time_zone_name()) << ")";
+            //if( _next_time.not_zero() )  details << " (" << _next_time.as_string(_job->time_zone_name()) << ")";
             if( new_state == s_starting  &&  _start_at.not_zero() )  details << " (at=" << _start_at.as_string(_job->time_zone_name()) << ")";
             if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
 
             _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
-
         }
     }
 }
@@ -895,17 +917,6 @@ string Task::state_name( State state )
         case s_closed:                      return "closed";
         default:                            return as_string( (int)state );
     }
-}
-
-//-------------------------------------------------------------------------------------Task::signal
-
-void Task::signal( const string& signal_name )
-{
-        _signaled = true;
-        set_next_time(Time(0));
-
-        if( _spooler->_task_subsystem )  _spooler->_task_subsystem->signal( signal_name );
-               //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
 }
 
 //----------------------------------------------------------------------------------Task::set_cause
@@ -1016,59 +1027,167 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
         case s_running_waiting_for_locks:   set_state_direct( s_running );  break;
         default:                            z::throw_xc( Z_FUNCTION );
     }
-    
-    signal( Z_FUNCTION );
+
+    _call_register.call<Task_locks_are_available_call>();
 }
 
 //------------------------------------------------------------------------------Task::set_next_time
 
-void Task::set_next_time( const Time& next_time )
-{
-    _next_time = next_time;
-}
+//void Task::set_next_time( const Time& t )
+//{
+//    Time t = min(t, next_time());
+//    if (_state == s_closed)
+//        _call_register.cancel<Next_time_task_call>();
+//    else
+//        _call_register.call_at<Next_time_task_call>(t);
+//}
 
 //----------------------------------------------------------------------------------Task::next_time
 
-Time Task::next_time()
+//Time Task::next_time()
+//{
+//    Time result;
+//
+//    if( _operation )
+//    {
+//        if( _operation->async_finished() ) {
+//            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
+//        } else {
+//            Duration t = _timeout;
+//            result = t.is_eternal()? Time::never 
+//                                   : _last_operation_time + t;     // _timeout sollte nicht zu groß sein
+//        }                 
+//    }
+//    else
+//    if( _state == s_running_process  &&  !_timeout.is_eternal() )
+//    {
+//        result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groß sein
+//    }
+//    else
+//    {
+//        result = _next_time;
+//        if( _state == s_running_delayed  &&  result > _next_spooler_process )  result = _next_spooler_process;
+//    }
+//
+//    if( result > _subprocess_timeout )  result = _subprocess_timeout;
+//
+//    return result;
+//}
+
+//---------------------------------------------------------------------Task::on_remote_task_running
+
+void Task::on_remote_task_running() {
+    _call_register.call<Remote_task_running_call>();
+}
+
+//------------------------------------------------------------------------------------Task::on_call
+
+void Task::on_call(const Task_starting_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_opening_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_step_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Try_next_step_call&) {
+    do_something();
+}
+
+void Task::on_call(const Next_spooler_process_call&) {
+    do_something();
+}
+
+void Task::on_call(const Next_order_step_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_idle_timeout_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_locks_are_available_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_check_for_order_call&) {
+    do_something();
+}
+
+void Task::on_call(const Subprocess_timeout_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_end_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Remote_task_running_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_end_with_period_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_on_success_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_on_error_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_exit_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_release_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_ended_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const End_task_call&) {
+    do_something();
+}
+
+void Task::on_call(const Warn_longer_than_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Task_timeout_call&) {
+    do_something();
+}
+
+void Task::on_call(const Killing_task_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_process_ended_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Task_wait_for_subprocesses_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Try_deleting_files_call&) {
+    do_something();
+}
+
+//----------------------------------------------------------------------Task::wake_when_longer_than
+
+void Task::wake_when_longer_than() 
 {
-    // Besser, ein neues _next_time wird an der Stelle gesetzt, wo das Ereignis auftritt //
-
-
-    Time result;
-
-    if( _end == end_kill_immediately  &&  !_kill_tried )
-    {
-        result = Time(0);
-    }
-    else
-    if( _operation )
-    {
-        if( _operation->async_finished() ) {
-            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
-        } else {
-            Duration t = _timeout;
-            if( _state == s_running ||
-                _state == s_running_process ||
-                _state == s_running_remote_process )  t = min( t, _warn_if_longer_than );
-
-            result = t.is_eternal()? Time::never 
-                                   : _last_operation_time + t;     // _timeout sollte nicht zu groß sein
-        }                 
-    }
-    else
-    if( _state == s_running_process  &&  !_timeout.is_eternal() )
-    {
-        result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groß sein
-    }
-    else
-    {
-        result = _next_time;
-        if( _state == s_running_delayed  &&  result > _next_spooler_process )  result = _next_spooler_process;
-    }
-
-    if( result > _subprocess_timeout )  result = _subprocess_timeout;
-
-    return result;
+    if (!_warn_if_longer_than.is_eternal())
+        _call_register.call_at<Warn_longer_than_call>(Time::now() + _warn_if_longer_than);
 }
 
 //------------------------------------------------------------------------------Task::check_timeout
@@ -1293,8 +1412,8 @@ void Task::set_subprocess_timeout()
     _subprocess_timeout = Time::never;
     FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout_at )  _subprocess_timeout = p->second->_timeout_at;
 
-    if( !_subprocess_timeout.is_never() )  signal( "subprocess_timeout" );
-    //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
+    _call_register.call_at<Subprocess_timeout_call>(_subprocess_timeout);
+    //if( !_subprocess_timeout.is_never() )  signal( "subprocess_timeout" );
 }
 
 //-------------------------------------------------------------------Task::check_subprocess_timeout
@@ -1351,9 +1470,7 @@ bool Task::do_something()
     bool had_operation      = _operation != NULL;
     bool something_done     = false;
     Time now                = Time::now();
-    Time next_time_at_begin = _next_time;
-
-    _signaled = false;
+    //Time next_time_at_begin = _next_time;
 
     //if( _end == end_kill_immediately  &&  !_kill_tried )
     //{
@@ -1474,6 +1591,7 @@ bool Task::do_something()
                             if( !_operation )
                             {
                                 _operation = begin__start();
+                                _operation->set_async_call(Z_NEW(Task_starting_completed_call(this)));
                             }
                             else
                             {
@@ -1515,6 +1633,7 @@ bool Task::do_something()
                                 }
 
                                 _operation = do_call__start( spooler_open_name );
+                                _operation->set_async_call(Z_NEW(Task_opening_completed_call(this)));
                             }
                             else
                             {
@@ -1549,6 +1668,7 @@ bool Task::do_something()
                             
                             if( _module_instance->process_has_signaled() )
                             {
+                                _call_register.cancel<Warn_longer_than_call>();
                                 _file_logger->flush();
                                 _log->info( message_string( "SCHEDULER-915" ) );
                                 check_if_shorter_than( now );
@@ -1560,11 +1680,12 @@ bool Task::do_something()
                             else
                             {
                                 check_timeout( now );
-
+                                wake_when_longer_than();
                                 _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
-                                _next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                                //_next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                                if (!_timeout.is_eternal()) 
+                                    _call_register.call_at<Task_timeout_call>(now + _timeout);
                             }
-
                             break;
 
 
@@ -1575,9 +1696,12 @@ bool Task::do_something()
                             if( !_operation )
                             {
                                 _operation = do_step__start();
+                                _operation->set_async_call(Z_NEW(Task_step_completed_call(this)));
+                                wake_when_longer_than();
                             }
                             else
                             {
+                                _call_register.cancel<Warn_longer_than_call>();
                                 string result = remote_process_step__end();
                                 check_if_shorter_than( now );
                                 // JS-448 something_done |= check_if_longer_than( now );
@@ -1622,13 +1746,17 @@ bool Task::do_something()
                                     }
 
                                     _operation = do_step__start();
+                                    _operation->set_async_call(Z_NEW(Task_step_completed_call(this)));
+                                    wake_when_longer_than();
 
                                     something_done = true;
                                 }
                             }
                             else
                             {
+                                _call_register.cancel<Warn_longer_than_call>();
                                 ok = step__end();
+                                _operation->set_async_call(NULL);
                                 _operation = NULL;
 
                                 if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )   
@@ -1660,6 +1788,7 @@ bool Task::do_something()
 
                                 if( _state != s_ending  &&  !_end )  _order_for_task_end = NULL;
 
+                                _call_register.call<Try_next_step_call>();
                                 something_done = true;
                             }
 
@@ -1688,7 +1817,7 @@ bool Task::do_something()
                                     _idle_timeout_at = now + _job->_idle_timeout;
                                     set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
                                     Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << 
-                                        now.as_string(_job->time_zone_name()) << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << "\n" );
+                                        now.as_string(_job->time_zone_name()) << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     something_done = true;
                                 }
@@ -1728,6 +1857,7 @@ bool Task::do_something()
                                 if( _begin_called )
                                 {
                                     _operation = do_end__start();
+                                    _operation->set_async_call(Z_NEW(Task_end_completed_call(this)));
                                 }
                                 else
                                 {
@@ -1759,6 +1889,7 @@ bool Task::do_something()
                                     if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
                                     {
                                         _operation = m->_remote_instance->call__start( "Wait_for_subprocesses" );
+                                        _operation->set_async_call(Z_NEW(Task_wait_for_subprocesses_completed_call(this)));
                                     }
                                     else
                                     {
@@ -1789,8 +1920,14 @@ bool Task::do_something()
 
                         case s_on_success:
                         {
-                            if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                         else  operation__end(), set_state_direct( s_exit ), loop = true;
+                            if( !_operation ) {
+                                _operation = do_call__start( spooler_on_success_name );
+                                _operation->set_async_call(Z_NEW(Task_on_success_completed_call(this)));
+                            } else {
+                                operation__end();
+                                set_state_direct( s_exit );
+                                loop = true;
+                            } 
 
                             something_done = true;
                             break;
@@ -1799,8 +1936,12 @@ bool Task::do_something()
 
                         case s_on_error:
                         {
-                            if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                         else  operation__end(), set_state_direct( s_exit ), loop = true;
+                            if( !_operation ) {
+                                _operation = do_call__start( spooler_on_error_name );
+                                _operation->set_async_call(Z_NEW(Task_on_error_completed_call(this)));
+                            }
+                            else  
+                                operation__end(), set_state_direct( s_exit ), loop = true;
 
                             something_done = true;
                             break;
@@ -1811,8 +1952,14 @@ bool Task::do_something()
                         {
                             if( _job->_module->_reuse == Module::reuse_task )
                             {
-                                if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                             else  operation__end(), set_state_direct( s_release ), loop = true;
+                                if( !_operation ) {
+                                    _operation = do_call__start( spooler_exit_name );
+                                    _operation->set_async_call(Z_NEW(Task_exit_completed_call(this)));
+                                } else {
+                                    operation__end();
+                                    set_state_direct( s_release );
+                                    loop = true;
+                                }
                             }
                             else
                             {
@@ -1827,8 +1974,14 @@ bool Task::do_something()
 
                         case s_release:
                         {
-                            if( !_operation )  _operation = do_release__start();
-                                         else  operation__end(), set_state_direct( s_killing ), loop = true;
+                            if( !_operation ) {
+                                _operation = do_release__start();
+                                _operation->set_async_call(Z_NEW(Task_release_completed_call(this)));
+                            } else  {
+                                operation__end();
+                                set_state_direct( s_killing );
+                                loop = true;
+                            }
 
                             something_done = true;
                             break;
@@ -1839,7 +1992,7 @@ bool Task::do_something()
                         {
                             if( _module_instance  &&  _module_instance->is_kill_thread_running() )
                             {
-                                _next_time = Time::now() + Duration(0.1);
+                                _call_register.call_at<Killing_task_call>(Time::now() + Duration(0.1));
                             }
                             else
                             {
@@ -1855,6 +2008,7 @@ bool Task::do_something()
                             if( !_operation )
                             {
                                 _operation = do_close__start();
+                                _operation->set_async_call(Z_NEW(Task_ended_completed_call(this)));
                             }
                             else
                             {
@@ -1889,21 +2043,16 @@ bool Task::do_something()
                         }
 
 
-                        case s_deleting_files:
-                        {
+                        case s_deleting_files: {
                             bool ok;
 
-                            if( !_module_instance )
-                            {
+                            if( !_module_instance ) {
                                 ok = true;
-                            }
-                            else
-                            {
+                            } else {
                                 ok = false;
                                 Time now = Time::now();
 
-                                if( !_trying_deleting_files_until  ||  now >= _next_time )     // do_something() wird zu oft gerufen, deshalb prüfen, ob_next_time erreicht ist.
-                                {
+                                if (!_trying_deleting_files_until  ||  now >= _call_register.at<Try_deleting_files_call>()) {     // do_something() wird zu oft gerufen, deshalb prüfen, ob_next_time erreicht ist.
                                     // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. Das soll kein Task-Problem sein!
                                     // Siehe auch ~Process_module_instance
                                     Has_log* my_log = NULL; //_trying_deleting_files_until? NULL : _job->log();
@@ -1911,51 +2060,40 @@ bool Task::do_something()
                                     // Folgendes könnte zusammengefasst werden mit Remote_task_close_command_response::async_continue_() als eigene Async_operation
 
                                     ok = _module_instance->try_delete_files( my_log );
-                                    if( ok )
-                                    {
+                                    if (ok) {
                                         if( _trying_deleting_files_until.not_zero() )  
-                                        {
                                             _log->debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if( !_trying_deleting_files_until )  
-                                        {
+                                    } else {
+                                        if (!_trying_deleting_files_until) {
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
                                         }
-
-                                        //if( _end == end_kill_immediately  &&  // Bei kill_immediately nur einmal warten (1/10s, das ist zu kurz!)
-                                        if( _trying_deleting_files_until.not_zero()  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
-                                        {
+                                        
+                                        if (_trying_deleting_files_until.not_zero()  &&  now >= _trying_deleting_files_until) {   // Nach Fristablauf geben wir auf
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->info( message_string( "SCHEDULER-878", paths ) );
                                             _job->log()->warn( message_string( "SCHEDULER-878", paths ) );
                                             ok = true;
-                                        }
-                                        else
-                                        {
-                                            // Funktioniert in lokaler Zeit. Zum Beginn der Winterzeit: +1h, zum Beginn der Sommerzeit: 0s.
-                                            if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay;
-                                            _next_time = min( now + delete_temporary_files_retry, _trying_deleting_files_until );
-                                        }
+                                        } 
+                                        else 
+                                        if (!_trying_deleting_files_until)  
+                                            _trying_deleting_files_until = now + delete_temporary_files_delay;
                                     }
 
                                     something_done = true;
                                 }
                             }
                             
-                            if( ok )
-                            {
+                            if (!ok) {
+                                _call_register.call_at<Try_deleting_files_call>(min(now + delete_temporary_files_retry, _trying_deleting_files_until));
+                            } else {
                                 if( _module_instance )  _module_instance->detach_process();
                                 _module_instance = NULL;
                                 finish();
                                 set_state_direct( s_closed );
                                 something_done = true;
                                 loop = true;
-                            }
-                            
+                            } 
                             break;
                         }
 
@@ -1964,7 +2102,6 @@ bool Task::do_something()
                             break;
 
                         case s_closed:
-                            report_event_code(taskClosedEvent, java_sister());
                             break;
 
                         case s_none:
@@ -2037,36 +2174,30 @@ bool Task::do_something()
             } // catch( const exception& x )
         }  // while 
 
-        if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
+        if( _operation && !had_operation ) {
+            _last_operation_time = now;
+            if (!_timeout.is_eternal())
+                _call_register.call_at<Task_timeout_call>(_last_operation_time + _timeout);
+        }
 
-        if( !something_done  &&  _next_time <= now  &&  !_signaled )    // Obwohl _next_time erreicht, ist nichts getan?
+        if( !something_done )    // Obwohl _next_time erreicht, ist nichts getan?
         {
             // Das kann bei s_running_waiting_for_order passieren, wenn zunächst ein Auftrag da ist (=> _next_time = 0),
             // der dann aber von einer anderen Task genommen wird. Dann ist der Auftrag weg und something_done == false.
 
             set_state_direct( state() );  // _next_time neu setzen
 
-            if( _next_time <= now )
+            //if( _next_time <= now )
+            //{
+            //    Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << ", delayed\n" );
+            //    //set_next_time(Time::now() + Duration(0.1));
+            //}
+            //else
             {
-                Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << ", delayed\n" );
-                _next_time = Time::now() + Duration(0.1);
-            }
-            else
-            {
-                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin.as_string(_job->time_zone_name()) << "\n" );
+                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << "\n" );
             }
         }
     }  // if( _operation &&  !_operation->async_finished() )
-
-  //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
-
-/*
-    if( _state != s_running
-     && _state != s_running_delayed
-     && _state != s_running_waiting_for_order
-     && _state != s_running_process
-     && _state != s_suspended                 )  send_collected_log();
-*/
 
 
     return something_done;
@@ -2108,6 +2239,9 @@ bool Task::load()
     _timeout = _job->_task_timeout;
 
     if( _job->is_machine_resumable() )  _spooler->begin_dont_suspend_machine();
+
+    if (!_let_run) 
+        _call_register.call_at<Task_end_with_period_call>(_job->_period.end());   // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
     return do_load();
 }
@@ -2218,6 +2352,7 @@ string Task::remote_process_step__end()
         set_error(x); 
     }
 
+    _operation->set_async_call(NULL);
     _operation = NULL;
 
     return result;
@@ -2252,6 +2387,7 @@ bool Task::operation__end()
     }
     catch( const exception& x ) { set_error(x); result = false; }
 
+    _operation->set_async_call(NULL);
     _operation = NULL;
 
     return result;
@@ -2310,6 +2446,8 @@ void Task::postprocess_order( Order::Order_state_transition state_transition, bo
         }
 
         detach_order();
+
+        //_call_register.call<Task_check_for_order_call>();
     }
 }
 

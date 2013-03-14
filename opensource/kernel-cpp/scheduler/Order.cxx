@@ -2817,14 +2817,9 @@ void Order::processing_error()
 
 void Order::postprocessing2( Job* last_job )
 {
-    Job* job = this->job();
-
-    if( _moved  &&  job  &&  !order_queue()->has_immediately_processable_order() )
-    {
-        job->signal( "Order (delayed set_state)" );
-    }
-
     _moved = false;
+
+    if (job()) job()->signal_earlier_order(this);
 
     if( finished() )
     {

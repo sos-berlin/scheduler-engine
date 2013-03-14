@@ -291,10 +291,13 @@ Process::Process( Spooler* sp )
 
 Process::~Process()
 {
-    if( _async_remote_operation )
-    {
+    if (_async_remote_operation) {
         _async_remote_operation->set_async_manager( NULL );
         _async_remote_operation = NULL;
+    }
+    if (_close_operation) {
+        _close_operation->set_async_manager(NULL);
+        _close_operation = NULL;
     }
 
     if( _process_handle_copy )  _spooler->unregister_process_handle( _process_handle_copy );
@@ -329,9 +332,11 @@ void Process::close_async()
 
 Async_operation* Process::close__start( bool run_independently )
 {
+    assert(!_close_operation);
     _close_operation = Z_NEW( Close_operation( this, run_independently ) );
+    _close_operation->set_async_next_gmtime((time_t)0);
     _close_operation->set_async_manager( _spooler->_connection_manager );
-    _close_operation->async_continue();
+    //_close_operation->async_continue();
 
     return _close_operation;
 }
@@ -340,6 +345,7 @@ Async_operation* Process::close__start( bool run_independently )
 
 void Process::close__end()
 {
+    if (_close_operation) _close_operation->set_async_manager(NULL);
     _close_operation = NULL;
     _session = NULL;
 }
@@ -638,7 +644,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
 
         case Async_remote_operation::s_running:    
         {
-            if( _module_instance  &&  _module_instance->_task )  _module_instance->_task->signal( Z_FUNCTION );
+            if( _module_instance  &&  _module_instance->_task )  _module_instance->_task->on_remote_task_running();
             break;
         }
 
@@ -1235,6 +1241,7 @@ void Process_class::add_process( Process* process )
 {
     process->_process_class = this;
     _process_set.insert( process );
+    _process_set_version++;
 }
 
 //--------------------------------------------------------------------------Spooler::remove_process
@@ -1246,6 +1253,7 @@ void Process_class::remove_process( Process* process )
 
     process->_process_class = NULL; 
     _process_set.erase( it ); 
+    _process_set_version++;
 
     if( is_to_be_removed()  &&  can_be_removed_now() )
     {
@@ -1484,9 +1492,11 @@ bool Process_class_subsystem::async_continue()
 
     FOR_EACH_FILE_BASED( Process_class, process_class )
     {
+        int v = process_class->_process_set_version;
         FOR_EACH( Process_class::Process_set, process_class->_process_set, p )
         {
             something_done |= (*p)->async_continue();
+            if (process_class->_process_set_version != v) break;
         }
     }
 

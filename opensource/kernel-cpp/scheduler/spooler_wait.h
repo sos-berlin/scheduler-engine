@@ -101,9 +101,6 @@ struct Wait_handles : Non_cloneable
     string                      as_string                   ();
     friend ostream&             operator <<                 ( ostream& s, Wait_handles& w )         { return s << w.as_string(); }
 
-
-    z::Event_base*             _catched_event;              // Ereignis, das wait_until() beendete. Nur unmittelbar nach wait_until() oder signaled() gültig.
-
   protected:
     Spooler*                   _spooler;
     Prefix_log*                _log;

@@ -40,6 +40,9 @@ namespace job {
     DEFINE_SIMPLE_CALL(Job, Period_end_call)
     DEFINE_SIMPLE_CALL(Job, Calculated_next_time_do_something_call)
     DEFINE_SIMPLE_CALL(Job, Start_when_directory_changed_call)
+    DEFINE_SIMPLE_CALL(Job, Order_timed_call)
+
+    Task_closed_call::Task_closed_call(Task* task) : object_call<Job, Task_closed_call>(task->job()), _task(task) {}
 }
 
 using namespace job;
@@ -1892,6 +1895,18 @@ void Job::on_call(const Calculated_next_time_do_something_call&) {
     do_something();
 }
 
+void Job::on_call(const Order_timed_call&) {
+    _call_register.cancel<Order_timed_call>();
+    do_something();
+}
+
+//--------------------------------------------------------------------Job::on_call Task_closed_call
+
+void Job::on_call(const Task_closed_call& call) {
+    assert(call._task->state() == Task::s_closed);
+    _spooler->_task_subsystem->remove_task(call._task);
+}
+
 //---------------------------------------------------Job::on_call Start_when_directory_changed_call
 
 void Job::on_call(const Start_when_directory_changed_call&) {
@@ -2479,7 +2494,7 @@ void Job::calculate_next_time( const Time& now )
         }
     }
 
-    if (_next_time != next_time) {
+    //if (_next_time != next_time) {
         Time old_next_time = _next_time;
         _next_time = next_time;
         //_log->info(S() << "*********************** calculate_next_time=" << _next_time.as_string(_spooler->_time_zone_name));
@@ -2491,7 +2506,7 @@ void Job::calculate_next_time( const Time& now )
                   _next_time > old_next_time? " > " : " = " ) 
               << "old " << old_next_time.as_string(time_zone_name()) << "\n" );
         #endif
-    }
+    //}
 }
 
 //------------------------------------------------------------------------Job::signal_earlier_order
@@ -2501,19 +2516,12 @@ void Job::signal_earlier_order( Order* order )
     signal_earlier_order( order->next_time(), order->obj_name(), Z_FUNCTION );
 }
 
-//------------------------------------------------------------------------Job::signal_earlier_order
-
-void Job::signal_earlier_order( const Time& next_time, const string& order_name, const string& function )
+void Job::signal_earlier_order( const Time& t, const string& order_name, const string& function )
 {
-    if( !next_time.is_never() )
-    {
-        Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << obj_name() << "  " << order_name << " " << next_time.as_string(time_zone_name()) << "\n" );
-
-        if( !_next_time.is_zero()  &&  _next_time > next_time )
-        {
-            Time now = Time::now();
-            calculate_next_time( now );
-       }
+    if (!t.is_never()) {
+        Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << order_name << "  " << order_name << " " << t.as_string(time_zone_name()) << "\n" );
+        if (_call_register.at<Order_timed_call>() >= t)
+            _call_register.call_at<Order_timed_call>(t);
     }
 }
 

@@ -355,6 +355,7 @@ bool Process_module_instance::begin__end()
     
     if( _spooler )  
     {
+        if (_task) _process_handle.set_call(Z_NEW(job::Task_process_ended_call(_task)));
         _process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle );
     }
@@ -687,6 +688,7 @@ bool Process_module_instance::begin__end()
 
     if( _spooler )
     {
+        if (_task) _process_handle.set_call(Z_NEW(job::Task_process_ended_call(_task)));
         _process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle._pid );
         _pid_to_unregister = _process_handle._pid;

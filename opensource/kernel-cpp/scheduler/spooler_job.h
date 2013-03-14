@@ -19,6 +19,12 @@ namespace job {
     struct Period_end_call;
     struct Calculated_next_time_do_something_call;
     struct Start_when_directory_changed_call;
+    struct Order_timed_call;
+
+    struct Task_closed_call : object_call<Job, Task_closed_call> {
+        Task* const _task;
+        Task_closed_call(Task*);
+    };
 }
 
 //------------------------------------------------------------------------------Combined_job_nodes
@@ -287,7 +293,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        on_call                     (const job::Period_begin_call&);
     void                        on_call                     (const job::Period_end_call&);
     void                        on_call                     (const job::Calculated_next_time_do_something_call&);
+    void                        on_call                     (const job::Task_closed_call&);
     void                        on_call                     (const job::Start_when_directory_changed_call&);
+    void                        on_call                     (const job::Order_timed_call&);
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
   //void                        on_removing_lock            ( lock::Lock* );
