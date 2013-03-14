@@ -63,6 +63,7 @@ public final class Environment {
         result.add("-id="+schedulerId);
         result.add("-sos.ini=" + sosIniFile());
         result.add("-ini=" + iniFile());
+        result.add("-log-level=debug9");
         result.add("-log-dir=" + logDirectory.getPath());
         result.add("-log="+logCategories+">" + schedulerLog.getPath());
         if (OperatingSystem.isUnix)
