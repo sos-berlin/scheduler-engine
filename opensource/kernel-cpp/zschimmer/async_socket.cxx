@@ -955,15 +955,18 @@ int Socket_wait::wait( double seconds )
         // Denn diese Stelle wirkt nur, wenn der Scheduler sekundenlang nichts zu tun hat.
         // Am besten sei Directory_watcher eine Async_operation. Joacim 31.12.2003
 
-        Z_FOR_EACH( Event_list, _event_list, e )
-        {
+        int result = 0;
+        Z_FOR_EACH(Event_list, _event_list, i) {
             //Z_LOG2( "zschimmer", Z_FUNCTION << " " << **e << "->signaled()?\n" );
-            if( (*e)->signaled() )
-            { 
-                Z_LOG2( "object_server.wait", **e << " signaled!\n" );  
-                return 1; 
+            Event_base* e = *i;
+            if (e->signaled()) { 
+                Z_LOG2( "object_server.wait", *e << " signaled!\n" );  
+                e->set_signaled_then_callback("");
+                result = 1;
             }
         }
+        if (result)
+            return result;
 
         now = double_from_gmtime();
         if( now - until > -0.000001 )  return 0;
