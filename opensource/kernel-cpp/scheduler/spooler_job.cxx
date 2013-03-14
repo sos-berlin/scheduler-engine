@@ -39,6 +39,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Job, Period_begin_call)
     DEFINE_SIMPLE_CALL(Job, Period_end_call)
     DEFINE_SIMPLE_CALL(Job, Calculated_next_time_do_something_call)
+    DEFINE_SIMPLE_CALL(Job, Start_when_directory_changed_call)
 }
 
 using namespace job;
@@ -550,7 +551,6 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _schedule_use = Z_NEW( Job_schedule_use( this ) );
 
     _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
-    _directory_watcher_next_time = Time::never;
     _default_params = new Com_variable_set;
     _task_timeout   = Duration::eternal;
     _idle_timeout   = Duration(5);
@@ -1892,6 +1892,14 @@ void Job::on_call(const Calculated_next_time_do_something_call&) {
     do_something();
 }
 
+//---------------------------------------------------Job::on_call Start_when_directory_changed_call
+
+void Job::on_call(const Start_when_directory_changed_call&) {
+	bool ok = check_for_changed_directory(Time::now());         // Hier prüfen, damit Signal zurückgesetzt wird
+    log()->debug(S() << "Start_when_directory_changed_call ok=" << ok);
+    if (ok) do_something();
+}
+
 //-------------------------------------------------------------------------------Job::set_state_cmd
 
 void Job::set_state_cmd(State_cmd state_cmd)
@@ -2003,7 +2011,6 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 {
     _log->debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
 
-
     Directory_watcher_list::iterator it; 
 
     for( it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
@@ -2036,6 +2043,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 
     new_dw->watch_directory( directory_name, filename_pattern );
     new_dw->set_name( "job(\"" + name() + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
+    new_dw->set_call(Z_NEW(Start_when_directory_changed_call(this)));
     new_dw->add_to( &_spooler->_wait_handles );
 
     if( it == _directory_watcher_list.end() )  // neu?
@@ -2062,21 +2070,16 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         *it = new_dw;       // Alte durch neue Überwachung ersetzen
     }
 
-    _directory_watcher_next_time = Time(0);
-    calculate_next_time( Time::now() );
+	_call_register.call_at<Start_when_directory_changed_call>(Time(0));
 }
 
 //----------------------------------------------------------------Job::clear_when_directory_changed
 
 void Job::clear_when_directory_changed()
 {
-    {
-        if( !_directory_watcher_list.empty() )  _log->debug( "clear_when_directory_changed" );
-
-        _directory_watcher_list.clear();
-
-        _directory_watcher_next_time = Time::never;
-    }
+    if( !_directory_watcher_list.empty() )  _log->debug( "clear_when_directory_changed" );
+    _directory_watcher_list.clear();
+	_call_register.cancel<Start_when_directory_changed_call>();
 }
 
 //------------------------------------------------------------------Job::update_changed_directories
@@ -2102,46 +2105,22 @@ bool Job::check_for_changed_directory( const Time& now )
 {
     bool something_done = false;
 
-#   ifdef Z_UNIX
-        if( now < _directory_watcher_next_time )  
-        { 
-            //Z_LOG2( "zschimmer", obj_name() << " " << Z_FUNCTION << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
-            return false; 
-        }
-#   endif
+	_call_register.call_at<Start_when_directory_changed_call>(_directory_watcher_list.empty()? Time::never : now + directory_watcher_intervall);
 
-
-    //Z_LOG2( "zschimmer", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
-    _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
-                                                                     : Time::never;
-    calculate_next_time( now );
-
-
-    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
-    while( it != _directory_watcher_list.end() )
-    {
-#       ifdef Z_UNIX
-            something_done = true;    // Unter Unix lassen wir do_something() periodisch aufrufen, um has_changed() ausführen können. Also: something done!
-#       endif   
-
+    for (Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end();) {
         Directory_watcher* directory_watcher = *it;
 
         directory_watcher->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
-
-        if( directory_watcher->signaled_then_reset() )
-        {
+        
+        if (directory_watcher->signaled_then_reset()) {
             Z_LOG2( "zschimmer", Z_FUNCTION << " something_done=true\n" );
             something_done = true;
-
             update_changed_directories( directory_watcher );
-
-            if( !directory_watcher->valid() )
-            {
+            if (!directory_watcher->valid()) {
                 it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
                 continue;
             }
         }            
-
         it++;
     }
 
@@ -2497,10 +2476,6 @@ void Job::calculate_next_time( const Time& now )
                     next_time = has_order? Time(0) : min(next_time, _combined_job_nodes->next_time() );
                 }
             }
-
-#           ifdef Z_UNIX
-                next_time = min(next_time, _directory_watcher_next_time);
-#           endif
         }
     }
 
@@ -2839,8 +2814,6 @@ bool Job::do_something()
     bool task_started       = false;
     Time now                = Time::now();
 
-    something_done |= check_for_changed_directory( now );         // Hier prüfen, damit Signal zurückgesetzt wird
-
     if (_state > s_loaded && _state != s_error)
     try {
         Time next_time_at_begin = _next_time;
@@ -2890,6 +2863,10 @@ bool Job::do_something()
             }
         }
 
+        Z_FOR_EACH(Task_list, _running_tasks, it) {
+            Task* task = *it;
+            task->do_something();
+        }
 
         if( !something_done  &&  _next_time <= now ) {  // Obwohl _next_time erreicht, ist nichts getan?
             calculate_next_time( now );
@@ -2899,7 +2876,6 @@ bool Job::do_something()
                     " _next_time=" << _next_time.as_string(time_zone_name()) <<
                     " _next_start_time=" << _next_start_time.as_string(time_zone_name()) <<
                     " _next_single_start=" << _next_single_start.as_string(time_zone_name()) <<
-                    " _directory_watcher_next_time=" << _directory_watcher_next_time.as_string(time_zone_name()) <<
                     " _period=" << _period.obj_name() <<
                     " _repeat=" << _repeat <<
                     " _waiting_for_process=" << _waiting_for_process <<

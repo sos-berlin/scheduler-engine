@@ -87,18 +87,6 @@ void Event::create()
     if( !_handle )  throw_mswin( "CreateEvent", _name.c_str() );
 }
 
-//--------------------------------------------------------------------------------Event::set_signal
-/*
-void Event::set_signal()
-{
-    Z_MUTEX( _mutex )
-    {
-        Z_LOG( "Event(" << _name << "," << _signal_name << ").set_signal()\n" );
-
-        _signaled = true;
-    }
-}
-*/
 //------------------------------------------------------------------------------------Event::signal
 
 void Event::signal( const string& name )

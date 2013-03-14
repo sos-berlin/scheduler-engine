@@ -18,6 +18,7 @@ namespace job {
     struct Period_begin_call;
     struct Period_end_call;
     struct Calculated_next_time_do_something_call;
+    struct Start_when_directory_changed_call;
 }
 
 //------------------------------------------------------------------------------Combined_job_nodes
@@ -286,6 +287,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        on_call                     (const job::Period_begin_call&);
     void                        on_call                     (const job::Period_end_call&);
     void                        on_call                     (const job::Calculated_next_time_do_something_call&);
+    void                        on_call                     (const job::Start_when_directory_changed_call&);
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
   //void                        on_removing_lock            ( lock::Lock* );
@@ -412,7 +414,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     long32                     _error_steps;                // Zahl aufeinanderfolgender Fehler
 
     Directory_watcher_list     _directory_watcher_list;
-    Time                       _directory_watcher_next_time;
     bool                       _directory_changed;
     string                     _changed_directories;
     Xc_copy                    _error;

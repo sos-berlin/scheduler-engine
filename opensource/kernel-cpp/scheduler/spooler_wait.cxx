@@ -379,23 +379,21 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )           // "normales" handle
         {
-                int            index = ret - WAIT_OBJECT_0;
-                z::Event_base* event = _events[ index ];                                // scheduler-internes event-object
+            int            index = ret - WAIT_OBJECT_0;
+            z::Event_base* event = _events[ index ];                                // scheduler-internes event-object
             
-                if( event )
-                {
-                    if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
-                    if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );            // signal für "event" gesetzt
-                    if (const Call* c = event->call())
-                        c->call();
-                }
-                else
-                    if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
+            if( event )
+            {
+                if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
+                if( event != &_spooler->_waitable_timer )  event->set_signaled_then_callback( "MsgWaitForMultipleObjects" );            // signal für "event" gesetzt
+            }
+            else
+                if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
 
-                _catched_event = event;
+            _catched_event = event;
 
-                if( event != &_spooler->_waitable_timer )  result = true;                // PC aufwecken
-                break;
+            if( event != &_spooler->_waitable_timer )  result = true;                // PC aufwecken
+            break;
         }
         else
         if( ret == WAIT_OBJECT_0 + _handles.size() )

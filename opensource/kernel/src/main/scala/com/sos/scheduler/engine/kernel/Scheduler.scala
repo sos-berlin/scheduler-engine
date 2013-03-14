@@ -109,9 +109,9 @@ with HasInjector {
   }
 
   /** Wird bei jedem Schleifendurchlauf aufgerufen. */
-  @ForCpp private def onEnteringSleepState() = {
-    eventBus.dispatchEvents()
+  @ForCpp private def onEnteringSleepState(): Long = {
     val somethingDone = callRunner.execute()
+    eventBus.dispatchEvents()
     val nextTime = schedulerThreadCallQueue.nextTime
     if (somethingDone) -nextTime else nextTime
   }

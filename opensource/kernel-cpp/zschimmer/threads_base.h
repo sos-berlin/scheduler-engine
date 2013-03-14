@@ -34,10 +34,10 @@ struct Event_base : Object//, Has_set_signaled
     bool                        signaled_flag               () const                                { return _signaled; }   // const
     void                    set_signaled                    ( bool b = true )                       { _signaled = b; }
     void                    set_signaled                    ( const string& name )                  { _signaled = true; _signal_name = name; }
+    void                    set_signaled_then_callback      (const string& name);
     virtual void                reset                       () = 0;
   //virtual bool                signaled_after_check        ()                                      { return _signaled; }
     void                    set_call                        (Call* o)                               { _call = o; }
-    const Call*                 call                        () const                                { return _call; }
 
     void                    set_waiting_thread_id           ( Thread_id id )                        { _waiting_thread_id = id; }  // Wenn nur dieser Thread wartet
 
