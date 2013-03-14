@@ -149,6 +149,8 @@ struct Typed_call_register {
     void enqueue_id(int id, Timed_call* o);
     void cancel_id(int id);
     void cancel_entry(ptr<Timed_call>*);
+    Time at(int id) const;
+    const Timed_call* get(int id) const;
 };
 
 //----------------------------------------------------------------------------typed_call_register<>
@@ -185,6 +187,16 @@ struct typed_call_register : Typed_call_register {
     template<typename CALL>
     void call(const ptr<CALL>& call) {
         enqueue_id(CALL::type_id(), call);
+    }
+
+    template<typename CALL>
+    Time at() const {
+        return Typed_call_register::at(CALL::type_id());
+    }
+
+    template<typename CALL>
+    const CALL* get() const {
+        return (CALL*)get(CALL::type_id());
     }
 };
 

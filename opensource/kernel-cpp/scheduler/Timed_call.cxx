@@ -100,4 +100,18 @@ Time Typed_call_register::next_time() const {
     return result;
 }
 
+
+Time Typed_call_register::at(int id) const {
+    if (const Timed_call* c = get(id))
+        return c->at();
+    else
+        return Time::never;
+}
+
+
+const Timed_call* Typed_call_register::get(int id) const {
+    Map::const_iterator i = _map.find(id);
+    return i == _map.end()? NULL : i->second;
+}
+
 }}
