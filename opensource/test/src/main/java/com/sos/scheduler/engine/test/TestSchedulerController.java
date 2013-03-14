@@ -5,6 +5,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.common.system.Files;
 import com.sos.scheduler.engine.common.time.Time;
+import com.sos.scheduler.engine.common.xml.XmlUtils;
 import com.sos.scheduler.engine.data.log.ErrorLogEvent;
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
 import com.sos.scheduler.engine.eventbus.*;
@@ -34,6 +35,7 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 import static com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.common.system.Files.tryRemoveDirectoryRecursivly;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.*;
 import static java.util.Arrays.asList;
 
 public class TestSchedulerController extends DelegatingSchedulerController implements EventHandlerAnnotated {
@@ -158,7 +160,14 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     public final void waitForTermination(Time timeout) {
         boolean ok = tryWaitForTermination(timeout);
-        if (!ok) throw new SchedulerRunningAfterTimeoutException(timeout);
+        if (!ok) {
+            RuntimeException x = new SchedulerRunningAfterTimeoutException(timeout);
+            logger.warn(x.toString());
+            String cmd = "<show_state what='folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations'/>";
+            logger.warn(cmd);
+            logger.warn(prettyXml(scheduler().uncheckedExecuteXml(cmd)));
+            throw x;
+        }
     }
 
     private void automaticStart() {
