@@ -75,17 +75,17 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA_HOME)/include/win32;$(JAVA_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA_HOME)/include/win32;$(JAVA_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA_HOME)/include/win32;$(JAVA_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(JAVA7_HOME)/include/win32;$(JAVA7_HOME)/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(JAVA_HOME)/include/win32;$(JAVA_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
