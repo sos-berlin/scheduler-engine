@@ -14,11 +14,13 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
   val schedulerResourceToFileTransformer: ResourceToFileTransformer = null
   val schedulerResourceNameMap: Iterable[(String,String)] = List()
   val binariesDebugMode = CppBinariesDebugMode.debug
+  val logCategories = ""
   lazy val controller = TestSchedulerController.builder(getClass)
       .resourcesPackage(configurationPackage)
       .nameMap(ImmutableMap.copyOf(mapAsJavaMap(schedulerResourceNameMap.toMap)))
       .resourceToFileTransformer(schedulerResourceToFileTransformer)
       .debugMode(binariesDebugMode)
+      .logCategories(logCategories)
       .build
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
