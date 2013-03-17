@@ -534,16 +534,18 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, co
         xml::Element_ptr source_element = result.ownerDocument().createElement( "source" );
         result.insertBefore( source_element, original_first_node );
 
-        try
-        {
-            xml::Document_ptr source_dom ( _source_xml );
-            source_element.appendForeignChild(source_dom.documentElement());      // Ein "prune()" wäre effizienter als clone()
+        xml::Document_ptr source_dom;
+        source_dom.create();
+        try {
+            source_dom.load_xml(_source_xml);
         }
-        catch( exception& x )
-        {
+        catch (exception& x) {
+            source_dom = xml::Document_ptr();
             source_element.appendChild( result.ownerDocument().createTextNode( _source_xml ) );
             append_error_element( source_element, x );
         }
+        if (source_dom)
+            source_element.adoptAndAppendChild(source_dom.documentElement());
     }
 }
 
