@@ -120,7 +120,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
   }
 
   test("TaskEntity is read as expected") {
-    val queuedTasksElem = (scheduler executeXml <show_job job={simpleJob.getPath.string} what="task_queue"/>) \ "answer" \ "job" \ "queued_tasks"
+    val queuedTasksElem = (scheduler executeXml <show_job job={simpleJob.getPath.string} what="task_queue"/>).elem \ "answer" \ "job" \ "queued_tasks"
     (queuedTasksElem \ "@length").text.toInt should equal (3)
     val queuedTaskElems = queuedTasksElem \ "queued_task"
     queuedTaskElems should have size (3)

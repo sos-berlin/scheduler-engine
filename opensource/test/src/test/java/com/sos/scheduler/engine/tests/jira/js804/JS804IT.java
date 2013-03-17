@@ -10,7 +10,9 @@ import org.w3c.dom.Document;
 
 import java.io.StringWriter;
 
-import static com.sos.scheduler.engine.common.xml.XmlUtils.*;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.writeXmlTo;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -39,8 +41,8 @@ public final class JS804IT extends SchedulerTest {
 		controller().activateScheduler();
 		controller().scheduler().executeXml( util.modifyOrder(order_setback).getCommand() );
 		controller().tryWaitForTermination(shortTimeout);
-		assertTrue("order " + order_setback + " is not in setback",result_setback);
-		assertFalse("order " + order_simple + " is in setback",result_simple);
+		assertTrue("order " + order_setback + " is not in setback", result_setback);
+		assertFalse("order " + order_simple + " is in setback", result_simple);
 	}
 
 	@EventHandler
@@ -55,7 +57,7 @@ public final class JS804IT extends SchedulerTest {
     private void showCalendar() {
     	showCalendarAnswer = loadXml(scheduler().executeXml(util.showCalendar(ONE_DAY, What.orders).getCommand()));
         StringWriter sw = new StringWriter();
-        writeXmlTo(showCalendarAnswer.getFirstChild(),sw);
+        writeXmlTo(showCalendarAnswer.getFirstChild(), sw);
     }
 
     private boolean isSetback(String order) {

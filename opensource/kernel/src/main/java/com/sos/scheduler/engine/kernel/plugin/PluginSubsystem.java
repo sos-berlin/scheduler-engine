@@ -19,6 +19,7 @@ import java.util.Map;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.elementXPathOrNull;
 import static com.sos.scheduler.engine.common.xml.XmlUtils.elementsXPath;
+import static scala.collection.JavaConversions.asJavaIterable;
 
 @Singleton
 public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
@@ -41,7 +42,7 @@ public final class PluginSubsystem implements Subsystem, HasCommandHandlers {
         PluginReader pluginReader = new PluginReader(log);
         Element pluginsElement = elementXPathOrNull(root, "config/plugins");
         if (pluginsElement != null) {
-            for (Element e: elementsXPath(pluginsElement, "plugin")) {
+            for (Element e: asJavaIterable(elementsXPath(pluginsElement, "plugin"))) {
                 PluginAdapter a = pluginReader.readPlugin(e);
                 plugins.put(a.getPluginClassName(), a);
                 log.info(a + " added");
