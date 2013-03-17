@@ -20,6 +20,11 @@ namespace job {
     struct Calculated_next_time_do_something_call;
     struct Start_when_directory_changed_call;
     struct Order_timed_call;
+    struct Order_available_call;
+    struct Process_available_call;
+    struct Below_min_tasks_call;
+    struct Below_max_tasks_call;
+    struct Locks_available_call;
 
     struct Task_closed_call : object_call<Job, Task_closed_call> {
         Task* const _task;
@@ -296,6 +301,11 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        on_call                     (const job::Task_closed_call&);
     void                        on_call                     (const job::Start_when_directory_changed_call&);
     void                        on_call                     (const job::Order_timed_call&);
+    void                        on_call                     (const job::Order_available_call&);
+    void                        on_call                     (const job::Process_available_call&);
+    void                        on_call                     (const job::Below_min_tasks_call&);
+    void                        on_call                     (const job::Below_max_tasks_call&);
+    void                        on_call                     (const job::Locks_available_call&);
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
   //void                        on_removing_lock            ( lock::Lock* );
@@ -329,10 +339,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        reset_error                 ()                                      { _error = NULL,  _log->reset_highest_level(); }
     void                        set_job_error               ( const exception& );
 
-    void                        signal                      ( const string& signal_name );
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
     void                        remove_waiting_job_from_process_list();
-    void                        on_process_class_active     ( Process_class* );
+    void                        on_locks_available          ();
 
     ptr<Com_job>&               com_job                     ()                                      { return _com_job; }
 
@@ -348,6 +357,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        withdraw_order_request      ();
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
+    void                        on_order_available          ();
 
     Module*                     module                      ()                                      { return _module; }
     ptr<Module_instance>        create_module_instance      ();

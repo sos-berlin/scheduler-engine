@@ -4060,7 +4060,7 @@ void Order_queue::tip_for_new_distributed_order()
     {
         _has_tip_for_new_order = true;
         if( Job_node* job_node = Job_node::try_cast( _order_queue_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal( Z_FUNCTION );
+            if( Job* job = job_node->job_or_null() )  job->on_order_available();
     }
 }
 

@@ -2549,8 +2549,8 @@ void Order::postprocessing( Order_state_transition state_transition )
         _setback_count = 0;
     }
 
-    if( _task  &&  _moved  &&  job_node )
-        if( Job* job = job_node->job_or_null() )  job->signal( "delayed set_state()" );
+    //if( _task  &&  _moved  &&  job_node )
+    //    if( Job* job = job_node->job_or_null() )  job->signal( "delayed set_state()" );
 
     _task = NULL;
 

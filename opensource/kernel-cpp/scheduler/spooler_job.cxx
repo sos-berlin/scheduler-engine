@@ -41,6 +41,11 @@ namespace job {
     DEFINE_SIMPLE_CALL(Job, Calculated_next_time_do_something_call)
     DEFINE_SIMPLE_CALL(Job, Start_when_directory_changed_call)
     DEFINE_SIMPLE_CALL(Job, Order_timed_call)
+    DEFINE_SIMPLE_CALL(Job, Order_available_call)
+    DEFINE_SIMPLE_CALL(Job, Process_available_call)
+    DEFINE_SIMPLE_CALL(Job, Below_min_tasks_call)
+    DEFINE_SIMPLE_CALL(Job, Below_max_tasks_call)
+    DEFINE_SIMPLE_CALL(Job, Locks_available_call)
 
     Task_closed_call::Task_closed_call(Task* task) : object_call<Job, Task_closed_call>(task->job()), _task(task) {}
 }
@@ -140,7 +145,7 @@ struct Job_lock_requestor : lock::Requestor
 
 
     // Requestor:
-    void                        on_locks_are_available      ()                                      { _job->signal( Z_FUNCTION ); }
+    void                        on_locks_are_available      ()                                      { _job->on_locks_available(); }
   //void                        on_removing_lock            ( lock::Lock* l )                       { _job->on_removing_lock( l ); }
 
   private:
@@ -1334,18 +1339,6 @@ void Job::set_error( const exception& x )
     }
 }
 
-//--------------------------------------------------------------------------------------Job::signal
-
-void Job::signal( const string& signal_name )
-{ 
-    //Z_DEBUG_ONLY( assert( _state != s_stopped ) );
-
-    _next_time = Time(0);
-    
-    Z_LOG2( "zschimmer", obj_name() << "  " << Z_FUNCTION << " " << signal_name << "\n" );
-    _spooler->signal( signal_name ); 
-}
-
 //---------------------------------------------------------------------------------Job::create_task
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time& start_at, int id )
@@ -1746,7 +1739,8 @@ void Job::remove_running_task( Task* task )
         set_next_start_time( Time::now(), true );
     }
 
-    if( _running_tasks.size() < _max_tasks )  signal( S() << Z_FUNCTION << "  " << task->obj_name() );
+    if (_running_tasks.size() == _max_tasks - 1)
+        _call_register.call<Below_max_tasks_call>();
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -1818,7 +1812,7 @@ void Job::enqueue_task( Task* task )
     _task_queue->enqueue_task( task );
     calculate_next_time( now );
 
-    signal( "start job" );
+    //signal( "start job" );
 }
 
 //-----------------------------------------------------------------------Job::stop_after_task_error
@@ -1897,6 +1891,26 @@ void Job::on_call(const Calculated_next_time_do_something_call&) {
 
 void Job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
+    do_something();
+}
+
+void Job::on_call(const Order_available_call&) {
+    do_something();
+}
+
+void Job::on_call(const Process_available_call&) {
+    do_something();
+}
+
+void Job::on_call(const Below_min_tasks_call&) {
+    do_something();
+}
+
+void Job::on_call(const Below_max_tasks_call&) {
+    do_something();
+}
+
+void Job::on_call(const Locks_available_call&) {
     do_something();
 }
 
@@ -2578,7 +2592,7 @@ void Job::withdraw_order_request()
 void Job::notify_a_process_is_idle()
 {
     _waiting_for_process_try_again = true;
-    signal( "A process is idle" );
+    _call_register.call<Process_available_call>();
 }
 
 //--------------------------------------------------------Job::remove_waiting_job_from_process_list
@@ -2598,22 +2612,18 @@ void Job::remove_waiting_job_from_process_list()
     _waiting_for_process_try_again = false;
 }
 
-//---------------------------------------------------------------------Job::on_process_class_active
+//--------------------------------------------------------------------------Job::on_requisite_loaded
 
 bool Job::on_requisite_loaded( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
 
-    if( _module->_use_process_class )
-    {
+    if (_module->_use_process_class) {
         assert( file_based == _module->process_class() );
-
         assert( dynamic_cast<Process_class*>( file_based ) );
-
-        if( _waiting_for_process )
-        {
+        if (_waiting_for_process) {
             _waiting_for_process_try_again = true;
-            signal( Z_FUNCTION );
+            notify_a_process_is_idle();
         }
     }
 
@@ -2626,6 +2636,20 @@ bool Job::on_requisite_to_be_removed( File_based* file_based )
 {
     end_tasks( message_string( "SCHEDULER-885", file_based->obj_name() ) );
     return true;
+}
+
+//---------------------------------------------------------------------------Job::on_locks_available
+
+void Job::on_locks_available()
+{
+    _call_register.call<Locks_available_call>();
+}
+
+//---------------------------------------------------------------------------Job::on_order_available
+
+void Job::on_order_available()
+{
+    _call_register.call<Order_available_call>();
 }
 
 //-------------------------------------------------------------------------------Job::task_to_start
@@ -2927,7 +2951,7 @@ void Job::check_min_tasks( const string& cause )
     {
         _log->debug( message_string( "SCHEDULER-969", _min_tasks, cause ) );
         _start_min_tasks = true;
-        signal( "min_tasks" );
+        _call_register.call<Below_min_tasks_call>();
     }
     else
     {
@@ -3501,7 +3525,7 @@ void Job::kill_queued_task( int task_id )
     {
         Time old_next_time = _next_time;
         calculate_next_time( Time::now() );
-        if( _next_time != old_next_time )  signal( "task killed" );
+        //if( _next_time != old_next_time )  signal( "task killed" );
     }
 }
 
