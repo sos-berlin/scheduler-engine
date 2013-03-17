@@ -1,14 +1,32 @@
 package com.sos.scheduler.engine.test.scala
 
-import scala.xml.Elem
+import scala.xml.{NodeBuffer, Node, NodeSeq, Elem}
 import com.sos.scheduler.engine.kernel.Scheduler
 import scala.reflect.ClassTag
+import scala.xml
+import scala.xml
+import com.sos.scheduler.engine.common.Lazy
 
 object SchedulerTestImplicits {
-  implicit def toRichScheduler(scheduler: Scheduler) = new ScaledScheduler(scheduler)
+  implicit class ScaledScheduler(val scheduler: Scheduler) extends AnyVal {
+    def executeXmls(e: Iterable[NodeBuffer]): Result =
+      executeXmlString(<commands>{e}</commands>.toString())
 
-  class ScaledScheduler(scheduler: Scheduler) {
-    def executeXml(e: Elem): Elem = xml.XML.loadString(scheduler.executeXml(e.toString()))
+    def executeXmls(e: NodeSeq): Result =
+      executeXmlString(<commands>{e}</commands>.toString())
+
+    def executeXml(e: Elem): Result =
+      executeXmlString(e.toString())
+
+    private def executeXmlString(o: String): Result = {
+      val result = scheduler.executeXml(o)
+      Result(result)
+    }
+
     def instance[A](implicit c: ClassTag[A]): A = scheduler.injector.getInstance(c.runtimeClass).asInstanceOf[A]
+  }
+
+  case class Result(string: String) {
+    lazy val elem = xml.XML.loadString(string)
   }
 }

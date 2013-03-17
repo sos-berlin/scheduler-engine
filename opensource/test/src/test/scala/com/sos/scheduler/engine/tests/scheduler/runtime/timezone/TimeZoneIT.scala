@@ -30,8 +30,8 @@ final class TimeZoneIT extends ScalaSchedulerTest {
 
   private def fetchCalendarEntries() = {
     val tomorrow = now plusDays 1
-    val calendarElem = scheduler executeXml <show_calendar what="jobs orders" from={dateTimeToXml(now)} before={dateTimeToXml(tomorrow)}/>
-    calendarElem \ "answer" \ "calendar" \ "at" map { node => CalendarEntry(node.asInstanceOf[Elem]) }
+    val calendar = scheduler executeXml <show_calendar what="jobs orders" from={dateTimeToXml(now)} before={dateTimeToXml(tomorrow)}/>
+    calendar.elem \ "answer" \ "calendar" \ "at" map { node => CalendarEntry(node.asInstanceOf[Elem]) }
   }
 }
 
