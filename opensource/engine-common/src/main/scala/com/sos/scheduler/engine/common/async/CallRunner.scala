@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.common.async
 
 import CallRunner._
 import com.sos.scheduler.engine.common.scalautil.Logger
+import scala.annotation.tailrec
 
 final class CallRunner(val queue: PoppableCallQueue) {
 
@@ -11,15 +12,17 @@ final class CallRunner(val queue: PoppableCallQueue) {
     somethingDone
   }
 
-  private def executeCalls(n: Int) {
-    for (i <- 0 until n) {
+  @tailrec private def executeCalls(n: Int) {
+    if (n == 0) {
+      queue.matureHeadOption foreach { o => logger debug s"Interrupted after $n calls. next=$o" }
+    } else {
       queue.popMature() match {
-        case Some(o) => o.apply()
-        case None => return
+        case Some(o) =>
+          o.apply()
+          executeCalls(n - 1)
+        case None =>
       }
     }
-    if (n > 1)
-      logger.debug(s"Interrupted after $n calls. next=${queue.matureHeadOption}")
   }
 
   override def toString = s"${getClass.getSimpleName} with $queue"
