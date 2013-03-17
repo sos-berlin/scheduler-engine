@@ -15,6 +15,7 @@ import scala.collection.mutable
 import scala.math._
 import scala.sys.error
 import scala.util.Try
+import com.sos.scheduler.engine.common.time.Stopwatch
 
 @RunWith(classOf[JUnitRunner])
 class ManyJobsIT extends ScalaSchedulerTest {
@@ -31,14 +32,16 @@ class ManyJobsIT extends ScalaSchedulerTest {
   }
 
   test(s"Adding $n jobs") {
+    val stopwatch = new Stopwatch
     for (j <- jobs) scheduler executeXml j.xmlElem
     waitForCondition(timeout=n*100.ms, step=100.ms) { activatedJobCount == n }
+    System.err.println(s"${jobs.size} added in $stopwatch (${1000f * jobs.size / stopwatch.elapsedMs} jobs/s)")
   }
 
   val duration = 30.s //millis(min(30000, (1000 * n / tasksPerSecond).toInt)) //4 * interval
   val expectedTaskCount = (duration.getMillis * tasksPerSecond / 1000).toInt
 
-  test(s"$expectedTaskCount tasks should run in ${duration.getMillis}ms ($tasksPerSecond tasks/s)") {
+  test(s"Running 1 task/job/s in ${duration.getMillis}ms") {
     if (n == 0) pending
     else {
       scheduler executeXmls (
@@ -48,7 +51,7 @@ class ManyJobsIT extends ScalaSchedulerTest {
             })
       sleep(duration)
       controller.getEventBus.dispatchEvents()
-      System.err.println(s"$taskCount in ${duration.getStandardSeconds}s, ${1000 * taskCount.toDouble / duration.getMillis} tasks/s")
+      System.err.println(s"$taskCount tasks in ${duration.getStandardSeconds}s, ${1000f * taskCount / duration.getMillis} tasks/s")
       //taskCount should be (expectedTaskCount plusOrMinus (0.2 * expectedTaskCount).toInt)
       //(for (j <- jobStatistics) j.taskCount should equal (tasksPer)
     }
