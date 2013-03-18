@@ -612,18 +612,6 @@ Process_class* Module::process_class() const
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }
 
-//-------------------------------------------------------------------------------Module::needs_java
-
-bool Module::needs_java() 
-{
-    bool result = _kind == Module::kind_java  &&  has_source_script();
-    if( !result )  result = _kind == Module::kind_scripting_engine_java  &&  has_source_script();           // JS-498
-
-    if( !result )  result = _monitors->needs_java();
-
-    return result;
-}
-
 //----------------------------------------------------------------Module_instance::In_call::In_call
 
 Module_instance::In_call::In_call( Module_instance* module_instance, const string& name, const string& extra ) 
@@ -1186,21 +1174,6 @@ void Module_monitors::set_dom( const xml::Element_ptr& element )
     }
 }
 
-//----------------------------------------------------------------------Module_monitors::needs_java
-
-bool Module_monitors::needs_java() 
-{
-    bool result = false;
-
-    Z_FOR_EACH( Module_monitors::Monitor_map, _monitor_map, m )
-    {
-        Module_monitor* monitor = m->second;
-        result = monitor->_module->needs_java();
-        if( result )  break;
-    }
-
-    return result;
-}
 //-----------------------------------------------------------------Module_monitors::monitor_or_null
 
 Module_monitor* Module_monitors::monitor_or_null( const string& name )

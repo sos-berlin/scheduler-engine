@@ -41,7 +41,6 @@ struct Scheduler_script_subsystem : Scheduler_script_subsystem_interface
     void                        set_dom                     ( const xml::Element_ptr& script_element );
     Scheduler_script*           default_scheduler_script    ();
     Scheduler_script*           default_scheduler_script_or_null();
-    bool                        needs_java                  () const;
 
     vector<Scheduler_script*>   ordered_file_baseds         ();
 
@@ -317,22 +316,6 @@ bool Scheduler_script_subsystem::subsystem_activate()
     _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen
     file_based_subsystem<Scheduler_script>::subsystem_activate();
     return true;
-}
-
-//-----------------------------------------------------------Scheduler_script_subsystem::needs_java
-
-bool Scheduler_script_subsystem::needs_java() const
-{
-    bool result = false;
-
-    Z_FOR_EACH_CONST( File_based_map, _file_based_map, fb )
-    {
-        Scheduler_script* script = fb->second;
-        result = script->module()->kind() == Module::kind_java;
-        if( result )  break;
-    }
-
-    return result;
 }
 
 //-------------------------------------------------------------------------------------------------

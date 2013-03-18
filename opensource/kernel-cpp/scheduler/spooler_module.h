@@ -349,7 +349,6 @@ struct Module_monitors : Object
     void                        add_monitor                 ( Module_monitor* monitor )             { _monitor_map[ monitor->name() ] = monitor; }
     Module_monitor*             monitor_or_null             ( const string& );
     bool                        is_empty                    () const                                { return _monitor_map.empty(); }
-    bool                        needs_java                  ();
     vector<Module_monitor*>     ordered_monitors            ();
 
 
