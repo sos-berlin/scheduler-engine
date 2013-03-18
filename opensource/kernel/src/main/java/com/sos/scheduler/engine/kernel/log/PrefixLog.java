@@ -15,10 +15,10 @@ import java.util.List;
 @ForCpp
 public final class PrefixLog implements Sister, SchedulerLogger {
     private static final Logger logger = LoggerFactory.getLogger(PrefixLog.class);
+    private static final LogSubscription[] emptyLogSubscriptions = new LogSubscription[0];
 
     private final Prefix_logC cppProxy;
     private final List<LogSubscription> subscriptions = new ArrayList<LogSubscription>();
-    private final LogSubscription[] emptyLogSubscriptions = new LogSubscription[0];
     private LogSubscription[] subscriptionsSnapshot = emptyLogSubscriptions;
     private boolean subscriptionsModified = false;
 //    private File fileToBeRemoved = null;
