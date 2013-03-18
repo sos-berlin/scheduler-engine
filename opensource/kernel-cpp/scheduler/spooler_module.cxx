@@ -34,21 +34,15 @@ Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based
     _file_based(file_based),
     _include_path(include_path)
 { 
-    initialize(); 
+    _xml = "<source/>";
     if( e )  append_dom( e ); 
-}
-
-//-------------------------------------------------------------------Text_with_includes::initialize
-
-void Text_with_includes::initialize()
-{
-    _dom_document.load_xml( "<source/>" );
 }
 
 //--------------------------------------------------------------------Text_with_includes::append_dom
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
+    xml::Document_ptr dom_document (_xml);
     size_t linenr_base = element.line_number();
 
     for( xml::Node_ptr node = element.firstChild(); node; node = node.nextSibling() )
@@ -81,8 +75,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
 
                 if( *p )    // Nur nicht leeren Text berücksichtigen
                 {
-                    xml::Element_ptr e = _dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
-
+                    xml::Element_ptr e = dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
                     e.setAttribute( "linenr", linenr_base );
                 }
 
@@ -104,11 +97,11 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
 
                 if( e.nodeName_is( "include" ) )
                 {
-                    xml::Element_ptr include_element = _dom_document.createElement( "include" );
+                    xml::Element_ptr include_element = dom_document.createElement( "include" );
                     include_element.setAttribute( "file"     , e.getAttribute( "file"      ) );
                     include_element.setAttribute( "live_file", e.getAttribute( "live_file" ) );
 
-                    _dom_document.documentElement().appendChild( include_element );
+                    dom_document.documentElement().appendChild( include_element );
                 }
                 else
                     z::throw_xc( Z_FUNCTION, e.nodeName() );
@@ -119,6 +112,8 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
             default: ;
         }
     }
+
+    _xml = dom_document.xml();
 }
 
 //------------------------------------------------------------Text_with_includes::includes_resolved
@@ -127,10 +122,7 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
 {
     // Löst die <include> auf und macht sie zu <source_part>
 
-    xml::Document_ptr result;
-
-    result.create();
-    result.appendForeignChild(_dom_document.documentElement());
+    xml::Document_ptr result (_xml);
 
     DOM_FOR_EACH_ELEMENT( result.documentElement(), element )
     {
@@ -212,16 +204,8 @@ string Text_with_includes::text_element_filepath( const xml::Element_ptr& elemen
 
 bool Text_with_includes::is_empty() const
 { 
-    if( !_dom_document )  return true;
-    if( !_dom_document.documentElement().firstChild() )  return true;
-
-    return !_dom_document.documentElement().first_child_element();
-
-    // Jira JS-60: Die SOS schreibt gerne <script> </script>, was dasselbe sein soll wie <script/>.
-    //string text = _dom_document.documentElement().text();
-    //const char* p = text.c_str();
-    //while( *p  &&  isspace( (unsigned char)*p ) )  p++;
-    //return *p == '\0';
+    if (_xml.empty()) return true;
+    return !dom_element().first_child_element();
 }
 
 //-----------------------------------------------------------------------------------Module::Module

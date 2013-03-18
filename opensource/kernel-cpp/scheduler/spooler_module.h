@@ -47,21 +47,19 @@ struct Text_with_includes : Non_cloneable
     int                         text_element_linenr         ( const xml::Element_ptr& );
     string                      text_element_filepath       ( const xml::Element_ptr& );
 
-    string                      xml                         ()                                      { return _dom_document.xml(); }
-    void                    set_xml                         ( const string& x )                     { _dom_document.load_xml( x ); }
+    string                      xml                         () const                                { return _xml; }
+    void                    set_xml                         ( const string& x )                     { _xml = x; }
     xml::Document_ptr           includes_resolved           () const;
 
-    xml::Element_ptr            dom_element                 ()                                      { return _dom_document.documentElement(); }
+    xml::Element_ptr            dom_element                 () const                                { return xml::Document_ptr(_xml).documentElement(); }
     void                        append_dom                  ( const xml::Element_ptr& dom );
-    void                        initialize                  ();
 
   private:
-
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     File_based*                _file_based;
     File_path                  _include_path;
-    xml::Document_ptr          _dom_document;
+    string                     _xml;
 };
 
 //-------------------------------------------------------------------------------------------Module
@@ -110,7 +108,6 @@ struct Module : Object
 
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
     string                      read_source_script          ()                                      { return _text_with_includes.read_text(); }
-    bool                        needs_java                  ();
 
     Process_class*              process_class               () const;
     Process_class*              process_class_or_null       () const;
