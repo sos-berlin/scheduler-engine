@@ -18,7 +18,7 @@ string Object_call::obj_name() const
 
 int Type_int_map::type_to_int(const type_info& t) {
     // Registriert den Typ, wenn nicht schon bekannt, und liefert eine ID
-    Z_MUTEX(_mutex) {
+    Z_FAST_MUTEX(_mutex) {
         string id_string = id_of_type_info(t);
         stdext::hash_map<string,int>::iterator i = _map.find(id_string);
         if (i != _map.end()) {

@@ -205,8 +205,7 @@ Log_categories::Log_categories()
     
 void Log_categories::save_to( Log_categories_content* to )
 {
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         *to = *this;
     }
 
@@ -217,8 +216,7 @@ void Log_categories::save_to( Log_categories_content* to )
 
 void Log_categories::restore_from( const Log_categories_content& from )
 {
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         Map previous_map = _map;
 
         *(Log_categories_content*)this = from;
@@ -262,8 +260,7 @@ bool Log_categories::is_set( const string& name, bool is_derived )
     if( name == ""  )  return true;
     if( !_valid     )  return true;
 
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         result = name == "all"? is_set2( ""  , is_derived )
                               : is_set2( name, is_derived );
     }
@@ -345,8 +342,7 @@ string Log_categories::set( const string& name_, bool value, Entry::Type type )
         children_too = true;
     }
 
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         generate_missing_anchestors_of( name );
 
         Map::iterator e = _map.find( name );
@@ -484,8 +480,7 @@ void Log_categories::set_multiple( const string& names )
 
 void Log_categories::set_default( const string& name, bool value )
 {
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         string real_name = set( name, value );
 
         _map[ real_name ]._has_default   = value;
@@ -501,8 +496,7 @@ Log_categories::Map Log_categories::map_copy() const
 {
     Map result;
 
-    Z_MUTEX( _mutex )  
-    {
+    Z_FAST_MUTEX( _mutex ) {
         Z_FOR_EACH_CONST( Map, _map, e )
         {
             if( e->second._type != Entry::e_derived  ||
@@ -582,8 +576,7 @@ string Log_categories::to_string() const
     vector<string> result;
     result.reserve( _map.size() );
 
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         Z_FOR_EACH_CONST( Map, _map, it )
         {
             const Entry& e    = it->second;
@@ -611,8 +604,7 @@ string Log_categories::debug_string() const
     vector<string> ordered_names;
     ordered_names.reserve( _map.size() );
 
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         Z_FOR_EACH_CONST( Map, _map, e )  ordered_names.push_back( e->first );
         sort( ordered_names.begin(), ordered_names.end() );
 

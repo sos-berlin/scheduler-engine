@@ -9,8 +9,7 @@ namespace zschimmer {
 
 void Simple_event::signal( const string& name )
 {
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         _signal_name = name;
         _signaled = true;
     }
@@ -29,8 +28,7 @@ bool Simple_event::signaled_then_reset()
 {
     bool signaled = false;
 
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         signaled = _signaled;
         _signal_name = "";
         _signaled = false;
@@ -43,8 +41,7 @@ bool Simple_event::signaled_then_reset()
 
 void Simple_event::reset()
 {
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         _signal_name = "";
         _signaled = false;
     }

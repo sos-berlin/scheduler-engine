@@ -91,8 +91,7 @@ void Event::create()
 
 void Event::signal( const string& name )
 {
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         _signaled = true;
         _signal_name = name;
 
@@ -123,8 +122,7 @@ bool Event::signaled_then_reset()
     
     bool signaled = false;
 
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         signaled = _signaled;
         reset();
     }
@@ -136,8 +134,7 @@ bool Event::signaled_then_reset()
 
 void Event::reset()
 {
-    Z_MUTEX( _mutex )
-    {
+    Z_FAST_MUTEX( _mutex ) {
         //Z_DEBUG_ONLY( Z_LOG( "Event(" << _name << "," << _signal_name << ").reset()  ResetEvent()\n" ); )
 
         _signaled = false;
