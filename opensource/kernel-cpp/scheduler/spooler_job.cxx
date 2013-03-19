@@ -594,7 +594,7 @@ void Job::close()
     catch( const exception& x ) { _log->warn( S() << "clear_when_directory_changed() ==> " << x.what() ); }
 
 
-    Z_FOR_EACH( Task_list, _running_tasks, t )
+    Z_FOR_EACH( Task_set, _running_tasks, t )
     {
         Task* task = *t;
         try
@@ -604,14 +604,12 @@ void Job::close()
         catch( const exception& x ) { Z_LOG2( "scheduler", *task << ".kill() => " << x.what() << "\n" ); }
     }
 
-    for( Task_list::iterator t = _running_tasks.begin();  t != _running_tasks.end(); )
-    {
-        ptr<Task> task = *t;
+    while (!_running_tasks.empty()) {
+        Task_set::iterator t = _running_tasks.begin();
+        Task* task = *t;
         task->job_close();
-        t = _running_tasks.erase( t );
-        task = NULL;        // ~Task()
+        _running_tasks.erase(t);
     }
-
 
     Z_FOR_EACH( Task_list, *_task_queue, t )  (*t)->job_close();
     _task_queue->clear();
@@ -1266,10 +1264,8 @@ bool Job::can_be_removed_now()
     {
         if( _temporary  &&  !is_to_be_removed() )  return false;
 
-        if( _running_tasks.size() > 0 )  //2007-09-26 ||  _task_queue->size() > 0 )
-        {
+        if (!_running_tasks.empty())  //2007-09-26 ||  _task_queue->size() > 0 )
             return false;
-        }
 
         if( _state == s_not_initialized )  return true;
         if( _state == s_initialized     )  return true;
@@ -1713,12 +1709,7 @@ ptr<Task> Job::get_task_from_queue( const Time& now )
 
 void Job::remove_running_task( Task* task )
 {
-    for(Task_list::iterator t = _running_tasks.begin(); t != _running_tasks.end(); t++) {
-        if (*t == task) {
-            _running_tasks.erase(t);
-            break;
-        }
-    }
+    _running_tasks.erase(task);
 
     if (_running_tasks.empty()) {
         if (_state != s_stopped)
@@ -1830,7 +1821,7 @@ void Job::stop_simply( bool end_all_tasks )
 {
     // _is_permanenty_stopped wird nicht gesetzt. Muss verbessert werden!
 
-    set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
+    set_state(_running_tasks.empty()? s_stopped : s_stopping);
     if( end_all_tasks )  end_tasks( "" );
     clear_when_directory_changed();
     _start_min_tasks = false;
@@ -1840,7 +1831,7 @@ void Job::stop_simply( bool end_all_tasks )
 
 void Job::end_tasks( const string& task_warning )
 {
-    Z_FOR_EACH( Task_list, _running_tasks, t )
+    Z_FOR_EACH( Task_set, _running_tasks, t )
     {
         Task* task = *t;
 
@@ -1949,12 +1940,12 @@ void Job::set_state_cmd(State_cmd state_cmd)
             break;
 
         case sc_end:        
-            Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+            Z_FOR_EACH( Task_set, _running_tasks, t )  (*t)->cmd_end();
             break;
 
         case sc_suspend: {
             if( _state == s_running ) {
-                Z_FOR_EACH( Task_list, _running_tasks, t ) {
+                Z_FOR_EACH( Task_set, _running_tasks, t ) {
                     Task* task = *t;
                     if( task->_state == Task::s_running 
                      || task->_state == Task::s_running_delayed
@@ -1965,14 +1956,14 @@ void Job::set_state_cmd(State_cmd state_cmd)
         }
 
         case sc_continue: {
-            Z_FOR_EACH( Task_list, _running_tasks, t ) {
+            Z_FOR_EACH( Task_set, _running_tasks, t ) {
                 Task* task = *t;
                 if( task->_state == Task::s_suspended 
                  || task->_state == Task::s_running_delayed
                  || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
             }
                     
-            set_state( _running_tasks.size() > 0? s_running : s_pending );
+            set_state(_running_tasks.empty()? s_pending : s_running);
             check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
             do_something();
             break;
@@ -2838,7 +2829,7 @@ bool Job::do_something()
         Time next_time_at_begin = _next_time;
 
         if( _state == s_running  &&  is_in_job_chain()) {    // Auftrag bereit und Tasks warten auf Aufträge?
-            FOR_EACH( Task_list, _running_tasks, t ) {
+            FOR_EACH( Task_set, _running_tasks, t ) {
                 Task* task = *t;
                 if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) {
                     if( task->fetch_and_occupy_order( now, Z_FUNCTION ) ) {
@@ -2859,7 +2850,7 @@ bool Job::do_something()
                     _repeat = Duration(0);
                     _delay_until = Time(0);
 
-                    _running_tasks.push_back( task );
+                    _running_tasks.insert(task);
                     set_state( s_running );
 
                     _next_start_time = Time::never;
@@ -2882,7 +2873,7 @@ bool Job::do_something()
             }
         }
 
-        Z_FOR_EACH(Task_list, _running_tasks, it) {
+        Z_FOR_EACH(Task_set, _running_tasks, it) {
             Task* task = *it;
             task->do_something();
         }
@@ -2975,7 +2966,7 @@ int Job::not_ending_tasks_count() const
 {
     int result = 0;
 
-    Z_FOR_EACH_CONST( Task_list, _running_tasks, t )
+    Z_FOR_EACH_CONST( Task_set, _running_tasks, t )
     {
         if( !(*t)->ending() )  result++;
     }
@@ -3259,7 +3250,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         {
             xml::Element_ptr tasks_element = document.createElement( "tasks" );
             int task_count = 0;        
-            Z_FOR_EACH( Task_list, _running_tasks, t )
+            Z_FOR_EACH( Task_set, _running_tasks, t )
             {
                 Task* task = *t;
                 if( !which_job_chain  ||  !task->_order  ||  task->_order->job_chain_for_api() == which_job_chain )
@@ -3367,7 +3358,7 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
             append_obstacle_element(result, "order_controlled", as_bool_string(is_order_controlled()));
         if (!_running_tasks.empty()) {
             xml::Element_ptr tasks = e.append_new_element("tasks.why");
-            Z_FOR_EACH(Task_list, _running_tasks, it) {
+            Z_FOR_EACH(Task_set, _running_tasks, it) {
                 Task* task = *it;
                 xml::Element_ptr t = tasks.append_new_element("task.why");
                 if (task->state() != Task::s_running_waiting_for_order)  append_obstacle_element(t, "state", task->state_name());
@@ -3523,7 +3514,7 @@ void Job::kill_task( int id, bool immediately )
     {
         //Task* task = NULL;
 
-        Z_FOR_EACH( Task_list, _running_tasks, t )
+        Z_FOR_EACH( Task_set, _running_tasks, t )
         {
             if( (*t)->_id == id )  
             { 

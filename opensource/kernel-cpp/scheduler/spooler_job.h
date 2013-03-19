@@ -143,7 +143,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     };
 
 
-    typedef list< ptr<Task> >                   Task_list;
+    typedef stdext::hash_set< ptr<Task> >       Task_set;
     typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
     typedef map< int, Duration >                Delay_after_error;
     typedef map< int, Duration >                Delay_order_after_setback;
@@ -447,7 +447,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     ptr<Com_job>               _com_job;
 
     ptr<Task_queue>            _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
-    Task_list                  _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
+    Task_set                   _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
     long32                     _running_tasks_count;        // Anzahl der Tasks, die tatsächlich laufen (und nicht gerade warten)
     int                        _min_tasks;                  // Min. Anzahl Tasks, die der Scheduler stets laufen lassen soll
     bool                       _start_min_tasks;            // Starte Tasks solange _running_tasks.count() < _min_tasks
