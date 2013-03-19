@@ -2145,7 +2145,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
                     if( e3.nodeName_is( "day" ) )
                     {
                         list<int> weekdays = get_weekday_numbers( e3.getAttribute( "day" ) );
-                        Z_FOR_EACH( list<int>, weekdays, w )  _weekdays.insert( *w );
+                        Z_FOR_EACH( list<int>, weekdays, w )  _weekdays[*w] = true;
                     }
                 }
             }
@@ -2200,8 +2200,8 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
 
 bool Holidays::is_included( const Time& t )
 { 
-    return _set.find( t.midnight().as_time_t() ) != _set.end()  ||
-           _weekdays.find( weekday_of_day_number( t.day_nr() ) ) != _weekdays.end();
+    return _set.find(t.midnight().as_time_t()) != _set.end()  ||
+           _weekdays[weekday_of_day_number(t.day_nr())];
 }
 
 //--------------------------------------------------------------------------------------Date::print

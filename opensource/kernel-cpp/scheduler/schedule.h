@@ -3,6 +3,8 @@
 #ifndef __SCHEDULER_SCHEDULE_H
 #define __SCHEDULER_SCHEDULE_H
 
+#include <bitset>
+
 namespace sos {
 namespace scheduler {
 namespace schedule {
@@ -263,7 +265,7 @@ struct Holidays
     Spooler*                   _spooler;
     typedef stdext::hash_set<time_t> Set;
     Set                        _set;
-    stdext::hash_set<int>      _weekdays;
+    std::bitset<7>             _weekdays;
 };
 
 //--------------------------------------------------------------------------------------------Date
