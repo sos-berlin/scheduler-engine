@@ -2667,17 +2667,12 @@ bool Spooler::run_continue( const Time& now )
 {
     bool something_done = false;
 
-    if( _state != Spooler::s_paused )
-    {
+    if( _state != Spooler::s_paused ) {
         // PROZESSE FORTSETZEN
         something_done |= _process_class_subsystem->async_continue();
-
-        // TASKS FORTSETZEN
-        if( _task_subsystem )  something_done |= _task_subsystem->process( now );    
     }
 
     if( something_done )  _last_wait_until = Time(0), _last_resume_at = Time(0);
-
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();

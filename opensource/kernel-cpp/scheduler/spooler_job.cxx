@@ -46,6 +46,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Job, Below_min_tasks_call)
     DEFINE_SIMPLE_CALL(Job, Below_max_tasks_call)
     DEFINE_SIMPLE_CALL(Job, Locks_available_call)
+    DEFINE_SIMPLE_CALL(Job, Remove_temporary_job_call)
 
     Task_closed_call::Task_closed_call(Task* task) : object_call<Job, Task_closed_call>(task->job()), _task(task) {}
 }
@@ -68,7 +69,6 @@ struct Job_subsystem_impl : Job_subsystem
     // Job_subsystem
 
     ptr<Job_folder>             new_job_folder              ( Folder* folder )                      { return Z_NEW( Job_folder( folder ) ); }
-    int                         remove_temporary_jobs       ();
     bool                        has_any_order               ();
     bool                        is_any_task_queued          ();
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
@@ -234,33 +234,6 @@ void Job_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr& e
 
         job->append_calendar_dom_elements( element, options );
     }
-}
-
-//--------------------------------------------------------Job_subsystem_impl::remove_temporary_jobs
-
-int Job_subsystem_impl::remove_temporary_jobs()
-{
-    int count = 0;
-
-    File_based_map::iterator it = _file_based_map.begin();
-    while( it != _file_based_map.end() )
-    {
-        File_based_map::iterator next_it = it;
-        next_it++;
-
-        Job* job = it->second;
-
-        if( job->temporary()  &&  job->can_be_removed_now() )
-        {
-            job->remove();
-            // it ist ungültig
-            count++;
-        }
-
-        it = next_it;
-    }
-
-    return count;
 }
 
 //-----------------------------------------------------------Job_subsystem_impl::is_any_task_queued
@@ -1712,12 +1685,18 @@ void Job::remove_running_task( Task* task )
     _running_tasks.erase(task);
 
     if (_running_tasks.empty()) {
-        if (_state != s_stopped)
-            set_state(_state == s_stopping? s_stopped : s_pending);
-        set_next_start_time(Time::now(), true);
+        switch (_state) {
+            case s_stopping:
+                set_state(s_stopped);
+                break;
+            case s_running:
+                set_state(s_pending);
+                set_next_start_time(Time::now(), true);
+            default: ;
+        }
     }
 
-    if (_running_tasks.size() == _max_tasks - 1)
+    if (_state == s_pending  &&  _running_tasks.size() == _max_tasks - 1)
         _call_register.call<Below_max_tasks_call>();
 }
 
@@ -1897,6 +1876,8 @@ void Job::on_call(const Locks_available_call&) {
 void Job::on_call(const Task_closed_call& call) {
     assert(call._task->state() == Task::s_closed);
     _spooler->_task_subsystem->remove_task(call._task);
+    if (_temporary) 
+        _call_register.call<Remove_temporary_job_call>();
 }
 
 //---------------------------------------------------Job::on_call Start_when_directory_changed_call
@@ -1905,6 +1886,12 @@ void Job::on_call(const Start_when_directory_changed_call&) {
 	bool ok = check_for_changed_directory(Time::now());         // Hier prüfen, damit Signal zurückgesetzt wird
     log()->debug(S() << "Start_when_directory_changed_call ok=" << ok);
     if (ok) do_something();
+}
+
+//-----------------------------------------------------------Job::on_call Remote_temporary_job_call
+
+void Job::on_call(const job::Remove_temporary_job_call&) {
+    remove();
 }
 
 //-------------------------------------------------------------------------------Job::set_state_cmd

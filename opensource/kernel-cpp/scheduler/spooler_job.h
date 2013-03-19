@@ -25,6 +25,7 @@ namespace job {
     struct Below_min_tasks_call;
     struct Below_max_tasks_call;
     struct Locks_available_call;
+    struct Remove_temporary_job_call;
 
     struct Task_closed_call : object_call<Job, Task_closed_call> {
         Task* const _task;
@@ -306,6 +307,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        on_call                     (const job::Below_min_tasks_call&);
     void                        on_call                     (const job::Below_max_tasks_call&);
     void                        on_call                     (const job::Locks_available_call&);
+    void                        on_call                     (const job::Remove_temporary_job_call&);
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
   //void                        on_removing_lock            ( lock::Lock* );
@@ -510,7 +512,6 @@ struct Job_subsystem: Object,
                                 Job_subsystem               ( Scheduler*, Type_code );
 
     virtual ptr<Job_folder>     new_job_folder              ( Folder* )                             = 0;
-    virtual int                 remove_temporary_jobs       ()                                      = 0;
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
     virtual Schedule*           default_schedule            ()                                      = 0;

@@ -104,15 +104,6 @@ bool Task_subsystem::is_ready_for_termination()
     return false;
 }
 
-//--------------------------------------------------------------------------Task_subsystem::process
-
-bool Task_subsystem::process( const Time& now )
-{
-    _spooler->job_subsystem()->remove_temporary_jobs();
-
-    return false;
-}
-
 //--------------------------------------------------------------Task_subsystem::try_to_free_process
 
 bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_class, const Time& )

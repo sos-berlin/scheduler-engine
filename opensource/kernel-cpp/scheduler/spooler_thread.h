@@ -30,7 +30,6 @@ struct Task_subsystem: Object, Subsystem
     
     bool                        has_tasks                   ()                                      { return !_task_set.empty(); }
 
-    bool                        process                     ( const Time& now );                    // Einen Schritt im (Pseudo-)Thread ausführen
     void                        add_task                    ( Task* task )                          { _task_set.insert(task);  signal( task->obj_name() ); }
 
     ptr<Task>                   get_task_or_null            ( int task_id );
