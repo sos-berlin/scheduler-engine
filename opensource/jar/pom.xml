@@ -96,6 +96,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.sos.scheduler.enginedoc</groupId>
+            <artifactId>enginedoc-common</artifactId>
+            <version>${enginedoc.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jetty</artifactId>
             <version>${project.version}</version>
