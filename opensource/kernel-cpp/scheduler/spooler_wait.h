@@ -111,9 +111,6 @@ struct Wait_handles : Non_cloneable
 
     typedef vector<z::Event_base*>   Event_vector;
     Event_vector               _events;
-
-  public:
-    Thread_semaphore           _lock;
 };
 
 //--------------------------------------------------------------------------------Directory_watcher

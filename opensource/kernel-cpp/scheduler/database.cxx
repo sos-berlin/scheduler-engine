@@ -71,7 +71,6 @@ static string quote_and_prepend_comma( const string& s )
 Read_transaction::Read_transaction( Database* db )
 : 
     _zero_(this+1),
-    _guard(&db->_lock),
     _spooler(db->_spooler),
     _log(db->_log)
 {
@@ -98,8 +97,6 @@ void Read_transaction::assert_is_commitable( const string& debug_text ) const
     
 void Read_transaction::begin_transaction( Database* db )
 { 
-    if( !_guard )  _guard.enter( &db->_lock, Z_FUNCTION );
-
     _db = db; 
 }
 
@@ -313,8 +310,6 @@ void Transaction::commit( const string& debug_text )
 
     _db->_transaction = _outer_transaction;
     _db = NULL;
-    _guard.leave(); 
-
 
     if( !_suppress_heart_beat_timeout_check  &&  !_outer_transaction )  _spooler->assert_is_still_active( Z_FUNCTION, debug_text );
 }
@@ -349,14 +344,12 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
             {
                 _db->_transaction = _outer_transaction;
                 _db = NULL; 
-                _guard.leave(); 
                 throw;
             }
         }
 
         _db->_transaction = _outer_transaction;
         _db = NULL; 
-        _guard.leave(); 
 
         //Wir sind vielleicht in einer Exception, also keine weitere Exception auslösen:  if( !db->_transaction )  _spooler->assert_is_still_active( Z_FUNCTION, debug_text );
     }
@@ -419,7 +412,6 @@ Database::Database( Spooler* spooler )
 :
     Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
-    _lock("Database"),
     _database_descriptor( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names ),
     _jobs_table           ( &_database_descriptor, "scheduler_jobs"           , "spooler_id,cluster_member_id,path" ),
     _job_chains_table     ( &_database_descriptor, "scheduler_job_chains"     , "spooler_id,cluster_member_id,path" ),
@@ -495,62 +487,59 @@ void Database::open( const string& db_name )
 
 void Database::open2( const string& db_name )
 {
-    Z_MUTEX( _lock )
-    {
-        string my_db_name = db_name;
+    string my_db_name = db_name;
 
-        _db_name = db_name;
+    _db_name = db_name;
     
-        if( _db_name != "" )
+    if( _db_name != "" )
+    {
+        if( _db_name.find(' ') == string::npos  &&  _db_name.find( ':', 1 ) == string::npos )
         {
-            if( _db_name.find(' ') == string::npos  &&  _db_name.find( ':', 1 ) == string::npos )
+            if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
             {
-                if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
-                {
-                    if( _spooler->_need_db )  z::throw_xc( "SCHEDULER-142", _db_name );
-                    return;
-                }
-
-                  _db_name = "odbc "         + make_absolute_filename( _spooler->log_directory(),   _db_name );
-                my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
+                if( _spooler->_need_db )  z::throw_xc( "SCHEDULER-142", _db_name );
+                return;
             }
 
-            if( _db_name.substr(0,5) == "odbc " 
-             || _db_name.substr(0,5) == "jdbc ")   _db_name = _db_name.substr(0,5) + " -id=spooler " +   _db_name.substr(5),
-                                                 my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
+                _db_name = "odbc "         + make_absolute_filename( _spooler->log_directory(),   _db_name );
+            my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
+        }
 
-            _log->info( message_string( "SCHEDULER-907", my_db_name ) );     // Datenbank wird geöffnet
+        if( _db_name.substr(0,5) == "odbc " 
+            || _db_name.substr(0,5) == "jdbc ")   _db_name = _db_name.substr(0,5) + " -id=spooler " +   _db_name.substr(5),
+                                                my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
 
-            try
+        _log->info( message_string( "SCHEDULER-907", my_db_name ) );     // Datenbank wird geöffnet
+
+        try
+        {
+            _db.open( "-in -out " + my_db_name );
+
+            switch( _db.dbms_kind() )
             {
-                _db.open( "-in -out " + my_db_name );
+                case dbms_sybase: 
+                    _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
+                    break;
 
-                switch( _db.dbms_kind() )
-                {
-                    case dbms_sybase: 
-                        _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
-                        break;
+                case dbms_h2: 
+                    _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
+                    break;
 
-                    case dbms_h2: 
-                        _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
-                        break;
-
-                    default: ;
-                }
-
-                _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geöffnet
-
-                _db_name += " ";
-                _email_sent_after_db_error = false;
+                default: ;
             }
-            catch( exception& x )  
-            { 
-                close();
 
-                if( _spooler->_need_db )  throw;
+            _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geöffnet
+
+            _db_name += " ";
+            _email_sent_after_db_error = false;
+        }
+        catch( exception& x )  
+        { 
+            close();
+
+            if( _spooler->_need_db )  throw;
             
-                _log->warn( message_string( "SCHEDULER-309", x ) );         // "FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: "
-            }
+            _log->warn( message_string( "SCHEDULER-309", x ) );         // "FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: "
         }
     }
 }
@@ -1278,19 +1267,16 @@ int Database::column_width( Transaction* ta, const string& table_name, const str
 
 void Database::close()
 {
-    Z_MUTEX( _lock )
+    _history_table.close();
+    _history_table.destroy();
+
+    try
     {
-        _history_table.close();
-        _history_table.destroy();
-
-        try
-        {
-            _db.close();  // odbc.cxx und jdbc.cxx unterdrücken selbst Fehler.
-        }
-        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }
-
-        _db.destroy();
+        _db.close();  // odbc.cxx und jdbc.cxx unterdrücken selbst Fehler.
     }
+    catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }
+
+    _db.destroy();
 }
 
 //---------------------------------------------------------------------Database::open_history_table
@@ -1299,7 +1285,6 @@ void Database::open_history_table( Read_transaction* ta )
 {
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
 
-    THREAD_LOCK( _lock )
     {
         if( !_history_table.opened() )
         {
@@ -1324,7 +1309,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
     if( In_recursion in_recursion = &_waiting )  throw_xc( callers_exception );   
     else
     {
-        THREAD_LOCK( _error_lock )  _error = callers_exception.what();
+        _error = callers_exception.what();
 
         _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception, function ) );
 
@@ -1377,15 +1362,14 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                 try
                 {
                     open2(_db_name);
-                    //open_history_table();
-                    THREAD_LOCK( _error_lock )  _error = "";
+                    _error = "";
  
                     _reopen_time = ::time(NULL);
                     break;
                 }
                 catch( exception& x )
                 {
-                    THREAD_LOCK( _error_lock )  _error = x.what();
+                    _error = x.what();
 
                     if( _spooler->_executing_command )  throw;
 
@@ -1992,7 +1976,7 @@ void Job_history::open( Transaction* outer_transaction )
 {
     string section = _job->profile_section();
 
-    _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
+    _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift
 
 
     try

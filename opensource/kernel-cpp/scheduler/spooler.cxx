@@ -809,17 +809,11 @@ string Spooler::name() const
 }
 
 //--------------------------------------------------------------------------Spooler::security_level
-// Anderer Thread
 
 Security::Level Spooler::security_level( const Ip_address& host )
 {
     Security::Level result = Security::seclev_none;
-
-    THREAD_LOCK( _lock )
-    {
-        result = _security.level( host.as_in_addr() );
-    }
-
+    result = _security.level( host.as_in_addr() );
     return result;
 }
 
@@ -890,7 +884,6 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
     if( _db )
     {
-        THREAD_LOCK( _lock )
         {
             string db_name = _db->db_name();
             db_name = remove_password( db_name );
@@ -1228,7 +1221,6 @@ bool Spooler::has_any_task()
 }
 
 //--------------------------------------------------------------------------------Spooler::get_task
-// Anderer Thread
 
 ptr<Task> Spooler::get_task( int task_id )
 {
@@ -1238,7 +1230,6 @@ ptr<Task> Spooler::get_task( int task_id )
 }
 
 //------------------------------------------------------------------------Spooler::get_task_or_null
-// Anderer Thread
 
 ptr<Task> Spooler::get_task_or_null( int task_id )
 {
@@ -2967,7 +2958,7 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config, const string& sou
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_continue
-// Anderer Thread
+// Anderer Thread (spooler_service.cxx)
 
 void Spooler::cmd_continue()
 { 
@@ -2979,7 +2970,6 @@ void Spooler::cmd_continue()
 }
 
 //------------------------------------------------------------------------------Spooler::cmd_reload
-// Anderer Thread
 
 void Spooler::cmd_reload()
 {
@@ -2987,15 +2977,6 @@ void Spooler::cmd_reload()
     signal( "reload" );
 }
 
-//--------------------------------------------------------------------------------Spooler::cmd_stop
-// Anderer Thread
-/*
-void Spooler::cmd_stop()
-{
-    _state_cmd = sc_stop;
-    signal( "stop" );
-}
-*/
 //---------------------------------------------------------------Spooler::cmd_terminate_after_error
 
 void Spooler::cmd_terminate_after_error( const string& debug_function, const string& debug_text )
@@ -3023,7 +3004,6 @@ void Spooler::cmd_terminate( bool restart, int timeout, const string& continue_e
 }
 
 //-------------------------------------------------------Spooler::cmd_let_run_terminate_and_restart
-// Anderer Thread
 
 void Spooler::cmd_let_run_terminate_and_restart()
 {
@@ -3080,7 +3060,7 @@ void Spooler::abort_immediately( bool restart, const string& message_text )
 }
 
 //-------------------------------------------------------------------------------Spooler::abort_now
-// KANN VON EINEM ANDEREN THREAD GERUFEN WERDEN (
+// KANN VON EINEM ANDEREN THREAD GERUFEN WERDEN
 
 void Spooler::abort_now( bool restart )
 {

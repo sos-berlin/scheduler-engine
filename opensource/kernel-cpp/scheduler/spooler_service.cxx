@@ -563,8 +563,7 @@ DWORD My_scheduler_service::handle( DWORD dwControl, DWORD event, void* event_da
         Message_string m ( "SCHEDULER-960", string_from_handler_control(dwControl),
                            ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) );
 
-        if( dwControl != SERVICE_CONTROL_INTERROGATE )  static_service_spooler->log()->log( log_info, m );
-                                                  else  Z_LOG2( "scheduler.service", m.as_string() << "\n" );
+        Z_LOG2( "scheduler.service", m.as_string() << "\n" );
 
         switch( dwControl )
         {
@@ -605,8 +604,6 @@ DWORD My_scheduler_service::handle( DWORD dwControl, DWORD event, void* event_da
                 break;
 
             case SERVICE_CONTROL_PARAMCHANGE:       // Windows 2000: Notifies the service that service-specific startup parameters have changed. The service should reread its startup parameters. 
-                //static_service_spooler->cmd_reload();
-                //result = NO_ERROR;  
                 break;
 /*
             case SERVICE_CONTROL_NETBINDADD:        // Windows 2000: Notifies a network service that there is a new component for binding. The service should bind to the new component.  
@@ -722,7 +719,7 @@ uint My_scheduler_service::service_thread(void* param)
             set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei, falls der Spooler beim eMail-Versand hängt.
             event_log( x, p->_argc, p->_argv, &spooler );
           //set_service_status( 2 );
-            spooler.log()->error( x.what() );
+            Z_LOG2("scheduler", x.what() );
             ret = 99;
         }
 

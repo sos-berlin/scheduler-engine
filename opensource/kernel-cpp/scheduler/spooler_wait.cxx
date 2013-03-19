@@ -66,26 +66,20 @@ void Event::close()
 
 void Event::add_to( Wait_handles* w )                 
 { 
-    Z_MUTEX( _mutex )
-    {
-        _wait_handles.push_back(w); 
-        w->add( this );
-    }
+    _wait_handles.push_back(w); 
+    w->add( this );
 }
 
 //-------------------------------------------------------------------------------Event::remove_from
 
 void Event::remove_from( Wait_handles* w )
 {
-    Z_MUTEX( _mutex )
+    FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
     {
-        FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
-        {
-            if( *it == w )  _wait_handles.erase( it );
-        }
-
-        w->remove( this );
+        if( *it == w )  _wait_handles.erase( it );
     }
+
+    w->remove( this );
 }
 
 //------------------------------------------------------------------------ait_handles::Wait_handles
@@ -94,8 +88,7 @@ Wait_handles::Wait_handles( Spooler* spooler )
 : 
     _zero_(this+1),
     _spooler(spooler),
-    _log( spooler->log() ),
-    _lock("Wait_handles") 
+    _log( spooler->log() )
 {
 }
 
@@ -106,7 +99,6 @@ Wait_handles::Wait_handles( const Wait_handles& o )
     _zero_(this+1),
     _spooler ( o._spooler ),
     _log     ( o._log ),
-    _lock    ( "Wait_handles" ),
     _events  ( o._events )
 #ifdef Z_WINDOWS
    ,_handles ( o._handles )
@@ -125,7 +117,6 @@ Wait_handles::~Wait_handles()
 
 void Wait_handles::close()
 {
-    //THREAD_LOCK( _lock )
     {
         FOR_EACH( Event_vector, _events, it )  
         {
@@ -142,7 +133,6 @@ void Wait_handles::close()
 
 void Wait_handles::clear()
 {
-    //THREAD_LOCK( _lock )
     {
         _events.clear();
 
@@ -156,7 +146,6 @@ void Wait_handles::clear()
 
 bool Wait_handles::signaled()
 {
-    //THREAD_LOCK( _lock )
     {
         FOR_EACH( Event_vector, _events, it )  
         {
@@ -570,7 +559,6 @@ string Wait_handles::as_string()
 {
     string result;
 
-    //THREAD_LOCK( _lock )
     {
         if( _events.empty() )
         {
@@ -955,11 +943,8 @@ void Directory_watcher::set_signaled()
 
 void Directory_watcher::reset()
 {
-    Z_MUTEX( _mutex )
-    {
-        _signaled = false;
-        _signal_name = "";
-    }
+    _signaled = false;
+    _signal_name = "";
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -40,7 +40,6 @@
 #include "../kram/sossock1.h"
 #include "../kram/sosdate.h"
 #include "../kram/sosprof.h"
-#include "../kram/thread_semaphore.h"
 #include "../kram/com_simple_standards.h"
 #include "../kram/log.h"
 
@@ -397,7 +396,7 @@ struct Spooler : Object,
     File_path                   include_path                () const                            { return _include_path; }
     string                      temp_dir                    () const                            { return _temp_dir; }
   //int                         priority_max                () const                            { return _priority_max; }
-    State                       state                       () const                            { return _state; }
+    State                       state                       () const                            { return _state; }      // Thread-sicher!
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
     const string&               log_directory               () const                            { return _log_directory; }                      
@@ -423,7 +422,7 @@ struct Spooler : Object,
     string                      execute_xml                 (const string& xml);
     http::Java_response*        java_execute_http           (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&);
     void                        cmd_reload                  ();
-    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
+    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }  // Anderer Thread (spooler_service.cxx)
     void                        cmd_continue                ();
     void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
     void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, 
@@ -737,7 +736,7 @@ struct Spooler : Object,
 
     ptr<Com_variable_set>      _variables;
     Security                   _security;                   // <security>
-    Communication              _communication;              // TCP und UDP (ein Thread)
+    Communication              _communication;              // TCP und UDP
 
     ptr<supervisor::Supervisor_interface>        _supervisor;
     ptr<supervisor::Supervisor_client_interface> _supervisor_client;
