@@ -52,8 +52,6 @@ class ManyJobsIT extends ScalaSchedulerTest {
       sleep(duration)
       controller.getEventBus.dispatchEvents()
       System.err.println(s"$taskCount tasks in ${duration.getStandardSeconds}s, ${1000f * taskCount / duration.getMillis} tasks/s")
-      //taskCount should be (expectedTaskCount plusOrMinus (0.2 * expectedTaskCount).toInt)
-      //(for (j <- jobStatistics) j.taskCount should equal (tasksPer)
     }
   }
 
@@ -79,7 +77,6 @@ private object ManyJobsIT {
     }
   }
   private val tasksPerSecond = 40.0
-  //private lazy val interval = standardSeconds((n / tasksPerSecond).toInt)
 
   case class JobDefinition(name: Int) {
     def path = JobPath.of(s"/a-$name")
@@ -89,9 +86,6 @@ private object ManyJobsIT {
         <script language="shell">exit 0</script>
         <run_time repeat="1"/>
       </job>
-//          <run_time>
-//            <period absolute_repeat={interval.getStandardSeconds.toString}/>
-//          </run_time>
   }
 
   case class JobStatistics(var taskCount: Int = 0)
