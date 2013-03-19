@@ -17,7 +17,7 @@ static int                  recursive    = 0;
 
 //-------------------------------------------------------------------------------Mutex_guard::enter_
 
-void Mutex_guard::enter_( Mutex* m, const string& function, const char* file, int line_nr )  
+void Mutex_guard::enter_( Mutex* m, const char* function, const char* file, int line_nr )  
 { 
     __assume(m); 
 

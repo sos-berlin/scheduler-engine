@@ -62,19 +62,19 @@ namespace zschimmer {
 struct Mutex_guard : Non_cloneable
 {
                                 Mutex_guard                 ()                                      : _mutex(NULL), _function(""), _file(""), _line_nr(0) {}
-                                Mutex_guard                 ( Mutex* m, const string& function = "", const char* file = "", int line = 0 ) { enter(m,function,file,line); }
+                                Mutex_guard                 ( Mutex* m, const char* function = "", const char* file = "", int line = 0 ) { enter(m,function,file,line); }
                                ~Mutex_guard                 ()                                      { leave(); }
 
                                 operator bool               () const                                { return _mutex != NULL; }
     void                        leave                       ()                                      { leave_();  __assume( _mutex == NULL ); }
-    void                        enter                       ( Mutex* m, const string& function = "", const char* file="", int line=0 ) { enter_( m, function, file, line ); __assume(_mutex); }
+    void                        enter                       ( Mutex* m, const char* function = "", const char* file="", int line=0 ) { enter_( m, function, file, line ); __assume(_mutex); }
 
   private:
-    void                        enter_                      ( Mutex* m, const string& function, const char* file, int line );
+    void                        enter_                      ( Mutex* m, const char* function, const char* file, int line );
     void                        leave_                      ();
 
     Mutex*                     _mutex;
-    string                     _function;
+    const char*                _function;
     const char*                _file;
     int                        _line_nr;
 };
