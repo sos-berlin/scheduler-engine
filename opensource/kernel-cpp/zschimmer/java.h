@@ -583,8 +583,6 @@ struct Vm : Object              // Java virtual machine
 
 
     Fill_zero                  _zero_;
-    //Mutex                      _jni_switch_mutex;
-    //Mutex_guard                _jni_switch_mutex_guard;     // Synchronisiert den nebenl�ufigen Aufruf aus Java
     bool                       _foreign;                    // JVM ist von au�en (f�r Hostjava)
     bool                       _vm_requested;
     bool                       _dont_destroy;               // DestroyJavaVM() nicht rufen (h�ngt manchmal)
@@ -596,7 +594,6 @@ struct Vm : Object              // Java virtual machine
     std::vector<Option>        _options;
     string                     _options_string;             // JS-540
     JavaVM*                    _vm;
-  //Thread_data<Java_thread_data> _thread_data;
 
     string                     _filename;                   // Dateiname der Java-VM
     string                     _class_path;

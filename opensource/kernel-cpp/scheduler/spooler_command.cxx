@@ -1080,29 +1080,12 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     return xml::Element_ptr();
 }
 
-//---------------------------------------------------------Command_processor::execute_signal_object
-
-//xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
-//{
-//    if( _security_level < Security::seclev_signal )  z::throw_xc( "SCHEDULER-121" );
-//
-//    string class_name = element.getAttribute( "class" );
-//    Level  level      = as_int( element.getAttribute( "level" ) );
-//
-//    xml::Element_ptr jobs_element = _answer.createElement( "tasks" );
-//
-//    //_spooler->signal_object( class_name, level );
-//    
-//    return _answer.createElement( "ok" );
-//}
-
 //--------------------------------------------------------------Command_processor::execute_add_jobs
 
 xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& add_jobs_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
-    //ptr<Task_subsystem> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
     _spooler->cmd_add_jobs( add_jobs_element );
 
     return _answer.createElement( "ok" );

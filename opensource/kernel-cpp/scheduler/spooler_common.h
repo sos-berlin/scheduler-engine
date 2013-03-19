@@ -18,7 +18,6 @@ namespace scheduler {
 
 
 typedef zschimmer::Thread::Id   Thread_id;                  // _beginthreadex()
-//typedef DWORD                   Process_id;
 
 namespace time
 {

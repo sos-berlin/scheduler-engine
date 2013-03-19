@@ -826,7 +826,6 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
         for( int i = 1; i <= wait_for_port_available; i++ )
         {
             if( ctrl_c_pressed || _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopped )  { errno = EINTR; return SOCKET_ERROR; }
-            //if( !main_thread_exists() )  return EINTR;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
 
             sos_sleep(1);
         
@@ -860,7 +859,6 @@ void Communication::bind()
 
     if( _udp_port != _spooler->udp_port() )
     {
-        //THREAD_LOCK( _semaphore )
         {
             _udp_socket.close();
             _udp_port = 0;

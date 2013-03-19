@@ -176,9 +176,6 @@ bool File_logger::flush()
         }
     }
 
-
-    // Nicht rufen, wenn wir in eigenem Thread sind:  close();
-
     return something_done;
 }
 
@@ -215,8 +212,6 @@ bool File_logger::async_continue_( Async_operation::Continue_flags )
 
 string File_logger::async_state_text_() const
 {
-    // Kann von anderem Thread gerufen werden!
-
     S result;
     result << "File_logger(";
     result << _for_object;
@@ -224,7 +219,6 @@ string File_logger::async_state_text_() const
     Z_FOR_EACH_CONST( File_line_reader_list, _file_line_reader_list, it )
     {
         File_line_reader* file_line_reader = *it;
-        //if( it != _file_line_reader_list.begin() )  
         result << ", ";
         result << file_line_reader->_name << ": " << file_line_reader->_read_length << " bytes";
     }
@@ -347,7 +341,6 @@ File_logger::File_logger_thread::~File_logger_thread()
 }
 
 //-------------------------------------------------------File_logger::File_logger_thread::terminate
-// Anderer Thread!
 
 void File_logger::File_logger_thread::terminate()
 {
