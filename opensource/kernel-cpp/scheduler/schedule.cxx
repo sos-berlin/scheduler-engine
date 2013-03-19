@@ -2154,7 +2154,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
             {
                 Sos_optional_date_time dt;
                 dt.assign( e2.getAttribute( "date" ) );
-                include( dt.as_time_t() );
+                include_day( dt.as_time_t() / (24*60*60) );
             }
             else
             if( e2.nodeName_is( "include" ) )
@@ -2190,7 +2190,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
     {   
         Sos_optional_date dt;
         dt.assign( e.getAttribute( "date" ) );
-        include( dt.as_time_t() );
+        include_day(dt.as_time_t() / (24*60*60));
     }
     else
         z::throw_xc( "SCHEDULER-319", e.nodeName(), Z_FUNCTION );
@@ -2200,8 +2200,8 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
 
 bool Holidays::is_included( const Time& t )
 { 
-    return _set.find(t.midnight().as_time_t()) != _set.end()  ||
-           _weekdays[weekday_of_day_number(t.day_nr())];
+    int day = t.day_nr();
+    return _day_set.find(day) != _day_set.end()  ||  _weekdays[weekday_of_day_number(day)];
 }
 
 //--------------------------------------------------------------------------------------Date::print

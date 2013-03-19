@@ -256,15 +256,15 @@ struct Holidays
 {
                                 Holidays                    ( Spooler* spooler )                    : _spooler(spooler) {}
 
-    void                        clear                       ()                                      { _set.clear(); }
-    bool                        is_filled                   () const                                { return !_set.empty(); }
+    void                        clear                       ()                                      { _day_set.clear(); }
+    bool                        is_filled                   () const                                { return !_day_set.empty(); }
     void                        set_dom                     ( File_based* source_file_based, const xml::Element_ptr&, int include_nesting = 0 );
-    void                        include                     ( time_t t )                            { _set.insert( t ); }
+    void                        include_day                 (int o)                                 { _day_set.insert(o); }
     bool                        is_included                 ( const Time& );
 
     Spooler*                   _spooler;
-    typedef stdext::hash_set<time_t> Set;
-    Set                        _set;
+    typedef stdext::hash_set<int> Set;
+    Set                        _day_set;
     std::bitset<7>             _weekdays;
 };
 
