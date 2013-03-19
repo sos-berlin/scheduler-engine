@@ -299,18 +299,8 @@ library Spooler
         [id(2)]
         HRESULT                 Clear_when_directory_changed();
 
-      //HRESULT                 Start_on_signal             ();
-
-      //HRESULT                 Start_after_timeout         ( [in,optional] VARIANT* Variables, [out,retval] Itask** );
-
         [id(3)]
         HRESULT                 Start                       ( [in,optional] VARIANT* Variables, [out,retval] Itask** );
-
-      //[propget]
-      //HRESULT                 Thread                      ( [out,retval] Ithread** Result );
-
-      //[propput]
-      //HRESULT                 Include_path                ( [in] BSTR include_path );
 
         [id(5),propget]
         HRESULT                 Include_path                ( [out,retval] BSTR* include_path );
@@ -415,9 +405,6 @@ library Spooler
 
         [id(7),propput,helpstring("Task nach der Anzahl Sekunden erneut starten")]
         HRESULT                 Repeat                      ( [in] double* seconds );
-
-      //[propget]
-      //HRESULT                 Thread                      ( [out,retval] Ithread** Result );
 
         [id(8)]
         HRESULT                 End                         ();
@@ -580,44 +567,6 @@ library Spooler
         interface Itask_proxy;
     }
 
-    //---------------------------------------------------------------------------------------Thread
-/*
-    [
-        uuid       ( feee478e-6c1b-11d8-8103-000476ee8afb ),
-        odl,
-        dual
-    ]
-    interface Ithread : IDispatch
-    {
-        [propget]
-        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name �ber IDispatch, statt �ber Ihas_java_class_name gerufen werden kann
-                                                                                                    // F�r den Objectserver
-
-        [propget]
-        HRESULT                 Log                     ( [out,retval] Ilog** log );
-
-        [propget]
-        HRESULT                 Script                  ( [out,retval] IDispatch** script_object );
-
-      //[propput]
-      //HRESULT                 Include_path            ( [in] BSTR include_path );
-
-        [propget]
-        HRESULT                 Include_path            ( [out,retval] BSTR* include_path );
-
-        [propget]
-        HRESULT                 Name                    ( [out,retval] BSTR* Name );
-    }
-
-    [
-        uuid       ( feee478f-6c1b-11d8-8103-000476ee8afb )
-    ]
-    coclass Thread
-    {
-        interface Ithread;
-        interface Ihas_java_class_name;
-    }
-*/
     //--------------------------------------------------------------------------------------Spooler
 
     [
@@ -819,9 +768,6 @@ library Spooler
 
         [id(2),propget]
         HRESULT                 Spooler                 ( [out,retval] Idispatch** Spooler );
-
-      //[propget]
-      //HRESULT                 Thread                  ( [out,retval] Ithread** thread );
 
         [id(4),propget]
         HRESULT                 Job                     ( [out,retval] Idispatch** Job );

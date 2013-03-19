@@ -309,7 +309,7 @@ void Task::init()
 
     _file_logger = Z_NEW( File_logger( _log ) );
     _file_logger->set_object_name( obj_name() );
-    _spooler->_task_subsystem->add_task( this );       // Jetzt kann der Thread die Task schon starten!
+    _spooler->_task_subsystem->add_task( this );
 }
 
 //------------------------------------------------------------------------------------Task::set_dom
@@ -2599,75 +2599,12 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated
-// Anderer Thread
 
 bool Task::wait_until_terminated( double )
 {
     z::throw_xc( "SCHEDULER-125" );     // Deadlock
     return false;
 }
-
-//-------------------------------------------------------------------------Task::send_collected_log
-
-//void Task::send_collected_log()
-//{
-//    try
-//    {
-//        Scheduler_event scheduler_event ( evt_task_ended, _log->highest_level(), this );
-//        _log->send( -2, &scheduler_event );
-//    }
-//    catch( const exception&  x ) { _spooler->log()->error( x.what() ); }
-//    catch( const _com_error& x ) { _spooler->log()->error( bstr_as_string(x.Description()) ); }
-//}
-
-//--------------------------------------------------------------------------Task::set_mail_defaults
-/*
-void Task::set_mail_defaults()
-{
-    bool is_error = has_error();
-
-    _log->set_mail_from_name( _job->profile_section() );
-
-    string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
-    body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " Schritte\n";
-    body += "Scheduler -id=" + _spooler->id() + "  host=" + _spooler->_complete_hostname + "\n\n";
-
-    if( !is_error )
-    {
-        string subject = obj_name();
-
-        if( _log->highest_level() == log_warn )
-        {
-            subject += " mit Warnung beendet";
-            body += _log->highest_msg() + "\n\n";
-        }
-        else
-        {
-            subject += " gelungen";
-        }
-
-        _log->set_mail_subject( subject );
-    }
-    else
-    {
-        string errmsg = _error? _error->what() : _log->highest_msg();
-        _log->set_mail_subject( string("FEHLER ") + errmsg );   //, is_error );
-
-        body += errmsg + "\n\n";
-    }
-
-    _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
-}
-*/
-//---------------------------------------------------------------------------------Task::clear_mail
-/*
-void Task::clear_mail()
-{
-    _log->set_mail_from_name( "", true );
-    _log->set_mail_subject  ( "", true );
-    _log->set_mail_body     ( "", true );
-}
-*/
 
 //----------------------------------------------------------------------------Task::set_web_service
 

@@ -989,7 +989,6 @@ struct Simple_operation : Async_operation
     string                     _debug_text;             // Für Debug-Meldungen
     bool                       _on_stack;               //                                          Connection::pop_operation() rufen!
     int                        _callback_nesting;       // Von Connection::_callback_nesting
-  //Mutex_guard                _connection_mutex_guard;
     bool                       _different_thread_is_allowed;    // Nur vorsichtshalber, Thread-Fähigkeit müsste getestet werden
 
     Fill_end _end_;
