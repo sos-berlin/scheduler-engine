@@ -450,6 +450,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         Monthday_set               _monthday_set;
         Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
         vector< ptr<Month> >       _months;
+        bool                       _has_month;
         Holidays                   _holidays;
         xml::Document_ptr          _dom;
         string                     _start_time_function;

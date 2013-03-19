@@ -1337,6 +1337,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
             {
                 if( _months[ *it ] )  z::throw_xc( "SCHEDULER-443", month_names[ *it ] );
                 _months[ *it ] = month;
+                _has_month = true;
             }
         }
         if( e.nodeName_is( "holidays" ) )
@@ -1372,10 +1373,8 @@ bool Schedule::Inlay::is_filled() const
                || _monthday_set.is_filled()
                || _ultimo_set  .is_filled();
 
-    if( !result )
-    {
-        for( int i = 0; i < 12; i++ )
-        {
+    if (!result && _has_month) {
+        for (int i = 0; i < 12; i++) {
             result = _months[ i ]  &&  _months[ i ]->is_filled();
             if( result )  break;
         }
@@ -1480,17 +1479,15 @@ Period Schedule::Inlay::next_period_of_same_day( const Time& t, With_single_star
     if( _at_set  .is_filled() )  result = min( result, _at_set  .next_period_of_same_day( t, single_start ) );
     if( _date_set.is_filled() )  result = min( result, _date_set.next_period_of_same_day( t, single_start ) );
 
-    int m = t.month_nr() - 1;
-    if( _months[ m ] )
-    {
-        result = min( result, _months[ m ]->next_period_of_same_day( t, single_start ) );
+    if (_has_month) {
+        int m = t.month_nr() - 1;
+        if (_months[m]) 
+            return min(result, _months[m]->next_period_of_same_day(t, single_start));
     }
-    else
-    {
-        if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( t, single_start ) );
-        if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( t, single_start ) );
-        if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( t, single_start ) );
-    }
+    
+    if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( t, single_start ) );
+    if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( t, single_start ) );
+    if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( t, single_start ) );
 
     return result;
 }
