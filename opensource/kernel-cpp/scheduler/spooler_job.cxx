@@ -1713,30 +1713,17 @@ ptr<Task> Job::get_task_from_queue( const Time& now )
 
 void Job::remove_running_task( Task* task )
 {
-    ptr<Task> hold_task = task;
-
-    Task_list::iterator t = _running_tasks.begin();
-    while( t != _running_tasks.end() )
-    {
-        if( *t == task )  t = _running_tasks.erase( t );
-                    else  t++;
+    for(Task_list::iterator t = _running_tasks.begin(); t != _running_tasks.end(); t++) {
+        if (*t == task) {
+            _running_tasks.erase(t);
+            break;
+        }
     }
 
-    if( _running_tasks.empty() )
-    {
-        if( _state != s_stopped )
-        {
-            if( _state == s_stopping )  
-            {
-                set_state( s_stopped );
-            }
-            else
-            {
-                set_state( s_pending );
-            }
-        }
-
-        set_next_start_time( Time::now(), true );
+    if (_running_tasks.empty()) {
+        if (_state != s_stopped)
+            set_state(_state == s_stopping? s_stopped : s_pending);
+        set_next_start_time(Time::now(), true);
     }
 
     if (_running_tasks.size() == _max_tasks - 1)
