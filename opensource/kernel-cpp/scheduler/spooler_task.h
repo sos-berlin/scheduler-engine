@@ -443,9 +443,10 @@ struct Task : Object,
 //----------------------------------------------------------------------------------------Task_list
 
 typedef list< ptr<Task> >   Task_list;
+typedef stdext::hash_set< ptr<Task> >   Task_set;
 
-#define FOR_EACH_TASK( ITERATOR, TASK )  FOR_EACH( Task_list, _task_list, ITERATOR )  if( Task* TASK = *ITERATOR )
-#define FOR_EACH_TASK_CONST( ITERATOR, TASK )  FOR_EACH_CONST( Task_list, _task_list, ITERATOR )  if( Task* TASK = *ITERATOR )
+#define FOR_EACH_TASK( ITERATOR, TASK )  FOR_EACH( Task_set, _task_set, ITERATOR )  if( Task* TASK = *ITERATOR )
+#define FOR_EACH_TASK_CONST( ITERATOR, TASK )  FOR_EACH_CONST( Task_set, _task_set, ITERATOR )  if( Task* TASK = *ITERATOR )
 
 //--------------------------------------------------------------------------------------Module_task
 

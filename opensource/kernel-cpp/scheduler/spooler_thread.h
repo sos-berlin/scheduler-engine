@@ -28,10 +28,10 @@ struct Task_subsystem: Object, Subsystem
     int                         count_tasks_exist           () const;
     xml::Element_ptr            exist_task_statistic_element( const xml::Document_ptr& dom_document ) const;
     
-    bool                        has_tasks                   ()                                      { return !_task_list.empty(); }
+    bool                        has_tasks                   ()                                      { return !_task_set.empty(); }
 
     bool                        process                     ( const Time& now );                    // Einen Schritt im (Pseudo-)Thread ausführen
-    void                        add_task                    ( Task* task )                          { _task_list.push_back( task );  signal( task->obj_name() ); }
+    void                        add_task                    ( Task* task )                          { _task_set.insert(task);  signal( task->obj_name() ); }
 
     ptr<Task>                   get_task_or_null            ( int task_id );
     Task*                       get_next_task               ();
@@ -65,7 +65,7 @@ struct Task_subsystem: Object, Subsystem
 
     Event*                     _event;
 
-    Task_list                  _task_list;
+    Task_set                   _task_set;
     bool                       _task_closed;
 
     vector<Job*>               _prioritized_order_job_array;            // Jobs am Ende einer Jobkette priorisieren

@@ -28,17 +28,17 @@ Task_subsystem::Task_subsystem( Spooler* spooler )
 
 Task_subsystem::~Task_subsystem() 
 {
-    _task_list.clear();
+    _task_set.clear();
 }
 
 //----------------------------------------------------------------------------Task_subsystem::close
 
 void Task_subsystem::close() 
 {
-    Z_FOR_EACH( Task_list, _task_list, t )  (*t)->job_close();
+    Z_FOR_EACH(Task_set, _task_set, t)  (*t)->job_close();
 
     _prioritized_order_job_array.clear();
-    _task_list.clear();
+    _task_set.clear();
     _event = NULL;
 }
 
@@ -79,16 +79,10 @@ ptr<Task> Task_subsystem::get_task_or_null( int task_id )
 //---------------------------------------------------------------Task_subsystem::remove_ended_tasks
 
 void Task_subsystem::remove_task(Task* task) {
-    for (Task_list::iterator i = _task_list.begin(); i != _task_list.end();) {
-        if (*i == task) {
-            task->job()->remove_running_task(task);
-            _task_list.erase(i);
-            if (is_ready_for_termination())
-                _spooler->signal("is_ready_for_termination");
-            return;
-        }
-        i++;
-    }
+    _task_set.erase(task);
+    task->job()->remove_running_task(task);
+    if (is_ready_for_termination())
+        _spooler->signal("is_ready_for_termination");
 }
 
 //---------------------------------------------------------Task_subsystem::is_ready_for_termination
@@ -98,11 +92,10 @@ bool Task_subsystem::is_ready_for_termination()
     if( _spooler->state() == Spooler::s_stopping_let_run  &&  
         ( !_spooler->order_subsystem()  ||  _spooler->order_subsystem()->has_any_order() ) )
     {
-        if( _task_list.size() == 0 )  return true;
+        if (_task_set.empty())  return true;
     }
 
-    if( _task_list.size() == 0 )
-    {
+    if (_task_set.empty()) {
         if( _spooler->_manual                        )  return true;
         if( _spooler->_configuration_is_job_script   )  return true;
         if( _spooler->state() == Spooler::s_stopping )  return true;

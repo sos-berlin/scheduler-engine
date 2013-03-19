@@ -591,7 +591,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
     {
         case s_ending:
         {
-            string error_line = message_string( "SCHEDULER-256", _spooler->_task_subsystem->_task_list.size() );  // "Frist zur Beendigung des Schedulers ist abgelaufen, aber $1 Tasks haben sich nicht beendet
+            string error_line = message_string( "SCHEDULER-256", _spooler->_task_subsystem->_task_set.size() );  // "Frist zur Beendigung des Schedulers ist abgelaufen, aber $1 Tasks haben sich nicht beendet
             
             _spooler->_log->error( error_line );
 
@@ -606,8 +606,7 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
                 scheduler_event.send_mail( mail_defaults );
             }
 
-            Z_FOR_EACH( Task_list, _spooler->_task_subsystem->_task_list, t )
-            {
+            Z_FOR_EACH(Task_set, _spooler->_task_subsystem->_task_set, t ) {
                 (*t)->cmd_end( Task::end_kill_immediately );      // Wirkt erst beim nächsten Task::do_something()
             }
 
@@ -622,13 +621,12 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
         case s_killing_1:
         {
-            int count = int_cast(_spooler->_task_subsystem->_task_list.size());
+            int count = int_cast(_spooler->_task_subsystem->_task_set.size());
             _spooler->_log->warn( message_string( "SCHEDULER-254", count, kill_timeout_1, kill_timeout_total ) );    // $1 Tasks haben sich nicht beendet trotz kill vor $2. Die $3s lange Nachfrist läuft weiter</title>
             //_spooler->_log->warn( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_1 << "s."
             //                     " Die " << kill_timeout_total << "s lange Nachfrist läuft weiter" );
 
-            Z_FOR_EACH( Task_list, _spooler->_task_subsystem->_task_list, t )
-            {
+            Z_FOR_EACH(Task_set, _spooler->_task_subsystem->_task_set, t) {
                 _spooler->_log->warn( S() << "    " << (*t)->obj_name() );
             }
 
@@ -641,13 +639,12 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 
         case s_killing_2:
         {
-            int count = int_cast(_spooler->_task_subsystem->_task_list.size());
+            int count = int_cast(_spooler->_task_subsystem->_task_set.size());
             _spooler->_log->error( message_string( "SCHEDULER-255", count, kill_timeout_total ) );  // "$1 Tasks haben sich nicht beendet trotz kill vor $2s. Scheduler bricht ab"
             //_spooler->_log->error( S() << count << " Tasks haben sich nicht beendet trotz kill vor " << kill_timeout_total << "s."
             //                                      " Scheduler bricht ab" ); 
 
-            Z_FOR_EACH( Task_list, _spooler->_task_subsystem->_task_list, t )
-            {
+            Z_FOR_EACH(Task_set, _spooler->_task_subsystem->_task_set, t) {
                 _spooler->_log->error( S() << "    " << (*t)->obj_name() );
             }
 
@@ -1225,7 +1222,7 @@ supervisor::Supervisor_client_interface* Spooler::supervisor_client()
 
 bool Spooler::has_any_task()
 {
-    if( _task_subsystem  &&  _task_subsystem->_task_list.size() > 0 )  return true;
+    if (_task_subsystem  &&  !_task_subsystem->_task_set.empty())  return true;
 
     return _job_subsystem->is_any_task_queued();
 }
@@ -2270,8 +2267,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
 
         if( _task_subsystem )  
         {
-            FOR_EACH( Task_list, _task_subsystem->_task_list, t )
-            {
+            FOR_EACH(Task_set, _task_subsystem->_task_set, t ) {
                 Task* task = *t;
                 if( tasks.length() > 0 )  tasks << ", ";
                 tasks << task->obj_name() << " " << task->state_name();
@@ -2382,12 +2378,10 @@ void Spooler::end_waiting_tasks()
 {
     if( _task_subsystem )
     {
-        FOR_EACH( Task_list, _task_subsystem->_task_list, t )
-        {
+        FOR_EACH(Task_set, _task_subsystem->_task_set, t) {
             Task* task = *t;
 
-            if( task->state() == Task::s_running_waiting_for_order ) 
-            {
+            if( task->state() == Task::s_running_waiting_for_order )  {
                 //_log->info( S() << "end " << task->obj_name() );
                 task->cmd_end();
             }
