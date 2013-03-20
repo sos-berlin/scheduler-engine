@@ -2329,7 +2329,6 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT,  9, "history_field"             , (Com_method_ptr)&Com_task::put_History_field      , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 10, "id"                        , (Com_method_ptr)&Com_task::get_Id                 , VT_I4         },
     { DISPATCH_PROPERTYPUT, 11, "delay_spooler_process"     , (Com_method_ptr)&Com_task::put_Delay_spooler_process, VT_EMPTY    , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_Close_engine       , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_Order              , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_Java_class_name    , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_Changed_directories, VT_BSTR       },
@@ -2662,24 +2661,6 @@ STDMETHODIMP Com_task::put_Delay_spooler_process( VARIANT* time )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
-
-    return hr;
-}
-
-//-----------------------------------------------------------------------Com_task::put_close_engine
-
-STDMETHODIMP Com_task::put_Close_engine( VARIANT_BOOL b )
-{
-    HRESULT hr = NOERROR;
-
-    try
-    {
-        if( !_task )  z::throw_xc( "SCHEDULER-122" );
-
-        _task->set_close_engine( b != 0 );
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
 
     return hr;
 }

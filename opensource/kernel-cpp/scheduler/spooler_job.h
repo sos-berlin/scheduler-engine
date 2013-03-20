@@ -372,9 +372,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     friend struct               Object_set;
     friend struct               Task;
-    friend struct               Module_task;
-    friend struct               Job_module_task;
-    friend struct               Object_set_task;
     friend struct               Com_job;
     friend struct               Task_subsystem;
 

@@ -217,7 +217,6 @@ struct Module_instance : Object
     void                    set_log                         ( Prefix_log* );
     void                    set_log                         ( Has_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
-    void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schlie�en
 
     virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();

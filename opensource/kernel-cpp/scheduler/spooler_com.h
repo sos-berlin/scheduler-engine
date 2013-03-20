@@ -506,7 +506,6 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            put_History_field               ( BSTR name, VARIANT* value );
     STDMETHODIMP            get_Id                          ( int* value );
     STDMETHODIMP            put_Delay_spooler_process       ( VARIANT* time );
-    STDMETHODIMP            put_Close_engine                ( VARIANT_BOOL );
     STDMETHODIMP            get_Order                       ( spooler_com::Iorder** );
     STDMETHODIMP            get_Changed_directories         ( BSTR* );
     STDMETHODIMP                Add_pid                     ( int, VARIANT* );

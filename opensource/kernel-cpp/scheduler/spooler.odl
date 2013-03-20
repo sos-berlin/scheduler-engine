@@ -418,9 +418,6 @@ library Spooler
         [id(11),propput]
         HRESULT                 Delay_spooler_process       ( [in] VARIANT* seconds );
 
-        [id(12),propput]
-        HRESULT                 Close_engine                ( [in] VARIANT_BOOL close_after_task );
-
         [id(13),propget]
         HRESULT                 Order                       ( [out,retval] Iorder** Result );
 

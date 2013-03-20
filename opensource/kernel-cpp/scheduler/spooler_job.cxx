@@ -1322,7 +1322,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
         default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), Z_FUNCTION, state_name() );
     }
 
-    ptr<Job_module_task> task = Z_NEW( Job_module_task( this ) );
+    ptr<Task> task = Z_NEW( Task( this ) );
 
     task->_id          = id;
     task->_obj_name    = S() << "Task " << path().without_slash() << ":" << task->_id;

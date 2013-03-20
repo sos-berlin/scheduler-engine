@@ -365,22 +365,18 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
         task_element.setAttribute( "log_file"        , _log->filename() );
 
-        if( const Module_task* t = dynamic_cast<const Module_task*>( this ) ) {
-            if( t->_module_instance ) {
-                if( t->_module_instance->_in_call )
-                task_element.setAttribute( "calling"         , t->_module_instance->_in_call->name() );
-
-                task_element.setAttribute_optional( "process", t->_module_instance->process_name() );
-
-                if (int pid = t->_module_instance->pid()) {
-                    task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
-                    try {
-                        zschimmer::Process process ( pid );
-                        task_element.setAttribute( "priority", process.priority_class() );
-                    }
-                    catch( exception& x ) {
-                        Z_LOG2( "scheduler", Z_FUNCTION << " priority_class() ==> " << x.what() << "\n" );
-                    }
+        if( _module_instance ) {
+            if( _module_instance->_in_call )
+                task_element.setAttribute( "calling", _module_instance->_in_call->name() );
+            task_element.setAttribute_optional( "process", _module_instance->process_name() );
+            if (int pid = _module_instance->pid()) {
+                task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
+                try {
+                    zschimmer::Process process ( pid );
+                    task_element.setAttribute( "priority", process.priority_class() );
+                }
+                catch( exception& x ) {
+                    Z_LOG2( "scheduler", Z_FUNCTION << " priority_class() ==> " << x.what() << "\n" );
                 }
             }
         }
@@ -1896,7 +1892,8 @@ bool Task::load()
 
 Async_operation* Task::begin__start()
 {
-    return do_begin__start();
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
+    return _module_instance->begin__start();
 }
 
 //-----------------------------------------------------------------------------------Task::step__end
@@ -2359,18 +2356,18 @@ Web_service* Task::web_service() const
     return result;
 }
 
-//---------------------------------------------------------------------Module_task::do_close__start
+//----------------------------------------------------------------------------Task::do_close__start
 
-Async_operation* Module_task::do_close__start()
+Async_operation* Task::do_close__start()
 {
     if( !_module_instance )  return &dummy_sync_operation;
     _module_instance->detach_task();
     return _module_instance->close__start();
 }
 
-//-----------------------------------------------------------------------Module_task::do_close__end
+//------------------------------------------------------------------------------Task::do_close__end
 
-void Module_task::do_close__end()
+void Task::do_close__end()
 {
     if( _module_instance ) {
         _module_instance->close__end();
@@ -2418,18 +2415,18 @@ void Module_task::do_close__end()
     }
 }
 
-//--------------------------------------------------------------------------Job_module_task::do_kill
+//------------------------------------------------------------------------------------Task::do_kill
 
-bool Job_module_task::do_kill()
+bool Task::do_kill()
 {
     return _module_instance? _module_instance->kill() :
            _operation      ? _operation->async_kill()
                            : false;
 }
 
-//-------------------------------------------------------------------------Job_module_task::do_load
+//------------------------------------------------------------------------------------Task::do_load
 
-bool Job_module_task::do_load()
+bool Task::do_load()
 {
     ptr<Module_instance> module_instance;
     bool                 is_new = false;
@@ -2441,7 +2438,6 @@ bool Job_module_task::do_load()
         module_instance = _job->create_module_instance();
         if( !module_instance )  return false;
         is_new = true;
-        module_instance->set_close_instance_at_end( true );
         module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
     }
 
@@ -2462,82 +2458,74 @@ bool Job_module_task::do_load()
     return true;
 }
 
-//------------------------------------------------------------------Job_module_task::do_begin_start
+//------------------------------------------------------------------------------Task::do_begin__end
 
-Async_operation* Job_module_task::do_begin__start()
-{
-    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-    return _module_instance->begin__start();
-}
-
-//-------------------------------------------------------------------Job_module_task::do_begin__end
-
-bool Job_module_task::do_begin__end()
+bool Task::do_begin__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
     return _module_instance->begin__end();
 }
 
-//-------------------------------------------------------------------Job_module_task::do_end__start
+//------------------------------------------------------------------------------Task::do_end__start
 
-Async_operation* Job_module_task::do_end__start()
+Async_operation* Task::do_end__start()
 {
     if( !_module_instance )  return &dummy_sync_operation;
     return _module_instance->end__start( !has_error() );        // Parameter wird nicht benutzt
 }
 
-//---------------------------------------------------------------------Job_module_task::do_end__end
+//--------------------------------------------------------------------------------Task::do_end__end
 
-void Job_module_task::do_end__end()
+void Task::do_end__end()
 {
     if( _module_instance ) 
         _module_instance->end__end();
 }
 
-//------------------------------------------------------------------Job_module_task::do_step__start
+//-----------------------------------------------------------------------------Task::do_step__start
 
-Async_operation* Job_module_task::do_step__start()
+Async_operation* Task::do_step__start()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
     if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
     return _module_instance->step__start();
 }
 
-//--------------------------------------------------------------------Job_module_task::do_step__end
+//-------------------------------------------------------------------------------Task::do_step__end
 
-Variant Job_module_task::do_step__end()
+Variant Task::do_step__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
     return _module_instance->step__end();
 }
 
-//------------------------------------------------------------------Job_module_task::do_call__start
+//------------------------------------------------------------------------------Task::do_call__start
 
-Async_operation* Job_module_task::do_call__start( const string& method )
+Async_operation* Task::do_call__start( const string& method )
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
     return _module_instance->call__start( method );
 }
 
-//--------------------------------------------------------------------Job_module_task::do_call__end
+//-------------------------------------------------------------------------------Task::do_call__end
 
-bool Job_module_task::do_call__end()
+bool Task::do_call__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
     return check_result( _module_instance->call__end() );
 }
 
-//---------------------------------------------------------------Job_module_task::do_release__start
+//--------------------------------------------------------------------------Task::do_release__start
 
-Async_operation* Job_module_task::do_release__start()
+Async_operation* Task::do_release__start()
 {
     if( !_module_instance )  return &dummy_sync_operation;
     return _module_instance->release__start();
 }
 
-//-----------------------------------------------------------------Job_module_task::do_release__end
+//----------------------------------------------------------------------------Task::do_release__end
 
-void Job_module_task::do_release__end()
+void Task::do_release__end()
 {
     if( !_module_instance )  return;  //z::throw_xc( "SCHEDULER-199" );
     _module_instance->release__end();

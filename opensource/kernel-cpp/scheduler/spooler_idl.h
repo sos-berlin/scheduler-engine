@@ -240,8 +240,6 @@ struct Ijob : IDispatch
 
 DEFINE_GUID( IID_Itask ,  0xfeee478d, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );
 DEFINE_GUID( CLSID_Task,  0xfeee478c, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );
-//DEFINE_GUID( IID_Itask,  0x65E311F1, 0x04BF, 0x4e34, 0xA8, 0x47, 0xBB, 0xF0, 0xB0, 0xAC, 0x6D, 0xC6 );
-//DEFINE_GUID( CLSID_Task,   0x00BB25C8, 0x812A, 0x4200, 0xA6, 0xF9, 0x1A, 0xE8, 0xE2, 0x65, 0x04, 0x74 );
 
 struct Itask : IDispatch
 {
@@ -257,12 +255,10 @@ struct Itask : IDispatch
     virtual HRESULT     get_Result                      ( VARIANT* value )                      = 0;
     virtual HRESULT         Wait_until_terminated       ( double* wait_time, VARIANT_BOOL* ok )  = 0;
     virtual HRESULT     put_Repeat                      ( double* seconds )                     = 0;
- //?virtual HRESULT     get_Thread                      ( Ithread** result )                    = 0;
     virtual HRESULT         End                         ()                                      = 0;
     virtual HRESULT     put_History_field               ( BSTR name, VARIANT* value )           = 0;
     virtual HRESULT     get_Id                          ( int* result )                         = 0;
     virtual HRESULT     put_Delay_spooler_process       ( VARIANT* seconds )                    = 0;
-    virtual HRESULT     put_Close_engine                ( VARIANT_BOOL close_after_task )       = 0;
     virtual HRESULT     get_Order                       ( Iorder** result )                     = 0;
     virtual HRESULT     get_Stderr_text                 ( BSTR* )                               = 0;
     virtual HRESULT     get_Stderr_path                 ( BSTR* )                               = 0;
@@ -286,8 +282,6 @@ struct Itask : IDispatch
     virtual HRESULT         Call_me_again_when_locks_available()                                = 0;
     virtual HRESULT     get_Params_xml                  ( BSTR* )                               = 0;
     virtual HRESULT     get_Order_params_xml            ( BSTR* )                               = 0;
-    //virtual HRESULT         Try_lock_else_call_me_again( BSTR, VARIANT_BOOL* )               = 0;
-    //virtual HRESULT         Try_lock_non_exclusive_else_call_me_again( BSTR, VARIANT_BOOL* ) = 0;
 };
 
 //--------------------------------------------------------------------------------------Itask_proxy

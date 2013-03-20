@@ -272,7 +272,6 @@ struct Task : Object,
     Start_cause                 cause                       () const                                { return _cause; }
 
     void                        set_history_field           ( const string& name, const Variant& value );
-    virtual void                set_close_engine            ( bool )                                {}      // Für Module_task
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom( Com_variable_set::xml_element_name(), "variable" ); }
 
@@ -307,22 +306,22 @@ struct Task : Object,
     friend struct               com_objects::Com_task;
     friend struct               database::Task_history;
 
-    virtual bool                do_load                     ()                                      { return true; }
-    virtual bool                do_kill                     ()                                      { return false; }
-    virtual Async_operation*    do_close__start             ()                                      { return &dummy_sync_operation; }
-    virtual void                do_close__end               ()                                      {}
-    virtual Async_operation*    do_begin__start             ()                                      { return &dummy_sync_operation; }
-    virtual bool                do_begin__end               () = 0;
-    virtual Async_operation*    do_end__start               ()                                      { return &dummy_sync_operation; }
-    virtual void                do_end__end                 () = 0;
-    virtual Async_operation*    do_step__start              ()                                      { return &dummy_sync_operation; }
-    virtual Variant             do_step__end                () = 0;
-    virtual Async_operation*    do_call__start              ( const string& )                       { return &dummy_sync_operation; }
-    virtual bool                do_call__end                ()                                      { return true; }           // Default: Nicht implementiert
-    virtual Async_operation*    do_release__start           ()                                      { return &dummy_sync_operation; }
-    virtual void                do_release__end             ()                                      {}
+    bool                        do_kill                     ();
+    bool                        do_load                     ();
+    bool                        do_begin__end               ();
+    Async_operation*            do_end__start               ();
+    void                        do_end__end                 ();
+    Async_operation*            do_step__start              ();
+    Variant                     do_step__end                ();
+    Async_operation*            do_call__start              ( const string& method );
+    bool                        do_call__end                ();
+    Async_operation*            do_release__start           ();
+    void                        do_release__end             ();
 
-    virtual bool                loaded                      ()                                      { return true; }
+    Async_operation*            do_close__start             ();
+    void                        do_close__end               ();
+
+    bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
     virtual bool                has_step_count              ()                                      { return true; }
 
  private:
@@ -417,39 +416,6 @@ typedef stdext::hash_set< ptr<Task> >   Task_set;
 
 #define FOR_EACH_TASK( ITERATOR, TASK )  FOR_EACH( Task_set, _task_set, ITERATOR )  if( Task* TASK = *ITERATOR )
 #define FOR_EACH_TASK_CONST( ITERATOR, TASK )  FOR_EACH_CONST( Task_set, _task_set, ITERATOR )  if( Task* TASK = *ITERATOR )
-
-//--------------------------------------------------------------------------------------Module_task
-
-struct Module_task : Task       // Oberklasse für Object_set_task und Job_module_task
-{
-                                Module_task                 ( Job* j )                              : Task(j) {}
-
-    virtual void                set_close_engine            ( bool b )                              { if( _module_instance )  _module_instance->set_close_instance_at_end(b); }
-
-    virtual Async_operation*    do_close__start             ();
-    virtual void                do_close__end               ();
-    bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
-};
-
-//----------------------------------------------------------------------------------Job_module_task
-
-struct Job_module_task : Module_task
-{
-                                Job_module_task             ( Job* j )                              : Module_task(j) {}
-
-    virtual bool                do_kill                     ();
-    virtual bool                do_load                     ();
-    virtual Async_operation*    do_begin__start             ();
-    virtual bool                do_begin__end               ();
-    virtual Async_operation*    do_end__start               ();
-    virtual void                do_end__end                 ();
-    virtual Async_operation*    do_step__start              ();
-    virtual Variant             do_step__end                ();
-    virtual Async_operation*    do_call__start              ( const string& method );
-    virtual bool                do_call__end                ();
-    virtual Async_operation*    do_release__start           ();
-    virtual void                do_release__end             ();
-};
 
 //-------------------------------------------------------------------------------------------------
 
