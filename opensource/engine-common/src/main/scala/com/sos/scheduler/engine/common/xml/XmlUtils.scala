@@ -36,7 +36,7 @@ import scala.sys.error
   }
 
   def prettyXml(xml: String): String =
-    writingString { w => writeXmlTo(loadXml(xml), new StreamResult(w), null, indent=true) }
+    writingString { w => writeXmlTo(loadXml(xml), new StreamResult(w), None, indent=true) }
 
   @ForCpp def loadXml(xml: Array[Byte], encoding: String): Document =
     loadXml(new InputStreamReader(new ByteArrayInputStream(xml), Charset.forName(encoding)))
