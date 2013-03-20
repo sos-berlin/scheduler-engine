@@ -16,9 +16,9 @@ import scala.collection.mutable
 
 /** JS-948 */
 @RunWith(classOf[JUnitRunner])
-class WakeWhenNotInPeriodIT extends ScalaSchedulerTest {
+class WakeWhenInPeriodIT extends ScalaSchedulerTest {
 
-  import WakeWhenNotInPeriodIT._
+  import WakeWhenInPeriodIT._
 
   private val startTimes = mutable.Buffer[LocalTime]()
 
@@ -29,8 +29,8 @@ class WakeWhenNotInPeriodIT extends ScalaSchedulerTest {
       sleep(minimumTimeUntilMidnight + 1000)
 
     val t = new LocalTime(now) plusMillis 1999 withMillisOfSecond 0
-    val a = Period(t plusSeconds 1, t plusSeconds 2)
-    val b = Period(t plusSeconds 3, t plusSeconds 4)
+    val a = Period(t plusSeconds 2, t plusSeconds 4)
+    val b = Period(t plusSeconds 6, t plusSeconds 8)
     scheduler executeXml jobElem(List(a, b))
 
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Vor der Periode: unwirksam
@@ -50,7 +50,7 @@ class WakeWhenNotInPeriodIT extends ScalaSchedulerTest {
   }
 }
 
-private object WakeWhenNotInPeriodIT {
+private object WakeWhenInPeriodIT {
   val jobPath = JobPath.of("/a")
   val hhmmssFormat = DateTimeFormat.forPattern("HH:mm:ss")
 
