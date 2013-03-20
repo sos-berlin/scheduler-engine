@@ -531,7 +531,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 
     _schedule_use = Z_NEW( Job_schedule_use( this ) );
 
-    _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
+    _next_time      = Time::never;
     _default_params = new Com_variable_set;
     _task_timeout   = Duration::eternal;
     _idle_timeout   = Duration(5);
@@ -1822,15 +1822,19 @@ void Job::end_tasks( const string& task_warning )
     }
 }
 
-//-------------------------------------------------------------------------------------Job::on_call
+//----------------------------------------------------------------------Job::on_call State_cmd_call
 
 void Job::on_call(const State_cmd_call& call) {
     set_state_cmd(call._cmd);
 }
 
+//-------------------------------------------------------------------Job::on_call Period_begin_call
+
 void Job::on_call(const Period_begin_call&) {
     calculate_next_time(Time::now());
 }
+
+//---------------------------------------------------------------------Job::on_call Period_end_call
 
 void Job::on_call(const Period_end_call&) {
     Time now = Time::now();
@@ -1842,33 +1846,63 @@ void Job::on_call(const Period_end_call&) {
     }
 }
 
+//----------------------------------------------Job::on_call Calculated_next_time_do_something_call
+
 void Job::on_call(const Calculated_next_time_do_something_call&) {
-    do_something();
+    try_start_task();
 }
+
+//--------------------------------------------------------------------Job::on_call Order_timed_call
 
 void Job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
-    do_something();
+    process_order();
 }
+
+//----------------------------------------------------------------Job::on_call Order_available_call
 
 void Job::on_call(const Order_available_call&) {
-    do_something();
+    process_order();
 }
+
+//-------------------------------------------------------------------------------Job::process_order
+
+void Job::process_order() {
+    Time now = Time::now();
+    Z_FOR_EACH( Task_set, _running_tasks, t ) {
+        Task* task = *t;
+        if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) {
+            if( task->fetch_and_occupy_order( now, Z_FUNCTION ) ) {
+                task->do_something();
+                return;
+            }
+        }
+    }
+    try_start_task();
+}
+
+//--------------------------------------------------------------Job::on_call Process_available_call
 
 void Job::on_call(const Process_available_call&) {
-    do_something();
+    try_start_task();
 }
+
+//----------------------------------------------------------------Job::on_call Below_min_tasks_call
 
 void Job::on_call(const Below_min_tasks_call&) {
-    do_something();
+    try_start_task();
 }
+
+//----------------------------------------------------------------Job::on_call Below_max_tasks_call
 
 void Job::on_call(const Below_max_tasks_call&) {
-    do_something();
+    try_start_task();
 }
 
+//----------------------------------------------------------------Job::on_call Locks_available_call
+
 void Job::on_call(const Locks_available_call&) {
-    do_something();
+    try_start_task();
 }
 
 //--------------------------------------------------------------------Job::on_call Task_closed_call
@@ -1885,7 +1919,7 @@ void Job::on_call(const Task_closed_call& call) {
 void Job::on_call(const Start_when_directory_changed_call&) {
 	bool ok = check_for_changed_directory(Time::now());         // Hier prüfen, damit Signal zurückgesetzt wird
     log()->debug(S() << "Start_when_directory_changed_call ok=" << ok);
-    if (ok) do_something();
+    if (ok) try_start_task();
 }
 
 //-----------------------------------------------------------Job::on_call Remote_temporary_job_call
@@ -1921,7 +1955,7 @@ void Job::set_state_cmd(State_cmd state_cmd)
                     if (state_cmd == sc_enable) _enabled = true;         // JS-551
                     check_min_tasks( "job has been unstopped" );
                     set_next_start_time( Time::now() );
-                    do_something();
+                    try_start_task();
                 }
             }
             break;
@@ -1952,7 +1986,7 @@ void Job::set_state_cmd(State_cmd state_cmd)
                     
             set_state(_running_tasks.empty()? s_pending : s_running);
             check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
-            do_something();
+            try_start_task();
             break;
         }
 
@@ -1971,7 +2005,7 @@ void Job::set_state_cmd(State_cmd state_cmd)
                     task->_cause = cause_wake;
                     task->_let_run = true;
                     task->init();
-                    do_something();
+                    try_start_task();
                 }
             }
             break;
@@ -1981,14 +2015,14 @@ void Job::set_state_cmd(State_cmd state_cmd)
             if (is_in_period(Time::now())) {
                 _wake_when_in_period = true;
                 if (_state == s_pending || _state == s_running)
-                    do_something();
+                    try_start_task();
             }
             return;
         }
 
         case sc_start:
             start( NULL, "", Time::now() );
-            do_something();
+            try_start_task();
             break;
 
         case sc_remove:     
@@ -2621,9 +2655,6 @@ void Job::on_order_available()
 
 ptr<Task> Job::task_to_start()
 {
-    if( _spooler->state() == Spooler::s_stopping
-     || _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
-
     Time            now       = Time::now();
     Start_cause     cause     = cause_none;
     ptr<Task>       task      = NULL;
@@ -2803,91 +2834,48 @@ ptr<Task> Job::task_to_start()
     return task;
 }
 
-//--------------------------------------------------------------------------------Job::do_something
+//------------------------------------------------------------------------------Job::try_start_task
 
-bool Job::do_something()
+void Job::try_start_task()
 {
-    bool something_done     = false;       
     bool task_started       = false;
     Time now                = Time::now();
 
-    if (_state > s_loaded && _state != s_error)
-    try {
-        Time next_time_at_begin = _next_time;
+    if ((_state == s_pending && _max_tasks > 0  || _state == s_running && _running_tasks.size() < _max_tasks)  && 
+        (!_waiting_for_process || _waiting_for_process_try_again)  && 
+        _spooler->state() != Spooler::s_stopping_let_run) {
+        try {
+            if (ptr<Task> task = task_to_start()) {
+                _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+                reset_error();
+                _repeat = Duration(0);
+                _delay_until = Time(0);
 
-        if( _state == s_running  &&  is_in_job_chain()) {    // Auftrag bereit und Tasks warten auf Aufträge?
-            FOR_EACH( Task_set, _running_tasks, t ) {
-                Task* task = *t;
-                if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) {
-                    if( task->fetch_and_occupy_order( now, Z_FUNCTION ) ) {
-                        something_done |= task->do_something();
-                    }
-                }
+                _running_tasks.insert(task);
+                set_state( s_running );
+
+                _next_start_time = Time::never;
+                calculate_next_time( now );
+
+                task->init();
+
+                string c = task->cause() == cause_order && task->order()? task->order()->obj_name()
+                                                                        : start_cause_name( task->cause() );
+                _log->info( message_string( "SCHEDULER-930", task->id(), c ) );
+
+                if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
+
+                task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
+
+                task_started = true;
+                _wake_when_in_period = false;
             }
         }
-
-        if( _state == s_pending  &&  _max_tasks > 0                         // Jira JS-55: tasks="0" soll keine Task starten
-         || _state == s_running  &&  _running_tasks.size() < _max_tasks )
-        {
-            if (!_waiting_for_process || _waiting_for_process_try_again ) {
-                if (ptr<Task> task = task_to_start()) {
-                    _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
-
-                    reset_error();
-                    _repeat = Duration(0);
-                    _delay_until = Time(0);
-
-                    _running_tasks.insert(task);
-                    set_state( s_running );
-
-                    _next_start_time = Time::never;
-                    calculate_next_time( now );
-
-                    task->init();
-
-                    string c = task->cause() == cause_order && task->order()? task->order()->obj_name()
-                                                                            : start_cause_name( task->cause() );
-                    _log->info( message_string( "SCHEDULER-930", task->id(), c ) );
-
-                    if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
-
-                    task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
-
-                    task_started = true;
-                    _wake_when_in_period = false;
-                    something_done = true;
-                }
-            }
-        }
-
-        Z_FOR_EACH(Task_set, _running_tasks, it) {
-            Task* task = *it;
-            task->do_something();
-        }
-
-        if( !something_done  &&  _next_time <= now ) {  // Obwohl _next_time erreicht, ist nichts getan?
-            calculate_next_time( now );
-
-            Z_LOG2( _next_time <= now? "scheduler" : "scheduler.nothing_done", 
-                    obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin.as_string(time_zone_name()) <<
-                    " _next_time=" << _next_time.as_string(time_zone_name()) <<
-                    " _next_start_time=" << _next_start_time.as_string(time_zone_name()) <<
-                    " _next_single_start=" << _next_single_start.as_string(time_zone_name()) <<
-                    " _period=" << _period.obj_name() <<
-                    " _repeat=" << _repeat <<
-                    " _waiting_for_process=" << _waiting_for_process <<
-                    "\n" );
-
-            if( _next_time <= now )
-                _next_time = Time::now() + Duration(1);
-        }
+        catch( const exception& x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
     }
-    catch( const exception& x ) { set_error( x );  set_job_error( x );  sos_sleep(1); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
     if( !task_started  &&  _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() ) 
         _lock_requestor->dequeue_lock_requests();
-
-    return something_done;
 }
 
 //----------------------------------------------------------------------------Job::on_task_finished

@@ -170,7 +170,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     // File_based:
     bool                        on_initialize               (); 
     bool                        on_load                     (); 
-  //void                        on_load                     ( Transaction* );
     bool                        on_activate                 ();
     list<Requisite_path>        missing_requisites          ();
     bool                        can_be_removed_now          ();
@@ -181,9 +180,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                        on_requisite_to_be_removed  ( File_based* );
   //void                        on_requisite_removed        ( File_based* );
 
-
-    // Has_includes:
-  //void                        on_include_changed          ();
 
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
@@ -308,12 +304,12 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        on_call                     (const job::Below_max_tasks_call&);
     void                        on_call                     (const job::Locks_available_call&);
     void                        on_call                     (const job::Remove_temporary_job_call&);
+    void                        process_order               ();
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
-  //void                        on_removing_lock            ( lock::Lock* );
 
+    void                        try_start_task              ();
     ptr<Task>                   task_to_start               ();
-    bool                        do_something                ();
 
     void                    set_repeat                      (const Duration& d)                     { _log->debug( "repeat=" + d.as_string() ),  _repeat = d; }
     Duration                    repeat                      ()                                      { return _repeat; }
