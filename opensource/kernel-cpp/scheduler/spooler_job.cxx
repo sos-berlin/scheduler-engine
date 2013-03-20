@@ -2295,7 +2295,7 @@ void Job::select_period( const Time& now )
             _schedule_use->log_changed_active_schedule( now );
 
             Period next_period = _schedule_use->next_period(now);
-            if (_period.end() < _period.begin())    // Folgende Periode schließt sich nicht nahtlos an?
+            if (_period.end() < next_period.begin())    // Folgende Periode schließt sich nicht nahtlos an?
                 _wake_when_in_period = false;
 
             set_period(next_period);  
