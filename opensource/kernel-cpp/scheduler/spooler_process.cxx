@@ -609,6 +609,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             //if( _spooler->_validate_xml )  _spooler->_schema.validate( dom_document );
 
             _remote_process_id = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "process_id", 0 );
+            assert(_remote_process_id);
             _remote_pid        = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "pid", 0 );
 
             _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
@@ -675,6 +676,7 @@ void Process::Async_remote_operation::close_remote_task( bool kill )
     if( _state >= s_starting  &&  _state < s_closing ) {
         if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() ) {
             try {
+                assert(_process->_remote_process_id);
                 S xml;
                 xml << "<remote_scheduler.remote_task.close process_id='" << _process->_remote_process_id << "'";
                 if( kill )  xml << " kill='yes'";
