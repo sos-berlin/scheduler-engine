@@ -512,14 +512,19 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <!--  http://jira.codehaus.org/browse/SUREFIRE-959 wird in 2.15 gelöst sein. <version>2.14</version-->
-                <version>2.12</version>
                 <configuration>
                     <printSummary>false</printSummary>
                     <!-- Soll ab Version 2.13 gehen. http://jira.codehaus.org/browse/SUREFIRE-827
                     <parallel>classes</parallel>
                     <forkMode>perthread</forkMode>
                     <threadCount>4</threadCount>-->
+                    <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
+                    <systemPropertyVariables>
+                        <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
+                        <com.sos.scheduler.engine.test.underMaven/>
+                        <com.sos.scheduler.engine.test.binary.tmpdir>${project.basedir}/target/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
+                        <com.sos.scheduler.engine.test.directory>${project.basedir}/target/surefire-reports</com.sos.scheduler.engine.test.directory>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -615,7 +620,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.9</version>
+                    <version>2.12</version> <!--  http://jira.codehaus.org/browse/SUREFIRE-959 wird in 2.15 gelöst sein -->
                 </plugin>
                 <plugin>
                     <groupId>org.scala-tools</groupId>

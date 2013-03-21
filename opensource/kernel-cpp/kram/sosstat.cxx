@@ -207,6 +207,7 @@ void Sos_static::init()
     set_log_category_default ( "exception.*"    );
     set_log_category_explicit( "exception.D310" );    // Eof_error
     set_log_category_explicit( "exception.D311" );    // Not_found_error
+    set_log_category_explicit( "sleep" );
 
 
     init_std_client();
