@@ -37,7 +37,7 @@ struct Event_base : Object//, Has_set_signaled
     void                    set_signaled_then_callback      (const string& name);
     virtual void                reset                       () = 0;
   //virtual bool                signaled_after_check        ()                                      { return _signaled; }
-    void                    set_call                        (Call* o)                               { _call = o; }
+    void                        on_signaled_call            (Call* o)                               { _call = o; }
 
     void                    set_waiting_thread_id           ( Thread_id id )                        { _waiting_thread_id = id; }  // Wenn nur dieser Thread wartet
 
