@@ -673,7 +673,7 @@ void Process::Async_remote_operation::close_remote_task( bool kill )
         }
     }
     else
-    if( _state >= s_starting  &&  _state < s_closing ) {
+    if( _state > s_starting  &&  _state < s_closing ) {
         if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() ) {
             try {
                 assert(_process->_remote_process_id);
