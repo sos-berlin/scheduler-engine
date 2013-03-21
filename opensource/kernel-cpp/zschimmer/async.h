@@ -66,7 +66,7 @@ struct Async_operation : Object
     void                        async_clear_signaled    ()                                          { async_clear_signaled_(); }
   //void                        async_on_signal_from_child( Async_operation* op )                   { async_on_signal_from_child_( op ); }
   //virtual Socket_event*       async_event             ()                                          { throw_xc( "NO ASYNC_EVENT" ); }
-    void                        on_async_finished_call  (Call* o)                                   { _call = o; }
+    void                        on_async_finished_call  (Call*);
 
   protected:
     void                        async_check_error       ( const string& text, bool check_finished );

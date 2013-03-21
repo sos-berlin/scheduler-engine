@@ -200,7 +200,19 @@ bool Async_operation::async_continue( Continue_flags flags )
     return something_done;
 }
 
-//----------------------------------------------------------Async_operation::async_finished_then_call
+//----------------------------------------------------------Async_operation::on_async_finished_call
+
+void Async_operation::on_async_finished_call(Call* o)
+{ 
+    if (o) {
+        assert(!_call);
+        _call = o; 
+        async_finished_then_call();
+    } else
+        _call = NULL;
+}
+
+//--------------------------------------------------------Async_operation::async_finished_then_call
 
 bool Async_operation::async_finished_then_call() {
     bool finished = async_finished();
