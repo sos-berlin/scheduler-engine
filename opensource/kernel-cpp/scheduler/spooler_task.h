@@ -263,6 +263,7 @@ struct Task : Object,
     void                        count_step                  ();
     string                      remote_process_step__end    ();
     bool                        operation__end              ();
+    void                        close_operation             ();
 
     void                        set_mail_defaults           ();
     void                        trigger_event               ( Scheduler_event* );

@@ -10,17 +10,12 @@ using namespace std;
 
 namespace zschimmer {
 
-//-------------------------------------------------------------------------------------------static
-
-Sync_operation                      dummy_sync_operation;
-
 //------------------------------------------------------------------sync_operation::Async_operation
 
 Async_operation::Async_operation( Async_manager* m )
 : 
     _zero_(this+1), 
     _manager(m), 
-    //_signaled(true),
     _next_gmtime(double_time_max) 
 {
 }
@@ -39,6 +34,13 @@ Async_operation::~Async_operation()
     }
 
     if( _manager )  _manager->remove_operation( this );
+}
+
+//---------------------------------------------------------------------Async_operation::async_close
+
+void Async_operation::async_close() {
+    _call = NULL;
+    set_async_manager(NULL);
 }
 
 //---------------------------------------------------------------Async_operation::set_async_manager
@@ -148,8 +150,8 @@ bool Async_operation::async_continue( Continue_flags flags )
             }
         }
 
-        if (async_finished()) 
-            if (Call* c = _call) c->call();
+        if (_call)
+            async_finished_then_call();
     }
     catch( const Xc& x )
     {
@@ -196,6 +198,19 @@ bool Async_operation::async_continue( Continue_flags flags )
 
     
     return something_done;
+}
+
+//----------------------------------------------------------Async_operation::async_finished_then_call
+
+bool Async_operation::async_finished_then_call() {
+    bool finished = async_finished();
+    if (finished) { 
+        if (ptr<Call> c = _call) {
+            _call = NULL;
+            c->call();
+        }
+    }
+    return finished;
 }
 
 //-----------------------------------------------------------------Async_operation::async_has_error

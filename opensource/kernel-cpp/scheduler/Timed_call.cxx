@@ -58,6 +58,12 @@ int Type_int_map::type_to_int(const type_info& t) {
 //}
 //
 
+//---------------------------------------------------------------------------------Async_call::call
+
+void Async_call::call() const {
+    _typed_call_register->enqueue_id(_type_id, _timed_call);
+}
+
 
 Typed_call_register::Typed_call_register(Spooler* spooler) 
     : _spooler(spooler) {}
@@ -70,32 +76,40 @@ Typed_call_register::~Typed_call_register() {
 
 
 void Typed_call_register::enqueue_id(int id, Timed_call* o) {
-    cancel_id(id);
-    _map[id] = o;
-    _spooler->enqueue_call(o);
+    Z_FAST_MUTEX(_mutex) {
+        cancel_id(id);
+        _map[id] = o;
+        _spooler->enqueue_call(o);
+    }
 }
 
 
 void Typed_call_register::cancel_id(int id) {
-    Map::iterator i = _map.find(id);
-    if (i != _map.end())
-        cancel_entry(&i->second);
+    Z_FAST_MUTEX(_mutex) {
+        Map::iterator i = _map.find(id);
+        if (i != _map.end())
+            cancel_entry(&i->second);
+        }
 }
 
 
 void Typed_call_register::cancel_entry(ptr<Timed_call>* entry) {
     if (Timed_call* o = *entry) {
-        _spooler->cancel_call(o);
-        *entry = (Timed_call*)NULL;
+        Z_FAST_MUTEX(_mutex) {
+            _spooler->cancel_call(o);
+            *entry = (Timed_call*)NULL;
+        }
     }
 }
 
 
 Time Typed_call_register::next_time() const {
     Time result = Time::never;
-    Z_FOR_EACH_CONST(Map, _map, i) {
-        if (const Timed_call* t = i->second)
-            if (result < t->at()) result = t->at();
+    Z_FAST_MUTEX(_mutex) {
+        Z_FOR_EACH_CONST(Map, _map, i) {
+            if (const Timed_call* t = i->second)
+                if (result < t->at()) result = t->at();
+        }
     }
     return result;
 }

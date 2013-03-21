@@ -30,6 +30,7 @@ struct Async_operation : Object
 
     virtual string              obj_name                () const                                    { return async_state_text(); }  //"Async_operation"; }
 
+    void                        async_close             ();
 
     void                    set_async_manager           ( Async_manager* );
     Async_manager*              async_manager           () const                                    { return _manager; }
@@ -46,6 +47,7 @@ struct Async_operation : Object
     bool                        async_continue          ( Continue_flags = cont_default );          // Operation fortsetzen
     bool                        async_has_error         () const;
     bool                        async_finished          () const                                    { return async_has_error() || async_finished_(); }
+    bool                        async_finished_then_call();
     void                        async_check_error       ( const string& text = "" )                 { async_check_error( text, true ); }
     void                        async_check_exception   ( const string& text = "" )                 { async_check_error( text, false ); }
     void                        async_reset_error       ()                                          { _error = false; _error_name = _error_code = _error_what = ""; }
@@ -64,7 +66,7 @@ struct Async_operation : Object
     void                        async_clear_signaled    ()                                          { async_clear_signaled_(); }
   //void                        async_on_signal_from_child( Async_operation* op )                   { async_on_signal_from_child_( op ); }
   //virtual Socket_event*       async_event             ()                                          { throw_xc( "NO ASYNC_EVENT" ); }
-    void                    set_async_call              (Call* o)                                   { _call = o; }
+    void                        on_async_finished_call  (Call* o)                                   { _call = o; }
 
   protected:
     void                        async_check_error       ( const string& text, bool check_finished );
