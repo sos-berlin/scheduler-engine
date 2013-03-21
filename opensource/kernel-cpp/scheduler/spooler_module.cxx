@@ -922,7 +922,8 @@ void Module_instance::close()
 
 Async_operation* Module_instance::close__start()
 { 
-    return &dummy_sync_operation; 
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //----------------------------------------------------------------------Module_instance::close__end
@@ -955,7 +956,8 @@ void Module_instance::close_monitor()
 
 Async_operation* Module_instance::begin__start()
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //---------------------------------------------------------Module_instance::implicit_load_and_start
@@ -1002,7 +1004,8 @@ bool Module_instance::begin__end()
 
 Async_operation* Module_instance::end__start( bool )
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //------------------------------------------------------------------------Module_instance::end__end
@@ -1022,7 +1025,8 @@ void Module_instance::end__end()
 
 Async_operation* Module_instance::step__start()
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //-----------------------------------------------------------------------Module_instance::step__end
@@ -1073,7 +1077,9 @@ Variant Module_instance::step__end()
 Async_operation* Module_instance::call__start( const string& method )
 {
     _call_method = method;
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //-----------------------------------------------------------------------Module_instance::call__end
@@ -1111,7 +1117,8 @@ Variant Module_instance::call__end()
 
 Async_operation* Module_instance::release__start()
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //--------------------------------------------------------------------Module_instance::release__end

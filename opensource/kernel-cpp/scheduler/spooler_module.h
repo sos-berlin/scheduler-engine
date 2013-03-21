@@ -287,6 +287,7 @@ struct Module_instance : Object
     Module::Kind               _kind;
     Delegated_log              _log;
     ptr<Module>                _module;
+    ptr<Async_operation>       _sync_operation;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
     int                        _exit_code;
     int                        _termination_signal;

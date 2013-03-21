@@ -118,8 +118,6 @@ struct Sync_operation : Async_operation
     virtual string              async_state_text_       () const                                    { return "Sync_operation"; }
 };
 
-extern Sync_operation           dummy_sync_operation;
-
 //----------------------------------------------------------------------------------Operation_is_ok
 
 typedef bool Operation_is_ok( Async_operation* );

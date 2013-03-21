@@ -52,10 +52,6 @@ bool Remote_module_instance_proxy::load()
 
 Async_operation* Remote_module_instance_proxy::close__start()
 {
-    Async_operation* result;
-
-  //if( _session )  _session->close_current_operation();
-    
     if( _remote_instance )
     {
         if( _process  &&  _process->connected() )
@@ -83,16 +79,12 @@ Async_operation* Remote_module_instance_proxy::close__start()
 
     _idispatch = NULL;
 
-    if( _process )  result = _process->close__start();
-              else  result = &dummy_sync_operation;
-
-
-    //if( _session )
-    //{
-    //    return _session->close__start();
-    //}
-
-    return result;
+    if (_process)
+        return _process->close__start();
+    else {
+        _operation = Z_NEW(Sync_operation);
+        return _operation;
+    }
 }
 
 //---------------------------------------------------------Remote_module_instance_proxy::close__end
@@ -240,12 +232,13 @@ bool Remote_module_instance_proxy::begin__end()
 
 Async_operation* Remote_module_instance_proxy::end__start( bool success )
 {
-    if( !_remote_instance )  return &dummy_sync_operation; //NULL;
+    if( !_remote_instance ) {
+        _operation = Z_NEW(Sync_operation);
+        return _operation;
+    }
 
     _end_success = success;
-
     _operation = _remote_instance->call__start( "end", success );
-    
     return _operation;
 }
 
@@ -333,7 +326,7 @@ Variant Remote_module_instance_proxy::call__end()
 Async_operation* Remote_module_instance_proxy::release__start()
 {
     if( _remote_instance )  _operation = _remote_instance->release__start();
-                      else  _operation = &dummy_sync_operation;
+                      else  _operation = Z_NEW(Sync_operation);
 
     return _operation;
 }
@@ -344,7 +337,7 @@ void Remote_module_instance_proxy::release__end()
 {
     if( !_operation->async_finished() )  z::throw_xc( "SCHEDULER-191", "release__end", _operation->async_state_text() );
 
-    if( _operation == &dummy_sync_operation )
+    if (dynamic_cast<Sync_operation*>(+_operation))
     {
         _operation = NULL;
     }

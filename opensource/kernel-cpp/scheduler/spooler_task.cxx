@@ -2360,9 +2360,13 @@ Web_service* Task::web_service() const
 
 Async_operation* Task::do_close__start()
 {
-    if( !_module_instance )  return &dummy_sync_operation;
-    _module_instance->detach_task();
-    return _module_instance->close__start();
+    if( !_module_instance ) {
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
+    } else {
+        _module_instance->detach_task();
+        return _module_instance->close__start();
+    }
 }
 
 //------------------------------------------------------------------------------Task::do_close__end
@@ -2470,8 +2474,12 @@ bool Task::do_begin__end()
 
 Async_operation* Task::do_end__start()
 {
-    if( !_module_instance )  return &dummy_sync_operation;
-    return _module_instance->end__start( !has_error() );        // Parameter wird nicht benutzt
+    if (!_module_instance ) {
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
+    } else {
+        return _module_instance->end__start( !has_error() );        // Parameter wird nicht benutzt
+    }
 }
 
 //--------------------------------------------------------------------------------Task::do_end__end
@@ -2519,8 +2527,12 @@ bool Task::do_call__end()
 
 Async_operation* Task::do_release__start()
 {
-    if( !_module_instance )  return &dummy_sync_operation;
-    return _module_instance->release__start();
+    if (!_module_instance ) {
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
+    } else {
+        return _module_instance->release__start();
+    }
 }
 
 //----------------------------------------------------------------------------Task::do_release__end

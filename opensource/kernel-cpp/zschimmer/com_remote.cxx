@@ -318,7 +318,8 @@ Async_operation* Connection::close__start()
         _manager->remove_connection( this ), _manager = NULL;
     }
 
-    return &dummy_sync_operation;
+    _my_operation = Z_NEW(Sync_operation);
+    return _my_operation;
 }
 
 //---------------------------------------------------------------------------Connection::close__end
@@ -2088,7 +2089,8 @@ Session::~Session()
 
 Async_operation* Session::close__start()
 {
-    Async_operation* operation = &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    Async_operation* operation = _sync_operation;
 
     if( !_object_table.empty() )  Z_LOG( "pid=" << pid() << " Offene Objekte:\n" << _object_table << "\n" );
 
@@ -3830,7 +3832,8 @@ Async_operation* Proxy::release__start()
     if( _session->connection()->has_error() )
     {
         _no_operation = true;
-        return &dummy_sync_operation;
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
     }
 
 

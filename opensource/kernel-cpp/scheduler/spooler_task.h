@@ -342,6 +342,7 @@ struct Task : Object,
     Task_subsystem*            _thread;
     Task_history               _history;
     typed_call_register<Task>  _call_register;
+    ptr<Async_operation>       _sync_operation;
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;
