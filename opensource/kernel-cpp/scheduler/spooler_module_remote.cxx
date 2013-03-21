@@ -79,7 +79,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
 
     _idispatch = NULL;
 
-    if (_process)
+    if (_process)  
         return _process->close__start();
     else {
         _operation = Z_NEW(Sync_operation);
@@ -238,7 +238,7 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
     }
 
     _end_success = success;
-    _operation = _remote_instance->call__start( "end", success );
+    _operation = _remote_instance->call__start( "end", success );    
     return _operation;
 }
 
@@ -597,41 +597,6 @@ AGAIN:
             break;
         }
 
-        //operation->_bool_result = check_result( _remote_instance->call__end() );
-
-
-        // end__start() .. end__end()
-/*
-        case c_end:
-        {
-            operation->set_async_child( _remote_instance->call__start( "end", _end_success ) );
-            operation->_call_state = c_call_end;
-          //something_done = true;
-            break;
-        }
-
-
-        case c_call_end:
-        {
-            operation->set_async_child( NULL );
-            _remote_instance->call__end();
-          //something_done = true;
-        }
-*/
-        // Nächste Operation
-/*
-        {
-            if( _close_instance_at_end )
-            {
-                operation->set_async_child( _remote_instance->release__start() );
-                operation->_call_state = c_release;
-            }
-            else
-                operation->_call_state = c_finished;
-            break;
-        }
-
-*/
         case c_release_begin:     // Nur, wenn Construct() NULL geliefert hat (weil Module_monitor.spooler_task_before() false lieferte)
         {
             operation->set_async_child( NULL );
@@ -647,10 +612,6 @@ AGAIN:
             _idispatch = NULL;
             operation->_call_state = c_finished;
         }
-
-//      operation->_call_state = c_finished;
-//      break;
-
 
         default:
             throw_xc( "Remote_module_instance_proxy::Operation::process" );

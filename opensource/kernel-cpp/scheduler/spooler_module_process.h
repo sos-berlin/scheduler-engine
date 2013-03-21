@@ -77,7 +77,6 @@ struct Process_module_instance : Module_instance
     string                     _process_param;
 
 #   ifdef Z_WINDOWS
-        //Process_id             _pid;
         Event                  _process_handle;
 #    else
         Process_event          _process_handle;

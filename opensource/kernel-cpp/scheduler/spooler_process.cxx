@@ -555,32 +555,6 @@ void Process::async_remote_start()
     _async_remote_operation->set_async_manager( _spooler->_connection_manager );
 }
 
-//------------------------------------------------------------------------------Process::is_started
-
-//bool Process::is_started()
-//{
-//    bool result = false;
-//
-//    if( _async_remote_operation )
-//    {
-//        _async_remote_operation->async_check_exception( Z_FUNCTION );
-//
-//        result = _async_remote_operation->async_finished();
-//     
-//        //if( result )
-//        //{
-//        //    _async_remote_operation->set_async_manager( NULL );
-//        //    _async_remote_operation = NULL;
-//        //}
-//    }
-//    else
-//    {
-//        result = true;
-//    }
-//
-//    return result;
-//}
-
 //-------------------------------------------------------------Process::async_remote_start_continue
 
 bool Process::async_remote_start_continue( Async_operation::Continue_flags )
@@ -689,10 +663,8 @@ bool Process::async_continue()
 
 void Process::Async_remote_operation::close_remote_task( bool kill )
 {
-    if( _state <= s_connecting )
-    {
-        if( _process->_xml_client_connection )  
-        {
+    if( _state <= s_connecting ) {
+        if( _process->_xml_client_connection ) {
             _process->_xml_client_connection->close();
             _process->_xml_client_connection->set_async_parent( NULL );
             _process->_xml_client_connection = NULL;
@@ -700,27 +672,17 @@ void Process::Async_remote_operation::close_remote_task( bool kill )
         }
     }
     else
-    if( _state >= s_starting  &&  _state < s_closing )
-    {
-        if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() )
-        {
-            try
-            {
+    if( _state >= s_starting  &&  _state < s_closing ) {
+        if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() ) {
+            try {
                 S xml;
                 xml << "<remote_scheduler.remote_task.close process_id='" << _process->_remote_process_id << "'";
                 if( kill )  xml << " kill='yes'";
                 xml << "/>";
-
                 _process->_xml_client_connection->send( xml );
-
                 _state = s_closing;
             }
             catch( exception& x )  { _process->_log->warn( x.what() ); }
-        }
-        else
-        { 
-            //_process->_xml_client_connection->close();
-            //_state = s_closed;
         }
     }
 }
@@ -930,7 +892,6 @@ xml::Element_ptr Process::dom_element( const xml::Document_ptr& document, const 
 
     if( _connection )
     process_element.setAttribute( "pid"              , _connection->pid() );
-  //process_element.setAttribute( "module_instances" , _module_instance_count );
 
     if( !_job_name.empty() )
     process_element.setAttribute( "job"              , _job_name );
@@ -1040,7 +1001,6 @@ xml::Element_ptr Process_class_configuration::dom_element( const xml::Document_p
     xml::Element_ptr result = document.createElement( "process_class" );
         
     fill_file_based_dom_element( result, show_what );
-  //result.setAttribute         ( "name"            , name() );
     result.setAttribute         ( "max_processes"   , _max_processes );
     result.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
 
@@ -1359,13 +1319,6 @@ void Process_class::remove_waiting_job( Job* waiting_job )
 
 bool Process_class::need_process()
 { 
-/*
-    for( Job_list::iterator j = _waiting_jobs.begin(); j != _waiting_jobs.end(); )
-    {
-        if( !(*j)->_waiting_for_process )  _waiting_jobs.erase( j );   // Hat sich erledigt
-                                     else  j++;
-    }
-*/
     return !_waiting_jobs.empty(); 
 }
 
