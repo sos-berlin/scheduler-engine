@@ -10,7 +10,7 @@ class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, cppProxy: Spoole
   def add(o: TimedCall[_]) = {
     logger debug s"Enqueue $o"
     delegate.add(o)
-    try cppProxy.signal("TimedCall")
+    try cppProxy.signal()
     catch { case e: CppProxyInvalidatedException => }   // Das passiert, wenn der TimedCall den Scheduler beendet und er beim signal() schon beendet ist.
   }
 

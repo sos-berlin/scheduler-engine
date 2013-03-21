@@ -110,12 +110,15 @@ const string                    variable_set_name_for_substitution  = "$";      
 
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
 extern const char               _author_[]                          = "\n\n" "Scheduler, 2000-2007 Joacim Zschimmer, Zschimer GmbH, http://www.zschimmer.com\n\n";
-
-/**
-* \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden
-* \detail
-*/
 Embedded_and_dynamic_files embedded_and_dynamic_files = { embedded_files, new vector<Dynamic_file*> };
+
+//-------------------------------------------------------------------------------------------------
+
+//DEFINE_SIMPLE_CALL(Spooler, Pause_scheduler_call)
+//DEFINE_SIMPLE_CALL(Spooler, Continue_scheduler_call)
+//DEFINE_SIMPLE_CALL(Spooler, Reload_scheduler_call)
+//DEFINE_SIMPLE_CALL(Spooler, Terminate_scheduler_call)
+//DEFINE_SIMPLE_CALL(Spooler, Let_run_terminate_and_restart_scheduler_call);
 
 //-----------------------------------------------------------------------------------Error_settings
 
@@ -441,15 +444,13 @@ First_and_last make_yes_no_last_both( const string& setting_name, const string& 
             ctrl_c_pressed++;
 
             if( ctrl_c_pressed - ctrl_c_pressed_handled > 4 )
-            //if( ctrl_c_pressed >= 4 )
             {
                 if( spooler_ptr )  spooler_ptr->abort_now();  
                 return false;
             }
 
-            //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-            //fprintf( stderr, "Scheduler wird wegen Ctrl-C beendet ...\n" );
-            if( spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
+            //Kein Systemaufruf hier in der Interrupt-Routine!
+            if( spooler_ptr )  spooler_ptr->signal(); //_call_register.call<Ctrl_c_scheduler_call>();
             return true;
         }
         else
@@ -698,7 +699,8 @@ Spooler::Spooler(jobject java_main_context)
     _next_process_id(1),
     _configuration_directories(confdir__max+1),
     _configuration_directories_as_option_set(confdir__max+1),
-    _max_micro_step_time(Duration(10))
+    _max_micro_step_time(Duration(10)),
+    _call_register(this)
 {
     _log->init( this );              // Nochmal nach load_argv()
     _log->set_title( "Main log" );
@@ -776,7 +778,7 @@ void Spooler::close()
     _security.clear();
 
     _waitable_timer.close();
-    _event.close();
+    _scheduler_event.close();
     _wait_handles.close();
 
     release_com_objects(); // falls noch jemand eine Referenz darauf hat
@@ -2445,7 +2447,7 @@ void Spooler::run()
         //---------------------------------------------------------------------------------CONTINUE
         // Hier werden die asynchronen Operationen fortgesetzt, die eigentliche Scheduler-Arbeit
 
-        _event.reset();
+        _scheduler_event.reset();
 
         execute_state_cmd();
         if( _shutdown_cmd )  if( !_task_subsystem  ||  !_task_subsystem->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
@@ -2673,9 +2675,9 @@ bool Spooler::run_continue( const Time& now )
 
 //----------------------------------------------------------------------------------Spooler::signal
 // Thread-fähig
-void Spooler::signal( const string& signal_name )       
+void Spooler::signal()       
 { 
-    _event.signal( signal_name ); 
+    _scheduler_event.signal(""); 
 }
 
 //---------------------------------------------------------------------------Spooler::check_cluster
@@ -2966,7 +2968,15 @@ void Spooler::cmd_continue()
     
     //if( _waiting_errno )  _waiting_errno_continue = true;       // Siehe spooler_log.cxx: Warten bei ENOSPC
 
-    signal( "continue" ); 
+    signal(); //_call_register.call<Continue_scheduler_call>();
+}
+
+//-------------------------------------------------------------------------------Spooler::cmd_pause
+
+void Spooler::cmd_pause() 
+{
+    _state_cmd = sc_pause; 
+    signal(); //_call_register.call<Pause_scheduler_call>();
 }
 
 //------------------------------------------------------------------------------Spooler::cmd_reload
@@ -2974,7 +2984,7 @@ void Spooler::cmd_continue()
 void Spooler::cmd_reload()
 {
     _state_cmd = sc_reload;
-    signal( "reload" );
+    signal(); //_call_register.call<Reload_scheduler_call>();
 }
 
 //---------------------------------------------------------------Spooler::cmd_terminate_after_error
@@ -3000,7 +3010,7 @@ void Spooler::cmd_terminate( bool restart, int timeout, const string& continue_e
     _terminate_continue_exclusive_operation = continue_exclusive_operation == "non_backup"? cluster::continue_exclusive_non_backup
                                                                                           : continue_exclusive_operation;
 
-    signal( "terminate" );
+    signal(); //_call_register.call<Terminate_scheduler_call>();
 }
 
 //-------------------------------------------------------Spooler::cmd_let_run_terminate_and_restart
@@ -3008,7 +3018,7 @@ void Spooler::cmd_terminate( bool restart, int timeout, const string& continue_e
 void Spooler::cmd_let_run_terminate_and_restart()
 {
     _state_cmd = sc_let_run_terminate_and_restart;
-    signal( "let_run_terminate_and_restart" );
+    signal(); //_call_register.call<Let_run_terminate_and_restart_scheduler_call>();
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_add_jobs
@@ -3018,7 +3028,7 @@ void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
     //_job_subsystem->set_dom( element, Time::now(), true );
     root_folder()->job_folder()->set_dom( element );
 
-    signal( "add_jobs" );
+    //signal( "add_jobs" );
 }
 
 //---------------------------------------------------------------------------------Spooler::cmd_job
@@ -3028,7 +3038,7 @@ void Spooler::cmd_job( const xml::Element_ptr& element )
     //_job_subsystem->load_job_from_xml( element, Time::now(), _spooler->state() >= Spooler::s_starting );
     root_folder()->job_folder()->add_or_replace_file_based_xml( element );
 
-    signal( "add_job" );
+    //signal( "add_job" );
 }
 
 //-----------------------------------------------------------------------Spooler::abort_immediately
@@ -3098,6 +3108,31 @@ void Spooler::abort_now( bool restart )
 
 }
 
+////------------------------------------------------------------Spooler::on_call Pause_scheduler_call
+//
+//void Spooler::on_call(const Pause_scheduler_call&) {
+//}
+//
+////---------------------------------------------------------Spooler::on_call Continue_scheduler_call
+//
+//void Spooler::on_call(const Continue_scheduler_call&) {
+//}
+//
+////-----------------------------------------------------------Spooler::on_call Reload_scheduler_call
+//
+//void Spooler::on_call(const Reload_scheduler_call&) {
+//}
+//
+////--------------------------------------------------------Spooler::on_call Terminate_scheduler_call
+//
+//void Spooler::on_call(const Terminate_scheduler_call&) {
+//}
+//
+////------------------------------------Spooler::on_call Let_run_terminate_and_restart_scheduler_call
+//
+//void Spooler::on_call(const Let_run_terminate_and_restart_scheduler_call&) {
+//}
+//
 //----------------------------------------------------------------------Spooler::kill_all_processes
 
 void Spooler::kill_all_processes( Kill_all_processs_option option )
@@ -3237,10 +3272,10 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
 
     _thread_id = current_thread_id();
 
-    _event.set_name( "Scheduler" );
-    _event.set_waiting_thread_id( current_thread_id() );
-    _event.create();
-    _event.add_to( &_wait_handles );
+    _scheduler_event.set_name( "Scheduler" );
+    _scheduler_event.set_waiting_thread_id( current_thread_id() );
+    _scheduler_event.create();
+    _scheduler_event.add_to( &_wait_handles );
 
 #   ifdef Z_WINDOWS
         if( !_is_service )  _has_windows_console = true;

@@ -154,6 +154,12 @@ struct Web_service_response;
 struct Xml_client_connection;
 struct Xslt_stylesheet;
 
+//struct Pause_scheduler_call;
+//struct Continue_scheduler_call;
+//struct Reload_scheduler_call;
+//struct Terminate_scheduler_call;
+//struct Let_run_terminate_and_restart_scheduler_call;
+
 namespace database
 {
     struct Database;
@@ -422,7 +428,7 @@ struct Spooler : Object,
     string                      execute_xml                 (const string& xml);
     http::Java_response*        java_execute_http           (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&);
     void                        cmd_reload                  ();
-    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }  // Anderer Thread (spooler_service.cxx)
+    void                        cmd_pause                   ();
     void                        cmd_continue                ();
     void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
     void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, 
@@ -517,9 +523,8 @@ struct Spooler : Object,
     void                        wait                        ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
 
-    void                        signal                      ( const string& signal_name );
-    void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
-    bool                        signaled                    ()                                  { return _event.signaled(); }
+    void                        signal                      ();
+    void                        async_signal                ( const char* signal_name = "" )    { _scheduler_event.async_signal( signal_name ); }
 
     void                        send_cmd                    ();
 
@@ -575,6 +580,13 @@ struct Spooler : Object,
 
     void                        detect_warning_and_send_mail();
     void                        write_to_scheduler_log      (const string& category, const string& text) { Z_LOG2(category, text); }  // F�r Java nicht mit Mutex abgesichert
+
+  private:
+    //void                        on_call                     (const Pause_scheduler_call&);
+    //void                        on_call                     (const Continue_scheduler_call&);
+    //void                        on_call                     (const Reload_scheduler_call&);
+    //void                        on_call                     (const Terminate_scheduler_call&);
+    //void                        on_call                     (const Let_run_terminate_and_restart_scheduler_call&);
 
 
   private:
@@ -689,7 +701,8 @@ struct Spooler : Object,
 
     Wait_handles               _wait_handles;
 
-    Event                      _event;                      // F�r Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
+    Event                      _scheduler_event;
+    typed_call_register<Spooler> _call_register;
 
     int                        _loop_counter;               // Z�hler der Schleifendurchl�ufe in spooler.cxx
     int                        _wait_counter;               // Z�hler der Aufrufe von wait_until()

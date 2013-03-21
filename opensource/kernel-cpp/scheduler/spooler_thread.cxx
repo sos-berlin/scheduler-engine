@@ -82,7 +82,7 @@ void Task_subsystem::remove_task(Task* task) {
     _task_set.erase(task);
     task->job()->remove_running_task(task);
     if (is_ready_for_termination())
-        _spooler->signal("is_ready_for_termination");
+        _spooler->signal();
 }
 
 //---------------------------------------------------------Task_subsystem::is_ready_for_termination

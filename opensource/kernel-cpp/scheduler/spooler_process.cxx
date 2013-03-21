@@ -413,7 +413,7 @@ void Process::start()
     }
 
 #   ifdef Z_WINDOWS
-        if( _spooler )  _connection->set_event( &_spooler->_event );
+        if( _spooler )  _connection->set_event( &_spooler->_scheduler_event );
 #   endif
 
     _log->set_prefix( obj_name() );

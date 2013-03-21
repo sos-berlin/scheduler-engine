@@ -485,7 +485,7 @@ bool Communication::Connection::do_recv()
             { 
                 if( _spooler->_supervisor_client )  _spooler->_supervisor_client->try_connect();
                 if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )  _spooler->folder_subsystem()->handle_folders(Duration(1)); 
-                _spooler->signal( "do_something!" );  
+                //_spooler->signal( "do_something!" );  
                 _spooler->_last_time_enter_pressed = Time::now().as_time_t(); 
                 return true; 
             }
