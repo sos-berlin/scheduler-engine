@@ -31,27 +31,26 @@ class ManyJobsIT extends ScalaSchedulerTest {
     controller.setLogCategories("java.stackTrace-")
   }
 
-  test(s"Adding $n jobs") {
-    val stopwatch = new Stopwatch
-    for (j <- jobs) scheduler executeXml j.xmlElem
-    waitForCondition(timeout=n*100.ms, step=100.ms) { activatedJobCount == n }
-    System.err.println(s"${jobs.size} added in $stopwatch (${1000f * jobs.size / stopwatch.elapsedMs} jobs/s)")
-  }
+  if (n > 0) {
+    test(s"Adding $n jobs") {
+      val stopwatch = new Stopwatch
+      for (j <- jobs) scheduler executeXml j.xmlElem
+      waitForCondition(timeout=n*100.ms, step=100.ms) { activatedJobCount == n }
+      System.err.println(s"${jobs.size} added in $stopwatch (${1000f * jobs.size / stopwatch.elapsedMs} jobs/s)")
+    }
 
-  val duration = 30.s //millis(min(30000, (1000 * n / tasksPerSecond).toInt)) //4 * interval
-  val expectedTaskCount = (duration.getMillis * tasksPerSecond / 1000).toInt
-
-  test(s"Running 1 task/job/s in ${duration.getMillis}ms") {
-    if (n == 0) pending
-    else {
-      scheduler executeXmls (
-            jobs map { o =>
-              <modify_job job={o.path.string} cmd="enable"/>
-              <modify_job job={o.path.string} cmd="unstop"/>
-            })
-      sleep(duration)
-      controller.getEventBus.dispatchEvents()
-      System.err.println(s"$taskCount tasks in ${duration.getStandardSeconds}s, ${1000f * taskCount / duration.getMillis} tasks/s")
+    test(s"Running 1 task/job/s in ${duration.getMillis}ms") {
+      if (n == 0) pending
+      else {
+        scheduler executeXmls (
+              jobs map { o =>
+                <modify_job job={o.path.string} cmd="enable"/>
+                <modify_job job={o.path.string} cmd="unstop"/>
+              })
+        sleep(duration)
+        controller.getEventBus.dispatchEvents()
+        System.err.println(s"$taskCount tasks in ${duration.getStandardSeconds}s, ${1000f * taskCount / duration.getMillis} tasks/s")
+      }
     }
   }
 
@@ -68,6 +67,7 @@ class ManyJobsIT extends ScalaSchedulerTest {
 private object ManyJobsIT {
   private val propertyName = "ManyJobsIT"
   private val minimumTasks = 10
+  private val duration = 30.s
 
   private lazy val n = {
     val v = System.getProperty(propertyName, "0")
