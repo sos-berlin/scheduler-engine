@@ -427,9 +427,13 @@ AGAIN:
 
             ptr<Async_operation> connection_operation = _session->connect_server__start();
             connection_operation->set_async_manager( _spooler->_connection_manager );
-            operation->set_async_child( connection_operation );
-
+            operation->set_async_child( connection_operation );            
             operation->_call_state = c_connect;
+
+            #if defined Z_UNIX
+                if (connection_operation->async_finished())     // Immer bei socketpair()
+                    goto AGAIN;
+            #endif
             break;
         }
 

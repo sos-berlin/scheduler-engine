@@ -483,7 +483,6 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
 
                 _connection->_socket = ::accept( _connection->_listen_socket, (sockaddr*)&peer_addr, &len );
 
-                //Z_LOG2( "socket", "accept(" << _connection->_listen_socket << ")\n" );
                 int err = _connection->_socket == SOCKET_ERROR? socket_errno() : 0;
 
                 Z_LOG2( err == Z_EWOULDBLOCK? "zschimmer" : "", "pid=" << _connection->pid() << " accept()  errno=" << err << "\n" );
@@ -505,6 +504,7 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
                 }
                 else
                 {
+                    Z_LOG2("socket", "accept(" << _connection->_listen_socket << ") => " << _connection->_socket << "\n");
                     _connection->_peer = peer_addr;
 
                     //Prüfung ist zu streng, wenn der Rechner im Cluster ist. Dann hat er zwei IP-Adressen.
@@ -949,6 +949,7 @@ int Connection::read_async( void* buffer, int size, bool* eof )
     {
         if( length == 0 )
         {
+            Z_LOG2( "socket.recv", "pid=" << pid() << " socket=" << _socket << " EOF\n");
             if( !eof )  throw_xc( Connection_reset_exception( "Z-REMOTE-101", pid() ) );
             *eof = true; 
         }
