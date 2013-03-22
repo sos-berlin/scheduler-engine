@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.common.async
 import java.util.concurrent.Callable
 import scala.sys._
 
-trait CallQueue {
+trait CallQueue extends AutoCloseable {
+
   final def add[A](f: () => A) {
     add(ShortTermCall(f))
   }
@@ -19,11 +20,11 @@ trait CallQueue {
   def add(o: TimedCall[_])
 
   final def remove(o: TimedCall[_]) {
-    val removed = tryRemove(o)
+    val removed = tryCancel(o)
     if (!removed) error(s"Unknown TimedCall '$o'")
   }
 
-  def tryRemove(o: TimedCall[_]): Boolean
+  def tryCancel(o: TimedCall[_]): Boolean
 
   def nextTime: Long
 }

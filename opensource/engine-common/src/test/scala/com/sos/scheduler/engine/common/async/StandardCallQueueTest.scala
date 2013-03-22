@@ -22,7 +22,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     callQueue add { () => a += 1 }
     val call = callQueue.popMature().get
     call.epochMillis should equal (0)
-    call()
+    call.onApply()
     a should equal (1)
     callQueue.popMature() should equal (None)
   }
@@ -33,7 +33,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     callQueue add call
     val c = callQueue.popMature().get
     c should be theSameInstanceAs (call)
-    c()
+    c.onApply()
     a should equal (1)
     callQueue.popMature() should equal (None)
   }
@@ -48,7 +48,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     sleep(42.ms)
     val c = callQueue.popMature().get
     c should be theSameInstanceAs (call)
-    c()
+    c.onApply()
     a should equal (1)
     callQueue.popMature() should equal (None)
   }
@@ -57,7 +57,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     val call = TimedCall(now() + 50.ms) {}
     callQueue.add(call)
     callQueue.remove(call)
-    callQueue.tryRemove(call) should equal (false)
+    callQueue.tryCancel(call) should equal (false)
     callQueue should be ('empty)
     intercept[RuntimeException] { callQueue.remove(call) }
   }

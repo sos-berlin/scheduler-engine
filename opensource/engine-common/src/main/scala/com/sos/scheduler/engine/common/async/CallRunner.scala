@@ -18,7 +18,7 @@ final class CallRunner(val queue: PoppableCallQueue) {
     } else {
       queue.popMature() match {
         case Some(o) =>
-          o.apply()
+          o.onApply()
           executeCalls(n - 1)
         case None =>
       }

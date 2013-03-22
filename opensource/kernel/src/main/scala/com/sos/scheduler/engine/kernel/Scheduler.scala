@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel
 
+import Scheduler._
 import com.google.common.base.Objects.firstNonNull
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
@@ -22,6 +23,7 @@ import com.sos.scheduler.engine.kernel.command.CommandSubsystem
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.log.CppLogger
 import com.sos.scheduler.engine.kernel.log.PrefixLog
@@ -35,8 +37,7 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
-import scala.util.Try
+import scala.sys.error
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -56,8 +57,6 @@ extends Sister
 with SchedulerIsClosed
 with SchedulerXmlCommandExecutor
 with HasInjector {
-
-  import Scheduler._
 
   private var closed = false
   private var onCloseFunction: Option[() => Unit] = None
@@ -87,6 +86,7 @@ with HasInjector {
     try {
       eventBus.publish(new SchedulerCloseEvent)
       eventBus.dispatchEvents()
+      schedulerThreadCallQueue.close()
       try databaseSubsystem.close() catch { case NonFatal(x) => prefixLog.error(s"databaseSubsystem.close(): $x") }
       try pluginSubsystem.close() catch { case NonFatal(x)=> prefixLog.error(s"pluginSubsystem.close(): $x") }
     }
@@ -139,7 +139,7 @@ with HasInjector {
   }
 
   @ForCpp private def cancelCall(o: CppCall) {
-    schedulerThreadCallQueue.tryRemove(o)
+    schedulerThreadCallQueue.tryCancel(o)
   }
 
   @ForCpp private def threadLock() {
@@ -161,18 +161,20 @@ with HasInjector {
 
   /** Löst bei einem ERROR-Element eine Exception aus. */
   def executeXml(xml: String): String = {
-    val result: String = uncheckedExecuteXml(xml)
-    if (result.contains("<ERROR")) {
-      val doc = loadXml(result)
-      for (e <- childElements(doc.getDocumentElement); error <- new NamedChildElements("ERROR", e))
-        throw new SchedulerException(error.getAttribute("code") + " " + error.getAttribute("text"))
+    val result = uncheckedExecuteXml(xml)
+    if (result contains "<ERROR") {
+      for (e <- childElements(loadXml(result).getDocumentElement);
+           error <- new NamedChildElements("ERROR", e))
+        throw new SchedulerException(error.getAttribute("code") +" "+ error.getAttribute("text"))
     }
     result
   }
 
   /** execute_xml() der C++-Klasse Spooler */
-  def uncheckedExecuteXml(xml: String): String =
+  def uncheckedExecuteXml(xml: String): String = {
+    if (closed) error("Scheduler is closed")
     inSchedulerThread { cppProxy.execute_xml(xml) }
+  }
 
   //    /** @param text Sollte auf \n enden */
   //    public void writeToSchedulerLog(LogCategory category, String text) {

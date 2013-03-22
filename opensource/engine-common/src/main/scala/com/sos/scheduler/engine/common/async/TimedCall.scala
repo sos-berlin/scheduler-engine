@@ -1,16 +1,14 @@
 package com.sos.scheduler.engine.common.async
 
+import TimedCall._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import java.util.concurrent.Callable
 import org.joda.time.Instant
 import org.joda.time.format.ISODateTimeFormat
-import org.slf4j.LoggerFactory
 import scala.util.control.NonFatal
 import scala.util.{Success, Try, Failure}
-import com.sos.scheduler.engine.common.scalautil.Logger
 
 trait TimedCall[A] extends Callable[A] {
-
-  import TimedCall._
 
   def instant = new Instant(epochMillis)
 
@@ -18,16 +16,26 @@ trait TimedCall[A] extends Callable[A] {
 
   def call(): A
 
-  final def apply() {
+  private[async] final def onApply() {
     logger debug s"Calling $toString"
     val result = Try(call())
-    try onComplete(result)
+    callOnComplete(result)
+  }
+
+  private[async] final def onCancel() {
+    logger debug s"Cancel $toString"
+    callOnComplete(Failure(CancelledException()))
+  }
+
+  private def callOnComplete(o: Try[A]) {
+    try onComplete(o)
     catch { case NonFatal(t) => logger.error(s"Error in onComplete() ignored: $t ($toString)", t) }
   }
 
   protected def onComplete(o: Try[A]) {
     o match {
       case Success(p) =>
+      case Failure(e: CancelledException) => logger.debug(s"TimedCall '$toString' cancelled")
       case Failure(t) => logger.error(s"Error in TimedCall ignored: $t ($toString)", t)
     }
   }
@@ -52,4 +60,6 @@ object TimedCall {
     def epochMillis = at.getMillis
     def call() = f
   }
+
+  case class CancelledException() extends RuntimeException
 }
