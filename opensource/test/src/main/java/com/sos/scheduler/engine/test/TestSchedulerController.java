@@ -190,8 +190,10 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     @EventHandler @HotEventHandler  // Beide, weil das EventHandlerFailedEvent wird nur innerhalb von Hot- oder ColdEventBus veröffentlicht wird.
     public final void handleEvent(EventHandlerFailedEvent e) {
-        if (terminateOnError)
+        if (terminateOnError) {
+            logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: "+ e);
             terminateAfterException(e.getThrowable());
+        }
     }
 
     /** Eine Exception in {@code runnable} beendet den Scheduler. */
