@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period
 
+import WakeWhenInPeriodIT._
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
 import com.sos.scheduler.engine.eventbus.EventHandler
@@ -18,8 +19,6 @@ import scala.collection.mutable
 @RunWith(classOf[JUnitRunner])
 class WakeWhenInPeriodIT extends ScalaSchedulerTest {
 
-  import WakeWhenInPeriodIT._
-
   private val startTimes = mutable.Buffer[LocalTime]()
 
   test("wake_when_in_period") {
@@ -29,8 +28,8 @@ class WakeWhenInPeriodIT extends ScalaSchedulerTest {
       sleep(minimumTimeUntilMidnight + 1000)
 
     val t = new LocalTime(now) plusMillis 1999 withMillisOfSecond 0
-    val a = Period(t plusSeconds 2, t plusSeconds 4)
-    val b = Period(t plusSeconds 6, t plusSeconds 8)
+    val a = SchedulerPeriod(t plusSeconds 2, t plusSeconds 6)
+    val b = SchedulerPeriod(t plusSeconds 8, t plusSeconds 10)
     scheduler executeXml jobElem(List(a, b))
 
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Vor der Periode: unwirksam
@@ -54,13 +53,13 @@ private object WakeWhenInPeriodIT {
   val jobPath = JobPath.of("/a")
   val hhmmssFormat = DateTimeFormat.forPattern("HH:mm:ss")
 
-  def jobElem(periods: Iterable[Period]) =
+  def jobElem(periods: Iterable[SchedulerPeriod]) =
     <job name={jobPath.getName}>
-      <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
+      <script language="shell">exit 0</script>
       <run_time>{ periods map { o => <period begin={hhmmssFormat.print(o.begin)} end={hhmmssFormat.print(o.end)}/>} }</run_time>
     </job>
 
-  case class Period(begin: LocalTime, end: LocalTime) {
+  case class SchedulerPeriod(begin: LocalTime, end: LocalTime) {
     def contains(t: LocalTime) = !(t isBefore begin) && (t isBefore end)
   }
 
