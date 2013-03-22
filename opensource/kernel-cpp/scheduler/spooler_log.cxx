@@ -452,24 +452,13 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 {
     if( this == NULL )  return;
 
-    if( !log_to_files )
-    {
-        if( !log_category_is_set( "scheduler" ) )  return;
-
-#       ifndef Z_DEBUG
-            if( !_spooler->_zschimmer_mode )  return;   // eMail von Uwe Risse 2007-07-12 15:18, Jira JS-50
-#       endif
-    }
-
-    string line = line_;
-    for( size_t i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
-
-    
-    {
+    if (log_to_files || log_category_is_set("scheduler.mainlog")) {
         Log_set_console_colors console_colors ( _spooler );
 
         char time_buffer [50];   time_buffer[0] = '\0';
         char level_buffer[50];
+        string line = line_;
+        for( size_t i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
 
         if( log_to_files )
         {
@@ -509,7 +498,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             size_t len = next - begin;
             while (len > 1  &&  line.c_str()[begin+len-1] == '\r')  len--;
             
-            if (z::Log_ptr log = "scheduler") {
+            if (z::Log_ptr log = "scheduler.mainlog") {
                 log->write(level_buffer + 1, level_len - 1);
                 log << prefix_string;
                 log->write(line.data() + begin, len);
