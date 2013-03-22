@@ -17,7 +17,7 @@ public final class TestSchedulerControllerBuilder {
     private ResourcePath resourcePath;
     private Predicate<ErrorLogEvent> expectedErrorLogEventPredicate = defaultExpectedErrorLogEventPredicate;
     private CppBinariesDebugMode debugMode = CppBinariesDebugMode.debug;
-    private String logCategories;
+    private String logCategories = System.getProperty("scheduler.logCategories");
     @Nullable private ImmutableMap<String,String> nameMap = null;
     @Nullable private ResourceToFileTransformer fileTransformer = null;
 
@@ -58,7 +58,7 @@ public final class TestSchedulerControllerBuilder {
 
     public TestSchedulerController build() {
         TestSchedulerController r = new TestSchedulerController(testClass, resourcePath, nameMap, fileTransformer, expectedErrorLogEventPredicate, debugMode);
-        r.setLogCategories(logCategories);
+        if (logCategories != null) r.setLogCategories(logCategories);
         return r;
     }
 }

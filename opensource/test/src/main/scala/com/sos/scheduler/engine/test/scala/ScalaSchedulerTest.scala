@@ -11,18 +11,18 @@ import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
   val configurationPackage = getClass.getPackage
-  val schedulerResourceToFileTransformer: ResourceToFileTransformer = null
+  val schedulerResourceToFileTransformer: Option[ResourceToFileTransformer] = None
   val schedulerResourceNameMap: Iterable[(String,String)] = List()
-  val binariesDebugMode = Option(CppBinariesDebugMode.debug)
-  val logCategories = ""
+  val binariesDebugMode: Option[CppBinariesDebugMode] = None
+  val logCategories: Option[String] = None
   lazy val controller = {
     val b = TestSchedulerController.builder(getClass)
         .resourcesPackage(configurationPackage)
         .nameMap(ImmutableMap.copyOf(mapAsJavaMap(schedulerResourceNameMap.toMap)))
-        .resourceToFileTransformer(schedulerResourceToFileTransformer)
-    for (o <- binariesDebugMode) b.debugMode(o)
-    b.logCategories(logCategories)
-     .build
+    schedulerResourceToFileTransformer foreach b.resourceToFileTransformer
+    binariesDebugMode foreach b.debugMode
+    logCategories foreach b.logCategories
+    b.build
   }
 
   def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
