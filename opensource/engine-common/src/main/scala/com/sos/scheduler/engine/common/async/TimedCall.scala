@@ -61,5 +61,5 @@ object TimedCall {
     def call() = f
   }
 
-  case class CancelledException() extends RuntimeException
+  case class CancelledException protected[async]() extends RuntimeException
 }
