@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.xml.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.Config._
+import com.sos.scheduler.engine.plugins.jetty.Utils._
 import java.net.{URL, ServerSocket, BindException}
 import javax.servlet.Filter
 import org.eclipse.jetty.security._
@@ -31,7 +32,7 @@ class ServerBuilder(pluginElement: Element, schedulerModule: SchedulerModule, sc
     val myInjector = createInjector(schedulerModule, Config.newServletModule())  //TODO Besser ist, den original Scheduler-Injector zu nehmen. Der muss dann aber beim Start schon das Servlet-Guice-Module des Plugins kennen
     val contextHandler = jobSchedulerContextHandler(contextPath, loginServiceOption)
     newServer(
-      config.tryUntilPortOption map { until => findFreePort(config.portOption.get, until) } orElse config.portOption,
+      config.tryUntilPortOption map { until => findFreePort(config.portOption.get until until) } orElse config.portOption,
       config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
       newHandlerCollection(Iterable(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
@@ -143,17 +144,21 @@ object ServerBuilder {
     result
   }
 
-  def findFreePort(firstPort: Int, end: Int): Int =
-    if (firstPort >= end) firstPort
-    else {
-      try {
-        val backlog = 1
-        new ServerSocket(firstPort, backlog).close()
-        firstPort
-      } catch {
-        case _: BindException => findFreePort(firstPort + 1, end)
-      }
+  def findFreePort(range: Range): Int =
+    findFreePort(randomInts(range)) getOrElse range.head
+
+  def findFreePort(ports: TraversableOnce[Int]): Option[Int] =
+    ports.toIterator find portIsFree
+
+  private def portIsFree(port: Int) =
+    try {
+      val backlog = 1
+      new ServerSocket(port, backlog).close()
+      true
+    } catch {
+      case _: BindException => false
     }
 
-  private def childElementOption(e: Element, name: String) = Option(childElementOrNull(e, name))
+  private def childElementOption(e: Element, name: String) =
+    Option(childElementOrNull(e, name))
 }
