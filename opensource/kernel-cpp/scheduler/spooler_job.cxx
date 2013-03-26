@@ -1917,7 +1917,7 @@ void Job::on_call(const Task_closed_call& call) {
 //---------------------------------------------------Job::on_call Start_when_directory_changed_call
 
 void Job::on_call(const Start_when_directory_changed_call&) {
-	bool ok = check_for_changed_directory(Time::now());         // Hier prüfen, damit Signal zurückgesetzt wird
+    bool ok = check_for_changed_directory(Time::now());         // Hier prüfen, damit Signal zurückgesetzt wird
     log()->debug(S() << "Start_when_directory_changed_call ok=" << ok);
     if (ok) try_start_task();
 }
@@ -2098,7 +2098,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         *it = new_dw;       // Alte durch neue Überwachung ersetzen
     }
 
-	_call_register.call_at<Start_when_directory_changed_call>(Time(0));
+    _call_register.call_at<Start_when_directory_changed_call>(Time(0));
 }
 
 //----------------------------------------------------------------Job::clear_when_directory_changed
@@ -2107,7 +2107,7 @@ void Job::clear_when_directory_changed()
 {
     if( !_directory_watcher_list.empty() )  _log->debug( "clear_when_directory_changed" );
     _directory_watcher_list.clear();
-	_call_register.cancel<Start_when_directory_changed_call>();
+    _call_register.cancel<Start_when_directory_changed_call>();
 }
 
 //------------------------------------------------------------------Job::update_changed_directories
@@ -2133,7 +2133,7 @@ bool Job::check_for_changed_directory( const Time& now )
 {
     bool something_done = false;
 
-	_call_register.call_at<Start_when_directory_changed_call>(_directory_watcher_list.empty()? Time::never : now + directory_watcher_intervall);
+    _call_register.call_at<Start_when_directory_changed_call>(_directory_watcher_list.empty()? Time::never : now + directory_watcher_intervall);
 
     for (Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end();) {
         Directory_watcher* directory_watcher = *it;
