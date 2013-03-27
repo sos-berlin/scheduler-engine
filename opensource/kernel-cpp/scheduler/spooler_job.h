@@ -188,10 +188,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
  //   Job*                        on_replace_now              ();
     void                        set_dom                     ( const xml::Element_ptr& );
-    Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
-    Duration                    average_step_duration       ( const Duration& deflt );
-    Duration                    db_average_step_duration    ( const Duration& deflt );
-    void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
 
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show_what )  { return dom_element( document, show_what, (Job_chain*)NULL ); }
@@ -200,10 +196,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     const string&               description                 () const                                { return _description; }
 
-
-    void                        init_start_when_directory_changed( Task* = NULL );
-    void                        prepare_on_exit_commands    ();
-    void                        set_log                     ();
     Schedule_use*               schedule_use                () const;
     void                        on_schedule_loaded          ();
     void                        on_schedule_modified        ();
@@ -217,7 +209,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
     string                      profile_section             ();
-    bool                        temporary                   () const                                { return _temporary; }
 
     void                        on_prepare_to_remove        ();
     void                        on_remove_now               ();
@@ -236,12 +227,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     Duration                    get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks="+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
-    void                        database_record_store       ();
-    void                        database_record_remove      ();
-    void                        database_record_load        ( Read_transaction* );
-    void                        load_tasks                  ( Read_transaction* );
-    void                        load_tasks_with_java        ();
-    void                        load_tasks_from_db          ( Read_transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
@@ -251,48 +236,16 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        enqueue_task                (const TaskPersistentJ&);
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
-    bool                        check_for_changed_directory ( const Time& now );
-    void                        update_changed_directories  ( Directory_watcher* );
-    string                      trigger_files               ( Task* task = NULL );
-    void                        interrupt_script            ();
     bool                        queue_filled                ()                                      { return !_task_queue->empty(); }
     
-    void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
-    void                        check_min_tasks             ( const string& cause );                // Setzt _start_min_tasks
-    bool                        above_min_tasks             () const;
-    bool                        below_min_tasks             () const;
-    bool                        should_start_task_because_of_min_tasks();
-    int                         not_ending_tasks_count      () const;
-
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force = force_start_default, const Time& = Time::never );
     ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time&, int id );
-    ptr<Task>                   get_task_from_queue         ( const Time& now );
-    void                        run_task                    ( const ptr<Task>&  );
 
     void                        remove_running_task         ( Task* );
     void                        stop                        ( bool end_all_tasks );
     void                        stop_simply                 ( bool end_all_tasks );
-    void                        stop_after_task_error       ( const string& error_message );   // _ignore_error verhindert stop()
-    bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
 
-    void                        reset_scheduling            ();
-    void                        select_period               ( const Time& );
-    void                        set_period                  (const Period& p);
-    bool                        is_in_period                ( const Time& );
-    void                        set_next_start_time         ( const Time& now, bool repeat = false );
-    void                        set_next_start_time2        (const Time& now, bool repeat);
-    void                        set_next_time               ( const Time& );
     void                        calculate_next_time         ( const Time& now );
-    void                        signal_earlier_order        ( Order* );
-    void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
-
-    Time                        next_time                   () const;
-    Time                        next_start_time             () const;
-    int64                       next_start_time_millis      () const                                { return next_start_time().millis(); }
-    bool                        has_next_start_time         ()                                      { return !next_start_time().is_never(); }
-    bool                     is_machine_resumable           () const                                { return _machine_resumable; }
-    void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
-
     void                        on_call                     (const job::State_cmd_call&);
     void                        on_call                     (const job::Period_begin_call&);
     void                        on_call                     (const job::Period_end_call&);
@@ -306,23 +259,21 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        on_call                     (const job::Below_max_tasks_call&);
     void                        on_call                     (const job::Locks_available_call&);
     void                        on_call                     (const job::Remove_temporary_job_call&);
-    void                        process_order               ();
 
-    lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
+    bool                        is_in_period                ( const Time& );
+    void                        signal_earlier_order        ( Order* );
+    void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
 
-    void                        try_start_task              ();
-    ptr<Task>                   task_to_start               ();
+    int64                       next_start_time_millis      () const                                { return next_start_time().millis(); }
+    bool                     is_machine_resumable           () const                                { return _machine_resumable; }
+    void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
     void                    set_repeat                      (const Duration& d)                     { _log->debug( "repeat=" + d.as_string() ),  _repeat = d; }
     Duration                    repeat                      ()                                      { return _repeat; }
 
-    void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
     void                        set_state_cmd               (const string&);
-    bool                        execute_state_cmd           (State_cmd);
-    void                        end_tasks                   ( const string& task_warning );
     void                        kill_task                   ( int task_id, bool immediately = false );
-    void                        kill_queued_task            ( int task_id );
 
     string                      state_name                  ()                                      { return state_name( _state ); }
     static string               state_name                  ( State );
@@ -333,12 +284,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     void                        set_state_text              ( const string& text )                  { _state_text = text, _log->debug9( "state_text = " + text ); }
 
-    void                        set_error_xc                ( const Xc& );
-    void                        set_error_xc_only           ( const Xc& );
-    void                        set_error                   ( const exception& );
-    void                        reset_error                 ()                                      { _error = NULL,  _log->reset_highest_level(); }
-    void                        set_job_error               ( const exception& );
-
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
     void                        remove_waiting_job_from_process_list();
     void                        on_locks_available          ();
@@ -346,32 +291,78 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     ptr<Com_job>&               com_job                     ()                                      { return _com_job; }
 
     Order_queue*                any_order_queue             () const;
-    Combined_job_nodes*         combined_job_nodes          () const                                { return _combined_job_nodes; }
     bool                        connect_job_node            ( job_chain::Job_node* );
     void                        disconnect_job_node         ( job_chain::Job_node* );
     bool                        is_in_job_chain             () const                                { return _combined_job_nodes && !_combined_job_nodes->is_empty(); }
     bool                     is_order_controlled            () const                                { return _is_order_controlled; }    // Für shell-Jobs nicht mehr relevant. Nur für spooler_process()
     void                    set_order_controlled            ();
+
     void                    set_idle_timeout                ( const Duration& );
-    bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
-    void                        withdraw_order_request      ();
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
     void                        on_order_available          ();
 
     Module*                     module                      ()                                      { return _module; }
+
+    // public nur für Task:
+    Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
+    void                        init_start_when_directory_changed( Task* = NULL );
+    Combined_job_nodes*         combined_job_nodes          () const                                { return _combined_job_nodes; }
+    bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
+    void                        kill_queued_task            ( int task_id );
+    void                        end_tasks                   ( const string& task_warning );
     ptr<Module_instance>        create_module_instance      ();
-    Module_instance*            get_free_module_instance    ( Task* );
-    void                        release_module_instance     ( Module_instance* );
-
-    void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }
-    void                        decrement_running_tasks     ()                                      { InterlockedDecrement( &_running_tasks_count ); }
-
     void                        count_task                  ()                                      { InterlockedIncrement( &_tasks_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
+    void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }
+    void                        decrement_running_tasks     ()                                      { InterlockedDecrement( &_running_tasks_count ); }
     string                      time_zone_name              () const;
+    void                        stop_after_task_error       ( const string& error_message );   // _ignore_error verhindert stop()
+    bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
+    bool                        above_min_tasks             () const;
+    void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
 
   private:
+    void                        set_log                     ();
+    Duration                    average_step_duration       ( const Duration& deflt );
+    Duration                    db_average_step_duration    ( const Duration& deflt );
+    void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
+    void                        prepare_on_exit_commands    ();
+    bool                        temporary                   () const                                { return _temporary; }
+    void                        database_record_store       ();
+    void                        database_record_remove      ();
+    void                        database_record_load        ( Read_transaction* );
+    void                        load_tasks                  ( Read_transaction* );
+    void                        load_tasks_with_java        ();
+    void                        load_tasks_from_db          ( Read_transaction* );
+    bool                        check_for_changed_directory ( const Time& now );
+    void                        update_changed_directories  ( Directory_watcher* );
+    string                      trigger_files               ( Task* task = NULL );
+    void                        reset_scheduling            ();
+    void                        select_period               ( const Time& );
+    void                        set_period                  (const Period& p);
+    void                        set_next_start_time         ( const Time& now, bool repeat = false );
+    void                        set_next_start_time2        (const Time& now, bool repeat);
+    void                        set_next_time               ( const Time& );
+    Time                        next_time                   () const;
+    Time                        next_start_time             () const;
+    void                        process_order               ();
+    void                        try_start_task              ();
+    ptr<Task>                   task_to_start               ();
+    void                        set_state                   ( State );
+    bool                        execute_state_cmd           (State_cmd);
+    void                        set_error_xc                ( const Xc& );
+    void                        set_error_xc_only           ( const Xc& );
+    void                        set_error                   ( const exception& );
+    void                        reset_error                 ()                                      { _error = NULL,  _log->reset_highest_level(); }
+    void                        set_job_error               ( const exception& );
+    void                        withdraw_order_request      ();
+    ptr<Task>                   get_task_from_queue         ( const Time& now );
+    bool                        below_min_tasks             () const;
+    bool                        should_start_task_because_of_min_tasks();
+    int                         not_ending_tasks_count      () const;
+    void                        check_min_tasks             ( const string& cause );                // Setzt _start_min_tasks
+
     friend struct               Task;
     friend struct               Job_history;
 
