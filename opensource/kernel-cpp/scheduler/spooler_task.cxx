@@ -717,7 +717,7 @@ void Task::set_state_direct( State new_state )
                 break;
 
             case s_running_waiting_for_order: {
-                _call_register.call_at<Next_order_step_call>(_job->combined_job_nodes()->next_time());
+                _call_register.call_at<Next_order_step_call>(_job->next_order_time());
                 if (_state != s_running_waiting_for_order)  
                     _idle_since = Time::now();
                 if (_idle_timeout_at != Time::never)
@@ -2053,7 +2053,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
     if( !_order  
      && !_end   )   // Kann beim Aufruf aus Job::do_something() passieren 
     {
-        if( Order* order = _job->combined_job_nodes()->fetch_and_occupy_order(this, now, cause) ) {
+        if( Order* order = _job->fetch_and_occupy_order(this, now, cause) ) {
             if( order->is_file_order() )  
                 _trigger_files = order->file_path();
             _order = order;

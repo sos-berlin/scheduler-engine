@@ -12,6 +12,7 @@ struct Task;
 struct Module_task;
 struct Job_folder;
 struct Job_schedule_use;
+struct Combined_job_nodes;
 
 namespace job {
     struct State_cmd_call;
@@ -32,35 +33,6 @@ namespace job {
         Task_closed_call(Task*);
     };
 }
-
-//------------------------------------------------------------------------------Combined_job_nodes
-
-struct Combined_job_nodes : Object
-{
-                                Combined_job_nodes          ( Job* );
-                               ~Combined_job_nodes          ();
-
-    void                        close                       ();
-    bool                        is_empty                    () const                                { return _job_node_set.empty(); }
-    Order_queue*                any_order_queue             () const;
-    bool                        request_order               ( const Time& now, const string& cause );
-    void                        withdraw_order_requests     ();
-    Time                        next_time                   ();
-    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
-    xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&);
-    void                        connect_with_order_queues   ();
-    void                        connect_job_node            ( job_chain::Job_node* );
-    void                        disconnect_job_node         ( job_chain::Job_node* );
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* );
-    Spooler*                    spooler                     () const                                { return _spooler; }
-
-  private:
-    Fill_zero                  _zero_;
-    Job*                       _job;
-    Spooler*                   _spooler;
-    typedef stdext::hash_set< job_chain::Job_node* >  Job_node_set;
-    Job_node_set               _job_node_set;
-};
 
 //----------------------------------------------------------------------------------------------Job
 
@@ -130,7 +102,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         void                    enqueue_task                ( const ptr<Task>& );
         bool                    remove_task                 ( int task_id, Why_remove );
         void                    remove_task_from_db         ( int task_id );
-      //bool                    has_task_waiting_for_period ();
         void                    move_to_new_job             ( Job* );
         Time                    next_start_time             ();
         void                    append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
@@ -293,7 +264,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     Order_queue*                any_order_queue             () const;
     bool                        connect_job_node            ( job_chain::Job_node* );
     void                        disconnect_job_node         ( job_chain::Job_node* );
-    bool                        is_in_job_chain             () const                                { return _combined_job_nodes && !_combined_job_nodes->is_empty(); }
+    bool                        is_in_job_chain             () const;
     bool                     is_order_controlled            () const                                { return _is_order_controlled; }    // Für shell-Jobs nicht mehr relevant. Nur für spooler_process()
     void                    set_order_controlled            ();
 
@@ -307,7 +278,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     // public nur für Task:
     Duration                    get_step_duration_or_percentage( const string& value, const Duration& deflt );
     void                        init_start_when_directory_changed( Task* = NULL );
-    Combined_job_nodes*         combined_job_nodes          () const                                { return _combined_job_nodes; }
+    Time                        next_order_time             () const;
+    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
     void                        kill_queued_task            ( int task_id );
     void                        end_tasks                   ( const string& task_warning );

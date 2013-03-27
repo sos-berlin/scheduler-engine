@@ -152,6 +152,35 @@ struct Job_lock_requestor : lock::Requestor
     Job*                       _job;
 };
 
+//------------------------------------------------------------------------------Combined_job_nodes
+
+struct Combined_job_nodes : Object
+{
+                                Combined_job_nodes          ( Job* );
+                               ~Combined_job_nodes          ();
+
+    void                        close                       ();
+    bool                        is_empty                    () const                                { return _job_node_set.empty(); }
+    Order_queue*                any_order_queue             () const;
+    bool                        request_order               ( const Time& now, const string& cause );
+    void                        withdraw_order_requests     ();
+    Time                        next_time                   ();
+    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
+    xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&);
+    void                        connect_with_order_queues   ();
+    void                        connect_job_node            ( job_chain::Job_node* );
+    void                        disconnect_job_node         ( job_chain::Job_node* );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* );
+    Spooler*                    spooler                     () const                                { return _spooler; }
+
+  private:
+    Fill_zero                  _zero_;
+    Job*                       _job;
+    Spooler*                   _spooler;
+    typedef stdext::hash_set< job_chain::Job_node* >  Job_node_set;
+    Job_node_set               _job_node_set;
+};
+
 //--------------------------------------------------------------------------------new_job_subsystem
 
 ptr<Job_subsystem> new_job_subsystem( Scheduler* scheduler )
@@ -1042,6 +1071,26 @@ Duration Job::db_average_step_duration( const Duration& deflt )
     }
 
     return result;
+}
+
+//-----------------------------------------------------------------------------Job::is_in_job_chain
+
+bool Job::is_in_job_chain() const
+{ 
+    return _combined_job_nodes && !_combined_job_nodes->is_empty(); 
+}
+
+//-----------------------------------------------------------------------------Job::next_order_time
+
+Time Job::next_order_time() const
+{ 
+    return _combined_job_nodes->next_time(); 
+}
+
+//----------------------------------------------------------------------Job::fetch_and_occupy_order
+
+Order* Job::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause) {
+    return _combined_job_nodes->fetch_and_occupy_order(occupying_task, now, cause);
 }
 
 //------------------------------------------------------------------------Job::set_order_controlled
