@@ -34,29 +34,10 @@
 namespace sos {
 namespace scheduler {
 
-//typedef spooler_com::Log_level Log_level;
-/*
-using spooler_com::Log_level; //enum   Log_level;
-using spooler_com::log_debug9;
-using spooler_com::log_debug8;
-using spooler_com::log_debug7;
-using spooler_com::log_debug6;
-using spooler_com::log_debug5;
-using spooler_com::log_debug4;
-using spooler_com::log_debug3;
-using spooler_com::log_debug2;
-using spooler_com::log_debug1;
-using spooler_com::log_debug;
-using spooler_com::log_info;
-using spooler_com::log_warn;
-using spooler_com::log_error;
-*/
-
 const Log_level log_debug_spooler = log_debug3;
 
 struct Prefix_log;
 struct Log;
-struct Object_set;
 struct Job;
 struct Task;
 struct Spooler;
@@ -393,29 +374,6 @@ struct Com_log_proxy: object_server::Proxy,
     int                        _level;
 };
 
-//----------------------------------------------------------------------------------Com_object_set
-
-struct Com_object_set : spooler_com::Iobject_set, 
-                      //spooler_com::Ihas_java_class_name, 
-                        Sos_ole_object               
-{
-    Z_GNU_ONLY(                 Com_object_set              ();  )                                  // F�r gcc 3.2. Nicht implementiert.
-                                Com_object_set              ( Object_set* );
-
-    USE_SOS_OLE_OBJECT
-
-  //STDMETHODIMP            get_java_class_name             ( BSTR* result );
-
-    void                        clear                       ()                                      { _object_set = NULL; }
-
-    STDMETHODIMP            get_Low_level                   ( int* );
-    STDMETHODIMP            get_High_level                  ( int* );
-
-
-  private:
-    Object_set*                _object_set;
-};
-
 //------------------------------------------------------------------------------------------Com_job
 
 struct Com_job : spooler_com::Ijob, 
@@ -493,7 +451,6 @@ struct Com_task : spooler_com::Itask,
     void                        set_task                    ( Task* );
     Task*                       task                        ()                                      { return _task; }
 
-    STDMETHODIMP            get_Object_set                  ( spooler_com::Iobject_set** );
     STDMETHODIMP            put_Error                       ( VARIANT* error_text );
     STDMETHODIMP            get_Error                       ( spooler_com::Ierror** );
     STDMETHODIMP            get_Job                         ( spooler_com::Ijob** );

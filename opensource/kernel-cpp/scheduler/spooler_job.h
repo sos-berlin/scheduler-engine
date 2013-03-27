@@ -370,7 +370,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     string                      time_zone_name              () const;
 
 
-    friend struct               Object_set;
     friend struct               Task;
     friend struct               Com_job;
     friend struct               Task_subsystem;

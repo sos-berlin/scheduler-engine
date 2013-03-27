@@ -3,7 +3,6 @@
     Hier sind implementiert
 
     Com_log                     COM-H�lle f�r Task_log
-    Com_object_set              COM-H�lle f�r Object_set
     Com_task                    COM-H�lle f�r Task
     Com_spooler                 COM-H�lle f�r Spooler
 */
@@ -39,7 +38,6 @@ DESCRIBE_CLASS( &spooler_typelib, Com_variable_set_enumerator, variable_set_enum
 DESCRIBE_CLASS( &spooler_typelib, Com_log            , log            , CLSID_Log            , "Spooler.Log"           , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job            , job            , CLSID_Job            , "Spooler.Job"           , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_task           , task           , CLSID_Task           , "Spooler.Task"          , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_object_set     , object_set     , CLSID_Object_set     , "Spooler.Object_set"    , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler        , spooler        , CLSID_Spooler        , "Spooler.Spooler"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler_context, spooler_context, CLSID_Spooler_context, "Spooler.Context"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job_chain      , job_chain      , CLSID_Job_chain      , "Spooler.Job_chain"     , "1.0" )
@@ -1844,18 +1842,6 @@ void Com_log_proxy::log2( zschimmer::Log_level log_level, const string&, const s
     }
 }
 
-//-------------------------------------------------------------------------Com_object_set::_methods
-#ifdef Z_COM
-
-const Com_method Com_object_set::_methods[] =
-{ 
-   // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "low_level"            , (Com_method_ptr)&Com_object_set::get_Low_level    , VT_I4         },
-    { DISPATCH_PROPERTYGET,  2, "high_level"           , (Com_method_ptr)&Com_object_set::get_High_level   , VT_I4         },
-    {}
-};
-
-#endif
 //--------------------------------------------------------------------------------Com_job::_methods
 #ifdef Z_COM
 
@@ -2427,13 +2413,6 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
 void Com_task::set_task( Task* task )
 { 
     _task = task; 
-}
-
-//-------------------------------------------------------------------------Com_task::get_object_set
-
-STDMETHODIMP Com_task::get_Object_set( Iobject_set** )
-{
-    return E_NOTIMPL;
 }
 
 //----------------------------------------------------------------------------------Com_task::error

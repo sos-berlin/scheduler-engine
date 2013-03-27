@@ -303,7 +303,6 @@ struct Task : Object,
   
     friend struct               Job;
     friend struct               Job::Task_queue;
-    friend struct               Object_set;
     friend struct               com_objects::Com_task;
     friend struct               database::Task_history;
 
