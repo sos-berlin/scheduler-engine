@@ -1847,14 +1847,14 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                 {
                     Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, http_request->parameter( "job" ) ) );
                     
-                    if( job->_description == "" )  throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
+                    if( job->description() == "" )  throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
 
                     response_content_type = "text/html";
 
                     response_body = "<html><head><title>Scheduler-Job " + job->name() + "</title>";
                     response_body += "<style type='text/css'> @import 'scheduler.css'; @import 'custom.css';</style>";
                     response_body += "<body id='job_description'>";
-                    response_body += job->_description;
+                    response_body += job->description();
                     response_body += "</body></html>";
                 }
                 else

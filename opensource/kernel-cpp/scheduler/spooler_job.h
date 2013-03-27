@@ -183,6 +183,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
+    Absolute_path               process_class_path          () const                                { return _module->_process_class_path; }
+    bool                        waiting_for_process         () const                                { return _waiting_for_process; }
 
  //   Job*                        on_replace_now              ();
     void                        set_dom                     ( const xml::Element_ptr& );
@@ -369,19 +371,14 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
     string                      time_zone_name              () const;
 
-
+  private:
     friend struct               Task;
-    friend struct               Com_job;
-    friend struct               Task_subsystem;
-
+    friend struct               Job_history;
 
     Fill_zero                  _zero_;
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>
-
-  private:
-    friend struct               Job_history;
 
     const JobJ                 _typed_java_sister;
     typed_call_register<Job>   _call_register;
@@ -451,7 +448,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     bool                       _is_order_controlled;
 
-    ptr<Combined_job_nodes> _combined_job_nodes;
+    ptr<Combined_job_nodes>    _combined_job_nodes;
 
     int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
 

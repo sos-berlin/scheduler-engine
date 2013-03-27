@@ -320,7 +320,7 @@ int Job_subsystem_impl::count_jobs_waiting_for_process() const
     int result = 0;
 
     FOR_EACH_JOB( job )
-        if( job->_waiting_for_process )  result++;
+        if (job->waiting_for_process())  result++;
 
     return result;
 }
