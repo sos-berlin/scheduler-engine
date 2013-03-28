@@ -2269,14 +2269,14 @@ void Spooler::nichts_getan( int anzahl, const string& str )
         if( tasks.length() == 0 )  tasks << "no tasks";
 
 
-        FOR_EACH_JOB( job )  
-        {
-            if( jobs.length() > 0 )  jobs << ", ";
-            jobs << job->obj_name() << " " << job->state_name();
-            if( !job->is_in_period( Time::now() ) )  jobs << " (not in period)";
-            if( job->waiting_for_process() )  jobs << " (waiting for process)";
-        }
-        if( jobs.length() == 0 )  jobs << "no jobs";
+        //FOR_EACH_JOB( job )  
+        //{
+        //    if( jobs.length() > 0 )  jobs << ", ";
+        //    jobs << job->obj_name() << " " << job->state_name();
+        //    if( !job->is_in_period( Time::now() ) )  jobs << " (not in period)";
+        //    if( job->waiting_for_process() )  jobs << " (waiting for process)";
+        //}
+        //if( jobs.length() == 0 )  jobs << "no jobs";
 
         _log->log( anzahl <= 1? log_debug9 :
                    anzahl <= 2? log_info

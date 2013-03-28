@@ -77,7 +77,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
     virtual Absolute_path       process_class_path          () const                                = 0;
-    virtual bool                waiting_for_process         () const                                = 0;
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
 
@@ -124,7 +123,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     virtual void                calculate_next_time         ( const Time& now )                     = 0;
 
-    virtual bool                is_in_period                ( const Time& )                         = 0;
     virtual void                signal_earlier_order        ( Order* )                              = 0;
     virtual void                signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function ) = 0;
 
