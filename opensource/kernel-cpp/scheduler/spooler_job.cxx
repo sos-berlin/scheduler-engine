@@ -3087,13 +3087,6 @@ string Standard_job::job_state()
     return "state=" + state_name();
 }
 
-//-----------------------------------------------------------------------Standard_job::include_path
-
-string Standard_job::include_path() const
-{ 
-    return _spooler->include_path(); 
-}
-
 //----------------------------------------------------------------------------------Job::state_name
 
 string Job::state_name( State state )

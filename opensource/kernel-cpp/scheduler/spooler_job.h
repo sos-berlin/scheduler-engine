@@ -95,7 +95,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     virtual State               state                       () const                                = 0;
     virtual bool                is_permanently_stopped      () const                                = 0;
-    virtual string              include_path                () const                                = 0;
     virtual string              title                       ()                                      = 0;
     string                      profile_section             ();
 
@@ -269,7 +268,6 @@ struct Standard_job : Job
     State                       state                       () const                                { return _state; }
     bool                        is_permanently_stopped      () const                                { return _is_permanently_stopped; }
     string                      job_state                   ();
-    string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
 
     void                        on_prepare_to_remove        ();
