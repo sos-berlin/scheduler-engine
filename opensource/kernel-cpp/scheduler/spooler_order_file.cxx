@@ -500,7 +500,7 @@ void Directory_file_order_source::activate()
     set_async_manager( _spooler->_connection_manager );
 
 
-    if( next_job  &&  next_job->state() > Job::s_not_initialized )  next_job->calculate_next_time( Time::now() );     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)
+    if( next_job  &&  next_job->state() > Job::s_not_initialized )  next_job->on_order_available();     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order

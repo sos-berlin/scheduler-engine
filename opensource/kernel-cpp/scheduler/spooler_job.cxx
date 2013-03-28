@@ -38,6 +38,7 @@ namespace job {
 
     DEFINE_SIMPLE_CALL(Standard_job, Period_begin_call)
     DEFINE_SIMPLE_CALL(Standard_job, Period_end_call)
+    DEFINE_SIMPLE_CALL(Standard_job, Start_queued_task_call)
     DEFINE_SIMPLE_CALL(Standard_job, Calculated_next_time_do_something_call)
     DEFINE_SIMPLE_CALL(Standard_job, Start_when_directory_changed_call)
     DEFINE_SIMPLE_CALL(Standard_job, Order_timed_call)
@@ -569,7 +570,6 @@ Standard_job::Standard_job( Scheduler* scheduler, const string& name, const ptr<
 
     _schedule_use = Z_NEW( Job_schedule_use( this ) );
 
-    _next_time      = Time::never;
     _default_params = new Com_variable_set;
     _task_timeout   = Duration::eternal;
     _idle_timeout   = Duration(5);
@@ -1788,7 +1788,6 @@ ptr<Task> Standard_job::start_task_(spooler_com::Ivariable_set* params, Com_vari
 
 void Standard_job::enqueue_task(const TaskPersistentJ& taskPersistentJ) 
 {
-
     int task_id = taskPersistentJ.taskId().value();
 
     Time start_at = Time::of_millis(taskPersistentJ.startTimeMillis());
@@ -1838,11 +1837,8 @@ void Standard_job::enqueue_task( Task* task )
 
     task->_let_run = true;
 
-
     _task_queue->enqueue_task( task );
-    calculate_next_time( now );
-
-    //signal( "start job" );
+    _call_register.call_at<Start_queued_task_call>(_task_queue->next_start_time());
 }
 
 //--------------------------------------------------------------Standard_job::stop_after_task_error
@@ -1904,7 +1900,7 @@ void Standard_job::on_call(const State_cmd_call& call) {
 //----------------------------------------------------------Standard_job::on_call Period_begin_call
 
 void Standard_job::on_call(const Period_begin_call&) {
-    calculate_next_time(Time::now());
+    try_start_task();
 }
 
 //------------------------------------------------------------Standard_job::on_call Period_end_call
@@ -1917,6 +1913,13 @@ void Standard_job::on_call(const Period_end_call&) {
     {
         set_next_start_time(now);
     }
+}
+
+//-----------------------------------------------------Standard_job::on_call Start_queued_task_call
+
+void Standard_job::on_call(const job::Start_queued_task_call&) 
+{
+    try_start_task();
 }
 
 //-------------------------------------Standard_job::on_call Calculated_next_time_do_something_call
@@ -2523,13 +2526,6 @@ void Standard_job::set_next_start_time2(const Time& now, bool repeat) {
     _next_start_time = next_start_time;
 }
 
-//--------------------------------------------------------------------------Standard_job::next_time
-
-Time Standard_job::next_time() const
-{
-    return min(_next_time, _call_register.next_time());
-}
-
 //--------------------------------------------------------------------Standard_job::next_start_time
 
 Time Standard_job::next_start_time() const
@@ -2573,7 +2569,6 @@ void Standard_job::calculate_next_time( const Time& now )
                 if( in_period  &&  ( _start_once || _start_once_for_directory ) )
                     next_time = Time(0);
                 else {
-                    next_time = min(next_time, _task_queue->next_start_time() );
                     next_time = min(next_time, _next_start_time);
                     next_time = min(next_time, _next_single_start);
                 }
@@ -2586,19 +2581,7 @@ void Standard_job::calculate_next_time( const Time& now )
         }
     }
 
-    //if (_next_time != next_time) {
-        Time old_next_time = _next_time;
-        _next_time = next_time;
-        //_log->info(S() << "*********************** calculate_next_time=" << _next_time.as_string(_spooler->_time_zone_name));
-        _call_register.call_at<Calculated_next_time_do_something_call>(_next_time);
-
-        #ifdef Z_DEBUG
-            Z_LOG2( "developer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string(time_zone_name()) << 
-                ( _next_time < old_next_time? " < " :
-                  _next_time > old_next_time? " > " : " = " ) 
-              << "old " << old_next_time.as_string(time_zone_name()) << "\n" );
-        #endif
-    //}
+    _call_register.call_at<Calculated_next_time_do_something_call>(next_time);
 }
 
 //------------------------------------------------------------------------Job::signal_earlier_order
@@ -2627,10 +2610,9 @@ bool Standard_job::connect_job_node( Job_node* job_node )
 
     if( !is_order_controlled() && _module->kind() != Module::kind_process)  z::throw_xc( "SCHEDULER-147", obj_name() );
 
-    if( _state >= s_initialized )
-    {
+    if( _state >= s_initialized ) {
         _combined_job_nodes->connect_job_node( job_node );
-        calculate_next_time( Time::now() );     // Ruft request_order()
+        on_order_available();  // Ruft request_order()
         result = true;
     }
 
@@ -2718,14 +2700,14 @@ bool Standard_job::on_requisite_to_be_removed( File_based* file_based )
     return true;
 }
 
-//------------------------------------------------------------------Standard_job::on_locks_available
+//-----------------------------------------------------------------Standard_job::on_locks_available
 
 void Standard_job::on_locks_available()
 {
     _call_register.call<Locks_available_call>();
 }
 
-//------------------------------------------------------------------Standard_job::on_order_available
+//-----------------------------------------------------------------Standard_job::on_order_available
 
 void Standard_job::on_order_available()
 {
@@ -2919,8 +2901,7 @@ ptr<Task> Standard_job::task_to_start()
 
 void Standard_job::try_start_task()
 {
-    bool task_started       = false;
-    Time now                = Time::now();
+    bool task_started = false;
 
     if ((_state == s_pending && _max_tasks > 0  || _state == s_running && _running_tasks.size() < _max_tasks)  && 
         (!_waiting_for_process || _waiting_for_process_try_again)  && 
@@ -2931,12 +2912,10 @@ void Standard_job::try_start_task()
                 reset_error();
                 _repeat = Duration(0);
                 _delay_until = Time(0);
-
                 _running_tasks.insert(task);
                 set_state( s_running );
 
                 _next_start_time = Time::never;
-                calculate_next_time( now );
 
                 task->init();
 
@@ -2944,7 +2923,8 @@ void Standard_job::try_start_task()
                                                                         : start_cause_name( task->cause() );
                 _log->info( message_string( "SCHEDULER-930", task->id(), c ) );
 
-                if( _min_tasks <= not_ending_tasks_count() )  _start_min_tasks = false;
+                if( _min_tasks <= not_ending_tasks_count() )  
+                    _start_min_tasks = false;
 
                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiß
 
@@ -3063,7 +3043,7 @@ void Standard_job::set_state( State new_state )
     _state = new_state;
 
     if( _state == s_stopped 
-     || _state == s_error      )  _next_start_time = _next_time = Time::never;
+     || _state == s_error      )  _next_start_time = Time::never;
 
     if( old_state > s_initialized  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
     {
@@ -3568,33 +3548,22 @@ bool Standard_job::try_to_end_task(Job* for_job)
 void Standard_job::kill_queued_task( int task_id )
 {
     bool ok = _task_queue->remove_task( task_id, Task_queue::w_task_killed );
-
-    if( ok ) 
-    {
-        Time old_next_time = _next_time;
-        calculate_next_time( Time::now() );
-        //if( _next_time != old_next_time )  signal( "task killed" );
-    }
+    if (ok) 
+        _call_register.call_at<Start_queued_task_call>(_task_queue->next_start_time());
 }
 
 //--------------------------------------------------------------------------Standard_job::kill_task
 
 void Standard_job::kill_task( int id, bool immediately )
 {
-    {
-        //Task* task = NULL;
-
-        Z_FOR_EACH( Task_set, _running_tasks, t )
-        {
-            if( (*t)->_id == id )  
-            { 
-                (*t)->cmd_end( immediately? Task::end_kill_immediately : Task::end_normal );       // Ruft kill_queued_task()
-                return;
-            }
+    Z_FOR_EACH( Task_set, _running_tasks, t ) {
+        if( (*t)->_id == id ) { 
+            (*t)->cmd_end( immediately? Task::end_kill_immediately : Task::end_normal );       // Ruft kill_queued_task()
+            return;
         }
-
-        kill_queued_task( id );
     }
+
+    kill_queued_task( id );
 }
 
 //-------------------------------------------------------------Standard_job::create_module_instance

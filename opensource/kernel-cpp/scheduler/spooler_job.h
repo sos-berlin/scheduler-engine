@@ -121,8 +121,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void                stop                        ( bool end_all_tasks )                  = 0;
     virtual void                stop_simply                 ( bool end_all_tasks )                  = 0;
 
-    virtual void                calculate_next_time         ( const Time& now )                     = 0;
-
     void                        signal_earlier_order        (Order*);
     virtual void                signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function ) = 0;
 
@@ -167,6 +165,7 @@ namespace job {
     struct State_cmd_call;
     struct Period_begin_call;
     struct Period_end_call;
+    struct Start_queued_task_call;
     struct Calculated_next_time_do_something_call;
     struct Start_when_directory_changed_call;
     struct Order_timed_call;
@@ -307,10 +306,10 @@ struct Standard_job : Job
     void                        stop                        ( bool end_all_tasks );
     void                        stop_simply                 ( bool end_all_tasks );
 
-    void                        calculate_next_time         ( const Time& now );
     void                        on_call                     (const job::State_cmd_call&);
     void                        on_call                     (const job::Period_begin_call&);
     void                        on_call                     (const job::Period_end_call&);
+    void                        on_call                     (const job::Start_queued_task_call&);
     void                        on_call                     (const job::Calculated_next_time_do_something_call&);
     void                        on_call                     (const job::Task_closed_call&);
     void                        on_call                     (const job::Start_when_directory_changed_call&);
@@ -400,8 +399,8 @@ struct Standard_job : Job
     void                        set_next_start_time         ( const Time& now, bool repeat = false );
     void                        set_next_start_time2        (const Time& now, bool repeat);
     void                        set_next_time               ( const Time& );
-    Time                        next_time                   () const;
     Time                        next_start_time             () const;
+    void                        calculate_next_time         ( const Time& now );
     void                        process_order               ();
     void                        try_start_task              ();
     ptr<Task>                   task_to_start               ();
@@ -456,7 +455,6 @@ struct Standard_job : Job
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _next_single_start;
     Time                       _next_start_time;
-    Time                       _next_time;                  // Für Task_subsystem::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
 
     Duration                   _repeat;                     // spooler_task.repeat
     Time                       _delay_until;                // Nach Fehler verzögern
