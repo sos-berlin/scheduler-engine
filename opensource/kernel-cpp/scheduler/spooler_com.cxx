@@ -1961,7 +1961,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         }
 
         string name = bstr_as_string( task_name_vt.bstrVal );
-        task = _job->start( pars, name, start_at );
+        task = _job->start_task( pars, name, start_at );
 
         *itask = new Com_task( task );
         (*itask)->AddRef();

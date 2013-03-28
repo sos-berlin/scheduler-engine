@@ -2158,7 +2158,7 @@ void Task::finish()
 
                 if (_cause == cause_queue) {
                     try {
-                        ptr<Task> task = _job->start( +_params, _name );   // Keine Startzeit: Nach Periode und _delay_until richten
+                        ptr<Task> task = _job->start_task( +_params, _name );   // Keine Startzeit: Nach Periode und _delay_until richten
                         task->_delayed_after_error_task_id = id();
                     }
                     catch( exception& x ) {

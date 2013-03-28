@@ -1001,14 +1001,10 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "environment" ) )   environment = new Com_variable_set,  environment->set_dom( e, NULL, "variable" );
     }
 
-    Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) );
-    ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(params), task_name, force, start_at );
-    task->set_web_service( web_service_name );
-    if( environment )  task->merge_environment( environment );
-    job->enqueue_task( task );
+    ptr<Task> task = _spooler->job_subsystem()->job(Absolute_path(root_path, job_path))->start_task(params, environment, start_at, force, task_name, web_service_name);
 
     xml::Element_ptr result = _answer.createElement( "ok" ); 
-    result.appendChild( task->dom_element( _answer, Show_what() ) );
+    if (task)  result.appendChild( task->dom_element( _answer, Show_what() ) );
     return result;
 }
 

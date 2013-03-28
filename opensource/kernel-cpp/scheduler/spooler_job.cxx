@@ -1368,7 +1368,7 @@ void Standard_job::set_error( const exception& x )
 
 //------------------------------------------------------------------------Standard_job::create_task
 
-ptr<Task> Standard_job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time& start_at, int id )
+ptr<Task> Standard_job::create_task(spooler_com::Ivariable_set* params, const string& task_name, bool force, const Time& start_at, int id )
 {
     assert_is_initialized();
     if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
@@ -1395,7 +1395,7 @@ ptr<Task> Standard_job::create_task( const ptr<spooler_com::Ivariable_set>& para
 
 //------------------------------------------------------------------------Standard_job::create_task
 
-ptr<Task> Standard_job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, bool force, const Time& start_at )
+ptr<Task> Standard_job::create_task(spooler_com::Ivariable_set* params, const string& name, bool force, const Time& start_at )
 {
     return create_task( params, name, force, start_at, _spooler->db()->get_task_id() );
 }
@@ -1758,21 +1758,36 @@ void Standard_job::remove_running_task( Task* task )
         _call_register.call<Below_max_tasks_call>();
 }
 
-//------------------------------------------------------------------------------Standard_job::start
+//---------------------------------------------------------------------------------Job::start_task
 
-ptr<Task> Standard_job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at )
+ptr<Task> Job::start_task(spooler_com::Ivariable_set* params, const string& task_name, const Time& at)
 {
     if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
-    
-    ptr<Task> task = create_task( params, task_name, force_start_default, start_at );
-    enqueue_task( task );
+    return start_task(params, (Com_variable_set*)NULL, at, force_start_default, task_name, "");
+}
 
+//---------------------------------------------------------------------------------Job::start_task
+
+void Job::start_task(spooler_com::Ivariable_set* params, Com_variable_set* environment)
+{
+    start_task(params, environment, Time(0), force_start_default, "", "");
+}
+
+//------------------------------------------------------------------------Standard_job::start_task_
+
+ptr<Task> Standard_job::start_task_(spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name)
+{
+    ptr<Task> task = create_task(params, task_name, force, at);
+    task->set_web_service( web_service_name );
+    if (environment)  task->merge_environment(environment);
+    enqueue_task(task);
     return task;
 }
 
 //-----------------------------------------------------------------------Standard_job::enqueue_task
 
-void Standard_job::enqueue_task(const TaskPersistentJ& taskPersistentJ) {
+void Standard_job::enqueue_task(const TaskPersistentJ& taskPersistentJ) 
+{
 
     int task_id = taskPersistentJ.taskId().value();
 
@@ -2079,7 +2094,7 @@ void Standard_job::set_state_cmd(State_cmd state_cmd)
         }
 
         case sc_start:
-            start( NULL, "", Time::now() );
+            start_task( NULL, "", Time::now() );
             try_start_task();
             break;
 

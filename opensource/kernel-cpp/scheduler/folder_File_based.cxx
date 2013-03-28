@@ -721,11 +721,8 @@ void File_based::handle_event( Base_file_event base_file_event )
                                                                  base_file_event == bfevt_removed ? "deleted"  : "" );
 
                 Z_FOR_EACH( Com_variable_set::Map, environment->_map, v )  parameters->set_var( lcase( v->second->name() ), v->second->string_value() );
-                
-                Job*  job  = spooler()->job_subsystem()->job( job_path );
-                ptr<Task> task = job->create_task( +parameters , "", 0 );
-                task->merge_environment( environment );
-                job->enqueue_task( task );
+
+                spooler()->job_subsystem()->job(job_path)->start_task(parameters, environment);
             }
             catch( exception& x )
             {

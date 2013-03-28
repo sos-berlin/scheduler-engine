@@ -77,6 +77,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
     virtual Absolute_path       process_class_path          () const                                = 0;
+    virtual bool                waiting_for_process         () const                                = 0;
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
 
@@ -109,14 +110,13 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void                close                       ()                                      = 0;
 
     virtual bool                queue_filled                ()                                      = 0;
-    virtual ptr<Task>           start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) ) = 0;
-    virtual void                enqueue_task                ( Task* )                               = 0;
+    ptr<Task>                   start_task                  (spooler_com::Ivariable_set* params, const string& task_name = "", const Time& = Time(0) );
+    void                        start_task                  (spooler_com::Ivariable_set* params, Com_variable_set* environment);
+    ptr<Task>                   start_task                  (spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) { return start_task_(params, environment, at, force, task_name, web_service_name); }
+    virtual ptr<Task>           start_task_                 (spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) = 0;
     virtual void                enqueue_task                (const TaskPersistentJ&)                = 0;
     virtual bool                try_to_end_task             (Job* for_job)                          = 0;
     
-    virtual ptr<Task>           create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force = force_start_default, const Time& = Time::never ) = 0;
-    virtual ptr<Task>           create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time&, int id ) = 0;
-
     virtual void                remove_running_task         ( Task* )                               = 0;
     virtual void                stop                        ( bool end_all_tasks )                  = 0;
     virtual void                stop_simply                 ( bool end_all_tasks )                  = 0;
@@ -132,7 +132,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void                set_state_cmd               (const string&)                         = 0;
     virtual void                kill_task                   ( int task_id, bool immediately = false ) = 0;
 
-    virtual string              state_name                  ()                                      = 0;
+    string                      state_name                  ()                                      { return state_name(state()); }
     static string               state_name                  ( State );
     static State                as_state                    ( const string& );
     
@@ -161,6 +161,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     Fill_zero                  _zero_;
     const JobJ                 _typed_java_sister;
 };
+
+//-------------------------------------------------------------------------------------Standard_job
 
 namespace job {
     struct State_cmd_call;
@@ -292,15 +294,15 @@ struct Standard_job : Job
 
     void                        close                       ();
 
-    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) );
+    ptr<Task>                   start_task_                 (spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name);
     void                        enqueue_task                ( Task* );
     void                        enqueue_task                (const TaskPersistentJ&);
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     bool                        queue_filled                ()                                      { return !_task_queue->empty(); }
     
-    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force = force_start_default, const Time& = Time::never );
-    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time&, int id );
+    ptr<Task>                   create_task                 ( spooler_com::Ivariable_set* params, const string& task_name = "", bool force = force_start_default, const Time& = Time::never );
+    ptr<Task>                   create_task                 ( spooler_com::Ivariable_set* params, const string& task_name, bool force, const Time&, int id );
 
     void                        remove_running_task         ( Task* );
     void                        stop                        ( bool end_all_tasks );
@@ -336,8 +338,6 @@ struct Standard_job : Job
     void                        set_state_cmd               (const string&);
     void                        kill_task                   ( int task_id, bool immediately = false );
 
-    string                      state_name                  ()                                      { return Job::state_name( _state ); }
-    
     void                        set_state_text              ( const string& text )                  { _state_text = text, _log->debug9( "state_text = " + text ); }
 
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
