@@ -183,9 +183,11 @@ struct typed_call_register : Typed_call_register {
     typed_call_register(OBJECT* o) : Typed_call_register(o->spooler()), _object(o) {}
 
     template<typename CALL>
-    void call_at(const Time& at) {
-        if (at.is_never()) cancel<CALL>();
-        else call<CALL>(Z_NEW(CALL(at, _object)));
+    void call_at(const Time& t) {
+        if (t != at<CALL>()) {
+            if (t.is_never()) cancel<CALL>();
+            else call<CALL>(Z_NEW(CALL(t, _object)));
+        }
     }
     
     template<typename CALL>
