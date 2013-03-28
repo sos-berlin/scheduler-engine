@@ -2601,12 +2601,14 @@ void Standard_job::calculate_next_time( const Time& now )
     //}
 }
 
-//---------------------------------------------------------------Standard_job::signal_earlier_order
+//------------------------------------------------------------------------Job::signal_earlier_order
 
-void Standard_job::signal_earlier_order( Order* order )
+void Job::signal_earlier_order( Order* order )
 {
     signal_earlier_order( order->next_time(), order->obj_name(), Z_FUNCTION );
 }
+
+//---------------------------------------------------------------Standard_job::signal_earlier_order
 
 void Standard_job::signal_earlier_order( const Time& t, const string& order_name, const string& function )
 {

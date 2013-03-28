@@ -123,7 +123,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     virtual void                calculate_next_time         ( const Time& now )                     = 0;
 
-    virtual void                signal_earlier_order        ( Order* )                              = 0;
+    void                        signal_earlier_order        (Order*);
     virtual void                signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function ) = 0;
 
     virtual int64               next_start_time_millis      () const                                = 0;
@@ -145,7 +145,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     virtual ptr<Com_job>&       com_job                     ()                                      = 0;
 
-    virtual Order_queue*        any_order_queue             () const                                = 0;
     virtual bool                connect_job_node            ( job_chain::Job_node* )                = 0;
     virtual void                disconnect_job_node         ( job_chain::Job_node* )                = 0;
     virtual bool                is_in_job_chain             () const                                = 0;
@@ -324,7 +323,6 @@ struct Standard_job : Job
     void                        on_call                     (const job::Remove_temporary_job_call&);
 
     bool                        is_in_period                ( const Time& );
-    void                        signal_earlier_order        ( Order* );
     void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
 
     int64                       next_start_time_millis      () const                                { return next_start_time().millis(); }
