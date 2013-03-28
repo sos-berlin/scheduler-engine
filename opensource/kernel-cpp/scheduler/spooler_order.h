@@ -76,7 +76,6 @@ struct Order : Com_order,
 
     void                        close                       ();
     virtual string              obj_name                    () const;
-    virtual IDispatch*          idispatch                   ()                                      { return this; }
 
 
     // file_based<>

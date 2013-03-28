@@ -103,8 +103,6 @@ struct Scheduler_object
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
     virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }
-    virtual IDispatch*          idispatch                   ();
-    IUnknown*                   iunknown                    () const                                { return _my_iunknown; }
     virtual void                write_element_attributes    ( const xml::Element_ptr& ) const;
 
 

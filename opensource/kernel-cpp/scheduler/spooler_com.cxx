@@ -1875,7 +1875,7 @@ const Com_method Com_job::_methods[] =
 #endif
 //---------------------------------------------------------------------------------Com_job::Com_job
 
-Com_job::Com_job( Job* job )
+Com_job::Com_job( Standard_job* job )
 :
     Sos_ole_object( job_class_ptr, (Ijob*)this ),
     _job(job)

@@ -142,7 +142,7 @@ struct Task : Object,
 
 
 
-                                Task                        ( Job* );
+                                Task                        ( Standard_job* );
                                ~Task                        ();
 
     // Scheduler_object::
@@ -157,7 +157,7 @@ struct Task : Object,
 
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
-    void                        move_to_new_job             ( Job* new_job )                        { assert( _state == s_none );  _job = new_job; }
+    void                        move_to_new_job             ( Standard_job* new_job )               { assert( _state == s_none );  _job = new_job; }
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     xml::Document_ptr           dom                         ( const Show_what& ) const;
@@ -166,7 +166,7 @@ struct Task : Object,
     void                        init                        ();
     bool                        do_something                ();
 
-    Job*                        job                         ();
+    Standard_job*               job                         ();
     Time                        calculated_start_time       ( const Time& now );
     void                        on_remote_task_running      ();
     void                        on_call                     (const job::Task_starting_completed_call&);
@@ -301,8 +301,8 @@ struct Task : Object,
     void                        set_error                   ( const _com_error& );
     void                        reset_error                 ()                                      { _error = NULL,  _non_connection_reset_error = NULL,  _is_connection_reset_error = false,  _log->reset_highest_level(); }
   
-    friend struct               Job;
-    friend struct               Job::Task_queue;
+    friend struct               Standard_job;
+    friend struct               Standard_job::Task_queue;
     friend struct               com_objects::Com_task;
     friend struct               database::Task_history;
 
@@ -337,7 +337,7 @@ struct Task : Object,
     State                      _enqueued_state;
     string                     _obj_name;
 
-    Job*                       _job;
+    Standard_job*              _job;
     Task_subsystem*            _thread;
     Task_history               _history;
     typed_call_register<Task>  _call_register;

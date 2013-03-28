@@ -892,7 +892,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "run_time" ) )  { job->schedule_use()->set_dom( (File_based*)NULL, e );  break; }
+        if( e.nodeName_is( "run_time" ) )  { job->set_schedule_dom(e);  break; }
     }
 
 

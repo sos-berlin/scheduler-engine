@@ -38,7 +38,7 @@ const Log_level log_debug_spooler = log_debug3;
 
 struct Prefix_log;
 struct Log;
-struct Job;
+struct Standard_job;
 struct Task;
 struct Spooler;
 
@@ -381,7 +381,7 @@ struct Com_job : spooler_com::Ijob,
                  Sos_ole_object               
 {
     Z_GNU_ONLY(                 Com_job                     ();  )                                  // F�r gcc 3.2. Nicht implementiert.
-                                Com_job                     ( Job* );
+                                Com_job                     ( Standard_job* );
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
@@ -417,7 +417,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            get_Script_code                 ( BSTR* );
 
   private:
-    Job*                       _job;                        // Es gibt nur einen Com_job pro Job
+    Standard_job*              _job;                        // Es gibt nur einen Com_job pro Job
 };
 
 //-----------------------------------------------------------------------------------------Com_task

@@ -167,7 +167,7 @@ int Task_subsystem::count_tasks_exist( ) const
 
 //---------------------------------------------------------------------------------------Task::Task
 
-Task::Task( Job* job )
+Task::Task(Standard_job* job)
 :
     Scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
     javabridge::has_proxy<Task>(job->_spooler),
@@ -457,7 +457,7 @@ void Task::write_element_attributes( const xml::Element_ptr& element ) const
 
 //----------------------------------------------------------------------------------------Task::job
 
-Job* Task::job()
+Standard_job* Task::job()
 {
     if( !_job )  assert(0), throw_xc( "TASK-WITHOUT-JOB", obj_name() );
     return _job;
@@ -2147,7 +2147,7 @@ void Task::finish()
         if( !_job->repeat() ) {  // spooler_task.repeat hat Vorrang
             Duration delay = _job->_delay_after_error.empty()? Duration::eternal : Duration(0);
 
-            FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )
+            FOR_EACH( Standard_job::Delay_after_error, _job->_delay_after_error, it )
                 if( _job->_error_steps >= it->first )  delay = it->second;
 
             if(delay.is_eternal()) {
@@ -2206,7 +2206,7 @@ void Task::process_on_exit_commands()
     if( _job->_commands_document ) {
         xml::Element_ptr commands_element = xml::Element_ptr();
 
-        Job::Exit_code_commands_map::iterator it = _job->_exit_code_commands_map.find( _exit_code );
+        Standard_job::Exit_code_commands_map::iterator it = _job->_exit_code_commands_map.find( _exit_code );
         if( it != _job->_exit_code_commands_map.end() ) {
             commands_element = it->second;
         }

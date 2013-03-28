@@ -13,26 +13,7 @@ struct Module_task;
 struct Job_folder;
 struct Job_schedule_use;
 struct Combined_job_nodes;
-
-namespace job {
-    struct State_cmd_call;
-    struct Period_begin_call;
-    struct Period_end_call;
-    struct Calculated_next_time_do_something_call;
-    struct Start_when_directory_changed_call;
-    struct Order_timed_call;
-    struct Order_available_call;
-    struct Process_available_call;
-    struct Below_min_tasks_call;
-    struct Below_max_tasks_call;
-    struct Locks_available_call;
-    struct Remove_temporary_job_call;
-
-    struct Task_closed_call : object_call<Job, Task_closed_call> {
-        Task* const _task;
-        Task_closed_call(Task*);
-    };
-}
+struct Standard_job;
 
 //----------------------------------------------------------------------------------------------Job
 
@@ -78,7 +59,134 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         sc__max
     };
 
+    static const bool           force_start_default;
 
+
+                                Job                         (Scheduler*);
+
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Object::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job>::java_sister(); }
+    const JobJ&                 typed_java_sister           () const                                { return _typed_java_sister; }
+
+    // Scheduler_object:
+    string                      obj_name                    () const                                { return "Job " + path().without_slash(); }
+    void                        write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path().with_slash() ); }
+
+
+    Job_folder*                 job_folder                  () const                                { return typed_folder(); }
+    virtual Absolute_path       process_class_path          () const                                = 0;
+    virtual bool                waiting_for_process         () const                                = 0;
+
+    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
+
+    bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show_what )  { return dom_element( document, show_what, (Job_chain*)NULL ); }
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*) = 0;
+    virtual xml::Element_ptr    why_dom_element             ( const xml::Document_ptr& )            = 0;
+    virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
+    virtual const string&       description                 () const                                = 0;
+    virtual void                set_schedule_dom            (const xml::Element_ptr&)               = 0;
+
+    virtual void                on_schedule_loaded          ()                                      = 0;
+    virtual void                on_schedule_modified        ()                                      = 0;
+    virtual bool                on_schedule_to_be_removed   ()                                      = 0;
+
+    virtual State               state                       () const                                = 0;
+    virtual bool                is_permanently_stopped      () const                                = 0;
+    virtual string              job_state                   ()                                      = 0;
+    virtual string              include_path                () const                                = 0;
+    virtual string              title                       ()                                      = 0;
+    string                      profile_section             ();
+
+    virtual void                on_prepare_to_remove        ()                                      = 0;
+    virtual void                on_remove_now               ()                                      = 0;
+    virtual zschimmer::Xc       remove_error                ()                                      = 0;
+
+    virtual int                 max_order_setbacks          () const                                = 0;
+    virtual xml::Element_ptr    read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) = 0;
+
+    virtual void                close                       ()                                      = 0;
+
+    virtual bool                queue_filled                ()                                      = 0;
+    virtual ptr<Task>           start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time(0) ) = 0;
+    virtual void                enqueue_task                ( Task* )                               = 0;
+    virtual void                enqueue_task                (const TaskPersistentJ&)                = 0;
+    virtual bool                try_to_end_task             (Job* for_job)                          = 0;
+    
+    virtual ptr<Task>           create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force = force_start_default, const Time& = Time::never ) = 0;
+    virtual ptr<Task>           create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time&, int id ) = 0;
+
+    virtual void                remove_running_task         ( Task* )                               = 0;
+    virtual void                stop                        ( bool end_all_tasks )                  = 0;
+    virtual void                stop_simply                 ( bool end_all_tasks )                  = 0;
+
+    virtual void                calculate_next_time         ( const Time& now )                     = 0;
+
+    virtual bool                is_in_period                ( const Time& )                         = 0;
+    virtual void                signal_earlier_order        ( Order* )                              = 0;
+    virtual void                signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function ) = 0;
+
+    virtual int64               next_start_time_millis      () const                                = 0;
+
+    virtual void                set_state_cmd               ( State_cmd )                           = 0;
+    virtual void                set_state_cmd               (const string&)                         = 0;
+    virtual void                kill_task                   ( int task_id, bool immediately = false ) = 0;
+
+    virtual string              state_name                  ()                                      = 0;
+    static string               state_name                  ( State );
+    static State                as_state                    ( const string& );
+    
+    static string               state_cmd_name              ( State_cmd );
+    static State_cmd            as_state_cmd                ( const string& );
+
+    virtual void                set_state_text              ( const string& text )                  = 0;
+
+    virtual void                notify_a_process_is_idle    ()                                      = 0;
+
+    virtual ptr<Com_job>&       com_job                     ()                                      = 0;
+
+    virtual Order_queue*        any_order_queue             () const                                = 0;
+    virtual bool                connect_job_node            ( job_chain::Job_node* )                = 0;
+    virtual void                disconnect_job_node         ( job_chain::Job_node* )                = 0;
+    virtual bool                is_in_job_chain             () const                                = 0;
+    virtual void            set_order_controlled            ()                                      = 0;
+
+    virtual void            set_idle_timeout                ( const Duration& )                     = 0;
+    virtual void                set_job_chain_priority      ( int pri )                             = 0;
+    virtual int                 job_chain_priority          () const                                = 0;
+    static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->job_chain_priority() > b->job_chain_priority(); }
+    virtual void                on_order_available          ()                                      = 0;
+
+  private:
+    Fill_zero                  _zero_;
+    const JobJ                 _typed_java_sister;
+};
+
+namespace job {
+    struct State_cmd_call;
+    struct Period_begin_call;
+    struct Period_end_call;
+    struct Calculated_next_time_do_something_call;
+    struct Start_when_directory_changed_call;
+    struct Order_timed_call;
+    struct Order_available_call;
+    struct Process_available_call;
+    struct Below_min_tasks_call;
+    struct Below_max_tasks_call;
+    struct Locks_available_call;
+    struct Remove_temporary_job_call;
+
+
+    struct Task_closed_call : object_call<Standard_job, Task_closed_call> {
+        Task* const _task;
+        Task_closed_call(Task*);
+    };
+}
+
+struct Standard_job : Job 
+{
     struct Task_queue : Object
     {
         typedef list< ptr<Task> >       Queue;
@@ -91,7 +199,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         };
 
         
-                                Task_queue                  ( Job* job )                            : _job(job), _spooler(job->_spooler) {}
+                                Task_queue                  ( Standard_job* job )                   : _job(job), _spooler(job->_spooler) {}
         
         void                    clear                       ()                                      { _queue.clear(); }
         int                     size                        () const                                { return int_cast(_queue.size()); }
@@ -102,7 +210,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         void                    enqueue_task                ( const ptr<Task>& );
         bool                    remove_task                 ( int task_id, Why_remove );
         void                    remove_task_from_db         ( int task_id );
-        void                    move_to_new_job             ( Job* );
+        void                    move_to_new_job             ( Standard_job* );
         Time                    next_start_time             ();
         void                    append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
         xml::Element_ptr        why_dom_element             (const xml::Document_ptr&, const Time& now, bool in_period);
@@ -120,22 +228,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     typedef map< int, Duration >                Delay_after_error;
     typedef map< int, Duration >                Delay_order_after_setback;
 
-    static const bool           force_start_default;
 
-
-                                Job                         ( Scheduler*, const string& name = "", const ptr<Module>& = NULL );
-    virtual                    ~Job                         (); 
-
-    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Object::AddRef(); }
-    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
-
-    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job>::java_sister(); }
-    const JobJ&                 typed_java_sister           () const                                { return _typed_java_sister; }
-
-    // Scheduler_object:
-    virtual string              obj_name                    () const                                { return "Job " + path().without_slash(); }
-    virtual IDispatch*          idispatch                   ()                                      { return _com_job; }
-    virtual void                write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path().with_slash() ); }
+                                Standard_job                ( Scheduler*, const string& name = "", const ptr<Module>& = NULL );
+    virtual                    ~Standard_job                (); 
 
 
     // File_based:
@@ -153,20 +248,18 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
 
 
-    Job_folder*                 job_folder                  () const                                { return typed_folder(); }
     Absolute_path               process_class_path          () const                                { return _module->_process_class_path; }
     bool                        waiting_for_process         () const                                { return _waiting_for_process; }
 
  //   Job*                        on_replace_now              ();
     void                        set_dom                     ( const xml::Element_ptr& );
 
-    bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show_what )  { return dom_element( document, show_what, (Job_chain*)NULL ); }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*  );
     xml::Element_ptr            why_dom_element             ( const xml::Document_ptr& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     const string&               description                 () const                                { return _description; }
 
+    void                    set_schedule_dom                (const xml::Element_ptr&);
     Schedule_use*               schedule_use                () const;
     void                        on_schedule_loaded          ();
     void                        on_schedule_modified        ();
@@ -179,7 +272,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     string                      job_state                   ();
     string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
-    string                      profile_section             ();
 
     void                        on_prepare_to_remove        ();
     void                        on_remove_now               ();
@@ -246,13 +338,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        set_state_cmd               (const string&);
     void                        kill_task                   ( int task_id, bool immediately = false );
 
-    string                      state_name                  ()                                      { return state_name( _state ); }
-    static string               state_name                  ( State );
-    static State                as_state                    ( const string& );
+    string                      state_name                  ()                                      { return Job::state_name( _state ); }
     
-    static string               state_cmd_name              ( State_cmd );
-    static State_cmd            as_state_cmd                ( const string& );
-
     void                        set_state_text              ( const string& text )                  { _state_text = text, _log->debug9( "state_text = " + text ); }
 
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
@@ -270,7 +357,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     void                    set_idle_timeout                ( const Duration& );
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
-    static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
+    int                         job_chain_priority          () const                                { return _job_chain_priority; }
     void                        on_order_available          ();
 
     Module*                     module                      ()                                      { return _module; }
@@ -281,6 +368,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     Time                        next_order_time             () const;
     Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
+    bool                        try_to_end_task             (Job* for_job);
     void                        kill_queued_task            ( int task_id );
     void                        end_tasks                   ( const string& task_warning );
     ptr<Module_instance>        create_module_instance      ();
@@ -343,8 +431,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>
 
-    const JobJ                 _typed_java_sister;
-    typed_call_register<Job>   _call_register;
+    typed_call_register<Standard_job> _call_register;
 
     string                     _title;                      // <job title="">
     string                     _state_text;                 // spooler_job.state_text = "..."
@@ -433,7 +520,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
 //-------------------------------------------------------------------------------------Internal_job
 
-struct Internal_job : Job
+struct Internal_job : Standard_job
 {
                                 Internal_job                ( Scheduler*, const string& name, const ptr<Module>& );
 };
