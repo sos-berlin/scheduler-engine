@@ -246,7 +246,6 @@ struct Itask : IDispatch
     DEFINE_UUIDOF( Itask )
 
   //virtual HRESULT     get_Java_class_name             ( BSTR* result )                        = 0;
-    virtual HRESULT     get_Object_set                  ( Iobject_set** result )                = 0;
     virtual HRESULT     put_Error                       ( VARIANT* error_text )                 = 0;       // Für PerlScript, das einen Fehlertext nicht durchreicht
     virtual HRESULT     get_Error                       ( Ierror** result )                     = 0;
     virtual HRESULT     get_Job                         ( Ijob** job )                          = 0;

@@ -2302,7 +2302,6 @@ STDMETHODIMP Com_job::get_Script_code( BSTR* result )
 const Com_method Com_task::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "object_set"                , (Com_method_ptr)&Com_task::get_Object_set         , VT_DISPATCH  },
     { DISPATCH_PROPERTYPUT,  2, "error"                     , (Com_method_ptr)&Com_task::put_Error              , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET,  2, "error"                     , (Com_method_ptr)&Com_task::get_Error              , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  3, "job"                       , (Com_method_ptr)&Com_task::get_Job                , VT_DISPATCH  },
