@@ -3259,7 +3259,7 @@ xml::Element_ptr Standard_job::dom_element( const xml::Document_ptr& document, c
         result.setAttribute( "temporary", "yes" );
 
         if( is_in_job_chain() )
-        result.setAttribute( "job_chain_priority", _job_chain_priority );
+        result.setAttribute( "job_chain_priority", job_chain_priority() );
 
         if( _warn_if_shorter_than_string != "" )
             result.setAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );

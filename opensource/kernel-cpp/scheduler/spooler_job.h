@@ -148,14 +148,16 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void            set_order_controlled            ()                                      = 0;
 
     virtual void            set_idle_timeout                ( const Duration& )                     = 0;
-    virtual void                set_job_chain_priority      ( int pri )                             = 0;
-    virtual int                 job_chain_priority          () const                                = 0;
+    void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
+    int                         job_chain_priority          () const                                { return _job_chain_priority; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->job_chain_priority() > b->job_chain_priority(); }
     virtual void                on_order_available          ()                                      = 0;
+
 
   private:
     Fill_zero                  _zero_;
     const JobJ                 _typed_java_sister;
+    int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
 };
 
 //-------------------------------------------------------------------------------------Standard_job
@@ -350,8 +352,6 @@ struct Standard_job : Job
     void                    set_order_controlled            ();
 
     void                    set_idle_timeout                ( const Duration& );
-    void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
-    int                         job_chain_priority          () const                                { return _job_chain_priority; }
     void                        on_order_available          ();
 
     Module*                     module                      ()                                      { return _module; }
@@ -492,8 +492,6 @@ struct Standard_job : Job
     bool                       _is_order_controlled;
 
     ptr<Combined_job_nodes>    _combined_job_nodes;
-
-    int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
 
     Delay_order_after_setback  _delay_order_after_setback;
     int                        _max_order_setbacks;
