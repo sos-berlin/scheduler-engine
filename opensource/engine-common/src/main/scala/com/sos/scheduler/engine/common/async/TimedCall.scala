@@ -16,13 +16,13 @@ trait TimedCall[A] extends Callable[A] {
 
   def call(): A
 
-  private[async] final def onApply() {
+  final def onApply() {
     logger debug s"Calling $toString"
     val result = Try(call())
     callOnComplete(result)
   }
 
-  private[async] final def onCancel() {
+  final def onCancel() {
     logger debug s"Cancel $toString"
     callOnComplete(Failure(CancelledException()))
   }
