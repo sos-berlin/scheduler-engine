@@ -1961,7 +1961,9 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         }
 
         string name = bstr_as_string( task_name_vt.bstrVal );
-        task = _job->start_task( pars, name, start_at );
+        Com_variable_set* variable_set = dynamic_cast<Com_variable_set*>(+pars);
+        if (!variable_set) z::throw_xc("Ivariable_set is not a Com_variable_set");
+        task = _job->start_task( variable_set, name, start_at );
 
         *itask = new Com_task( task );
         (*itask)->AddRef();

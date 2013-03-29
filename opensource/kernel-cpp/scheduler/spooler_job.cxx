@@ -1366,7 +1366,7 @@ void Standard_job::set_error( const exception& x )
 
 //------------------------------------------------------------------------Standard_job::create_task
 
-ptr<Task> Standard_job::create_task(spooler_com::Ivariable_set* params, const string& task_name, bool force, const Time& start_at, int id )
+ptr<Task> Standard_job::create_task(Com_variable_set* params, const string& task_name, bool force, const Time& start_at, int id )
 {
     assert_is_initialized();
     if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
@@ -1393,7 +1393,7 @@ ptr<Task> Standard_job::create_task(spooler_com::Ivariable_set* params, const st
 
 //------------------------------------------------------------------------Standard_job::create_task
 
-ptr<Task> Standard_job::create_task(spooler_com::Ivariable_set* params, const string& name, bool force, const Time& start_at )
+ptr<Task> Standard_job::create_task(Com_variable_set* params, const string& name, bool force, const Time& start_at )
 {
     return create_task( params, name, force, start_at, _spooler->db()->get_task_id() );
 }
@@ -1758,7 +1758,7 @@ void Standard_job::remove_running_task( Task* task )
 
 //---------------------------------------------------------------------------------Job::start_task
 
-ptr<Task> Job::start_task(spooler_com::Ivariable_set* params, const string& task_name, const Time& at)
+ptr<Task> Job::start_task(Com_variable_set* params, const string& task_name, const Time& at)
 {
     if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
     return start_task(params, (Com_variable_set*)NULL, at, force_start_default, task_name, "");
@@ -1766,14 +1766,14 @@ ptr<Task> Job::start_task(spooler_com::Ivariable_set* params, const string& task
 
 //---------------------------------------------------------------------------------Job::start_task
 
-void Job::start_task(spooler_com::Ivariable_set* params, Com_variable_set* environment)
+void Job::start_task(Com_variable_set* params, Com_variable_set* environment)
 {
     start_task(params, environment, Time(0), force_start_default, "", "");
 }
 
 //------------------------------------------------------------------------Standard_job::start_task_
 
-ptr<Task> Standard_job::start_task_(spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name)
+ptr<Task> Standard_job::start_task_(Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name)
 {
     ptr<Task> task = create_task(params, task_name, force, at);
     task->set_web_service( web_service_name );

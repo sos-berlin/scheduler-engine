@@ -108,10 +108,10 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void                close                       ()                                      = 0;
 
     virtual bool                queue_filled                ()                                      = 0;
-    ptr<Task>                   start_task                  (spooler_com::Ivariable_set* params, const string& task_name = "", const Time& = Time(0) );
-    void                        start_task                  (spooler_com::Ivariable_set* params, Com_variable_set* environment);
-    ptr<Task>                   start_task                  (spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) { return start_task_(params, environment, at, force, task_name, web_service_name); }
-    virtual ptr<Task>           start_task_                 (spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) = 0;
+    ptr<Task>                   start_task                  (Com_variable_set* params, const string& task_name = "", const Time& = Time(0) );
+    void                        start_task                  (Com_variable_set* params, Com_variable_set* environment);
+    ptr<Task>                   start_task                  (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) { return start_task_(params, environment, at, force, task_name, web_service_name); }
+    virtual ptr<Task>           start_task_                 (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) = 0;
     virtual void                enqueue_task                (const TaskPersistentJ&)                = 0;
     virtual bool                try_to_end_task             (Job* for_job)                          = 0;
     
@@ -291,15 +291,15 @@ struct Standard_job : Job
 
     void                        close                       ();
 
-    ptr<Task>                   start_task_                 (spooler_com::Ivariable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name);
+    ptr<Task>                   start_task_                 (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name);
     void                        enqueue_task                ( Task* );
     void                        enqueue_task                (const TaskPersistentJ&);
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     bool                        queue_filled                ()                                      { return !_task_queue->empty(); }
     
-    ptr<Task>                   create_task                 ( spooler_com::Ivariable_set* params, const string& task_name = "", bool force = force_start_default, const Time& = Time::never );
-    ptr<Task>                   create_task                 ( spooler_com::Ivariable_set* params, const string& task_name, bool force, const Time&, int id );
+    ptr<Task>                   create_task                 (Com_variable_set* params, const string& task_name = "", bool force = force_start_default, const Time& = Time::never );
+    ptr<Task>                   create_task                 (Com_variable_set* params, const string& task_name, bool force, const Time&, int id );
 
     void                        remove_running_task         ( Task* );
     void                        stop                        ( bool end_all_tasks );
