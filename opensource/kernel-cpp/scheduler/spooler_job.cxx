@@ -13,8 +13,6 @@
 #   include <sys/wait.h>
 #endif
 
-#define THREAD_LOCK_DUMMY( x )
-
 
 namespace sos {
 namespace scheduler {

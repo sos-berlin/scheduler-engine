@@ -86,7 +86,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*) = 0;
     virtual xml::Element_ptr    why_dom_element             ( const xml::Document_ptr& )            = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
-    virtual const string&       description                 () const                                = 0;
+    virtual string              description                 () const                                = 0;
     virtual void                set_schedule_dom            (const xml::Element_ptr&)               = 0;
 
     virtual void                on_schedule_loaded          ()                                      = 0;
@@ -255,7 +255,7 @@ struct Standard_job : Job
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*  );
     xml::Element_ptr            why_dom_element             ( const xml::Document_ptr& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
-    const string&               description                 () const                                { return _description; }
+    string                      description                 () const                                { return _description; }
 
     void                    set_schedule_dom                (const xml::Element_ptr&);
     Schedule_use*               schedule_use                () const;
