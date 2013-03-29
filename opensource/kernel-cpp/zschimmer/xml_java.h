@@ -88,13 +88,11 @@ struct Simple_node_ptr
     virtual                    ~Simple_node_ptr             ()                                      {}              // Für gcc 3.2
 
 
-  //void                        free                        ();
     virtual void                assign                      (const NodeJ& o)                        { _nodeJ = o; }
     virtual void                assign                      (const NodeJ&, NodeType );
 
     const NodeJ&                ref                         () const                                { return _nodeJ; }
 
-                                //operator const NodeJ&     () const                                { return node(); }
                                 operator bool               () const                                { return !!_nodeJ; }
 
     virtual bool                is_type                     ( NodeType )                            { return false; }
@@ -162,8 +160,6 @@ struct Document_ptr : Simple_node_ptr
 
     const DocumentJ&            ref                         () const                                { return _documentJ; }
 
-    //const DocumentJ&            detach                      ()                                      { const DocumentJ& result = ref(); _nodeJ = NULL; return result; }
-
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == DOCUMENT_NODE || Simple_node_ptr::is_type( type ); }
 
     Document_ptr&               create                      ();
@@ -191,7 +187,6 @@ private:
 };                                                          
 
 //-----------------------------------------------------------------------------------------Node_ptr
-// _document hält den Speicher des Node_ptr, mit meiner Änderung des libxml2-Codes 
 
 struct Node_ptr : Simple_node_ptr
 {
@@ -201,22 +196,10 @@ struct Node_ptr : Simple_node_ptr
 
                                 operator const NodeJ&       () const                                { return ref(); }
 
-  //void                        free                        ()                                      { Simple_node_ptr::free(); }
     void                        assign                      (const NodeJ& o)                        { Simple_node_ptr::assign(o); }
     void                        assign                      (const NodeJ& o, NodeType t )           { Simple_node_ptr::assign(o, t); }
-
-    Document_ptr               _document;
 };
 
-//-------------------------------------------------------------------------------------NodeList_ptr
-/*
-struct NodeList_ptr : Node_ptr
-{
-                                NodeList_ptr                ( _xmlNode* p )                         :  Node_ptr( p ) {}
-
-    _xmlNode*                   ptr                         ()                                      { return (_xmlNode*)_ptr; }
-};
-*/
 //--------------------------------------------------------------------------------CharacterData_ptr
 
 struct CharacterData_ptr : Node_ptr 
@@ -255,9 +238,7 @@ struct Element_ptr : Node_ptr
     explicit                    Element_ptr                 ( const Simple_node_ptr& p, No_xc )     : Node_ptr(p.ref()), _elementJ(NULL) { if (is_type( ELEMENT_NODE)) _elementJ = p.ref(); else assign(NULL); }
 
     void                        assign                      ( const ElementJ& o)                    { _elementJ = o; Node_ptr::assign(NodeJ(o)); }
-
-  //_xmlElement*                ptr                         () const                                { return (_xmlElement*)_ptr; }
-
+    const ElementJ&             ref                         () const                                { return _elementJ; }
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == ELEMENT_NODE || Node_ptr::is_type( type ); }
 
     string                      getAttribute                ( const char* name, const char* deflt = "" ) const;
