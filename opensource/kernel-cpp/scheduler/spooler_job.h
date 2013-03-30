@@ -79,8 +79,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual Absolute_path       process_class_path          () const                                = 0;
     virtual bool                waiting_for_process         () const                                = 0;
 
-    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
-
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show_what )  { return dom_element( document, show_what, (Job_chain*)NULL ); }
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*) = 0;

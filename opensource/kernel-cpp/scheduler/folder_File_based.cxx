@@ -570,6 +570,28 @@ xml::Element_ptr File_based::execute_xml( Command_processor* command_processor, 
     return command_processor->_answer.createElement( "ok" );
 }
 
+//-----------------------------------------------------------------------------File_based::set_xml
+
+void File_based::set_xml(const string& x) 
+{
+    xml::Document_ptr dom_document (x);
+    xml::Element_ptr  element      = dom_document.documentElement();
+    subsystem()->assert_xml_element_name( element );
+    if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
+
+    assert_empty_attribute( element, "spooler_id" );
+    if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
+    
+    set_dom(element);
+}
+
+//-----------------------------------------------------------------------------File_based::set_dom
+
+void File_based::set_dom(const xml::Element_ptr&)
+{
+    z::throw_xc("set_dom() not implemented");   // Entweder set_xml() oder set_dom() überschreiben!
+}
+
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& show_what )

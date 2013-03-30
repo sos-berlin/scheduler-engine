@@ -224,16 +224,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                         if( !content_xc.is_empty() )  throw content_xc;
 
-                        xml::Document_ptr dom_document ( source_xml );
-                        xml::Element_ptr  element      = dom_document.documentElement();
-                        subsystem()->assert_xml_element_name( element );
-                        if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
-
-                        assert_empty_attribute( element, "spooler_id" );
-                        if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
                         Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml << "\n" );
-
-                        file_based->set_dom( element );         // Ruft clear_source_xml()
+                        file_based->set_xml(source_xml);         // Ruft clear_source_xml()
                         file_based->_source_xml = source_xml;   
                         file_based->set_file_based_state( File_based::s_not_initialized );
                         file_based->initialize();
