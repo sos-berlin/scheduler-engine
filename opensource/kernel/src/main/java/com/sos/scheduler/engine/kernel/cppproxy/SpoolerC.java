@@ -98,4 +98,5 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     boolean has_any_task();
     @CppThreadSafe void write_to_scheduler_log(String category, String text);
     String setting(int index);
+    String time_zone_name();
 }

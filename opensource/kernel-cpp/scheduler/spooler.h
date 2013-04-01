@@ -415,6 +415,7 @@ struct Spooler : Object,
     string                      home_directory              () const                            { return _home_directory; }
     string                      local_configuration_directory() const                           { return _configuration_directories[confdir_local]; }
     string                      string_need_db              () const;
+    string                      time_zone_name              () const                            { return _time_zone_name; }
 
     Timed_call*                 enqueue_call                (Timed_call*);
     void                        cancel_call                 (Timed_call*);
