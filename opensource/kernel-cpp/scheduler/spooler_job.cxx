@@ -83,7 +83,7 @@ struct Job_subsystem_impl : Job_subsystem
     string                      object_type_name            () const                                { return "Job"; }
     string                      filename_extension          () const                                { return ".job.xml"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
-    ptr<Job>                    new_file_based              ();
+    ptr<Job>                    new_file_based              (const string& source);
 
 
 private:
@@ -247,7 +247,7 @@ bool Job_subsystem_impl::subsystem_activate()
 
 //---------------------------------------------------------------Job_subsystem_impl::new_file_based
 
-ptr<Job> Job_subsystem_impl::new_file_based()
+ptr<Job> Job_subsystem_impl::new_file_based(const string& source)
 {
     ptr<Standard_job> result = Z_NEW( Standard_job( _spooler ) );
     return +result;

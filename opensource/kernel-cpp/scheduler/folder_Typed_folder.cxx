@@ -198,7 +198,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                     } else {   
                         something_changed = true;
 
-                        file_based = subsystem()->call_new_file_based();
+                        file_based = subsystem()->call_new_file_based(source_xml);
                         file_based->set_reread(!is_new);
                         file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
                         file_based->set_base_file_info( Base_file_info( *directory_entry ) );
@@ -343,7 +343,7 @@ ptr<File_based> Typed_folder::new_initialized_file_based_xml( const xml::Element
     subsystem()->check_file_based_element( element );
     //assert_empty_attribute( element, "replace"    );
 
-    ptr<File_based> file_based = subsystem()->call_new_file_based();
+    ptr<File_based> file_based = subsystem()->call_new_file_based("");
     file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
     file_based->set_folder_path( folder()->path() );
     file_based->set_name( element.getAttribute( "name", default_name ) );

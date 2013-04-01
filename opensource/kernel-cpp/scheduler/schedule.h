@@ -600,7 +600,7 @@ struct Schedule_subsystem_interface : Object,
     virtual ptr<Schedule_folder> new_schedule_folder        ( Folder* )                             = 0;
     Schedule*                   schedule                    ( const Absolute_path& path ) const     { return file_based( path ); }
     Schedule*                   schedule_or_null            ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
-    ptr<Schedule>               new_schedule                ()                                      { return new_file_based(); }
+    ptr<Schedule>               new_schedule                ()                                      { return new_file_based(""); }
   //virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& ) = 0;
 };
 

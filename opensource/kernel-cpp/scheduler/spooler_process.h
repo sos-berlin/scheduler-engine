@@ -336,7 +336,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     string                      xml_element_name            () const                                { return "process_class"; }
     string                      xml_elements_name           () const                                { return "process_classes"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
-    ptr<Process_class>          new_file_based              ()                                      { return Z_NEW( Process_class( spooler() ) ); }
+    ptr<Process_class>          new_file_based              (const string& source)                  { return Z_NEW( Process_class( spooler() ) ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "process_classes" ); }
 
     ptr<Process_class_folder>   new_process_class_folder    ( Folder* folder )                      { return Z_NEW( Process_class_folder( folder ) ); }

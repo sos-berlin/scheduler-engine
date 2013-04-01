@@ -1105,13 +1105,13 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     string                      xml_element_name            () const                                { return "order"; }
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
     string                      normalized_name             ( const string& ) const;
-    ptr<Order>                  new_file_based              ();
+    ptr<Order>                  new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "orders" ); }
     string                      name_attributes             () const                                { return "job_chain id"; }
 
 
     ptr<Standing_order_folder>  new_standing_order_folder   ( Folder* folder )                      { return Z_NEW( Standing_order_folder( folder ) ); }
-    ptr<Order>                  new_order                   ()                                      { return new_file_based(); }
+    ptr<Order>                  new_order                   ()                                      { return new_file_based(""); }
 
 
     Order*                      order                       ( const Absolute_path& job_chain_path, const string& order_id ) const  { return file_based        ( make_path( job_chain_path, order_id ) ); }

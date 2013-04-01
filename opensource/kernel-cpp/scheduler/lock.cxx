@@ -87,7 +87,7 @@ bool Lock_subsystem::subsystem_activate()
 
 //-------------------------------------------------------------Lock_subsystem<Lock>::new_file_based
 
-ptr<Lock> Lock_subsystem::new_file_based()
+ptr<Lock> Lock_subsystem::new_file_based(const string&)
 {
     return Z_NEW( Lock( this ) );
 }

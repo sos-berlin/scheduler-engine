@@ -134,7 +134,7 @@ ptr<Directory> Folder_subsystem::merged_cache_and_local_directories()
 
 //-----------------------------------------------------------------Folder_subsystem::new_file_based
 
-ptr<Folder> Folder_subsystem::new_file_based()
+ptr<Folder> Folder_subsystem::new_file_based(const string&)
 {
     assert(0);
     zschimmer::throw_xc( Z_FUNCTION );    // Subfolder_folder::on_base_file_changed() legt selbst Folder an

@@ -144,7 +144,7 @@ bool Standing_order_subsystem::subsystem_activate()
 
 //---------------------------------------------------------Standing_order_subsystem::new_file_based
 
-ptr<Order> Standing_order_subsystem::new_file_based()
+ptr<Order> Standing_order_subsystem::new_file_based(const string& source)
 {
     return new Order( this );
 }
@@ -516,7 +516,7 @@ ptr<Job_chain_folder_interface> Order_subsystem_impl::new_job_chain_folder( Fold
 
 //-------------------------------------------------------------Order_subsystem_impl::new_file_based
 
-ptr<Job_chain> Order_subsystem_impl::new_file_based()
+ptr<Job_chain> Order_subsystem_impl::new_file_based(const string& source)
 {
     return new Job_chain( _spooler );
 }

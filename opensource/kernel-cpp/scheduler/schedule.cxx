@@ -37,7 +37,7 @@ struct Schedule_subsystem : Schedule_subsystem_interface
     string                      object_type_name            () const                                { return "Schedule"; }
     string                      filename_extension          () const                                { return ".schedule.xml"; }
   //string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
-    ptr<Schedule>               new_file_based              ();
+    ptr<Schedule>               new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "schedules" ); }
     ptr<Schedule_folder>        new_schedule_folder         ( Folder* folder )                      { return Z_NEW( Schedule_folder( folder ) ); }
 
@@ -206,7 +206,7 @@ void Schedule_subsystem::assert_xml_element_name( const xml::Element_ptr& elemen
 
 //-----------------------------------------------------Schedule_subsystem<Schedule>::new_file_based
 
-ptr<Schedule> Schedule_subsystem::new_file_based()
+ptr<Schedule> Schedule_subsystem::new_file_based(const string&)
 {
     return Z_NEW( Schedule( this ) );
 }

@@ -32,7 +32,7 @@ struct Scheduler_script_subsystem : Scheduler_script_subsystem_interface
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
     void                        assert_xml_element_name     ( const xml::Element_ptr& ) const;
     string                      normalized_name             ( const string& name ) const            { return name; }
-    ptr<Scheduler_script>       new_file_based              ()                                      { return Z_NEW( Scheduler_script( this ) ); }
+    ptr<Scheduler_script>       new_file_based              (const string& source)                  { return Z_NEW( Scheduler_script( this ) ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "scheduler_scripts" ); }
     ptr<Scheduler_script_folder> new_scheduler_script_folder( Folder* );
 

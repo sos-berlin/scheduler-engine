@@ -285,7 +285,7 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
     string                      xml_element_name            () const                                { return "lock"; }
     string                      xml_elements_name           () const                                { return "locks"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
-    ptr<Lock>                   new_file_based              ();
+    ptr<Lock>                   new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "locks" ); }
 
 

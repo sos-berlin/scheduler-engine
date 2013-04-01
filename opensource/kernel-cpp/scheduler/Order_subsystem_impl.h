@@ -130,7 +130,7 @@ struct Order_subsystem_impl : Order_subsystem
     string                      xml_elements_name           () const                                { return "job_chains"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
     ptr<Job_chain_folder_interface> new_job_chain_folder_interface();
-    ptr<Job_chain>              new_file_based              ();
+    ptr<Job_chain>              new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& );
 
 

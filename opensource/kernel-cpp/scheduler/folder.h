@@ -537,7 +537,7 @@ struct File_based_subsystem : Subsystem
 
     virtual File_based*         file_based_or_null_         ( const Absolute_path& path ) const     = 0;
     virtual File_based*         file_based_                 ( const Absolute_path& path ) const     = 0;
-    virtual ptr<File_based>     call_new_file_based         ()                                      = 0;
+    virtual ptr<File_based>     call_new_file_based         (const string& source_xml)              = 0;
     virtual void                add_file_based              ( File_based* )                         = 0;
     virtual void                remove_file_based           ( File_based* )                         = 0;
     virtual void                replace_file_based          ( File_based*, File_based* )            = 0;
@@ -574,9 +574,8 @@ struct file_based_subsystem : File_based_subsystem
     }
 
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
-    ptr<File_based>             call_new_file_based         ()                                      { return +new_file_based(); }
-    virtual ptr<FILE_BASED>     new_file_based              ()                                      = 0;
-
+    ptr<File_based>             call_new_file_based         (const string& source)                  { return +new_file_based(source); }
+    virtual ptr<FILE_BASED>     new_file_based              (const string& source)                  = 0;
 
 
     void close()
@@ -825,7 +824,7 @@ struct Folder_subsystem : Object,
     string                      xml_element_name            () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
   //string                      normalized_name             ( const string& name ) const            { return name; }
-    ptr<Folder>                 new_file_based              ();
+    ptr<Folder>                 new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "folders" ); }
 
 
