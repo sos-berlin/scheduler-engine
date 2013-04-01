@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.common.async
 
+import StandardCallQueue._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import org.joda.time.DateTimeUtils.currentTimeMillis
 import scala.collection.mutable
 import scala.sys.error
@@ -10,6 +12,7 @@ final class StandardCallQueue extends PoppableCallQueue {
   private var closed = false
 
   def add(o: TimedCall[_]) {
+    logger debug s"Enqueue $o"
     synchronized {
       if (closed)  error(s"CallQueue is closed. '$o' is rejected")
       val i = positionAfter(o.epochMillis)
@@ -63,4 +66,8 @@ final class StandardCallQueue extends PoppableCallQueue {
   private def timedCallIsMature(o: TimedCall[_]) = o.epochMillis <= currentTimeMillis()
 
   override def toString = s"${getClass.getSimpleName} with ${queue.size} operations, next=${queue.headOption}"
+}
+
+object StandardCallQueue {
+  private val logger = Logger(getClass)
 }
