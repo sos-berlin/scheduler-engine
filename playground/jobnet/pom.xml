@@ -19,6 +19,10 @@
     <name>${project.artifactId}</name>
     <inceptionYear>2012</inceptionYear>
 
+    <properties>
+        <sos.jars.version>2136</sos.jars.version>            <!-- verwendete Version der jar Files der SOS, vorher mit setup/deploy-sos-jars deployen: ant -f deploy-sos-jars.xml -Djar.version=x.x.xx.xxxx -->
+    </properties>
+
     <build>
     
         <!-- test in package com.sos.jobnet will run with parameter -Dtest=... only -->
