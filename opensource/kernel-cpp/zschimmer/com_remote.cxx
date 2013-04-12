@@ -922,9 +922,9 @@ int Connection::send_async( const void* data, int length )
     }
     
     if( written < length )
-    {
         _manager->set_fd( Socket_manager::write_fd, _socket );
-    }
+    else
+        _manager->clear_fd( Socket_manager::write_fd, _socket );
 
     return written;
 }
