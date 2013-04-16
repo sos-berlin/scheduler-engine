@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import javax.servlet.ServletRequest
 import scala.xml.Elem

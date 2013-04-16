@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.sos.scheduler.engine.data.folder.AbsolutePath

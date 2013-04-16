@@ -1,10 +1,10 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
 import com.sos.scheduler.engine.data.folder.{AbsolutePath, JobPath}
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
-import com.sos.scheduler.engine.plugins.jetty.rest.WebServices._
+import com.sos.scheduler.engine.plugins.jetty.services.WebServices._
 import javax.inject.Inject
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType._
@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response.Status.NOT_FOUND
 import javax.ws.rs.core._
 
 @Path("job")
-class JobResource @Inject private(
+class JobService @Inject private(
     jobSubsystem: JobSubsystem,
     schedulerInstanceId: SchedulerInstanceId,
     @QueryParam("job") @DefaultValue("") pathString: String)

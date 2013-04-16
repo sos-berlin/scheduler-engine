@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import javax.ws.rs.core.MediaType._
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
-final class JobsResourceIT extends ScalaSchedulerTest {
+final class JobsServiceIT extends ScalaSchedulerTest {
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val jobsResource = javaResource(injector).path("jobs")
 

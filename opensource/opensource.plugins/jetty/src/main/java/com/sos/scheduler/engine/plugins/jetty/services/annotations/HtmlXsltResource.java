@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest.annotations;
+package com.sos.scheduler.engine.plugins.jetty.services.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

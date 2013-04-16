@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest.bodywriters
+package com.sos.scheduler.engine.plugins.jetty.services.bodywriters
 
 import javax.ws.rs.ext.MessageBodyWriter
 

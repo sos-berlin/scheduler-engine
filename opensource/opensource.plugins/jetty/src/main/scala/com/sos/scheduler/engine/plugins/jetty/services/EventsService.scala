@@ -1,9 +1,9 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.google.common.collect.AbstractIterator
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventBus, EventHandler}
-import com.sos.scheduler.engine.plugins.jetty.rest.WebServices._
+import com.sos.scheduler.engine.plugins.jetty.services.WebServices._
 import java.io.OutputStream
 import java.util.concurrent.{TimeUnit, ArrayBlockingQueue}
 import javax.inject.{Inject, Singleton}
@@ -15,8 +15,8 @@ import com.fasterxml.jackson.core.JsonGenerator
 
 @Path("TESTONLY/events")
 @Singleton
-class EventsResource @Inject()(eventBus: EventBus){
-  import EventsResource._
+class EventsService @Inject()(eventBus: EventBus){
+  import EventsService._
 
   private val objectMapper = {
     val result = new ObjectMapper()
@@ -55,9 +55,9 @@ class EventsResource @Inject()(eventBus: EventBus){
   }
 }
 
-object EventsResource {
+object EventsService {
   private val maxQueueSize = 100 // Klein halten, weil EventBus.unregisterAnnotated() nicht aufgerufen wird => Speicherleck
-  private val logger = LoggerFactory.getLogger(classOf[EventsResource])
+  private val logger = LoggerFactory.getLogger(classOf[EventsService])
 
   private class EventCollector extends AbstractIterator[Event] with EventHandlerAnnotated {
     val queue = new ArrayBlockingQueue[Event](maxQueueSize)//new mutable.SynchronizedQueue[Event]

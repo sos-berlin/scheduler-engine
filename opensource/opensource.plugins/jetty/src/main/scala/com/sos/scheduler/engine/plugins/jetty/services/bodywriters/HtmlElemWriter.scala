@@ -1,6 +1,6 @@
-package com.sos.scheduler.engine.plugins.jetty.rest.bodywriters
+package com.sos.scheduler.engine.plugins.jetty.services.bodywriters
 
-import com.sos.scheduler.engine.plugins.jetty.rest.annotations.HtmlXsltResource
+import com.sos.scheduler.engine.plugins.jetty.services.annotations.HtmlXsltResource
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
 import java.io.OutputStream

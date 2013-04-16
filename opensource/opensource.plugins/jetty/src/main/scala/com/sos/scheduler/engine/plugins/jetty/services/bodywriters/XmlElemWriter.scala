@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest.bodywriters
+package com.sos.scheduler.engine.plugins.jetty.services.bodywriters
 
 import scala.xml.Elem
 import java.lang.reflect.Type

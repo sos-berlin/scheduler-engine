@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.log.PrefixLog
@@ -13,9 +13,9 @@ import org.scalatest.matchers.ShouldMatchers._
 import org.slf4j.LoggerFactory
 
 @RunWith(classOf[JUnitRunner])
-final class EventsResourceIT extends ScalaSchedulerTest {
+final class EventsServiceIT extends ScalaSchedulerTest {
 
-  import EventsResourceIT._
+  import EventsServiceIT._
 
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val eventsResource = javaResource(injector).path("TESTONLY/events")
@@ -45,8 +45,8 @@ final class EventsResourceIT extends ScalaSchedulerTest {
   }
 }
 
-object EventsResourceIT {
-  private val logger = LoggerFactory.getLogger(classOf[EventsResourceIT])
+object EventsServiceIT {
+  private val logger = LoggerFactory.getLogger(classOf[EventsServiceIT])
 
   class ResponsePrinter(resource: WebResource) extends Thread {
     val result = new StringBuilder

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import javax.inject.Inject
 import javax.ws.rs._
@@ -7,10 +7,10 @@ import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
-import com.sos.scheduler.engine.plugins.jetty.rest.WebServices._
+import com.sos.scheduler.engine.plugins.jetty.services.WebServices._
 
 @Path("order")
-class OrderResource @Inject()(
+class OrderService @Inject()(
     @QueryParam("jobChain") @DefaultValue("") jobChainPathString: String,
     @PathParam("orderId") @DefaultValue("") orderId: OrderId,
     orderSubsystem: OrderSubsystem,

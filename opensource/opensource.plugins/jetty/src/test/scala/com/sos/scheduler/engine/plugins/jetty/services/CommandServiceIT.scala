@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
@@ -10,7 +10,7 @@ import org.scalatest.matchers.ShouldMatchers._
 
 /**JS-795: Einbau von Jetty in den JobScheduler. */
 @RunWith(classOf[JUnitRunner])
-final class CommandResourceIT extends ScalaSchedulerTest {
+final class CommandServiceIT extends ScalaSchedulerTest {
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val commandResource = javaResource(injector).path("command")
 

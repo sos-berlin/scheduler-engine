@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.log
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.rest.WebServices.getOrSetAttribute
+import com.sos.scheduler.engine.plugins.jetty.services.WebServices.getOrSetAttribute
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}

@@ -8,8 +8,8 @@ import com.sos.scheduler.engine.common.xml.XmlUtils._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet
 import com.sos.scheduler.engine.plugins.jetty.log.{MainLogServlet, OrderLogServlet, JobLogServlet}
-import com.sos.scheduler.engine.plugins.jetty.rest.bodywriters.BodyWriters
-import com.sos.scheduler.engine.plugins.jetty.rest.{ObjectMapperJacksonJsonProvider, RestResources}
+import com.sos.scheduler.engine.plugins.jetty.services.bodywriters.BodyWriters
+import com.sos.scheduler.engine.plugins.jetty.services.{ObjectMapperJacksonJsonProvider, Services}
 import com.sun.jersey.guice.JerseyServletModule
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer
 import java.io.File
@@ -42,7 +42,7 @@ object Config {
       serveRegex(enginePrefixPath+"/log").`with`(classOf[MainLogServlet])
       serveRegex(enginePrefixPath+"/"+JobLogServlet.PathInfoRegex).`with`(classOf[JobLogServlet])
       serveRegex(enginePrefixPath+"/"+OrderLogServlet.PathInfoRegex).`with`(classOf[OrderLogServlet])
-      for (c <- BodyWriters.messageBodyWriters ++ RestResources.resources) bind(c)
+      for (c <- BodyWriters.messageBodyWriters ++ Services.services) bind(c)
       bind(classOf[ObjectMapperJacksonJsonProvider]).toInstance(new ObjectMapperJacksonJsonProvider(newObjectMapper()))
       serve(cppPrefixPath).`with`(classOf[CppServlet])
       serve(cppPrefixPath+"/*").`with`(classOf[CppServlet])

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType.APPLICATION_JSON

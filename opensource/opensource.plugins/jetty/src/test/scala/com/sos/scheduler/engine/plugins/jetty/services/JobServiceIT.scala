@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.rest
+package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
-final class JobResourceIT extends ScalaSchedulerTest {
+final class JobServiceIT extends ScalaSchedulerTest {
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val jobResource = javaResource(injector).path("job").queryParam("job", "a")
 
@@ -29,6 +29,6 @@ final class JobResourceIT extends ScalaSchedulerTest {
   }
 }
 
-//object JobResourceIT {
-//  private val logger = Logger.getLogger(classOf[JobResourceIT])
+//object JobServiceIT {
+//  private val logger = Logger.getLogger(classOf[JobServiceIT])
 //}
