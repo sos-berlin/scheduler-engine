@@ -41,7 +41,7 @@ public final class TestCppBinaries {
         ImmutableList<Resource> resources = resources();
         if (resources.isEmpty()) {
             // Das passiert, wenn ohne Maven gebaut wird. So unter der IntelliJ-IDE. Dann greifen wir eben direkt auf die binaries im Dateisystem zu.
-            if (System.getProperty("com.sos.scheduler.engine.test.underMaven") != null)
+            if (!isUnderIDE())
                 throw new RuntimeException("Missing kernel-cpp resources while running under Maven");  // Denn nur bei den Ressourcen sind wir über deren Stand sicher.
             return new KernelCppArtifactBinaries(debugMode);
         } else {
@@ -50,6 +50,11 @@ public final class TestCppBinaries {
             return isNullOrEmpty(d)? newTemporaryCppBinaries(resources, debugMode)
                     : newExistingCppBinaries(resources, new File(d), debugMode);   // Wir recyceln die vorher mal oder von einem parallel laufenden Test ausgepacken Ressourcen.
         }
+    }
+
+    private static boolean isUnderIDE() {
+        return System.getProperty("sun.java.command").startsWith("com.intellij.") ||     // IntelliJ IDEA 12.1 kennt die Maven-Properties
+            System.getProperty("com.sos.scheduler.engine.test.underMaven") == null;
     }
 
     private static ImmutableList<Resource> resources() {
