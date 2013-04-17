@@ -64,7 +64,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
   }
 
   private def newPluginInstance(injector: Injector) =
-    newPluginInstanceByDI(injector, configuration.pluginClass, configuration.configElementOption)
+    newPluginInstanceByDI(injector, configuration.pluginClass, configuration.configElement)
 
   private[plugin] final def xmlState: String = {
     try pluginInstance.xmlState
@@ -106,14 +106,12 @@ class PluginAdapter(configuration: PluginConfiguration) {
 }
 
 object PluginAdapter {
-  private def newPluginInstanceByDI(injector: Injector, c: Class[_ <: Plugin], elementOption: Option[Element]): Plugin = {
-    val moduleOption = elementOption map { o =>
-      new AbstractModule {
-        protected def configure() {
-          bind(classOf[Element]) annotatedWith(Names.named(Plugin.configurationXMLName)) toInstance o
-        }
+  private def newPluginInstanceByDI(injector: Injector, c: Class[_ <: Plugin], configElement: Element): Plugin = {
+    val module = new AbstractModule {
+      protected def configure() {
+        bind(classOf[Element]) annotatedWith(Names.named(Plugin.configurationXMLName)) toInstance configElement
       }
     }
-    injector.createChildInjector(moduleOption.toSeq).getInstance(c)
+    injector.createChildInjector(module).getInstance(c)
   }
 }
