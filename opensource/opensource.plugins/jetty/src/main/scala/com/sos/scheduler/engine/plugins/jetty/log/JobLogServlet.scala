@@ -2,13 +2,14 @@ package com.sos.scheduler.engine.plugins.jetty.log
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.services.WebServices.getOrSetAttribute
+import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.getOrSetAttribute
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 @Singleton
-class JobLogServlet @Inject()(jobSubsystem: JobSubsystem) extends HttpServlet {
+final class JobLogServlet @Inject()(jobSubsystem: JobSubsystem) extends HttpServlet {
+
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     val operation = getOrSetAttribute(request, classOf[JobLogServlet].getName) {
       val job = jobSubsystem.job(JobPath.of(Option(request.getParameter("job")).get))

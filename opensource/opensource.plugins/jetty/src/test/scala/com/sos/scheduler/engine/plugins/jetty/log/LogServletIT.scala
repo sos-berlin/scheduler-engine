@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
-import java.io.{BufferedReader, Reader}
-import javax.ws.rs.core.MediaType._
-import com.sun.jersey.api.client.WebResource
-import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
-import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
+import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.{javaResource, testPackage}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sun.jersey.api.client.WebResource
+import java.io.{BufferedReader, Reader}
+import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.slf4j.LoggerFactory
@@ -16,22 +15,19 @@ import org.slf4j.LoggerFactory
 
 @RunWith(classOf[JUnitRunner])
 final class LogServletIT extends ScalaSchedulerTest {
+
   import LogServletIT._
 
-  override val configurationPackage = classOf[JettyPlugin].getPackage
+  override val configurationPackage = testPackage
   private lazy val resource = javaResource(injector)
 
-  test("Read a task log") {
+  ignore("Read a task log") {
     startLogThread(resource.path("job.log").queryParam("job", "a"))
     for (i <- 1 to 3) {
       Thread.sleep(1000)
       scheduler.executeXml(<start_job job='/a'/>)
     }
     Thread.sleep(100)
-  }
-
-  test("Read a job snapshot log") {
-    logReader(resource.path("job/log.snapshot").queryParam("job", "a").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
   }
 
   // Fehler SCHEDULER-291  Error when removing protocol file: ERRNO-13  Permission denied

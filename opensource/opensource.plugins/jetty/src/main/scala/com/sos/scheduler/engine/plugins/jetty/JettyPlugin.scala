@@ -7,7 +7,8 @@ import org.eclipse.jetty.server.Server
 import org.w3c.dom.Element
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
-@UseGuiceModule(classOf[JettyModule]) final class JettyPlugin @Inject()(
+@UseGuiceModule(classOf[JettyModule])
+final class JettyPlugin @Inject()(
     @Named(Plugin.configurationXMLName) pluginElement: Element,
     schedulerConf: SchedulerConfiguration)
 extends AbstractPlugin {
