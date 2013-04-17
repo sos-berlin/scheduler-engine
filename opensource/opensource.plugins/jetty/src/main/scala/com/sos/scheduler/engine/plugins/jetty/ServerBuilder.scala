@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.google.inject.Guice._
+import ServerBuilder._
 import com.google.inject.servlet.GuiceFilter
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.XmlUtils.childElementOrNull
-import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.Config._
 import com.sos.scheduler.engine.plugins.jetty.Utils._
@@ -18,18 +18,14 @@ import org.eclipse.jetty.servlets.GzipFilter
 import org.eclipse.jetty.util.security.Constraint
 import org.eclipse.jetty.webapp.{WebXmlConfiguration, WebAppContext}
 import org.eclipse.jetty.xml.XmlConfiguration
-import org.slf4j.LoggerFactory
 import org.w3c.dom.Element
 
-class ServerBuilder(pluginElement: Element, schedulerModule: SchedulerModule, schedulerConfiguration: SchedulerConfiguration) {
-
-  import ServerBuilder._
+class ServerBuilder(pluginElement: Element, schedulerConfiguration: SchedulerConfiguration) {
 
   private val config = new Config(pluginElement, schedulerConfiguration)
 
   private val server = {
     val loginServiceOption = childElementOption(pluginElement, "loginService") map PluginLoginService.apply
-    val myInjector = createInjector(schedulerModule, Config.newServletModule())  //TODO Besser ist, den original Scheduler-Injector zu nehmen. Der muss dann aber beim Start schon das Servlet-Guice-Module des Plugins kennen
     val contextHandler = jobSchedulerContextHandler(contextPath, loginServiceOption)
     newServer(
       config.tryUntilPortOption map { until => findFreePort(config.portOption.get until until) } orElse config.portOption,
@@ -82,7 +78,7 @@ class ServerBuilder(pluginElement: Element, schedulerModule: SchedulerModule, sc
 }
 
 object ServerBuilder {
-  private val logger = LoggerFactory.getLogger(classOf[ServerBuilder])
+  private val logger = Logger(getClass)
 
   private def newServer(port: Option[Int], configuration: Option[XmlConfiguration], handler: Handler, beans: Iterable[AnyRef] = Iterable()) = {
     val result = new Server

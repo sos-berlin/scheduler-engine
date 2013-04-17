@@ -3,9 +3,11 @@ package com.sos.scheduler.engine.plugins.jms;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
+import com.sos.scheduler.engine.kernel.plugin.Plugin;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 import java.util.ArrayList;
@@ -24,7 +27,7 @@ import static java.net.InetAddress.getLocalHost;
 /**
  * JS Plugin to connect the JMS
  */
-public class JMSEventPlugin extends AbstractPlugin {
+public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnotated {
 	
 	private static final Logger logger = LoggerFactory.getLogger(JMSEventPlugin.class);
 
@@ -40,7 +43,11 @@ public class JMSEventPlugin extends AbstractPlugin {
     );
 
 	@Inject
-	private JMSEventPlugin(SchedulerConfiguration c, PrefixLog prefixLog,  SchedulerConfiguration configuration, Element pluginElement) {
+	private JMSEventPlugin(
+            SchedulerConfiguration c,
+            PrefixLog prefixLog,
+            SchedulerConfiguration configuration,
+            @Named(Plugin.configurationXMLName) Element pluginElement) {
         this.schedulerConfiguration = c;
         this.configuration = configuration;
 		String providerUrl = stringXPath(pluginElement,	"jms/connection/@providerUrl", ActiveMQConfiguration.vmProviderUrl);

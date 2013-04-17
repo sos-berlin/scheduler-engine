@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.configuration
 
+import SchedulerModule._
 import com.google.inject.Provides
 import com.google.inject.Scopes.SINGLETON
 import com.sos.scheduler.engine.common.async.StandardCallQueue
@@ -23,9 +24,9 @@ import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import scala.collection.JavaConversions._
 
-class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread) extends ScalaAbstractModule {
+class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
+extends ScalaAbstractModule {
 
-  import SchedulerModule._
 
   def configure() {
     bindInstance(cppProxy)
@@ -36,7 +37,6 @@ class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerB
     provideSingleton { new SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
     bindInstance(cppProxy.log.getSister)
-    bindInstance(this) // Nur für JettyPlugin, bis es unseren Injector nutzen kann (setzt Jetty-Initialisierung vor Guice voraus)
     provideSingleton { new SchedulerId(cppProxy.id) }
     provideSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideSingleton { new FolderSubsystem(cppProxy.folder_subsystem) }
@@ -61,5 +61,5 @@ class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerB
 
 object SchedulerModule {
   private def commandHandlers(objects: Iterable[AnyRef]): Iterable[CommandHandler] =
-    (objects collect { case o: HasCommandHandlers => o.getCommandHandlers: Iterable[CommandHandler] }).flatten
+    (objects collect { case o: HasCommandHandlers => o.commandHandlers: Iterable[CommandHandler] }).flatten
 }

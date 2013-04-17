@@ -14,15 +14,13 @@ final class CommandServiceIT extends ScalaSchedulerTest {
   override val configurationPackage = classOf[JettyPlugin].getPackage
   private lazy val commandResource = javaResource(injector).path("command")
 
-  ignore("JettyPlugin soll nicht eingenen Injector anlegen") {
-  //test("Execute a command via POST") {
+  test("Execute a command via POST") {
     pending
     val result = commandResource.accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], "<show_state><!--äöü--></show_state>")
     checkCommandResult(result)
   }
 
-  ignore("JettyPlugin soll nicht eingenen Injector anlegen -2") {
-  //test("Execute a command via GET") {
+  test("Execute a command via GET") {
     val result = commandResource.queryParam("command", "<show_state/>").accept(TEXT_XML_TYPE).get(classOf[String])
     checkCommandResult(result)
   }

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.command;
 
-import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 
 public interface HasCommandHandlers {
-    ImmutableCollection<CommandHandler> getCommandHandlers();
+    ImmutableList<CommandHandler> commandHandlers();
 }

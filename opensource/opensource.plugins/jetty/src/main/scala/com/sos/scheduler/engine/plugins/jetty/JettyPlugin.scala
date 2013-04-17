@@ -1,17 +1,18 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
-import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin
+import com.sos.scheduler.engine.kernel.plugin.{Plugin, UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import javax.inject.Inject
+import javax.inject.{Named, Inject}
 import org.eclipse.jetty.server.Server
 import org.w3c.dom.Element
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
-final class JettyPlugin @Inject()(pluginElement: Element, schedulerModule: SchedulerModule, schedulerConf: SchedulerConfiguration)
-  extends AbstractPlugin {
+@UseGuiceModule(classOf[JettyModule]) final class JettyPlugin @Inject()(
+    @Named(Plugin.configurationXMLName) pluginElement: Element,
+    schedulerConf: SchedulerConfiguration)
+extends AbstractPlugin {
 
-  private val server: Server = new ServerBuilder(pluginElement, schedulerModule, schedulerConf).build()
+  private val server: Server = new ServerBuilder(pluginElement, schedulerConf).build()
   private var started = false
 
   /** Der Port des ersten Connector */
@@ -31,9 +32,6 @@ final class JettyPlugin @Inject()(pluginElement: Element, schedulerModule: Sched
   }
 }
 
-//object JettyPlugin {
-//  private val logger = LoggerFactory.getLogger(classOf[JettyPlugin])
-//}
 // jobscheduler/engine/  Übersicht über den Zustand und weitere URIs
 // jobscheduler/engine/log  Hauptprotokoll
 // jobscheduler/engine/log.snapshot  Hauptprotokoll
