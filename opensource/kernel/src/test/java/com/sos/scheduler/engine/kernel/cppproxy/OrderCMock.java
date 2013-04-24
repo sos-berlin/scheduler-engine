@@ -40,6 +40,10 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC {
 
     @Override public String title() { return title; }
 
+    @Override public void set_title(String o) {
+        title = o;
+    }
+
     @Override public String path() {
         throw new UnsupportedOperationException("com.sos.scheduler.engine.kernel.cppproxy.OrderCMock.path()");
     }
