@@ -8,7 +8,7 @@ call prepare-setup.sh <version> to use this pom
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.5.2335-SNAPSHOT</version>
+        <version>1.5.3101-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -45,7 +45,7 @@ call prepare-setup.sh <version> to use this pom
                                 <configuration>
                                     <target>
                                         <ant antfile="prepare-setup.xml" target="purge.local">
-                                            <property name="settings.localRepository" value="${settings.localRepository}"/>
+                                            <property name="settings.localRepository" value="${settings.localRepository}" />
                                         </ant>
                                     </target>
                                 </configuration>

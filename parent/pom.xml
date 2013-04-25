@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>parent</artifactId>
-    <version>1.5.2335-SNAPSHOT</version>
+    <version>1.5.3101-SNAPSHOT</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
 
@@ -173,32 +173,32 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.generator</artifactId>
-                <version>1.5.2335-SNAPSHOT</version>
+                <version>1.5.3101-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.scalautil.io</artifactId>
-                <version>1.5.2335-SNAPSHOT</version>
+                <version>1.5.3101-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.runtime</artifactId>
-                <version>1.5.2335-SNAPSHOT</version>
+                <version>1.5.3101-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>engine-common</artifactId>
-                <version>1.5.2335-SNAPSHOT</version>
+                <version>1.5.3101-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>data</artifactId>
-                <version>1.5.2335-SNAPSHOT</version>
+                <version>1.5.3101-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>web</artifactId>
-                <version>1.5.2335-SNAPSHOT</version>
+                <version>1.5.3101-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -500,7 +500,7 @@
                     <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
-                        <com.sos.scheduler.engine.test.underMaven/>
+                        <com.sos.scheduler.engine.test.underMaven />
                         <com.sos.scheduler.engine.test.binary.tmpdir>${project.basedir}/target/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
                         <com.sos.scheduler.engine.test.directory>${project.basedir}/target/surefire-reports</com.sos.scheduler.engine.test.directory>
                     </systemPropertyVariables>
@@ -515,7 +515,7 @@
                     <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
-                        <com.sos.scheduler.engine.test.underMaven/>
+                        <com.sos.scheduler.engine.test.underMaven />
                         <com.sos.scheduler.engine.test.binary.tmpdir>${project.basedir}/target/scheduler-test-binaries</com.sos.scheduler.engine.test.binary.tmpdir>
                         <com.sos.scheduler.engine.test.directory>${project.basedir}/target/failsafe-reports</com.sos.scheduler.engine.test.directory>
                     </systemPropertyVariables>
