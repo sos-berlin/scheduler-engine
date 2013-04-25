@@ -64,7 +64,7 @@ class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with 
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
-    executeShowOrder().toString should not include ("<source")   // Nach Wiederherstellung des Auftrags aus der Datenbank gibt es keine Quelle
+    executeShowOrder().toString should include ("<source")   // JS-956: Nach Wiederherstellung des Auftrags aus der Datenbank wird weiterhin der Text der Konfigurationsdatei geliefert
     controller.terminateScheduler()
   }
 
