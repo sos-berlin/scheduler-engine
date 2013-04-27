@@ -13,9 +13,9 @@ import java.util.*;
 public final class MailMessage {
     static final int current_version = 2;
 
-    private MimeMessage _msg = new MimeMessage(get_session());
     private final Properties _properties = System.getProperties();
-    private Session _session = null;
+    private final Session _session = Session.getInstance(_properties, new My_authenticator());
+    private MimeMessage _msg = new MimeMessage(_session);
     private byte[] _body;
     private final List<MimeBodyPart> _attachments = new LinkedList<MimeBodyPart>();
     private final List<FileInputStream> file_input_streams = new ArrayList<FileInputStream>();      // Alle offenen Attachments, werden von close() geschlossen
@@ -40,14 +40,6 @@ public final class MailMessage {
     public void need_version(int version) throws Exception {
         if (version > current_version)
             throw new Exception("Class com.sos.scheduler.engine.kernel.mail.MailMessage (sos.mail.jar) is not up to date");
-    }
-
-    private Session get_session() {
-        if (_session == null) {
-            _session = Session.getInstance(_properties, new My_authenticator());
-        }
-
-        return _session;
     }
 
     public void set(String what, byte[] value) throws MessagingException, UnsupportedEncodingException {
@@ -82,10 +74,10 @@ public final class MailMessage {
             if (what.equals("encoding")) _encoding = new String(value, "iso8859-1");
             else
             if (what.equals("send_rfc822")) {
-                _msg = new MimeMessage(get_session(), new ByteArrayInputStream(value));
+                _msg = new MimeMessage(_session, new ByteArrayInputStream(value));
                 send2();
             } else
-            if (what.equals("debug")) get_session().setDebug((new String(value, "iso8859-1")).equals("1"));
+            if (what.equals("debug")) _session.setDebug((new String(value, "iso8859-1")).equals("1"));
             else
                 throw new RuntimeException("com.sos.scheduler.engine.kernel.mail.MailMessage.set: what");
     }
