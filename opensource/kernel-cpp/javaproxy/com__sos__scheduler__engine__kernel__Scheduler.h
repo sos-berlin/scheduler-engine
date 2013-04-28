@@ -59,12 +59,12 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem() const;
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void log(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;
-    static ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1);
+    static ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2);
     void onActivate() const;
     void onActivated() const;
     void onClose() const;
     jlong onEnteringSleepState() const;
-    void onLoad(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
+    void onLoad() const;
     void threadLock() const;
     void threadUnlock() const;
 

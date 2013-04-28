@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>opensource</artifactId>
-        <version>1.5.2335-SNAPSHOT</version>
+        <version>1.5.3101-SNAPSHOT</version>
     </parent>
     
     <artifactId>kernel</artifactId>
@@ -110,6 +110,11 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -1335,8 +1335,6 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( !element.nodeName_is( "order" )  && 
         !element.nodeName_is( "add_order" ) )  z::throw_xc( "SCHEDULER-409", "order", element.nodeName() );
 
-    clear_source_xml();
-
     string priority         = element.getAttribute( "priority"  );
     string id               = element.getAttribute( "id"        );
     string title            = element.getAttribute( "title"     );
@@ -2931,10 +2929,9 @@ bool Order::setback()
 
 //-------------------------------------------------------------------------------Order::set_setback
 
-void Order::set_setback( const Time& start_time_, bool keep_setback_count )
+void Order::set_setback( const Time& t, bool keep_setback_count )
 {
-    Time start_time = start_time_.is_zero() ||  start_time_ > Time::now()? start_time_ 
-                                                                         : Time(0);
+    Time start_time = t > Time::now()? t : Time(0);
 
     if( _setback != start_time )
     {
@@ -3026,7 +3023,8 @@ Time Order::next_start_time( bool first_call )
 
             if( result >= _period.end() )       // Periode abgelaufen?
             {
-                Period next_period = _schedule_use->next_period( _period.end(), schedule::wss_next_any_start );
+                bool period_not_initialized = _period.end().is_never(); // JS-957
+                Period next_period = _schedule_use->next_period( period_not_initialized? Time::now() : _period.end(), schedule::wss_next_any_start );
                 
                 if (result.is_never()) 
                         result = next_period.begin();  // SOS1219 next_period.begin() kann never sein!??

@@ -1,25 +1,24 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
+import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
-import com.sos.scheduler.engine.kernel.plugin.CommandPlugin;
+import com.sos.scheduler.engine.kernel.plugin.Plugin;
 
 import javax.inject.Inject;
 
-public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin {
+public class DatabaseQueryPlugin extends AbstractPlugin implements Plugin, HasCommandHandlers {
     private final CommandHandler[] commandHandlers;
 
-    @Inject public DatabaseQueryPlugin(Injector injector) {
+    @Inject public DatabaseQueryPlugin(ShowTaskHistoryCommandExecutor showTaskHistoryCommandExecutor) {
         commandHandlers = new CommandHandler[]{
-            injector.getInstance(ShowTaskHistoryCommandExecutor.class),
+            showTaskHistoryCommandExecutor,
             ShowTaskHistoryCommandXmlParser.singleton,
             TaskHistoryEntriesResultXmlizer.singleton };
     }
 
-    @Override public final ImmutableCollection<CommandHandler> getCommandHandlers() {
+    @Override public final ImmutableList<CommandHandler> commandHandlers() {
         return ImmutableList.copyOf(commandHandlers);
     }
 }

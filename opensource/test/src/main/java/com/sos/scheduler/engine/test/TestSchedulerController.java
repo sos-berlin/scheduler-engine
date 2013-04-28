@@ -19,17 +19,21 @@ import com.sos.scheduler.engine.main.CppBinary;
 import com.sos.scheduler.engine.main.SchedulerState;
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode;
 import com.sos.scheduler.engine.test.binary.TestCppBinaries;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.toArray;
 import static com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory;
@@ -41,14 +45,16 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private static final Logger logger = LoggerFactory.getLogger(TestSchedulerController.class);
     private static final String workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory";
     public static final Time shortTimeout = Time.of(15);
-    private static final AtomicInteger instanceCount = new AtomicInteger(0);
+    private static final String jdbcClass = "org.h2.Driver";
 
+    private final String testName;
     private final List<Runnable> closingRunnables = new ArrayList<Runnable>();
     private final SchedulerEventBus eventBus = getEventBus();
     private final Thread thread = Thread.currentThread();
     private final Environment environment;
     private final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate;
     private final CppBinariesDebugMode debugMode;
+    private final String jdbcUrl;
 
     private boolean terminateOnError = true;
     private boolean isPrepared = false;
@@ -62,11 +68,12 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             CppBinariesDebugMode debugMode) {
         super(testClass.getName());
         logger.debug(testClass.getName());
-        instanceCount.addAndGet(1);
+        this.testName = testClass.getName();
         environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         this.debugMode = debugMode;
         setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")));
+        this.jdbcUrl = "jdbc:h2:mem:scheduler-"+ testName;
     }
 
     private File workDirectory(Class<?> testClass) {
@@ -216,7 +223,9 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     private void registerEventHandler(final EventHandlerAnnotated o) {
         eventBus.registerAnnotated(o);
         closingRunnables.add(new Runnable() {
-            @Override public void run() { eventBus.unregisterAnnotated(o); }
+            @Override public void run() {
+                eventBus.unregisterAnnotated(o);
+            }
         });
     }
 
@@ -225,7 +234,13 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     }
 
     public final void useDatabase() {
-        String dbName = Hostware.h2DatabasePath("mem:scheduler-"+instanceCount);
+        useDatabase(null);
+    }
+
+    public final void useDatabase(@Nullable Duration closeDelay) {
+        String suffix = closeDelay == null? "" : ";DB_CLOSE_DELAY=" + closeDelay.plus(999).getStandardSeconds();
+        String dbName = Hostware.databasePath(jdbcClass, jdbcUrl + suffix);
+        //String dbName = Hostware.h2DatabasePath("tcp://localhost/c:/sos/tmp/database") +" -user=sa";
         setSettings(Settings.of(SettingName.dbName, dbName));
     }
 
@@ -235,6 +250,14 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     public final CppBinaries cppBinaries() {
         return TestCppBinaries.cppBinaries(debugMode);
+    }
+
+    public final Connection newJDBCConnection() {
+        try {
+            Class.forName(jdbcClass);
+            return DriverManager.getConnection(jdbcUrl);
+        } catch (ClassNotFoundException e) { throw propagate(e); }
+        catch (SQLException e) { throw propagate(e); }
     }
 
     /** @param testClass Test-Klasse, für Benennung des Scheduler-Arbeitsverzeichnisses und Ort der Konfigurationsresourcen. */

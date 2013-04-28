@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.js644;
 
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue;
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem;
@@ -11,7 +12,7 @@ import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 
 import javax.inject.Inject;
 
-public class JS644Plugin extends AbstractPlugin {
+public class JS644Plugin extends AbstractPlugin implements EventHandlerAnnotated {
     private final SchedulerThreadCallQueue callQueue;
     private final OrderSubsystem orderSubsystem;
     private final FolderSubsystem folderSubsystem;

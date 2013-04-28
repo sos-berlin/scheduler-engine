@@ -817,8 +817,6 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
     if( !element )  return;
     if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
 
-    clear_source_xml();
-
     _module->set_folder_path( folder_path() );
 
     {

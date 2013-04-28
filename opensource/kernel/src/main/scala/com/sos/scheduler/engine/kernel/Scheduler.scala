@@ -6,6 +6,7 @@ import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.async.CallRunner
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.childElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
@@ -27,7 +28,7 @@ import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.log.CppLogger
 import com.sos.scheduler.engine.kernel.log.PrefixLog
-import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
+import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
@@ -35,7 +36,6 @@ import java.lang.Thread.currentThread
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
-import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
 import scala.sys.error
 import scala.util.control.NonFatal
@@ -95,8 +95,8 @@ with HasInjector {
     disposableCppProxyRegister.tryDisposeAll()
   }
 
-  @ForCpp private def onLoad(configurationXml: String) {
-    pluginSubsystem.load(loadXml(configurationXml).getDocumentElement)
+  @ForCpp private def onLoad() {
+    pluginSubsystem.initialize()
     controllerBridge.onSchedulerStarted(this)
   }
 
@@ -165,7 +165,7 @@ with HasInjector {
     if (result contains "<ERROR") {
       for (e <- childElements(loadXml(result).getDocumentElement);
            error <- new NamedChildElements("ERROR", e))
-        throw new SchedulerException(error.getAttribute("code") +" "+ error.getAttribute("text"))
+        throw new SchedulerException(error.getAttribute("text"))
     }
     result
   }
@@ -190,12 +190,15 @@ with HasInjector {
 
 @ForCpp
 object Scheduler {
-  private final val logger = LoggerFactory.getLogger(classOf[Scheduler])
+  private final val logger = Logger(getClass)
 
-  @ForCpp def of(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge) = {
+  @ForCpp def of(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
     controllerBridge.getSettings.setSettingsInCpp(cppProxy.modifiable_settings)
-    val injector = createInjector(new SchedulerModule(cppProxy, controllerBridge, currentThread()))
+
+    val injector = createInjector(Seq(
+      new SchedulerModule(cppProxy, controllerBridge, currentThread()),
+      PluginModule(configurationXml)))
     injector.getInstance(classOf[Scheduler])
   }
 }
