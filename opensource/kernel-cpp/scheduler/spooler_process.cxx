@@ -608,7 +608,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml_writer.write_prolog();
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
             xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
-            if( _module_instance->_module->kind() == Module::kind_process )  xml_writer.set_attribute( "kind", "process" );
+            if (!_module_instance->_module->has_api())  xml_writer.set_attribute( "kind", "process" );
             xml_writer.set_attribute_optional("java_options", _java_options);
             xml_writer.set_attribute_optional("java_classpath", _java_classpath);
             xml_writer.end_element( "remote_scheduler.start_remote_task" );

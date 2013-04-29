@@ -498,7 +498,7 @@ ptr<Module_instance> Module::create_instance_impl()
     Kind kind = _kind;
     
     if( _use_process_class  &&
-        ( _kind != kind_process  ||  !_monitors->is_empty()  ||  process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+        ( has_api() || process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
     {
         kind = kind_remote;                 
     }
@@ -584,6 +584,13 @@ ptr<Module_instance> Module::create_instance_impl()
     result->_kind = kind;
 
     return result;
+}
+
+//----------------------------------------------------------------------------------Module::has_api
+
+bool Module::has_api() const
+{ 
+    return _kind != kind_process || !_monitors->is_empty(); 
 }
 
 //--------------------------------------------------------------------Module::process_class_or_null
