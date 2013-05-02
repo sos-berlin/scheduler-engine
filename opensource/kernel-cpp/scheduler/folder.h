@@ -215,7 +215,6 @@ struct File_based : Scheduler_object,
     string                      normalized_name             () const;
     string                      normalized_path             () const;
     File_path                   configuration_root_directory() const;
-    void                        clear_source_xml            ()                                      { _source_xml = ""; }   // Von set_dom() zu rufen
     const string&               source_xml                  () const                                { return _source_xml; }
 
     State                       file_based_state            () const                                { return _state; }

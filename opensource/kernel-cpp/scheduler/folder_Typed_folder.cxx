@@ -233,8 +233,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
                         Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml << "\n" );
 
-                        file_based->set_dom( element );         // Ruft clear_source_xml()
                         file_based->_source_xml = source_xml;   
+                        file_based->set_dom( element );
                         file_based->set_file_based_state( File_based::s_not_initialized );
                         file_based->initialize();
 

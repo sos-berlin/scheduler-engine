@@ -1914,7 +1914,6 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     if( !element )  return;
     if( !element.nodeName_is( "job_chain" ) )  z::throw_xc( "SCHEDULER-409", "job_chain", element.nodeName() );
 
-    clear_source_xml();
     set_name( element.getAttribute( "name", name() ) );
     _title = element.getAttribute( "title", _title );
 

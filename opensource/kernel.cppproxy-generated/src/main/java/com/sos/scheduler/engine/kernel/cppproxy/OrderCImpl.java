@@ -134,6 +134,20 @@ final class OrderCImpl
     private static native void set_id__native(long cppReference, java.lang.String p0);
 
 
+    @Override public void set_title(java.lang.String p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_title__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_title__native(long cppReference, java.lang.String p0);
+
+
     @Override public java.lang.String string_end_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

@@ -64,6 +64,10 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
         return cppProxy.title();
     }
 
+    public void setTitle(String o) {
+        cppProxy.set_title(o);
+    }
+
     @Override public FileBasedType getFileBasedType() {
         return FileBasedType.order;
     }
