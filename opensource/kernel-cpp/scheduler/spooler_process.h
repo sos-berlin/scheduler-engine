@@ -187,7 +187,7 @@ struct Process : zschimmer::Object, Scheduler_object
     ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;
-    Process_id                 _process_id;
+    const Process_id           _process_id;
     bool                       _log_stdout_and_stderr;      // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
 };
 

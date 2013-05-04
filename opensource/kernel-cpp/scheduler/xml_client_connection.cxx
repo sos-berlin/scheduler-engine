@@ -91,9 +91,10 @@ xml::Document_ptr Xml_client_connection::fetch_received_dom_document()
     {
         result.create();
 
-        result.load_xml( _received_data );
+        string xml = _received_data.to_string();
         _received_data.clear();
-
+        if (!xml.empty() && *xml.rbegin() == '\0')  xml.erase(xml.length() - 1);   // '\0' am Ende abschneiden (kennzeichnet das Ende der Übertragung)
+        result.load_xml(xml);
         DOM_FOR_EACH_ELEMENT( result.documentElement(), e1 )
             if( e1.nodeName_is( "answer" ) )
                 DOM_FOR_EACH_ELEMENT( e1, e2 )
