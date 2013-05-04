@@ -47,7 +47,6 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     public static final Time shortTimeout = Time.of(15);
     private static final String jdbcClass = "org.h2.Driver";
 
-    private final String testName;
     private final List<Runnable> closingRunnables = new ArrayList<Runnable>();
     private final SchedulerEventBus eventBus = getEventBus();
     private final Thread thread = Thread.currentThread();
@@ -68,12 +67,11 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             CppBinariesDebugMode debugMode) {
         super(testClass.getName());
         logger.debug(testClass.getName());
-        this.testName = testClass.getName();
         environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         this.debugMode = debugMode;
         setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")));
-        this.jdbcUrl = "jdbc:h2:mem:scheduler-"+ testName;
+        this.jdbcUrl = "jdbc:h2:mem:scheduler-"+ testClass.getName();
     }
 
     private File workDirectory(Class<?> testClass) {
