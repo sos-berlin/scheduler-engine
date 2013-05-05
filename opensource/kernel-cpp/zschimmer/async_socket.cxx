@@ -143,7 +143,7 @@ void Socket_operation::close()
 
             _write_socket = SOCKET_ERROR;
 
-            if( ret == SOCKET_ERROR )  throw_socket( errno, _peer_host_and_port.as_string().c_str() );   // In Windows WSA..() verwenden?
+            if( ret == SOCKET_ERROR )  throw_socket(socket_errno(), "closesocket", _peer_host_and_port);
         }
 
         if( _read_socket != SOCKET_ERROR )
@@ -152,7 +152,7 @@ void Socket_operation::close()
             int ret = closesocket( _read_socket );
             _read_socket = SOCKET_ERROR;
 
-            if( ret == SOCKET_ERROR )  throw_socket( errno, _peer_host_and_port.as_string().c_str() );   // In Windows WSA..() verwenden?
+            if( ret == SOCKET_ERROR )  throw_socket(socket_errno(), "closesocket", _peer_host_and_port);
         }
     }
 
@@ -264,14 +264,14 @@ void Socket_operation::call_ioctl( int what, unsigned long value )
     {
         Z_LOG2( "socket", "ioctl(" << _read_socket << "," << what << "," << value << ")\n" );
         int ret = ioctlsocket( _read_socket, what, &value );
-        if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl()", _peer_host_and_port.as_string().c_str() );
+        if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl()", _peer_host_and_port);
     }
 
     if( _write_socket != SOCKET_ERROR  &&  _read_socket != _write_socket )
     {
         Z_LOG2( "socket", "ioctl(" << _read_socket << "," << what << "," << value << ")\n" );
         int ret = ioctlsocket( _write_socket, what, &value );
-        if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl()", _peer_host_and_port.as_string().c_str() );
+        if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl()", _peer_host_and_port);
     }
 }
 
