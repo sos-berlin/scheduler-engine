@@ -13,6 +13,7 @@ namespace zschimmer {
 
 struct Message_string;
 struct Object;
+struct Host_and_port;
 
 void        insert_into_message( Message_string* m, int index, int64    ) throw();
 void        insert_into_message( Message_string* m, int index, const char* ) throw();               // Für gcc
@@ -406,6 +407,7 @@ inline Z_NORETURN void      throw_errno                 ( int errn, const string
 inline Z_NORETURN void      throw_errno                 ( int errn, const string& a, const string& b )  { throw_errno( errn, a.c_str(), b.c_str(), NULL ); }
 inline Z_NORETURN void      throw_errno                 ( int errn, const string& a, const string& b, const string& c )  { throw_errno( errn, a.c_str(), b.c_str(), c.c_str() ); }
 Z_NORETURN void             throw_socket                ( int errn, const char* = NULL, const char* = NULL, const char* = NULL );
+Z_NORETURN void             throw_socket                ( int errn, const char* function_name, const Host_and_port&, const char* = NULL );
 Z_NORETURN void             throw_pattern               ( const char* pattern, int error, const char* function_name, const char* text1 = NULL, const char* text2 = NULL );
 Z_NORETURN void             throw_mswin                 ( int mswin_error, const char* function = "", const char* = NULL, const char* = NULL );
 inline Z_NORETURN void      throw_mswin                 ( int mswin_error, const char* function, const string& a ) { throw_mswin( mswin_error, function, a.c_str() ); }
