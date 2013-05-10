@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js866
 
 import JS866IT._
-import com.sos.scheduler.engine.common.time.Time
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.{TaskEndedEvent, TaskStartedEvent}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
@@ -37,7 +37,7 @@ final class JS866IT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <start_job job={jobPath.string}/>
     val taskId = eventPipe.nextWithCondition[TaskStartedEvent] { _.jobPath == jobPath } .taskId
     scheduler executeXml <kill_task job={jobPath.string} id={taskId.value.toString} immediately="yes"/>
-    eventPipe.nextWithTimeoutAndCondition[TaskEndedEvent](Time.of(15)) { _.jobPath == jobPath }
+    eventPipe.nextWithCondition[TaskEndedEvent] { _.jobPath == jobPath }
   }
 }
 

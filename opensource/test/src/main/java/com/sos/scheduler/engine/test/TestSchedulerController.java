@@ -67,11 +67,12 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             CppBinariesDebugMode debugMode) {
         super(testClass.getName());
         logger.debug(testClass.getName());
+        String testName = testClass.getName();
         environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         this.debugMode = debugMode;
         setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")));
-        this.jdbcUrl = "jdbc:h2:mem:scheduler-"+ testClass.getName();
+        this.jdbcUrl = "jdbc:h2:mem:scheduler-"+ testName;
     }
 
     private File workDirectory(Class<?> testClass) {
@@ -213,8 +214,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
     public final EventPipe newEventPipe() {
-        EventPipe result = new EventPipe(shortTimeout);
-        registerEventHandler(result);
+        EventPipe result = new EventPipe(eventBus, shortTimeout.toDuration());
+        registerEventHandler(result);  // unregisterEventHandler() in EventPipe.close()
         return result;
     }
 
