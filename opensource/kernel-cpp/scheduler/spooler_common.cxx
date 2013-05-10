@@ -2,6 +2,7 @@
 
 
 #include "spooler.h"
+#include "../javaproxy/com__sos__scheduler__engine__common__scalautil__Resources.h"
 
 namespace sos {
 namespace scheduler {
@@ -57,6 +58,12 @@ xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const 
 void require_not_attribute(const xml::Element_ptr& e, const string& name) 
 {
     if (e.hasAttribute(name))  z::throw_xc("SCHEDULER-232", e.nodeName(), name, e.getAttribute(name));
+}
+
+//--------------------------------------------------------------------------java_resource_as_string
+
+string java_resource_as_string(const string& path) {
+    return javaproxy::com::sos::scheduler::engine::common::scalautil::Resources::resourceAsString(path);
 }
 
 //-------------------------------------------------------------------------------------------------
