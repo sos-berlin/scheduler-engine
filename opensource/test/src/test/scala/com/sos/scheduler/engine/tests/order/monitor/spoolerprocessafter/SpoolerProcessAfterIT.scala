@@ -92,7 +92,7 @@ final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
   private def publishMyFinishedEvent(order: UnmodifiableOrder) {
     controller.getEventBus.publishCold(MyFinishedEvent(
       order.getKey, order.getState,
-      Option(emptyToNull(order.getParameters.get(SpoolerProcessAfterNames.parameter))) map { _.toBoolean }))
+      Option(emptyToNull(order.getParameters(SpoolerProcessAfterNames.parameter))) map { _.toBoolean }))
   }
 
   @EventHandler def handleEvent(e: LogEvent) {

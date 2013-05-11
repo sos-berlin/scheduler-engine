@@ -42,10 +42,10 @@ public class DatabaseSubsystem implements Subsystem {
     private ImmutableMap<String,String> entityManagerProperties() {
         UnmodifiableVariableSet v = cppDatabaseProperties();
         return new ImmutableMap.Builder<String,String>()
-            .put("javax.persistence.jdbc.driver", v.get("jdbc.driverClass"))
-            .put("javax.persistence.jdbc.url", v.get("path"))
-            .put("javax.persistence.jdbc.user", v.get("user"))
-            .put("javax.persistence.jdbc.password", v.get("password"))
+            .put("javax.persistence.jdbc.driver", v.apply("jdbc.driverClass"))
+            .put("javax.persistence.jdbc.url", v.apply("path"))
+            .put("javax.persistence.jdbc.user", v.apply("user"))
+            .put("javax.persistence.jdbc.password", v.apply("password"))
           //.put("hibernate.show_sql", "true")
             .build();
     }
