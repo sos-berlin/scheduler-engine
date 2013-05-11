@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.common.time
 
-import org.joda.time.Duration.{millis, standardSeconds, standardDays}
+import org.joda.time.Duration.{millis, standardSeconds, standardHours, standardDays}
 import org.joda.time._
 
 object ScalaJoda {
   implicit class DurationRichInt(val delegate: Int) extends AnyVal {
     final def ms = millis(delegate)
     final def s = standardSeconds(delegate)
-    final def hours = standardSeconds(delegate)
+    final def hours = standardHours(delegate)
     final def days = standardDays(delegate)
     final def *(o: Duration) = millis(delegate * o.getMillis)
   }
@@ -15,9 +15,14 @@ object ScalaJoda {
   implicit class DurationRichLong(val delegate: Long) extends AnyVal {
     final def ms = millis(delegate)
     final def s = standardSeconds(delegate)
-    final def hours = standardSeconds(delegate)
+    final def hours = standardHours(delegate)
     final def days = standardDays(delegate)
     final def *(o: Duration) = millis(delegate * o.getMillis)
+  }
+
+  implicit class RichDuration(val delegate: Duration) extends AnyVal {
+    def +(o: Duration) = delegate plus o
+    def -(o: Duration) = delegate minus o
   }
 
   implicit class RichInstant(val delegate: Instant) extends AnyVal {
@@ -29,6 +34,7 @@ object ScalaJoda {
   implicit class RichDateTime(val delegate: DateTime) extends AnyVal {
     def +(o: Duration) = delegate plus o
     def -(o: Duration) = delegate minus o
+    def -(o: DateTime) = new Duration(o, delegate)
   }
 
   implicit class RichLocalTime(val delegate: LocalTime) extends AnyVal {
