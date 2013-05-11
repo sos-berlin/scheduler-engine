@@ -56,4 +56,20 @@ final class TaskCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.OrderC order__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = params__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params__native(long cppReference);
+
+
 }

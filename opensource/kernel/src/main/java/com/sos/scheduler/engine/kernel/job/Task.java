@@ -36,7 +36,11 @@ public final class Task implements UnmodifiableTask, Sister, EventSource {
 		return cppProxy.order().getSister();
 	}
 
-	@Override public TaskId getId() {
+    @Override public TaskId getId() {
 		return new TaskId( cppProxy.id() );
 	}
+
+    @Override public String parameterValue(String name) {
+        return cppProxy.params().get_string(name);
+    }
 }

@@ -66,10 +66,28 @@ static jobject JNICALL order(JNIEnv* jenv, jobject, jlong cppReference)
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL params(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Task* o_ = has_proxy< ::sos::scheduler::Task >::of_cpp_reference(cppReference,"::sos::scheduler::Task::params()");
+        return Has_proxy::jobject_of(o_->params());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
     { (char*)"id__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::id },
     { (char*)"job__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job },
-    { (char*)"order__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/OrderC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order }
+    { (char*)"order__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/OrderC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order },
+    { (char*)"params__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::params }
 };
 
 namespace zschimmer { namespace javabridge { 
@@ -77,7 +95,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Task >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Task >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 3);
+        int ret = env->RegisterNatives(*cls, native_methods, 4);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

@@ -10,4 +10,5 @@ public interface UnmodifiableTask extends EventSource {
 	TaskId getId();
     UnmodifiableJob getJob();
     UnmodifiableOrder getOrderOrNull();
+    String parameterValue(String name);
 }
