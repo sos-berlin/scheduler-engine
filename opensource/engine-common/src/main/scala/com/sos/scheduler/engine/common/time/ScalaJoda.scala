@@ -23,6 +23,7 @@ object ScalaJoda {
   implicit class RichDuration(val delegate: Duration) extends AnyVal {
     def +(o: Duration) = delegate plus o
     def -(o: Duration) = delegate minus o
+    def toScalaDuration = scala.concurrent.duration.Duration(delegate.getMillis, scala.concurrent.duration.MILLISECONDS)
   }
 
   implicit class RichInstant(val delegate: Instant) extends AnyVal {
