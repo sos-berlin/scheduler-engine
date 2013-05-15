@@ -1,0 +1,6 @@
+<job order="false">
+    <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
+    <run_time>
+        <period absolute_repeat="01:00" begin="00:00" end="24:00"/>
+    </run_time>
+</job>
