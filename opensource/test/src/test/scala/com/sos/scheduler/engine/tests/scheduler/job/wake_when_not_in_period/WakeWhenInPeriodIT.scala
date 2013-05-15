@@ -35,12 +35,15 @@ class WakeWhenInPeriodIT extends ScalaSchedulerTest {
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Vor der Periode: unwirksam
     sleepUntil(a.begin plusMillis 100)
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // In der Periode: wirksam
+    sleepUntil(a.begin plusMillis 2100)
+    scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // In der Periode: wirksam
     sleepUntil(a.end plusMillis 100)
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Nach der Periode: unwirksam
     sleepUntil(b.begin plusMillis 500)
 
-    startTimes should have size(1)
+    startTimes should have size(2)
     assert(a contains startTimes(0))
+    assert(a contains startTimes(1))
   }
 
   @EventHandler def handle(e: TaskStartedEvent) {

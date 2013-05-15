@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js948;
 
+import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,48 +14,49 @@ import static org.junit.Assert.assertEquals;
  */
 public class JS948IT extends SchedulerTest {
 
-    private final Logger logger = LoggerFactory.getLogger(JS948IT.class);
+    private static final JobPath repeatJobPath = JobPath.of("/repeat");
+    private static final JobPath absoluteRepeatJobPath = JobPath.of("/absolute-repeat");
 
-    private int tasksCompleted = 0;
-    private int modifyCommands = 0;
-    private int maxModifyCommands = 0;
-    private String testJob = "";
-    private int maxTasks = 0;
+    private int maxModifyCommands;
+    private int maxTasks;
+    private JobPath jobPath;
+    private int tasksCompleted;
+    private int modifyCommands;
 
-    @Ignore
+    @Test
     public void singleWakeUpRepeat() {
-        init(1,"repeat");
+        init(1, repeatJobPath);
         controller().activateScheduler();
         controller().waitForTermination(shortTimeout);
     }
 
-    @Ignore
+    @Test
     public void multipleWakeUpRepeat() {
-        init(2,"repeat");
+        init(2, repeatJobPath);
         controller().activateScheduler();
         controller().waitForTermination(shortTimeout);
     }
 
     @Test
     public void singleWakeUpAbsoluteRepeat() {
-        init(1,"absolute-repeat");
+        init(1, absoluteRepeatJobPath);
         controller().activateScheduler();
         controller().waitForTermination(shortTimeout);
     }
 
-    @Ignore
+    @Test
     public void multipleWakeUpAbsoluteRepeat() {
-        init(2,"absolute-repeat");
+        init(2, absoluteRepeatJobPath);
         controller().activateScheduler();
         controller().waitForTermination(shortTimeout);
     }
 
-    private void init(int maxModifyCommands, String jobName) {
+    private void init(int maxModifyCommands, JobPath jobPath) {
         this.maxModifyCommands = maxModifyCommands;
-        this.testJob = jobName;
+        this.maxTasks = maxModifyCommands + 1;
+        this.jobPath = jobPath;
         this.tasksCompleted = 0;
         this.modifyCommands = 0;
-        this.maxTasks = maxModifyCommands + 1;
     }
 
     @EventHandler
@@ -69,10 +68,10 @@ public class JS948IT extends SchedulerTest {
         // Erneuter Start durch wake_when_in_period
         if (modifyCommands < maxModifyCommands) {          // absolute_repeat.job wird beim Start des JobScheduler 1x ausgeführt
             modifyCommands++;
-            scheduler().executeXml("<modify_job job=\"/" + testJob + "\" cmd=\"wake_when_in_period\" />");
+            scheduler().executeXml("<modify_job job=\"" + jobPath.string() + "\" cmd=\"wake_when_in_period\" />");
         }
 
-        if(tasksCompleted == maxTasks) {
+        if (tasksCompleted == maxTasks) {
             controller().terminateScheduler();
         }
     }
