@@ -23,6 +23,7 @@
         <module>data</module>
         <module>engine-persistence</module>
 		<module>engine-job-api</module>
+		<module>newkernel</module>
         <module>kernel</module>
         <module>kernel.cppproxy-generated</module>
         <module>kernel-cpp</module>

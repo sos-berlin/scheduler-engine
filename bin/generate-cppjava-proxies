@@ -1,4 +1,4 @@
 #! /bin/bash
 set -e
-mvn --no-snapshot-updates --threads 1C -pl :data,:engine-common,:engine-persistence,:kernel clean install -D test.forkCount=1C
+mvn --no-snapshot-updates --threads 1C -pl :data,:engine-common,:engine-persistence,:kernel,:engine-newkernel clean install -D test.forkCount=1C
 mvn --no-snapshot-updates --threads 1C -pl :kernel.cppproxy-generated,:kernel-cpp generate-sources -D test.forkCount=1C
