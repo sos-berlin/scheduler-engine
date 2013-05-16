@@ -5,9 +5,10 @@ import com.google.common.base.Preconditions.checkState
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
-import com.sos.scheduler.engine.newkernel.utils.{Service, ThreadService, TimedCallHolder}
+import com.sos.scheduler.engine.newkernel.utils.{ThreadService, TimedCallHolder}
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.Charset.defaultCharset
@@ -18,7 +19,7 @@ final class ShellProcess(
     processTerminatedHandler: ProcessTerminatedHandler)
 extends SosAutoCloseable {
 
-  private var file: File = null
+  private var starter: Starter = null
   private var process: Process = null
   private val processTerminatedCheckerCallHolder = new TimedCallHolder(callQueue)
   private var stdLoggers = Seq[ThreadService]()
@@ -28,14 +29,13 @@ extends SosAutoCloseable {
     startProcessTerminatedChecker()
   }
 
-  private def startProcess(script: ShellScript) {
+  private def startProcess(shellScript: ShellScript) {
     checkState(process == null)
-    file = File.createTempFile("sos", ".cmd")
-    Files.write(script.text, file, defaultCharset)
-    val processBuilder = new ProcessBuilder
-    logger debug s"Start script $file"
-    processBuilder.command("c:\\windows\\system32\\cmd.exe", "/C", file.toString)
+    starter = if (isWindows) new WindowsStarter else new UnixStarter
+    val processBuilder = starter.newProcessBuilder(shellScript)
+    logger debug s"Start shell script $shellScript"
     process = processBuilder.start()
+
     stdLoggers = Seq(process.getInputStream, process.getErrorStream) map {
       o => new ThreadService(new InputStreamLogger(o, Charset.defaultCharset, logger.delegate))
     }
@@ -64,19 +64,57 @@ extends SosAutoCloseable {
   }
 
   def close() {
-    try if (process != null) {
-      process.destroy()
-      process.waitFor()
-      for (o <- stdLoggers) {
-        o.thread.join() // Sollte asynchron sein
-        o.close()
-      }
+    try
+      if (process != null) {
+        process.destroy()
+        process.waitFor()
+        for (o <- stdLoggers) {
+          o.thread.join() // Sollte asynchron sein
+          o.close()
+        }
     }
-    finally if (file != null)
-      file.delete()   // Verzögert löschen? (s_deleting_files)
+    finally
+      if (starter != null) starter.close()
   }
 }
 
 object ShellProcess {
   private val logger = Logger[ShellProcess]
+
+  def startShellScript(shellScript: ShellScript) = {
+  }
+
+  trait Starter {
+    def file: File
+    def newProcessBuilder(shellScript: ShellScript): ProcessBuilder
+
+    def close() {
+      if (file != null)
+        file.delete()   // Verzögert löschen? (s_deleting_files)
+    }
+  }
+
+  final class UnixStarter extends Starter {
+    var file: File = null
+
+    def newProcessBuilder(shellScript: ShellScript) = {
+      file = File.createTempFile("sos", ".sh")
+      Files.write(shellScript.text, file, defaultCharset)
+      val processBuilder = new ProcessBuilder
+      processBuilder.command("/bin/sh", "-c", shellScript.toString)
+      processBuilder
+    }
+  }
+
+  final class WindowsStarter extends Starter {
+    var file: File = null
+
+    def newProcessBuilder(shellScript: ShellScript) = {
+      file = File.createTempFile("sos", ".cmd")
+      Files.write(shellScript.text, file, defaultCharset)
+      val processBuilder = new ProcessBuilder
+      processBuilder.command("""c:\windows\system32\cmd.exe""", "/C", shellScript.toString)
+      processBuilder
+    }
+  }
 }

@@ -30,15 +30,15 @@ final class NewJob(
     currentIntervalSelector.close()
   }
 
+  def activate() {
+    currentIntervalSelector.start()
+    startTaskAtNextStartTime()
+  }
+
   def executeCommand(o: SomeJobCommand) {
     o match {
       case StopJobCommand => stop()
     }
-  }
-
-  def activate() {
-    currentIntervalSelector.start()
-    startTaskAtNextStartTime()
   }
 
   def onTaskTerminated(task: ShellTask) {
