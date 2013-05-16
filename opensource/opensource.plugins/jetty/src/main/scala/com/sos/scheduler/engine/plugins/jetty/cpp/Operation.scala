@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
+import Operation._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse
@@ -9,15 +10,13 @@ import javax.annotation.Nullable
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet.{AsyncEvent, AsyncListener}
 
-private[cpp] class Operation(
+private[cpp] final class Operation(
     request: HttpServletRequest,
     response: HttpServletResponse,
     schedulerHttpService: SchedulerHttpService,
     cppProxyRegister: DisposableCppProxyRegister,
     schedulerIsClosed: SchedulerIsClosed
 ) extends SchedulerHttpResponse {
-
-  import Operation._
 
   private val _isClosed = new AtomicBoolean(false)
 
@@ -103,7 +102,7 @@ private[cpp] class Operation(
     }
   }
 
-  final def isClosed = _isClosed.get
+  def isClosed = _isClosed.get
 }
 
 object Operation {

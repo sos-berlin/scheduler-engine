@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.plugin
 
+import PluginConfiguration._
 import com.google.inject.Module
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.XmlUtils._
@@ -7,11 +8,9 @@ import com.sos.scheduler.engine.kernel.plugin.ActivationMode.activateOnStart
 import com.sos.scheduler.engine.kernel.plugin.ActivationMode.dontActivate
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import org.w3c.dom.Element
-import scala.Predef._
 import scala.collection.immutable
-import PluginConfiguration._
 
-private [plugin] case class PluginConfiguration(className: String, activationMode: ActivationMode, configElementOption: Option[Element]) {
+private[plugin] final case class PluginConfiguration(className: String, activationMode: ActivationMode, configElementOption: Option[Element]) {
 
   val pluginClass = {
     val c = Class.forName(className)
@@ -32,8 +31,8 @@ private [plugin] object PluginConfiguration {
   private [plugin] def readXml(configurationXml: String): immutable.Seq[PluginConfiguration] = {
     val root = loadXml(configurationXml).getDocumentElement
     for (pluginsElement <- Option(elementXPathOrNull(root, "config/plugins")).to[immutable.Seq];
-         e <- elementsXPath(pluginsElement, "plugin")) yield
-      read(e)
+         e <- elementsXPath(pluginsElement, "plugin"))
+    yield read(e)
   }
 
   private[plugin] def read(e: Element): PluginConfiguration = {
