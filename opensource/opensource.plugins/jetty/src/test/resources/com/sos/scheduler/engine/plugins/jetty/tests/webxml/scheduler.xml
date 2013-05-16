@@ -3,7 +3,7 @@
     <config>
         <plugins>
             <plugin java_class="com.sos.scheduler.engine.plugins.jetty.JettyPlugin" dont_activate="true">
-                <plugin.config port="44440" tryUntilPort="50000"/>
+                <plugin.config port="TEST"/>
             </plugin>
         </plugins>
     </config>

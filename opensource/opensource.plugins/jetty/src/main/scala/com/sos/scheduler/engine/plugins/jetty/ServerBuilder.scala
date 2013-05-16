@@ -28,7 +28,7 @@ class ServerBuilder(pluginElement: Element, schedulerConfiguration: SchedulerCon
     val loginServiceOption = childElementOption(pluginElement, "loginService") map PluginLoginService.apply
     val contextHandler = jobSchedulerContextHandler(contextPath, loginServiceOption)
     newServer(
-      config.tryUntilPortOption map { until => findFreePort(config.portOption.get until until) } orElse config.portOption,
+      config.portOption,
       config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
       newHandlerCollection(Iterable(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
@@ -139,21 +139,6 @@ object ServerBuilder {
     result.setConstraintMappings(Array(constraintMapping))
     result
   }
-
-  def findFreePort(range: Range): Int =
-    findFreePort(randomInts(range)) getOrElse range.head
-
-  def findFreePort(ports: TraversableOnce[Int]): Option[Int] =
-    ports.toIterator find portIsFree
-
-  private def portIsFree(port: Int) =
-    try {
-      val backlog = 1
-      new ServerSocket(port, backlog).close()
-      true
-    } catch {
-      case _: BindException => false
-    }
 
   private def childElementOption(e: Element, name: String) =
     Option(childElementOrNull(e, name))
