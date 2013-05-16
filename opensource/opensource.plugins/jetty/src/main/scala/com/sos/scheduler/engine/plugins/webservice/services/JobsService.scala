@@ -8,7 +8,7 @@ import javax.ws.rs.core.{MediaType, Response}
 import scala.collection.JavaConversions._
 
 @Path("jobs")
-class JobsService @Inject()(jobSubsystem: JobSubsystem) {
+final class JobsService @Inject private(jobSubsystem: JobSubsystem) {
   @GET
   @Produces(Array(MediaType.TEXT_XML))
   def get() = {

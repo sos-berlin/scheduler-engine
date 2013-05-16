@@ -5,10 +5,11 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import javax.inject.{Named, Inject}
 import org.eclipse.jetty.server.Server
 import org.w3c.dom.Element
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyModule
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @UseGuiceModule(classOf[JettyModule])
-final class JettyPlugin @Inject()(
+final class JettyPlugin @Inject private(
     @Named(Plugin.configurationXMLName) pluginElement: Element,
     schedulerConf: SchedulerConfiguration)
 extends AbstractPlugin {

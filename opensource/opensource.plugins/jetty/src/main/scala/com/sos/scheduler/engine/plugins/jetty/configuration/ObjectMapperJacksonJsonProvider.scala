@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.webservice.configuration
+package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider

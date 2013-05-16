@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import Config._
 import com.sos.scheduler.engine.common.xml.XmlUtils._

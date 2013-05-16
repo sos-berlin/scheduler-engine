@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.webservice.services.bodywriters
+package com.sos.scheduler.engine.plugins.jetty.bodywriters
 
 import com.google.common.base.Charsets.UTF_8
 import java.io.{OutputStreamWriter, OutputStream}
@@ -15,11 +15,13 @@ import scala.xml.Elem
 @Provider
 @Produces(Array(TEXT_XML))
 @Singleton
-class XmlElemWriter extends MessageBodyWriter[Elem] {
+final class XmlElemWriter extends MessageBodyWriter[Elem] {
+
   def isWriteable(c: Class[_], genericType: Type, annotations: Array[Annotation], mediaType: MediaType) =
     c == classOf[Elem] && mediaType == TEXT_XML_TYPE
 
-  def getSize(o: Elem, c: Class[_], genericType: Type, annotations: Array[Annotation], mediaType: MediaType) = -1
+  def getSize(o: Elem, c: Class[_], genericType: Type, annotations: Array[Annotation], mediaType: MediaType) =
+    -1
 
   def writeTo(o: Elem, c: Class[_], genericType: Type, annotations: Array[Annotation], mediaType: MediaType,
       httpHeaders: MultivaluedMap[String, AnyRef], out: OutputStream) {

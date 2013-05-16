@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.jetty.tests.userrealm;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import com.sos.scheduler.engine.plugins.jetty.Config;
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.Sockets;
 import com.sun.jersey.api.client.Client;
@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -5,7 +5,8 @@ import com.google.inject.servlet.GuiceFilter
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.XmlUtils.childElementOrNull
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.jetty.Config._
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config
+import Config._
 import com.sos.scheduler.engine.plugins.jetty.Utils._
 import java.net.{URL, ServerSocket, BindException}
 import javax.servlet.Filter

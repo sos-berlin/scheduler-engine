@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import com.sos.scheduler.engine.plugins.jetty.Config.contextPath
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config
+import Config.contextPath
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
 

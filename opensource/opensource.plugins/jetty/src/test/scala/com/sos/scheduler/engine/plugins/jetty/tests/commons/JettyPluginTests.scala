@@ -2,7 +2,8 @@ package com.sos.scheduler.engine.plugins.jetty.tests.commons
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.plugins.jetty.Config._
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config
+import Config._
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
 import com.sun.jersey.api.client.{Client, WebResource}

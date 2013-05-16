@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.plugins.webservice.configuration
 
 import WebServicesModule._
 import com.google.inject.AbstractModule
-import com.sos.scheduler.engine.plugins.jetty.services.RootService
 import com.sos.scheduler.engine.plugins.webservice.services._
 import scala.collection.immutable
 
@@ -18,6 +17,5 @@ object WebServicesModule {
     classOf[EventsService],
     classOf[FolderService],
     classOf[JobService],
-    classOf[JobsService],
-    classOf[RootService])
+    classOf[JobsService])
 }
