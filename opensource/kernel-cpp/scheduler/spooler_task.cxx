@@ -1557,12 +1557,13 @@ bool Task::do_something()
                                 set_state_direct( s_ending );
                                 loop = true;
                             }
-                            else
-                            {
+                            else {
                                 check_timeout( now );
-                                if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
-                                _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
-                                _next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                                if (!_running_state_reached) {
+                                    if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
+                                    _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
+                                    _next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                                }
                             }
 
                             break;
