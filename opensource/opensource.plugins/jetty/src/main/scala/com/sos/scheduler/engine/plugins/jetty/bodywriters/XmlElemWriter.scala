@@ -29,6 +29,6 @@ final class XmlElemWriter extends MessageBodyWriter[Elem] {
     val w = new OutputStreamWriter(out, encoding)
     w.write("<?xml version='1.0'?>")  // encoding='"+encoding+"'?>")
     w.write(o.toString())
-    w.close()
+    w.flush()
   }
 }
