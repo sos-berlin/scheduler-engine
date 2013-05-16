@@ -44,7 +44,7 @@ public class OrderKey {
     }
 
     @Override public String toString() {
-        return jobChainPath+":"+id;
+        return jobChainPath.string() +":"+ id;
     }
 
     public static OrderKey of(String jobChainPath, String id) {

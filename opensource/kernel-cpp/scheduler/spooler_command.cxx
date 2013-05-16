@@ -570,7 +570,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
 
         // Einstellung der Dokumentation �bernehmen
 
-        xml::Document_ptr doc                        ( embedded_files.get_embedded_file( "doc.en/log_categories.xml" )->_content );
+        xml::Document_ptr doc                        ( java_resource_as_string("com/sos/scheduler/enginedoc/common/log_categories.xml"));
         xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
 
         execute_scheduler_log__append( doc_log_categories_element, "", result );

@@ -47,7 +47,6 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
     public static final Time shortTimeout = Time.of(15);
     private static final String jdbcClass = "org.h2.Driver";
 
-    private final String testName;
     private final List<Runnable> closingRunnables = new ArrayList<Runnable>();
     private final SchedulerEventBus eventBus = getEventBus();
     private final Thread thread = Thread.currentThread();
@@ -68,7 +67,7 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
             CppBinariesDebugMode debugMode) {
         super(testClass.getName());
         logger.debug(testClass.getName());
-        this.testName = testClass.getName();
+        String testName = testClass.getName();
         environment = new Environment(configurationResourcePath, workDirectory(testClass), nameMap, fileTransformer);
         this.expectedErrorLogEventPredicate = expectedErrorLogEventPredicate;
         this.debugMode = debugMode;
@@ -215,8 +214,8 @@ public class TestSchedulerController extends DelegatingSchedulerController imple
 
     /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
     public final EventPipe newEventPipe() {
-        EventPipe result = new EventPipe(shortTimeout);
-        registerEventHandler(result);
+        EventPipe result = new EventPipe(eventBus, shortTimeout.toDuration());
+        registerEventHandler(result);  // unregisterEventHandler() in EventPipe.close()
         return result;
     }
 

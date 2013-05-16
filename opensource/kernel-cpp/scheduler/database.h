@@ -109,7 +109,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     friend struct Read_transaction;
     friend struct Transaction;
 
-    void                        open2                   ( const string& db_name );
+    void                        open2                   ();
     void                        open_history_table      ( Read_transaction* );
     bool                        add_column              ( Transaction*, const string& table_name, const string& column_name, const string add_clause );
     bool                        alter_column_allow_null ( Transaction*, const string& table_name, const string& column_name, const string& type );

@@ -108,7 +108,7 @@ public class JS428Test extends SchedulerTest {
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
         logger.debug("ORDERFINISHED: " + order.getId().asString());
-        resultSet = instance(VariableSet.class).toMap();
+        resultSet = instance(VariableSet.class).toGuavaMap();
         controller().terminateScheduler();
     }
 
@@ -122,7 +122,7 @@ public class JS428Test extends SchedulerTest {
         String step = setForState.string();
         String stepId = step + DELIMITER;
         for (String orderParam : orderParams.getNames()) {
-            String orderParamValue = orderParams.get(orderParam);
+            String orderParamValue = orderParams.apply(orderParam);
             if (orderParam.startsWith(stepId))
                 order.getParameters().put(orderParam.replace(stepId, ""), orderParamValue);
         }
@@ -131,7 +131,7 @@ public class JS428Test extends SchedulerTest {
     private void showOrderParameter(Order order, OrderState state) {
         logger.debug("================== order parameter at state " + state);
         for (String orderParam : orderParams.getNames()) {
-            String orderParamValue = orderParams.get(orderParam);
+            String orderParamValue = orderParams.apply(orderParam);
             logger.debug(orderParam + "=" + orderParamValue);
         }
         logger.debug("==================");

@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.common.time;
 
+import org.joda.time.Duration;
+
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +27,10 @@ public final class Time {
 //    public final String toXml() {
 //        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(new Date(getMillis()));
 //    }
+
+    public Duration toDuration() {
+        return new Duration(getMillis());
+    }
 
     @Override public String toString() {
         return (unit.toMillis(value) / 1000.0) + "s";

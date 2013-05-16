@@ -46,7 +46,8 @@ class JobLoginIT extends ScalaSchedulerTest {
   private def jobPropertyMap(jobPath: JobPath) = {
     val namePrefix = jobPath.getName +"."
     val NamePattern = new Regex(Pattern.quote(namePrefix) +"(.*)")
-    instance[VariableSet].toMap collect { case (NamePattern(propertyName), v) => propertyName -> v }
+    val result = instance[VariableSet] collect { case (NamePattern(propertyName), v) => propertyName -> v }
+    result.toMap
   }
 }
 

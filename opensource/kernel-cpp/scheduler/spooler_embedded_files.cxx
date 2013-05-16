@@ -6,7 +6,7 @@
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/embedded_files.h"
 
-const char file_C__sos_devel_scheduler_scheduler_src_devel_engine_opensource_kernel_cpp_target_dependency_com_sos_scheduler_enginedoc_common_scheduler_xsd[] = 
+const char file_scheduler_xsd[] = 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n"
     "<!-- <xsd:key> nicht verwenden, libxslt kann das nicht: \"Internal error: xmlSchemaAreValuesEqual, failed to compare the values.\" -->\n"
@@ -1793,7 +1793,7 @@ const char file_C__sos_devel_scheduler_scheduler_src_devel_engine_opensource_ker
     "</xsd:schema>\n"
     "";
 
-const char file_C__sos_devel_scheduler_scheduler_src_devel_engine_opensource_kernel_cpp_target_dependency_com_sos_scheduler_enginedoc_common_log_categories_xml[] = 
+const char file_doc_en_log_categories_xml[] = 
     "\xef" "\xbb" "\xbf" "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<?xml-stylesheet href=\"scheduler.xsl\" type=\"text/xsl\"?>\n"
     "\n"
@@ -2043,8 +2043,8 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "C:/sos/devel/scheduler/scheduler.src.devel/engine/opensource/kernel-cpp/target/dependency/com/sos/scheduler/enginedoc/common/scheduler.xsd", file_C__sos_devel_scheduler_scheduler_src_devel_engine_opensource_kernel_cpp_target_dependency_com_sos_scheduler_enginedoc_common_scheduler_xsd, sizeof file_C__sos_devel_scheduler_scheduler_src_devel_engine_opensource_kernel_cpp_target_dependency_com_sos_scheduler_enginedoc_common_scheduler_xsd - 1, 0 },
-    { "C:/sos/devel/scheduler/scheduler.src.devel/engine/opensource/kernel-cpp/target/dependency/com/sos/scheduler/enginedoc/common/log_categories.xml", file_C__sos_devel_scheduler_scheduler_src_devel_engine_opensource_kernel_cpp_target_dependency_com_sos_scheduler_enginedoc_common_log_categories_xml, sizeof file_C__sos_devel_scheduler_scheduler_src_devel_engine_opensource_kernel_cpp_target_dependency_com_sos_scheduler_enginedoc_common_log_categories_xml - 1, 0 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 0 },
+    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 0 },
     { NULL, NULL, 0 }
 };
 

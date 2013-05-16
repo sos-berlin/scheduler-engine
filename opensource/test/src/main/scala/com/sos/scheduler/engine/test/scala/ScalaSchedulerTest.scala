@@ -10,12 +10,13 @@ import scala.reflect.ClassTag
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
-  val configurationPackage = getClass.getPackage
-  val schedulerResourceToFileTransformer: Option[ResourceToFileTransformer] = None
-  val schedulerResourceNameMap: Iterable[(String,String)] = List()
-  val binariesDebugMode: Option[CppBinariesDebugMode] = None
-  val logCategories: Option[String] = None
-  lazy val controller = {
+  protected val configurationPackage = getClass.getPackage
+  protected val schedulerResourceToFileTransformer: Option[ResourceToFileTransformer] = None
+  protected val schedulerResourceNameMap: Iterable[(String,String)] = List()
+  protected val binariesDebugMode: Option[CppBinariesDebugMode] = None
+  protected val arguments: Seq[String] = Nil
+  protected val logCategories: Option[String] = None
+  lazy final val controller = {
     val b = TestSchedulerController.builder(getClass)
         .resourcesPackage(configurationPackage)
         .nameMap(ImmutableMap.copyOf(mapAsJavaMap(schedulerResourceNameMap.toMap)))
@@ -25,8 +26,8 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
     b.build
   }
 
-  def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
-  def injector = scheduler.injector
+  final def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
+  final def injector = scheduler.injector
 
   override protected final def beforeAll(configMap: Map[String, Any]) {
     try {
@@ -51,7 +52,7 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
   protected def checkedBeforeAll(configMap: Map[String, Any]) {
     checkedBeforeAll()
     if (!controller.isStarted)
-      controller.activateScheduler()
+      controller.activateScheduler(arguments: _*)
   }
 
   override def afterAll(configMap: Map[String, Any]) {

@@ -4,6 +4,7 @@
 #include "zschimmer.h"
 #include "message.h"
 #include "log.h"
+#include "z_sockets.h"
 
 
 using namespace std;
@@ -515,6 +516,14 @@ void throw_errno( int errn, const char* text1, const char* text2, const char* te
 void throw_null_pointer_exception()
 {
     throw Null_pointer_exception();
+}
+
+//-------------------------------------------------------------------------------------throw_socket
+
+void throw_socket(int errn, const char* function_name, const Host_and_port& h, const char* insertion)
+{
+    // Host_and_port.as_string() löscht errno. Deshalb sollte Host_and_port.as_string() nicht als (String-)Parameter übergeben werden.
+    throw_socket(errn, function_name, h.as_string().c_str(), insertion);
 }
 
 //-------------------------------------------------------------------------------------throw_socket

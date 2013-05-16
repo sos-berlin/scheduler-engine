@@ -8,6 +8,8 @@ import scala.concurrent.{Await, Future}
 
 object SchedulerThreadFutures {
 
+  // FIXME Bei Scheduler-Ende kann es noch passieren, dass die Future nicht endet. Tests terminieren damit nicht. Eigentlich sollte tryCancel() wirken.
+
   def inSchedulerThread[A](f: => A)(implicit q: SchedulerThreadCallQueue): A =
     if (currentThread == q.thread) f
     else {

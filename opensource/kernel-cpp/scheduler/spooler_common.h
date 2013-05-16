@@ -74,6 +74,7 @@ xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const 
 xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const xml::Element_ptr& obstacle_child);
 inline string                   as_bool_string(bool b) { return b? "true" : "false"; }
 void require_not_attribute(const xml::Element_ptr&, const string& name);
+string java_resource_as_string(const string&);
 
 //-------------------------------------------------------------------------------------------------
 

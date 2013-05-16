@@ -374,7 +374,7 @@ void Connection::connect( const Host_and_port& controller_address )
     Z_LOG2( "socket.connect", "pid=" << pid() << " connect(" << _socket << "," << controller_address << ") ...\n" );
 
     int ret = ::connect( _socket, (sockaddr*)&addr, sizeof addr );
-    if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "connect ", controller_address.as_string().c_str() );
+    if( ret == SOCKET_ERROR ) throw_socket( socket_errno(), "connect", controller_address);
 
     Z_LOG2( "socket.connect", "pid=" << pid() << " connect(" << _socket << "," << controller_address << ") OK\n" );
 

@@ -13,7 +13,7 @@ import static org.junit.Assert.assertThat;
 
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-731'>JS-731</a> */
 public final class JS731IT extends SchedulerTest {
-    @Test public void testOrderParametersNamesAndGet() throws InterruptedException {
+    @Test public void testOrderParametersNamesAndGet() {
         controller().startScheduler();
         String params = "<params><param name='a' value='ä'/><param name='B' value='B'/></params>";
         scheduler().executeXml("<add_order job_chain='a' id='1'>" + params + "</add_order>");
@@ -22,10 +22,10 @@ public final class JS731IT extends SchedulerTest {
 
     @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) {
         UnmodifiableVariableSet v = order.getParameters();
-        assertThat(v.get("a"), equalTo("ä"));
-        assertThat(v.get("A"), equalTo("ä"));
-        assertThat(v.get("b"), equalTo("B"));
-        assertThat(v.get("B"), equalTo("B"));
+        assertThat(v.apply("a"), equalTo("ä"));
+        assertThat(v.apply("A"), equalTo("ä"));
+        assertThat(v.apply("b"), equalTo("B"));
+        assertThat(v.apply("B"), equalTo("B"));
         assertThat(v.getNames(), containsInAnyOrder("a", "B"));
         controller().terminateScheduler();
     }

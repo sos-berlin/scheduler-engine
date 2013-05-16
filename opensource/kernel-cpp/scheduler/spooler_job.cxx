@@ -2749,7 +2749,7 @@ ptr<Task> Standard_job::task_to_start()
             if( _directory_changed )       cause = cause_directory,                             log_lines += "Task starts due to an event for watched directory " + _changed_directories + "\n";
         }
 
-        if (_wake_when_in_period && (_state == s_pending || _state == s_running) && _tasks_count < _max_tasks)
+        if (_wake_when_in_period && (_state == s_pending || _state == s_running) && _running_tasks.size() < _max_tasks)
             cause = cause_wake, log_lines += "Task starts due to wake_when_in_period\n";
 
         if( _start_min_tasks )

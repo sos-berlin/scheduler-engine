@@ -36,7 +36,7 @@ class JavaOptionsIT extends ScalaSchedulerTest {
   private def runJob(j: JobPath) {
     scheduler executeXml <start_job job={j.asString}/>
     eventPipe.nextWithCondition { e: TaskClosedEvent => e.jobPath == j }
-    instance[VariableSet].get(j.getName +".myJavaOption") should equal ("TEST")
+    instance[VariableSet].apply(j.getName +".myJavaOption") should equal ("TEST")
   }
 }
 

@@ -11,4 +11,5 @@ public interface TaskC extends CppProxyWithSister<Task> {
     int id();
     JobC job();
     OrderC order();
+    Variable_setC params();
 }

@@ -18,7 +18,7 @@ class StartTaskTest extends ScalaSchedulerTest {
 
   @EventHandler def handle(e: TaskEndedEvent) {
     if (e.jobPath == JobPath.of("/test-b")) {
-      scheduler.instance[VariableSet].get("test-b") should equal ("TEST-TEST")
+      scheduler.instance[VariableSet].apply("test-b") should equal ("TEST-TEST")
       controller.terminateScheduler()
     }
   }

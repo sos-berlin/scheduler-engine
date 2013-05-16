@@ -102,6 +102,7 @@ struct Module : Object
     ptr<Module_instance>        create_instance             ();
     virtual ptr<Module_instance> create_instance_impl       ();
     bool                        set                         ()                                      { return _set; }
+    bool                        has_api                     () const;
     Kind                        kind                        () const                                { return _kind; }
     void                        set_checked_attribute       ( string*, const xml::Element_ptr&, const string&, bool modify_allowed = false );
     void                        set_priority                ( const string& );

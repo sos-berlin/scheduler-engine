@@ -17,9 +17,9 @@ public final class VariablesIT extends SchedulerTest {
         VariableSet variables = instance(VariableSet.class);
         Collection<String> names = variables.getNames();
         assertThat(names, containsInAnyOrder("Ä", "Bb", "Ccc"));
-        assertThat(variables.get("Ä"), equalTo("ä"));
-        assertThat(variables.get("Bb"), equalTo("bb"));
-        assertThat(variables.get("Ccc"), equalTo("ccc"));
+        assertThat(variables.apply("Ä"), equalTo("ä"));
+        assertThat(variables.apply("Bb"), equalTo("bb"));
+        assertThat(variables.apply("Ccc"), equalTo("ccc"));
         controller().terminateScheduler();
     }
 }

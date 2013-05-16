@@ -60,10 +60,6 @@ object Logger {
   def apply(c: Class[_]) = new Logger(LoggerFactory.getLogger(normalizeClassName(c)))
 
   /** Entfernt das '$' der object-Klasse. */
-  private def normalizeClassName(c: Class[_]) = {
-    val name = c.getName
-    val n = name.length - 1
-    if (name(n) == '$') name.substring(0, n)
-    else name
-  }
+  private def normalizeClassName(c: Class[_]) =
+    c.getName stripSuffix "$"
 }

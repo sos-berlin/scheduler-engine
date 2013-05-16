@@ -67,7 +67,7 @@ abstract class JS856IT(testNamePrefix: String) extends ScalaSchedulerTest {
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPathString} order={orderKey.idString} action="reset"/>
     }
 
-    final def orderParameters = mapAsScalaMap(order.getParameters.toMap).toMap filterKeys { _ != suspendedParameterName }
+    final def orderParameters = order.getParameters.toMap filterKeys { _ != suspendedParameterName }
 
     final def order = instance[OrderSubsystem].order(orderKey)
   }

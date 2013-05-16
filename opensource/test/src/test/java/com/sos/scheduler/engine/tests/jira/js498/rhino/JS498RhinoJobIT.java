@@ -44,7 +44,7 @@ public final class JS498RhinoJobIT extends SchedulerTest {
         for (String jobName : jobNames) {
             controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
         }
-        assertThat(instance(VariableSet.class).get("scheduler_script"), equalTo("*(spooler_init)"));
+        assertThat(instance(VariableSet.class).apply("scheduler_script"), equalTo("*(spooler_init)"));
         controller().waitForTermination(shortTimeout);
         resultMap = getResultMap(resultFile);
         checkScriptOnlyJob();
