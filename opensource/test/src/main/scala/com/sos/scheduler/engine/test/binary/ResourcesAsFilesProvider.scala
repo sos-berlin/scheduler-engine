@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.test.binary
 import com.sos.scheduler.engine.common.system.Files.copyURLToFile
 import com.sos.scheduler.engine.kernel.util.Util.ignore
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
-import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import com.sos.scheduler.engine.test.util.time.WaitForCondition.{waitForCondition, waitFromNowFor}
 import java.io.File
 import org.joda.time.Duration
 import org.joda.time.Duration.{millis, standardSeconds}
@@ -44,8 +44,9 @@ object ResourcesAsFilesProvider {
   private def copyResource(r: Resource, f: File) {
     logger.debug("copyURLToFile("+ r.getURL +", "+ f +")")
     copyURLToFile(r.getURL, f)
-    ignore(f.setLastModified(r.lastModified))
-    assert(resourceSeemsEqualToFile(r, f))
+    val ok = waitFromNowFor(0L to 5000 by 10) { f.setLastModified(r.lastModified) }   // Jemand verzögert das Sperren der Datei? Der Windwos-Virenscanner?
+    assert(ok, s"setLastModified $f")
+    assert(resourceSeemsEqualToFile(r, f), s"Copying resource failed: $f")
   }
 
   private def resourceSeemsEqualToFile(r: Resource, f: File) =
