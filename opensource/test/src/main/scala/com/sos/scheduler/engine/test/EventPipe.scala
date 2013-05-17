@@ -30,10 +30,10 @@ extends EventHandlerAnnotated with SosAutoCloseable {
   def next[E <: Event](implicit c: ClassTag[E]): E =
     nextEvent[E](now() + defaultTimeout, everyEvent, c)
 
-  def nextWithCondition[E <: Event](condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]) =
+  def nextWithCondition[E <: Event](condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]): E =
     nextEvent[E](now() + defaultTimeout, condition, c)
 
-  def nextWithTimeoutAndCondition[E <: Event](timeout: Duration)(condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]) =
+  def nextWithTimeoutAndCondition[E <: Event](timeout: Duration)(condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]): E =
     nextEvent[E](now() + timeout, condition, c)
 
   private def nextEvent[E <: Event](until: Instant, predicate: E => Boolean, classTag: ClassTag[E]): E =
@@ -44,7 +44,7 @@ extends EventHandlerAnnotated with SosAutoCloseable {
     tryPoll(until - now()) match {
       case None => throw new TimeoutException(s"Expected Event '$expectedName' has not arrived until $until")
       case Some(e: TerminatedEvent) => error(s"Expected event '$expectedName' has not arrived before ${classOf[TerminatedEvent].getName} has arrived")
-      case Some(e: E) if (expectedEventClass isAssignableFrom e.getClass) && predicate(e) => e
+      case Some(e: E) if (expectedEventClass isAssignableFrom e.getClass) && evalPredicateIfDefined(predicate, e) => e
       case _ => nextEvent[E](until, predicate, expectedEventClass)
     }
   }
@@ -60,4 +60,9 @@ object EventPipe {
   private val everyEvent = (e: Event) => true
 
   class TimeoutException(override val getMessage: String) extends RuntimeException
+
+  private def evalPredicateIfDefined[E <: Event](o: E => Boolean, e: E) = o match {
+    case o: PartialFunction[Event, Boolean] => (o isDefinedAt e) && o(e)
+    case _ => o(e)
+  }
 }
