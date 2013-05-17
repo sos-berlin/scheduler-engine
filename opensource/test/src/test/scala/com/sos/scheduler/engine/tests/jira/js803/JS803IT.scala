@@ -52,15 +52,15 @@ final class JS803IT extends SchedulerTest {
   }
 
   @EventHandler def handleEvent(e: OrderTouchedEvent) {
-    assertTrue("Order "+e.getKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
+    assertTrue("Order "+e.orderKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
   }
 
   @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder) {
-    assertThat("Wrong end state of order "+event.getKey, order.getState, equalTo(expectedEndState))
+    assertThat("Wrong end state of order "+event.orderKey, order.getState, equalTo(expectedEndState))
   }
 
   @EventHandler def handleEvent(event: OrderFinishedEvent) {
-    terminatedOrders.add(event.getKey.getId)
+    terminatedOrders.add(event.orderKey.getId)
     if (terminatedOrders == expectedOrders)  controller.terminateScheduler()
   }
 }

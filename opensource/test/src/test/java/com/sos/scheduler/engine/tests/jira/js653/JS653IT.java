@@ -52,11 +52,11 @@ public final class JS653IT extends SchedulerTest {
     }
 
     @HotEventHandler public void handleEvent(OrderTouchedEvent e, UnmodifiableOrder o) {
-        orderStarts.add(new OrderIdAndState(e.getKey().getId(), o.getState()));
+        orderStarts.add(new OrderIdAndState(e.orderKey().getId(), o.getState()));
     }
 
     @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder o) {
-        OrderKeyAndState a = new OrderKeyAndState(e.getKey(), o.getState());
+        OrderKeyAndState a = new OrderKeyAndState(e.orderKey(), o.getState());
         orderEnds.add(a);
         lastActivity = currentTimeMillis();
     }

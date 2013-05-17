@@ -72,7 +72,7 @@ public final class JS644v3IT extends SchedulerTest {
     }
 
     @EventHandler public void handleEvent(OrderFinishedEvent e) throws InterruptedException {
-        (e.getKey().getJobChainPath().equals(lowerCaseJobChainPath)? lowerCaseGate : upperCaseGate).put(true);
+        (e.orderKey().getJobChainPath().equals(lowerCaseJobChainPath)? lowerCaseGate : upperCaseGate).put(true);
     }
 
     @EventHandler public void handleEvent(TerminatedEvent e) throws InterruptedException {

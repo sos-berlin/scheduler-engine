@@ -181,7 +181,11 @@ import scala.sys.error
 
   private def newXPathFactory(): XPathFactory = {
     try XPathFactory.newInstance
-    catch { case e: NullPointerException => workaroundNewXPathFactory(e) }
+    catch {
+      case e: NullPointerException =>
+        // JSSIXFOUR-8: Passiert als Dienst unter Windows 2008 mit JDK 1.7.0_09 (64bit?).
+        workaroundNewXPathFactory(e)
+    }
   }
 
   private def workaroundNewXPathFactory(e: NullPointerException): XPathFactory = {

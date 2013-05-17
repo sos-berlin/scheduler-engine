@@ -23,7 +23,7 @@ final class JS832IT extends ScalaSchedulerTest {
     val firstLines = new mutable.HashSet[String]
     for (i <- 1 to 3) {
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPathString} order={orderKey.idString} at="now"/>
-      eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == orderKey }
+      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
       val line = firstLine(logFile(orderKey))
       firstLines should not contain (line)    // Erste Zeile hat jedesmal einen neuen Zeitstempel
       firstLines += line

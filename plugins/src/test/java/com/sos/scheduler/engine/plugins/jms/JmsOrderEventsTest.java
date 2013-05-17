@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
 import com.sos.scheduler.engine.data.EventList;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
@@ -34,7 +35,7 @@ public class JmsOrderEventsTest extends JMSConnection {
 //    private static final String providerUrl = "tcp://w2k3.sos:61616";  // in scheduler.xml einstellen
     private static final Logger logger = LoggerFactory.getLogger(JmsOrderEventsTest.class);
     private static final String jobchain = "jmstest";
-    private static final List<String> eventsToListen = asList("OrderTouchedEvent","OrderStateChangedEvent","OrderFinishedEvent");
+    private static final List<String> eventsToListen = asList("OrderTouchedEvent", "OrderStateChangedEvent", "OrderFinishedEvent");
 
     private final CommandBuilder util = new CommandBuilder();
     // Queue for collecting the fired events in the listener thread
@@ -88,6 +89,7 @@ public class JmsOrderEventsTest extends JMSConnection {
 
         private JmsListener() {
             mapper = new ObjectMapper();
+            mapper.registerModule(DefaultScalaModule$.MODULE$);
             mapper.registerSubtypes(EventList.eventClassArray());
         }
 
@@ -111,18 +113,18 @@ public class JmsOrderEventsTest extends JMSConnection {
                 textMessage.acknowledge();
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
                 result = ev.getClass().getSimpleName();
-            } catch (IOException e1) {
+            } catch (IOException e) {
                 String msg = "could not deserialize " + jsonContent;
-                logger.warn(msg);
-            } catch (JMSException e2) {
+                logger.warn(msg, e);
+            } catch (JMSException e) {
                 String msg = "error getting content from JMS.";
                 logger.error(msg);
-                throw new SchedulerException(msg,e2);
+                throw new SchedulerException(msg, e);
             } finally {
                 try {
 					resultQueue.put(result);
 				} catch (InterruptedException e) {
-					logger.error(e.getMessage());
+					logger.error(e.toString(), e);
 				}
             }
         }

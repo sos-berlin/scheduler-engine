@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
 import com.google.common.collect.ImmutableSet;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
@@ -56,6 +57,7 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
 		logger.info( getClass().getName() + ": providerUrl=" + providerUrl);
 		prefixLog.info("Providing messages to " + providerUrl);
         mapper = new ObjectMapper();
+        mapper.registerModule(DefaultScalaModule$.MODULE$);
         registerDefaultEventPackages();
 	}
     

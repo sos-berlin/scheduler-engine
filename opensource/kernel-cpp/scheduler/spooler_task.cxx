@@ -1444,14 +1444,15 @@ bool Task::do_something()
                                 count_step();
                                 set_state_direct( s_ending );
                                 loop = true;
-                            } else {
                                 check_timeout( now );
-                                wake_when_longer_than();
-                                _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
-                                if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
-                                //_next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
-                                if (!_timeout.is_eternal()) 
-                                    _call_register.call_at<Task_timeout_call>(now + _timeout);
+                                if (!_running_state_reached) {
+                                    _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
+                                    wake_when_longer_than();
+                                    if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
+                                    //_next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                                    if (!_timeout.is_eternal()) 
+                                        _call_register.call_at<Task_timeout_call>(now + _timeout);
+                                }
                             }
                             break;
 
