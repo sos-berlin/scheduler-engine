@@ -37,8 +37,8 @@ class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with 
     controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(repeatOrderKey)
     repeatOrder.setTitle(alteredTitle)
     repeatOrder.getTitle should equal (alteredTitle)
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
+    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
+    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
     executeShowOrder().toString should include ("<source")
     simulateAbort()
   }
@@ -61,9 +61,9 @@ class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with 
     val eventPipe = controller.newEventPipe()
     controller.activateScheduler()
     repeatOrder.getTitle should equal (alteredTitle)
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.getKey == repeatOrderKey }
+    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
+    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
+    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
     executeShowOrder().toString should include ("<source")   // JS-956: Nach Wiederherstellung des Auftrags aus der Datenbank wird weiterhin der Text der Konfigurationsdatei geliefert
     controller.terminateScheduler()
   }

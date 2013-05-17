@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
+import EventsService._
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.AbstractIterator
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventBus, EventHandler}
@@ -10,16 +13,15 @@ import javax.inject.{Inject, Singleton}
 import javax.ws.rs._
 import javax.ws.rs.core.{StreamingOutput, MediaType, Response}
 import org.slf4j.LoggerFactory
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 @Path("TESTONLY/events")
 @Singleton
-class EventsService @Inject()(eventBus: EventBus){
-  import EventsService._
+final class EventsService @Inject private(eventBus: EventBus){
 
   private val objectMapper = {
     val result = new ObjectMapper()
+    result.registerModule(DefaultScalaModule)
     result.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false)
     result
   }

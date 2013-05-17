@@ -41,7 +41,7 @@ public class JS801IT extends SchedulerTest {
     }
 
     @EventHandler public void handleEvent(OrderFinishedEvent e) {
-        if (e.getKey().getId().equals(orderId))
+        if (e.orderKey().getId().equals(orderId))
             controller().terminateScheduler();
     }
 }

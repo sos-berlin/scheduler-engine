@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
 import com.sos.scheduler.engine.data.EventList;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
@@ -39,6 +40,7 @@ public class JMSTaskObserver extends JMSConnection implements MessageListener, T
 		setMessageListener(this);
 
         mapper = new ObjectMapper();
+        mapper.registerModule(DefaultScalaModule$.MODULE$);
         mapper.registerSubtypes(EventList.eventClassArray());
 
 		listener.clear();

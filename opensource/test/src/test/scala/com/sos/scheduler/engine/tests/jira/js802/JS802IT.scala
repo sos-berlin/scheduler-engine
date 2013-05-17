@@ -39,9 +39,9 @@ class JS802IT extends SchedulerTest {
     }
 
     @EventHandler def handleEvent(event: OrderTouchedEvent) {
-        if (event.getKey == orderKey) {
-            assertTrue("Order "+event.getKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
-            collector.add(event.getKey)
+        if (event.orderKey == orderKey) {
+            assertTrue("Order "+event.orderKey+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
+            collector.add(event.orderKey)
         }
     }
 

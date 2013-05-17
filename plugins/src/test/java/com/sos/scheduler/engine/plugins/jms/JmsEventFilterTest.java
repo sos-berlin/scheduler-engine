@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -45,6 +46,8 @@ public class JmsEventFilterTest extends JMSConnection {
 
     public JmsEventFilterTest() throws Exception {
     	super(providerUrl,eventsToListen);
+        mapper.registerModule(DefaultScalaModule$.MODULE$);
+        mapper.registerSubtypes(OrderTouchedEvent.class);
     	setMessageListener( new MyListener() );
     }
 
@@ -86,10 +89,9 @@ public class JmsEventFilterTest extends JMSConnection {
                 showMessageHeader(textMessage);
                 jsonContent = textMessage.getText();
                 textMessage.acknowledge();
-                mapper.registerSubtypes(OrderTouchedEvent.class);
                 OrderTouchedEvent ev = mapper.readValue(jsonContent, OrderTouchedEvent.class);
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                result = ev.getKey().getId().toString();
+                result = ev.orderKey().getId().string();
             } catch (IOException e1) {
                 String msg = "could not deserialize " + jsonContent;
                 logger.error(msg);
