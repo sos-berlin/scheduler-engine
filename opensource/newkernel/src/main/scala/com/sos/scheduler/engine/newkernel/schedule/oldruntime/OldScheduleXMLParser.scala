@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.newkernel.schedule.oldruntime
 
+import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.newkernel.schedule.{Weekday, Schedule}
-import com.sos.scheduler.engine.newkernel.utils.ScalaXMLEventReader
 import javax.xml.stream.XMLEventReader
 import org.joda.time.DateTimeZone
 

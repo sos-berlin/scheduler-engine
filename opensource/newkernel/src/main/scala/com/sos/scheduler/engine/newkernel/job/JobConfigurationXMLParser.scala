@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.newkernel.job
 
+import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.newkernel.schedule.oldruntime.OldScheduleXMLParser
-import com.sos.scheduler.engine.newkernel.utils.ScalaXMLEventReader
 import java.io.StringReader
 import javax.xml.stream.events.{EndDocument, StartDocument}
 import javax.xml.stream.{XMLInputFactory, XMLEventReader}

@@ -1,13 +1,12 @@
-package com.sos.scheduler.engine.newkernel.utils
+package com.sos.scheduler.engine.common.scalautil.xml
 
-import ScalaXMLEventReader._
 import ScalaStax.RichStartElement
-import javax.xml.stream.{Location, XMLEventReader}
+import ScalaXMLEventReader._
 import javax.xml.stream.events._
+import javax.xml.stream.{Location, XMLEventReader}
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 import scala.sys.error
-import scala.collection.mutable
 
 final class ScalaXMLEventReader(eventReader: XMLEventReader) {
   def currentEvent = eventReader.peek
@@ -109,7 +108,8 @@ final class ScalaXMLEventReader(eventReader: XMLEventReader) {
 }
 
 object ScalaXMLEventReader {
-  private def attributeToPair(a: Attribute) = a.getName.toString -> a.getValue
+  private def attributeToPair(a: Attribute) =
+    a.getName.toString -> a.getValue
 
   private def locationStringOf(o: Location) =
     (Option(o.getSystemId) ++ Option(o.getPublicId)).flatten.mkString(":") + ":" + o.getLineNumber +":" + o.getColumnNumber

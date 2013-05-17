@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.newkernel.utils
+package com.sos.scheduler.engine.common.scalautil.xml
 
 import javax.xml.stream.events.{Attribute, StartElement}
 import scala.collection.JavaConversions._

@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.newkernel.schedule.oldruntime
 
 import SchedulePeriodXMLParser._
-import com.sos.scheduler.engine.newkernel.utils.ScalaXMLEventReader
+import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
+import com.sos.scheduler.engine.newkernel.schedule.TimeOfDay
 import com.sos.scheduler.engine.newkernel.utils.StringConverters._
 import javax.xml.stream.XMLEventReader
 import org.joda.time.Duration.standardSeconds
 import scala.collection.mutable
-import com.sos.scheduler.engine.newkernel.schedule.TimeOfDay
 
 class SchedulePeriodXMLParser(eventReader: XMLEventReader) {
   private val eventIterator = new ScalaXMLEventReader(eventReader)
