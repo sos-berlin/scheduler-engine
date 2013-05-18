@@ -87,7 +87,6 @@ libzschimmer_objects = \
  charset.o\
  charset_messages.o\
  directory_lister.o\
- embedded_files.o\
  file.o\
  file_path.o\
  md5.o\

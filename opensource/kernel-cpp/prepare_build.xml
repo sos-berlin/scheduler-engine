@@ -24,13 +24,11 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
 	<property name="dependency.dir" value="${base}/target/dependency" />
 	<property name="doc.dir" value="${dependency.dir}/com/sos/scheduler/enginedoc/common" />
 
-  <property name="scheduler.schema" value="scheduler.xsd" />
-  <property name="output.e" value="spooler_embedded_files.cxx" />
   <property name="output.r" value="register_data.xml"/>
 
   <target name="all"
           description="generierung von c++ sourcen"
-          depends="prepare, embedded.files, messages.to.cpp"
+          depends="prepare, messages.to.cpp"
   >
     <echo>DONE!</echo>
   </target>
@@ -46,23 +44,6 @@ scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_ca
 	    </fileset>
 		</unzip>
 
-  </target>
-
-  <target name="embedded.files"
-          description="generates scheduler_embedded_files.cxx"
-          depends="prepare"
-  >
-
-    <echo message="generating ${output.e} ..." />
-    <exec executable="perl" dir="${work.dir}" output="${generated.dir}/${output.e}">
-      <arg value="${perl.embeddedfiles}" />
-      <arg value="-trim" />
-      <arg value="${doc.dir}/scheduler.xsd" />
-      <arg value="${doc.dir}/log_categories.xml" />
-    </exec>
-    
-    <!-- copy spooler_embedded_files.cxx to scheduler -->
-    <macro_copy sourcefile="${generated.dir}/${output.e}" targetfile="${work.dir}/${output.e}" />
   </target>
 
   <target name="messages.to.cpp"

@@ -10,7 +10,6 @@
 #include "../file/anyfile.h"
 #include "../kram/licence.h"
 #include "../zschimmer/z_sql.h"
-#include "../zschimmer/embedded_files.h"
 #include "../zschimmer/z_gzip.h"
 
 // F�r tempor�re Datei:

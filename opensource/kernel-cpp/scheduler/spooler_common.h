@@ -4,9 +4,6 @@
 #define __SPOOLER_COMMON_H
 
 
-#include "../zschimmer/embedded_files.h"
-
-
 namespace sos {
 namespace scheduler {
 
@@ -26,7 +23,6 @@ namespace time
 
 //-------------------------------------------------------------------------------------------------
 
-extern const Embedded_files            embedded_files;             // spooler_embedded_files.cxx
 extern const string reason_start_element_name;
 extern const string obstacle_element_name;
 

@@ -7,8 +7,6 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration Name="Release|Win32" OutputDirectory="../bin" IntermediateDirectory="Release" ConfigurationType="1" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops" UseOfMFC="0" ATLMinimizesCRunTimeLibraryUsage="false" CharacterSet="2">
-			<Tool Name="VCPreBuildEventTool" CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx&#x0D;&#x0A;&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"/>
-			<Tool Name="VCCustomBuildTool" CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;&#x0D;&#x0A;copy scheduler.xsd doc.en\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc.en&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;" AdditionalDependencies="" Outputs=""/>
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TypeLibraryName=".\Release/spooler.tlb" HeaderFileName=""/>
@@ -26,8 +24,6 @@
 			<Tool Name="VCPostBuildEventTool"/>
 		</Configuration>
 		<Configuration Name="Debug|Win32" OutputDirectory="../bind" IntermediateDirectory="Debug" ConfigurationType="2" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops" UseOfMFC="0" ATLMinimizesCRunTimeLibraryUsage="false" CharacterSet="2">
-			<Tool Name="VCPreBuildEventTool" CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx&#x0D;&#x0A;&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"/>
-			<Tool Name="VCCustomBuildTool" CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;&#x0D;&#x0A;copy scheduler.xsd doc.en\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc.en&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;" AdditionalDependencies="" Outputs="doc\register_data.xml"/>
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TypeLibraryName=".\Debug/spooler.tlb" HeaderFileName=""/>
@@ -111,28 +107,6 @@
 			<File RelativePath=".\spooler_dll.cxx">
 			</File>
 			<File RelativePath=".\spooler_dll_java.cxx">
-			</File>
-			<File RelativePath=".\spooler_embedded_files.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration Name="Release-DLL|Win32">
-					<Tool UsePrecompiledHeader="0" Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File RelativePath=".\spooler_embedded_files_z.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration Name="Release-DLL|Win32">
-					<Tool UsePrecompiledHeader="0" Name="VCCLCompilerTool"/>
-				</FileConfiguration>
 			</File>
 			<File RelativePath=".\spooler_event.cxx">
 			</File>

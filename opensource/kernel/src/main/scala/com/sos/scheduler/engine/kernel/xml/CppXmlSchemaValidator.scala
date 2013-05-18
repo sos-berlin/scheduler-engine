@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.xml
 
+import CppXmlSchemaValidator._
 import com.google.common.io.Resources._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.net.URL
@@ -10,7 +11,6 @@ import org.w3c.dom.Document
 
 @ForCpp
 final class CppXmlSchemaValidator @ForCpp()(urlString: String) {
-  import CppXmlSchemaValidator._
   private val url = if (urlString.isEmpty) schedulerXmlSchemaUrl else new URL(urlString)
   private val validator = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(url).newValidator
 

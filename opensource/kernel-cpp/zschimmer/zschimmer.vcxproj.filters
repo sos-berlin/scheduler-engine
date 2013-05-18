@@ -56,9 +56,6 @@
     <ClCompile Include="directory_lister.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
-    <ClCompile Include="embedded_files.cxx">
-      <Filter>Quellcodedateien</Filter>
-    </ClCompile>
     <ClCompile Include="file.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>

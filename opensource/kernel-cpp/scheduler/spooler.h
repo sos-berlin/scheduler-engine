@@ -76,7 +76,6 @@ using time::Duration;
 extern const char               version_string[];
 extern const string             temporary_process_class_name;
 extern volatile int             ctrl_c_pressed;
-extern const string             xml_schema_path;            // "scheduler.xsd"
 extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;
 const int                       max_memory_file_size          = 10*1024*1024;   // F�r Dateien, die komplett in den Speicher geladen werden
