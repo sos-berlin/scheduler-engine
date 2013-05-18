@@ -3052,14 +3052,33 @@ void Spooler::suspend_machine()
 //-----------------------------------------------------------------------------Spooler::execute_xml
 
 string Spooler::execute_xml(const string& xml_command) {
-    Command_processor cp ( _spooler, Security::seclev_all );
+    return execute_xml_with_security_level(xml_command, Security::seclev_all);
+}
+
+//----------------------------------------------------------Spooler::execute_xml_with_security_level
+
+string Spooler::execute_xml_with_security_level(const string& xml_command, const string& security_level) {
+   Command_processor cp ( _spooler, Security::as_level(security_level));
+    return cp.execute(xml_command);
+}
+
+//----------------------------------------------------------Spooler::execute_xml_with_security_level
+
+string Spooler::execute_xml_with_security_level(const string& xml_command, Security::Level security_level) {
+   Command_processor cp ( _spooler, security_level);
     return cp.execute(xml_command);
 }
 
 //-----------------------------------------------------------------------Spooler::java_execute_http
 
 http::Java_response* Spooler::java_execute_http(const SchedulerHttpRequestJ& requestJ, const SchedulerHttpResponseJ& responseJ) {
-    Command_processor command_processor ( this, Security::seclev_all);
+   return java_execute_http_with_security_level(requestJ, responseJ, as_string(Security::seclev_all) );
+}
+
+//-----------------------------------------------------------------------Spooler::java_execute_http
+
+http::Java_response* Spooler::java_execute_http_with_security_level(const SchedulerHttpRequestJ& requestJ, const SchedulerHttpResponseJ& responseJ, const string& security_level) {
+    Command_processor command_processor ( this, Security::as_level(security_level));
     ptr<http::Request> request = http::new_java_request(requestJ);
     ptr<http::Java_response> response = Z_NEW(http::Java_response(request, responseJ));
     command_processor.execute_http(request, response, (Http_file_directory*)NULL);

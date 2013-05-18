@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.kernel.async.{SchedulerThreadCallQueue, CppCall}
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
-import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.sos.scheduler.engine.kernel.cppproxy.{HttpResponseC, SpoolerC}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.log.CppLogger
@@ -38,6 +38,8 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
+import com.sos.scheduler.engine.kernel.http.{SchedulerHttpResponse, SchedulerHttpRequest}
+import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 
 @ForCpp
 @Singleton
@@ -171,6 +173,9 @@ with HasInjector {
   /** execute_xml() der C++-Klasse Spooler */
   def uncheckedExecuteXml(xml: String): String =
     inSchedulerThread { cppProxy.execute_xml(xml) }
+
+  def uncheckedExecuteXml(xml: String, securityLevel: SchedulerSecurityLevel) =
+    cppProxy.execute_xml_with_security_level(xml, securityLevel.cppName)
 
   //    /** @param text Sollte auf \n enden */
   //    public void writeToSchedulerLog(LogCategory category, String text) {

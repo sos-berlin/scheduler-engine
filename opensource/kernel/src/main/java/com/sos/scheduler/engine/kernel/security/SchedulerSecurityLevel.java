@@ -1,24 +1,19 @@
 package com.sos.scheduler.engine.kernel.security;
 
 public enum SchedulerSecurityLevel {
-    debug(-1, "debug"),
-    info(0, "info"),
-    warn(1, "warn"),
-    error(2, "error");
+    none("none"),
+    signal("signal"),
+    info("info"),
+    no_add("no_add"),
+    all("all");
 
-    private final int number;
     private final String cppName;
 
-    SchedulerSecurityLevel(int n, String cppName) {
-        this.number = n;
+    SchedulerSecurityLevel(String cppName) {
         this.cppName = cppName;
     }
 
-    public int getNumber() {
-        return number;
-    }
-
-    String getCppName() {
+    public String cppName() {
         return cppName;
     }
 }

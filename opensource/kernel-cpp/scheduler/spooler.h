@@ -421,7 +421,10 @@ struct Spooler : Object,
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
     string                      execute_xml                 (const string& xml);
+    string                      execute_xml_with_security_level (const string& xml, const string& security_level);
+    string                      execute_xml_with_security_level (const string& xml, Security::Level security_level);
     http::Java_response*        java_execute_http           (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&);
+    http::Java_response*        java_execute_http_with_security_level (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&, const string& security_level);
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
