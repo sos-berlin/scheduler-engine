@@ -39,7 +39,8 @@ object SchemaIT {
     try f(controller)
     finally if (controller.isStarted) {
       controller.terminateScheduler()
-      controller.waitForTermination(Time.eternal)
+      try controller.waitForTermination(Time.eternal)
+      finally controller.close()
     }
   }
 }
