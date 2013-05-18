@@ -1,17 +1,20 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.Reader
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import com.fasterxml.jackson.databind.ObjectMapper
 
 @RunWith(classOf[JUnitRunner])
 final class FolderServiceIT extends ScalaSchedulerTest {
-  override val configurationPackage = classOf[JettyPlugin].getPackage
+
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
+
   private lazy val resource = javaResource(injector).path("folder")
   private val objectMapper = new ObjectMapper
 

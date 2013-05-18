@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.tests.excluded.js707;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.Thread.sleep;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import com.sos.scheduler.engine.main.CppBinary;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,13 +13,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import com.sos.scheduler.engine.main.CppBinary;
-import com.sos.scheduler.engine.test.SchedulerTest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 /** JS-707 "If JS terminates caused by an exception a potentially existent backup scheduler should do the scheduling". */
 public class JS707Test extends SchedulerTest {
@@ -32,7 +32,7 @@ public class JS707Test extends SchedulerTest {
     @Ignore     // Test ist nur ein Entwurf
     @Test public void test() throws Exception {
         database.start();
-        controller().activateScheduler("-e", "-id="+schedulerId, "-exclusive", "-tcp-port="+portNumber, "-db="+database.hostwarePath());
+        controller().activateScheduler(asList("-e", "-id="+schedulerId, "-exclusive", "-tcp-port="+portNumber, "-db="+database.hostwarePath()));
         Process backupScheduler = startBackupScheduler();
         Thread stdoutThread = new Thread(new StreamLogger(backupScheduler.getInputStream(), "backup scheduler stdout"));
         Thread stderrThread = new Thread(new StreamLogger(backupScheduler.getErrorStream(), "backup scheduler stderr"));

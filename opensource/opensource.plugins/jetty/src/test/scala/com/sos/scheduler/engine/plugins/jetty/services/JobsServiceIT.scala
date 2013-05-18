@@ -1,16 +1,19 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
-import javax.ws.rs.core.MediaType._
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 final class JobsServiceIT extends ScalaSchedulerTest {
-  override val configurationPackage = classOf[JettyPlugin].getPackage
+
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
+
   private lazy val jobsResource = javaResource(injector).path("jobs")
 
   test("Read job list") {

@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertTrue;
 
 public class BackupLogfileIT extends SchedulerTest {
@@ -60,7 +61,7 @@ public class BackupLogfileIT extends SchedulerTest {
         File expectedFile = new File(logDir,expectedName);
         controller().prepare();
         Files.touch(logFile);
-        controller().activateScheduler("-log-dir=" + logDir.getAbsolutePath(), "-log=" + logFile.getAbsolutePath());
+        controller().activateScheduler(asList("-log-dir=" + logDir.getAbsolutePath(), "-log=" + logFile.getAbsolutePath()));
         controller().scheduler().executeXml(cmd.startJobImmediately("test").getCommand());
         controller().waitForTermination(timeout);
         assertTrue("Backup file " + expectedName + " does not exist in " + logDir.getAbsolutePath(),expectedFile.exists());

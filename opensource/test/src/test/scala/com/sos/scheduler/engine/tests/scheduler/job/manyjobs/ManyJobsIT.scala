@@ -16,20 +16,20 @@ import scala.math._
 import scala.sys.error
 import scala.util.Try
 import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.test.{DatabaseConfiguration, TestConfiguration}
 
 @RunWith(classOf[JUnitRunner])
 class ManyJobsIT extends ScalaSchedulerTest {
 
-  override val binariesDebugMode = if (n > 0) Some(CppBinariesDebugMode.release) else None
+  override lazy val testConfiguration = TestConfiguration(
+    database = DatabaseConfiguration(use = true),   // Nur damit die History-Dateien nicht die File-handles aufbrauchen.
+    logCategories = "java.stackTrace-",   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
+    binariesDebugMode = if (n > 0) Some(CppBinariesDebugMode.release) else None)
+
   private var activatedJobCount = 0
   private var taskCount = 0
   private lazy val jobs = 1 to n map JobDefinition
   private lazy val jobStatistics = mutable.HashMap[JobPath, JobStatistics]() ++ (jobs map { j => j.path -> JobStatistics() })
-
-  override def checkedBeforeAll() {
-    controller.useDatabase()    // Damit die History-Dateien nicht die File-handles aufbrauchen.
-    controller.setLogCategories("java.stackTrace-")
-  }
 
   if (n > 0) {
     test(s"Adding $n jobs") {

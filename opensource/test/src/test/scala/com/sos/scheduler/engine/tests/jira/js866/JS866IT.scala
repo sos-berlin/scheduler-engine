@@ -11,11 +11,13 @@ import com.sos.scheduler.engine.test.util.Sockets._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import com.sos.scheduler.engine.test.TestConfiguration
 
 @RunWith(classOf[JUnitRunner])
 final class JS866IT extends FunSuite with ScalaSchedulerTest {
 
-  protected override val arguments = List("-tcp-port="+ findAvailablePort())
+  protected override lazy val testConfiguration = TestConfiguration(
+    mainArguments = List("-tcp-port="+ findAvailablePort()))
 
   override def checkedBeforeAll() {
     controller.setTerminateOnError(false)

@@ -41,7 +41,7 @@ public class SchedulerThreadController implements SchedulerController {
         thread.loadModule(cppModuleFile);
     }
 
-    @Override public final void startScheduler(String... args) {
+    @Override public final void startScheduler(Iterable<String> args) {
         checkIsNotStarted();
         controllerBridge.start();
         thread.startThread(ImmutableList.copyOf(args));

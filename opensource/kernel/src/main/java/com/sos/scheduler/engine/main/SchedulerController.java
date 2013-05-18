@@ -6,13 +6,13 @@ import com.sos.scheduler.engine.kernel.settings.Settings;
 
 /** Steuerung für den C++-Scheduler in einem eigenen nebenläufigen Thread. */
 public interface SchedulerController {
-    /** @throws IllegalStateException, wenn nach {@link #startScheduler(String...)} aufgerufen. */
+    /** @throws IllegalStateException, wenn nach {@link #startScheduler(Iterable)}} aufgerufen. */
     void setSettings(Settings o);
 
     Settings getSettings();
 
     /** Startet den Scheduler ohne zu warten. */
-    void startScheduler(String... arguments);
+    void startScheduler(Iterable<String> arguments);
 
     /** Veranlasst die Beendigung des Schedulers, wartet aufs Ende und schließt alles. */
     void close();

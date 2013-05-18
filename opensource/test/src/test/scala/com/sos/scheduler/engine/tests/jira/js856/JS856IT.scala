@@ -1,25 +1,18 @@
 package com.sos.scheduler.engine.tests.jira.js856
 
+import JS856IT._
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.scalatest.matchers.ShouldMatchers._
-import scala.collection.JavaConversions._
 
 /** JS-856 */
 abstract class JS856IT(testNamePrefix: String) extends ScalaSchedulerTest {
 
-  import JS856IT._
-
   val finallyExpectedParameters: Map[String, String]
   val whenSuspendedExpectedParameters: Map[String, String]
-
-  override def checkedBeforeAll() {
-    controller.useDatabase()
-    controller.setLogCategories("java.stackTrace-")   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
-  }
 
   test(testNamePrefix +" - run standing order normally") {
     val c = new StandingOrderContext(testJobChain)

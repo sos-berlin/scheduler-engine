@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.database
 
+import EntitiesIT._
 import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, FileBasedActivatedEvent, JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
@@ -16,6 +17,7 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import com.sos.scheduler.engine.test.{DatabaseConfiguration, TestConfiguration}
 import javax.persistence.EntityManagerFactory
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
@@ -29,7 +31,9 @@ import scala.xml.XML
 @RunWith(classOf[JUnitRunner])
 final class EntitiesIT extends ScalaSchedulerTest {
 
-  import EntitiesIT._
+  override lazy val testConfiguration = TestConfiguration(
+    database = DatabaseConfiguration(use = true),
+    logCategories = "java.stackTrace-")  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
 
   private val testStartTime = now() withMillisOfSecond 0
   private lazy val jobSubsystem = controller.scheduler.instance[JobSubsystem]
@@ -37,8 +41,6 @@ final class EntitiesIT extends ScalaSchedulerTest {
   private def simpleJob = scheduler.instance[JobSubsystem].job(simpleJobPath)
 
   override def checkedBeforeAll() {
-    controller.useDatabase()
-    controller.setLogCategories("java.stackTrace-")
     controller.setSettings(Settings.of(SettingName.useJavaPersistence, "true"))
     controller.activateScheduler()
     val eventPipe = controller.newEventPipe()

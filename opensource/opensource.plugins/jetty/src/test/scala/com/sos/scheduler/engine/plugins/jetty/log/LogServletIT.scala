@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.slf4j.LoggerFactory
+import com.sos.scheduler.engine.test.TestConfiguration
 
 //TODO Wechsel der Datei bei Log.start_new_file() und instance_number berücksichtigen
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
@@ -18,7 +19,8 @@ import org.slf4j.LoggerFactory
 final class LogServletIT extends ScalaSchedulerTest {
   import LogServletIT._
 
-  override val configurationPackage = classOf[JettyPlugin].getPackage
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
+
   private lazy val resource = javaResource(injector)
 
   test("Read a task log") {

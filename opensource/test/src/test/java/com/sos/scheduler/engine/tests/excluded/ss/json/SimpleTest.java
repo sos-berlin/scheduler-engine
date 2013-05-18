@@ -100,7 +100,7 @@ public class SimpleTest extends SchedulerTest {
 
         // serialize the event into JSON
         mapper.writeValue(outputStream, e);
-        String expected = "{\"TYPE\":\"OrderFinishedEvent\",\"key\":{\"jobChainPath\":\"/jobchain1\",\"id\":\"jobchain1\"}}";
+        String expected = "{\"TYPE\":\"OrderFinishedEvent\",\"orderKey\":{\"jobChainPath\":\"/jobchain1\",\"id\":\"jobchain1\"}}";
         assertEquals(expected,outputStream.toString());
 
         // deserialize the event from JSON into the TaskStartEvent object

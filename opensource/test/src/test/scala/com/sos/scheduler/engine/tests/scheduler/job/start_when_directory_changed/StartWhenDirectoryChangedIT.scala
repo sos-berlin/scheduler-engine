@@ -19,7 +19,7 @@ import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
-  private lazy val directory = new File(controller.environment().directory(), "start_when_directory_changed")
+  private lazy val directory = new File(controller.environment.directory, "start_when_directory_changed")
   private val startTimes = mutable.Buffer[LocalTime]()
 
   override def checkedBeforeAll() {

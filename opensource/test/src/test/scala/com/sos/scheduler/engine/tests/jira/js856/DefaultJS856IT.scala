@@ -1,12 +1,18 @@
 package com.sos.scheduler.engine.tests.jira.js856
 
+import JS856IT.modifiedParameters
+import com.sos.scheduler.engine.test.{DatabaseConfiguration, TestConfiguration}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import JS856IT.modifiedParameters
 
 /** JS-856 */
 @RunWith(classOf[JUnitRunner])
-class DefaultJS856IT extends JS856IT("Current default behaviour: keep order state") {
+final class DefaultJS856IT extends JS856IT("Current default behaviour: keep order state") {
+
+  override lazy val testConfiguration = TestConfiguration(
+    database = DatabaseConfiguration(use = true),
+    logCategories = "java.stackTrace-")   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
+
   val finallyExpectedParameters = modifiedParameters
   val whenSuspendedExpectedParameters = modifiedParameters
 }

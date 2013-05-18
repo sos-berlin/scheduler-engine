@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
@@ -11,7 +12,9 @@ import org.scalatest.matchers.ShouldMatchers._
 /**JS-795: Einbau von Jetty in den JobScheduler. */
 @RunWith(classOf[JUnitRunner])
 final class CommandServiceIT extends ScalaSchedulerTest {
-  override val configurationPackage = classOf[JettyPlugin].getPackage
+
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
+
   private lazy val commandResource = javaResource(injector).path("command")
 
   test("Execute a command via POST") {
