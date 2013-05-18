@@ -22,7 +22,8 @@ public final class MaxOrderIT extends SchedulerTest {
     private int finishedOrderCount = 0;
 
     @Test public void test() throws Exception {
-        controller().runScheduler(timeout);
+        controller().activateScheduler();
+        controller().waitForTermination(timeout);
     }
 
     @EventHandler public void handleEvent(OrderTouchedEvent e) {

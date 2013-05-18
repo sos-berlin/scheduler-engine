@@ -17,7 +17,7 @@ public final class SchedulerTestIT extends SchedulerTest {
     private final ImmutableList.Builder<Class<? extends Event>> receivedEventClasses = ImmutableList.builder();
 
     @Test public void test() {
-        controller().startScheduler();
+        controller().activateScheduler();
         controller().close();
         Class<?>[] expected = {SchedulerReadyEvent.class, SchedulerCloseEvent.class, TerminatedEvent.class};
         assertThat(receivedEventClasses.build(), contains(expected));

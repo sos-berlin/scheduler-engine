@@ -14,7 +14,7 @@ import static org.junit.Assert.assertThat;
 
 public final class OrderSubsystemOfJobIT extends SchedulerTest {
     @Test public void test() throws Exception {
-        controller().startScheduler();
+        controller().activateScheduler();
         doTest();
         controller().terminateScheduler();
     }

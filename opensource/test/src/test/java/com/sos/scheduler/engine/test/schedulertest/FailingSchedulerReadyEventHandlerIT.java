@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.test.schedulertest;
 
-import org.junit.Test;
-
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 
 /** Testet {@link com.sos.scheduler.engine.test.SchedulerTest} */
 public final class FailingSchedulerReadyEventHandlerIT extends SchedulerTest {
@@ -14,7 +13,7 @@ public final class FailingSchedulerReadyEventHandlerIT extends SchedulerTest {
     }
 
     @Test(expected=TestError.class) public void startTest() {
-        controller().startScheduler();
+        controller().activateScheduler();
         controller().close();
     }
 

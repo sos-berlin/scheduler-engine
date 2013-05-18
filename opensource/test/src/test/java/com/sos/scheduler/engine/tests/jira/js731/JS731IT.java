@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js731;
 
-import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
@@ -14,7 +14,7 @@ import static org.junit.Assert.assertThat;
 /** @see <a href='http://www.sos-berlin.com/jira/browse/JS-731'>JS-731</a> */
 public final class JS731IT extends SchedulerTest {
     @Test public void testOrderParametersNamesAndGet() {
-        controller().startScheduler();
+        controller().activateScheduler();
         String params = "<params><param name='a' value='ä'/><param name='B' value='B'/></params>";
         scheduler().executeXml("<add_order job_chain='a' id='1'>" + params + "</add_order>");
         controller().waitForTermination(shortTimeout);

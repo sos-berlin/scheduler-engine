@@ -31,8 +31,7 @@ public final class JS644PluginIT extends SchedulerTest {
     private volatile boolean schedulerIsActive = false;
 
     @Test public void test() throws Exception {
-        controller().startScheduler();
-        controller().waitUntilSchedulerIsActive();
+        controller().activateScheduler();
         schedulerIsActive = true;
         modifyJobFile();
         gate.expect(jobActivated, timeout);
