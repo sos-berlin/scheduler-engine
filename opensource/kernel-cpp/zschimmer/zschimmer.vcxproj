@@ -261,7 +261,6 @@
     </ClCompile>
     <ClCompile Include="com_remote_messages.cxx" />
     <ClCompile Include="directory_lister.cxx" />
-    <ClCompile Include="embedded_files.cxx" />
     <ClCompile Include="file.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>

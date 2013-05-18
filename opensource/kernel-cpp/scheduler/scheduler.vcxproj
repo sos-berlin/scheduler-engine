@@ -105,14 +105,6 @@
     <IncludePath>$(JAVA_HOME)/include/win32;$(JAVA_HOME)/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <PreBuildEvent>
-      <Command>echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx
-perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx
-
-echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx
-perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx
-</Command>
-    </PreBuildEvent>
     <CustomBuildStep>
       <Command>
       </Command>
@@ -172,14 +164,6 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <Bscmake />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PreBuildEvent>
-      <Command>echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx
-perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx
-
-echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx
-perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx
-</Command>
-    </PreBuildEvent>
     <CustomBuildStep>
       <Command>
       </Command>
@@ -409,16 +393,6 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
     <ClCompile Include="spooler_config.cxx" />
     <ClCompile Include="spooler_dll.cxx" />
     <ClCompile Include="spooler_dll_java.cxx" />
-    <ClCompile Include="spooler_embedded_files.cxx">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="spooler_event.cxx" />
     <ClCompile Include="spooler_http.cxx" />
     <ClCompile Include="spooler_job.cxx" />
