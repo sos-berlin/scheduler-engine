@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nullable
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet.{AsyncEvent, AsyncListener}
+import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
+import com.sos.scheduler.engine.plugins.jetty.SchedulerSecurityRequest
 
 private[cpp] final class Operation(
     request: HttpServletRequest,
@@ -39,7 +41,7 @@ private[cpp] final class Operation(
 
   /** Das C++-Objekt httpResponseC MUSS mit Release() wieder freigegeben werden, sonst Speicherleck. */
   private lazy val httpResponseCRef = cppProxyRegister.reference(
-    schedulerHttpService.executeHttpRequest(new ServletSchedulerHttpRequest(request), this))
+    schedulerHttpService.executeHttpRequestWithSecurityLevel(new ServletSchedulerHttpRequest(request), this, SchedulerSecurityRequest.securityLevel(request)))
 
   private def httpResponseC = httpResponseCRef.get
 

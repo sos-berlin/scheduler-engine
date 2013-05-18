@@ -460,6 +460,22 @@ final class SpoolerCImpl
     private static native java.lang.String execute_xml__native(long cppReference, java.lang.String p0);
 
 
+    @Override public java.lang.String execute_xml_with_security_level(java.lang.String p0, java.lang.String p1) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = execute_xml_with_security_level__native(cppReference(), p0, p1);
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String execute_xml_with_security_level__native(long cppReference, java.lang.String p0, java.lang.String p1);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC folder_subsystem() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -656,6 +672,22 @@ final class SpoolerCImpl
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC java_execute_http__native(long cppReference, com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest p0, com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse p1);
+
+
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC java_execute_http_with_security_level(com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest p0, com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse p1, java.lang.String p2) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC result = java_execute_http_with_security_level__native(cppReference(), p0, p1, p2);
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC java_execute_http_with_security_level__native(long cppReference, com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest p0, com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse p1, java.lang.String p2);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC job_subsystem() {

@@ -522,6 +522,23 @@ static jstring JNICALL execute_1xml__Ljava_lang_String_2(JNIEnv* jenv, jobject, 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL execute_1xml_1with_1security_1level__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_xml_with_security_level()");
+        return env.jstring_from_string(o_->execute_xml_with_security_level(env.string_from_jstring(p0), env.string_from_jstring(p1)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL folder_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -732,6 +749,23 @@ static jobject JNICALL java_1execute_1http__Lcom_sos_scheduler_engine_kernel_htt
     try {
         ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::java_execute_http()");
         return Has_proxy::jobject_of(o_->java_execute_http(::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest(p0), ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse(p1)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL java_1execute_1http_1with_1security_1level__Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpRequest_2Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpResponse_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jobject p0, jobject p1, jstring p2)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::java_execute_http_with_security_level()");
+        return Has_proxy::jobject_of(o_->java_execute_http_with_security_level(::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest(p0), ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpResponse(p1), env.string_from_jstring(p2)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -1288,6 +1322,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"execute_config_commands__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1config_1commands },
     { (char*)"execute_state_cmd__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1state_1cmd },
     { (char*)"execute_xml__native", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1xml__Ljava_lang_String_2 },
+    { (char*)"execute_xml_with_security_level__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1xml_1with_1security_1level__Ljava_lang_String_2Ljava_lang_String_2 },
     { (char*)"folder_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Folder_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::folder_1subsystem },
     { (char*)"has_any_task__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::has_1any_1task },
     { (char*)"has_exclusiveness__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::has_1exclusiveness },
@@ -1301,6 +1336,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"is_service__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1service },
     { (char*)"is_termination_state_cmd__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1termination_1state_1cmd },
     { (char*)"java_execute_http__native", (char*)"(JLcom/sos/scheduler/engine/kernel/http/SchedulerHttpRequest;Lcom/sos/scheduler/engine/kernel/http/SchedulerHttpResponse;)Lcom/sos/scheduler/engine/kernel/cppproxy/HttpResponseC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1execute_1http__Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpRequest_2Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpResponse_2 },
+    { (char*)"java_execute_http_with_security_level__native", (char*)"(JLcom/sos/scheduler/engine/kernel/http/SchedulerHttpRequest;Lcom/sos/scheduler/engine/kernel/http/SchedulerHttpResponse;Ljava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/HttpResponseC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1execute_1http_1with_1security_1level__Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpRequest_2Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpResponse_2Ljava_lang_String_2 },
     { (char*)"job_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1subsystem },
     { (char*)"job_subsystem_or_null__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1subsystem_1or_1null },
     { (char*)"load__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::load },
@@ -1339,7 +1375,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Spooler >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Spooler >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 75);
+        int ret = env->RegisterNatives(*cls, native_methods, 77);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 
