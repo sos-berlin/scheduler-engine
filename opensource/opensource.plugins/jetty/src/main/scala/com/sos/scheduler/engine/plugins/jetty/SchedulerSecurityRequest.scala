@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 
 object SchedulerSecurityRequest {
-  val securityLevelRolePrefix = "seclevel."
+  val securityLevelRolePrefix = "SecurityLevel."
 
   def securityLevel(request: HttpServletRequest): SchedulerSecurityLevel =
     if (requestIsAnonymous(request))

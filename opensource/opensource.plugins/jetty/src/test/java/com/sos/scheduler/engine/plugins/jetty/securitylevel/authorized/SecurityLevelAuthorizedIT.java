@@ -41,7 +41,7 @@ public class SecurityLevelAuthorizedIT extends SchedulerTest {
         testUser("infouser", OK, "SCHEDULER-121");
         testUser("alluser", OK, "task enqueued");
         testUser("nonuser", NOT_FOUND, "");                     // scheduler detects bad request
-        testUser("unknownsecleveluser", FORBIDDEN, "");         // role seclevel.unknown not defined in web.xml
+        testUser("unknownsecleveluser", FORBIDDEN, "");         // role SecurityLevel.unknown not defined in web.xml
         testUser("normaluser", OK, "SCHEDULER-121");
         testUser(anonymousUser, UNAUTHORIZED, "");
     }

@@ -10,9 +10,9 @@
             <url-pattern>/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
-            <role-name>seclevel.info</role-name>
-            <role-name>seclevel.all</role-name>
-            <role-name>seclevel.none</role-name>
+            <role-name>SecurityLevel.info</role-name>
+            <role-name>SecurityLevel.all</role-name>
+            <role-name>SecurityLevel.none</role-name>
             <role-name>guest</role-name>
         </auth-constraint>
     </security-constraint>

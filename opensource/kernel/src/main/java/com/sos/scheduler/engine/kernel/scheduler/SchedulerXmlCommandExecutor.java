@@ -7,6 +7,6 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 @ImplementedBy(Scheduler.class)
 public interface SchedulerXmlCommandExecutor {
     String uncheckedExecuteXml(String xml);
-    String uncheckedExecuteXml(String xml, SchedulerSecurityLevel secLevel);
+    String uncheckedExecuteXml(String xml, SchedulerSecurityLevel securityLevel);
     String executeXml(String xml);
 }
