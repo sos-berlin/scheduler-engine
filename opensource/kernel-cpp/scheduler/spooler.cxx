@@ -804,18 +804,10 @@ string Spooler::name() const
 }
 
 //--------------------------------------------------------------------------Spooler::security_level
-// Anderer Thread
 
 Security::Level Spooler::security_level( const Ip_address& host )
 {
-    Security::Level result = Security::seclev_none;
-
-    THREAD_LOCK( _lock )
-    {
-        result = _security.level( host.as_in_addr() );
-    }
-
-    return result;
+    return _security.level( host.as_in_addr() );
 }
 
 //----------------------------------------------------------------------------------Spooler::set_id
@@ -883,20 +875,16 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( _ip_address )
     state_element.setAttribute( "ip_address"           , _ip_address.ip_string() );
 
-    if( _db )
-    {
-        THREAD_LOCK( _lock )
-        {
-            string db_name = _db->db_name();
-            db_name = remove_password( db_name );
-            state_element.setAttribute( "db", trim( db_name ) );
+    if( _db ) {
+        string db_name = _db->db_name();
+        db_name = remove_password( db_name );
+        state_element.setAttribute( "db", trim( db_name ) );
 
-            if( _db->is_waiting() )
-                state_element.setAttribute( "db_waiting", "yes" );
+        if( _db->is_waiting() )
+            state_element.setAttribute( "db_waiting", "yes" );
 
-            if( _db->error() != "" )
-                state_element.setAttribute( "db_error", trim( _db->error() ) );
-        }
+        if( _db->error() != "" )
+            state_element.setAttribute( "db_error", trim( _db->error() ) );
     }
 
     if( _waiting_errno )
@@ -928,16 +916,17 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
     if( !show_what.is_set( show_folders ) )
     {
-        if( !lock_subsystem()->is_empty() )  state_element.appendChild( lock_subsystem()->file_baseds_dom_element( dom, show_what ) );
+        if (_lock_subsystem && !_lock_subsystem->is_empty() )  state_element.appendChild(_lock_subsystem->file_baseds_dom_element( dom, show_what ) );
 
-        if( show_what.is_set( show_jobs ) )  state_element.appendChild( job_subsystem()->file_baseds_dom_element( dom, show_what ) );
-                                       else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
+        if (_job_subsystem && show_what.is_set( show_jobs ) )  state_element.appendChild(_job_subsystem->file_baseds_dom_element( dom, show_what ) );
+        else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
         if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->file_baseds_dom_element( dom, show_what ) );
 
         if( show_what.is_set( show_schedules ) && _schedule_subsystem )  state_element.appendChild( _schedule_subsystem->file_baseds_dom_element( dom, show_what ) );
-    
-        state_element.appendChild( order_subsystem()->file_baseds_dom_element( dom, show_what ) );
+
+        if (_order_subsystem) 
+            state_element.appendChild(_order_subsystem->file_baseds_dom_element( dom, show_what ) );
     }
     else
     if( _folder_subsystem )  
@@ -949,7 +938,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     }
 
 
-    if( !_order_subsystem->order_id_spaces_interface()->is_empty() )
+    if (_order_subsystem && !_order_subsystem->order_id_spaces_interface()->is_empty() )
          state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show_what ) );
 
 
@@ -971,9 +960,9 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     }
 
 
-    state_element.appendChild( _supervisor->dom_element( dom, show_what ) );
+    if (_supervisor) state_element.appendChild( _supervisor->dom_element( dom, show_what ) );
     if( _cluster )  state_element.appendChild( _cluster->dom_element( dom, show_what ) );
-    state_element.appendChild( _web_services->dom_element( dom, show_what ) );
+    if (_web_services) state_element.appendChild( _web_services->dom_element( dom, show_what ) );
 
     state_element.appendChild( _communication.dom_element( dom, show_what ) );
 
