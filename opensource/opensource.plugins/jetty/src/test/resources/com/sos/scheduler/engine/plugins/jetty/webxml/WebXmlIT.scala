@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.plugins.jetty.webxml
 
+import WebXmlIT._
 import com.google.common.base.Charsets.UTF_8
+import com.google.common.io.Resources.getResource
 import com.google.common.io.{Resources, Files}
-import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
@@ -31,12 +32,12 @@ final class WebXmlIT extends ScalaSchedulerTest {
     Files.write(a, webXmlFile, UTF_8)
   }
 
-  ignore("(for debugging only)") {
-    controller.waitForTermination(Time.of(3600))
-  }
+//  ignore("(for debugging only)") {
+//    controller.waitForTermination(Time.of(3600))
+//  }
 
   test("Web server should deliver integrated resource as without a web.xml") {
-    val expected = Resources.toString(getClass.getResource("/com/sos/scheduler/engine/web/z/index.html"), UTF_8)
+    val expected = Resources.toString(getResource("com/sos/scheduler/engine/web/z/index.html"), UTF_8)
     val a = resource.path("z/index.html").get(classOf[String])
     assert(a === expected)
   }
@@ -47,6 +48,9 @@ final class WebXmlIT extends ScalaSchedulerTest {
     val a = resource.path(configDir.getName +"/scheduler.xml").get(classOf[String])
     assert(a === expected)
   }
+}
 
-  private def readFile(f: File) = Files.toString(f, UTF_8)
+private object WebXmlIT {
+  def readFile(f: File) =
+    Files.toString(f, UTF_8)
 }
