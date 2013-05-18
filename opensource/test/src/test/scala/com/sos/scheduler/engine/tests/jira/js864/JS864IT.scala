@@ -25,21 +25,21 @@ final class JS864IT extends ScalaSchedulerTest {
   test("0) No job chain node having action='process'") {
     val orderKey = jobChainPath.orderKey(new OrderId("0"))
     resumeOrder(orderKey)
-    nextOrderEvent(orderKey) should equal (new OrderTouchedEvent(orderKey))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, aState))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, bState))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, cState))
-    nextOrderEvent(orderKey) should equal (new OrderFinishedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, aState))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, bState))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, cState))
+    nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
   test("1) Job chain node B has action='next_state'") {
     modifyNode(bState, nextStateAction)
     val orderKey = jobChainPath.orderKey(new OrderId("1"))
     resumeOrder(orderKey)
-    nextOrderEvent(orderKey) should equal (new OrderTouchedEvent(orderKey))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, aState))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, cState))
-    nextOrderEvent(orderKey) should equal (new OrderFinishedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, aState))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, cState))
+    nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
   test("2) Job chain node A has action='next_state'") {
@@ -47,21 +47,21 @@ final class JS864IT extends ScalaSchedulerTest {
     modifyNode(aState, nextStateAction)   // Alle wartenden Auftrage wechseln zu B
     val orderKey = jobChainPath.orderKey(new OrderId("2"))
     resumeOrder(orderKey)
-    nextOrderEvent(orderKey) should equal (new OrderTouchedEvent(orderKey))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, bState))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, cState))
-    nextOrderEvent(orderKey) should equal (new OrderFinishedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, bState))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, cState))
+    nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
   test("3) Again, all job chain nodes having action='process'") {
     modifyNode(aState, processAction)
     val orderKey = jobChainPath.orderKey(new OrderId("3"))
     resumeOrder(orderKey)
-    nextOrderEvent(orderKey) should equal (new OrderTouchedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
     // aState nicht, weil next_state im vorangehenden Test den Auftrag schon weitergeschoben hat.
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, bState))
-    nextOrderEvent(orderKey) should equal (new OrderStepStartedEvent(orderKey, cState))
-    nextOrderEvent(orderKey) should equal (new OrderFinishedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, bState))
+    nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, cState))
+    nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
   test("4) All job chain nodes having action='next_state'") {
@@ -70,7 +70,7 @@ final class JS864IT extends ScalaSchedulerTest {
     modifyNode(cState, nextStateAction)
     val orderKey = jobChainPath.orderKey(new OrderId("4"))
     resumeOrder(orderKey)
-    nextOrderEvent(orderKey) should equal (new OrderFinishedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
   test("5) Again, no job chain node having action='next_state'") {
@@ -78,7 +78,7 @@ final class JS864IT extends ScalaSchedulerTest {
     val orderKey = jobChainPath.orderKey(new OrderId("5"))
     resumeOrder(orderKey)
     //intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition(2.s) { e: OrderTouchedEvent => e.getKey == jobChainPath.orderKey(orderId) } }
-    nextOrderEvent(orderKey) should equal (new OrderFinishedEvent(orderKey))
+    nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
   private def nextOrderEvent(orderKey: OrderKey) =

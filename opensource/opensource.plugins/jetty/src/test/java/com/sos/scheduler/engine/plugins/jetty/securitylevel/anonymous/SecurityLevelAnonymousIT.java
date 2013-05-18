@@ -21,7 +21,6 @@ public final class SecurityLevelAnonymousIT extends SchedulerTest {
 
     @Test
     public void test() throws Exception {
-        controller().prepare();
         controller().activateScheduler();
         testUser(ClientResponse.Status.OK, "task enqueued");
     }
