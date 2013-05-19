@@ -14,35 +14,41 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static com.sos.scheduler.engine.common.system.Files.tryRemoveDirectoryRecursivly;
+import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertTrue;
 
 public class BackupLogfileIT extends SchedulerTest {
 
-    private static final CommandBuilder cmd = new CommandBuilder();
-    private static final File tempDir = new File(Files.createTempDir(), "log");
-    private static final File tempDirWithDot = new File(Files.createTempDir(), "log.dir");
     private static final Time timeout = Time.of(30);
+    private static File testDirectory;
+    private static File tempDirWithoutDot;
+    private static File tempDirWithDot;
+
+    private final CommandBuilder cmd = new CommandBuilder();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        tempDir.mkdirs();
+        testDirectory = Files.createTempDir();
+        tempDirWithoutDot = new File(testDirectory, "log");
+        tempDirWithDot = new File(testDirectory, "log.dir");
+        tempDirWithoutDot.mkdirs();
         tempDirWithDot.mkdirs();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        tempDir.delete();
-        tempDirWithDot.delete();
+        tryRemoveDirectoryRecursivly(testDirectory);
     }
 
     @Test
     public void test1() throws IOException {
-        doTest(tempDir, "scheduler.log", "scheduler-old.log");
+        doTest(tempDirWithoutDot, "scheduler.log", "scheduler-old.log");
     }
 
     @Test
     public void test2() throws IOException {
-        doTest(tempDir, "scheduler_log", "scheduler_log-old");
+        doTest(tempDirWithoutDot, "scheduler_log", "scheduler_log-old");
     }
 
     @Test
@@ -60,7 +66,7 @@ public class BackupLogfileIT extends SchedulerTest {
         File expectedFile = new File(logDir,expectedName);
         controller().prepare();
         Files.touch(logFile);
-        controller().activateScheduler("-log-dir=" + logDir.getAbsolutePath(), "-log=" + logFile.getAbsolutePath());
+        controller().activateScheduler(asList("-log-dir=" + logDir.getAbsolutePath(), "-log=" + logFile.getAbsolutePath()));
         controller().scheduler().executeXml(cmd.startJobImmediately("test").getCommand());
         controller().waitForTermination(timeout);
         assertTrue("Backup file " + expectedName + " does not exist in " + logDir.getAbsolutePath(),expectedFile.exists());

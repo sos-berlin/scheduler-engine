@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -39,8 +40,8 @@ public class JS746Test extends SchedulerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JS746Test.class);
 
-    private static final DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");;
-    private static final DateTimeFormatter dateISO = DateTimeFormat.forPattern("yyyy-MM-dd");;
+    private static final DateTimeFormatter format = DateTimeFormat.forPattern("dd.MM.yy HH:mm:ss");
+    private static final DateTimeFormatter dateISO = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final DateTimeFormatter formatISO = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @BeforeClass
@@ -50,8 +51,7 @@ public class JS746Test extends SchedulerTest {
 
     @Test
     public void test() throws Exception {
-        controller().startScheduler("-e", "-log-level=warn");
-        controller().waitUntilSchedulerIsActive();
+        controller().activateScheduler(asList("-e", "-log-level=warn"));
         testStandaloneJobs();
         testOrders();
         controller().terminateScheduler();

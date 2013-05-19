@@ -13,7 +13,8 @@ public final class OrderStressIT extends SchedulerTest {
     private int touchedOrderCount = 0;
 
     @Test public void test() throws Exception {
-        controller().runScheduler(Time.of(3600));
+        controller().activateScheduler();
+        controller().waitForTermination(Time.of(3600));
     }
     
     @EventHandler public void handleEvent(OrderTouchedEvent e) {

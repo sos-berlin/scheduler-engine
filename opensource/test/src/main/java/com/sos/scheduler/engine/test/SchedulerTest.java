@@ -11,16 +11,16 @@ import java.io.File;
 import java.io.IOException;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
-    public static final Time shortTimeout = TestSchedulerController.shortTimeout;
+    public static final Time shortTimeout = TestSchedulerController.shortTimeout();
 
     private final TestSchedulerController controller;
 
-    protected SchedulerTest(TestSchedulerController controller) {
-        this.controller = controller;
+    protected SchedulerTest() {
+        controller = new TestSchedulerController(getClass(), TestConfiguration.standard());
     }
 
-    protected SchedulerTest() {
-        controller = TestSchedulerController.builder(getClass()).build();
+    protected SchedulerTest(TestSchedulerController controller) {
+        this.controller = controller;
     }
 
     @Before public final void schedulerTestBefore() {

@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.webservice.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.javaResource
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.Reader
 import javax.ws.rs.core.MediaType._
@@ -12,7 +13,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class FolderServiceIT extends ScalaSchedulerTest {
 
-  override val configurationPackage = Tests.testPackage
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(Tests.testPackage))
+
   private lazy val resource = javaResource(injector).path("folder")
   private val objectMapper = new ObjectMapper
 

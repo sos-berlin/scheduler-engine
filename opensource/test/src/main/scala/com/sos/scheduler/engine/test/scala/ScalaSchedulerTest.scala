@@ -1,30 +1,16 @@
 package com.sos.scheduler.engine.test.scala
 
-import com.google.common.collect.ImmutableMap
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.test.scala.Utils._
-import com.sos.scheduler.engine.test.{ResourceToFileTransformer, TestSchedulerController, SchedulerTest}
+import com.sos.scheduler.engine.test.{TestConfiguration, TestSchedulerController, SchedulerTest}
 import org.scalatest.{FunSuite, BeforeAndAfterAll}
-import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
-import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 
 trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
-  protected val configurationPackage = getClass.getPackage
-  protected val schedulerResourceToFileTransformer: Option[ResourceToFileTransformer] = None
-  protected val schedulerResourceNameMap: Iterable[(String,String)] = List()
-  protected val binariesDebugMode: Option[CppBinariesDebugMode] = None
-  protected val arguments: Seq[String] = Nil
-  protected val logCategories: Option[String] = None
-  lazy final val controller = {
-    val b = TestSchedulerController.builder(getClass)
-        .resourcesPackage(configurationPackage)
-        .nameMap(ImmutableMap.copyOf(mapAsJavaMap(schedulerResourceNameMap.toMap)))
-    schedulerResourceToFileTransformer foreach b.resourceToFileTransformer
-    binariesDebugMode foreach b.debugMode
-    logCategories foreach b.logCategories
-    b.build
-  }
+
+  protected lazy val testConfiguration = TestConfiguration()
+
+  lazy final val controller = new TestSchedulerController(getClass, testConfiguration)
 
   final def shortTimeout = SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
   final def injector = scheduler.injector
@@ -52,7 +38,7 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
   protected def checkedBeforeAll(configMap: Map[String, Any]) {
     checkedBeforeAll()
     if (!controller.isStarted)
-      controller.activateScheduler(arguments: _*)
+      controller.activateScheduler(testConfiguration.mainArguments: _*)
   }
 
   override def afterAll(configMap: Map[String, Any]) {

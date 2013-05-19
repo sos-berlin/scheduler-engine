@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.javaResource
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sun.jersey.api.client.WebResource
 import java.io.{BufferedReader, IOException, Reader}
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
 @RunWith(classOf[JUnitRunner])
 final class EventsServiceIT extends ScalaSchedulerTest {
 
-  override val configurationPackage = Tests.testPackage
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(Tests.testPackage))
   private lazy val eventsResource = javaResource(injector).path("TESTONLY/events")
 
   test("Read some events") {

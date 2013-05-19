@@ -9,7 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @uthor ss
+ * @author ss
  * at 15.05.13 08:33
  */
 public class JS948IT extends SchedulerTest {

@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.spoolerapi.job;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
@@ -13,7 +12,9 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -23,8 +24,9 @@ public class GetSourceCodeIT extends SchedulerTest {
 
     private static final ImmutableList<String> jobs = ImmutableList.of("javascript_intern", "javascript_include");
     private static final String expectedFilename = "expected-content.xml";
+
     private int taskCount = 0;
-    private HashMap<String,String> resultMap = new HashMap<String,String>();
+    private final Map<String,String> resultMap = new HashMap<String,String>();
 
     @Test
     public void test() throws IOException {
@@ -43,8 +45,8 @@ public class GetSourceCodeIT extends SchedulerTest {
     }
 
     private String getExpectedSourceCode() throws IOException {
-        File f = new File(controller().environment().configDirectory(),expectedFilename);
-        return Files.toString(f,Charsets.UTF_8).trim();
+        File f = new File(controller().environment().configDirectory(), expectedFilename);
+        return Files.toString(f, UTF_8).trim();
     }
 
     @EventHandler
@@ -56,5 +58,4 @@ public class GetSourceCodeIT extends SchedulerTest {
         if (taskCount == jobs.size())
             controller().terminateScheduler();
     }
-
 }

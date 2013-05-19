@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.tests.scheduler.config.schema
 
 import SchemaIT._
 import com.sos.scheduler.engine.common.time.Time
-import com.sos.scheduler.engine.test.TestSchedulerController
+import com.sos.scheduler.engine.test.{TestConfiguration, TestSchedulerController}
+import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
-import java.io.File
 
 @RunWith(classOf[JUnitRunner])
 final class SchemaIT extends FunSuite {
@@ -31,31 +31,16 @@ final class SchemaIT extends FunSuite {
       e.getMessage should include ("cvc-elt.1: Cannot find the declaration")   // Das ist wegen Spooler::configuration_for_single_job_script
     }
   }
-
-  test("-show-xml-schema") {
-    pending
-//    runScheduler { controller =>
-//      controller.activateScheduler("-show-xml-schema")
-//    }
-  }
-
-  test("-use-schema-xml") {
-    pending
-    //val schemaFile = ...
-//    runScheduler { controller =>
-//      val x = intercept[RuntimeException] { controller.activateScheduler("-use-xml-schema="+schemaFile) }
-//      x.getMessage should (include ("LIBXML2-007") or include ("SAXParseException"))
-//    }
-  }
 }
 
 object SchemaIT {
   private def runScheduler(f: TestSchedulerController => Unit) {
-    val controller = TestSchedulerController.of(classOf[SchemaIT])
+    val controller = new TestSchedulerController(classOf[SchemaIT], TestConfiguration())
     try f(controller)
     finally if (controller.isStarted) {
       controller.terminateScheduler()
-      controller.waitForTermination(Time.eternal)
+      try controller.waitForTermination(Time.eternal)
+      finally controller.close()
     }
   }
 }

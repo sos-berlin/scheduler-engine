@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.kernel.settings.SettingName
 import com.sos.scheduler.engine.plugins.jetty.configuration.Config
 import Config._
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.{Client, ClientResponse, UniformInterfaceException}
@@ -22,7 +23,7 @@ import org.scalatest.matchers.ShouldMatchers._
 @RunWith(classOf[JUnitRunner])
 final class CppServletIT extends ScalaSchedulerTest {
 
-  override val configurationPackage = testPackage
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(testPackage))
   private val httpDirectory = controller.environment.directory
 
   override protected def checkedBeforeAll(configMap: Map[String, Any]) {

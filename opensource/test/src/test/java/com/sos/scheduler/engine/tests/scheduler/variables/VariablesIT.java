@@ -1,19 +1,18 @@
 package com.sos.scheduler.engine.tests.scheduler.variables;
 
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
+
+import java.util.Collection;
+
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import java.util.Collection;
-
-import org.junit.Test;
-
-import com.sos.scheduler.engine.kernel.variable.VariableSet;
-import com.sos.scheduler.engine.test.SchedulerTest;
-
 public final class VariablesIT extends SchedulerTest {
     @Test public void test() {
-        controller().startScheduler();
+        controller().activateScheduler();
         VariableSet variables = instance(VariableSet.class);
         Collection<String> names = variables.getNames();
         assertThat(names, containsInAnyOrder("Ä", "Bb", "Ccc"));

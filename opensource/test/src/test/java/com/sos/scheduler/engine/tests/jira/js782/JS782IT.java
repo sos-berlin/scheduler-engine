@@ -15,7 +15,7 @@ public final class JS782IT extends SchedulerTest {
 
     @Test public void suspendedOrderMovedToEndStateShouldBeOnBlacklist() {
         controller().setTerminateOnError(false);
-        controller().startScheduler();
+        controller().activateScheduler();
         doTest();
         controller().terminateScheduler();
     }

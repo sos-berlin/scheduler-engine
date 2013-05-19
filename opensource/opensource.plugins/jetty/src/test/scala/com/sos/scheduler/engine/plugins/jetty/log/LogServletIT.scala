@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.{javaResource, testPackage}
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.WebResource
@@ -18,7 +19,8 @@ final class LogServletIT extends ScalaSchedulerTest {
 
   import LogServletIT._
 
-  override val configurationPackage = testPackage
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(testPackage))
+
   private lazy val resource = javaResource(injector)
 
   ignore("Read a task log") {

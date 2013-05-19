@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.Environment;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.test.TestSchedulerController;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -26,6 +25,7 @@ import java.io.File;
 import static com.google.common.collect.Iterables.transform;
 import static com.sos.scheduler.engine.data.folder.FileBasedType.job;
 import static com.sos.scheduler.engine.data.folder.FileBasedType.jobChain;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.fail;
 
 /** Der Test lässt einen Auftrag kontinuierlich durch eine Jobkette laufen.
@@ -45,13 +45,13 @@ public final class JS644IT extends SchedulerTest {
 
     private final Gate<Boolean> threadGate = new Gate<Boolean>();
 
-    public JS644IT() {
-        super(TestSchedulerController.builder(JS644IT.class)
-                .expectedErrorLogEventPredicate(expectedErrorLogEventPredicate).build());
-    }
+//    public JS644IT() {
+//        super(TestSchedulerController.builder(JS644IT.class)
+//                //.expectedErrorLogEventPredicate(expectedErrorLogEventPredicate).build());
+//    }
 
     @Test public void test() throws InterruptedException {
-        controller().startScheduler("-e");
+        controller().activateScheduler(asList("-e"));
         runModifierThreadAndCheckOrderChanges();
     }
 

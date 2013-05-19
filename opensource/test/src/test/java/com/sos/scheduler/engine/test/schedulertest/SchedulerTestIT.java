@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.test.schedulertest;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.data.event.Event;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.contains;
@@ -17,7 +17,7 @@ public final class SchedulerTestIT extends SchedulerTest {
     private final ImmutableList.Builder<Class<? extends Event>> receivedEventClasses = ImmutableList.builder();
 
     @Test public void test() {
-        controller().startScheduler();
+        controller().activateScheduler();
         controller().close();
         Class<?>[] expected = {SchedulerReadyEvent.class, SchedulerCloseEvent.class, TerminatedEvent.class};
         assertThat(receivedEventClasses.build(), contains(expected));
