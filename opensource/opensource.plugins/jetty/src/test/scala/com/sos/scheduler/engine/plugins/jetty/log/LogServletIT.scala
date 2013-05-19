@@ -1,25 +1,25 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
-import java.io.{BufferedReader, Reader}
-import javax.ws.rs.core.MediaType._
-import com.sun.jersey.api.client.WebResource
-import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
+import LogServletIT._
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
+import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sun.jersey.api.client.WebResource
+import java.io.{BufferedReader, Reader}
+import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.slf4j.LoggerFactory
-import com.sos.scheduler.engine.test.TestConfiguration
 
 //TODO Wechsel der Datei bei Log.start_new_file() und instance_number berücksichtigen
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
 
 @RunWith(classOf[JUnitRunner])
 final class LogServletIT extends ScalaSchedulerTest {
-  import LogServletIT._
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(JettyPluginTests.getClass.getPackage))
 
   private lazy val resource = javaResource(injector)
 
@@ -53,10 +53,10 @@ final class LogServletIT extends ScalaSchedulerTest {
   }
 }
 
-object LogServletIT {
-  private val logger = LoggerFactory.getLogger(classOf[LogServletIT])
+private object LogServletIT {
+  val logger = LoggerFactory.getLogger(classOf[LogServletIT])
 
-  private def logReader(reader: Reader) {
+  def logReader(reader: Reader) {
     val r = new BufferedReader(reader)
     while (true) {
       val line = r.readLine()

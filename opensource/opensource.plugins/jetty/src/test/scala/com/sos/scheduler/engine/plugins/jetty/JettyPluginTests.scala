@@ -2,22 +2,31 @@ package com.sos.scheduler.engine.plugins.jetty
 
 import java.net.URI
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.plugins.jetty.Config._
 import com.sun.jersey.api.client.{Client, WebResource}
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
 import org.joda.time.Duration
+import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
 
 object JettyPluginTests {
-  private val defaultTimeout = new Duration(60 * 1000)
 
-  def javaResource(injector: Injector) = newAuthentifyingClient().resource(javaContextUri(injector))
+  private val defaultTimeout = 60.s
+  val aJobChainPath = JobChainPath.of("/a")
+  val orderJobPath = JobPath.of("/order")
 
-  private def javaContextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + enginePrefixPath)
+  def javaResource(injector: Injector) =
+    newAuthentifyingClient().resource(javaContextUri(injector))
 
-  def contextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath)
+  private def javaContextUri(injector: Injector) =
+    new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + enginePrefixPath)
 
-  def jettyPortNumber(injector: Injector) = injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).tcpPortNumber
+  def contextUri(injector: Injector) =
+    new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath)
+
+  def jettyPortNumber(injector: Injector) =
+    injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).tcpPortNumber
 
   def newAuthResource(uri: URI): WebResource = {
     val client = newAuthentifyingClient(defaultTimeout)
