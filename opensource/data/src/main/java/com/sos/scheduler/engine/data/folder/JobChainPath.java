@@ -10,6 +10,10 @@ public final class JobChainPath extends TypedPath {
         super(FileBasedType.jobChain, path);
     }
 
+    public OrderKey orderKey(String o) {
+        return orderKey(new OrderId(o));
+    }
+
     public OrderKey orderKey(OrderId o) {
         return new OrderKey(this, o);
     }
