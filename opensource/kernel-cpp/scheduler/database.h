@@ -18,6 +18,7 @@ namespace database {
 //--------------------------------------------------------------------------------------------const
 
 extern const int                max_column_length;
+extern const int                order_title_column_size;
 
 //-----------------------------------------------------------------------------------Archive_switch
 

@@ -3,9 +3,10 @@ package com.sos.scheduler.engine.plugins.jetty.cpp
 import CppServletIT._
 import com.google.common.io.Files
 import com.google.inject.Injector
+import com.sos.scheduler.engine.data.job.TaskStartedEvent
 import com.sos.scheduler.engine.kernel.settings.SettingName
-import com.sos.scheduler.engine.plugins.jetty.configuration.Config
-import Config._
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
+import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
 import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -23,13 +24,13 @@ import org.scalatest.matchers.ShouldMatchers._
 @RunWith(classOf[JUnitRunner])
 final class CppServletIT extends ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(testPackage))
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(JettyPluginTests.getClass.getPackage))
+
   private val httpDirectory = controller.environment.directory
 
-  override protected def checkedBeforeAll(configMap: Map[String, Any]) {
+  override protected def checkedBeforeAll() {
     controller.getSettings.set(SettingName.htmlDir, httpDirectory.getPath)    // Für Bitmuster-Test
     controller.activateScheduler()
-    super.checkedBeforeAll(configMap)
   }
 
   for (testConf <- TestConf(newAuthentifyingClient(), withGzip = false) ::
@@ -43,9 +44,11 @@ final class CppServletIT extends ScalaSchedulerTest {
     }
 
     test("Kommando über POST ohne Authentifizierung "+testConf) {
+      val webClient = Client.create()
       val x = intercept[UniformInterfaceException] {
-        cppResource(injector, Client.create()).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
+        cppResource(injector, webClient).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
       }
+      webClient.destroy()
       x.getResponse.getStatus should equal(UNAUTHORIZED.getStatusCode)
     }
 
@@ -63,34 +66,38 @@ final class CppServletIT extends ScalaSchedulerTest {
     }
 
     test("show_log?task=... "+testConf) {
-      scheduler.executeXml(<order job_chain={jobChainPath} id={orderId}/>)
-      Thread.sleep(500)  //TODO TaskStartedEvent
-      val result = stringFromResponse(resource.path("show_log").queryParam("task", "1").accept(TEXT_HTML_TYPE).get(classOf[ClientResponse]))
+      val eventPipe = controller.newEventPipe()
+      scheduler.executeXml(<order job_chain={orderKey.jobChainPathString} id={orderKey.getId.string}/>)
+      val taskId = eventPipe.nextWithCondition { e: TaskStartedEvent => e.jobPath == orderJobPath } .taskId
+      val result = stringFromResponse(resource.path("show_log").queryParam("task", taskId.string).accept(TEXT_HTML_TYPE).get(classOf[ClientResponse]))
       result should include ("SCHEDULER-918  state=closed")
       result should include ("SCHEDULER-962") // "Protocol ends in ..."
       result.trim should endWith("</html>")
     }
 
-    def stringFromResponse(r: ClientResponse) = checkedResponse(r).getEntity(classOf[String])
+    def stringFromResponse(r: ClientResponse) =
+      checkedResponse(r).getEntity(classOf[String])
 
     def checkedResponse(r: ClientResponse) = {
       assert(fromStatusCode(r.getStatus) === OK, "Unexpected HTTP status "+r.getStatus)
-      if (testConf.withGzip) assert(r.getEntityInputStream.isInstanceOf[GZIPInputStream], r.getEntityInputStream.getClass +" should be a GZIPInputStream")
-      else assert(!r.getEntityInputStream.isInstanceOf[GZIPInputStream], r.getEntityInputStream.getClass +" should not be a GZIPInputStream")
+      val isZipped = r.getEntityInputStream.isInstanceOf[GZIPInputStream]
+      if (testConf.withGzip) assert(isZipped, r.getEntityInputStream.getClass +" should be a GZIPInputStream")
+      else assert(!isZipped, r.getEntityInputStream.getClass +" should not be a GZIPInputStream")
       r
     }
   }
 }
 
-object CppServletIT {
-  private val jobChainPath = "a"
-  private val orderId = "1"
+private object CppServletIT {
+  val orderKey = aJobChainPath.orderKey("1")
 
-  def cppResource(injector: Injector, client: Client) = client.resource(cppContextUri(injector))
+  def cppResource(injector: Injector, client: Client) =
+    client.resource(cppContextUri(injector))
 
-  private def cppContextUri(injector: Injector) = new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + cppPrefixPath)
+  def cppContextUri(injector: Injector) =
+    new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + cppPrefixPath)
 
-  private case class TestConf(client: Client, withGzip: Boolean) {
+  case class TestConf(client: Client, withGzip: Boolean) {
     override def toString = if (withGzip) "compressed with gzip" else ""
   }
 }

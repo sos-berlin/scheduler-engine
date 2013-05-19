@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
-import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.{javaResource, testPackage}
+import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
+import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.javaResource
 import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -19,7 +20,7 @@ final class LogServletIT extends ScalaSchedulerTest {
 
   import LogServletIT._
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(testPackage))
+  override lazy val testConfiguration = TestConfiguration(testPackage = Some(JettyPluginTests.getClass.getPackage))
 
   private lazy val resource = javaResource(injector)
 
@@ -49,10 +50,10 @@ final class LogServletIT extends ScalaSchedulerTest {
   }
 }
 
-object LogServletIT {
-  private val logger = LoggerFactory.getLogger(classOf[LogServletIT])
+private object LogServletIT {
+  val logger = LoggerFactory.getLogger(classOf[LogServletIT])
 
-  private def logReader(reader: Reader) {
+  def logReader(reader: Reader) {
     val r = new BufferedReader(reader)
     while (true) {
       val line = r.readLine()
