@@ -7,6 +7,8 @@ import scala.annotation.meta.getter
 @ForCpp
 final case class TaskId(
   @(JsonValue @getter) @(ForCpp @getter) value: Int) {
+
+  def string = value.toString
 }
 
 object TaskId {
