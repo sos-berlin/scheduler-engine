@@ -40,6 +40,8 @@ const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -t
 const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
 const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
 const int max_column_length = 249;      // Für MySQL 249 statt 250. jz 7.1.04
+const int order_title_column_size = 200;
+
 
 //-------------------------------------------------------------------------------------------------
 

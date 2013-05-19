@@ -349,7 +349,7 @@ void Order::db_insert_order_history_record( Transaction* ta )
         insert[ "history_id" ] = _history_id;
         insert[ "job_chain"  ] = job_chain_path().without_slash();
         insert[ "order_id"   ] = id().as_string();
-        insert[ "title"      ] = title();
+        insert[ "title"      ] = title().substr(0, database::order_title_column_size);;
         insert[ "state"      ] = state().as_string();
         insert[ "state_text" ] = state_text();
         insert[ "spooler_id" ] = _spooler->id_for_db();
@@ -386,7 +386,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
             
             update[ "state"      ] = state().as_string();
             update[ "state_text" ] = state_text();
-            update[ "title"      ] = title();
+            update[ "title"      ] = title().substr(0, database::order_title_column_size);
             update.set_datetime( "end_time"  , ( end_time().not_zero()? end_time() : Time::now() ).db_string(time::without_ms) );
 
             ta.execute( update, Z_FUNCTION );
@@ -655,7 +655,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
         insert[ "job_chain"     ] = _job_chain_path.without_slash();
         insert[ "id"            ] = id().as_string();
         insert[ "spooler_id"    ] = _spooler->id_for_db();
-        insert[ "title"         ] = title()                     , _title_modified      = false;
+        insert[ "title"         ] = title().substr(0, database::order_title_column_size), _title_modified = false;
         insert[ "state"         ] = state().as_string();
         insert[ "state_text"    ] = state_text()                , _state_text_modified = false;
         insert[ "priority"      ] = priority()                  , _priority_modified   = false;
@@ -847,7 +847,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
             db_fill_stmt( &update );
 
             if( _priority_modified   )  update[ "priority"   ] = priority();
-            if( _title_modified      )  update[ "title"      ] = title();
+            if( _title_modified      )  update[ "title"      ] = title().substr(0, database::order_title_column_size);
             if( _state_text_modified )  update[ "state_text" ] = state_text();
 
             for( Retry_nested_transaction ta ( db(), outer_transaction ); ta.enter_loop(); ta++ ) try
