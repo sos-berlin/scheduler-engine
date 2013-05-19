@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.base.HasKey
 import com.sos.scheduler.engine.data.folder.JobPath
 import org.joda.time.ReadableInstant
-import scala.annotation.target.getter
+import scala.annotation.meta.getter
 
 @ForCpp
 case class TaskPersistent(
