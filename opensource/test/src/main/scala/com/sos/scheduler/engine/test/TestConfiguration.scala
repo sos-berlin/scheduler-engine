@@ -10,7 +10,7 @@ final case class TestConfiguration(
   binariesDebugMode: Option[CppBinariesDebugMode] = None,
   nameMap: Map[String, String] = Map(),
   mainArguments: Seq[String] = Seq(),
-  logCategories: String = System.getProperty("scheduler.logCategories"),
+  logCategories: String = "",
   database: DatabaseConfiguration = DatabaseConfiguration(use = false),
   expectedErrorLogEventPredicate: ErrorLogEvent => Boolean = (_ => false)
 ) {

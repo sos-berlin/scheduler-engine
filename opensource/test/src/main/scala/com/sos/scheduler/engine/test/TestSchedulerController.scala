@@ -56,7 +56,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
   private val jdbcUrl = "jdbc:h2:mem:scheduler-" + testName
   private var terminateOnError: Boolean = true
   private var isPrepared: Boolean = false
-  private var logCategories = configuration.logCategories
+  private var logCategories = (configuration.logCategories +" "+ System.getProperty("scheduler.logCategories")).trim
   private var _scheduler: Scheduler = null
   private val closingRunnables = mutable.Buffer[() => Unit]()
 
