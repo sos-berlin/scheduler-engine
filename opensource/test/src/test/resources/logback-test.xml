@@ -1,14 +1,3 @@
 <configuration>
-
-    <!-- output to console -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{dd HH:mm:ss} [%thread] %-5level %logger:%line - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <root level="OFF">
-        <appender-ref ref="CONSOLE" />
-    </root>
-
+    <root level="OFF"/>
 </configuration>
