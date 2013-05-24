@@ -177,7 +177,8 @@ Task::Task(Standard_job* job)
     _history(&job->_history,this),
     _timeout(Duration::eternal),
     _lock_requestors( 1+lock_level__max ),
-    _warn_if_longer_than( Duration::eternal )
+    _warn_if_longer_than( Duration::eternal ),
+    _order_state_transition(Order::post_keep_state)
 {
     _log = Z_NEW( Prefix_log( this ) );
 
@@ -1704,6 +1705,12 @@ bool Task::do_something()
                                             else {}     // detach_order_after_error() wird sich drum kümmern.
                                         }
                                     }
+                                    else
+                                    if (_order_state_transition != Order::post_keep_state) {
+                                        postprocess_order(_order_state_transition);       
+                                        //postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
+                                        //                                                             : Order::post_error   );       
+                                    }
                                 }                                                               
 
                                 report_event_code(taskEndedEvent, java_sister());
@@ -1972,8 +1979,11 @@ string Task::remote_process_step__end()
                 ptr<Com_variable_set> p = new Com_variable_set( order_params_element );
                 _order->params()->merge( p );
             }
-            postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
-                                                                         : Order::post_error   );       
+            _order_state_transition = _module_instance->spooler_process_result()? Order::post_success 
+                                                                                : Order::post_error;       
+            if (_module_instance->_module->_kind != Module::kind_process) {
+                postprocess_order(_order_state_transition);
+            }
         }
 
         _spooler->_task_subsystem->count_step();
@@ -1982,6 +1992,12 @@ string Task::remote_process_step__end()
     }
     catch( const exception& x )  { 
         set_error(x); 
+        if( _order ) {
+            _order_state_transition = _job->stops_on_task_error()? Order::post_keep_state : Order::post_error;
+            if (_module_instance->_module->_kind != Module::kind_process) {
+                detach_order_after_error();
+            }
+        } 
     }
 
     close_operation();

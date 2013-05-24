@@ -33,6 +33,9 @@ object Settings {
     Setting(SpoolerProcess(Returns(false))) ->
         Expected(ErrorState),
 
+    Setting(SpoolerProcess(Returns(true), LogError("TEST-ERROR"))) ->
+        Expected(SuccessState, ErrorCode("TEST-ERROR"), Warning("SCHEDULER-280"), JobIsStopped),
+
     Setting(SpoolerProcess(Returns(true)), SpoolerProcessAfter(Returns(true))) ->
         Expected(SuccessState, SpoolerProcessAfterParameter(true)),
     Setting(SpoolerProcess(Returns(true)), SpoolerProcessAfter(Returns(false))) ->

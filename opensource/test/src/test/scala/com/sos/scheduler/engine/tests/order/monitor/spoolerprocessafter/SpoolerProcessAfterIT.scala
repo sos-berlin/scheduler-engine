@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 
+import SpoolerProcessAfterIT._
 import com.google.common.base.Strings.emptyToNull
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.job.{TaskId, TaskClosedEvent}
@@ -22,8 +23,6 @@ import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
-
-  import SpoolerProcessAfterIT._
 
   private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
   private lazy val orderSubsystem = scheduler.instance[OrderSubsystem]
@@ -68,8 +67,8 @@ final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
       assert(event.orderKey === setting.orderKey)
       assert(expected.orderStateExpectation matches event.state, "Expected OrderState="+expected.orderStateExpectation+", but was "+event.state)
       assert(event.spoolerProcessAfterParameterOption === expected.spoolerProcessAfterParameterOption, "Parameter for spooler_process_after(): ")
-      assert(messageCodes.toMap === expected.messageCodes.toMap)
       assert(job.state === expected.jobState, "Job.state is not as expected: ")
+      assert(messageCodes.toMap === expected.messageCodes.toMap)
     }
 
     private def cleanUpAfterTest() {
