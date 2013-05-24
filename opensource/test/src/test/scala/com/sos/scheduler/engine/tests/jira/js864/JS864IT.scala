@@ -22,7 +22,7 @@ final class JS864IT extends ScalaSchedulerTest {
       scheduler executeXml newOrderElem(new OrderId(i.toString))
   }
 
-  ignore("0) No job chain node having action='process'") {
+  test("0) No job chain node having action='process'") {
     val orderKey = jobChainPath.orderKey(new OrderId("0"))
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
@@ -32,7 +32,7 @@ final class JS864IT extends ScalaSchedulerTest {
     nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
-  ignore("1) Job chain node B has action='next_state'") {
+  test("1) Job chain node B has action='next_state'") {
     modifyNode(bState, nextStateAction)
     val orderKey = jobChainPath.orderKey(new OrderId("1"))
     resumeOrder(orderKey)
@@ -42,7 +42,7 @@ final class JS864IT extends ScalaSchedulerTest {
     nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
-  ignore("2) Job chain node A has action='next_state'") {
+  test("2) Job chain node A has action='next_state'") {
     modifyNode(bState, processAction)
     modifyNode(aState, nextStateAction)   // Alle wartenden Auftrage wechseln zu B
     val orderKey = jobChainPath.orderKey(new OrderId("2"))
@@ -53,7 +53,7 @@ final class JS864IT extends ScalaSchedulerTest {
     nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
-  ignore("3) Again, all job chain nodes having action='process'") {
+  test("3) Again, all job chain nodes having action='process'") {
     modifyNode(aState, processAction)
     val orderKey = jobChainPath.orderKey(new OrderId("3"))
     resumeOrder(orderKey)
