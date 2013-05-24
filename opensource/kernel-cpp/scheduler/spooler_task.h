@@ -359,6 +359,7 @@ struct Task : Object,
     bool                       _is_last_job_delay_after_error;
     bool                       _move_order_to_error_state;
     bool                       _delay_until_locks_available;
+    Order::Order_state_transition _order_state_transition;
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;
