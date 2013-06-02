@@ -1,12 +1,10 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
-import Config._
 import JettyModule._
-import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.sos.scheduler.engine.plugins.jetty.bodywriters.BodyWriters
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
 import com.sos.scheduler.engine.plugins.jetty.cpp.CppServlet
 import com.sos.scheduler.engine.plugins.jetty.log.{MainLogServlet, OrderLogServlet, JobLogServlet}
 import com.sos.scheduler.engine.plugins.jetty.services.RootService
@@ -29,9 +27,7 @@ final class JettyModule extends JerseyServletModule {
 
 object JettyModule {
   private def newObjectMapper() = {
-    def newJacksonModule() = new SimpleModule(classOf[Config].getName, new Version(0, 0, 0, "", null, null))
     val result = new ObjectMapper
-    result.registerModule(newJacksonModule())
     result.registerModule(DefaultScalaModule)
     result
   }

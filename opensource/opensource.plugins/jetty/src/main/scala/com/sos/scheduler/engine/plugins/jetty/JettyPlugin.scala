@@ -1,20 +1,24 @@
 package com.sos.scheduler.engine.plugins.jetty
 
+import JettyPlugin._
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
+import com.sos.scheduler.engine.plugins.jetty.SchedulerConfigurationAdapter.serverConfiguration
+import com.sos.scheduler.engine.plugins.jetty.ServerBuilder._
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyModule
 import javax.inject.{Named, Inject}
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.servlet.ServletContextHandler
 import org.w3c.dom.Element
-import com.sos.scheduler.engine.plugins.jetty.configuration.JettyModule
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @UseGuiceModule(classOf[JettyModule])
 final class JettyPlugin @Inject private(
     @Named(Plugin.configurationXMLName) pluginElement: Element,
-    schedulerConf: SchedulerConfiguration)
+    schedulerConfiguration: SchedulerConfiguration)
 extends AbstractPlugin {
 
-  private val server: Server = new ServerBuilder(pluginElement, schedulerConf).build()
+  private val server: Server = myNewServer(serverConfiguration(pluginElement, schedulerConfiguration))
   private var started = false
 
   /** Der Port des ersten Connector */
@@ -31,6 +35,18 @@ extends AbstractPlugin {
       server.join()
       started = false
     }
+  }
+}
+
+object JettyPlugin {
+  private def myNewServer(config: ServerConfiguration) =
+    newServer(config, List(newRootContextHandler()))
+
+  private def newRootContextHandler() = {
+    val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
+    result.setContextPath("/")
+    result.addServlet(classOf[RootForwardingServlet], "/")
+    result
   }
 }
 
