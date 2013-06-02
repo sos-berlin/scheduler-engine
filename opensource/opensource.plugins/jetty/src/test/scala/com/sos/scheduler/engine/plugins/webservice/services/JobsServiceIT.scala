@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.jav
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sun.jersey.api.client.GenericType
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -17,8 +18,6 @@ final class JobsServiceIT extends ScalaSchedulerTest {
   private lazy val jobsResource = javaResource(injector).path("jobs")
 
   test("Read job list") {
-    val xml = jobsResource.accept(TEXT_XML_TYPE).get(classOf[String])
-    xml should include ("<job name=\"a\"")
-    //assertXpathEvaluatesTo(<job name='a'/>.toString(), "/scheduler/job[@name='a']", xml)
+    jobsResource.accept(APPLICATION_JSON_TYPE).get(new GenericType[Set[String]]() {})  should equal (Set("a"))
   }
 }

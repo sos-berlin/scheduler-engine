@@ -1,18 +1,18 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.{noCache, wrapXmlResponse}
+import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.noCache
 import javax.inject.Inject
 import javax.ws.rs._
-import javax.ws.rs.core.{MediaType, Response}
-import scala.collection.JavaConversions._
+import javax.ws.rs.core.MediaType.APPLICATION_JSON
+import javax.ws.rs.core.Response
 
 @Path("jobs")
 final class JobsService @Inject private(jobSubsystem: JobSubsystem) {
   @GET
-  @Produces(Array(MediaType.TEXT_XML))
+  @Produces(Array(APPLICATION_JSON))
   def get() = {
-    val contents = wrapXmlResponse(jobSubsystem.getVisibleNames map { name => <job name={name}/> })
-    Response.ok(contents).cacheControl(noCache).build()
+    val result = jobSubsystem.getVisibleNames
+    Response.ok(result).cacheControl(noCache).build()
   }
 }

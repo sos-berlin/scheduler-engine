@@ -1,16 +1,18 @@
 package com.sos.scheduler.engine.plugins.jetty.tests.commons
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.plugins.jetty.configuration.Config
-import Config._
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
+import com.sos.scheduler.engine.plugins.jetty.configuration.ObjectMapperJacksonJsonProvider
+import com.sun.jersey.api.client.config.DefaultClientConfig
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
 import com.sun.jersey.api.client.{Client, WebResource}
 import java.net.URI
 import org.joda.time.Duration
-import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
 
 object JettyPluginTests {
 
@@ -36,10 +38,11 @@ object JettyPluginTests {
   }
 
   def newAuthentifyingClient(timeout: Duration = defaultTimeout, filters: Iterable[ClientFilter] = Iterable()) = {
-    val result = Client.create()
-    result.setReadTimeout(timeout.getMillis.toInt)
-    result.addFilter(new HTTPBasicAuthFilter("testName", "testPassword"))
-    for (f <- filters) result.addFilter(f)
-    result
+    val config = new DefaultClientConfig sideEffect { _.getSingletons.add(ObjectMapperJacksonJsonProvider) }
+    Client.create(config) sideEffect { client =>
+      client.setReadTimeout(timeout.getMillis.toInt)
+      client.addFilter(new HTTPBasicAuthFilter("testName", "testPassword"))
+      for (f <- filters) client.addFilter(f)
+    }
   }
 }
