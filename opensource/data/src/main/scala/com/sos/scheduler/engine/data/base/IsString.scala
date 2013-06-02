@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.data.base
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import javax.annotation.Nullable
 
-@JsonSerialize(using = classOf[IsStringSerializer])
-trait IsString {
-  val string: String
+//@JsonSerialize(using = classOf[IsStringSerializer])
+trait IsString extends SerializableIsString {
+  def string: String
 
   final def isEmpty = string.isEmpty
 
