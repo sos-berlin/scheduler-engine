@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import com.google.inject.servlet.GuiceFilter
-import com.sos.scheduler.engine.plugins.jetty.configuration.{ServerConfiguration, Config}
+import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.WebAppContextConfiguration
+import com.sos.scheduler.engine.plugins.jetty.configuration.{JettyConfiguration, Config}
 import javax.servlet.Filter
 import org.eclipse.jetty.security._
 import org.eclipse.jetty.server._
@@ -13,17 +14,19 @@ import org.eclipse.jetty.util.security.Constraint
 import org.eclipse.jetty.webapp.{WebXmlConfiguration, WebAppContext}
 import org.eclipse.jetty.xml.XmlConfiguration
 
-object ServerBuilder {
-  def newServer(config: ServerConfiguration, handlers: Iterable[Handler]) = {
+object JettyServerBuilder {
+  def newJettyServer(config: JettyConfiguration) = {
     def newContextHandler(): Handler = {
-      val webAppContext = newWebAppContext()
+      val webAppContext = config.webAppContextConfigurationOption match {
+        case Some(c) => newWebAppContext(c)
+        case None => new ServletContextHandler
+      }
+      (webAppContext: { def setContextPath(p: String) }).setContextPath(config.contextPath)
 
       def addFilter[F <: Filter](filter: Class[F], path: String, initParameters: (String, String)*) {
         webAppContext.getServletHandler.addFilterWithMapping(newFilterHolder(filter, initParameters), path, null)
       }
 
-      config.contextPathOption foreach webAppContext.setContextPath
-      //result.addEventListener(new GuiceServletContextListener { def getInjector = injector })
       addFilter(classOf[GzipFilter], "/*") //, "mimeTypes" -> gzipContentTypes.mkString(","))
       // GuiceFilter (Guice 3.0) kann nur einmal verwendet werden, siehe http://code.google.com/p/google-guice/issues/detail?id=635
       webAppContext.addFilter(classOf[GuiceFilter], "/*", null)  // Reroute all requests through this filter
@@ -35,21 +38,21 @@ object ServerBuilder {
       webAppContext
     }
 
-    def newWebAppContext() = {
-      val result = new WebAppContext
-      for (o <- config.resourceBaseURLOption) result.setResourceBase(o.toExternalForm)
-      for (f <- config.webXMLFileOption) result.setDescriptor(f.getPath)
-      new WebXmlConfiguration().configure(result)
-      result
+    def newWebAppContext(c: WebAppContextConfiguration) = {
+      val webAppContext = new WebAppContext
+      webAppContext.setResourceBase(c.resourceBaseURL.toExternalForm)
+      for (f <- c.webXMLFileOption) webAppContext.setDescriptor(f.getPath)
+      new WebXmlConfiguration().configure(webAppContext)
+      webAppContext
     }
 
     val result = new Server
-    for (o <- config.portOption) result.addConnector(newConnector(o))
+    for (o <- config.portOption) result.addConnector(newConnector(o.value))
     val logHandlerOption = config.accessLogFileOption map { o => newRequestLogHandler(new NCSARequestLog(o.getPath)) }
     result.setHandler(newHandlerCollection(
       logHandlerOption ++
       Some(newContextHandler()) ++
-      handlers ++
+      config.handlers ++
       Some(new DefaultHandler)))
     for (o <- config.jettyXMLURLOption) new XmlConfiguration(o).configure(result)
     result

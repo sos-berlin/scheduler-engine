@@ -3,12 +3,9 @@ package com.sos.scheduler.engine.plugins.jetty
 import JettyPlugin._
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.jetty.ServerBuilder._
-import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter.serverConfiguration
-import com.sos.scheduler.engine.plugins.jetty.configuration.ServerConfiguration
+import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
 import javax.inject.{Named, Inject}
-import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.w3c.dom.Element
 
@@ -19,30 +16,23 @@ final class JettyPlugin @Inject private(
     schedulerConfiguration: SchedulerConfiguration)
 extends AbstractPlugin {
 
-  private val server: Server = myNewServer(serverConfiguration(pluginElement, schedulerConfiguration))
-  private var started = false
+  private val webServer = new WebServer(myJettyConfiguration)
 
-  /** Der Port des ersten Connector */
-  def tcpPortNumber = server.getConnectors.head.getPort
+  private def myJettyConfiguration = {
+    val c = SchedulerConfigurationAdapter.jettyConfiguration(pluginElement, schedulerConfiguration)
+    c.copy(handlers = newRootContextHandler() +: c.handlers)
+  }
 
   override def activate() {
-    server.start()
-    started = true
+    webServer.start()
   }
 
   override def close() {
-    server.stop()
-    if (started) {
-      server.join()
-      started = false
-    }
+    webServer.close()
   }
 }
 
 object JettyPlugin {
-  private def myNewServer(config: ServerConfiguration) =
-    newServer(config, List(newRootContextHandler()))
-
   private def newRootContextHandler() = {
     val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
     result.setContextPath("/")

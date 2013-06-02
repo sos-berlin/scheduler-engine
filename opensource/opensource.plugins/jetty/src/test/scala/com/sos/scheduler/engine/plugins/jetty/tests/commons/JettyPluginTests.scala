@@ -4,8 +4,7 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
-import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
+import com.sos.scheduler.engine.plugins.jetty.WebServer
 import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
 import com.sos.scheduler.engine.plugins.jetty.configuration.ObjectMapperJacksonJsonProvider
 import com.sun.jersey.api.client.config.DefaultClientConfig
@@ -30,7 +29,8 @@ object JettyPluginTests {
     new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath)
 
   def jettyPortNumber(injector: Injector) =
-    injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).tcpPortNumber
+    WebServer.tcpPortNumber
+    //Macht abhängig vom Scheduler: injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).tcpPortNumber
 
   def newAuthResource(uri: URI): WebResource = {
     val client = newAuthentifyingClient(defaultTimeout)
