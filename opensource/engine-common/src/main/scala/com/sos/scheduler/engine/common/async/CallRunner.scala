@@ -4,7 +4,7 @@ import CallRunner._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import scala.annotation.tailrec
 import org.joda.time.Instant._
-import scala.Some
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 
 final class CallRunner(val queue: PoppableCallQueue) extends Runnable {
 
@@ -12,7 +12,7 @@ final class CallRunner(val queue: PoppableCallQueue) extends Runnable {
 
   def run() {
     while (!ended) {
-      Thread.sleep(nextTime - now().getMillis)
+      sleep(nextTime - now().getMillis)
       executeMatureCalls()
     }
   }

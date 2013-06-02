@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.data.job.TaskStartedEvent
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import java.lang.Thread.sleep
 import org.joda.time.DateTimeConstants.MILLIS_PER_DAY
 import org.joda.time._
 import org.joda.time.format.DateTimeFormat
@@ -14,6 +13,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.mutable
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 
 /** JS-948 */
 @RunWith(classOf[JUnitRunner])

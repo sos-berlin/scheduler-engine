@@ -9,13 +9,13 @@ import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
-import java.lang.Thread.sleep
 import org.joda.time._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import org.slf4j.LoggerFactory
 import scala.collection.mutable
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 
 @RunWith(classOf[JUnitRunner])
 class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
@@ -31,7 +31,7 @@ class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
     val file = new File(directory, "X")
     val file_ = new File(directory, "X~")
     scheduler executeXml jobElem(directory, """^.*[^~]$""")
-    sleep(500)
+    sleep(500.ms)
     //startTimes should have size (1)
 
     touch(file_)
@@ -65,7 +65,7 @@ class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
 
 private object StartWhenDirectoryChangedIT {
   val logger = LoggerFactory.getLogger(classOf[StartWhenDirectoryChangedIT])
-  val responseTime = (if (isWindows) 0 else 10000) + 2000
+  val responseTime = (if (isWindows) 0.s else 10.s) + 2.s
   val jobPath = JobPath.of("/a")
 
   def jobElem(directory: File, regEx: String) =
