@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import java.io.File
 import java.net.URL

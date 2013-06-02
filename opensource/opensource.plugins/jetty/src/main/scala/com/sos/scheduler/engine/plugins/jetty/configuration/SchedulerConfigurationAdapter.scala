@@ -1,9 +1,8 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import com.sos.scheduler.engine.common.xml.XmlUtils._
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.jetty.Utils._
-import com.sos.scheduler.engine.plugins.jetty.configuration.Config
+import com.sos.scheduler.engine.plugins.jetty.utils.Utils.randomInts
 import java.io.File
 import java.net.{BindException, ServerSocket}
 import org.w3c.dom.Element

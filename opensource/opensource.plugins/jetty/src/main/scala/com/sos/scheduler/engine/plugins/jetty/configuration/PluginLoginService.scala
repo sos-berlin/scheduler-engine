@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import PluginLoginService._
 import com.google.common.base.Splitter
@@ -9,7 +9,7 @@ import org.eclipse.jetty.util.security.{Credential, Password}
 import org.w3c.dom.Element
 import scala.collection.JavaConversions._
 
-class PluginLoginService(logins: Iterable[Login]) extends MappedLoginService {
+final class PluginLoginService(logins: Iterable[Login]) extends MappedLoginService {
   logins foreach { o => putUser(o.name, o.credential, o.roles) }
   setName(realmName)
 
@@ -19,9 +19,10 @@ class PluginLoginService(logins: Iterable[Login]) extends MappedLoginService {
 }
 
 object PluginLoginService {
-  val realmName = "JobScheduler realm"
+  private val realmName = "JobScheduler realm"
 
-  def apply(element: Element) = new PluginLoginService(logins(element))
+  def apply(element: Element) =
+    new PluginLoginService(logins(element))
 
   private val spaceSplitter = Splitter.on(Pattern.compile(" +")).omitEmptyStrings
 

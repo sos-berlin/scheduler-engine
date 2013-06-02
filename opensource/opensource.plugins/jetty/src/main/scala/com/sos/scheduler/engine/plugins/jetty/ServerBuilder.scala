@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import com.google.inject.servlet.GuiceFilter
-import com.sos.scheduler.engine.plugins.jetty.configuration.Config
+import com.sos.scheduler.engine.plugins.jetty.configuration.{ServerConfiguration, Config}
 import javax.servlet.Filter
 import org.eclipse.jetty.security._
 import org.eclipse.jetty.server._

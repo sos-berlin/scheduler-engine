@@ -3,8 +3,9 @@ package com.sos.scheduler.engine.plugins.jetty
 import JettyPlugin._
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.jetty.SchedulerConfigurationAdapter.serverConfiguration
 import com.sos.scheduler.engine.plugins.jetty.ServerBuilder._
+import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter.serverConfiguration
+import com.sos.scheduler.engine.plugins.jetty.configuration.ServerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
 import javax.inject.{Named, Inject}
 import org.eclipse.jetty.server.Server

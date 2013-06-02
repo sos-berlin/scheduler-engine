@@ -2,9 +2,8 @@ package com.sos.scheduler.engine.plugins.jetty.log
 
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.Utils.getOrSetAttribute
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.sos.scheduler.engine.plugins.jetty.utils.Utils.getOrSetAttribute
+import javax.inject.{Inject, Singleton}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 @Singleton

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.securitylevel.anonymous;
+package com.sos.scheduler.engine.plugins.jetty.tests.securitylevel.anonymous;
 
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;

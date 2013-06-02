@@ -1,8 +1,8 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.utils
 
+import javax.servlet.ServletRequest
 import scala.math._
 import scala.util.Random
-import javax.servlet.ServletRequest
 
 object Utils {
   def randomInts(range: Range) = {

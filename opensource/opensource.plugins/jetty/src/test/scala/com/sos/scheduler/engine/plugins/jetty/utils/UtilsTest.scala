@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty
+package com.sos.scheduler.engine.plugins.jetty.utils
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

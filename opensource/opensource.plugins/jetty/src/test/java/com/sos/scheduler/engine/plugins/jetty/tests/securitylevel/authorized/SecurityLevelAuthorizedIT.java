@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.securitylevel.authorized;
+package com.sos.scheduler.engine.plugins.jetty.tests.securitylevel.authorized;
 
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -28,8 +28,8 @@ import static org.hamcrest.Matchers.containsString;
 public class SecurityLevelAuthorizedIT extends SchedulerTest {
 
     private static final String generalPassword = "testpassword";
-    private static final String jettyXmlTemplateResourcePath = "com/sos/scheduler/engine/plugins/jetty/securitylevel/authorized/jetty-template.xml";
-    private static final String realmPropertiesPath = "com/sos/scheduler/engine/plugins/jetty/securitylevel/authorized/realm.properties";
+    private static final String jettyXmlTemplateResourcePath = "com/sos/scheduler/engine/plugins/jetty/tests/securitylevel/authorized/jetty-template.xml";
+    private static final String realmPropertiesPath = "com/sos/scheduler/engine/plugins/jetty/tests/securitylevel/authorized/realm.properties";
     private static final String anonymousUser = "anonymous";
     private static final String xmlCommand = new CommandBuilder().startJobImmediately("a").getCommand();
 
