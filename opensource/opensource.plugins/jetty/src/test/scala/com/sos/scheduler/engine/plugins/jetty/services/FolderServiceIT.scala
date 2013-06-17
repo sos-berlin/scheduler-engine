@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.jetty.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
-import com.sos.scheduler.engine.test.TestConfiguration
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.Reader
 import javax.ws.rs.core.MediaType._

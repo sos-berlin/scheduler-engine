@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests.javaResource
-import com.sos.scheduler.engine.test.TestConfiguration
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sun.jersey.api.client.WebResource
 import java.io.{BufferedReader, IOException, Reader}

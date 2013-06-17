@@ -2,12 +2,13 @@ package com.sos.scheduler.engine.tests.scheduler.config.schema
 
 import SchemaIT._
 import com.sos.scheduler.engine.common.time.Time
-import com.sos.scheduler.engine.test.{TestConfiguration, TestSchedulerController}
+import com.sos.scheduler.engine.test.TestSchedulerController
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
-import java.io.File
 
 @RunWith(classOf[JUnitRunner])
 final class SchemaIT extends FunSuite {

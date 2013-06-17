@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js804;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import com.sos.scheduler.engine.test.util.What;
 import org.junit.Test;
@@ -10,9 +11,7 @@ import org.w3c.dom.Document;
 
 import java.io.StringWriter;
 
-import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.writeXmlTo;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -34,10 +33,13 @@ public final class JS804IT extends SchedulerTest {
 	private final CommandBuilder util = new CommandBuilder();
 	private boolean result_setback = false;
 	private boolean result_simple = true;
+
+    public JS804IT() {
+        super(new TestConfigurationBuilder().terminateOnError(false).build());
+    }
 	
 	@Test
 	public void testSetback() {
-		controller().setTerminateOnError(false);
 		controller().activateScheduler();
 		controller().scheduler().executeXml( util.modifyOrder(order_setback).getCommand() );
 		controller().tryWaitForTermination(shortTimeout);

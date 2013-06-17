@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js782;
 
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -13,8 +14,11 @@ import static org.junit.Assert.assertTrue;
 public final class JS782IT extends SchedulerTest {
     private static final OrderId orderId = new OrderId("testOrder");
 
+    public JS782IT() {
+        super(new TestConfigurationBuilder().terminateOnError(false).build());
+    }
+
     @Test public void suspendedOrderMovedToEndStateShouldBeOnBlacklist() {
-        controller().setTerminateOnError(false);
         controller().activateScheduler();
         doTest();
         controller().terminateScheduler();

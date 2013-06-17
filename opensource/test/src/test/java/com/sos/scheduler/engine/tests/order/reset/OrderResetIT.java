@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.data.order.OrderResumedEvent;
 import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.Test;
 
@@ -13,9 +14,12 @@ public class OrderResetIT extends SchedulerTest {
 
     private int touchedCount = 0;
 
+    public OrderResetIT() {
+        super(new TestConfigurationBuilder().terminateOnError(false).build());
+    }
+
 	@Test
 	public void test() throws Exception {
-        controller().setTerminateOnError(false);
 		controller().activateScheduler();
         CommandBuilder cmd = new CommandBuilder();
         cmd.addOrder("chain","test");
@@ -34,5 +38,4 @@ public class OrderResetIT extends SchedulerTest {
     public void handleResume(OrderResumedEvent e) throws InterruptedException {
         controller().terminateScheduler();
     }
-
 }

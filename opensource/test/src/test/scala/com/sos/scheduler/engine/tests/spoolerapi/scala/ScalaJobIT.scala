@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.scala._
 import org.junit.runner.RunWith
@@ -18,11 +19,11 @@ import org.scalatest.matchers.ShouldMatchers.{value => _, _ }
 @RunWith(classOf[JUnitRunner])
 final class ScalaJobIT extends ScalaSchedulerTest {
 
+  protected override lazy val testConfiguration = TestConfiguration(terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
 
   override def checkedBeforeAll() {
     eventPipe
-    controller.setTerminateOnError(false)
     controller.activateScheduler()
   }
 

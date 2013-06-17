@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,11 @@ public final class JS644StoppedJobIT extends SchedulerTest {
     enum M { taskEnded, orderStateChanged, terminated }
     private final Gate<M> threadGate = new Gate<M>();
 
+    public JS644StoppedJobIT() {
+        super(new TestConfigurationBuilder().terminateOnError(false).build());     // Wegen SCHEDULER-280  Process terminated with exit code 1 (0x1)
+    }
+
     @Test public void test() throws Exception {
-        controller().setTerminateOnError(false);   // Wegen SCHEDULER-280  Process terminated with exit code 1 (0x1)
         controller().activateScheduler();
         threadGate.expect(taskEnded, shortTimeout);
         modifyFile(controller().environment().fileFromPath(jobPath));

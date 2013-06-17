@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.data.order.OrderResumedEvent;
 import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.Test;
 
@@ -36,9 +37,12 @@ public class JS461IT extends SchedulerTest {
 	// Queue for collecting the fired events in the listener thread
 	private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
 
+    public JS461IT() {
+        super(new TestConfigurationBuilder().terminateOnError(false).build());
+    }
+
 	@Test
 	public void test() throws Exception {
-		controller().setTerminateOnError(false);
 		controller().activateScheduler();
 		utils.addOrder(JOB_CHAIN);
 		controller().scheduler().executeXml(utils.getCommand());

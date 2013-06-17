@@ -3,11 +3,12 @@ package com.sos.scheduler.engine.plugins.jetty.cpp
 import CppServletIT._
 import com.google.common.io.Files
 import com.google.inject.Injector
-import com.sos.scheduler.engine.data.job.{TaskStartedEvent, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.TaskStartedEvent
 import com.sos.scheduler.engine.kernel.settings.SettingName
 import com.sos.scheduler.engine.plugins.jetty.Config._
+import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests
 import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
-import com.sos.scheduler.engine.test.TestConfiguration
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.{Client, ClientResponse, UniformInterfaceException}
@@ -19,7 +20,6 @@ import javax.ws.rs.core.Response.Status._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
-import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests
 
 @RunWith(classOf[JUnitRunner])
 final class CppServletIT extends ScalaSchedulerTest {

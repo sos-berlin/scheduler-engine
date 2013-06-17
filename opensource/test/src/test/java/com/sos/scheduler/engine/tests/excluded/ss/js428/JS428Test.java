@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -34,6 +35,10 @@ public class JS428Test extends SchedulerTest {
         logger.debug("starting test for " + JS428Test.class.getName());
     }
 
+    public JS428Test() {
+        super(new TestConfigurationBuilder().terminateOnError(false).build());
+    }
+
     /**
      * Dieser Test funktioniert nicht, weil die StepStartedEvent für shell jobs nicht ausgelöst wird.
      * Hier sind noch Änderungen im C++ code vorzunehmen.
@@ -44,7 +49,6 @@ public class JS428Test extends SchedulerTest {
      */
     @Ignore
     public void mixedTest() throws InterruptedException {
-        controller().setTerminateOnError(false);
         String resultFile = getTempFile("scheduler.log").getAbsolutePath();
         controller().activateScheduler(asList("-e","-log-level=warn","-log=" + resultFile));
         util.addOrder("jobchain-mixed")
@@ -71,7 +75,6 @@ public class JS428Test extends SchedulerTest {
 
     @Test
     public void apiTest() throws InterruptedException {
-        controller().setTerminateOnError(false);
         String resultFile = getTempFile("scheduler.log").getAbsolutePath();
         controller().activateScheduler(asList("-e","-log-level=warn","-log=" + resultFile));
         util.addOrder("jobchain-api")

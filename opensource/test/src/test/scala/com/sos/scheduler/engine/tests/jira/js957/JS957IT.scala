@@ -7,12 +7,13 @@ import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderFinishedEven
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.SchedulerTest.shortTimeout
-import com.sos.scheduler.engine.test.{DatabaseConfiguration, TestConfiguration, TestSchedulerController}
+import com.sos.scheduler.engine.test.TestSchedulerController
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 
 /** Jira-Tickets JS-956 und JS-957. */
 @RunWith(classOf[JUnitRunner])
@@ -22,7 +23,7 @@ class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with 
     getClass,
     TestConfiguration(
       logCategories = "scheduler java.stackTrace-",
-      database = DatabaseConfiguration(use = true, closeDelay = 60.s)))
+      database = Some(DefaultDatabaseConfiguration(closeDelay = 60.s))))
 
   after {
     controller.close()
