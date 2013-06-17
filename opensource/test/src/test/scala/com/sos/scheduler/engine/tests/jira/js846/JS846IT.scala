@@ -3,9 +3,9 @@ package com.sos.scheduler.engine.tests.jira.js846
 import JS846IT._
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.{DatabaseConfiguration, TestConfiguration}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
 class JS846IT extends ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
-    database = DatabaseConfiguration(use = true))
+    database = Some(DefaultDatabaseConfiguration()))
 
   for (titleLength <- Seq(201, 500)) {   // Bei 10000 Zeichen gbt es einen StackOverflowError
     test(s"Order with title $titleLength characters should not lead to database error") {

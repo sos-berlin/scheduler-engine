@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
-import com.sos.scheduler.engine.test.TestConfiguration
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith

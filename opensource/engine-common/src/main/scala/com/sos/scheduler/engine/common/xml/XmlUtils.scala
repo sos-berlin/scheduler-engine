@@ -2,10 +2,10 @@ package com.sos.scheduler.engine.common.xml
 
 import com.google.common.base.Objects.firstNonNull
 import com.google.common.collect.ImmutableList
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ModifiedBy.modifiedBy
-import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
-import com.sos.scheduler.engine.common.scalautil.{ModifiedBy, Logger}
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
+import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.io._
 import java.nio.charset.Charset
@@ -22,11 +22,13 @@ import org.xml.sax.InputSource
 import scala.sys.error
 
 @ForCpp object XmlUtils {
-  private val logger = Logger(getClass)
   private lazy val xPathFactory = newXPathFactory()
   private lazy val xPath = threadLocal { xPathFactory.newXPath() }
+
+  private val logger = Logger(getClass)
   private val documentBuilder = threadLocal { (DocumentBuilderFactory.newInstance() modifiedBy { _.setNamespaceAware(true) }).newDocumentBuilder() }
   private val transformerFactory = threadLocal { TransformerFactory.newInstance() }
+
   private var static_xPathNullPointerLogged = false
 
   @ForCpp def newDocument(): Document = {
@@ -101,7 +103,7 @@ import scala.sys.error
     case "false" => Some(false)
     case "1" => Some(true)
     case "0" => Some(false)
-    case _ if (s.isEmpty) => Some(deflt)
+    case _ if s.isEmpty => Some(deflt)
     case _ => None
   }
 
@@ -195,7 +197,7 @@ import scala.sys.error
       static_xPathNullPointerLogged = true
     }
     try {
-      @SuppressWarnings(Array("unchecked")) val result = (Class.forName(workAroundClassName).asInstanceOf[Class[XPathFactory]]).newInstance
+      @SuppressWarnings(Array("unchecked")) val result = Class.forName(workAroundClassName).asInstanceOf[Class[XPathFactory]].newInstance
       result
     }
     catch {

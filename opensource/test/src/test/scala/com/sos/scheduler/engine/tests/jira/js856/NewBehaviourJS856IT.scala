@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js856
 
 import JS856IT.originalParameters
-import com.sos.scheduler.engine.test.{DatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -10,7 +10,7 @@ import org.scalatest.junit.JUnitRunner
 final class NewBehaviourJS856IT extends JS856IT("New behaviour: restore original order state") {
 
   override lazy val testConfiguration = TestConfiguration(
-    database = DatabaseConfiguration(use = true),
+    database = Some(DefaultDatabaseConfiguration()),
     logCategories = "java.stackTrace-",   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
     resourceNameMap = List("new-behaviour-scheduler.xml" -> "scheduler.xml"))
 

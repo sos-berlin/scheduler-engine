@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.common.system.Files
 import com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory
 import com.sos.scheduler.engine.common.system.Files.tryRemoveDirectoryRecursivly
-import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.common.xml.XmlUtils.prettyXml
@@ -30,11 +29,11 @@ import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.main.SchedulerState
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.binary.TestCppBinaries
+import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
-import org.joda.time.Duration
 
 final class TestSchedulerController(
     testClass: Class[_],
@@ -42,8 +41,7 @@ final class TestSchedulerController(
 extends DelegatingSchedulerController(testClass.getName)
 with EventHandlerAnnotated with SosAutoCloseable {
 
-  private val testName: String = testClass.getName
-
+  private val testName = testClass.getName
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
   lazy val environment = new Environment(
@@ -53,15 +51,26 @@ with EventHandlerAnnotated with SosAutoCloseable {
     fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   private val debugMode = configuration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
-  private val jdbcUrl = "jdbc:h2:mem:scheduler-" + testName
-  private var terminateOnError: Boolean = true
+  private val logCategories = (configuration.logCategories +" "+ System.getProperty("scheduler.logCategories")).trim
+
   private var isPrepared: Boolean = false
-  private var logCategories = (configuration.logCategories +" "+ System.getProperty("scheduler.logCategories")).trim
   private var _scheduler: Scheduler = null
   private val closingRunnables = mutable.Buffer[() => Unit]()
 
   setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")))
-  if (configuration.database.use) useDatabase(configuration.database.closeDelay)
+
+  val jdbcUrlOption: Option[String] = configuration.database match {
+    case Some(c: JdbcDatabaseConfiguration) =>
+      Class.forName(c.jdbcClassName)
+      val jdbcUrl = c.testJdbcUrl(testName)
+      setSettings(Settings.of(SettingName.dbName, Hostware.databasePath(c.jdbcClassName, jdbcUrl)))
+      Some(jdbcUrl)
+    case Some(c: HostwareDatabaseConfiguration) =>
+      setSettings(Settings.of(SettingName.dbName, c.hostwareString))
+      None
+    case None =>
+      None
+  }
 
   private def workDirectory(testClass: Class[_]): File = {
     System.getProperty(workDirectoryPropertyName) match {
@@ -78,17 +87,6 @@ with EventHandlerAnnotated with SosAutoCloseable {
   def close() {
     try getDelegate.close()
     finally for (r <- closingRunnables.view.reverse) r()
-  }
-
-  /** Bricht den Test mit Fehler ab, wenn ein [[com.sos.scheduler.engine.data.log.ErrorLogEvent]] ausgelöst worden ist. */
-  def setTerminateOnError(o: Boolean) {
-    getDelegate.checkIsNotStarted()
-    terminateOnError = o
-  }
-
-  def setLogCategories(o: String) {
-    getDelegate.checkIsNotStarted()
-    logCategories = o
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */
@@ -141,7 +139,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
     val previous = _scheduler
     _scheduler = getDelegate.waitUntilSchedulerState(SchedulerState.active)
     if (_scheduler == null) throw new RuntimeException("Scheduler aborted before startup")
-    if (previous == null && terminateOnError) checkForErrorLogLine()
+    if (previous == null && configuration.terminateOnError) checkForErrorLogLine()
   }
 
   def waitForTermination(timeout: Time) {
@@ -170,13 +168,13 @@ with EventHandlerAnnotated with SosAutoCloseable {
 
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
-    if (!configuration.expectedErrorLogEventPredicate(e) && terminateOnError)
+    if (!configuration.expectedErrorLogEventPredicate(e) && configuration.terminateOnError)
       terminateAfterException(error(s"Test terminated after error log line: ${e.getLine}"))
   }
 
   @EventHandler @HotEventHandler
   def handleEvent(e: EventHandlerFailedEvent) {
-    if (terminateOnError) {
+    if (configuration.terminateOnError) {
       logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: " + e)
       terminateAfterException(e.getThrowable)
     }
@@ -211,30 +209,17 @@ with EventHandlerAnnotated with SosAutoCloseable {
   def isStarted =
     getDelegate.isStarted
 
-  def useDatabase() {
-    useDatabase(closeDelay = 0.s)
-  }
-
-  def useDatabase(closeDelay: Duration) {
-    val suffix = if (closeDelay == Duration.ZERO) "" else ";DB_CLOSE_DELAY=" + closeDelay.plus(999).getStandardSeconds
-    val dbName = Hostware.databasePath(jdbcClass, jdbcUrl + suffix)
-    setSettings(Settings.of(SettingName.dbName, dbName))
-  }
-
   def cppBinaries: CppBinaries =
     TestCppBinaries.cppBinaries(debugMode)
 
-  def newJDBCConnection(): Connection = {
-    Class.forName(jdbcClass)
-    DriverManager.getConnection(jdbcUrl)
-  }
+  def newJDBCConnection(): Connection =
+    DriverManager.getConnection(jdbcUrlOption.get)
 }
 
 object TestSchedulerController {
   final val shortTimeout = Time.of(15.0)
   private val logger = Logger(getClass)
   private val workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory"
-  private val jdbcClass = "org.h2.Driver"
 
   private def makeCleanDirectory(directory: File) {
     Files.makeDirectory(directory)

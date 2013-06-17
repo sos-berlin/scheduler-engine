@@ -4,6 +4,8 @@ import com.google.common.io.Files;
 import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.test.configuration.TestConfiguration;
+import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import org.junit.After;
 import org.junit.Before;
 
@@ -16,7 +18,11 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     private final TestSchedulerController controller;
 
     protected SchedulerTest() {
-        controller = new TestSchedulerController(getClass(), TestConfiguration.standard());
+        this(new TestConfigurationBuilder().build());
+    }
+
+    protected SchedulerTest(TestConfiguration c) {
+        controller = new TestSchedulerController(getClass(), c);
     }
 
     protected SchedulerTest(TestSchedulerController controller) {

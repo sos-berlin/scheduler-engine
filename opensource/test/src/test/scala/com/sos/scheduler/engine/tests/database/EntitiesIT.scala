@@ -13,11 +13,11 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTim
 import com.sos.scheduler.engine.kernel.settings.{SettingName, Settings}
 import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.Environment.schedulerId
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.test.{DatabaseConfiguration, TestConfiguration}
 import javax.persistence.EntityManagerFactory
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
@@ -32,7 +32,7 @@ import scala.xml.XML
 final class EntitiesIT extends ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
-    database = DatabaseConfiguration(use = true),
+    database = Some(DefaultDatabaseConfiguration()),
     logCategories = "java.stackTrace-")  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
 
   private val testStartTime = now() withMillisOfSecond 0
@@ -59,7 +59,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
   private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
   test("TaskHistoryEntity") {
-    taskHistoryEntities should have size (2)
+    taskHistoryEntities should have size 2
   }
 
   test("First TaskHistoryEntity is from Scheduler start") {
@@ -99,7 +99,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
 
   test("TaskEntity is written as expected") {
     val e = fetchTaskEntities(simpleJobPath)
-    e should have size (3)
+    e should have size 3
 
     e(0) should have (
       'taskId (firstTaskHistoryEntityId + 2),
@@ -125,7 +125,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     val queuedTasksElem = (scheduler executeXml <show_job job={simpleJob.getPath.string} what="task_queue"/>).elem \ "answer" \ "job" \ "queued_tasks"
     (queuedTasksElem \ "@length").text.toInt should equal (3)
     val queuedTaskElems = queuedTasksElem \ "queued_task"
-    queuedTaskElems should have size (3)
+    queuedTaskElems should have size 3
     for (q <- queuedTaskElems) {
       val enqueuedString = (q \ "@enqueued").text
       val t = xmlDateTimeFormatter.parseDateTime(enqueuedString)
@@ -155,7 +155,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
 
   test("Job.tryFetchAverageStepDuration()") {
     val duration = simpleJob.tryFetchAverageStepDuration().get
-    duration.getMillis should (be >= (0L) and be <= (10*1000L))
+    duration.getMillis should (be >= 0L and be <= 10*1000L)
   }
 
   test("JobChainEntity") {
@@ -179,7 +179,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="next_state"/>
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="300" action="stop"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
-      nodes should have size (2)
+      nodes should have size 2
       for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
       nodes(0) should have ('orderState ("200"), 'action ("next_state"))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))
@@ -187,7 +187,7 @@ final class EntitiesIT extends ScalaSchedulerTest {
 
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
-      nodes should have size (2)
+      nodes should have size 2
       for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
       nodes(0) should have ('orderState ("200"), 'action (null))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))

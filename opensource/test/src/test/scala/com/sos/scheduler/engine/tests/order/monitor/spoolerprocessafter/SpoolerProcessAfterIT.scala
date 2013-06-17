@@ -3,16 +3,19 @@ package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 import SpoolerProcessAfterIT._
 import com.google.common.base.Strings.emptyToNull
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.{TaskId, TaskClosedEvent}
+import com.sos.scheduler.engine.data.job.TaskClosedEvent
+import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.log.{LogEvent, SchedulerLogLevel}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{EventHandler, HotEventHandler}
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.time.TimeoutWithSteps
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
+import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.SpoolerProcessAfterIT.MyFinishedEvent
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected._
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting._
 import org.joda.time.Duration.millis
@@ -24,11 +27,12 @@ import scala.collection.mutable
 @RunWith(classOf[JUnitRunner])
 final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
 
-  private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
-  private lazy val orderSubsystem = scheduler.instance[OrderSubsystem]
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
 
-  controller.setTerminateOnError(false)
+  protected override lazy val testConfiguration = TestConfiguration(terminateOnError = false)
+
+  private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
+  private lazy val orderSubsystem = scheduler.instance[OrderSubsystem]
 
   Settings.list.zipWithIndex foreach { case ((setting, expected), i) =>
     val index = i + 1

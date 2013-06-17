@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.log
 
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.javaResource
-import com.sos.scheduler.engine.test.TestConfiguration
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sun.jersey.api.client.WebResource
