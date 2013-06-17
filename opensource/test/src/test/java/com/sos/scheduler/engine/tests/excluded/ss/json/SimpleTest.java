@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderKey;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
@@ -26,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 public class SimpleTest extends SchedulerTest {
     private static final JobPath jobPath = JobPath.of("/job1");
 	private static final Logger logger = LoggerFactory.getLogger(SimpleTest.class);
+    private static final OrderKey orderKey = OrderKey.of("jobchain1", "jobchain1");
 	
 	private final CommandBuilder util = new CommandBuilder();
 
@@ -105,7 +107,7 @@ public class SimpleTest extends SchedulerTest {
 
         // deserialize the event from JSON into the TaskStartEvent object
         OrderFinishedEvent ev = mapper.readValue(outputStream.toString(), OrderFinishedEvent.class);
-        assertEquals("OrderFinishedEvent JobChain /jobchain1:jobchain1",ev.toString());
+        assertEquals(new OrderFinishedEvent(orderKey), ev);
 
         // deserialize the event from JSON into a JsonNode
         //TODO keine anderen Felder als TYPE werden geliefert. Warum?
