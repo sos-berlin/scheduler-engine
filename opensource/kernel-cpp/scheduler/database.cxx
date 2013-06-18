@@ -1284,13 +1284,13 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
     bool    too_much_errors = false;
     string  warn_msg;
 
+    if( _spooler->_is_reopening_database_after_error)  throw;
 
-    // Wenn ein TCP-Kommando ausgeführt wird, müssen wir hier sofort raus, sonst wird das Kommando doppelt oder rekursiv aufgerufen werden async_continue_selected(), s.u.
-    if( _spooler->_executing_command )  throw;
-
-    if( In_recursion in_recursion = &_waiting )  throw_xc( callers_exception );   
-    else
-    {
+    In_recursion in_recursion = &_waiting; 
+    if (in_recursion)  throw_xc( callers_exception );   
+    
+    try {
+        _spooler->_is_reopening_database_after_error = true;
         _error = callers_exception.what();
 
         _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception, function ) );
@@ -1353,7 +1353,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                 {
                     _error = x.what();
 
-                    if( _spooler->_executing_command )  throw;
+                    if( _spooler->_executing_command )  throw;   // Wenn wir ein (TCP-)Kommando ausführen, warten (und blockieren) wir nicht. Der Scheduler-Zustand kann dann vom Datenbank-Zustand abweichen!
 
                     _spooler->log()->warn( x.what() );
 
@@ -1429,6 +1429,10 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
         }
 
         if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->assert_is_still_active( Z_FUNCTION );
+    }
+    catch (exception&) {
+        _spooler->_is_reopening_database_after_error = false;
+        throw;
     }
 }
 

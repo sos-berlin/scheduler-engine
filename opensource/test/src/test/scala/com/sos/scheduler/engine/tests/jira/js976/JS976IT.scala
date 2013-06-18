@@ -12,7 +12,7 @@ import org.scalatest.junit.JUnitRunner
   * Erforderliche MySQL-Kommandos:
   *   create database scheduler;
   *   create user 'scheduler'@'localhost';
-  *   create database scheduler;
+  *   grant ...;
   */
 @RunWith(classOf[JUnitRunner])
 final class JS976IT extends ScalaSchedulerTest {
@@ -29,6 +29,7 @@ final class JS976IT extends ScalaSchedulerTest {
   if (withMySQL)
     test("JS-976") {
       sleep(3.s)
+      scheduler executeXml <job_chain_node.modify job_chain="test" state="100" action="process"/>   // Datenbank hat sich Zustand vom letzten Testlauf gemerkt
       scheduler executeXml <job_chain_node.modify job_chain="test" state="100" action="stop"/>
     }
 }
