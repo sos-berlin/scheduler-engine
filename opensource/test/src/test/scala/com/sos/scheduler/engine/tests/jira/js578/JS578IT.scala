@@ -34,7 +34,7 @@ final class JS578IT extends ScalaSchedulerTest {
     intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[OrderTouchedEvent](3.s)  { _.orderKey == orderKey }}
   }
 
-  test("<modify_order at='next'/> (PENDING)") {
+  ignore("<modify_order at='next'/> (PENDING)") {
     pendingUntilFixed {
       val eventPipe = controller.newEventPipe()
       startOrderAt("next")
@@ -42,7 +42,7 @@ final class JS578IT extends ScalaSchedulerTest {
     }
   }
 
-  test("<modify_order at='next'/> while order is running repeats order (PENDING)") {
+  ignore("<modify_order at='next'/> while order is running repeats order (PENDING)") {
     pendingUntilFixed {
       val eventPipe = controller.newEventPipe()
       setJobChainNodeStop(true)
