@@ -716,6 +716,7 @@ struct Spooler : Object,
     bool                       _central_configuration_directory_as_option_set;
 
     bool                       _executing_command;          // true: database wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
+    bool                       _is_reopening_database_after_error;       // true: database.cxx wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 
     bool                       _subprocess_own_process_group_default;
