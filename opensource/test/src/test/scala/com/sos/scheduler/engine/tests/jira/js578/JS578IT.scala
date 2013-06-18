@@ -7,8 +7,11 @@ import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
+@RunWith(classOf[JUnitRunner])
 final class JS578IT extends ScalaSchedulerTest {
   private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystem])
 
