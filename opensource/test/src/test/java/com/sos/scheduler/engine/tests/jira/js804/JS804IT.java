@@ -11,7 +11,9 @@ import org.w3c.dom.Document;
 
 import java.io.StringWriter;
 
-import static com.sos.scheduler.engine.common.xml.XmlUtils.*;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.writeXmlTo;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

@@ -14,7 +14,10 @@ import org.w3c.dom.Element;
 import java.util.Map;
 
 import static com.google.common.collect.Sets.difference;
-import static com.sos.scheduler.engine.common.xml.XmlUtils.*;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.booleanXPath;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.elementXPath;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.loadXml;
+import static com.sos.scheduler.engine.common.xml.XmlUtils.toXml;
 import static com.sos.scheduler.engine.tests.xmlcommand.job_why.Configuration.jobNames;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
