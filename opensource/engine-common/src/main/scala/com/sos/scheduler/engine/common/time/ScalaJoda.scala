@@ -2,10 +2,12 @@ package com.sos.scheduler.engine.common.time
 
 import org.joda.time.Duration.{millis, standardSeconds, standardHours, standardDays}
 import org.joda.time._
-import scala.math.abs
 import scala.annotation.tailrec
+import scala.math.abs
 
 object ScalaJoda {
+  @volatile var extraSleepCount = 0L
+
   implicit class DurationRichInt(val delegate: Int) extends AnyVal {
     final def ms = millis(delegate)
     final def s = standardSeconds(delegate)
@@ -68,8 +70,24 @@ object ScalaJoda {
       x.getMillis compare y.getMillis
   }
 
-  def sleep(d: Duration) =
-    Thread.sleep(d.getMillis)
+  def sleep(d: Duration) {
+    sleep(d.getMillis)
+  }
+
+  def sleep(millis: Long) = {
+    val m = 1000000
+    val until = System.nanoTime() + millis * m
+    Thread.sleep(millis)
+    @tailrec def extraSleep() {
+      val remainingNanos = until - System.nanoTime()
+      if (remainingNanos > 0) {
+        extraSleepCount += 1
+        Thread.sleep(remainingNanos / m, (remainingNanos % m).toInt)
+        extraSleep()
+      }
+    }
+    extraSleep()
+  }
 
   def millisToPretty(t: Long) = {
     val result = new StringBuilder(30)
