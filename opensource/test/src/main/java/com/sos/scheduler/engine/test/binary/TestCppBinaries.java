@@ -38,13 +38,12 @@ public final class TestCppBinaries {
     };
 
     private static CppBinaries newCppBinaries(CppBinariesDebugMode debugMode) {
-        ImmutableList<Resource> resources = resources();
-        if (resources.isEmpty()) {
-            // Das passiert, wenn ohne Maven gebaut wird. So unter der IntelliJ-IDE. Dann greifen wir eben direkt auf die binaries im Dateisystem zu.
-            if (!isUnderIDE())
-                throw new RuntimeException("Missing kernel-cpp resources while running under Maven");  // Denn nur bei den Ressourcen sind wir über deren Stand sicher.
+        if (isUnderIDE()) {  // So unter der IDE wollen wir direkt auf die binaries im Dateisystem zugreifen, die frisch gebaut worden sein können.
             return new KernelCppArtifactBinaries(debugMode);
-        } else {
+        }
+        else {
+            ImmutableList<Resource> resources = resources();
+            if (resources.isEmpty()) throw new RuntimeException("Missing kernel-cpp resources while running under Maven");  // Denn nur bei den Ressourcen sind wir über deren Stand sicher.
             // Wir packen die binaries aus den Ressourcen aus
             String d = System.getProperty(binariesTmpdirPropertyName);
             return isNullOrEmpty(d)? newTemporaryCppBinaries(resources, debugMode)
@@ -53,8 +52,11 @@ public final class TestCppBinaries {
     }
 
     private static boolean isUnderIDE() {
-        return System.getProperty("sun.java.command").startsWith("com.intellij.") ||     // IntelliJ IDEA 12.1 kennt die Maven-Properties
-            System.getProperty("com.sos.scheduler.engine.test.underMaven") == null;
+        return System.getProperty("sun.java.command").startsWith("com.intellij.") || !isUnderMaven();    // IntelliJ IDEA 12.1 kennt die Maven-Properties
+    }
+
+    private static boolean isUnderMaven() {
+        return System.getProperty("com.sos.scheduler.engine.test.underMaven") != null;
     }
 
     private static ImmutableList<Resource> resources() {

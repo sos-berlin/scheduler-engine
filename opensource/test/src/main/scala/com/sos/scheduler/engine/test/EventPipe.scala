@@ -12,12 +12,12 @@ import com.sos.scheduler.engine.main.event.TerminatedEvent
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import org.joda.time.Instant.now
-import org.joda.time.{ReadableDuration, Instant, Duration}
+import org.joda.time.{ReadableDuration, Duration}
 
-class EventPipe(eventBus: EventBus, defaultTimeout: Duration)
+final class EventPipe(eventBus: EventBus, defaultTimeout: Duration)
 extends EventHandlerAnnotated with SosAutoCloseable {
 
-  private final val queue = new LinkedBlockingQueue[Event]
+  private val queue = new LinkedBlockingQueue[Event]
 
   def close() {
     eventBus unregisterAnnotated this
@@ -28,29 +28,35 @@ extends EventHandlerAnnotated with SosAutoCloseable {
   }
 
   def next[E <: Event](implicit c: ClassTag[E]): E =
-    nextEvent[E](now() + defaultTimeout, everyEvent, c)
+    nextEvent[E](defaultTimeout, everyEvent, c)
 
   def nextWithCondition[E <: Event](condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]): E =
-    nextEvent[E](now() + defaultTimeout, condition, c)
+    nextEvent[E](defaultTimeout, condition, c)
 
   def nextWithTimeoutAndCondition[E <: Event](timeout: Duration)(condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]): E =
-    nextEvent[E](now() + timeout, condition, c)
+    nextEvent[E](timeout, condition, c)
 
-  private def nextEvent[E <: Event](until: Instant, predicate: E => Boolean, classTag: ClassTag[E]): E =
-    nextEvent[E](until, predicate, classTag.runtimeClass.asInstanceOf[Class[E]])
+  private def nextEvent[E <: Event](timeout: Duration, predicate: E => Boolean, classTag: ClassTag[E]): E =
+    nextEvent(timeout, predicate, classTag.runtimeClass.asInstanceOf[Class[E]])
 
-  @tailrec private def nextEvent[E <: Event](until: Instant, predicate: E => Boolean, expectedEventClass: Class[E]): E = {
-    def expectedName = expectedEventClass.getSimpleName
-    tryPoll(until - now()) match {
-      case None => throw new TimeoutException(s"Expected Event '$expectedName' has not arrived until $until")
-      case Some(e: TerminatedEvent) => error(s"Expected event '$expectedName' has not arrived before ${classOf[TerminatedEvent].getName} has arrived")
-      case Some(e: E) if (expectedEventClass isAssignableFrom e.getClass) && evalPredicateIfDefined(predicate, e) => e
-      case _ => nextEvent[E](until, predicate, expectedEventClass)
+  private def nextEvent[E <: Event](timeout: Duration, predicate: E => Boolean, expectedEventClass: Class[E]): E = {
+    val until = now() + timeout
+
+    @tailrec def waitForEvent(): E = {
+      def expectedName = expectedEventClass.getSimpleName
+      tryPoll(until - now()) match {
+        case None => throw new TimeoutException(s"Expected Event '$expectedName' has not arrived with ${timeout.pretty}")
+        case Some(e: TerminatedEvent) => error(s"Expected event '$expectedName' has not arrived before ${classOf[TerminatedEvent].getName} has arrived")
+        case Some(e: E) if (expectedEventClass isAssignableFrom e.getClass) && evalPredicateIfDefined(predicate, e) => e
+        case _ => waitForEvent()
+      }
     }
+
+    waitForEvent()
   }
 
   def poll(t: ReadableDuration): Event =
-    tryPoll(t) getOrElse error(s"Event has not arrived within $t")
+    tryPoll(t) getOrElse error(s"Event has not arrived within ${t.pretty}")
 
   def tryPoll(t: ReadableDuration): Option[Event] =
     Option(queue.poll(t.getMillis, TimeUnit.MILLISECONDS))

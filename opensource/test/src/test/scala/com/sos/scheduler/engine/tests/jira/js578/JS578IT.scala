@@ -7,18 +7,25 @@ import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
+@RunWith(classOf[JUnitRunner])
 final class JS578IT extends ScalaSchedulerTest {
   private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystem])
 
-  test("<modify_order at='now'/>") {
+  ignore("<modify_order at='now'/> (TEST IST UNKLAR)") {
+    // Ohne <run_time> läuft die Order offenbar von selbst los. Dann haben wir eine race condition, der Auftrag kann schon laufen und startOrderAt versagt.
+    // Mit <run_time> auf 1999 wirkt aber startOrderAt nicht.
     val eventPipe = controller.newEventPipe()
     startOrderAt("now")
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
   }
 
-  test("<modify_order at='now'/> while order is running does nothing") {
+  ignore("<modify_order at='now'/> while order is running does nothing (TEST IST UNKLAR)") {
+    // Ohne <run_time> läuft die Order offenbar von selbst los. Dann haben wir eine race condition, der Auftrag kann schon laufen und startOrderAt versagt.
+    // Mit <run_time> auf 1999 wirkt aber startOrderAt nicht.
     val eventPipe = controller.newEventPipe()
     setJobChainNodeStop(true)
     startOrderAt("now")
@@ -31,7 +38,7 @@ final class JS578IT extends ScalaSchedulerTest {
     intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition[OrderTouchedEvent](3.s)  { _.orderKey == orderKey }}
   }
 
-  test("<modify_order at='next'/> (PENDING)") {
+  ignore("<modify_order at='next'/> (PENDING)") {
     pendingUntilFixed {
       val eventPipe = controller.newEventPipe()
       startOrderAt("next")
@@ -39,7 +46,7 @@ final class JS578IT extends ScalaSchedulerTest {
     }
   }
 
-  test("<modify_order at='next'/> while order is running repeats order (PENDING)") {
+  ignore("<modify_order at='next'/> while order is running repeats order (PENDING)") {
     pendingUntilFixed {
       val eventPipe = controller.newEventPipe()
       setJobChainNodeStop(true)
@@ -56,7 +63,7 @@ final class JS578IT extends ScalaSchedulerTest {
   }
 
   private def startOrderAt(at: String) {
-      scheduler executeXml <modify_order job_chain={orderKey.jobChainPathString} order={orderKey.idString} at={at}/>
+    scheduler executeXml <modify_order job_chain={orderKey.jobChainPathString} order={orderKey.idString} at={at}/>
   }
 
   private def setJobChainNodeStop(b: Boolean) {

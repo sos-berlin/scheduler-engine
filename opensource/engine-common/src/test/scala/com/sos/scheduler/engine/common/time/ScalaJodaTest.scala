@@ -38,16 +38,27 @@ class ScalaJodaTest extends FunSpec {
       (7L.days: Duration).getMillis should equal (7*24*3600*1000)
     }
     it("Duration + Duration") {
-      ((7.s + 2.ms): Duration).getMillis should equal (7*1000 + 2)
+      (7.s + 2.ms: Duration).getMillis should equal (7*1000 + 2)
     }
     it("Duration - Duration") {
-      ((7.s - 2.ms): Duration).getMillis should equal (7*1000 - 2)
+      (7.s - 2.ms: Duration).getMillis should equal (7*1000 - 2)
     }
     it("Int * Duration") {
-      ((3 * 7.s): Duration).getMillis should equal (3 * 7*1000)
+      (3 * 7.s: Duration).getMillis should equal (3 * 7*1000)
     }
     it("Long * Duration") {
-      ((3L * 7.s): Duration).getMillis should equal (3 * 7*1000)
+      (3L * 7.s: Duration).getMillis should equal (3 * 7*1000)
+    }
+    it("pretty") {
+      0.s.pretty should equal ("0s")
+      1.s.pretty should equal ("1s")
+      1200.ms.pretty should equal ("1.2s")
+      1230.ms.pretty should equal ("1.23s")
+      1234.ms.pretty should equal ("1.234s")
+      10.ms.pretty should equal ("0.01s")
+      for (i <- 1 to 10000000) (-10).ms.pretty
+      (-10).ms.pretty should equal ("-0.01s")
+      (-1).s.pretty should equal ("-1s")
     }
 //    it("Duration * Int") {
 //      ((7.s * 3): Duration).getMillis should equal (7*1000 * 3)
@@ -69,42 +80,42 @@ class ScalaJodaTest extends FunSpec {
   }
   describe("Instant") {
     it ("Instant + Duration") {
-      ((new Instant(7) + 2.ms): Instant) should equal (new Instant(7 + 2))
+      (new Instant(7) + 2.ms: Instant) should equal (new Instant(7 + 2))
     }
     it ("Instant - Duration") {
-      ((new Instant(7) - 2.ms): Instant) should equal (new Instant(7 - 2))
+      (new Instant(7) - 2.ms: Instant) should equal (new Instant(7 - 2))
     }
     it ("Instant - Instant") {
-      ((new Instant(7) - new Instant(2)): Duration) should equal (new Duration(7 - 2))
+      (new Instant(7) - new Instant(2): Duration) should equal (new Duration(7 - 2))
     }
   }
   describe("DateTime") {
     it ("DateTime + Duration") {
-      ((new DateTime(7) + 2.ms): DateTime) should equal (new DateTime(7 + 2))
+      (new DateTime(7) + 2.ms: DateTime) should equal (new DateTime(7 + 2))
     }
     it ("DateTime - Duration") {
-      ((new DateTime(7) - 2.ms): DateTime) should equal (new DateTime(7 - 2))
+      (new DateTime(7) - 2.ms: DateTime) should equal (new DateTime(7 - 2))
     }
     it ("DateTime - DateTime") {
-      ((new DateTime(7) - new DateTime(2)): Duration) should equal (new Duration(7 - 2))
+      (new DateTime(7) - new DateTime(2): Duration) should equal (new Duration(7 - 2))
     }
   }
   describe("LocalTime") {
     it ("LocalTime < LocalTime") {
-      (new LocalTime(7) < new LocalTime(2)) should equal (false)
-      (new LocalTime(7) <= new LocalTime(2)) should equal (false)
-      (new LocalTime(7) > new LocalTime(2)) should equal (true)
-      (new LocalTime(7) >= new LocalTime(2)) should equal (true)
+      new LocalTime(7) < new LocalTime(2) should equal (false)
+      new LocalTime(7) <= new LocalTime(2) should equal (false)
+      new LocalTime(7) > new LocalTime(2) should equal (true)
+      new LocalTime(7) >= new LocalTime(2) should equal (true)
 
-      (new LocalTime(2) < new LocalTime(7)) should equal (true)
-      (new LocalTime(2) <= new LocalTime(7)) should equal (true)
-      (new LocalTime(2) > new LocalTime(7)) should equal (false)
-      (new LocalTime(2) >= new LocalTime(7)) should equal (false)
+      new LocalTime(2) < new LocalTime(7) should equal (true)
+      new LocalTime(2) <= new LocalTime(7) should equal (true)
+      new LocalTime(2) > new LocalTime(7) should equal (false)
+      new LocalTime(2) >= new LocalTime(7) should equal (false)
 
-      (new LocalTime(7) < new LocalTime(7)) should equal (false)
-      (new LocalTime(7) <= new LocalTime(7)) should equal (true)
-      (new LocalTime(7) > new LocalTime(7)) should equal (false)
-      (new LocalTime(7) >= new LocalTime(7)) should equal (true)
+      new LocalTime(7) < new LocalTime(7) should equal (false)
+      new LocalTime(7) <= new LocalTime(7) should equal (true)
+      new LocalTime(7) > new LocalTime(7) should equal (false)
+      new LocalTime(7) >= new LocalTime(7) should equal (true)
     }
   }
 }

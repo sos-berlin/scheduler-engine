@@ -1284,6 +1284,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
     bool    too_much_errors = false;
     string  warn_msg;
 
+    if (_db_name == "") throw;
     if( _spooler->_is_reopening_database_after_error)  throw;
 
     In_recursion in_recursion = &_waiting; 
@@ -2211,7 +2212,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                             {
                                 ta.set_transaction_read();
 
-                                string log = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_db->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
+                                string log = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->_db_name + " -table=" + _spooler->_db->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                                 if( !log.empty() )  history_entry.append_new_text_element( "log", log );
                             }
                             catch( exception&  x ) { _job->_log->warn( string("History: ") + x.what() ); }
