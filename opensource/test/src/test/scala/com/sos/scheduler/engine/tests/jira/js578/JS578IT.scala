@@ -15,17 +15,13 @@ import org.scalatest.matchers.ShouldMatchers._
 final class JS578IT extends ScalaSchedulerTest {
   private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystem])
 
-  ignore("<modify_order at='now'/> (TEST IST UNKLAR)") {
-    // Ohne <run_time> läuft die Order offenbar von selbst los. Dann haben wir eine race condition, der Auftrag kann schon laufen und startOrderAt versagt.
-    // Mit <run_time> auf 1999 wirkt aber startOrderAt nicht.
+  test("<modify_order at='now'/>") {
     val eventPipe = controller.newEventPipe()
     startOrderAt("now")
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == orderKey }
   }
 
-  ignore("<modify_order at='now'/> while order is running does nothing (TEST IST UNKLAR)") {
-    // Ohne <run_time> läuft die Order offenbar von selbst los. Dann haben wir eine race condition, der Auftrag kann schon laufen und startOrderAt versagt.
-    // Mit <run_time> auf 1999 wirkt aber startOrderAt nicht.
+  test("<modify_order at='now'/> while order is running does nothing") {
     val eventPipe = controller.newEventPipe()
     setJobChainNodeStop(true)
     startOrderAt("now")
