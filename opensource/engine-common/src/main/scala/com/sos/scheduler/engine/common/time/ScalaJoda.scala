@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.common.time
 
 import org.joda.time.Duration.{millis, standardSeconds, standardHours, standardDays}
 import org.joda.time._
+import scala.math.abs
+import scala.annotation.tailrec
 
 object ScalaJoda {
   implicit class DurationRichInt(val delegate: Int) extends AnyVal {
@@ -23,7 +25,11 @@ object ScalaJoda {
   implicit class RichDuration(val delegate: Duration) extends AnyVal {
     def +(o: Duration) = delegate plus o
     def -(o: Duration) = delegate minus o
+  }
+
+  implicit class RichReadableDuration(val delegate: ReadableDuration) extends AnyVal {
     def toScalaDuration = scala.concurrent.duration.Duration(delegate.getMillis, scala.concurrent.duration.MILLISECONDS)
+    def pretty = millisToPretty(delegate.getMillis)
   }
 
   implicit class RichInstant(val delegate: Instant) extends AnyVal {
@@ -64,4 +70,24 @@ object ScalaJoda {
 
   def sleep(d: Duration) =
     Thread.sleep(d.getMillis)
+
+  def millisToPretty(t: Long) = {
+    val result = new StringBuilder(30)
+    val a = abs(t)
+    if (t < 0) result append '-'
+    result append a / 1000
+    val tailString = s"000${a % 1000}" takeRight 3
+    lengthWithoutTrailingZeros(tailString, tailString.length) match {
+      case 0 =>
+      case n => result append '.' append tailString.substring(0, n)
+    }
+    result append 's'
+    result.toString()
+  }
+
+  @tailrec private def lengthWithoutTrailingZeros(s: String, n: Int): Int = n match {
+    case 0 => 0
+    case _ if s(n - 1) == '0' => lengthWithoutTrailingZeros(s, n - 1)
+    case _ => n
+  }
 }
