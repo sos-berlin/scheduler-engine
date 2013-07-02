@@ -1238,34 +1238,15 @@ Process* Process_class::new_process()
 
 Process* Process_class::select_process_if_available()
 {
-    Process* process = NULL;
-
-    if( !is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
-        file_based_state() == File_based::s_active )  
+    if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
+        file_based_state() == File_based::s_active &&
+        _process_set.size() < _max_processes
+         && _spooler->_process_count < scheduler::max_processes)
     {
-        FOR_EACH( Process_set, _process_set, p )
-        {
-            if( (*p)->_module_instance_count == 0 )  { process = *p; break; }
-        }
-
-        if( process )
-        {
-            if( process->_connection && process->_connection->has_error() )
-            {
-                _spooler->log()->warn( message_string( "SCHEDULER-299", process->short_name() ) );   // "Prozess pid=$1 wird nach Fehler entfernt"
-
-                process->kill();
-                remove_process( process );
-                process = NULL;
-            }
-        }
-
-        if( !process  
-         && _process_set.size()      < _max_processes  
-         && _spooler->_process_count < scheduler::max_processes  )  return new_process();
+        return new_process();
     }
-
-    return process;
+    else
+        return NULL;
 }
 
 //-----------------------------------------------------------------Process_class::process_available
