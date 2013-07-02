@@ -1,6 +1,4 @@
 // $Id: spooler_process.cxx 14221 2011-04-29 14:18:28Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-// §1172
-// §1206
 
 #include "spooler.h"
 
@@ -549,32 +547,6 @@ void Process::async_remote_start()
     _async_remote_operation->set_async_manager( _spooler->_connection_manager );
 }
 
-//------------------------------------------------------------------------------Process::is_started
-
-//bool Process::is_started()
-//{
-//    bool result = false;
-//
-//    if( _async_remote_operation )
-//    {
-//        _async_remote_operation->async_check_exception( Z_FUNCTION );
-//
-//        result = _async_remote_operation->async_finished();
-//     
-//        //if( result )
-//        //{
-//        //    _async_remote_operation->set_async_manager( NULL );
-//        //    _async_remote_operation = NULL;
-//        //}
-//    }
-//    else
-//    {
-//        result = true;
-//    }
-//
-//    return result;
-//}
-
 //-------------------------------------------------------------Process::async_remote_start_continue
 
 bool Process::async_remote_start_continue( Async_operation::Continue_flags )
@@ -587,8 +559,6 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
     {
         case Async_remote_operation::s_not_connected:
         {
-            // Hier fehlt noch das Register für gemeinsame Benutzung
-
             _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _remote_scheduler ) );
             _xml_client_connection->set_async_parent( _async_remote_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
@@ -772,12 +742,6 @@ int Process::pid() const
 { 
     int result = 0;
 
-    //if( _module_instance  &&  _module_instance->kind() == Module::kind_process )
-    //{
-    //    if( _connection )  assert( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) );
-    //    result = _module_instance->pid();
-    //}
-    //else
     if( _connection )
     {
         if( _com_server_thread )
@@ -796,7 +760,6 @@ int Process::pid() const
         }
         else
         {
-            //assert( _module_instance  &&  _module_instance->kind() == Module::kind_remote );
             result = _connection->pid();
         }
     }
@@ -924,7 +887,6 @@ xml::Element_ptr Process::dom_element( const xml::Document_ptr& document, const 
 
     if( _connection )
     process_element.setAttribute( "pid"              , _connection->pid() );
-  //process_element.setAttribute( "module_instances" , _module_instance_count );
 
     if( !_job_name.empty() )
     process_element.setAttribute( "job"              , _job_name );
@@ -1032,7 +994,6 @@ xml::Element_ptr Process_class_configuration::dom_element( const xml::Document_p
     xml::Element_ptr result = document.createElement( "process_class" );
         
     fill_file_based_dom_element( result, show_what );
-  //result.setAttribute         ( "name"            , name() );
     result.setAttribute         ( "max_processes"   , _max_processes );
     result.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
 
@@ -1206,7 +1167,6 @@ Process_class* Process_class::on_replace_now()
 
 void Process_class::check_max_processes( int ) const
 {
-    //if( _remove )  z::throw_xc( "SCHEDULER-421", obj_name() );
 }
 
 //-----------------------------------------------------------------Process_class::set_max_processes
@@ -1224,7 +1184,6 @@ void Process_class::set_max_processes( int max_processes )
 
 void Process_class::check_remote_scheduler( const Host_and_port& ) const
 {
-    //if( _remove )  z::throw_xc( "SCHEDULER-421", obj_name() );
 }
 
 //-----------------------------------------------------------------------Process_class::add_process
@@ -1269,7 +1228,6 @@ Process* Process_class::new_process()
     process = Z_NEW( Process( _spooler ) );        
 
     process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
-  //process->start();
 
     add_process( process );
 
@@ -1612,13 +1570,6 @@ Process_class* Process_class_subsystem::temporary_process_class()
 { 
     return spooler()->root_folder()->process_class_folder()->process_class( temporary_process_class_name ); 
 }
-
-//-----------------------------------------------------Process_class_subsystem::try_to_free_process
-
-//bool Process_class_subsystem::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
-//{
-//    return _spooler->task_subsystem()->try_to_free_process( for_job, process_class, now );
-//}
 
 //-------------------------------------------------------------------------------------------------
 
