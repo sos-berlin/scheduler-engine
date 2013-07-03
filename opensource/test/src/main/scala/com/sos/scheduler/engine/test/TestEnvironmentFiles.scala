@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test
 
-import EnvironmentFiles._
+import TestEnvironmentFiles._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.kernel.util.ResourcePath
 import java.io.File
@@ -9,7 +9,7 @@ import org.joda.time.Instant.now
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
-final class EnvironmentFiles(
+final class TestEnvironmentFiles(
     configResourcePath: ResourcePath,
     directory: File,
     nameMap: Map[String, String],
@@ -23,7 +23,7 @@ final class EnvironmentFiles(
   }
 
   private def resourceUrls: Iterable[(String, URL)] =
-    (resourceUrls(defaultConfigResourcePath) ++ resourceUrls(configResourcePath)) map { o => nameOfUrl(o) -> o }
+    resourceUrls(defaultConfigResourcePath) ++ resourceUrls(configResourcePath) map { o => nameOfUrl(o) -> o }
 
   private def resourceUrls(p: ResourcePath): Iterable[URL] =
     resources(p) map { _.getURL }
@@ -46,15 +46,15 @@ final class EnvironmentFiles(
   }
 }
 
-object EnvironmentFiles {
+object TestEnvironmentFiles {
   def copy(
       configResourcePath: ResourcePath,
       directory: File,
       nameMap: Map[String, String] = Map(),
       fileTransformer: ResourceToFileTransformer = StandardResourceToFileTransformer.singleton) {
-    new EnvironmentFiles(configResourcePath, directory, nameMap, fileTransformer).copy()
+    new TestEnvironmentFiles(configResourcePath, directory, nameMap, fileTransformer).copy()
   }
 
-  private val defaultConfigResourcePath: ResourcePath = new ResourcePath(classOf[EnvironmentFiles].getPackage, "config")
+  private val defaultConfigResourcePath: ResourcePath = new ResourcePath(classOf[TestEnvironmentFiles].getPackage, "config")
 }
 

@@ -44,7 +44,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
   private val testName = testClass.getName
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
-  lazy val environment = new Environment(
+  lazy val environment = new TestEnvironment(
     resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
     directory = workDirectory(testClass),
     nameMap = configuration.resourceNameMap.toMap,
