@@ -68,12 +68,6 @@ struct Text_with_includes : Non_cloneable
 
 struct Module : Object
 {
-    enum Reuse
-    {
-        reuse_task,
-        reuse_job
-    };
-
     enum Kind
     {
         kind_none,
@@ -125,7 +119,6 @@ struct Module : Object
 
     Text_with_includes         _text_with_includes;
     string                     _include_path;
-    Reuse                      _reuse;
     Absolute_path              _folder_path;
     string                     _process_class_string;
     Absolute_path              _process_class_path;
