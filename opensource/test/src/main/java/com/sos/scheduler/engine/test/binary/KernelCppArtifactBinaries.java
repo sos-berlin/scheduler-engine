@@ -36,7 +36,7 @@ public final class KernelCppArtifactBinaries implements CppBinaries {
             if (result.exists()) return result.getAbsoluteFile();
             dir = dir.getParentFile();
         }
-        throw new RuntimeException("No parent directory has a subdirectory '"+kernelCppDirName+"', starting form "+start);
+        throw new RuntimeException("No parent directory has a subdirectory '"+kernelCppDirName+"', starting from "+start);
     }
 
     @Override public File directory() {

@@ -52,7 +52,7 @@ public final class TestCppBinaries {
     }
 
     private static boolean isUnderIDE() {
-        return System.getProperty("sun.java.command").startsWith("com.intellij.") || !isUnderMaven();    // IntelliJ IDEA 12.1 kennt die Maven-Properties
+        return System.getProperty("sun.java.command").startsWith("com.intellij."); // || !isUnderMaven();    // IntelliJ IDEA 12.1 kennt die Maven-Properties
     }
 
     private static boolean isUnderMaven() {
