@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test.util.time
 
-import java.lang.Thread.sleep
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import org.joda.time.Instant.now
 import org.joda.time.{Duration, DateTimeUtils}
 
