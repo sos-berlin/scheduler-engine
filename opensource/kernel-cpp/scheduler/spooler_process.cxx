@@ -579,8 +579,10 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
             xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
             if (!_module_instance->_module->has_api())  xml_writer.set_attribute( "kind", "process" );
-            xml_writer.set_attribute_optional("java_options", _java_options);
-            xml_writer.set_attribute_optional("java_classpath", _java_classpath);
+            if (!rtrim(_java_options).empty())
+                xml_writer.set_attribute_optional("java_options", _java_options);
+            if (!rtrim(_java_classpath).empty())
+                xml_writer.set_attribute_optional("java_classpath", _java_classpath);
             xml_writer.end_element( "remote_scheduler.start_remote_task" );
             xml_writer.close();
             _xml_client_connection->send( xml_writer.to_string() );
