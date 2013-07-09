@@ -58,8 +58,13 @@
             <id>release</id>
             <properties>
                 <!-- Versionsbezeichnungen für die nächste Freigabe und die darauffolgende Entwicklungsversion hier einstellen -->
+<<<<<<< origin/master
                 <releaseVersion>1.5.3100-beta</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
                 <developmentVersion>1.5.3101-SNAPSHOT</developmentVersion>
+=======
+                <releaseVersion>1.5.3189</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
+                <developmentVersion>1.5.3190-SNAPSHOT</developmentVersion>
+>>>>>>> local
                 <tag>v${releaseVersion}</tag>
             </properties>
         </profile>
