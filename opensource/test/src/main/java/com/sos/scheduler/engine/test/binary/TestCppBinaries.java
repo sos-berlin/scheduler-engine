@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.test.binary;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.main.CppBinaries;
@@ -52,7 +53,8 @@ public final class TestCppBinaries {
     }
 
     private static boolean isUnderIDE() {
-        return System.getProperty("sun.java.command").startsWith("com.intellij."); // || !isUnderMaven();    // IntelliJ IDEA 12.1 kennt die Maven-Properties
+        String v = Optional.fromNullable(System.getProperty("sun.java.command")).or("");
+        return v.startsWith("com.intellij.") || v.startsWith("org.jetbrains."); // || !isUnderMaven();    // IntelliJ IDEA 12.1 kennt die Maven-Properties
     }
 
     private static boolean isUnderMaven() {
