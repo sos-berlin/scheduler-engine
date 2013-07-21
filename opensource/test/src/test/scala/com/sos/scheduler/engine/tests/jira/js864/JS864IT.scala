@@ -110,8 +110,4 @@ private object JS864IT {
         <param name="count" value="0"/>
       </params>
     </order>
-
-  class OrderTest(orderNumber: Int) {
-    protected val orderId = new OrderId(orderNumber.toString)
-  }
 }
