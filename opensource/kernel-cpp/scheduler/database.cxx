@@ -1510,7 +1510,8 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
     {
         Transaction ta ( this, outer_transaction );
 
-        if( dbms_kind() == dbms_access )
+        if( dbms_kind() == dbms_access ||
+            dbms_kind() == dbms_sybase)
         {
             ta.execute( S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), Z_FUNCTION );
 
