@@ -1645,16 +1645,11 @@ bool Task::do_something()
                         }
 
                         case s_exit: {
-                            if( _job->_module->_reuse == Module::reuse_task ) {
-                                if( !_operation ) {
-                                    _operation = do_call__start( spooler_exit_name );
-                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_exit_completed_call>());
-                                } else {
-                                    operation__end();
-                                    set_state_direct( s_release );
-                                    loop = true;
-                                }
+                            if( !_operation ) {
+                                _operation = do_call__start( spooler_exit_name );
+                                _operation->on_async_finished_call(_call_register.new_async_call<Task_exit_completed_call>());
                             } else {
+                                operation__end();
                                 set_state_direct( s_release );
                                 loop = true;
                             }
@@ -2453,15 +2448,10 @@ bool Task::do_load()
     ptr<Module_instance> module_instance;
     bool                 is_new = false;
 
-    if( _job->_module->_reuse == Module::reuse_job ) {
-        module_instance = _job->create_module_instance();
-        if( !module_instance )  return false;
-    } else {
-        module_instance = _job->create_module_instance();
-        if( !module_instance )  return false;
-        is_new = true;
-        module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
-    }
+    module_instance = _job->create_module_instance();
+    if( !module_instance )  return false;
+    is_new = true;
+    module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
 
     _module_instance = module_instance;
     _module_instance->attach_task( this, _log );
