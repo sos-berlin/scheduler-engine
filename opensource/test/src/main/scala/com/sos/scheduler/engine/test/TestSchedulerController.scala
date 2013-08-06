@@ -51,7 +51,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
     fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   private val debugMode = configuration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
-  private val logCategories = configuration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
+  private val logCategories = (configuration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "")).trim
 
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
