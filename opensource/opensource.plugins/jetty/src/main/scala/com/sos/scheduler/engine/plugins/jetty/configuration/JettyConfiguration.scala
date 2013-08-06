@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import JettyConfiguration._
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreePort
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.WebAppContextConfiguration
-import com.sos.scheduler.engine.plugins.jetty.utils.Utils._
 import java.io.File
-import java.net.{BindException, ServerSocket, URL}
+import java.net.URL
 import org.eclipse.jetty.security.LoginService
 import org.eclipse.jetty.server.Handler
 import scala.collection.immutable
@@ -37,23 +37,7 @@ object JettyConfiguration {
     }
 
     def random() = new TcpPortNumber {
-      lazy val value = findFreePort(testPortRange)
+      lazy val value = findRandomFreePort(testPortRange)
     }
   }
-
-  private def findFreePort(range: Range): Int =
-    findFreePort(randomInts(range)) getOrElse range.head
-
-  private def findFreePort(ports: TraversableOnce[Int]): Option[Int] =
-    ports.toIterator find portIsFree
-
-  private def portIsFree(port: Int) =
-    try {
-      val backlog = 1
-      new ServerSocket(port, backlog).close()
-      true
-    } catch {
-      case _: BindException => false
-    }
-
 }
