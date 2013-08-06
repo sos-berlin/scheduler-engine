@@ -348,14 +348,6 @@ void Module::set_dom( const xml::Element_ptr& element )
         //if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
     //}
 
-    string use_engine = element.getAttribute     ( "use_engine" );
-    
-    if( use_engine == ""
-     || use_engine == "task" )  _reuse = reuse_task;
-    else
-        z::throw_xc( "SCHEDULER-196", use_engine );
-  //if( use_engine == "job"  )  _reuse = reuse_job;
-
     _set = true;
 }
 

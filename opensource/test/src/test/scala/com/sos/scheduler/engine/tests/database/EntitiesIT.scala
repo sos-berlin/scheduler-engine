@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.t
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
 import com.sos.scheduler.engine.kernel.settings.{SettingName, Settings}
 import com.sos.scheduler.engine.persistence.entities._
-import com.sos.scheduler.engine.test.Environment.schedulerId
+import com.sos.scheduler.engine.test.TestEnvironment.schedulerId
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._

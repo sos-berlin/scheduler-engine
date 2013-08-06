@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test
 
-import Environment._
+import TestEnvironment._
 import _root_.scala.collection.immutable
 import com.google.common.base.Strings.nullToEmpty
 import com.sos.scheduler.engine.common.system.Files.makeDirectories
@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.main.CppBinary
 import java.io.File
 
 /** Build the environment for the scheduler binary. */
-final class Environment(resourcePath: ResourcePath, val directory: File, nameMap: Map[String, String], fileTransformer: ResourceToFileTransformer) {
+final class TestEnvironment(resourcePath: ResourcePath, val directory: File, nameMap: Map[String, String], fileTransformer: ResourceToFileTransformer) {
   val configDirectory = new File(directory, configSubdir)
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
@@ -27,7 +27,7 @@ final class Environment(resourcePath: ResourcePath, val directory: File, nameMap
     makeDirectories(directory)
     makeDirectories(configDirectory)
     makeDirectories(logDirectory)
-    EnvironmentFiles.copy(resourcePath, configDirectory, nameMap, fileTransformer)
+    TestEnvironmentFiles.copy(resourcePath, configDirectory, nameMap, fileTransformer)
   }
 
   private[test] def standardArgs(cppBinaries: CppBinaries, logCategories: String): immutable.Iterable[String] =
@@ -53,7 +53,7 @@ final class Environment(resourcePath: ResourcePath, val directory: File, nameMap
     p.file(configDirectory)
 }
 
-object Environment {
+object TestEnvironment {
   val schedulerId = new SchedulerId("test")
   private val jobJavaOptions = "-Xms5m -Xmx10m"
   private val configSubdir = "config"

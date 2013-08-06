@@ -943,10 +943,9 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
     string            xml          = transaction.read_clob_or_empty( db()->_clusters_tablename, "xml", where );
     xml::Element_ptr  result;
 
-    if( xml != "" )
-    {
-        xml::Document_ptr dom_document = xml;
-        if( dom_document.documentElement() )  result = dom_document.importNode(dom_document.documentElement());
+    if (xml != "") {
+        if (xml::Element_ptr e = xml::Document_ptr(xml).documentElement())  
+            result = dom_document.importNode(e);
     }
 
     if( !result )  result = dom_document.createElement( "cluster_member" );

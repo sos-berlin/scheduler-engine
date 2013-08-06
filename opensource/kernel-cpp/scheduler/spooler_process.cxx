@@ -1,6 +1,4 @@
 // $Id: spooler_process.cxx 14221 2011-04-29 14:18:28Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-// §1172
-// §1206
 
 #include "spooler.h"
 
@@ -567,8 +565,6 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
     {
         case Async_remote_operation::s_not_connected:
         {
-            // Hier fehlt noch das Register für gemeinsame Benutzung
-
             _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _remote_scheduler ) );
             _xml_client_connection->set_async_parent( _async_remote_operation );
             _xml_client_connection->set_async_manager( _spooler->_connection_manager );
@@ -589,8 +585,10 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
             xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
             if (!_module_instance->_module->has_api())  xml_writer.set_attribute( "kind", "process" );
-            xml_writer.set_attribute_optional("java_options", _java_options);
-            xml_writer.set_attribute_optional("java_classpath", _java_classpath);
+            if (!rtrim(_java_options).empty())
+                xml_writer.set_attribute_optional("java_options", _java_options);
+            if (!rtrim(_java_classpath).empty())
+                xml_writer.set_attribute_optional("java_classpath", _java_classpath);
             xml_writer.end_element( "remote_scheduler.start_remote_task" );
             xml_writer.close();
             _xml_client_connection->send( xml_writer.to_string() );
@@ -742,12 +740,6 @@ int Process::pid() const
 { 
     int result = 0;
 
-    //if( _module_instance  &&  _module_instance->kind() == Module::kind_process )
-    //{
-    //    if( _connection )  assert( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) );
-    //    result = _module_instance->pid();
-    //}
-    //else
     if( _connection )
     {
         if( _com_server_thread )
@@ -766,7 +758,6 @@ int Process::pid() const
         }
         else
         {
-            //assert( _module_instance  &&  _module_instance->kind() == Module::kind_remote );
             result = _connection->pid();
         }
     }
@@ -1174,7 +1165,6 @@ Process_class* Process_class::on_replace_now()
 
 void Process_class::check_max_processes( int ) const
 {
-    //if( _remove )  z::throw_xc( "SCHEDULER-421", obj_name() );
 }
 
 //-----------------------------------------------------------------Process_class::set_max_processes
@@ -1192,7 +1182,6 @@ void Process_class::set_max_processes( int max_processes )
 
 void Process_class::check_remote_scheduler( const Host_and_port& ) const
 {
-    //if( _remove )  z::throw_xc( "SCHEDULER-421", obj_name() );
 }
 
 //-----------------------------------------------------------------------Process_class::add_process
@@ -1239,7 +1228,6 @@ Process* Process_class::new_process()
     process = Z_NEW( Process( _spooler ) );        
 
     process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
-  //process->start();
 
     add_process( process );
 
@@ -1250,34 +1238,15 @@ Process* Process_class::new_process()
 
 Process* Process_class::select_process_if_available()
 {
-    Process* process = NULL;
-
-    if( !is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
-        file_based_state() == File_based::s_active )  
+    if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
+        file_based_state() == File_based::s_active &&
+        _process_set.size() < _max_processes
+         && _spooler->_process_count < scheduler::max_processes)
     {
-        FOR_EACH( Process_set, _process_set, p )
-        {
-            if( (*p)->_module_instance_count == 0 )  { process = *p; break; }
-        }
-
-        if( process )
-        {
-            if( process->_connection && process->_connection->has_error() )
-            {
-                _spooler->log()->warn( message_string( "SCHEDULER-299", process->short_name() ) );   // "Prozess pid=$1 wird nach Fehler entfernt"
-
-                process->kill();
-                remove_process( process );
-                process = NULL;
-            }
-        }
-
-        if( !process  
-         && _process_set.size()      < _max_processes  
-         && _spooler->_process_count < scheduler::max_processes  )  return new_process();
+        return new_process();
     }
-
-    return process;
+    else
+        return NULL;
 }
 
 //-----------------------------------------------------------------Process_class::process_available

@@ -36,8 +36,6 @@ void Remote_module_instance_proxy::close()
 void Remote_module_instance_proxy::init()
 {
     Module_instance::init();
-
-    if( _module->_reuse != Module::reuse_task )  z::throw_xc( "SCHEDULER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load

@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.log.ErrorLogEvent;
 import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
-import com.sos.scheduler.engine.test.Environment;
+import com.sos.scheduler.engine.test.TestEnvironment;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
 import org.junit.ClassRule;
@@ -85,7 +85,7 @@ public final class JS644IT extends SchedulerTest {
     }
 
     private Iterable<File> jobFiles() {
-        final Environment e = controller().environment();
+        final TestEnvironment e = controller().environment();
         return transform(jobPaths, new Function<String,File>() {
             @Override public File apply(String o) { return e.fileFromPath(job.typedPath(o)); }
         });

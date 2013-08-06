@@ -19,7 +19,7 @@ final class EnvironmentFilesTest extends FunSuite {
     val dir = createTempDir()
     try {
       dir.list.toSet should be ('empty)
-      EnvironmentFiles.copy(new ResourcePath(classOf[EnvironmentFilesTest].getPackage, "config"), dir)
+      TestEnvironmentFiles.copy(new ResourcePath(classOf[EnvironmentFilesTest].getPackage, "config"), dir)
       dir.list.toSet should equal (expectedNames)
     }
     finally {

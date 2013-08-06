@@ -44,14 +44,14 @@ with EventHandlerAnnotated with SosAutoCloseable {
   private val testName = testClass.getName
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
-  lazy val environment = new Environment(
+  lazy val environment = new TestEnvironment(
     resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
     directory = workDirectory(testClass),
     nameMap = configuration.resourceNameMap.toMap,
     fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   private val debugMode = configuration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
-  private val logCategories = (configuration.logCategories +" "+ System.getProperty("scheduler.logCategories")).trim
+  private val logCategories = configuration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
 
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
