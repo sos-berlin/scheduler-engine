@@ -507,7 +507,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
                 DOM_FOR_EACH_ELEMENT( order_queue_element, e )
                 {
                     if( my_show_what._max_orders > 0 )  --my_show_what._max_orders;
-                    element.appendChild( e );
+                    element.importAndAppendChild( e );
                 }
             }
         }
