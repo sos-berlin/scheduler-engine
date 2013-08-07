@@ -1248,7 +1248,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 
 
     _dom.create();
-    _dom.appendForeignChild(element);
+    _dom.importAndAppendChild(element);
 
 
     _title = element.getAttribute( "title ");

@@ -191,7 +191,7 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
         if( xml::Element_ptr mail_element = event_dom.select_node( mail_xpath ) )
         {
             mail_dom.create();
-            mail_dom.appendForeignChild(mail_element);
+            mail_dom.importAndAppendChild(mail_element);
         }
     }
 

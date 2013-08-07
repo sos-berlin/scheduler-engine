@@ -130,7 +130,7 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
     xml::Document_ptr result;
 
     result.create();
-    result.appendForeignChild(_dom_document.documentElement());
+    result.importAndAppendChild(_dom_document.documentElement());
 
     DOM_FOR_EACH_ELEMENT( result.documentElement(), element )
     {
