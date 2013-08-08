@@ -70,17 +70,17 @@ public class ScriptInstance {
         catch (ScriptException e) { throw propagate(e); }
     }
 
-    public final boolean callBooleanWhenExists(String name, boolean defaultResult) {
+    public final boolean callBooleanWhenExists(boolean defaultResult, String name, Object... parameters) {
         try {
-            return callBooleanWithDefault(name, defaultResult);
+            return callBooleanWithDefault(defaultResult, name, parameters);
         } catch (NoSuchMethodException e) {
             //logger.debug(e +", method="+ name);
             return defaultResult;
         }
     }
 
-    public final boolean callBooleanWithDefault(String functionName, boolean deflt) throws NoSuchMethodException {
-        return resultToBoolean(call(functionName), deflt);
+    public final boolean callBooleanWithDefault(boolean deflt, String functionName, Object... parameters) throws NoSuchMethodException {
+        return resultToBoolean(call(functionName, parameters), deflt);
     }
 
     private static boolean resultToBoolean(Object result, boolean deflt) {
@@ -93,9 +93,9 @@ public class ScriptInstance {
             throw new RuntimeException("The function has not returned a Boolean: "+ result);
     }
 
-    public final void callWhenExists(String name) {
+    public final void callWhenExists(String name, Object... parameters) {
         try {
-            call(name);
+            call(name, parameters);
         } catch (NoSuchMethodException e) {
             //logger.trace(e +", function="+name);
         }

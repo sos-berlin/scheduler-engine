@@ -36,7 +36,7 @@ importClass(com.google.common.io.Files);
 importClass(java.nio.charset.Charset);
 
 function spooler_process_after(spooler_process_result) {
-	spooler_log.info(spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
+	spooler_log.info("spooler_process_after("+ spooler_process_result +"): " + spooler.id() +": " + spooler_job.name() + " is running with task id " + spooler_task.id() );   // use alle objects given by JS kernel
 	log_object("spooler_job.name",spooler_job.name());
 	return spooler_process_result;
 }
