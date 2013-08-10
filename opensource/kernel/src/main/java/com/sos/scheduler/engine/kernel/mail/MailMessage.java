@@ -9,11 +9,15 @@ import javax.mail.internet.*;
 import java.io.*;
 import java.util.*;
 
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.common.collect.Maps.newHashMap;
+
 /** Nur für C++. */
 public final class MailMessage {
     static final int current_version = 2;
 
     private final Properties _properties = System.getProperties();
+    private final Map<String, String> settings = newHashMap();
     private final Session _session = Session.getInstance(_properties, new My_authenticator());
     private MimeMessage _msg = new MimeMessage(_session);
     private byte[] _body;
@@ -42,44 +46,49 @@ public final class MailMessage {
             throw new Exception("Class com.sos.scheduler.engine.kernel.mail.MailMessage (sos.mail.jar) is not up to date");
     }
 
-    public void set(String what, byte[] value) throws MessagingException, UnsupportedEncodingException {
+    public void set(String what, byte[] value) throws UnsupportedEncodingException, MessagingException {
         if (what.equals("smtp"))
             _properties.put("mail.smtp.host", new String(value, "iso8859-1"));
         else
-            //if( what.equals( "smtp.user"     ) )  _smtp_user_name = new String( value, "iso8859-1" );
-            //else
-            //if( what.equals( "smtp.password" ) )  _smtp_password = new String( value, "iso8859-1" );
-            //else
+        if (what.equals("body"))
+            _body = value;
+        else
+        if (what.equals("send_rfc822")) {
+            _msg = new MimeMessage(_session, new ByteArrayInputStream(value));
+            send2();
+        }
+        else
+            settings.put(what, new String(value, "iso8859-1"));
+    }
+
+    public void transferSettings() throws MessagingException {
+        for (Map.Entry<String, String> entry: settings.entrySet()) {
+            String what = entry.getKey();
+            String value = entry.getValue();
+
             if (what.equals("from")) {
-                InternetAddress[] addr = InternetAddress.parse(new String(value, "iso8859-1"));
+                InternetAddress[] addr = InternetAddress.parse(value);
                 if (addr.length != 0) _msg.setFrom(addr[0]);
-            } else if (what.equals("reply-to")) _msg.setReplyTo(InternetAddress.parse(new String(value, "iso8859-1")));
+            } else
+            if (what.equals("reply-to")) _msg.setReplyTo(InternetAddress.parse(value));
             else
-            if (what.equals("to")) _msg.setRecipients(RecipientType.TO, InternetAddress.parse(new String(value, "iso8859-1")));
+            if (what.equals("to")) _msg.setRecipients(RecipientType.TO, InternetAddress.parse(value));
             else
-            if (what.equals("cc")) _msg.setRecipients(RecipientType.CC, InternetAddress.parse(new String(value, "iso8859-1")));
+            if (what.equals("cc")) _msg.setRecipients(RecipientType.CC, InternetAddress.parse(value));
             else
             if (what.equals("bcc"))
-                _msg.setRecipients(RecipientType.BCC, InternetAddress.parse(new String(value, "iso8859-1")));
+                _msg.setRecipients(RecipientType.BCC, InternetAddress.parse(value));
             else
-            if (what.equals("subject")) _msg.setSubject(new String(value, "iso8859-1"));
+            if (what.equals("subject")) _msg.setSubject(value);
             else
-            if (what.equals("body")) {
-                //_body = new MimeBodyPart();
-                //_body.setText( new String(value,"iso8859-1") );
-                _body = value;
-            } else
-            if (what.equals("content_type")) _content_type = new String(value, "iso8859-1");
+            if (what.equals("content_type")) _content_type = value;
             else
-            if (what.equals("encoding")) _encoding = new String(value, "iso8859-1");
+            if (what.equals("encoding")) _encoding = value;
             else
-            if (what.equals("send_rfc822")) {
-                _msg = new MimeMessage(_session, new ByteArrayInputStream(value));
-                send2();
-            } else
-            if (what.equals("debug")) _session.setDebug((new String(value, "iso8859-1")).equals("1"));
+            if (what.equals("debug")) _session.setDebug(value.equals("1"));
             else
-                throw new RuntimeException("com.sos.scheduler.engine.kernel.mail.MailMessage.set: what");
+                throw new RuntimeException("com.sos.scheduler.engine.kernel.mail.MailMessage.set: "+what);
+        }
     }
 
     public void set_property(String name, String value) {
@@ -100,21 +109,20 @@ public final class MailMessage {
     }
 
     public String get(String what) throws Exception {
-        if (what.equals("smtp")) return (String)_properties.get("mail.smtp.host");
-        else if (what.equals("from")) return string_from_addresses(_msg.getFrom());
-        else if (what.equals("reply-to")) return string_from_addresses(_msg.getReplyTo());
-        else if (what.equals("to")) return string_from_addresses(_msg.getRecipients(RecipientType.TO));
-        else if (what.equals("cc")) return string_from_addresses(_msg.getRecipients(RecipientType.CC));
-        else if (what.equals("bcc")) return string_from_addresses(_msg.getRecipients(RecipientType.BCC));
-        else if (what.equals("subject")) return _msg.getSubject();
-        else if (what.equals("body")) return _body == null? "" : new String(_body, "iso8859-1");
-        else if (what.equals("rfc822_text")) {
+        if (what.equals("smtp"))
+            return (String)_properties.get("mail.smtp.host");
+        else
+        if (what.equals("body"))
+            return _body == null? "" : new String(_body, "iso8859-1");
+        else
+        if (what.equals("rfc822_text")) {
             build();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             _msg.writeTo(os);
             return os.toString();
-        } else
-            throw new RuntimeException("com.sos.scheduler.engine.kernel.mail.MailMessage.get: what=\"" + what + "\" ist unbekannt");
+        } else {
+            return nullToEmpty(settings.get(what));
+        }
     }
 
     public void add_header_field(String name, String value) throws MessagingException {
@@ -157,6 +165,7 @@ public final class MailMessage {
     }
 
     public void build() throws Exception {
+        transferSettings();
         if (_built) return;
 
         _msg.setSentDate(new Date());     // Damit rfc822_text das Datum liefert. Jira JS-81

@@ -1595,7 +1595,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
             if( doc.documentElement() )
             {
-                xml_payload_element.appendForeignChild(doc.documentElement());
+                xml_payload_element.importAndAppendChild(doc.documentElement());
             }
         }
         catch( exception& x )   // Sollte nicht passieren

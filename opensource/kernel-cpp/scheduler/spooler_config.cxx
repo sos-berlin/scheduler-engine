@@ -221,7 +221,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
                 DOM_FOR_EACH_ELEMENT( e, command_element )
                 {
-                    _commands_document.documentElement().appendForeignChild(command_element);
+                    _commands_document.documentElement().importAndAppendChild(command_element);
                 }
             }
         }

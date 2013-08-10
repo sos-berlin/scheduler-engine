@@ -120,13 +120,12 @@ struct Simple_node_ptr
     Simple_node_ptr             replaceChild                ( const Simple_node_ptr& newChild, const Simple_node_ptr& oldChild ) const;
     Simple_node_ptr             replace_with                ( const Simple_node_ptr& );
     void                        removeChild                 ( const Simple_node_ptr& child ) const;
-    Simple_node_ptr             appendForeignChild          (const Simple_node_ptr&) const;
+    Simple_node_ptr             importAndAppendChild        (const Simple_node_ptr&) const;
     Simple_node_ptr             adoptAndAppendChild         (const Simple_node_ptr&) const;    
     Simple_node_ptr             appendChild                 ( const Simple_node_ptr& newChild ) const;
     Simple_node_ptr             appendChild_if              ( const Simple_node_ptr& newChild ) const             { return newChild? appendChild( newChild ) : Simple_node_ptr(NULL); }
     bool                        hasChildNodes               () const;
     string                      getTextContent              () const;
-    void                        setTexContent              ( const string& textContent ) const;
     string                      xml_without_prolog          ( const string& encoding, bool indented = false ) const;
     string                      xml                         ( const string& encoding, bool indented = false ) const;
     string                      xml                         () const                                { return xml( string_encoding, false ); }

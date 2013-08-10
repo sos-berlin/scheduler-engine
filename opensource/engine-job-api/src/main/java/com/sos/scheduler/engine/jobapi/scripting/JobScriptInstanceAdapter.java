@@ -15,7 +15,7 @@ public class JobScriptInstanceAdapter {
 
     public final boolean callInit(boolean deflt) throws Exception {
         loadScript();
-        return scriptInstance.callBooleanWhenExists("spooler_init", deflt);
+        return scriptInstance.callBooleanWhenExists(deflt, "spooler_init");
     }
 
     public final void callExit() {
@@ -27,7 +27,7 @@ public class JobScriptInstanceAdapter {
     }
 
     public final boolean callOpen(boolean deflt) throws Exception {
-        return scriptInstance.callBooleanWhenExists("spooler_open", deflt);
+        return scriptInstance.callBooleanWhenExists(deflt, "spooler_open");
     }
 
     public final void callClose() throws Exception {
@@ -35,7 +35,7 @@ public class JobScriptInstanceAdapter {
     }
 
     public final boolean callProcess(boolean deflt) throws Exception {
-        return scriptInstance.callBooleanWhenExists("spooler_process", deflt);
+        return scriptInstance.callBooleanWhenExists(deflt, "spooler_process");
     }
 
     public final void callOnError() throws Exception {
@@ -48,7 +48,7 @@ public class JobScriptInstanceAdapter {
 
     public final boolean callTaskBefore() throws Exception {
         loadScript();
-        return scriptInstance.callBooleanWhenExists("spooler_task_before", true);
+        return scriptInstance.callBooleanWhenExists(true, "spooler_task_before");
     }
 
     public final void callTaskAfter() throws Exception {
@@ -60,11 +60,11 @@ public class JobScriptInstanceAdapter {
     }
 
     public final boolean callProcessBefore() throws Exception {
-        return scriptInstance.callBooleanWhenExists("spooler_process_before", true);
+        return scriptInstance.callBooleanWhenExists(true, "spooler_process_before");
     }
 
     public final boolean callProcessAfter(boolean spoolerProcessResult) throws Exception {
-        return scriptInstance.callBooleanWhenExists("spooler_process_after", spoolerProcessResult);
+        return scriptInstance.callBooleanWhenExists(spoolerProcessResult, "spooler_process_after", spoolerProcessResult);
     }
 
     private void loadScript() {

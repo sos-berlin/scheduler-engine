@@ -853,7 +853,7 @@ void Schedule::cover_with_schedule( Schedule* covering_schedule )
     if( is_covering() )  z::throw_xc( "SCHEDULER-463", obj_name(), covering_schedule->obj_name() );
 
     assert_no_overlapped_covering( covering_schedule );
-    _covering_schedules[ covering_schedule->_inlay->_covered_schedule_begin.as_double() ] = covering_schedule;
+    _covering_schedules[ covering_schedule->_inlay->_covered_schedule_begin.millis() ] = covering_schedule;
 
     on_schedule_modified();
 }
@@ -862,7 +862,7 @@ void Schedule::cover_with_schedule( Schedule* covering_schedule )
 
 void Schedule::assert_no_overlapped_covering( Schedule* covering_schedule )
 {
-    Covering_schedules::iterator after = _covering_schedules.lower_bound( covering_schedule->_inlay->_covered_schedule_end.as_double() );
+    Covering_schedules::iterator after = _covering_schedules.lower_bound( covering_schedule->_inlay->_covered_schedule_end.millis() );
     
     if( after != _covering_schedules.begin() )
     {
@@ -876,9 +876,9 @@ void Schedule::assert_no_overlapped_covering( Schedule* covering_schedule )
 
 void Schedule::uncover_from_schedule( Schedule* covering_schedule )
 {
-    assert( _covering_schedules.find( covering_schedule->_inlay->_covered_schedule_begin.as_double() ) != _covering_schedules.end() );
+    assert( _covering_schedules.find( covering_schedule->_inlay->_covered_schedule_begin.millis() ) != _covering_schedules.end() );
 
-    _covering_schedules.erase( covering_schedule->_inlay->_covered_schedule_begin.as_double() );
+    _covering_schedules.erase( covering_schedule->_inlay->_covered_schedule_begin.millis() );
 
     on_schedule_modified();
 }
@@ -958,7 +958,7 @@ Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_sin
 
     // Überdeckende Schedule prüfen, <schedule substitute="...">
 
-    for( Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t.as_double() );; next_schedule++ )   // Liefert das erste Schedule nach t
+    for( Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound(t.millis());; next_schedule++ )   // Liefert das erste Schedule nach t
     {
         assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
@@ -996,7 +996,7 @@ Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_sin
         }
 
         interval_end = next_schedule != _covering_schedules.end()? next_schedule->second->_inlay->_covered_schedule_begin     // Ende der Lücke
-                                                        : Time::never;
+                                                                 : Time::never;
 
         assert( t >= interval_begin  &&  t <= interval_end );
 
@@ -1054,7 +1054,7 @@ Schedule* Schedule::covering_schedule_at( const Time& t )
 {
     Schedule* result = NULL;
 
-    Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t.as_double() );   // Liefert das erste Schedule nach t
+    Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t.millis() );   // Liefert das erste Schedule nach t
     assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
     if( next_schedule != _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
@@ -1248,14 +1248,14 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 
 
     _dom.create();
-    _dom.appendForeignChild(element);
+    _dom.importAndAppendChild(element);
 
 
     _title = element.getAttribute( "title ");
 
     _covered_schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "substitute" ) );
-    _covered_schedule_begin = Time::of_date_time( element.getAttribute( "valid_from"          ), "(NO-TIME-ZONE)" );
-    _covered_schedule_end   = Time::of_date_time( element.getAttribute( "valid_to"  , "never" ), "(NO-TIME-ZONE)" );
+    _covered_schedule_begin = Time::of_local_date_time(element.getAttribute( "valid_from"          ));
+    _covered_schedule_end   = Time::of_local_date_time(element.getAttribute( "valid_to"  , "never" ));
     if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.utc_string(), _covered_schedule_end.utc_string() );
 
     if( _covered_schedule_path == "" )

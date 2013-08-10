@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+        >
+    <config>
+        <schedules>
+            <!-- Der Job will die Schedules schon bei der Initialisierung haben, sonst SCHEDULER-161.
+                 Unter Linux wird aber zufällig erst der Job, dann a.scheduler.xml gelesen.
+                 Deshalb stehen die Schedules hier in der scheduler.xml, damit sie sicher vorab bekannt sind. -->
+            <schedule name="a">
+                <period single_start="00:11"/>
+                <period single_start="23:22"/>
+            </schedule>
+            <schedule name="b" substitute="/a" valid_from="2030-01-03 00:00" valid_to="2030-01-04 24:00">
+                <period single_start="00:44"/>
+                <period single_start="23:55"/>
+            </schedule>
+        </schedules>
+    </config>
+</spooler>

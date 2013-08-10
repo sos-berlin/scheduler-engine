@@ -279,16 +279,16 @@ Simple_node_ptr Simple_node_ptr::insertBefore( const Simple_node_ptr& newChild, 
      return _nodeJ.insertBefore(newChild.ref(), refChild.ref());
 }
 
-//--------------------------------------------------------------Simple_node_ptr::appendForeignChild
+//------------------------------------------------------------Simple_node_ptr::importAndAppendChild
 
-Simple_node_ptr Simple_node_ptr::appendForeignChild(const Simple_node_ptr& newChild) const 
+Simple_node_ptr Simple_node_ptr::importAndAppendChild(const Simple_node_ptr& newChild) const 
 {
     bool deep = true;
     NodeJ importedNode = thisOrOwnerDocumentJ().importNode(newChild.ref(), deep);
     return _nodeJ.appendChild(importedNode); 
 }
 
-//--------------------------------------------------------------Simple_node_ptr::appendForeignChild
+//-------------------------------------------------------------Simple_node_ptr::adoptAndAppendChild
 
 Simple_node_ptr Simple_node_ptr::adoptAndAppendChild(const Simple_node_ptr& newChild) const 
 {

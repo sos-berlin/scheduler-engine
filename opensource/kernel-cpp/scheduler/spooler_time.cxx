@@ -181,7 +181,7 @@ void Time::operator -= (const Duration& d)
 Time Time::operator + ( const Duration& d ) const
 { 
     return is_never() || d.is_eternal()? never
-                                       : Time( as_double() + d.as_double() );
+                                       : Time(min(never_double, as_double() + d.as_double()));
 }
 
 //---------------------------------------------------------------------------------Time::operator +

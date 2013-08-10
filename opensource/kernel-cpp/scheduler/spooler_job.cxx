@@ -527,7 +527,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
                 DOM_FOR_EACH_ELEMENT( order_queue_element, e )
                 {
                     if( my_show_what._max_orders > 0 )  --my_show_what._max_orders;
-                    element.appendChild( e );
+                    element.importAndAppendChild( e );
                 }
             }
         }
@@ -1129,7 +1129,7 @@ void Standard_job::add_on_exit_commands_element( const xml::Element_ptr& command
         _commands_document.create_root_element( "all_commands" );       // Name ist egal
     }
 
-    _commands_document.documentElement().appendForeignChild(commands_element);
+    _commands_document.documentElement().importAndAppendChild(commands_element);
 }
 
 //-----------------------------------------------------------Standard_job::prepare_on_exit_commands
@@ -3308,7 +3308,7 @@ xml::Element_ptr Standard_job::dom_element( const xml::Document_ptr& document, c
             for( xml::Node_ptr n = _commands_document.documentElement().firstChild(); n; n = n.nextSibling() )
             {
                 if( n.nodeType() == xml::ELEMENT_NODE ) 
-                    result.appendForeignChild(n);
+                    result.importAndAppendChild(n);
             }
         }
 
