@@ -1254,8 +1254,8 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _title = element.getAttribute( "title ");
 
     _covered_schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "substitute" ) );
-    _covered_schedule_begin = Time::of_date_time( element.getAttribute( "valid_from"          ), "(NO-TIME-ZONE)" );
-    _covered_schedule_end   = Time::of_date_time( element.getAttribute( "valid_to"  , "never" ), "(NO-TIME-ZONE)" );
+    _covered_schedule_begin = Time::of_local_date_time(element.getAttribute( "valid_from"          ));
+    _covered_schedule_end   = Time::of_local_date_time(element.getAttribute( "valid_to"  , "never" ));
     if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.utc_string(), _covered_schedule_end.utc_string() );
 
     if( _covered_schedule_path == "" )
