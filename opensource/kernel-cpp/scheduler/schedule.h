@@ -563,7 +563,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     typedef stdext::hash_set<Schedule_use*>    Use_set;
     Use_set                                   _use_set;
 
-    typedef map<double,Schedule*>  Covering_schedules;      // Geordnet!
+    typedef map<int64, Schedule*>  Covering_schedules;      // Geordnet!
     Covering_schedules            _covering_schedules;      // <schedule substitute="...">, die auf dieses Schedule verweisen
 
     ptr<Inlay>                    _inlay;
