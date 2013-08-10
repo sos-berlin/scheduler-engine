@@ -1,9 +1,9 @@
-package com.sos.scheduler.engine.common.scalautil
+package com.sos.scheduler.engine.common.scalautil.xml
 
-import org.scalatest.FunSuite
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import RichScalaXML.RichElem
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])

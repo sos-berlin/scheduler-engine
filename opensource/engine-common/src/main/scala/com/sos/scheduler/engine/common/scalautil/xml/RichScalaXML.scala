@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.common.scalautil
+package com.sos.scheduler.engine.common.scalautil.xml
 
 object RichScalaXML {
   implicit class RichElem(val delegate: xml.Node) extends AnyVal {
