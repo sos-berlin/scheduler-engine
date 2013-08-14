@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+\brief Delete all contents from the local repository of the JobScheduler engine 
+
+\version 1.0
+\date 2013-08-14
+-->
+<project name="com.sos.scheduler.setup.prepare" basedir="." default="purge.local">
+
+    <target name="purge.local">
+    	<delete dir="${user.home}/.m2/repository//com/sos/scheduler/engine" />
+    </target>
+
+</project>
