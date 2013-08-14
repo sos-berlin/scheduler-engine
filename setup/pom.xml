@@ -29,32 +29,6 @@ call prepare-setup.sh <version> to use this pom
                 <setup.platform>${engine.platform}</setup.platform>
             </properties>
         </profile>
-        <profile>
-            <id>purge-local-repo</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <!-- purge local repository for com.sos.scheduler.engine to ensure to load the actual version from remote repository and save disc space -->
-                            <execution>
-                                <phase>clean</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <ant antfile="prepare-setup.xml" target="purge.local">
-                                            <property name="settings.localRepository" value="${settings.localRepository}" />
-                                        </ant>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
     <repositories>
