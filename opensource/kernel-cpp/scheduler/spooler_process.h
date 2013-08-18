@@ -92,7 +92,7 @@ struct Process : zschimmer::Object, Scheduler_object
 
 
 
-                                Process                     ( Spooler* );
+                                Process                     ( Spooler*, const Host_and_port& remote_scheduler);
     Z_GNU_ONLY(                 Process                     (); )
                                ~Process                     ();
 
@@ -179,7 +179,7 @@ struct Process : zschimmer::Object, Scheduler_object
     string                     _java_options;
     string                     _java_classpath;
     bool                       _run_in_thread;
-    Host_and_port              _remote_scheduler;
+    Host_and_port const        _remote_scheduler;
     Process_id                 _remote_process_id;
     pid_t                      _remote_pid;
     //File                       _remote_stdout_file;
@@ -270,8 +270,8 @@ struct Process_class : Process_class_configuration
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
 
-    Process*                    new_process                 ();
-    Process*                    select_process_if_available ();                                     // Startet bei Bedarf. Bei _max_processes: return NULL
+    Process*                    new_process                 (const Host_and_port& remote_scheduler);
+    Process*                    select_process_if_available (const Host_and_port& remote_scheduler);        // Startet bei Bedarf. Bei _max_processes: return NULL
     bool                        process_available           ( Job* for_job );
     void                        enqueue_waiting_job         ( Job* );
     void                        remove_waiting_job          ( Job* );
@@ -342,7 +342,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     ptr<Process_class_folder>   new_process_class_folder    ( Folder* folder )                      { return Z_NEW( Process_class_folder( folder ) ); }
     Process_class*              process_class               ( const Absolute_path& path )           { return file_based( path ); }
     Process_class*              process_class_or_null       ( const Absolute_path& path )           { return file_based_or_null( path ); }
-    Process*                    new_temporary_process       ();
+    Process*                    new_temporary_process       (const Host_and_port& remote_scheduler);
     Process_class*              temporary_process_class     ();
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();

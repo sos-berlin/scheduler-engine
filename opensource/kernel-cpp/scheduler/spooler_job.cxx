@@ -3562,14 +3562,14 @@ void Standard_job::kill_task( int id, bool immediately )
 
 //-------------------------------------------------------------Standard_job::create_module_instance
 
-ptr<Module_instance> Standard_job::create_module_instance()
+ptr<Module_instance> Standard_job::create_module_instance(const Host_and_port& remote_scheduler)
 {
     ptr<Module_instance>  result;
 
     {
         if( _state == s_error      )  z::throw_xc( "SCHEDULER-204", name(), _error.what() );
 
-        result = _module->create_instance();
+        result = _module->create_instance(remote_scheduler);
 
         if( result )
         {

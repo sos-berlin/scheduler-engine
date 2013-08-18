@@ -277,11 +277,12 @@ int Process::Com_server_thread::thread_main()
 
 //---------------------------------------------------------------------------------Process::Process
 
-Process::Process( Spooler* sp )
+Process::Process(Spooler* sp, const Host_and_port& remote_scheduler)
 : 
     Scheduler_object( sp, this, type_process ), 
     _zero_(this+1),
-    _process_id( _spooler->get_next_process_id() )
+    _process_id( _spooler->get_next_process_id() ),
+    _remote_scheduler(remote_scheduler)
 {
 }
 
@@ -392,8 +393,6 @@ void Process::remove_module_instance( Module_instance* )
 void Process::start()
 {
     if( started() )  assert(0), z::throw_xc( Z_FUNCTION );
-
-    if( _process_class )  _remote_scheduler = _process_class->remote_scheduler();
 
     if( is_remote_host() )
     {
@@ -1219,13 +1218,14 @@ void Process_class::remove_process( Process* process )
 
 //------------------------------------------------------------------------Process_class::new_process
 
-Process* Process_class::new_process()
+Process* Process_class::new_process(const Host_and_port& remote_scheduler)
 {
     assert_is_active();
 
     ptr<Process> process;
 
-    process = Z_NEW( Process( _spooler ) );        
+    Host_and_port r = remote_scheduler.is_empty()? _remote_scheduler : remote_scheduler;
+    process = Z_NEW( Process(_spooler, r));        
 
     process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
 
@@ -1236,14 +1236,14 @@ Process* Process_class::new_process()
 
 //--------------------------------------------------------Process_class::select_process_if_available
 
-Process* Process_class::select_process_if_available()
+Process* Process_class::select_process_if_available(const Host_and_port& remote_scheduler)
 {
     if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active &&
         _process_set.size() < _max_processes
          && _spooler->_process_count < scheduler::max_processes)
     {
-        return new_process();
+        return new_process(remote_scheduler);
     }
     else
         return NULL;
@@ -1427,9 +1427,9 @@ bool Process_class_subsystem::async_continue()
 
 //---------------------------------------------------Process_class_subsystem::new_temporary_process
 
-Process* Process_class_subsystem::new_temporary_process()
+Process* Process_class_subsystem::new_temporary_process(const Host_and_port& remote_scheduler)
 {
-    ptr<Process> process = Z_NEW( Process( _spooler ) );
+    ptr<Process> process = Z_NEW( Process( _spooler, remote_scheduler) );
 
     process->set_temporary( true );
     temporary_process_class()->add_process( process );

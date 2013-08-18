@@ -56,7 +56,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
 
 
-                                Remote_module_instance_proxy( Module* module )                      : Com_module_instance_base(module), _zero_(_end_) {}
+                                Remote_module_instance_proxy( Module* module, const Host_and_port& remote_scheduler) : Com_module_instance_base(module), _zero_(_end_) { _remote_scheduler = remote_scheduler; }
                                ~Remote_module_instance_proxy();
 
     void                        init                        ();

@@ -447,9 +447,9 @@ void Module::init()
 
 //--------------------------------------------------------------------------Module::create_instance
 
-ptr<Module_instance> Module::create_instance()
+ptr<Module_instance> Module::create_instance(const Host_and_port& remote_scheduler)
 {
-    ptr<Module_instance> result = create_instance_impl();
+    ptr<Module_instance> result = create_instance_impl(remote_scheduler);
 
     if( !_monitors->is_empty() )
     {
@@ -466,7 +466,7 @@ ptr<Module_instance> Module::create_instance()
 
 //---------------------------------------------------------------------Module::create_instance_impl
 
-ptr<Module_instance> Module::create_instance_impl()
+ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_scheduler)
 {
     ptr<Module_instance> result;
 
@@ -474,7 +474,7 @@ ptr<Module_instance> Module::create_instance_impl()
     Kind kind = _kind;
     
     if( _use_process_class  &&
-        ( has_api() || process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+        ( has_api() || process_class()->is_remote_host() || !remote_scheduler.is_empty() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
     {
         kind = kind_remote;                 
     }
@@ -541,7 +541,7 @@ ptr<Module_instance> Module::create_instance_impl()
 
         case kind_remote:
         {
-            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this ) );
+            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this, remote_scheduler) );
             result = +p;
             break;
         }
@@ -861,11 +861,11 @@ bool Module_instance::try_to_get_process()
             &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
         {
             // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
-            _process = _spooler->process_class_subsystem()->new_temporary_process();
+            _process = _spooler->process_class_subsystem()->new_temporary_process(_remote_scheduler);
         }
         else
         {
-            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available();
+            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(_remote_scheduler);
         }
 
         if( _process )

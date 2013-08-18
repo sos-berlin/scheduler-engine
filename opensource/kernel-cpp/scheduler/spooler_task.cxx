@@ -2448,7 +2448,8 @@ bool Task::do_load()
     ptr<Module_instance> module_instance;
     bool                 is_new = false;
 
-    module_instance = _job->create_module_instance();
+    Host_and_port remote_scheduler = _order? _order->params()->get_string("scheduler.remote_scheduler") : "";
+    module_instance = _job->create_module_instance(remote_scheduler);
     if( !module_instance )  return false;
     is_new = true;
     module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
