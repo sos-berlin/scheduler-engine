@@ -66,7 +66,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-187", "Order.setback(): An order can only be set back when it is being executed by a task" },
     { "SCHEDULER-188", "Order.setback() and Order.state= cannot be combined" },
     { "SCHEDULER-191", "separate_process: Unexpected state $2 in $1" },
-    { "SCHEDULER-192", "A separate process is only possible with use_engine=\"task\"" },
     { "SCHEDULER-194", "process_class and separate_process cannot be combined" },
     { "SCHEDULER-196", "use_engine=\"$1\" is deprecated" },
     { "SCHEDULER-197", "Module::java_method_id($1): unknown Java class" },
