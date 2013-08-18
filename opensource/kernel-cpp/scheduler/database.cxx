@@ -1955,7 +1955,6 @@ void Job_history::read_profile_settings()
 {
     string section = _job->profile_section();
 
-    _filename    = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
     _history_yes = read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_job_history_yes );
     _on_process  = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_job_history_on_process );
     _with_log    = read_profile_with_log          ( _spooler->_factory_ini, section, "history_with_log"  , _spooler->_job_history_with_log );
@@ -1986,7 +1985,7 @@ void Job_history::open( Transaction* outer_transaction )
     {
         if( !_history_yes )  return;
 
-        if( _spooler->_db->opened()  &&  _filename == "" )
+        if( _spooler->_db->opened())
         {
             Transaction ta ( +_spooler->_db, outer_transaction );
             {
@@ -2014,36 +2013,6 @@ void Job_history::open( Transaction* outer_transaction )
 
             _use_db = true;
         }
-        else
-        {
-            string         extra_columns = read_profile_string ( _spooler->_factory_ini, section, "history_columns", _spooler->_job_history_columns );
-            Archive_switch arc           = read_profile_archive( _spooler->_factory_ini, section, "history_archive", _spooler->_job_history_archive );
-
-            _type_string = history_column_names;
-
-            _extra_type = make_record_type( extra_columns );
-
-            if( extra_columns != "" )  _type_string += "," + extra_columns;
-
-            _extra_names = vector_split( ", *", replace_regex( extra_columns, ":[^,]+", "" ) );
-
-            if( _filename == "" )
-            {
-                _filename = "history";
-                if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
-                _filename += ".job." + _job_path.to_filename() + ".txt";
-            }
-            _filename = make_absolute_filename( _spooler->log_directory(), _filename );
-            if( _filename[0] == '*' )  return;      // log_dir = *stderr
-
-            if( arc )  archive( arc, _filename );  
-
-            _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
-            _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
-
-            _job->_log->debug( message_string( "SCHEDULER-910", _filename ) );
-            _use_file = true;
-        }
     }
     catch( exception& x )  
     { 
@@ -2056,44 +2025,7 @@ void Job_history::open( Transaction* outer_transaction )
 
 void Job_history::close()
 {
-    try
-    {
-        _use_db = false;
-        _use_file = false;
-        _file.close();
-    }
-    catch( exception& x )  
-    { 
-        _job->_log->warn( message_string( "SCHEDULER-269", x ) );   //"FEHLER BEIM SCHLIESSEN DER HISTORIE: "
-    }
-}
-
-//-----------------------------------------------------------------------------Job_history::archive
-
-void Job_history::archive( Archive_switch arc, const File_path& filename )
-{
-    if( filename.file_exists() )
-    {
-        string ext   = filename.extension();
-        string rumpf = filename;
-        if( ext != "" )  rumpf = filename.substr( 0, filename.length() - ext.length() - 1 );
-
-        Sos_optional_date_time time = Time::now().as_time_t();
-        string arc_filename = rumpf + "." + time.formatted( "yyyy-mm-dd-HHMMSS" );
-        if( ext != "" )  arc_filename +=  "." + ext;
-
-        if( arc == arc_gzip )
-        {
-            arc_filename += ".gz";
-            copy_file( "file -b " + filename, "gzip | " + arc_filename );
-        }
-        else
-        {
-            rename_file( filename, arc_filename );
-        }
-
-        _job->_log->info( message_string( "SCHEDULER-913", arc_filename ) );    // "Bisherige Historie ist archiviert worden unter "
-    }
+    _use_db = false;
 }
 
 //---------------------------------------------------------------------------Job_history::read_tail
@@ -2123,49 +2055,41 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                 {
                     Any_file sel;
 
-                    if( _use_file )
-                    {
-                        if( id != -1  ||  next >= 0 )  z::throw_xc( "SCHEDULER-139" );
-                        sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
-                    }
-                    else
-                    if( _use_db )
-                    {
-                        S prefix;
-                        S clause;
-
-                        prefix << "-in -seq head -" << max( 1, abs(next) ) << " | ";
-
-                        clause << " where `job_name`="        << sql_quoted( _job_path.without_slash() );
-                        clause << " and `spooler_id`="        << sql_quoted( _spooler->id_for_db() );
-                        if ( !_spooler->_cluster_configuration._demand_exclusiveness )
-                          clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
-                        
-                        if( id != -1 )
-                        {
-                            clause << " and `id`";
-                            clause << ( next < 0? "<" : 
-                                        next > 0? ">" 
-                                                : "=" );
-                            clause << id;
-                        }
-
-                        clause << " order by `id` ";  
-                        if( next < 0 )  clause << " desc";
-                        
-                        if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
-
-                        sel = ta.open_file( prefix + _spooler->_db->_db_name, 
-                                S() << "select " <<
-                                ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
-                                " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text`, "
-                                " `cluster_member_id`, `exit_code`, `pid`" <<
-                                join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
-                                " from " << _spooler->db()->_job_history_tablename <<
-                                clause );
-                    }
-                    else
+                    if( !_use_db )
                         z::throw_xc( "SCHEDULER-136" );
+
+                    S prefix;
+                    S clause;
+
+                    prefix << "-in -seq head -" << max( 1, abs(next) ) << " | ";
+
+                    clause << " where `job_name`="        << sql_quoted( _job_path.without_slash() );
+                    clause << " and `spooler_id`="        << sql_quoted( _spooler->id_for_db() );
+                    if ( !_spooler->_cluster_configuration._demand_exclusiveness )
+                        clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
+                        
+                    if( id != -1 )
+                    {
+                        clause << " and `id`";
+                        clause << ( next < 0? "<" : 
+                                    next > 0? ">" 
+                                            : "=" );
+                        clause << id;
+                    }
+
+                    clause << " order by `id` ";  
+                    if( next < 0 )  clause << " desc";
+                        
+                    if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
+
+                    sel = ta.open_file( prefix + _spooler->_db->_db_name, 
+                            S() << "select " <<
+                            ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
+                            " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text`, "
+                            " `cluster_member_id`, `exit_code`, `pid`" <<
+                            join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
+                            " from " << _spooler->db()->_job_history_tablename <<
+                            clause );
 
                     const Record_type* type = sel.spec().field_type_ptr();
                     Dynamic_area rec ( type->field_size() );
@@ -2303,8 +2227,8 @@ void Task_history::write( bool start )
     
     _job_history->_last_task = _task;
 
-    if( start | _job_history->_use_file )  parameters = _task->has_parameters()? xml_as_string( _task->parameters_as_dom() )
-                                                                               : "";
+    if( start )  parameters = _task->has_parameters()? xml_as_string( _task->parameters_as_dom() )
+                                                     : "";
 
     string start_time = !start || !_task->_running_since.is_zero()? _task->_running_since.db_string(time::without_ms)
                                                                   : Time::now().db_string(time::without_ms);
@@ -2417,33 +2341,6 @@ void Task_history::write( bool start )
             _spooler->_db->try_reopen_after_error( x, Z_FUNCTION );
         }
     }
-
-    if( _job_history->_use_file )
-    {
-        _tabbed_record = "";
-        append_tabbed( _task->_id );
-        append_tabbed( _spooler->id_for_db() );
-        append_tabbed( _task->_job->name() );
-        append_tabbed( start_time );
-        append_tabbed( start? "" : Time::now().db_string(time::without_ms) );
-        append_tabbed( start_cause_name( _task->_cause ) );
-        append_tabbed( _task->_step_count );
-        append_tabbed( _task->has_error()? 1 : 0 );
-        append_tabbed( _task->_error.code() );
-        append_tabbed( _task->_error.what() );
-        append_tabbed( parameters );
-
-        if( !start  &&  _extra_record.type() )
-        {
-            for( int i = 0; i < _extra_record.type()->field_count(); i++ )
-            {
-                append_tabbed( _extra_record.as_string(i) );
-            }
-        }
-
-        _job_history->_file.print( _tabbed_record + SYSTEM_NL );
-        //zu langsam: _file.syncdata();
-    }
 }
 
 //------------------------------------------------------------------------------Task_history::start
@@ -2462,8 +2359,6 @@ void Task_history::start()
 
     try
     {
-        if( _job_history->_use_file )  _record_pos = _job_history->_file.tell();
-
         write( true );
     }
     catch( exception& x )  
@@ -2487,7 +2382,6 @@ void Task_history::end()
 
     try
     {
-        if( _job_history->_use_file && _job_history->_last_task == _task )  _job_history->_file.seek( _record_pos );
         write( false );
     }
     catch( exception& x )  

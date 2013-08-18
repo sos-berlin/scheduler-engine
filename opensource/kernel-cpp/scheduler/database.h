@@ -313,9 +313,6 @@ struct Job_history
   private:
     friend struct               Task_history;
 
-    void                        archive                 ( Archive_switch, const File_path& filename );
-
-
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Job*                       _job;
@@ -325,14 +322,9 @@ struct Job_history
     int                        _on_process;             // Beim soundsovieltem _on_process Historiensatz schreiben
     With_log_switch            _with_log;
     bool                       _use_db;
-    bool                       _use_file;
     bool                       _error;
     bool                       _start_called;
 
-    file::File_path            _filename;
-    string                     _type_string;            // _use_file:  -type=(...) tab ...
-    zschimmer::file::File      _file;
-    string                     _tabbed_record;
     vector<string>             _extra_names;
     Sos_ptr<Record_type>       _extra_type;
 };

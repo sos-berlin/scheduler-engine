@@ -329,7 +329,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-907", "Opening database: $1" },
     { "SCHEDULER-908", "Column $2 is being added to database table $1: $3" },
     { "SCHEDULER-909", "Creating database table $1" },
-    { "SCHEDULER-910", "New history file opened: $1" },
     { "SCHEDULER-912", "add_pid($1), process deadline is $2" },
     { "SCHEDULER-913", "Previous history has been archived under $1" },
     { "SCHEDULER-914", "end() called, task will terminate" },
