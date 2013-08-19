@@ -41,8 +41,8 @@ void init_file_types()
 #ifdef SYSTEM_ODBC
     REFERENCE_FOR_LINKER( const Abs_file_type&, odbc_file_type          );  // odbc.cxx
 #endif
-    REFERENCE_FOR_LINKER( const Abs_file_type&, sossql_file_type        );  // sossqlfl.cxx
     REFERENCE_FOR_LINKER( const Abs_file_type&, sql_file_type           );  // sqlfile.cxx
+    //REFERENCE_FOR_LINKER( const Abs_file_type&, sossql_file_type        );  // sossqlfl.cxx
     REFERENCE_FOR_LINKER( const Abs_file_type&, std_file_type           );  // stdfile.cxx
     REFERENCE_FOR_LINKER( const Abs_file_type&, zlib_file_type          );  // zlibfile.cxx
 }

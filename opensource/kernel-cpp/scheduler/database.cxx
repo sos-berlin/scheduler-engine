@@ -1961,9 +1961,7 @@ void Job_history::set_dom_settings( xml::Element_ptr settings_element )
 void Job_history::open( Transaction* outer_transaction )
 {
     string section = _job->profile_section();
-
     _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift
-
 
     try
     {
@@ -1973,7 +1971,6 @@ void Job_history::open( Transaction* outer_transaction )
         {
             Transaction ta ( +_spooler->_db, outer_transaction );
             {
-
                 set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
 
                 _spooler->_db->open_history_table( &ta );
@@ -2020,143 +2017,137 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
     xml::Element_ptr history_element;
 
-    if( !_error )  
-    {
-        history_element = doc.createElement( "history" );
-        dom_append_nl( history_element );
+    if (_error) throw_xc("SCHEDULER-270", "(previous open error)");
 
-        with_log &= _use_db;
+    history_element = doc.createElement( "history" );
+    dom_append_nl( history_element );
 
-        try
+    with_log &= _use_db;
+
+    try {
+        if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
+
+        if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+
+        Transaction ta ( +_spooler->_db );
         {
-            try
+            Any_file sel;
+
+            if( !_use_db )
+                z::throw_xc( "SCHEDULER-136" );
+
+            S prefix;
+            S clause;
+
+            prefix << "-in -seq head -" << max( 1, abs(next) ) << " | ";
+
+            clause << " where `job_name`="        << sql_quoted( _job_path.without_slash() );
+            clause << " and `spooler_id`="        << sql_quoted( _spooler->id_for_db() );
+            if ( !_spooler->_cluster_configuration._demand_exclusiveness )
+                clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
+                        
+            if( id != -1 )
             {
-                if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
-
-                if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
-
-                Transaction ta ( +_spooler->_db );
-                {
-                    Any_file sel;
-
-                    if( !_use_db )
-                        z::throw_xc( "SCHEDULER-136" );
-
-                    S prefix;
-                    S clause;
-
-                    prefix << "-in -seq head -" << max( 1, abs(next) ) << " | ";
-
-                    clause << " where `job_name`="        << sql_quoted( _job_path.without_slash() );
-                    clause << " and `spooler_id`="        << sql_quoted( _spooler->id_for_db() );
-                    if ( !_spooler->_cluster_configuration._demand_exclusiveness )
-                        clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
-                        
-                    if( id != -1 )
-                    {
-                        clause << " and `id`";
-                        clause << ( next < 0? "<" : 
-                                    next > 0? ">" 
-                                            : "=" );
-                        clause << id;
-                    }
-
-                    clause << " order by `id` ";  
-                    if( next < 0 )  clause << " desc";
-                        
-                    if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
-
-                    sel = ta.open_file( prefix + _spooler->_db->_db_name, 
-                            S() << "select " <<
-                            ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
-                            " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text`, "
-                            " `cluster_member_id`, `exit_code`, `pid`" <<
-                            join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
-                            " from " << _spooler->db()->_job_history_tablename <<
-                            clause );
-
-                    const Record_type* type = sel.spec().field_type_ptr();
-                    Dynamic_area rec ( type->field_size() );
-        
-                    while( !sel.eof() )
-                    {
-                        string           param_xml;
-                        string           error_code;
-                        string           error_text;
-                        xml::Element_ptr history_entry = doc.createElement( "history.entry" );
-
-                        sel.get( &rec );
-            
-                        for( int i = 0; i < type->field_count(); i++ )
-                        {
-                            string value = type->as_string( i, rec.byte_ptr() );
-                            if( value != "" )
-                            {
-                                string name = lcase( type->field_descr_ptr(i)->name() );
-
-                                if( name == "parameters" ) 
-                                {
-                                    param_xml = value;
-                                }
-                                else
-                                if( name == "id" )  
-                                {
-                                    history_entry.setAttribute( "task", value );
-                                    if( !use_task_schema )
-                                        history_entry.setAttribute( "id", value );      // id sollte nicht verwendet werden. jz 6.9.04
-                                }
-                                else
-                                if( use_task_schema  &&  name == "spooler_id" )  {} // ignorieren
-                                else
-                                if( use_task_schema  &&  name == "error"      )  {} // ignorieren
-                                else
-                                if( use_task_schema  &&  name == "error_code" )  error_code = value;
-                                else
-                                if( use_task_schema  &&  name == "error_text" )  error_text = value;
-                                else
-                                if (name == "start_time" || name == "end_time")  history_entry.setAttribute(name, Time::of_utc_date_time(value).xml_value());
-                                else
-                                {
-                                    history_entry.setAttribute( name, value );
-                                }
-                            }
-                        }
-
-                        if( use_task_schema  &&  error_text != "" )
-                        {
-                            Xc x ( error_code.c_str() );
-                            x.set_what( error_text );
-                            history_entry.appendChild( create_error_element( doc, x ) );
-                        }
-
-                        if( with_log )
-                        {
-                            int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
-                            try
-                            {
-                                ta.set_transaction_read();
-
-                                string log = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->_db_name + " -table=" + _spooler->_db->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
-                                if( !log.empty() )  history_entry.append_new_text_element( "log", log );
-                            }
-                            catch( exception&  x ) { _job->_log->warn( string("History: ") + x.what() ); }
-                        }
-
-                        history_element.appendChild( history_entry );
-                        dom_append_nl( history_element );
-                    }
-
-                    sel.close();
-                }
-                ta.commit( Z_FUNCTION );
+                clause << " and `id`";
+                clause << ( next < 0? "<" : 
+                            next > 0? ">" 
+                                    : "=" );
+                clause << id;
             }
-            catch( const _com_error& x )  { throw_com_error( x, "Job_history::read_tail" ); }
+
+            clause << " order by `id` ";  
+            if( next < 0 )  clause << " desc";
+                        
+            if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
+
+            sel = ta.open_file( prefix + _spooler->_db->_db_name, 
+                    S() << "select " <<
+                    ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
+                    " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text`, "
+                    " `cluster_member_id`, `exit_code`, `pid`" <<
+                    join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
+                    " from " << _spooler->db()->_job_history_tablename <<
+                    clause );
+
+            const Record_type* type = sel.spec().field_type_ptr();
+            Dynamic_area rec ( type->field_size() );
+        
+            while( !sel.eof() )
+            {
+                string           param_xml;
+                string           error_code;
+                string           error_text;
+                xml::Element_ptr history_entry = doc.createElement( "history.entry" );
+
+                sel.get( &rec );
+            
+                for( int i = 0; i < type->field_count(); i++ )
+                {
+                    string value = type->as_string( i, rec.byte_ptr() );
+                    if( value != "" )
+                    {
+                        string name = lcase( type->field_descr_ptr(i)->name() );
+
+                        if( name == "parameters" ) 
+                        {
+                            param_xml = value;
+                        }
+                        else
+                        if( name == "id" )  
+                        {
+                            history_entry.setAttribute( "task", value );
+                            if( !use_task_schema )
+                                history_entry.setAttribute( "id", value );      // id sollte nicht verwendet werden. jz 6.9.04
+                        }
+                        else
+                        if( use_task_schema  &&  name == "spooler_id" )  {} // ignorieren
+                        else
+                        if( use_task_schema  &&  name == "error"      )  {} // ignorieren
+                        else
+                        if( use_task_schema  &&  name == "error_code" )  error_code = value;
+                        else
+                        if( use_task_schema  &&  name == "error_text" )  error_text = value;
+                        else
+                        if (name == "start_time" || name == "end_time")  history_entry.setAttribute(name, Time::of_utc_date_time(value).xml_value());
+                        else
+                        {
+                            history_entry.setAttribute( name, value );
+                        }
+                    }
+                }
+
+                if( use_task_schema  &&  error_text != "" )
+                {
+                    Xc x ( error_code.c_str() );
+                    x.set_what( error_text );
+                    history_entry.appendChild( create_error_element( doc, x ) );
+                }
+
+                if( with_log )
+                {
+                    int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
+                    try
+                    {
+                        ta.set_transaction_read();
+
+                        string log = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->_db_name + " -table=" + _spooler->_db->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
+                        if( !log.empty() )  history_entry.append_new_text_element( "log", log );
+                    }
+                    catch( exception&  x ) { _job->_log->warn( string("History: ") + x.what() ); }
+                }
+
+                history_element.appendChild( history_entry );
+                dom_append_nl( history_element );
+            }
+
+            sel.close();
         }
-        catch( exception& x ) 
-        { 
-            if( !use_task_schema )  throw x;
-            history_element.appendChild( create_error_element( doc, x, 0 ) );
-        }
+        ta.commit( Z_FUNCTION );
+    }
+    catch( exception& x ) 
+    { 
+        if( !use_task_schema )  throw x;
+        history_element.appendChild( create_error_element( doc, x, 0 ) );
     }
 
     return history_element;

@@ -452,51 +452,6 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </BrowseInformation>
     </ClCompile>
-    <ClCompile Include="sossql1.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossql2.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossql2a.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossql3.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossql4.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossqlfl.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossqlfn.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossqlty.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="sossql_group_by.cxx">
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </BrowseInformation>
-    </ClCompile>
     <ClCompile Include="sosstrea.cxx">
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

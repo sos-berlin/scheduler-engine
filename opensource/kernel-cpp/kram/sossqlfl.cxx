@@ -36,8 +36,8 @@ struct Sossql_file_type : Abs_file_type
     }
 };
 
-const Sossql_file_type  _sossql_file_type;
-const Abs_file_type&     sossql_file_type = _sossql_file_type;
+//const Sossql_file_type  _sossql_file_type;
+//const Abs_file_type&     sossql_file_type = _sossql_file_type;
 
 //------------------------------------------------------------------------Sossql_session::_open
 
