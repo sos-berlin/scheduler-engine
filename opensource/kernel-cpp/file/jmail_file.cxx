@@ -6,7 +6,6 @@
 #include "../kram/sosopt.h"
 #include "../kram/sosprof.h"
 #include "../kram/sos_mail.h"
-#include "../kram/sos_mail_jmail.h"
 #include "../zschimmer/regex_class.h"
 
 
