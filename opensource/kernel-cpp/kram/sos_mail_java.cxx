@@ -17,7 +17,6 @@
 #include "sos.h"
 #include "sosprof.h"
 #include "sos_mail.h"
-#include "sos_mail_jmail.h"
 #include "com_simple_standards.h"
 #include "sos_mail_java.h"
 #include "../zschimmer/file.h"

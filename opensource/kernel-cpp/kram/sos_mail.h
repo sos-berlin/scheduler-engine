@@ -107,36 +107,13 @@ struct Message : Sos_self_deleting
 
 //-------------------------------------------------------------------------------------------------
 
-//string                        make_addr                   ( const string& addr, const string& name );
-Sos_ptr<Message>                create_message              ( z::javabridge::Vm* = NULL, const string& type = "" );
+Sos_ptr<Message>                create_message              ( z::javabridge::Vm* = NULL);
 
 //-------------------------------------------------------------------------------------------------
 
 } //namespace mail
 } //namespace sos
 
-//-------------------------------------------------------------------------------------------------
-/*
-#ifdef SYSTEM_WIN
-
-#   include "sos_mail_jmail.h"
-
-    namespace sos 
-    {
-        typedef Jmail_message       Mail_message;
-    }
-
-#else
-
-#   include "sos_mail_java.h"
-
-    namespace sos 
-    {
-        typedef Java_mail_message   Mail_message;
-    }
-
-#endif
-*/
 //-------------------------------------------------------------------------------------------------
 
 #endif

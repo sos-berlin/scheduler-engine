@@ -57,9 +57,6 @@
     <ClCompile Include="sos_mail_java.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sos_mail_jmail.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sosalloc.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>

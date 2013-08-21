@@ -22,11 +22,6 @@
 #include "../zschimmer/file.h"
 #include "../zschimmer/z_mail.h"
 
-#if defined _WIN32 && !defined _WIN64
-#   include "sos_mail_jmail.h"
-#endif
-
-
 
 using zschimmer::file::z_filelength;
 using zschimmer::vector_split;
@@ -51,51 +46,13 @@ static z::Mutex                 dequeue_lock ( "email_dequeue" );
 
 //-----------------------------------------------------------------------------------create_message
 
-Sos_ptr<Message> create_message( z::javabridge::Vm* java_vm, const string& type )
+Sos_ptr<Message> create_message( z::javabridge::Vm* java_vm)
 {
-    string t = z::lcase( type );
-
-
-    if( t == "" )
-    {
-#       if defined _WIN32 && !defined _WIN64
-        {
-            Sos_ptr<Jmail_message> message = SOS_NEW( Jmail_message( false ) );
-            if( message->is_installed() )
-            {
-                message->init();
-                return +message;
-            }
-        }
-#       endif
-
-        t = "java";
-    }
-
-
-#   if defined _WIN32 && !defined _WIN64
-    if( t == "jmail" || t == "dimac" )
-    {
-        Sos_ptr<Jmail_message> message = SOS_NEW( Jmail_message );
-        return +message;
-    }
-    else
-#   endif
-    if( t == "java" )
-    {
-        ptr<z::javabridge::Vm> vm = java_vm;
-        
-        if( !vm )  vm = get_java_vm();
-
-        vm->start();     // Falls es vergessen worden ist.
-
-        Sos_ptr<mail::Java_message> m = SOS_NEW( mail::Java_message( vm ) );
-        return +m;
-    }
-    else
-        throw_xc( "SOS-1451", type );
-
-    return NULL;
+    ptr<z::javabridge::Vm> vm = java_vm;
+    if( !vm )  vm = get_java_vm();
+    vm->start();     // Falls es vergessen worden ist.
+    Sos_ptr<mail::Java_message> m = SOS_NEW( mail::Java_message( vm ) );
+    return +m;
 }
 
 //----------------------------------------------------------------------------Mail_static::instance
