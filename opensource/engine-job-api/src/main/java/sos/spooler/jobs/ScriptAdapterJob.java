@@ -11,7 +11,6 @@ import static sos.spooler.Beans.toBean;
 // Wird nur von C++ aufgerufen.
 public class ScriptAdapterJob extends Job_impl {
 
-    private static final String spidermonkeyAdapterLanguageId = "javascript";
     private final JobScriptInstanceAdapter adapter;
 
     public ScriptAdapterJob(String language, String script) throws Exception {
@@ -35,7 +34,7 @@ public class ScriptAdapterJob extends Job_impl {
     }
 
     private static Parameters parseLanguageParameter(String languageString) {
-        boolean isBeanCall = languageString.toLowerCase().equals(spidermonkeyAdapterLanguageId);
+        boolean isBeanCall = true;          // see JS-993 / JS-982
         return new Parameters(languageString, isBeanCall);
     }
 
