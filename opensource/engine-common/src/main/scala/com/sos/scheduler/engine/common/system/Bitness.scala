@@ -19,5 +19,8 @@ object Bitness extends Enumeration {
     case "64" => Bits64
     case _ => error(s"Unknown value in system property sun.arch.data.model=$sunModel")
   }
+
+  def is64Bit = bitness == Bits64
+  def is32Bit = bitness == Bits32
 }
 
