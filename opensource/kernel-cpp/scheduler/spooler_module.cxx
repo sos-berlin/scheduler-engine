@@ -319,6 +319,12 @@ void Module::set_dom( const xml::Element_ptr& element )
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
     set_checked_attribute( &_java_class_path   , element, "java_class_path", true );  // JS-540
 
+    #ifdef Z_64
+        string language_lcase = lcase( _language );
+        if (language_lcase == "javascript" || language_lcase == "spidermonkey" ) 
+            z::throw_xc( "SCHEDULER-482", _language );  // Unter 64bit stellen wir Spidermonkey nicht mehr bereit.
+    #endif 
+
     if( element.hasAttribute( "encoding" ) )
     {
       #ifdef Z_WINDOWS        
@@ -398,9 +404,10 @@ void Module::init()
         {
             _kind = kind_scripting_engine;
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-            // JS-498: Scripting über JAVA-Klassen ausgeführt
-            if (_language.substr(0,13) == "javax.script:" || lcase(_language) == "javascript") {
-                Z_LOG2("scheduler","Using java interface for scripting language " << _language << "\n");
+            if (string_begins_with(_language, "javax.script:") || string_begins_with(_language, "java:")) {
+                // "javax.script:rhino" für Java-Methoden-Schnittstelle, z.B. spooler_task.set_exit_code( 0 );
+                // "java:rhino" für Beans-Schnittstelle (Property-Schnittstelle), z.B. spooler_task.exit_code = 0;
+                Z_LOG2("scheduler", "Using java interface for scripting language " << _language << "\n");
                 _kind = kind_scripting_engine_java;
             }
         }

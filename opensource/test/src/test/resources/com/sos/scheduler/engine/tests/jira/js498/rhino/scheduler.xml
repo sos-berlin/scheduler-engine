@@ -6,14 +6,14 @@
             <param name="scheduler_script" value="*"/>
         </params>
         <scheduler_script>
-            <script language="javascript">
+            <script language="javax.script:rhino">
                 function spooler_init() {
                     add("spooler_init")
                     return true;
                 }
 
                 function add(name) {
-                    spooler.variables.set_value("scheduler_script", spooler.variables.value("scheduler_script") + "("+ name +")")
+                    spooler.variables().set_var("scheduler_script", spooler.variables().value("scheduler_script") + "("+ name +")")
                 }
             </script>
         </scheduler_script>
