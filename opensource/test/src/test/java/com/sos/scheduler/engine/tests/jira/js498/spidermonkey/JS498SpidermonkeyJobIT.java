@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js498.spidermonkey;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
+import com.sos.scheduler.engine.common.system.Bitness;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
@@ -9,8 +10,7 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -34,17 +34,18 @@ public final class JS498SpidermonkeyJobIT extends SchedulerTest {
 
     @Test
     public void test() throws IOException {
-        //controller().activateScheduler("-e","-ignore-process-classes","-log-level=info","-log=" + logFile);
-        controller().activateScheduler();
-        File resultFile = prepareResultFile();
-        for (String jobName : jobs) {
-            controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
+        if (Bitness.is32Bit()) {    // SpiderMonkey stellen wir nur für 32bit bereit
+            controller().activateScheduler();
+            File resultFile = prepareResultFile();
+            for (String jobName : jobs) {
+                controller().scheduler().executeXml(util.startJobImmediately(jobName).getCommand());
+            }
+            controller().waitForTermination(shortTimeout);
+            resultMap = getResultMap(resultFile);
+            checkScriptOnlyJob();
+            checkObjectsJob();
+            checkFunctionsJob();
         }
-        controller().waitForTermination(shortTimeout);
-        resultMap = getResultMap(resultFile);
-        checkScriptOnlyJob();
-        checkObjectsJob();
-        checkFunctionsJob();
     }
 
     private File prepareResultFile() {
