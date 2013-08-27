@@ -420,9 +420,10 @@ void Module::init()
         {
             _kind = kind_scripting_engine;
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-            // JS-498: Scripting über JAVA-Klassen ausgeführt
-            if ( _language.substr(0, 13) == "javax.script:" ) {
-                Z_LOG2("scheduler","Using java interface for scripting language " << _language << "\n");
+            if (string_begins_with(_language, "javax.script:") || string_begins_with(_language, "java:")) {
+                // "javax.script:rhino" für Java-Methoden-Schnittstelle, z.B. spooler_task.set_exit_code( 0 );
+                // "java:rhino" für Beans-Schnittstelle (Property-Schnittstelle), z.B. spooler_task.exit_code = 0;
+                Z_LOG2("scheduler", "Using java interface for scripting language " << _language << "\n");
                 _kind = kind_scripting_engine_java;
             }
         }

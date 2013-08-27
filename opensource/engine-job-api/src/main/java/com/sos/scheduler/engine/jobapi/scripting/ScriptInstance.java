@@ -7,7 +7,6 @@ import com.google.common.collect.Iterables;
 import com.sos.scheduler.engine.common.Lazy;
 
 import javax.script.*;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Throwables.propagate;
 import static javax.script.ScriptContext.ENGINE_SCOPE;
@@ -25,7 +24,6 @@ module.call();
  * }
  */
 public class ScriptInstance {
-    private static final String languagePrefix = "javax.script:";
     //Haben wir im Task-Prozess das Logging eingestellt? private static final Logger logger = LoggerFactory.getLogger(ScriptInstance.class);
 
     private final ScriptEngine engine;
@@ -33,14 +31,9 @@ public class ScriptInstance {
     private final String script;
 
     public ScriptInstance(String language, Lazy<ImmutableMap<String, Object>> bindingsLazy, String script) {
-        this.engine = newScriptEngine(normalizeLanguageName(language));
+        this.engine = newScriptEngine(language.toLowerCase());
         this.bindingsLazy = bindingsLazy;
         this.script = script;
-    }
-
-
-    private static String normalizeLanguageName(String language) {
-        return language.replaceFirst("^" + Pattern.quote(languagePrefix), "").toLowerCase();
     }
 
     private static ScriptEngine newScriptEngine(String language) {
