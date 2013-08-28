@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.tests.jira.js498.spidermonkey;
+package com.sos.scheduler.engine.tests.jira.js498.rhinobeans;
 
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.common.system.Bitness;
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
  * @author Stefan Schädlich
  * @version 1.0 - 16.12.2011 13:39:41
  */
-public class JS498SpidermonkeyOrderIT extends SchedulerTest {
+public class JS498RhinoBeansOrderIT extends SchedulerTest {
 
     private static final String jobchain = "chain";
 

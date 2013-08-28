@@ -1,8 +1,7 @@
-package com.sos.scheduler.engine.tests.jira.js498.spidermonkey;
+package com.sos.scheduler.engine.tests.jira.js498.rhinobeans;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.common.system.Bitness;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
@@ -10,7 +9,8 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * This is a test for scripting with the Rhino engine. The test starts different standalone jobs.
  */
-public final class JS498SpidermonkeyJobIT extends SchedulerTest {
+public final class JS498RhinoBeansJobIT extends SchedulerTest {
 
     private static final ImmutableList<String> jobs = ImmutableList.of(
             "script_only",
@@ -34,7 +34,7 @@ public final class JS498SpidermonkeyJobIT extends SchedulerTest {
 
     @Test
     public void test() throws IOException {
-        if (Bitness.is32Bit()) {    // SpiderMonkey stellen wir nur für 32bit bereit
+        // if (Bitness.is32Bit()) {    // SpiderMonkey stellen wir nur für 32bit bereit
             controller().activateScheduler();
             File resultFile = prepareResultFile();
             for (String jobName : jobs) {
@@ -45,7 +45,7 @@ public final class JS498SpidermonkeyJobIT extends SchedulerTest {
             checkScriptOnlyJob();
             checkObjectsJob();
             checkFunctionsJob();
-        }
+        // }
     }
 
     private File prepareResultFile() {
