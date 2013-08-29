@@ -9,7 +9,7 @@ exit 5
         ]]>
     </script>
     <monitor name="process0" ordering="0">
-        <script language="java:rhino">
+        <script language="java:javascript">
             <![CDATA[
 function spooler_task_after() {
     if (spooler_task.exit_code != 5) throw new Error("spooler_task.exit_code is not 5 but "+spooler_task.exit_code);
