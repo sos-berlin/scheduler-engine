@@ -17,6 +17,8 @@ public class Web_service_operation extends Idispatch implements HasBean<Web_serv
     public Web_service          web_service             ()                          { return (Web_service         )   com_call( "<web_service" ); }
     public Web_service_request  request                 ()                          { return (Web_service_request )   com_call( "<request"     ); }
     public Web_service_response response                ()                          { return (Web_service_response)   com_call( "<response"    ); }
+    public String               peer_hostname           ()                          { return (String)                 com_call( "<peer_hostname" ); }
+    public String               peer_ip                 ()                          { return (String)                 com_call( "<peer_ip" ); }
 
     @Override
     public Web_service_operationBean toBean() {

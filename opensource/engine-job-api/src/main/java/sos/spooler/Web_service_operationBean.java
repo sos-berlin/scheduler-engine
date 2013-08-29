@@ -22,6 +22,14 @@ public class Web_service_operationBean implements Bean<Web_service_operation> {
         return toBean(delegate.response());
     }
 
+    public String peer_hostname() {
+        return delegate.peer_hostname();
+    }
+
+    public String peer_ip() {
+        return delegate.peer_ip();
+    }
+
     @Override
     public Web_service_operation getDelegate() {
         return delegate;
