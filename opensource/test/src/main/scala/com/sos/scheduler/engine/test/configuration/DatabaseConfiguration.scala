@@ -24,7 +24,7 @@ extends JdbcDatabaseConfiguration {
   }
 }
 
-object DefaultDatabaseConfiguration extends DatabaseConfiguration {
+object DefaultDatabaseConfiguration {
   val forJava = new DefaultDatabaseConfiguration
 }
 
