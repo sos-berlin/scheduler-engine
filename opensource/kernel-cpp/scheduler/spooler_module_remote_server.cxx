@@ -50,6 +50,10 @@ Remote_module_instance_server::~Remote_module_instance_server()
 
 void Remote_module_instance_server::close__end()   // synchron
 {
+    if (_file_logger) {
+        try { _file_logger->flush(); }   // JS-986: stdout und stderr ins Task- und Order-Protokoll schreiben, bevor spooler_task_after() den Auftrag beenden kann (mit order.state = "endState")
+        catch (exception& x) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
+    }
     close_monitor();
 
     if( _module_instance )  _module_instance->close();
