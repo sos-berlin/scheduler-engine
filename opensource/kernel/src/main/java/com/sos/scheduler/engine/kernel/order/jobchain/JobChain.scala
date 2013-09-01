@@ -98,6 +98,8 @@ with UnmodifiableJobchain {
       case _ => false
     }
 
+  def jobNodes: immutable.Seq[JobNode] =
+    nodes collect { case o: JobNode => o }
 
   def order(id: OrderId): Order =
     orderOption(id) getOrElse sys.error(s"$toString does not contain order '$id'")
