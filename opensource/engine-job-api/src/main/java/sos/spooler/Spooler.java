@@ -15,33 +15,42 @@ public class Spooler extends Idispatch implements HasBean<SpoolerBean>
     private                 Spooler             ( long idispatch )                  { super(idispatch); }
 
     /*+ @return Wert der Kommandozeilenoption -id= beim Start des Schedulers */
+    @SchedulerGetter
     public String           id                  ()                                  { return (String)       com_call( "<id"                             ); }
     
     /*+ @return Wert der Kommandozeilenoption -param= beim Start des Schedulers */
+    @SchedulerGetter
     public String           param               ()                                  { return (String)       com_call( "<param"                          ); }
     
     /*+ @return Liefert das Arbeitsverzeichnis (als absoluten Pfad) beim Start des Schedulers. 
      * Wenn die Kommandozeilenoption -cd= benutzt worden ist, ist es das damit angegebene Verzeichnis. */
+    @SchedulerGetter
     public String           directory           ()                                  { return (String)       com_call( "<directory"                      ); }
     
     /*+ @return Liefert die Einstellung include_path (Kommandozeilen-Option <code>-include=</code>). */
+    @SchedulerGetter
     public String           include_path        ()                                  { return (String)       com_call( "<include_path"                   ); }
     
     /*+ @return Wert der Kommandozeilenoption -log-dir= beim Start des Schedulers. 
       * Das ist das Verzeichnis, in dem der Scheduler die Protokolle und Historiendateien ablegt. */
+    @SchedulerGetter
     public String           log_dir             ()                                  { return (String)       com_call( "<log_dir"                        ); }
     
     /*+ @return Liefert den Hostware-Datenbank-Dateinamen (für Historie usw.) */
+    @SchedulerGetter
     public String           db_name             ()                                  { return (String)       com_call( "<db_name"                        ); }
     
     /*+ @return Liefert true, genau dann wenn der Scheduler als Dienst (in Windows) oder als Daemon (in Unix) läuft. */
+    @SchedulerGetter
     public boolean          is_service          ()                                  { return        boolean_com_call( "<is_service"                     ); }
     
     /*+ @return Liefert den Namen des Rechners, auf dem der Scheduler läuft. */
+    @SchedulerGetter
     public String           hostname            ()                                  { return (String)       com_call( "<hostname"                       ); }
 
     
     /*+ @return Die scheduler-weiten Variablen als {@link Variable_set} */
+    @SchedulerGetter
     public Variable_set     variables           ()                                  { return (Variable_set) com_call( "<variables"                      ); }
     
     /*+ Setzt eine scheduler-weite Variable. */
@@ -58,6 +67,7 @@ public class Spooler extends Idispatch implements HasBean<SpoolerBean>
 
     /*+ Liefert das {@link Log} des Schedulers. Normalerweise sollte man aber die Variable {@link Job_impl#spooler_log} verwenden.  
      */
+    @SchedulerGetter
     public Log              log                 ()                                  { return (Log)          com_call( "<log"                            ); }
     
   //public IDispatch        script              ()                                  { return (Idispatch)    com_call( "<script"                         ); }
@@ -108,28 +118,36 @@ public class Spooler extends Idispatch implements HasBean<SpoolerBean>
     public void             abort_immediately_and_restart()                         {                       com_call( "abort_immediately_and_restart"   ); }
     
     /*+ Name der Datenbanktabelle für die internen Variablen des Schedulers */
+    @SchedulerGetter
     public String           db_variables_table_name  ()                             { return (String)       com_call( "<db_variables_table_name" ); }
 
     /*+ Name der Datenbanktabelle für die Tasks */
+    @SchedulerGetter
     public String           db_tasks_table_name      ()                             { return (String)       com_call( "<db_tasks_table_name" ); }
 
     /*+ Name der Datenbanktabelle für die Aufträge */
+    @SchedulerGetter
     public String           db_orders_table_name     ()                             { return (String)       com_call( "<db_orders_table_name" ); }
 
     /*+ Name der Datenbanktabelle für die Historie */
+    @SchedulerGetter
     public String           db_history_table_name    ()                             { return (String)       com_call( "<db_history_table_name" ); }
 
     /*+ Name der Datenbanktabelle für die Auftragshistorie */
+    @SchedulerGetter
     public String           db_order_history_table_name()                           { return (String)       com_call( "<db_order_history_table_name" ); }
 
     /*+ Option -ini= (factory.ini) */
+    @SchedulerGetter
     public String           ini_path()                                              { return (String)       com_call( "<ini_path" ); }
 
     /*+ XML-Kommando ausführen */
     public String           execute_xml( String xml )                               { return (String)       com_call( "execute_xml", xml ); }
 
+    @SchedulerGetter
     public int              tcp_port()                                              { return            int_com_call( "<tcp_port" ); }
 
+    @SchedulerGetter
     public int              udp_port()                                              { return            int_com_call( "<udp_port" ); }
     
     public Xslt_stylesheet  create_xslt_stylesheet()                                { return (Xslt_stylesheet)com_call( "Create_xslt_stylesheet" ); }
@@ -147,13 +165,17 @@ public class Spooler extends Idispatch implements HasBean<SpoolerBean>
     public Xslt_stylesheet  create_xslt_stylesheet( String xml )                    { Xslt_stylesheet stylesheet = (Xslt_stylesheet)com_call( "Create_xslt_stylesheet" );
                                                                                       stylesheet.load_xml( xml );
                                                                                       return stylesheet; }
-                                                                                      
-    public Locks            locks()                                                 { return (Locks)        com_call( "<locks" ); }                                                                                      
-    
-    public Process_classes  process_classes()                                       { return (Process_classes)com_call( "<process_classes" ); }                                                                                      
-    
+
+    @SchedulerGetter
+    public Locks            locks()                                                 { return (Locks)        com_call( "<locks" ); }
+
+    @SchedulerGetter
+    public Process_classes  process_classes()                                       { return (Process_classes)com_call( "<process_classes" ); }
+
+    @SchedulerGetter
     public Supervisor_client supervisor_client()                                    { return (Supervisor_client)com_call( "<supervisor_client" ); }
-    
+
+    @SchedulerGetter
     public String           configuration_directory()                               { return (String)        com_call( "<configuration_directory" ); }
     
     public Schedule         schedule( String path )                                 { return (Schedule)      com_call( "<schedule", path ); }

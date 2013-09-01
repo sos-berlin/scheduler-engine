@@ -22,11 +22,13 @@ public class Task extends Idispatch implements HasBean<TaskBean>
 
     
     /*+ Liefert den {@link Job}, zu der die Task gehört. */
+    @SchedulerGetter
     public Job              job                 ()                                  { return (Job)          com_call( "<job"                            ); }
     
     
 
     /*+ Liefert die Kennung der Task. */
+    @SchedulerGetter
     public int              id                  ()                                  { return            int_com_call( "<id"                             ); }
     
     /*+ Liefert die Parameter der Task.
@@ -35,6 +37,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
      * Eine Task kann Parameter haben. Die Parameter können in der Konfiguration mit &lt;parameter>, 
      * mit {@link Job#start(Variable_set)} oder mit &lt;start_job> gesetzt werden. 
      */
+    @SchedulerGetter
     public Variable_set     params              ()                                  { return (Variable_set) com_call( "<params"                         ); }
     
     
@@ -51,6 +54,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
     
     
     /*+ Liefert das mit set_result() gesetzte Ergebnis. */
+    @SchedulerGetter
     public String           result              ()                                  { return (String)       com_call( "<result"                         ); }
     
     
@@ -93,6 +97,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
      * <p>
      * Wenn kein Fehler vorliegt, wird ein Error-Objekt zurückgeliefert, dessen Aufruf is_error false liefert.
      */
+    @SchedulerGetter
     public Error            error               ()                                  { return (Error)        com_call( "<error"                          ); }
 
     
@@ -143,13 +148,15 @@ public class Task extends Idispatch implements HasBean<TaskBean>
 
     
 
-    /*+ @deprecated Die Methode galt für use_engine="job", was es nicht mehr gibt. */    
+    /*+ @deprecated Die Methode galt für use_engine="job", was es nicht mehr gibt. */
+    @Deprecated
     public void         set_close_engine        ( boolean close_after_task )        {                       com_call( ">close_engine", close_after_task ); }
 
     
 
     /*+ Liefert den zu verarbeitenden Auftrag oder null.
      */
+    @SchedulerGetter
     public Order            order               ()                                  { return (Order)        com_call( "<order"                          ); }
 
     
@@ -161,6 +168,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
      * @see Job#start_when_directory_changed(String)
      * @see Job#start_when_directory_changed(String,String)
      */
+    @SchedulerGetter
     public String           changed_directories ()                                  { return (String)       com_call( "<changed_directories"            ); }
 
     
@@ -216,6 +224,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
      * 
      * @see #stderr_text()
      */
+    @SchedulerGetter
     public String           stdout_text         ()                                  { return (String)       com_call( "<stdout_text"                    ); }
 
 
@@ -226,6 +235,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
      * 
      * @see #stdout_text()
      */
+    @SchedulerGetter
     public String           stdout_path         ()                                  { return (String)       com_call( "<stdout_path"                    ); }
 
     
@@ -237,6 +247,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
      * 
      * @see #stderr_text()
      */
+    @SchedulerGetter
     public String           stderr_text         ()                                  { return (String)       com_call( "<stderr_text"                    ); }
     
     /*+ Pfadname für stderr.
@@ -246,6 +257,7 @@ public class Task extends Idispatch implements HasBean<TaskBean>
      * 
      * @see #stderr_text()
      */
+    @SchedulerGetter
     public String           stderr_path         ()                                  { return (String)       com_call( "<stderr_path"                    ); }
     
     public Subprocess       create_subprocess   ()                                  { return (Subprocess)   com_call( "create_subprocess" ); }
@@ -253,24 +265,32 @@ public class Task extends Idispatch implements HasBean<TaskBean>
     public Subprocess       create_subprocess   ( String command_line )             { return (Subprocess)   com_call( "create_subprocess", command_line ); }
 
     public Subprocess       create_subprocess   ( String filename_and_arguments[] ) { return (Subprocess)   com_call( "create_subprocess", filename_and_arguments ); }
-    
+
+    @SchedulerGetter
     public Web_service      web_service         ()                                  { return (Web_service)  com_call( "<web_service" ); }
 
+    @SchedulerGetter
     public Web_service      web_service_or_null ()                                  { return (Web_service)  com_call( "<web_service_or_null" ); }
     
     public void         set_priority            ( int priority )                    {                       com_call( ">priority", priority ); }
+    @SchedulerGetter
     public int              priority            ()                                  { return            int_com_call( "<priority" ); }
     
     public void         set_priority_class      ( String priority_class )           {                       com_call( ">priority_class", priority_class ); }
+    @SchedulerGetter
     public String           priority_class      ()                                  { return (String)       com_call( "<priority_class" ); }
     
     public void         set_exit_code           ( int exit_code )                   {                       com_call( ">exit_code", exit_code ); }
+    @SchedulerGetter
     public int              exit_code           ()                                  { return            int_com_call( "<exit_code" ); }
-    
+
+    @SchedulerGetter
     public String           trigger_files       ()                                  { return (String)       com_call( "<trigger_files" ); }
     
     public boolean          try_hold_lock       ( String lock_path )                { return boolean_com_call( "try_hold_lock"              , lock_path ); }
+
     public boolean          try_hold_lock_non_exclusive( String lock_path )         { return boolean_com_call( "try_hold_lock_non_exclusive", lock_path ); }
+
     public void             call_me_again_when_locks_available()                    {                com_call( "call_me_again_when_locks_available"     ); }
 
     @Override public final TaskBean toBean() {

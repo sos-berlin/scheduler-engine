@@ -87,6 +87,7 @@ public class Variable_set extends Idispatch implements HasBean<Variable_setBean>
      * </pre>
      */
 
+    @SchedulerGetter
     public int              count               ()                                  { return            int_com_call( "<count"                  ); }
   
   //public Dom              dom                 ()
@@ -149,8 +150,10 @@ public class Variable_set extends Idispatch implements HasBean<Variable_setBean>
      * </pre>
       */
 
+    @SchedulerGetter
     public String           xml                 ()                                  { return (String)       com_call( "<xml"                    ); }
 
+    @SchedulerGetter
     public String           names               ()                                  { return (String)       com_call( "<names"                  ); }
     
     public String           substitute          ( String string )                   { return (String)       com_call( "substitute", string      ); }

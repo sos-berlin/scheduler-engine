@@ -28,6 +28,7 @@ public class Order_queue extends Idispatch implements HasBean<Order_queueBean>
     private                 Order_queue         ( long idispatch )                  { super(idispatch); }
 
     /*+ Liefert die Anzahl der Aufträge in der Auftragswarteschlange. */
+    @SchedulerGetter
     public int              length              ()                                  { return        int_com_call( "<length"             ); }
     
     

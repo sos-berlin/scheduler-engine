@@ -24,6 +24,8 @@ public class Run_time extends Idispatch implements HasBean<Run_timeBean>
     
     public void         set_xml                 ( String xml )                      {                   com_call( ">xml", xml           ); }
   //public String           xml                 ()                                  { return (String)   com_call( "<xml"                ); }
+
+  @SchedulerGetter
     public Schedule     schedule                ()                                  { return (Schedule) com_call( "<schedule"           ); }
 
     @Override public final Run_timeBean toBean() {

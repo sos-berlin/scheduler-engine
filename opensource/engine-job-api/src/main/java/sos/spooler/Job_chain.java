@@ -95,6 +95,7 @@ public class Job_chain extends Idispatch implements HasBean<Job_chainBean>
      *     spooler_log.debug( "name=" + job_chain.name );       // "name=Jobkette"
      * </pre>
      */
+    @SchedulerGetter
     public String           name                ()                                  { return (String)           com_call( "<name"               ); }
     
     /*+ Fügt der Jobkette einen Knoten hinzu.
@@ -160,6 +161,7 @@ public class Job_chain extends Idispatch implements HasBean<Job_chainBean>
     
     
     /*+ @return Die Zahl der Aufträge in der Jobkette */
+    @SchedulerGetter
     public int              order_count         ()                                  { return                int_com_call( "<order_count"        ); }
     
     /*+ @return Der Jobkettenknoten zum angegebenen Zustand */ 
@@ -172,9 +174,11 @@ public class Job_chain extends Idispatch implements HasBean<Job_chainBean>
     public void             remove              ()                                  {                           com_call( "remove" );              }
     
     public void         set_orders_recoverable  ( boolean b )                       {                           com_call( ">orders_recoverable", b ); }
+    @SchedulerGetter
     public boolean          orders_recoverable  ()                                  { return            boolean_com_call( "<orders_recoverable" ); }
     
     public void         set_title               ( String title )                    {                           com_call( ">title", title ); }
+    @SchedulerGetter
     public String           title               ()                                  { return (String)           com_call( "<title" ); }
 
     public final Job_chainBean toBean() {

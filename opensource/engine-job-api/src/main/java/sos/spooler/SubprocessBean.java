@@ -99,8 +99,8 @@ public final class SubprocessBean implements Bean<Subprocess> {
         return delegate.own_process_group();
     }
 
-    public Variable_set getEnv() {
-        return delegate.env();
+    public Variable_setBean getEnv() {
+        return delegate.env().toBean();
     }
 
     @Override public Subprocess getDelegate() {

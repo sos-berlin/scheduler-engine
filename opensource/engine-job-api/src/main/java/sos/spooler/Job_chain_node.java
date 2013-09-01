@@ -40,7 +40,7 @@ public class Job_chain_node extends Idispatch implements HasBean<Job_chain_nodeB
      *     spooler_log.debug( "state=" + job_chain_node.state );                        // "state=100"
      * </pre>
      */
-
+    @SchedulerGetter
     public String           state               ()                                  { return (String)        com_call( "<state"       ); }
 
 
@@ -61,6 +61,7 @@ public class Job_chain_node extends Idispatch implements HasBean<Job_chain_nodeB
      *  
      * @return null, wenn es keinen nächsten Knoten gibt (Folgezustand ist nicht angegeben) 
      */
+    @SchedulerGetter
     public Job_chain_node   next_node           ()                                  { return (Job_chain_node)com_call( "<next_node"   ); }
 
 
@@ -81,6 +82,7 @@ public class Job_chain_node extends Idispatch implements HasBean<Job_chain_nodeB
      * 
      * @return null, wenn es keinen Fehler-Knoten gibt (Fehlerzustand ist nicht angegeben) 
      */
+    @SchedulerGetter
     public Job_chain_node   error_node          ()                                  { return (Job_chain_node)com_call( "<error_node"  ); }
 
 
@@ -98,6 +100,7 @@ public class Job_chain_node extends Idispatch implements HasBean<Job_chain_nodeB
      *     spooler_log.debug( "job=" + job_chain_node.job.name );                       // "job=job_100"
      * </pre>
      */
+    @SchedulerGetter
     public Job              job                 ()                                  { return (Job)           com_call( "<job"         ); }
 
 
@@ -115,6 +118,7 @@ public class Job_chain_node extends Idispatch implements HasBean<Job_chain_nodeB
      *     spooler_log.debug( "next_state=" + job_chain_node.next_state );              // "state=200"
      * </pre>
      */
+    @SchedulerGetter
     public String           next_state          ()                                  { return (String)        com_call( "<next_state"  ); }
 
 
@@ -133,6 +137,7 @@ public class Job_chain_node extends Idispatch implements HasBean<Job_chain_nodeB
      * </pre>
      *  
      */
+    @SchedulerGetter
     public String           error_state         ()                                  { return (String)        com_call( "<error_state" ); }
 
 
@@ -141,6 +146,7 @@ public class Job_chain_node extends Idispatch implements HasBean<Job_chain_nodeB
     public static final String ACTION_NEXT_STATE = "next_state";
     
     public void             set_action          ( String action )                   {                        com_call( ">action", action ); }
+    @SchedulerGetter
     public String           action              ()                                  { return (String)        com_call( "<action"         ); }
 
     public final Job_chain_nodeBean toBean() {

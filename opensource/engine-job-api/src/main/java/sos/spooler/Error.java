@@ -24,12 +24,13 @@ public class Error extends Idispatch implements HasBean<ErrorBean>
     
     /*+ Der Fehlercode
      */
-    
+    @SchedulerGetter
     public String               code                        ()                                      { return (String)com_call( "<code"     ); }
     
     
     /*+ Der Fehlertext (mit Fehlercode)
      */
+    @SchedulerGetter
     public String               text                        ()                                      { return (String)com_call( "<text"     ); }
 
     @Override public final ErrorBean toBean() {

@@ -2,7 +2,9 @@
 
 package sos.spooler;
 
-/** 
+import java.io.File;
+
+/**
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
  * @version $Revision: 3699 $
@@ -16,7 +18,7 @@ public class Xslt_stylesheet extends Idispatch implements HasBean<Xslt_styleshee
     public void             close               ()                                  { com_call( "close" ); }
     
     /*+ Lï¿½dt das Stylesheet aus einer Datei. */
-    public Xslt_stylesheet  load_file           ( java.io.File file )               { return load_file( file.toString() ); }
+    public Xslt_stylesheet  load_file           ( File file )                       { return load_file( file.toString() ); }
     
     /*+ Lï¿½dt das Stylesheet aus einer Datei. */
     public Xslt_stylesheet  load_file           ( String path )                     { return (Xslt_stylesheet)com_call( "load_file", path ); }

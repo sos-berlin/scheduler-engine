@@ -9,7 +9,7 @@ public final class Job_chain_nodeBean implements Bean<Job_chain_node> {
         this.delegate = delegate;
     }
 
-    public String state() {
+    public String getState() {
         return delegate.state();
     }
 

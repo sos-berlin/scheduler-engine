@@ -19,6 +19,7 @@ public class Schedule  extends Idispatch implements HasBean<ScheduleBean>
      */
     
     public void         set_xml                 ( String xml )                      {                   com_call( ">xml", xml           ); }
+    @SchedulerGetter
     public String           xml                 ()                                  { return (String)   com_call( "<xml"                ); }
 
     @Override public final ScheduleBean toBean() {

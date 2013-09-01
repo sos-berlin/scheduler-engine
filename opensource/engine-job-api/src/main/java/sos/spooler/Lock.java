@@ -12,9 +12,15 @@ public class Lock extends Idispatch implements HasBean<LockBean>
     private                 Lock                ( long idispatch )                  { super(idispatch); }
 
     public void         set_name                ( String name )                     {                       com_call( ">name"             , name ); }
+
+    @SchedulerGetter
     public String           name                ()                                  { return (String)       com_call( "<name"                    ); }
+
     public void         set_max_non_exclusive   ( int n )                           {                       com_call( ">max_non_exclusive", n    ); }
+
+    @SchedulerGetter
     public int              max_non_exclusive   ()                                  { return            int_com_call( "<max_non_exclusive"       ); }
+
     public void             remove              ()                                  {                       com_call( "remove"                   ); }
 
     @Override public LockBean toBean() {

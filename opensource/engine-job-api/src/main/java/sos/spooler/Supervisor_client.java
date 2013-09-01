@@ -11,7 +11,10 @@ public class Supervisor_client extends Idispatch implements HasBean<Supervisor_c
 {
     private                 Supervisor_client   ( long idispatch )                  { super(idispatch); }
 
+    @SchedulerGetter
     public String           hostname            ()                                  { return (String)       com_call( "<hostname" ); }
+
+    @SchedulerGetter
     public int              tcp_port            ()                                  { return            int_com_call( "<tcp_port" ); }
 
     @Override public final Supervisor_clientBean toBean() {
