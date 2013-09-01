@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.order.jobchain.{JobChainNodeAction, JobChai
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateJobChainNodeStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import javax.persistence.{EntityManager, EntityManagerFactory}
+import javax.persistence.EntityManager
 
 /** @author Zschimmer.sos */
 @ForCpp
