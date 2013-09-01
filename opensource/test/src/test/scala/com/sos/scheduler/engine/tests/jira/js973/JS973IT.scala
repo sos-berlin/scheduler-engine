@@ -6,9 +6,11 @@ import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.HotEventHandler
-import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder
+import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
+import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.remoteSchedulerParameterName
 import com.sos.scheduler.engine.main.CppBinary
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -38,15 +40,15 @@ final class JS973IT extends ScalaSchedulerTest {
   }
 
   test(s"Without parameter $remoteSchedulerParameterName runs job in our scheduler") {
-    testOrderWithRemoteScheduler(jobChainPath, None, "**")
+    testOrderWithRemoteScheduler(shellJobChainPath, None, "**")
   }
 
   test(s"Empty parameter $remoteSchedulerParameterName runs job in our scheduler") {
-    testOrderWithRemoteScheduler(jobChainPath, Some(SchedulerAddress("")), "**")
+    testOrderWithRemoteScheduler(shellJobChainPath, Some(SchedulerAddress("")), "**")
   }
 
   test(s"Order parameter $remoteSchedulerParameterName selects a remote scheduler") {
-    testOrderWithRemoteScheduler(jobChainPath, aSlave)
+    testOrderWithRemoteScheduler(shellJobChainPath, aSlave)
   }
 
   test(s"Task runs on remote_scheduler of process_class") {
@@ -55,6 +57,10 @@ final class JS973IT extends ScalaSchedulerTest {
 
   test(s"Order parameter $remoteSchedulerParameterName overrides remote scheduler of process class") {
     testOrderWithRemoteScheduler(processClassJobChainPath, aSlave)
+  }
+
+  test("Shell with monitor") {
+    testOrderWithRemoteScheduler(shellWithMonitorJobChainPath, aSlave)
   }
 
 //  JS-973 gilt nicht für API-Tasks.
@@ -72,34 +78,23 @@ final class JS973IT extends ScalaSchedulerTest {
 //  }
 
   test(s"Invalid syntax of $remoteSchedulerParameterName keeps order at same job node and stops job") {
-    val eventPipe = controller.newEventPipe()
-    val orderKey = newOrderKey(jobChainPath)
-    controller.suppressingTerminateOnError {
-      scheduler executeXml newOrder(orderKey, Some(SchedulerAddress(":INVALID-ADDRESS")))
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition should equal (OrderStateTransition.keepState)
-      // Job should be stopped
-    }
+    testInvalidJobChain(shellJobChainPath, SchedulerAddress(":INVALID-ADDRESS"), expectedErrorCode = "Z-4003")
   }
 
-  //TODO Nicht für API-Tasks - aber für Monitor-Shell-Tasks
   test("Not for API jobs") {
-    pending
-  }
-
-  test("Shell with monitor") {
-    pending
+    testInvalidJobChain(apiJobChainPath, aSlave.extraScheduler.address, expectedErrorCode = "SCHEDULER-484")
   }
 
   //test("Not in a cluster") {}
   //TODO Nicht für Cluster-Betrieb. In spooler_task prüfen.
 
-//  JS-974 gilt mir für Aufträge, nicht für Task-Starts
+//  JS-974 gilt nur für Aufträge, nicht für Task-Starts
 //  ignore(s"Order parameter overrides task parameter") {
 //    // Oder sollte ein leerer AUftragsparameter den Task-Parameter gelten lassen? "" ist wie nicht angegeben.
 //    pending
 //  }
 
-//  JS-974 gilt mir für Aufträge, nicht für Task-Starts
+//  JS-974 gilt nur für Aufträge, nicht für Task-Starts
 //  ignore(s"Empty order parameter overrides task parameter") {
 //    pending
 //  }
@@ -126,27 +121,45 @@ final class JS973IT extends ScalaSchedulerTest {
     testOrderWithRemoteScheduler(jobChainPath, Some(slave.extraScheduler.address), slave.expectedResult)
   }
 
-  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, schedulerAddressOption: Option[SchedulerAddress], expectedResult: String) {
-    testOrderWithRemoteScheduler(newOrderKey(jobChainPath), schedulerAddressOption, expectedResult)
+  private def testOrderWithRemoteScheduler(jobChainPath: JobChainPath, remoteScheduler: Option[SchedulerAddress], expectedResult: String) {
+    testOrderWithRemoteScheduler(newOrderKey(jobChainPath), remoteScheduler, expectedResult)
   }
 
-  private def testOrderWithRemoteScheduler(orderKey: OrderKey, schedulerAddressOption: Option[SchedulerAddress], expectedResult: String) {
+  private def testOrderWithRemoteScheduler(orderKey: OrderKey, remoteScheduler: Option[SchedulerAddress], expectedResult: String) {
     val eventPipe = controller.newEventPipe()
-    scheduler executeXml newOrder(orderKey, schedulerAddressOption)
+    scheduler executeXml newOrder(orderKey, remoteScheduler)
     eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.orderKey == orderKey } .result should startWith (expectedResult)
   }
 
-  @HotEventHandler def handle(e: OrderFinishedEvent, o: UnmodifiableOrder) {
+  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddress, expectedErrorCode: String) {
+    val eventPipe = controller.newEventPipe()
+    val orderKey = newOrderKey(jobChainPath)
+    controller.suppressingTerminateOnError {
+      val firstJobPath = instance[OrderSubsystem].jobChain(jobChainPath).jobNodes.head.jobPath
+      instance[JobSubsystem].job(firstJobPath).state should equal (JobState.pending)
+      scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
+      eventPipe.next[ErrorLogEvent].getCodeOrNull should equal (expectedErrorCode)
+      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition should equal (OrderStateTransition.keepState)
+      instance[JobSubsystem].job(firstJobPath).state should equal (JobState.stopped)
+    }
+  }
+
+  @HotEventHandler
+  def handle(e: OrderFinishedEvent, o: UnmodifiableOrder) {
     controller.getEventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.getParameters(resultVariableName)))
   }
 
   private val orderIdGenerator = (1 to Int.MaxValue).iterator map { i => new OrderId(i.toString) }
-  def newOrderKey(o: JobChainPath) = o.orderKey(orderIdGenerator.next())
+
+  def newOrderKey(o: JobChainPath) =
+    o.orderKey(orderIdGenerator.next())
 }
 
 private object JS973IT {
-  private val jobChainPath = JobChainPath.of("/test")
-  private val processClassJobChainPath = JobChainPath.of("/test-c")
+  private val shellJobChainPath = JobChainPath.of("/test-shell")
+  private val shellWithMonitorJobChainPath = JobChainPath.of("/test-shell-with-monitor")
+  private val apiJobChainPath = JobChainPath.of("/test-api")
+  private val processClassJobChainPath = JobChainPath.of("/test-processClass")
   private val testVariableName = "TEST_WHICH_SCHEDULER"
   private val resultVariableName = "result"
   private val extraSchedulerTimeout = 60.s
@@ -159,13 +172,13 @@ private object JS973IT {
       }</params>
     </order>
 
-  final case class OrderFinishedWithResultEvent(orderKey: OrderKey, result: String) extends OrderEvent
+  private case class OrderFinishedWithResultEvent(orderKey: OrderKey, result: String) extends OrderEvent
 
-  final class Slave(val extraScheduler: ExtraScheduler, _expectedResult: String) extends SosAutoCloseable {
+  private class Slave(val extraScheduler: ExtraScheduler, _expectedResult: String) extends SosAutoCloseable {
     def close() {
-      logger.info(s"close start $extraScheduler")
+      logger info s"close start $extraScheduler"
       extraScheduler.close()
-      logger.info(s"close finished $extraScheduler")
+      logger info s"close finished $extraScheduler"
     }
 
     def expectedResult = {

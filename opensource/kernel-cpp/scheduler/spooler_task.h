@@ -327,6 +327,7 @@ struct Task : Object,
  private:
     void                        set_enqueued_state          ();
     void                        set_state_direct            ( State );
+    Host_and_port               read_remote_scheduler_parameter();
 
  protected:
     Fill_zero                  _zero_;
