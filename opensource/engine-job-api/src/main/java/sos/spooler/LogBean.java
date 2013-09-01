@@ -135,11 +135,11 @@ public final class LogBean implements Bean<Log> {
         delegate.start_new_file();
     }
 
-    public void set_mail_it(boolean mailIt) {
+    public void setMail_it(boolean mailIt) {
         delegate.set_mail_it(mailIt);
     }
 
-    public String last_error_line() {
+    public String getLast_error_line() {
         return delegate.last_error_line();
     }
 

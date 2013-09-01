@@ -93,7 +93,7 @@ public final class MailBean implements Bean<Mail> {
         delegate.add_header_field(fieldName, value);
     }
 
-    public int getDequeue() {
+    public int dequeue() {
         return delegate.dequeue();
     }
 

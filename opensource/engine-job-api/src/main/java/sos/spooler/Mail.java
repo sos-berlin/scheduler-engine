@@ -6,7 +6,10 @@ package sos.spooler;
  *
  * @see Log#mail()
  */
-/** 
+
+import java.io.File;
+
+/**
  * @author Joacim Zschimmer
  * @version $Revision $
  */
@@ -51,6 +54,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      *     spooler_log.debug( "to=" + spooler_log.mail.to );                                                  
      * </pre>
      */
+    @SchedulerGetter
     public String       to                  ()                                              { return (String)   com_call( "<to"                     ); }
 
     
@@ -86,6 +90,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      * </pre>
      * 
      */
+    @SchedulerGetter
     public String       from                ()                                              { return (String)   com_call( "<from"                   ); }
 
     
@@ -122,6 +127,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      *     spooler_log.debug( "cc=" + spooler_log.mail.cc );                                                  
      * </pre>
      */
+    @SchedulerGetter
     public String       cc                  ()                                              { return (String)   com_call( "<cc"                     ); }
 
     
@@ -158,6 +164,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      *     spooler_log.debug( "bcc=" + spooler_log.mail.bcc );                                                  
      * </pre>
      */
+    @SchedulerGetter
     public String       bcc                 ()                                              { return (String)   com_call( "<bcc"                    ); }
 
     
@@ -191,6 +198,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      *     spooler_log.debug( "subject=" + spooler_log.mail.subject );                                                  
      * </pre>
      */
+    @SchedulerGetter
     public String       subject             ()                                              { return (String)   com_call( "<subject"                ); }
 
     
@@ -226,6 +234,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      * </pre>
      * 
      */
+    @SchedulerGetter
     public String       body                ()                                              { return (String)   com_call( "<body"                   ); }
 
     
@@ -342,6 +351,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      *     spooler_log.debug( "smtp=" + spooler_log.mail.smtp );                                                  
      * </pre>
      */
+    @SchedulerGetter
     public String       smtp                ()                                              { return (String)   com_call( "<smtp"                   ); }
 
     
@@ -377,6 +387,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      * </pre>
      * 
      */
+    @SchedulerGetter
     public String       queue_dir           ()                                              { return (String)   com_call( "<queue_dir"              ); }
 
     
@@ -430,6 +441,7 @@ public class Mail extends Idispatch implements HasBean<MailBean>
      * 
      * @return Protokoll (mehrzeilig).
      */
+    @SchedulerGetter
     public String       dequeue_log         ()                                              { return (String)   com_call( "<dequeue_log"            ); }
     
     
@@ -454,13 +466,14 @@ public class Mail extends Idispatch implements HasBean<MailBean>
     /*+ XSLT-Stylesheet für eMail-Aufbereitung setzen.
      * @see #set_xslt_stylesheet_path(String)
      */
-    public void         set_xslt_stylesheet_path( java.io.File file )                       {                   com_call( ">xslt_stylesheet_path", file.toString() ); }
+    public void         set_xslt_stylesheet_path( File file )                               {                   com_call( ">xslt_stylesheet_path", file.toString() ); }
 
 
 
     /*+ XSLT-Stylesheet für eMail-Aufbereitung.
      * @see #set_xslt_stylesheet_path(String)
      */
+    @SchedulerGetter
     public String       xslt_stylesheet_path()                                              { return (String)   com_call( "<xslt_stylesheet_path"   ); }
 
     @Override public final MailBean toBean() {

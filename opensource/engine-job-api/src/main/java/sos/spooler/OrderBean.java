@@ -67,7 +67,7 @@ public class OrderBean implements Bean<Order> {
         return delegate.payload();
     }
 
-    public boolean getPayload_is_type(String type) {
+    public boolean payload_is_type(String type) {
         return delegate.payload_is_type(type);
     }
 
@@ -147,7 +147,7 @@ public class OrderBean implements Bean<Order> {
         delegate.set_end_state(value);
     }
 
-    public String getEd_state() {
+    public String getEnd_state() {
         return delegate.end_state();
     }
 

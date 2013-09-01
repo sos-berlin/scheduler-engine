@@ -34,7 +34,6 @@ public final class Job_chainBean implements Bean<Job_chain>{
         delegate.add_or_replace_order(toDelegate(order));
     }
 
-
     public int getOrder_count() {
         return delegate.order_count();
     }

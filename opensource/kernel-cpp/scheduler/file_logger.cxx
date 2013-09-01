@@ -122,7 +122,7 @@ bool File_logger::flush_lines()
     return something_done;
 }
 
-//------------------------------------------------------------------------------File_logger::finish
+//-------------------------------------------------------------------------------File_logger::flush
 
 bool File_logger::flush()
 {
@@ -131,12 +131,6 @@ bool File_logger::flush()
 
     if( has_files() )
     {
-        //if( log_category_is_set( "zschimmer" ) )
-        //{
-        //    fprintf( stdout, "\n{joacim}---------stdout---------%s()\n", Z_FUNCTION.c_str() );
-        //    fprintf( stderr, "\n{joacim}---------stderr---------%s()\n", Z_FUNCTION.c_str() );
-        //}
-
         fflush( stdout );
         fflush( stderr );
 
@@ -251,14 +245,12 @@ File_logger::File_line_reader::File_line_reader( const File_path& path, const st
     _path(path),
     _name(name)
 {
-    //_file.open( path, "rb" );
 }
 
 //-------------------------------------------------------------File_logger::File_line_reader::close
     
 void File_logger::File_line_reader::close()
 {
-    //_file.close();
 }
 
 //--------------------------------------------------------File_logger::File_line_reader::read_lines

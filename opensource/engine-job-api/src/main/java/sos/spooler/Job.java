@@ -30,7 +30,6 @@ public class Job extends Idispatch implements HasBean<JobBean>
      * @see Spooler#job(String)
      * 
      */
-    
     public Task             start               ()                                  { return (Task)       com_call( "start"                         ); }
     
     
@@ -155,7 +154,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
      * 
      * @see Spooler#include_path()
      */
-    
+    @SchedulerGetter
     public String           include_path        ()                                  { return (String)     com_call( "<include_path"                 ); }
     
     
@@ -175,7 +174,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
      * @return Der Name des Jobs.
 
      */
-    
+    @SchedulerGetter
     public String           name                ()                                  { return (String)     com_call( "<name"                         ); }
     
     
@@ -214,6 +213,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
      * </pre>
      * 
      */
+    @SchedulerGetter
     public String           title               ()                                  { return (String)     com_call( "<title"                        ); }
 
     
@@ -230,7 +230,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
      * </pre>
      * @return Die {@link Order_queue} oder null, wenn der Job nicht auftragsgesteuert ist (&lt;job order="no">).
      */
-    
+    @SchedulerGetter
     public Order_queue      order_queue         ()                                  { return (Order_queue)com_call( "<order_queue"                  ); }
 
     
@@ -283,7 +283,7 @@ public class Job extends Idispatch implements HasBean<JobBean>
      * @param hhmm_ss Zeit im Format "HH:MM" oder "HH:MM:SS".
      */
     
-    public void         set_delay_after_error   ( int error_steps, String hhmm_ss ) {                     com_call( ">delay_after_error", new Integer(error_steps), hhmm_ss   ); }
+    public void         set_delay_after_error   ( int error_steps, String hhmm_ss ) {                     com_call( ">delay_after_error", error_steps, hhmm_ss   ); }
     
     
     /*+ Nimmt alle Aufrufe von set_delay_after_error() zur�ck. 
@@ -291,9 +291,9 @@ public class Job extends Idispatch implements HasBean<JobBean>
     public void             clear_delay_after_error()                               {                     com_call( "clear_delay_after_error"       ); }
     
     
-    public void         set_delay_order_after_setback( int setback_count, double seconds ) {              com_call( ">delay_order_after_setback", new Integer(setback_count), new Double( seconds ) ); }
+    public void         set_delay_order_after_setback( int setback_count, double seconds ) {              com_call( ">delay_order_after_setback", setback_count, new Double( seconds ) ); }
 
-    public void         set_delay_order_after_setback( int setback_count, String hhmm_ss ) {              com_call( ">delay_order_after_setback", new Integer(setback_count), hhmm_ss ); }
+    public void         set_delay_order_after_setback( int setback_count, String hhmm_ss ) {              com_call( ">delay_order_after_setback", setback_count, hhmm_ss ); }
 
     public void         set_max_order_setbacks  ( int setback_count )               {                     com_call( ">max_order_setbacks"       , new Integer(setback_count) ); }
     
@@ -308,14 +308,19 @@ public class Job extends Idispatch implements HasBean<JobBean>
      */
     public void             remove              ()                                  {                     com_call( "remove"                        ); }
 
+    @SchedulerGetter
     public Process_class    process_class       ()                                  { return (Process_class)com_call( "<process_class"              ); }
 
+    @SchedulerGetter
     public String           folder_path         ()                                  { return (String)     com_call( "<folder_path"                  ); }
 
+    @SchedulerGetter
     public String           configuration_directory()                               { return (String)     com_call( "<configuration_directory"      ); }
 
-    public int              setback_max         ()                                  { return ((Integer) com_call( "<setback_max"     )).intValue(); }
+    @SchedulerGetter
+    public int              setback_max         ()                                  { return ((Integer)   com_call( "<setback_max"     )).intValue(); }
 
+    @SchedulerGetter
     public String           script_code         ()                                  { return (String)     com_call( "<script_code"                  ); }
 
     @Override public final JobBean toBean() {

@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.test.scala
 
+import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.kernel.Scheduler
 import scala.reflect.ClassTag
 import scala.xml
@@ -8,6 +9,9 @@ object SchedulerTestImplicits {
   implicit class ScaledScheduler(val scheduler: Scheduler) extends AnyVal {
     def executeXmls(e: Iterable[xml.NodeBuffer]): Result =
       executeXmlString(<commands>{e}</commands>.toString())
+
+    def executeXml(o: XmlCommand): Result =
+      executeXmlString(o.xmlString)
 
     def executeXmls(e: xml.NodeSeq): Result =
       executeXmlString(<commands>{e}</commands>.toString())
@@ -23,6 +27,10 @@ object SchedulerTestImplicits {
   }
 
   final case class Result(string: String) {
-    lazy val elem = xml.XML.loadString(string)
+    lazy val elem: xml.Elem =
+      xml.XML.loadString(string)
+
+    lazy val answer =
+      elem \ "answer"
   }
 }

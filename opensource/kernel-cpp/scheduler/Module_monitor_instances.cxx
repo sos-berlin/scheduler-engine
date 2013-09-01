@@ -25,7 +25,7 @@ Module_monitor_instances::Module_monitor_instances( Has_log* log, Module_monitor
 {
 }
 
-//------------------------------------------------------------------Module_monitor_instances::close
+//--------------------------------------------------------Module_monitor_instances::close_instances
     
 void Module_monitor_instances::close_instances()
 {

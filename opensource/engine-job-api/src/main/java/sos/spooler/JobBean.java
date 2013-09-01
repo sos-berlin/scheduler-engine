@@ -64,11 +64,11 @@ public final class JobBean implements Bean<Job> {
         return toBean(delegate.order_queue());
     }
 
-    public void setDelay_after_error(int errorSteps, double seconds) {
+    public void set_delay_after_error(int errorSteps, double seconds) {
         delegate.set_delay_after_error(errorSteps, seconds);
     }
 
-    public void setDelay_after_error(int errorSteps, String hhmmSs) {
+    public void set_delay_after_error(int errorSteps, String hhmmSs) {
         delegate.set_delay_after_error(errorSteps, hhmmSs);
     }
 
@@ -76,11 +76,11 @@ public final class JobBean implements Bean<Job> {
         delegate.clear_delay_after_error();
     }
 
-    public void setDelay_order_after_setback(int setbackCount, double seconds) {
+    public void set_delay_order_after_setback(int setbackCount, double seconds) {
         delegate.set_delay_order_after_setback(setbackCount, seconds);
     }
 
-    public void setDelay_order_after_setback(int setbackCount, String hhmmSs) {
+    public void set_delay_order_after_setback(int setbackCount, String hhmmSs) {
         delegate.set_delay_order_after_setback(setbackCount, hhmmSs);
     }
 

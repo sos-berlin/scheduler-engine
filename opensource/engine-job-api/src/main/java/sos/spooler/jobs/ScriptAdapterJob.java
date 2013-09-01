@@ -3,12 +3,8 @@ package sos.spooler.jobs;
 import com.google.common.collect.ImmutableMap;
 import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.jobapi.scripting.JobScriptInstanceAdapter;
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Parameter;
 import sos.spooler.HasBean;
 import sos.spooler.Job_impl;
-
-
-import javax.print.attribute.standard.PageRanges;
 
 import static sos.spooler.Beans.toBean;
 

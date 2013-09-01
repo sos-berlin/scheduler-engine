@@ -58,7 +58,7 @@ public final class SpoolerBean implements Bean<Spooler> {
         return toBean(delegate.create_variable_set());
     }
 
-    public LogBean log() {
+    public LogBean getLog() {
         return toBean(delegate.log());
     }
 
@@ -182,7 +182,7 @@ public final class SpoolerBean implements Bean<Spooler> {
         return delegate.configuration_directory();
     }
 
-    public ScheduleBean getSchedule(String path) {
+    public ScheduleBean schedule(String path) {
         return delegate.schedule(path).toBean();
     }
 

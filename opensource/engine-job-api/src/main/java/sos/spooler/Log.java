@@ -7,7 +7,10 @@ package sos.spooler;
  * @see Job_impl#spooler_log
  * @see Spooler#log()
  */
-/** 
+
+import java.io.File;
+
+/**
  * @author Joacim Zschimmer
  * @version $Revision: 3946 $
  */
@@ -72,7 +75,7 @@ public class Log extends Idispatch implements HasBean<LogBean>
      * 
      * @param level Gewicht von -9 (debug9) bis 2 (error).
      */
-    public void                 log                     ( int level, String line )                  { com_call( "log"   , new Integer(level), line ); }
+    public void                 log                     ( int level, String line )                  { com_call( "log"   , level, line ); }
     
     
     /*+ Protokolliert den Inhalt der Datei. 
@@ -83,10 +86,11 @@ public class Log extends Idispatch implements HasBean<LogBean>
     
     /*+ Protokolliert den Inhalt der Datei.
       * @see #log_file(String) */
-    public void                 log_file                ( java.io.File file )                       {                   com_call( "log_file", file.toString() ); }
+    public void                 log_file                ( File file )                               {                   com_call( "log_file", file.toString() ); }
 
     
     /*+ Liefert das Mail-Objekt. */
+    @SchedulerGetter
     public Mail                 mail                    ()                                          { return (Mail)     com_call( "<mail"                   ); }
 
     
@@ -100,6 +104,7 @@ public class Log extends Idispatch implements HasBean<LogBean>
     
     
     /*+ Liefert die Angabe von {@link #set_mail_on_warning(boolean)}. */
+    @SchedulerGetter
     public boolean              mail_on_warning         ()                                          { return    boolean_com_call( "<mail_on_warning"        ); }
 
     
@@ -113,6 +118,7 @@ public class Log extends Idispatch implements HasBean<LogBean>
     
     
     /*+ Liefert die Angabe von {@link #set_mail_on_error(boolean)}. */
+    @SchedulerGetter
     public boolean              mail_on_error           ()                                          { return    boolean_com_call( "<mail_on_error"          ); }
 
     
@@ -126,6 +132,7 @@ public class Log extends Idispatch implements HasBean<LogBean>
     
     
     /*+ Liefert die Angabe von {@link #set_mail_on_success(boolean)}. */
+    @SchedulerGetter
     public boolean              mail_on_success         ()                                          { return    boolean_com_call( "<mail_on_success"        ); }
 
     
@@ -139,6 +146,7 @@ public class Log extends Idispatch implements HasBean<LogBean>
     
     
     /*+ Liefert die Angabe von {@link #set_mail_on_process(int)}. */
+    @SchedulerGetter
     public int                  mail_on_process         ()                                          { return        int_com_call( "<mail_on_process"        ); }
 
     
@@ -157,12 +165,14 @@ public class Log extends Idispatch implements HasBean<LogBean>
      * 
      * @see #set_level(int)
      */
+    @SchedulerGetter
     public int                  level                   ()                                          { return        int_com_call( "<level"                  ); }
 
     
     
     /*+ Dateiname des Protokolls. 
      */
+    @SchedulerGetter
     public String               filename                ()                                          { return (String)   com_call( "<filename"               ); }
 
     
@@ -183,6 +193,7 @@ public class Log extends Idispatch implements HasBean<LogBean>
      * 
      * @see #filename()
      */
+    @SchedulerGetter
     public String               new_filename            ()                                          { return (String)   com_call( "<new_filename"           ); }
 
 
@@ -190,27 +201,29 @@ public class Log extends Idispatch implements HasBean<LogBean>
     public void                 start_new_file          ()                                          {                   com_call( "start_new_file"          ); }
 
     
-    /*+ @deprecated */
+    @Deprecated
     public void             set_collect_within          ( double time )                             {                   com_call( ">collect_within", time   ); }
 
-    
-    /*+ @deprecated */
+
+    @Deprecated
     public void             set_collect_within          ( String time )                             {                   com_call( ">collect_within", time   ); }
 
-    
-    /*+ @deprecated */
+
+    @Deprecated
+    @SchedulerGetter
     public double               collect_within          ()                                          { return     double_com_call( "<collect_within"         ); }
 
-    
-    /*+ @deprecated */
+
+    @Deprecated
     public void             set_collect_max             ( double time )                             {                   com_call( ">collect_max", time      ); }
 
-    
-    /*+ @deprecated */
+
+    @Deprecated
     public void             set_collect_max             ( String time )                             {                   com_call( ">collect_max", time      ); }
 
-    
-    /*+ @deprecated */
+
+    @Deprecated
+    @SchedulerGetter
     public double               collect_max             ()                                          { return     double_com_call( "<collect_max"            ); }
 
     
@@ -219,6 +232,7 @@ public class Log extends Idispatch implements HasBean<LogBean>
     
     /*+ Liefert die zuletzt mit Gewicht 2 (error) ausgegebene Zeile. 
      * Oder einen Leerstring. */
+    @SchedulerGetter
     public String               last_error_line         ()                                          { return (String)   com_call( "<last_error_line"        ); }
 
 

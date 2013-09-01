@@ -30,7 +30,10 @@ package sos.spooler;
  * @see Spooler#job_chain(String)
  * @see Task#order() 
  */
-/** 
+
+import java.util.Date;
+
+/**
  * @author Joacim Zschimmer
  * @version $Revision: 6009 $
  */
@@ -60,6 +63,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     
     
     /*+ Liefert die Kennung des Auftrags. */
+    @SchedulerGetter
     public String           id                  ()                                  { return            com_call( "<id"                 ).toString(); }
     
     
@@ -69,7 +73,8 @@ public class Order extends Idispatch implements HasBean<OrderBean>
 
     
     
-    /*+ Der Titel ist ein Klartext, der den Auftrag bezeichnet. */ 
+    /*+ Der Titel ist ein Klartext, der den Auftrag bezeichnet. */
+    @SchedulerGetter
     public String           title               ()                                  { return (String)   com_call( "<title"              ); }
     
     
@@ -80,16 +85,19 @@ public class Order extends Idispatch implements HasBean<OrderBean>
 
     
     /*+ Auftr�ge mit h�herer Priorit�t werden zuerst abgearbeitet. */
+    @SchedulerGetter
     public int              priority            ()                                  { return        int_com_call( "<priority"           ); }
     
     
     
     /*+ Liefert die Jobkette, in der der Auftrag enthalten ist, oder null. */
+    @SchedulerGetter
     public Job_chain        job_chain           ()                                  { return (Job_chain)com_call( "<job_chain"          ); }
 
     
     
     /*+ Liefert den Jobkettenknoten, der dem Zustand des Auftrags entspricht, oder null, wenn der Auftrag nicht in einer Jobkette ist. */
+    @SchedulerGetter
     public Job_chain_node   job_chain_node      ()                                  { return (Job_chain_node)com_call( "<job_chain_node" ); }
 
     
@@ -132,6 +140,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     /*+
      * Liefert den Zustand des Auftrags.
      */
+    @SchedulerGetter
     public String           state               ()                                  { return (String)   com_call( "<state"              ); }
 
     
@@ -142,6 +151,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     
     
     /*+ Liefert den mit set_state_text() eingestellten Text. */
+    @SchedulerGetter
     public String           state_text          ()                                  { return (String)   com_call( "<state_text"         ); }
 
     
@@ -166,6 +176,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
       *     String       value        = variable_set.var( "einparameter" );
       * </pre>
     */
+    @SchedulerGetter
     public Object           payload             ()                                  { return            com_call( "<payload"            ); }
     
     
@@ -181,6 +192,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     /*+ Liefert die &lt;run_time> (zur periodischen Wiederholung des Auftrags).
      * 
      */
+    @SchedulerGetter
     public Run_time         run_time            ()                                  { return (Run_time) com_call( "<run_time"           ); }
 
 
@@ -202,39 +214,51 @@ public class Order extends Idispatch implements HasBean<OrderBean>
 
 
     /*+ Liefert "yyyy-mm-dd HH:MM:SS.MMM" oder "now" oder "never" */
+    @SchedulerGetter
     public String           string_next_start_time()                                { return (String)   com_call( "<string_next_start_time" ); }
     
     
     public void             setback             ()                                  {                   com_call( "setback" ); }
 
+    @SchedulerGetter
     public String           xml                 ()                                  { return (String)   com_call( "<xml" ); }
-    
+
+    @SchedulerGetter
     public Web_service      web_service         ()                                  { return (Web_service)com_call( "<web_service" ); }
 
+    @SchedulerGetter
     public Web_service      web_service_or_null ()                                  { return (Web_service)com_call( "<web_service_or_null" ); }
 
+    @SchedulerGetter
     public Web_service_operation web_service_operation()                            { return (Web_service_operation)com_call( "<web_service_operation" ); }
 
+    @SchedulerGetter
     public Web_service_operation web_service_operation_or_null ()                   { return (Web_service_operation)com_call( "<web_service_operation_or_null" ); }
 
     public void         set_xml_payload         ( String xml )                      {                   com_call( ">xml_payload", xml   ); }
+    @SchedulerGetter
     public String           xml_payload         ()                                  { return (String)   com_call( "<xml_payload"        ); }
     
     public void         set_params              ( Variable_set v )                  {                      com_call( ">params", v ); }
+    @SchedulerGetter
     public Variable_set     params              ()                                  { return (Variable_set)com_call( "<params" ); }
     
     public void         set_at                  ( String date_time )                { com_call( ">at", date_time ); }
   //public void         set_at                  ( java.util.Date date )             { com_call( ">at", date ); }
-    public void         set_at                  ( java.util.Date date )             { set_at( new java.text.SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" ).format( date ) ); }
+    public void         set_at                  ( Date date )                       { set_at( new java.text.SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" ).format( date ) ); }
     
     public void         set_suspended           ( boolean b )                       {                        com_call( ">suspended", b ); }
+    @SchedulerGetter
     public boolean          suspended           ()                                  { return         boolean_com_call( "<suspended" ); }
-    
+
+    @SchedulerGetter
     public Log              log                 ()                                  { return (Log)           com_call( "<log" ); }
 
     public void         set_end_state           ( String value )                    {                   com_call( ">end_state", value  ); }
+    @SchedulerGetter
     public String           end_state           ()                                  { return (String)   com_call( "<end_state"         ); }
 
+    @SchedulerGetter
     public int              setback_count       ()                                  { return ((Integer) com_call( "<setback_count"     )).intValue(); }
 
     public final OrderBean toBean() {

@@ -6,13 +6,13 @@ import com.google.common.base.Strings.nullToEmpty
 import com.sos.scheduler.engine.common.system.Files.makeDirectories
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
-import com.sos.scheduler.engine.data.folder.TypedPath
+import com.sos.scheduler.engine.data.folder.{JobPath, TypedPath}
+import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.CppBinaries
 import com.sos.scheduler.engine.main.CppBinary
 import java.io.File
-import com.sos.scheduler.engine.data.order.OrderKey
 
 /** Build the environment for the scheduler binary. */
 final class TestEnvironment(resourcePath: ResourcePath, val directory: File, nameMap: Map[String, String], fileTransformer: ResourceToFileTransformer) {
@@ -56,6 +56,10 @@ final class TestEnvironment(resourcePath: ResourcePath, val directory: File, nam
   /** @return Pfad der Auftragsprotokolldatei für einfache OrderKey */
   def orderLogFile(orderKey: OrderKey) =
     new File(logDirectory, s"order.${orderKey.getJobChainPath.withoutStartingSlash}.${orderKey.idString}.log")
+
+  /** @return Pfad einer Task-Potokolldatei für einfachen JobPath. */
+  def taskLogFile(jobPath: JobPath) =
+    new File(logDirectory, s"task.${jobPath.withoutStartingSlash}.log")
 }
 
 object TestEnvironment {
