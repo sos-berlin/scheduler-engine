@@ -2,23 +2,24 @@ package sos.spooler;
 
 /** Ein Proxy von {@link Web_service_request}, mit Gettern und Settern für Skriptsprachen. */
 public class Web_service_requestBean implements Bean<Web_service_request> {
-    private Web_service_request delegate;
+    private final Web_service_request delegate;
 
     Web_service_requestBean(Web_service_request web_service_request) {
         delegate = web_service_request;
     }
 
-    public String url() {
+    public String getUrl() {
         return delegate.url();
     }
 
-    public String header( String name ) {
+    public String header(String name) {
         return delegate.header(name);
     }
 
     public String getContent_type() {
         return delegate.content_type();
     }
+
     public String getCharset_name() {
         return delegate.charset_name();
     }
