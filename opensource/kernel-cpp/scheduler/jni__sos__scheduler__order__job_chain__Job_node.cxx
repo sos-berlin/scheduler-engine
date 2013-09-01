@@ -68,6 +68,23 @@ static jstring JNICALL job_1chain_1path(JNIEnv* jenv, jobject, jlong cppReferenc
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL job_1path(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::job_path()");
+        return env.jstring_from_string(o_->job_path());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL next_1node(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -188,6 +205,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"error_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/NodeC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::error_1node },
     { (char*)"job__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job },
     { (char*)"job_chain_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain_1path },
+    { (char*)"job_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1path },
     { (char*)"next_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/NodeC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1node },
     { (char*)"order_queue__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Order_queueC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order_1queue },
     { (char*)"set_action__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1action__Ljava_lang_String_2 },
@@ -202,7 +220,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::order::job_chain::Job_node >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 10);
+        int ret = env->RegisterNatives(*cls, native_methods, 11);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

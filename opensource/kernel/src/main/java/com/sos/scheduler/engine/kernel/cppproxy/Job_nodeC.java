@@ -9,4 +9,6 @@ public interface Job_nodeC extends Order_queue_nodeCI, CppProxyWithSister<JobNod
     JobNode.Type sisterType = new JobNode.Type();
 
     JobC job();
+
+    String job_path();
 }

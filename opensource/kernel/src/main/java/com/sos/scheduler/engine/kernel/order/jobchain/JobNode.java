@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain;
 import com.google.inject.Injector;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
+import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector;
@@ -13,6 +14,10 @@ public class JobNode extends OrderQueueNode {
     private JobNode(Job_nodeC cppProxy, Injector injector) {
         super(cppProxy, injector);
         this.cppProxy = cppProxy;
+    }
+
+    public final JobPath jobPath() {
+        return JobPath.of(cppProxy.job_path());
     }
 
     public final Job getJob() {
