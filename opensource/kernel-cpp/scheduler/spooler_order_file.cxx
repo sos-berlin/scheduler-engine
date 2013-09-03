@@ -390,67 +390,45 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
     // ohne dass die Überwachung das mitbekommt. Sie signaliert keine Veränderung im neuen Verzeichnis, ist also nutzlos.
     // Deshalb erneuern wir die Verzeichnisüberwachung, wenn seit _repeat Sekunde kein Signal gekommen ist.
 
-    Time now = Time::now();
-    
-    if( !_notification_event.handle()  ||  Time::now() >= _notification_event_time + _repeat )
-    {
-        Z_LOG2( "scheduler.file_order", "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-        HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-
-        if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
-
-        if( _notification_event.handle() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
+    try {
+        if( !_notification_event.handle()  ||  Time::now() >= _notification_event_time + _repeat )
         {
-            _notification_event.wait( 0 );
-            if( _notification_event.signaled() )      
+            _notification_event_time = Time::now();
+
+            Z_LOG2( "scheduler.file_order", "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+            HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+            if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
+
+            if( _notification_event.handle() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
             {
-                _notification_event.set_signaled();     
-                Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                _notification_event.wait( 0 );
+                if( _notification_event.signaled() )      
+                {
+                    _notification_event.set_signaled();     
+                    Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                }
+
+                close_notification();
             }
 
-            close_notification();
-        }
-
-        _notification_event.set_handle( h );
-        _notification_event.set_name( "FindFirstChangeNotification " + _path );
+            _notification_event.set_handle( h );
+            _notification_event.set_name( "FindFirstChangeNotification " + _path );
         
-        add_to_event_manager( _spooler->_connection_manager );
-
-        _notification_event_time = now;
-    }
-    else
-    if( was_notified )
-    {
-        Z_LOG2( "scheduler.file_order", "FindNextChangeNotification(\"" << _path << "\")\n" );
-        BOOL ok = FindNextChangeNotification( _notification_event.handle() );
-        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-
-        _notification_event_time = now;
-    }
-
-    /*
-    if( !_notification_event.handle() )
-    {
-        Z_LOG2( "scheduler.file_order", "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-        HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-
-        if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
-
-        _notification_event.set_handle( h );
-        _notification_event.set_name( "FindFirstChangeNotification " + _path );
-
-        add_to_event_manager( _spooler->_connection_manager );
-    }
-    else
-    {
+            add_to_event_manager( _spooler->_connection_manager );
+        }
+        else
         if( was_notified )
         {
+            _notification_event_time = Time::now();
+
             Z_LOG2( "scheduler.file_order", "FindNextChangeNotification(\"" << _path << "\")\n" );
             BOOL ok = FindNextChangeNotification( _notification_event.handle() );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
         }
+    } 
+    catch (exception &x) {
+        log()->debug(message_string("SCHEDULER-724", _path, x.what()));
     }
-    */
 }
 
 #endif
