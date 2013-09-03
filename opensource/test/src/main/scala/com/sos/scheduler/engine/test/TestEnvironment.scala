@@ -3,7 +3,9 @@ package com.sos.scheduler.engine.test
 import TestEnvironment._
 import _root_.scala.collection.immutable
 import com.google.common.base.Strings.nullToEmpty
-import com.sos.scheduler.engine.common.system.Files.makeDirectories
+import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.scheduler.engine.common.system.Files
+import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
 import com.sos.scheduler.engine.data.folder.{JobPath, TypedPath}
@@ -60,6 +62,9 @@ final class TestEnvironment(resourcePath: ResourcePath, val directory: File, nam
   /** @return Pfad einer Task-Potokolldatei für einfachen JobPath. */
   def taskLogFile(jobPath: JobPath) =
     new File(logDirectory, s"task.${jobPath.withoutStartingSlash}.log")
+
+  def subdirectory(name: String) =
+    new File(directory, name) sideEffect makeDirectory
 }
 
 object TestEnvironment {
