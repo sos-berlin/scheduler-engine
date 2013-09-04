@@ -25,7 +25,7 @@ class OrderEventsIT extends ScalaSchedulerTest {
 
   test("Persistent order") {
     checkOrderStates(persistentOrderKey)
-    eventPipe.next[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (persistentOrderKey); assert(e.previousState === new OrderState("end")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (persistentOrderKey); assert(e.previousState === new OrderState("end")) }
   }
 
   test("Temporary order") {
@@ -40,9 +40,9 @@ class OrderEventsIT extends ScalaSchedulerTest {
     coldEvents.clear()
     val orderKey = temporaryOrderKey
     scheduler.executeXml(<add_order job_chain={jobChainPath.asString} id={orderKey.getId.toString}/>)
-    eventPipe.next[OrderTouchedEvent].orderKey should equal (orderKey)
-    eventPipe.next[OrderSuspendedEvent].orderKey should equal (orderKey)
-    eventPipe.next[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state1")) }
+    eventPipe.nextAny[OrderTouchedEvent].orderKey should equal (orderKey)
+    eventPipe.nextAny[OrderSuspendedEvent].orderKey should equal (orderKey)
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state1")) }
     scheduler.executeXml(<remove_order job_chain={jobChainPath.asString} order={orderKey.getId.toString}/>)
     //eventPipe.next[OrderEvent] match { case e: OrderFinishedEvent => e.getKey should equal (orderKey) }
   }
@@ -53,17 +53,17 @@ class OrderEventsIT extends ScalaSchedulerTest {
   }
 
   private def expectOrderEventsAndResumeOrder(orderKey: OrderKey) {
-    eventPipe.next[OrderEvent] match { case e: OrderTouchedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.next[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (new OrderState("state1")) }
-    eventPipe.next[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.next[OrderEvent] match { case e: OrderSuspendedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.next[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state1")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderTouchedEvent => e.orderKey should equal (orderKey) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (new OrderState("state1")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderSuspendedEvent => e.orderKey should equal (orderKey) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state1")) }
     scheduler.executeXml(<modify_order job_chain={jobChainPath.asString} order={orderKey.getId.toString} suspended="no"/>)
-    eventPipe.next[OrderEvent] match { case e: OrderResumedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.next[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (new OrderState("state2")) }
-    eventPipe.next[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.next[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state2")) }
-    eventPipe.next[OrderEvent] match { case e: OrderFinishedEvent => e.orderKey should equal (orderKey) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderResumedEvent => e.orderKey should equal (orderKey) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (new OrderState("state2")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state2")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderFinishedEvent => e.orderKey should equal (orderKey) }
   }
 
   private def checkCollectedOrderEvents(orderKey: OrderKey) {

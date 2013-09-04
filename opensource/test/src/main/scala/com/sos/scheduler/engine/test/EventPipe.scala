@@ -6,7 +6,7 @@ import _root_.scala.reflect.ClassTag
 import _root_.scala.sys.error
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.main.event.TerminatedEvent
 import java.util.concurrent.LinkedBlockingQueue
@@ -27,19 +27,22 @@ extends EventHandlerAnnotated with SosAutoCloseable {
     queue.add(e)
   }
 
-  def next[E <: Event](implicit c: ClassTag[E]): E =
-    nextEvent[E](defaultTimeout, everyEvent, c)
+  def nextAny[E <: Event : ClassTag]: E =
+    nextEvent[E](defaultTimeout, everyEvent)
 
-  def nextWithCondition[E <: Event](condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]): E =
-    nextEvent[E](defaultTimeout, condition, c)
+  def next[E <: KeyedEvent : ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
+    nextEvent[E](timeout, { _.key == key })
 
-  def nextWithTimeoutAndCondition[E <: Event](timeout: Duration)(condition: E => Boolean = everyEvent)(implicit c: ClassTag[E]): E =
-    nextEvent[E](timeout, condition, c)
+  def nextWithCondition[E <: Event : ClassTag](condition: E => Boolean): E =
+    nextEvent[E](defaultTimeout, condition)
 
-  private def nextEvent[E <: Event](timeout: Duration, predicate: E => Boolean, classTag: ClassTag[E]): E =
-    nextEvent(timeout, predicate, classTag.runtimeClass.asInstanceOf[Class[E]])
+  def nextWithTimeoutAndCondition[E <: Event : ClassTag](timeout: Duration)(condition: E => Boolean): E =
+    nextEvent[E](timeout, condition)
 
-  private def nextEvent[E <: Event](timeout: Duration, predicate: E => Boolean, expectedEventClass: Class[E]): E = {
+  private def nextEvent[E <: Event](timeout: Duration, predicate: E => Boolean)(implicit classTag: ClassTag[E]): E =
+    nextEvent2(timeout, predicate, classTag.runtimeClass.asInstanceOf[Class[E]])
+
+  private def nextEvent2[E <: Event](timeout: Duration, predicate: E => Boolean, expectedEventClass: Class[E]): E = {
     val until = now() + timeout
 
     @tailrec def waitForEvent(): E = {

@@ -42,14 +42,14 @@ abstract class JS856IT(testNamePrefix: String) extends ScalaSchedulerTest {
     final def runUntilEnd() {
       val eventPipe = controller.newEventPipe()
       startOrder()
-      eventPipe.next[OrderFinishedEvent]
+      eventPipe.nextAny[OrderFinishedEvent]
     }
 
     final def runUntilSuspendedThenReset() {
       val eventPipe = controller.newEventPipe()
       startOrder(List(suspendedParameterName -> suspendedTrue))
-      eventPipe.next[OrderStepEndedEvent]
-      eventPipe.next[OrderSuspendedEvent]
+      eventPipe.nextAny[OrderStepEndedEvent]
+      eventPipe.nextAny[OrderSuspendedEvent]
       orderParameters should equal (whenSuspendedExpectedParameters)
       resetOrder()
     }

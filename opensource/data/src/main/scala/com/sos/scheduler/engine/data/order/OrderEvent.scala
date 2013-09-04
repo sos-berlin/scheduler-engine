@@ -1,7 +1,13 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.event.KeyedEvent
 
-trait OrderEvent extends Event {
+trait OrderEvent extends KeyedEvent {
+
+  type Key = OrderKey
+
+  final def key =
+    orderKey
+
   def orderKey: OrderKey
 }
