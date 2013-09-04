@@ -4,7 +4,7 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.folder.FileBasedType
 import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderId
+import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.data.order.jobchain.JobChainPersistentState
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
 import com.sos.scheduler.engine.kernel.folder.FileBased
@@ -79,6 +79,9 @@ with UnmodifiableJobchain {
     case n: JobNode => n.getJob eq job
     case _ => false
   }
+
+  def node(o: OrderState): Node =
+    nodeMap(o)
 
   lazy val nodeMap = (nodes map { n => n.orderState -> n }).toMap
 
