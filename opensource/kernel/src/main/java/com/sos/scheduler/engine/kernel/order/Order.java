@@ -64,6 +64,14 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
         return new OrderState(cppProxy.string_end_state());
     }
 
+    @Override public boolean suspended() {
+        return cppProxy.suspended();
+    }
+
+    @Override public void setSuspended(boolean b) {
+        cppProxy.set_suspended(b);
+    }
+
     @Override public String getTitle() {
         return cppProxy.title();
     }

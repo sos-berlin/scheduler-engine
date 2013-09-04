@@ -16,6 +16,14 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC {
         throw new UnsupportedOperationException("com.sos.scheduler.engine.kernel.cppproxy.OrderCMock.remove()");
     }
 
+    @Override public boolean suspended() {
+        throw new UnsupportedOperationException("com.sos.scheduler.engine.kernel.cppproxy.OrderCMock.suspended()");
+    }
+
+    @Override public void set_suspended(boolean o) {
+        throw new UnsupportedOperationException("com.sos.scheduler.engine.kernel.cppproxy.OrderCMock.set_suspended()");
+    }
+
     @Override public String string_id() { return id; }
 
     @Override public void set_id(String id) { this.id = id; }

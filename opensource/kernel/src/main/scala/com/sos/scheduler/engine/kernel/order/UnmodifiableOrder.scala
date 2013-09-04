@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet
-import java.lang.String
 import javax.annotation.Nullable
 
 @ForCpp trait UnmodifiableOrder extends EventSource {
@@ -17,6 +16,10 @@ import javax.annotation.Nullable
   def getState: OrderState
 
   def getEndState: OrderState
+
+  def suspended: Boolean
+
+  def setSuspended(o: Boolean)
 
   def getTitle: String
 
