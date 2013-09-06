@@ -23,12 +23,13 @@ to run without maven integration.
     <property name="source.dir" value="${basedir}/target/dependency"/>
     <property name="target.dir" value="${basedir}/target/setup"/>
     <property name="archive.root" value="/com/sos/scheduler/engine/kernelcpp"/>
+    <property name="config.root" value="/com/sos/scheduler/enginedoc/common"/>
 
     <target name="purge.local">
     	<delete dir="${settings.localRepository}/com/sos/scheduler/engine" />
     </target>
 
-    <target name="setup.platform" depends="-init, -unzip, -copy, -copy.platform, -versioninfo"
+    <target name="setup.platform" depends="-init, -unzip, -unzip.xsd, -copy, -copy.platform, -versioninfo"
             description="platform specific setup preparation">
         <echo message="DONE !!"/>
     </target>
@@ -59,7 +60,7 @@ to run without maven integration.
             </else>
         </if>
 
-        <fileset dir="${source.dir}/${folder.name}/${archive.root}" id="files.config">
+        <fileset dir="${source.dir}/${folder.name}${config.root}" id="files.config">
             <include name="scheduler.xsd"/>
         </fileset>
 
@@ -114,6 +115,18 @@ to run without maven integration.
             </patternset>
             <fileset dir="${source.dir}">
                 <include name="*${setup.platform}*.jar"/>
+            </fileset>
+        </unzip>
+    </target>
+
+    <target name="-unzip.xsd" description="unzip the common documentation/configiuration files.">
+        <unzip dest="${source.dir}/${folder.name}">
+            <patternset>
+                <exclude name="**/*.map"/>
+                <exclude name="**/*.pdb"/>
+            </patternset>
+            <fileset dir="${source.dir}">
+                <include name="*enginedoc-common*.jar"/>
             </fileset>
         </unzip>
     </target>
