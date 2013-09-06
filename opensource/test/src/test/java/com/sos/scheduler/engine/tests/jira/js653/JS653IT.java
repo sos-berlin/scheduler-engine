@@ -16,7 +16,7 @@ import static java.lang.Thread.sleep;
 
 /** Ticket JS-653.
  * <a href='http://www.sos-berlin.com/jira/browse/JS-653'>JS-653</a>
- * @see com.sos.scheduler.engine.tests.jira.js803.JS803IT */
+ */
 public final class JS653IT extends SchedulerTest {
     private static final long idleTimeoutMs = 5*1000;
     private static final ImmutableSet<OrderIdAndState> expectedOrderStarts = ImmutableSet.of(
