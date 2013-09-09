@@ -138,7 +138,7 @@ final class JS973IT extends ScalaSchedulerTest {
       val firstJobPath = instance[OrderSubsystem].jobChain(jobChainPath).jobNodes.head.jobPath
       instance[JobSubsystem].job(firstJobPath).state should equal (JobState.pending)
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
-      eventPipe.next[ErrorLogEvent].getCodeOrNull should equal (expectedErrorCode)
+      eventPipe.nextAny[ErrorLogEvent].getCodeOrNull should equal (expectedErrorCode)
       eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition should equal (OrderStateTransition.keepState)
       instance[JobSubsystem].job(firstJobPath).state should equal (JobState.stopped)
     }
