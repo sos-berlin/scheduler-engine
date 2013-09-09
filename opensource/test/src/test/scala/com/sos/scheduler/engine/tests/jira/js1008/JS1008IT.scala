@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1008
 
 import JS1008IT._
+import com.google.common.io.Files
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
@@ -18,7 +19,7 @@ final class JS1008IT extends ScalaSchedulerTest {
     // Ob Fehler in FindFirstChangeNotification ignoriert werden, testen wir manuell durch vorübergehenden Eingriff in den C++-Code. Dazu Polling-Intervall mit repeat="5" verkürzen
     val eventPipe = controller.newEventPipe()
     val orderSubsystem = instance[OrderSubsystem]
-    val directory = controller.environment.subdirectory("file_order_source")
+    val directory = Files.createTempDir()
     scheduler executeXml jobChainElem(directory)
     orderSubsystem.jobChain(testJobChainPath).nodeMap(OrderState("200")).action = JobChainNodeAction.stop
     val file = new File(directory, "test")
