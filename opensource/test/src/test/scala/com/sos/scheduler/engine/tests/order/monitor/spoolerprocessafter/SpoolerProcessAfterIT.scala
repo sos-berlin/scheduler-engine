@@ -53,7 +53,7 @@ final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
 
     def execute() = {
       scheduler executeXml setting.orderElem
-      val result = eventPipe.next[MyFinishedEvent]
+      val result = eventPipe.nextAny[MyFinishedEvent]
       cleanUpAfterExcecute()
       result
     }
@@ -61,7 +61,7 @@ final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
     def cleanUpAfterExcecute() {
       orderSubsystem.tryRemoveOrder(setting.orderKey)  // Falls Auftrag zurückgestellt ist, damit der Job nicht gleich nochmal mit demselben Auftrag startet.
       job.endTasks()   // Task kann schon beendet und Job schon gestoppt sein.
-      eventPipe.next[TaskClosedEvent] match { case e =>
+      eventPipe.nextAny[TaskClosedEvent] match { case e =>
         assert(e.taskId === new TaskId(index), "TaskClosedEvent not for expected task - probably a previous test failed")
       }
       waitForCondition(TimeoutWithSteps(millis(3000), millis(10))) { job.state == expected.jobState }   // Der Job-Zustand wird asynchron geändert (stopping -> stopped, running -> pending). Wir warten kurz darauf.

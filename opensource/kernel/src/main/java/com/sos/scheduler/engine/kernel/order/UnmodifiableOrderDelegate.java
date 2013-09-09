@@ -30,6 +30,14 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
         return order.getEndState();
     }
 
+    @Override public boolean suspended() {
+        return order.suspended();
+    }
+
+    @Override public void setSuspended(boolean o) {
+        order.setSuspended(o);
+    }
+
     @Override public final String getTitle() {
         return order.getTitle();
     }

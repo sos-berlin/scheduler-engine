@@ -148,6 +148,20 @@ final class OrderCImpl
     private static native void set_id__native(long cppReference, java.lang.String p0);
 
 
+    @Override public void set_suspended(boolean p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_suspended__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_suspended__native(long cppReference, boolean p0);
+
+
     @Override public void set_title(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -208,6 +222,20 @@ final class OrderCImpl
     }
 
     private static native java.lang.String string_state__native(long cppReference);
+
+
+    @Override public boolean suspended() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return suspended__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean suspended__native(long cppReference);
 
 
     @Override public java.lang.String title() {
