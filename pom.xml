@@ -61,7 +61,7 @@
                 <releaseVersion>1.5.3251</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
                 <developmentVersion>1.5.3252-SNAPSHOT</developmentVersion>
                 <tag>v${releaseVersion}</tag>
-                <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+                <ignoreSnapshots>true</ignoreSnapshots>
             </properties>
         </profile>
     </profiles>
