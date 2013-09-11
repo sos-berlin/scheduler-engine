@@ -25,7 +25,7 @@ public class Xslt_stylesheetBean  implements Bean<Xslt_stylesheet> {
     }
 
     public Xslt_stylesheetBean load_xml(String xml) {
-        return toBean(delegate.load_file(xml));
+        return toBean(delegate.load_xml(xml));
     }
 
     public String apply_xml(String xml) {
