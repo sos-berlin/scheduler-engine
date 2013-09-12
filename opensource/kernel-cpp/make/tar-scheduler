@@ -4,8 +4,6 @@
 archive=scheduler.tar.bz2
 
 subdirs=""
-subdirs="$subdirs prod/3rd_party/libxml2"
-subdirs="$subdirs prod/3rd_party/libxslt"
 subdirs="$subdirs prod/3rd_party/regexp"
 subdirs="$subdirs prod/file"
 subdirs="$subdirs prod/fs"
