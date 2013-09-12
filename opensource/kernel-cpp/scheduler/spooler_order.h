@@ -235,6 +235,7 @@ struct Order : Com_order,
     void                    set_replacement             ( bool );
     void                        activate_schedule       ();
     void                        handle_changed_schedule ();
+    int64                       next_time_millis        ()                                          { return next_time().millis(); }
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
     void                        set_next_start_time     ();
