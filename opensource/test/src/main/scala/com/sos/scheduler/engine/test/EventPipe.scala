@@ -30,7 +30,7 @@ extends EventHandlerAnnotated with SosAutoCloseable {
   def nextAny[E <: Event : ClassTag]: E =
     nextEvent[E](defaultTimeout, everyEvent)
 
-  def next[E <: KeyedEvent : ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
+  def nextKeyed[E <: KeyedEvent : ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =
     nextEvent[E](timeout, { _.key == key })
 
   def nextWithCondition[E <: Event : ClassTag](condition: E => Boolean): E =

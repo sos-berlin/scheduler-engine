@@ -40,21 +40,21 @@ final class JS1003IT extends ScalaSchedulerTest {
     val eventPipe = controller.newEventPipe()
     startOrder
     if (orderKey != standingOrderKey)  // Ein Dauerauftrag überspringt den ersten Knoten ohne Event
-      eventPipe.next[OrderStateChangedEvent](orderKey).previousState should equal (state100)
-    eventPipe.next[OrderStateChangedEvent](orderKey).previousState should equal (state200)
+      eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state100)
+    eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state200)
     def order = orderSubsystem.order(orderKey)
     order.getState should be (state300)
     order.setSuspended(true)
     order should be ('suspended)
     scheduler executeXml ModifyOrderCommand(orderKey, action = Some(Action.reset))
     order should not be 'suspended
-    eventPipe.next[OrderStateChangedEvent](orderKey).previousState should equal (state300)
+    eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state300)
 //    Alternative, wir im Ticket JS-1003 erwartet, aber entgegen der Dokumentation und dem tatsächlichen Verhalten:
 //    order should be ('suspended)
 //    order.getState should be (state200)
 //    withClue("Order should not start because it is suspended:") { intercept[TimeoutException] { eventPipe.next[OrderStepStartedEvent](orderKey, timeout = 5.s) } }
 //    order.getState should be (state200)
-    eventPipe.next[OrderStateChangedEvent](orderKey).previousState should equal (state200)
+    eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state200)
   }
 }
 
