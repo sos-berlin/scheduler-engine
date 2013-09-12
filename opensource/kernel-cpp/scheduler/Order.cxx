@@ -2135,7 +2135,13 @@ void Order::reset()
 
     set_suspended( false );
     clear_setback();
-    set_state( _initial_state );
+    if (Node* first_nested_job_chain_node = _outer_job_chain_path.empty()? NULL 
+            : order_subsystem()->job_chain(_outer_job_chain_path)->node_from_state_or_null(_initial_state)) {
+        move_to_other_nested_job_chain(Nested_job_chain_node::cast(first_nested_job_chain_node)->nested_job_chain_path());   // Muss ein Nested_job_chain_node sein
+        _outer_job_chain_state = _initial_state;
+    } else {
+        set_state( _initial_state );
+    }
     set_next_start_time();
     _is_virgin = true;
     prepare_for_next_roundtrip();
@@ -2691,21 +2697,7 @@ bool Order::handle_end_state_of_nested_job_chain()
 
             if( next_outer_job_chain_node  &&  next_outer_job_chain_node->nested_job_chain() )
             {
-                Job_chain* previous_job_chain = _job_chain;
-                Job_chain* next_job_chain     = next_outer_job_chain_node->nested_job_chain();
-
-                _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
-
-                close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
-                _start_time = Time(0);
-                _end_time = Time(0);
-                open_log();
-
-                _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
-                place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
-                _outer_job_chain_path = Absolute_path( root_path, outer_job_chain->path() );  // place_in_job_chain() hat's gelöscht
-
-                _log->info( message_string( "SCHEDULER-863", previous_job_chain->obj_name() ) );
+                move_to_other_nested_job_chain(next_outer_job_chain_node->nested_job_chain_path());
             }
             else
             {
@@ -2725,6 +2717,27 @@ bool Order::handle_end_state_of_nested_job_chain()
     }
 
     return end_state_reached;
+}
+
+//------------------------------------------------------------Order::move_to_other_nested_job_chain
+
+void Order::move_to_other_nested_job_chain(const Absolute_path& nested_job_chain_path) 
+{
+    Job_chain* next_job_chain = order_subsystem()->job_chain(nested_job_chain_path);
+    _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
+
+    close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
+    _start_time = Time(0);
+    _end_time = Time(0);
+    open_log();
+
+    Job_chain* previous_job_chain = _job_chain;
+    string outer_job_chain_path = _outer_job_chain_path;
+    _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
+    place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
+    _outer_job_chain_path = Absolute_path( root_path, outer_job_chain_path );  // place_in_job_chain() hat's gelöscht
+
+    _log->info( message_string( "SCHEDULER-863", previous_job_chain->obj_name() ) );
 }
 
 //-------------------------------------------------------------Order::handle_end_state_repeat_order

@@ -260,6 +260,7 @@ struct Order : Com_order,
     void                        handle_end_state        ();
     bool                        handle_end_state_of_nested_job_chain();
     void                        handle_end_state_repeat_order( const Time& );
+    void                        move_to_other_nested_job_chain(const Absolute_path& nested_job_chain_path);
 
     void                        on_carried_out          ();
     void                        prepare_for_next_roundtrip();
