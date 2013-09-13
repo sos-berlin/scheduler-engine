@@ -9,9 +9,13 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 
 @RunWith(classOf[JUnitRunner])
 final class JS631IT extends ScalaSchedulerTest {
+  override protected lazy val testConfiguration = TestConfiguration(
+    database = Some(DefaultDatabaseConfiguration()))
+
   test("Without reset") {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml <modify_order job_chain={aOrderKey.jobChainPathString} order={aOrderKey.idString} at="now"/>

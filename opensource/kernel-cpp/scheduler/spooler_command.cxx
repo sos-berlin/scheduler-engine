@@ -1285,13 +1285,16 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     string        at             = modify_order_element.getAttribute( "at"        );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
-    ptr<Order>     order;
+    ptr<Order> order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
+                                                  : job_chain->order( id );
+
+
+    if( modify_order_element.getAttribute( "action" ) == "reset" ) {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
+        order->reset();
+    }
 
     for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
     {
-        order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
-                                           : job_chain->order( id );
-
         if( !order  &&  job_chain->is_distributed() ) 
             order = _spooler->order_subsystem()->load_order_from_database( &ta, job_chain_path, id, Order_subsystem::lo_lock );  // Exception, wenn von einem Scheduler belegt
 
@@ -1347,11 +1350,6 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         if( modify_order_element.hasAttribute( "title" ) )
         {
             order->set_title( modify_order_element.getAttribute( "title" ) );
-        }
-
-        if( modify_order_element.getAttribute( "action" ) == "reset" )
-        {
-            order->reset();
         }
 
         if( order->finished()  &&  !order->has_base_file() && !order->is_on_blacklist() )
