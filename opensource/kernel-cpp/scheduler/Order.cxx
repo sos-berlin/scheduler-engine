@@ -2135,10 +2135,14 @@ void Order::reset()
 
     set_suspended( false );
     clear_setback();
-    if (Node* first_nested_job_chain_node = _outer_job_chain_path.empty()? NULL 
-            : order_subsystem()->job_chain(_outer_job_chain_path)->node_from_state_or_null(_initial_state)) {
-        move_to_other_nested_job_chain(Nested_job_chain_node::cast(first_nested_job_chain_node)->nested_job_chain_path());   // Muss ein Nested_job_chain_node sein
-        _outer_job_chain_state = _initial_state;
+    if (Nested_job_chain_node* first_nested_job_chain_node = Nested_job_chain_node::cast(
+          _outer_job_chain_path.empty()? NULL : order_subsystem()->job_chain(_outer_job_chain_path)->node_from_state_or_null(_initial_state))) {
+        if (first_nested_job_chain_node->nested_job_chain() == _job_chain)
+            set_state(_job_chain->first_node()->order_state());
+        else {
+            move_to_other_nested_job_chain(first_nested_job_chain_node->nested_job_chain_path());   // Muss ein Nested_job_chain_node sein
+            _outer_job_chain_state = _initial_state;
+        }
     } else {
         set_state( _initial_state );
     }
