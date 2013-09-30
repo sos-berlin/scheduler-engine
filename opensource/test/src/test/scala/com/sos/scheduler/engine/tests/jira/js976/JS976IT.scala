@@ -19,16 +19,15 @@ final class JS976IT extends ScalaSchedulerTest {
 
   private val withMySQL = System.getProperty("JS-976") != null   // Test mit MySQL nur, wenn die System-Property gesetzt ist
 
-  override lazy val testConfiguration = {
-    val databaseConfiguration =
-      if (withMySQL) HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=scheduler jdbc:mysql://127.0.0.1/scheduler")
-      else DefaultDatabaseConfiguration()
-    TestConfiguration(database = Some(databaseConfiguration))
-  }
+  override lazy val testConfiguration =
+    TestConfiguration(
+      database = Some(
+        if (withMySQL) HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=scheduler jdbc:mysql://127.0.0.1/scheduler")
+        else DefaultDatabaseConfiguration()))
 
   if (withMySQL)
     test("JS-976") {
-      sleep(3.s)
+      //sleep(3.s)
       scheduler executeXml <job_chain_node.modify job_chain="test" state="100" action="process"/>   // Datenbank hat sich Zustand vom letzten Testlauf gemerkt
       scheduler executeXml <job_chain_node.modify job_chain="test" state="100" action="stop"/>
     }
