@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job stop_on_error="no">
+    <script language="shell">
+        <![CDATA[
+            @echo off
+            echo ------ Shellscript 2 -------------------------------------
+            echo Hallo von %SCHEDULER_JOB_NAME%
+
+            echo SCHEDULER_RETURN_VALUES=%SCHEDULER_RETURN_VALUES%
+            echo testvar1=%SCHEDULER_PARAM_TESTVAR1%
+            echo testvar2=%SCHEDULER_PARAM_TESTVAR2%
+
+            rem echo testvar2=newvalue2 >> %SCHEDULER_RETURN_VALUES%
+            rem echo testvar3=value3 >> %SCHEDULER_RETURN_VALUES%
+            echo ----------------------------------------------------------
+        ]]>
+    </script>
+
+    <!--<monitor ordering="0" name="read-testvars2">-->
+        <!--<script language="javax.script:rhino">-->
+            <!--<![CDATA[-->
+                <!--function spooler_process_before()-->
+                <!--{-->
+                    <!--spooler_log.info( "==========================================================" );-->
+                    <!--spooler_log.info( "SPOOLER_PROCESS_BEFORE()" );-->
+                    <!--spooler_log.info( "==========================================================" );-->
+                    <!--return true;   // spooler_process() will be executed-->
+                <!--}-->
+
+                <!--function spooler_process_after(spooler_process_result)-->
+                <!--{-->
+                    <!--spooler_log.info( "==========================================================" );-->
+                    <!--spooler_log.info( "SPOOLER_PROCESS_AFTER()" );-->
+                    <!--var taskParams = spooler_task.params();-->
+                    <!--spooler_log.info( "testvar1=" + taskParams.value("testvar1") );-->
+                    <!--spooler_log.info( "testvar2=" + taskParams.value("testvar2") );-->
+                    <!--spooler_log.info( "testvar3=" + taskParams.value("testvar3") );-->
+                    <!--spooler_log.info( "==========================================================" );-->
+                    <!--return spooler_process_result;-->
+                <!--}-->
+
+                <!--function spooler_task_after()-->
+                <!--{-->
+                    <!--spooler_log.info( "==========================================================" );-->
+                    <!--spooler_log.info( "SPOOLER_TASK_AFTER()" );-->
+                    <!--spooler_log.info("Hallo von Monitor " + spooler_job.name() );-->
+
+                    <!--var taskParams = spooler_task.params();-->
+                    <!--spooler_log.info( "testvar1=" + taskParams.value("testvar1") );-->
+                    <!--spooler_log.info( "testvar2=" + taskParams.value("testvar2") );-->
+                    <!--spooler_log.info( "testvar3=" + taskParams.value("testvar3") );-->
+
+                    <!--//var orderParams = spooler_task.order().params();-->
+                    <!--//spooler_log.info(orderParams.value("foo");-->
+                    <!--spooler_log.info( "==========================================================" );-->
+                <!--}-->
+            <!--]]>-->
+        <!--</script>-->
+    <!--</monitor>-->
+
+    <run_time />
+</job>
