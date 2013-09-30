@@ -584,8 +584,6 @@ void Vm::start()
     log_version( jenv, module_filename );
 
     new_instances( _new_instances );
-
-    load_standard_classes();           // Wirkt nat�rlich nur f�r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
 }
 
 //----------------------------------------------------------------------------------Vm::load_module

@@ -122,8 +122,7 @@ void init_java_vm( javabridge::Vm* java_vm )
     }
 
     java_vm->start();
-
-  //make_path( _java_vm->work_dir() );       // Java-VM pr�ft Vorhandensein der Verzeichnisse in classpath schon beim Start
+    java_vm->load_standard_classes();           // Wirkt nat�rlich nur f�r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
 
     {
         Env env = java_vm->jni_env();
