@@ -39,9 +39,9 @@ class JniModule(config: CppClassConfiguration, procedureSignatures: Seq[Procedur
             def declaration = "template<> void " + hasProxyClassName + "::register_cpp_proxy_class_in_java()"
             def body =
                 "        Env env;\n" +
-                "        Class* cls = " + hasProxyClassName + "::proxy_class_factory.clas();\n" +
-                "        int ret = env->RegisterNatives(*cls, native_methods, " + jniMethods.size + ");\n" +
-                "        if (ret < 0)  env.throw_java(\"RegisterNatives\");\n"
+               s"        Class* cls = $hasProxyClassName::proxy_class_factory.clas();\n" +
+               s"        int ret = env->RegisterNatives(*cls, native_methods, ${jniMethods.size});\n" +
+             s"""        if (ret < 0)  env.throw_java("RegisterNatives", "$javaClassFullName");""" + "\n"
 
             JavaBridge.namespace.nestedCode(
                 "    " + declaration + " {\n" +
