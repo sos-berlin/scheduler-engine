@@ -54,7 +54,7 @@ public class SimpleTest extends SchedulerTest {
 	 */
 	@HotEventHandler
 	public void handleTaskEndedEvent(TaskEndedEvent e, UnmodifiableTask t) throws IOException {
-		logger.debug("TASKEVENT: " + t.getJob().getName());
+		logger.debug("TASKEVENT: " + t.job().getName());
 	}
 	
 	@HotEventHandler

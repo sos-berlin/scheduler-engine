@@ -7,8 +7,8 @@ import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 
 @ForCpp
 public interface UnmodifiableTask extends EventSource {
-	TaskId getId();
-    UnmodifiableJob getJob();
+	TaskId id();
+    UnmodifiableJob job();
     UnmodifiableOrder getOrderOrNull();
     String parameterValue(String name);
 }

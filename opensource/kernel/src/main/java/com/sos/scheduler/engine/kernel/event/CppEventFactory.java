@@ -29,17 +29,17 @@ public final class CppEventFactory {
 
             case taskStartedEvent: {
                 Task task = (Task)o;
-                return new TaskStartedEvent(task.getId(), task.getJob().getPath());
+                return new TaskStartedEvent(task.id(), task.job().getPath());
             }
 
             case taskEndedEvent: {
                 Task task = (Task)o;
-                return new TaskEndedEvent(task.getId(), task.getJob().getPath());
+                return new TaskEndedEvent(task.id(), task.job().getPath());
             }
 
             case taskClosedEvent: {
                 Task task = (Task)o;
-                return new TaskClosedEvent(task.getId(), task.getJob().getPath());
+                return new TaskClosedEvent(task.id(), task.job().getPath());
             }
 
             case orderTouchedEvent:
