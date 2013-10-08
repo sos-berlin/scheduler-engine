@@ -1565,7 +1565,7 @@ namespace zschimmer { namespace javabridge {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Spooler >::proxy_class_factory.clas();
         int ret = env->RegisterNatives(*cls, native_methods, 88);
-        if (ret < 0)  env.throw_java("RegisterNatives");
+        if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.SpoolerCImpl");
     }
 
 }}
