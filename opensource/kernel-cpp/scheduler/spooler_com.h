@@ -539,6 +539,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP                Try_hold_lock_non_exclusive ( BSTR, VARIANT_BOOL* );
     STDMETHODIMP                Call_me_again_when_locks_available();
     STDMETHODIMP            get_Params_xml                  ( BSTR* );
+    STDMETHODIMP            put_Params_xml                  ( BSTR );
     STDMETHODIMP            get_Order_params_xml            ( BSTR* );
     STDMETHODIMP            put_Order_params_xml            ( BSTR );
     //STDMETHODIMP            Try_lock_else_call_me_again( BSTR, VARIANT_BOOL* );

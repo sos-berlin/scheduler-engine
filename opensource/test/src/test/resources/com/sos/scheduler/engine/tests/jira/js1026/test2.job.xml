@@ -1,63 +1,79 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
-<job stop_on_error="no">
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+stop_on_error="no">
     <script language="shell">
         <![CDATA[
+
+            :;if false; then :
+            goto WINDOWS
+            fi
+
+            # echo Unix-Code ...
+            echo ------ Shellscript 2 -------------------------------------
+            echo Read some values in $SCHEDULER_JOB_NAME
+            echo SCHEDULER_RETURN_VALUES=$SCHEDULER_RETURN_VALUES
+            echo testvar1=$SCHEDULER_PARAM_TESTVAR1
+            echo testvar2=$SCHEDULER_PARAM_TESTVAR2
+
+            echo Set some values in $SCHEDULER_JOB_NAME ...
+            echo "testvar2=newvalue2" >> $SCHEDULER_RETURN_VALUES
+            echo "testvar3=value3" >> $SCHEDULER_RETURN_VALUES
+            echo "testvar4=value4" >> $SCHEDULER_RETURN_VALUES
+            echo ----------------------------------------------------------
+
+            exit
+
+            :WINDOWS
+            rem echo Windows-Code ...
             @echo off
             echo ------ Shellscript 2 -------------------------------------
-            echo Hallo von %SCHEDULER_JOB_NAME%
-
+            echo Read some values in $SCHEDULER_JOB_NAME
             echo SCHEDULER_RETURN_VALUES=%SCHEDULER_RETURN_VALUES%
             echo testvar1=%SCHEDULER_PARAM_TESTVAR1%
             echo testvar2=%SCHEDULER_PARAM_TESTVAR2%
 
-            rem echo testvar2=newvalue2 >> %SCHEDULER_RETURN_VALUES%
-            rem echo testvar3=value3 >> %SCHEDULER_RETURN_VALUES%
+            echo Set some values in $SCHEDULER_JOB_NAME ...
+            echo testvar2=newvalue2 >> %SCHEDULER_RETURN_VALUES%
+            echo testvar3=value3 >> %SCHEDULER_RETURN_VALUES%
+            echo testvar4=value4 >> %SCHEDULER_RETURN_VALUES%
             echo ----------------------------------------------------------
         ]]>
     </script>
 
-    <!--<monitor ordering="0" name="read-testvars2">-->
-        <!--<script language="javax.script:rhino">-->
-            <!--<![CDATA[-->
-                <!--function spooler_process_before()-->
-                <!--{-->
-                    <!--spooler_log.info( "==========================================================" );-->
-                    <!--spooler_log.info( "SPOOLER_PROCESS_BEFORE()" );-->
-                    <!--spooler_log.info( "==========================================================" );-->
-                    <!--return true;   // spooler_process() will be executed-->
-                <!--}-->
+    <monitor>
+        <script language="javax.script:rhino">
+            <![CDATA[
+                function spooler_process_after(spooler_process_result)
+                {
+                    spooler_log.info( "==========================================================" );
+                    spooler_log.info( "SPOOLER_PROCESS_AFTER()" );
+                    spooler_log.info( "Read some values in Monitor of " + spooler_job.name() );
 
-                <!--function spooler_process_after(spooler_process_result)-->
-                <!--{-->
-                    <!--spooler_log.info( "==========================================================" );-->
-                    <!--spooler_log.info( "SPOOLER_PROCESS_AFTER()" );-->
-                    <!--var taskParams = spooler_task.params();-->
-                    <!--spooler_log.info( "testvar1=" + taskParams.value("testvar1") );-->
-                    <!--spooler_log.info( "testvar2=" + taskParams.value("testvar2") );-->
-                    <!--spooler_log.info( "testvar3=" + taskParams.value("testvar3") );-->
-                    <!--spooler_log.info( "==========================================================" );-->
-                    <!--return spooler_process_result;-->
-                <!--}-->
+                    var taskParams = spooler_task.params();
+                    spooler_log.info( "testvar1=" + taskParams.value("testvar1") );
+                    spooler_log.info( "testvar2=" + taskParams.value("testvar2") );
+                    spooler_log.info( "testvar3=" + taskParams.value("testvar3") );
+                    spooler_log.info( "testvar4=" + taskParams.value("testvar4") );
 
-                <!--function spooler_task_after()-->
-                <!--{-->
-                    <!--spooler_log.info( "==========================================================" );-->
-                    <!--spooler_log.info( "SPOOLER_TASK_AFTER()" );-->
-                    <!--spooler_log.info("Hallo von Monitor " + spooler_job.name() );-->
+                    spooler_log.info( "Set some values in Monitor of " + spooler_job.name() + " ..." );
+                    if (       "value1" == taskParams.value("testvar1")
+                         && "newvalue2" == taskParams.value("testvar2")
+                         &&    "value3" == taskParams.value("testvar3")
+                         &&    "value4" == taskParams.value("testvar4")
+                       )
+                    {
+                        taskParams.set_value("testvar4", "newvalue4");
+                    }
 
-                    <!--var taskParams = spooler_task.params();-->
-                    <!--spooler_log.info( "testvar1=" + taskParams.value("testvar1") );-->
-                    <!--spooler_log.info( "testvar2=" + taskParams.value("testvar2") );-->
-                    <!--spooler_log.info( "testvar3=" + taskParams.value("testvar3") );-->
+                    taskParams.set_value("testvar5", "value5");
 
-                    <!--//var orderParams = spooler_task.order().params();-->
-                    <!--//spooler_log.info(orderParams.value("foo");-->
-                    <!--spooler_log.info( "==========================================================" );-->
-                <!--}-->
-            <!--]]>-->
-        <!--</script>-->
-    <!--</monitor>-->
+                    spooler_log.info( "==========================================================" );
+
+                    return spooler_process_result;
+                }
+            ]]>
+        </script>
+    </monitor>
 
     <run_time />
 </job>

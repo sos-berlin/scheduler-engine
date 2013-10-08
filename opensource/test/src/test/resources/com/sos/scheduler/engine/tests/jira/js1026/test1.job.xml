@@ -1,12 +1,29 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
-<job stop_on_error="no">
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd"
+    stop_on_error="no"
+>
     <script language="shell">
         <![CDATA[
+
+            :;if false; then :
+            goto WINDOWS
+            fi
+
+            # echo Unix-Code ...
+            echo ------ Shellscript 1 -------------------------------------
+            echo Set some values in $SCHEDULER_JOB_NAME ...
+            echo SCHEDULER_RETURN_VALUES=$SCHEDULER_RETURN_VALUES
+            echo "testvar1=value1" >> $SCHEDULER_RETURN_VALUES
+            echo "testvar2=value2" >> $SCHEDULER_RETURN_VALUES
+            echo ----------------------------------------------------------
+
+            exit
+
+            :WINDOWS
+            rem echo Windows-Code ...
             @echo off
             echo ------ Shellscript 1 -------------------------------------
-            echo Hallo von %SCHEDULER_JOB_NAME%
-
+            echo Set some values in %SCHEDULER_JOB_NAME% ...
             echo SCHEDULER_RETURN_VALUES=%SCHEDULER_RETURN_VALUES%
             echo testvar1=value1 >> %SCHEDULER_RETURN_VALUES%
             echo testvar2=value2 >> %SCHEDULER_RETURN_VALUES%
@@ -14,45 +31,13 @@
         ]]>
     </script>
 
-    <monitor ordering="0" name="read-testvars1">
-        <script language="javax.script:rhino">
-            <![CDATA[
-                function spooler_process_after(spooler_process_result)
-                {
-                    spooler_log.info( "==========================================================" );
-                    spooler_log.info( "SPOOLER_PROCESS_AFTER()" );
-                    spooler_log.info("Hallo von Monitor " + spooler_job.name() );
-
-                    var taskParams = spooler_task.params();
-                    spooler_log.info( "testvar1=" + taskParams.value("testvar1") );
-                    spooler_log.info( "testvar2=" + taskParams.value("testvar2") );
-                    spooler_log.info( "==========================================================" );
-
-                    return spooler_process_result;
-                }
-
-                //function spooler_task_after()
-                //{
-                //    spooler_log.info( "==========================================================" );
-                //    spooler_log.info( "SPOOLER_TASK_AFTER()" );
-                //    spooler_log.info("Hallo von Monitor " + spooler_job.name() );
-                //
-                //    var taskParams = spooler_task.params();
-                //    spooler_log.info( "testvar1=" + taskParams.value("testvar1") );
-                //    spooler_log.info( "testvar2=" + taskParams.value("testvar2") );
-                //    spooler_log.info( "==========================================================" );
-                //}
-            ]]>
-        </script>
-    </monitor>
-
     <run_time />
 
-    <!--<commands on_exit_code="success">-->
-        <!--<start_job job="test2" at="now">-->
-            <!--<params >-->
-                <!--<copy_params from="task"/>-->
-            <!--</params>-->
-        <!--</start_job>-->
-    <!--</commands>-->
+    <commands on_exit_code="success">
+        <start_job job="test2" at="now">
+            <params>
+                <copy_params from="task"/>
+            </params>
+        </start_job>
+    </commands>
 </job>
