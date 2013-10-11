@@ -79,6 +79,9 @@ struct Mswin_debug_streambuf : streambuf
     void                        log_system_values       ( ostream* );
 
   private:
+    void                        write_bytes             (const string& p)                           { write_bytes(p.data(), p.length()); }
+    void                        write_bytes             (const char* p)                             { write_bytes(p, strlen(p)); }
+    void                        write_bytes             (const char* p, size_t length);
 
     Fill_zero                  _zero_;
 
@@ -99,6 +102,7 @@ struct Mswin_debug_streambuf : streambuf
   //Thread_semaphore           _semaphore;
     string                     _last_line;
     int                        _repeated;
+    bool                       _write_to_stderr;
   //bool                       _print_pid;
 };
 
@@ -269,20 +273,20 @@ void Mswin_debug_streambuf::log_system_values( ostream* s )
 
         //setlocale( LC_NUMERIC, old_locale );
 
-        #ifdef Z_DEBUG
-        {
-            static size_t last_size = 0;
-            static size_t last_count = 0;
-            _CrtMemState s;
-            _CrtMemCheckpoint(&s);
-            size_t size = s.lSizes[_NORMAL_BLOCK];
-            size_t count = s.lCounts[_NORMAL_BLOCK];
-            len += sprintf(buffer + len, " (%d %+7d bytes)", size, size - last_size);
-            //len += sprintf(buffer + len, " (%d %+7d bytes, %d %+3d)", size, size - last_size, count, count - last_count);
-            last_size = size;
-            last_count = count;
-        }
-        #endif
+        //#ifdef Z_DEBUG
+        //{
+        //    static size_t last_size = 0;
+        //    static size_t last_count = 0;
+        //    _CrtMemState s;
+        //    _CrtMemCheckpoint(&s);
+        //    size_t size = s.lSizes[_NORMAL_BLOCK];
+        //    size_t count = s.lCounts[_NORMAL_BLOCK];
+        //    len += sprintf(buffer + len, " (%d %+7d bytes)", size, size - last_size);
+        //    //len += sprintf(buffer + len, " (%d %+7d bytes, %d %+3d)", size, size - last_size, count, count - last_count);
+        //    last_size = size;
+        //    last_count = count;
+        //}
+        //#endif
 
         s->write( buffer, len );
     }
@@ -336,7 +340,8 @@ Mswin_debug_streambuf::Mswin_debug_streambuf( const char* filename )
     _zero_(this+1),
     _new_line ( true ),
     _last_elapsed_msec( elapsed_msec() ),
-    _out ( -1 )
+    _out ( -1 ),
+    _write_to_stderr(zschimmer::static_log_categories.is_set("stderr"))
   //_semaphore( "log", Thread_semaphore::kind_recursive_dont_log )
 {
   //_semaphore.set_name( "log" );
@@ -494,8 +499,7 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
                     {
                         if( _repeated >= suppress_repeated )
                         {
-                            string str = as_string(_repeated-suppress_repeated+1) + " mal)" Z_NL;
-                            if( _out != -1 )  write( _out, str.c_str(), z::int_cast(str.length()) );
+                            write_bytes(as_string(_repeated-suppress_repeated+1) + " mal)" Z_NL);
                         }
                         _repeated = 0;
                     }
@@ -505,19 +509,21 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
 #                       if defined _DEBUG
                             OutputDebugString( line_p );
 #                        else
-                            if( !_out )  OutputDebugString( line_p ); else
+                            if( !_out ) {
+                                OutputDebugString( line_p ); 
+                                write_bytes(line_p);
+                            } else
 #                       endif
 #                   endif
                         if( _repeated < suppress_repeated )
                         {
-                            if( _out != -1 )  write( _out, line_p, len );
+                            write_bytes(line_p, len );
                             _last_line = string( line_p + text_begin, max( (int)0, len - text_begin ) );
                         }
                         else
                         if( _repeated == suppress_repeated )
                         {
-                            string str = string( line_p, text_begin ) + "(Letzte Zeile wiederholt sich ";
-                            if( _out != -1 )  write( _out, str.c_str(), z::int_cast(str.length()) );
+                            write_bytes(string( line_p, text_begin ) + "(Letzte Zeile wiederholt sich ");
                         }
 
                     l = line;
@@ -533,6 +539,16 @@ int _Cdecl Mswin_debug_streambuf::overflow( int b )
     }
 
     return 0;
+}
+
+//--------------------------------------------------------------Mswin_debug_streambuf::write_bytes
+
+void Mswin_debug_streambuf::write_bytes(const char* p, size_t length)
+{
+    if (_out != -1) 
+        write(_out, p, z::int_cast(length));
+    if (_write_to_stderr) 
+        write(2, p, length);
 }
 
 //--------------------------------------------------------------Mswin_debug_streambuf::get_app_name
