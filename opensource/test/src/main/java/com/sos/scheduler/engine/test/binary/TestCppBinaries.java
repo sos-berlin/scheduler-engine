@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.test.binary;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.main.CppBinaries;
@@ -17,6 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory;
 import static com.sos.scheduler.engine.common.system.OperatingSystem.isWindows;
 import static com.sos.scheduler.engine.kernel.util.Util.ignore;
+import static com.sos.scheduler.engine.test.util.IDE.isRunningUnderIDE;
 
 public final class TestCppBinaries {
     private static final Logger logger = LoggerFactory.getLogger(TestCppBinaries.class);
@@ -39,7 +39,7 @@ public final class TestCppBinaries {
     };
 
     private static CppBinaries newCppBinaries(CppBinariesDebugMode debugMode) {
-        if (isUnderIDE()) {  // So unter der IDE wollen wir direkt auf die binaries im Dateisystem zugreifen, die frisch gebaut worden sein können.
+        if (isRunningUnderIDE()) {  // So unter der IDE wollen wir direkt auf die binaries im Dateisystem zugreifen, die frisch gebaut worden sein können.
             return new KernelCppArtifactBinaries(debugMode);
         }
         else {
@@ -50,15 +50,6 @@ public final class TestCppBinaries {
             return isNullOrEmpty(d)? newTemporaryCppBinaries(resources, debugMode)
                     : newExistingCppBinaries(resources, new File(d), debugMode);   // Wir recyceln die vorher mal oder von einem parallel laufenden Test ausgepacken Ressourcen.
         }
-    }
-
-    private static boolean isUnderIDE() {
-        String v = Optional.fromNullable(System.getProperty("sun.java.command")).or("");
-        return v.startsWith("com.intellij.") || v.startsWith("org.jetbrains."); // || !isUnderMaven();    // IntelliJ IDEA 12.1 kennt die Maven-Properties
-    }
-
-    private static boolean isUnderMaven() {
-        return System.getProperty("com.sos.scheduler.engine.test.underMaven") != null;
     }
 
     private static ImmutableList<Resource> resources() {
