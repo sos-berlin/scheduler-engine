@@ -25,4 +25,5 @@ public interface OrderC extends CppProxyWithSister<Order> {
     void java_remove();
     boolean suspended();
     void set_suspended(boolean o);
+    long next_time_millis();
 }

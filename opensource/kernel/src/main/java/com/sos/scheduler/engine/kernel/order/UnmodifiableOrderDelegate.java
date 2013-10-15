@@ -6,6 +6,8 @@ import com.sos.scheduler.engine.data.order.OrderState;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
+import org.joda.time.Instant;
+import scala.Option;
 
 public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
     private final UnmodifiableOrder order;
@@ -56,6 +58,10 @@ public class UnmodifiableOrderDelegate implements UnmodifiableOrder {
 
     @Override public final PrefixLog getLog() {
         return order.getLog();
+    }
+
+    @Override public Option<Instant> nextInstantOption() {
+        return order.nextInstantOption();
     }
 
     @Override public String toString() {

@@ -1699,6 +1699,8 @@ bool Task::do_something()
                                             }
                                             else {}     // detach_order_after_error() wird sich drum kümmern.
                                         }
+                                        else
+                                           process_module_instance->fetch_parameters_from_process( _params );
                                     }
                                     else
                                     if (_order_state_transition != Order::post_keep_state) {

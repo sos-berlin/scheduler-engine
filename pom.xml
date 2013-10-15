@@ -61,6 +61,7 @@
                 <releaseVersion>1.6</releaseVersion>  <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
                 <developmentVersion>1.6-SNAPSHOT</developmentVersion>
                 <tag>v${releaseVersion}</tag>
+                <ignoreSnapshots>true</ignoreSnapshots>
             </properties>
         </profile>
     </profiles>

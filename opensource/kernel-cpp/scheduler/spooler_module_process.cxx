@@ -102,13 +102,9 @@ void Process_module_instance::close_handle()
 void Process_module_instance::init()
 {
     Module_instance::init();
-
-    if( _has_order )
-    {
-        _order_params_file.open_temporary( File::open_unlink_later );
-        _order_params_file.close();
-        _process_environment->set_var( order_params_environment_name, _order_params_file.path() );
-    }
+    _order_params_file.open_temporary( File::open_unlink_later );
+    _order_params_file.close();
+    _process_environment->set_var( order_params_environment_name, _order_params_file.path() );
 }
 
 //--------------------------------------------------------------------Process_module_instance::load
@@ -958,10 +954,8 @@ void Process_module_instance::transfer_back_order_params()
         vector<Variant> parameters;
         Bstr xml_bstr;
         order_parameters->get_Xml( &xml_bstr );
-        parameters.push_back( xml_bstr );
-        com_invoke( DISPATCH_PROPERTYPUT, task, "Order_params_xml", &parameters );
-
-        //xml_writer.write_element( order_parameters->dom( "order.params", "param" ).documentElement() );
+        parameters.push_back( xml_bstr );        
+        com_invoke(DISPATCH_PROPERTYPUT, task, _has_order? "Order_params_xml" : "Params_xml", &parameters);        
     }
 }
 

@@ -4,8 +4,6 @@
 . make/make-all.include
 
 
-do_make 3rd_party/libxml2          libxml2.a                                           || exit
-do_make 3rd_party/libxslt/libxslt  libxslt.a                                           || exit
 #do_make 3rd_party/regexp          libregexp.a                                         || exit
 do_make zschimmer                  libzschimmer.a                                      || exit
 do_make kram                       all                                                 || exit

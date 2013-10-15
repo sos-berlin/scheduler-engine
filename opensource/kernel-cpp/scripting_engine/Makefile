@@ -24,6 +24,10 @@ INCLUDES += -I$(PROD_DIR)/js/src/$(JS_SUBDIR)
 INCLUDES += -I$(PROD_DIR)/js/src/$(OBJDIR)
 
 MY_LIBS += $(PROD_DIR)/zschimmer/Release/libzschimmer.a
+ifeq ($(OS),AIX)
+# AIX verlangt auch javaproxy (nicht klar, warum) -Zschimmer
+MY_LIBS += $(PROD_DIR)/javaproxy/Release/libjavaproxy.a
+endif
 MY_LIBS += $(PROD_DIR)/js/src/$(OBJDIR)/libjs.a
 MY_LIBS += $(PROD_DIR)/js/src/liveconnect/$(OBJDIR)/libjsj.a
 #MY_LIBS += $(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a

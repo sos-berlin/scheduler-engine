@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain
 import com.sos.scheduler.engine.kernel.variable.UnmodifiableVariableSet
 import javax.annotation.Nullable
+import org.joda.time.Instant
 
 @ForCpp trait UnmodifiableOrder extends EventSource {
   def getKey: OrderKey
@@ -30,4 +31,6 @@ import javax.annotation.Nullable
   def getParameters: UnmodifiableVariableSet
 
   def getLog: PrefixLog
+
+  def nextInstantOption: Option[Instant]
 }

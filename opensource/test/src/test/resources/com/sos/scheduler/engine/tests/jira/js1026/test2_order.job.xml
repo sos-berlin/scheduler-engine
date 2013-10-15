@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+    <script language="shell">
+        <![CDATA[
+
+            :;if false; then :
+            goto WINDOWS
+            fi
+
+            # echo Unix-Code ...
+            echo ------ Shellscript 2 -------------------------------------
+            echo Read some values in $SCHEDULER_JOB_NAME
+            echo SCHEDULER_RETURN_VALUES=$SCHEDULER_RETURN_VALUES
+            echo testvar1=$SCHEDULER_PARAM_TESTVAR1
+            echo testvar2=$SCHEDULER_PARAM_TESTVAR2
+
+            echo Set some values in $SCHEDULER_JOB_NAME ...
+            echo "testvar2=newvalue2" >> $SCHEDULER_RETURN_VALUES
+            echo "testvar3=value3" >> $SCHEDULER_RETURN_VALUES
+            echo "testvar4=value4" >> $SCHEDULER_RETURN_VALUES
+            echo ----------------------------------------------------------
+
+            exit
+
+            :WINDOWS
+            rem echo Windows-Code ...
+            @echo off
+            echo ------ Shellscript 2 -------------------------------------
+            echo Read some values in $SCHEDULER_JOB_NAME
+            echo SCHEDULER_RETURN_VALUES=%SCHEDULER_RETURN_VALUES%
+            echo testvar1=%SCHEDULER_PARAM_TESTVAR1%
+            echo testvar2=%SCHEDULER_PARAM_TESTVAR2%
+
+            echo Set some values in $SCHEDULER_JOB_NAME ...
+            echo testvar2=newvalue2 >> %SCHEDULER_RETURN_VALUES%
+            echo testvar3=value3 >> %SCHEDULER_RETURN_VALUES%
+            echo testvar4=value4 >> %SCHEDULER_RETURN_VALUES%
+            echo ----------------------------------------------------------
+        ]]>
+    </script>
+
+    <monitor ordering="0" name="read-testvars2">
+        <script language="javax.script:rhino">
+            <![CDATA[
+                function spooler_process_after(spooler_process_result)
+                {
+                    spooler_log.info( "==========================================================" );
+                    spooler_log.info( "SPOOLER_PROCESS_AFTER()" );
+                    spooler_log.info( "Read some values in Monitor of " + spooler_job.name() );
+
+                    var orderParams = spooler_task.order().params();
+                    spooler_log.info( "testvar1=" + orderParams.value("testvar1") );
+                    spooler_log.info( "testvar2=" + orderParams.value("testvar2") );
+                    spooler_log.info( "testvar3=" + orderParams.value("testvar3") );
+                    spooler_log.info( "testvar4=" + orderParams.value("testvar4") );
+
+                    spooler_log.info( "Set some values in Monitor of " + spooler_job.name() + " ..." );
+                    if (       "value1" == orderParams.value("testvar1")
+                         && "newvalue2" == orderParams.value("testvar2")
+                         &&    "value3" == orderParams.value("testvar3")
+                         &&    "value4" == orderParams.value("testvar4")
+                       )
+                    {
+                        orderParams.set_value("testvar4", "newvalue4");
+                    }
+
+                    orderParams.set_value("testvar5", "value5");
+
+                    spooler_log.info( "==========================================================" );
+
+                    return spooler_process_result;
+                }
+            ]]>
+        </script>
+    </monitor>
+
+    <run_time />
+</job>

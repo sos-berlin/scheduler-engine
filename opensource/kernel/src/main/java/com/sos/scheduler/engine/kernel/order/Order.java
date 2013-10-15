@@ -1,6 +1,8 @@
 package com.sos.scheduler.engine.kernel.order;
 
+import com.google.common.base.Optional;
 import com.sos.scheduler.engine.common.Lazy;
+import com.sos.scheduler.engine.common.time.CppTime;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
@@ -18,6 +20,8 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
+import org.joda.time.Instant;
+import scala.Option;
 
 import javax.annotation.Nullable;
 
@@ -109,6 +113,10 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
 
     @Override public PrefixLog getLog() {
         return cppProxy.log().getSister();
+    }
+
+    @Override public Option<Instant> nextInstantOption() {
+        return CppTime.cppTimeToInstantOption(cppProxy.next_time_millis());
     }
 
     @Override public UnmodifiableOrder unmodifiableDelegate() {

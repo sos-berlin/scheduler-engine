@@ -14,7 +14,7 @@ cmd="$1"
 [ -n "$cmd" ] || fail "Missing first command argument: clean or compile"
 
 cpuArchitecture="$2"
-[ -n "$cpuArchitecture" ] || fail "Missing second command argument: Win32 or x64"
+[ -n "$cpuArchitecture" ] || fail "Missing second command argument: x86 or x64"
 
 configurations="$3 $4"
 [ -n "$3" ] || fail "Missing third command argument: Debug or Release"

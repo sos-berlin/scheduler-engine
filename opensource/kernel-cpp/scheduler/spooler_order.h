@@ -234,6 +234,7 @@ struct Order : Com_order,
     void                    set_replacement             ( bool );
     void                        activate_schedule       ();
     void                        handle_changed_schedule ();
+    int64                       next_time_millis        ()                                          { return next_time().millis(); }
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
     void                        set_next_start_time     ();
@@ -258,6 +259,7 @@ struct Order : Com_order,
     void                        handle_end_state        ();
     bool                        handle_end_state_of_nested_job_chain();
     void                        handle_end_state_repeat_order( const Time& );
+    void                        move_to_other_nested_job_chain(const Absolute_path& nested_job_chain_path);
 
     void                        on_carried_out          ();
     void                        prepare_for_next_roundtrip();

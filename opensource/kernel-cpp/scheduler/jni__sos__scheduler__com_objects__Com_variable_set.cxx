@@ -95,7 +95,7 @@ namespace zschimmer { namespace javabridge {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::com_objects::Com_variable_set >::proxy_class_factory.clas();
         int ret = env->RegisterNatives(*cls, native_methods, 4);
-        if (ret < 0)  env.throw_java("RegisterNatives");
+        if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.Variable_setCImpl");
     }
 
 }}

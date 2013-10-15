@@ -38,7 +38,7 @@ public class JS498RhinoBeansOrderIT extends SchedulerTest {
 
     @Test
     public void test() throws IOException {
-        if (Bitness.is32Bit()) {    // SpiderMonkey stellen wir nur für 32bit bereit
+//        if (Bitness.is32Bit()) {    // SpiderMonkey stellen wir nur für 32bit bereit
             controller().activateScheduler();
             File resultFile = prepareResultFile();
             controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
@@ -46,7 +46,7 @@ public class JS498RhinoBeansOrderIT extends SchedulerTest {
             resultMap = getResultMap(resultFile);
             checkJobObjects();
             checkJobFunctions();
-        }
+//        }
     }
 
     private File prepareResultFile() {
