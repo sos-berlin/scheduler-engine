@@ -1197,8 +1197,6 @@ Task_subsystem* Spooler::task_subsystem() const
 
 supervisor::Supervisor_client_interface* Spooler::supervisor_client()
 { 
-    if( !_supervisor_client )  z::throw_xc( "SCHEDULER-423" );
-
     return _supervisor_client;
 }
 
