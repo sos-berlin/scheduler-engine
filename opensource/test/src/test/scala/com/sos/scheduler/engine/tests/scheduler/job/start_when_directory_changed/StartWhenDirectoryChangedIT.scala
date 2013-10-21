@@ -80,4 +80,6 @@ object StartWhenDirectoryChangedIT {
       <script java_class="com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed.AJob"/>
       <start_when_directory_changed directory={directory.toString} regex={regex}/>
     </job>
+
+  private case class TriggerEvent(files: Set[File]) extends Event
 }

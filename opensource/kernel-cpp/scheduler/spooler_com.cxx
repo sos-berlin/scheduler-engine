@@ -3136,7 +3136,6 @@ STDMETHODIMP Com_task::put_Params_xml( BSTR xml_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;

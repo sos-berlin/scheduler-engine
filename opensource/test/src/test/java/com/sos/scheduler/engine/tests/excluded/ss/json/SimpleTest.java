@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 public class SimpleTest extends SchedulerTest {
     private static final JobPath jobPath = JobPath.of("/job1");
 	private static final Logger logger = LoggerFactory.getLogger(SimpleTest.class);
-    private static final OrderKey orderKey = OrderKey.of("jobchain1", "jobchain1");
+    private static final OrderKey orderKey = OrderKey.of("/jobchain1", "jobchain1");
 	
 	private final CommandBuilder util = new CommandBuilder();
 
