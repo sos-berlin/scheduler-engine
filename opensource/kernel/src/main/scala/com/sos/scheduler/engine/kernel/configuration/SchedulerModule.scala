@@ -24,7 +24,7 @@ import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import scala.collection.JavaConversions._
 
-class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
+final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
 extends ScalaAbstractModule {
 
   def configure() {
@@ -38,7 +38,6 @@ extends ScalaAbstractModule {
     bindInstance(cppProxy.log.getSister)
     provideSingleton { new SchedulerId(cppProxy.id) }
     provideSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
-    provideSingleton { new FolderSubsystem(cppProxy.folder_subsystem) }
     provideSingleton[JobSubsystem] { new AJobSubsystem(cppProxy.job_subsystem) }
     provideSingleton { new OrderSubsystem(cppProxy.order_subsystem) }
     provideSingleton { new DatabaseSubsystem(cppProxy.db) }
@@ -56,6 +55,9 @@ extends ScalaAbstractModule {
 
   @Provides @Singleton def provideCommandSubsystem(pluginSubsystem: PluginSubsystem) =
     new CommandSubsystem(asJavaIterable(commandHandlers(List(pluginSubsystem))))
+
+  @Provides @Singleton def provideFolderSubsystem(queue: SchedulerThreadCallQueue) =
+    new FolderSubsystem(cppProxy.folder_subsystem, queue)
 }
 
 object SchedulerModule {
