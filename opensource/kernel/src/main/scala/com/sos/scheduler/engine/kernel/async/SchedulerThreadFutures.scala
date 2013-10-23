@@ -10,17 +10,17 @@ object SchedulerThreadFutures {
 
   // FIXME Bei Scheduler-Ende kann es noch passieren, dass die Future nicht endet. Tests terminieren damit nicht. Eigentlich sollte tryCancel() wirken.
 
-  def inSchedulerThread[A](f: => A)(implicit q: SchedulerThreadCallQueue): A =
-    if (currentThread == q.thread) f
+  def inSchedulerThread[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): A =
+    if (currentThread == schedulerThreadCallQueue.thread) f
     else {
       val future = schedulerThreadFuture(f)
       Await.ready(future, Duration.Inf)
       future.value.get.get
     }
 
-  def schedulerThreadFuture[A](f: => A)(implicit callQueue: SchedulerThreadCallQueue): Future[A] =
-    callFuture(f)(callQueue)
+  def schedulerThreadFuture[A](f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Future[A] =
+    callFuture(f)(schedulerThreadCallQueue)
 
-  def timedSchedulerThreadFuture[A](at: Instant)(f: => A)(implicit q: SchedulerThreadCallQueue): Future[A] =
+  def timedSchedulerThreadFuture[A](at: Instant)(f: => A)(implicit schedulerThreadCallQueue: SchedulerThreadCallQueue): Future[A] =
     timedCallFuture(at)(f)
 }
