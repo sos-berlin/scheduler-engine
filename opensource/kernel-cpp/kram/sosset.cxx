@@ -25,10 +25,6 @@ Bit_set::Bit_set( uint4 count )
     _bit_map_ptr ( (Byte*)sos_alloc( _size, "Bit_set" ) ),
     _delete      ( true )
 {
-#   if defined SYSTEM_WIN16
-        assert (count + 7 <= (uint4)UINT_MAX * 8);
-#   endif
-
     if (valid ()) {
         memset (_bit_map_ptr, 0, _size);
     }
@@ -42,9 +38,6 @@ Bit_set::Bit_set( uint4 count, void* bit_map_ptr )
     _bit_map_ptr ( (Byte*)bit_map_ptr ),
     _delete      ( false )
 {
-#   if defined SYSTEM_WIN16
-        assert (count + 7 <= (uint4)UINT_MAX * 8);
-#   endif
 }
 
 //-------------------------------------------------------------------------------Bit_set::unite

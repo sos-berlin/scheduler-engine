@@ -32,24 +32,9 @@ using zschimmer::make_string;
 #   define SYSTEM_HPUX
 #endif
 
-#if defined __BORLANDC__
-
-
-#   undef SYSTEM_BORLAND
-#   if defined _WCHAR_T
-#      define SYSTEM_BORLAND 0x500
-#      define SYSTEM_BORLAND_5_00
-#    else
-#      define SYSTEM_BORLAND 0x453
-#      define SYSTEM_BORLAND_4_53
-#   endif
-
-#endif
-
 #if defined _MSC_VER
 #   define SYSTEM_MICROSOFT     // Visual C++
 #endif
-// _Windows && __DLL__ von BORLAND abhg. !!!
 
 
 #if defined _Windows  ||  defined _MSC_VER
@@ -90,30 +75,6 @@ using zschimmer::make_string;
 
 #    define SYSTEM_EXCEPTIONS
 #    define SYSTEM_NOTALIGNED
-
-#   if defined SYSTEM_WIN16
-#       undef  cin
-#       define cin    CIN_IN_WINDOWS_GESPERRT
-#       undef  cout
-#       define cout   COUT_IN_WINDOWS_GESPERRT
-#       undef  cerr
-#       define cerr   CERR_IN_WINDOWS_GESPERRT
-#       undef  clog
-#       define clog   CLOG_IN_WINDOWS_GESPERRT
-#       undef  stdin
-#       define stdin  STDIN_IN_WINDOWS_GESPERRT
-#       undef  stdout
-#       define stdout STDOUT_IN_WINDOWS_GESPERRT
-#       undef  stderr
-#       define stderr STDERR_IN_WINDOWS_GESPERRT
-#       undef  stdlog
-#       define stdlog STDLOG_IN_WINDOWS_GESPERRT
-#   endif
-
-#elif defined __BORLANDC__
-
-#    define SYSTEM_DOS
-#    define SYSTEM_EXCEPTIONS
 
 #else
 
@@ -207,12 +168,6 @@ using zschimmer::make_string;
 #   define SYSTEM_BOOL
 #endif
 
-#if defined __BORLANDC__
-#   if SYSTEM_BORLAND >= 0x500     // BC++ 5.0
-#       define SYSTEM_BOOL
-#   endif
-#endif
-
 #if defined _MSC_VER
 #   if _MSC_VER >= 1100  // MS VC++ 5.0?
 #       define SYSTEM_BOOL
@@ -262,20 +217,10 @@ typedef Bool Sos_bool;  // Für Herrn Püschel
 #endif
 
 //----------------------------------------------------------------------------------SYSTEM_RTTI
-//#if defined __BORLANDC__
-//#   define SYSTEM_RTTI                                     // Run time type information
-//#endif
-//#if defined SYSTEM_MICROSOFT  &&  defined _CPPRTTI
-//#   define SYSTEM_RTTI
-//#endif
 #define SYSTEM_RTTI
 //----------------------------------------------------------------------------------SYSTEM_ODBC
 #if defined SYSTEM_WIN
 #    define SYSTEM_ODBC
-#endif
-//------------------------------------------------------------------------------SYSTEM_STARVIEW
-#if defined SYSTEM_WIN16  &&  !defined SYSTEM_WINDLL  ||  defined SYSTEM_SOLARIS
-//#    define SYSTEM_STARVIEW
 #endif
 //----------------------------------------------------------------------------------SYSTEM_ODBC
 #if defined SYSTEM_WIN
@@ -290,11 +235,7 @@ typedef Bool Sos_bool;  // Für Herrn Püschel
 #    define SOS_CLASS
 #endif
 //------------------------------------------------------------------------------------SOS_CONST
-#if defined SYSTEM_WIN16
-#    define SOS_CONST const //__far   // far-Datensegment als CONST deklarieren!
-# else
-#    define SOS_CONST const
-#endif
+#define SOS_CONST const
 //-----------------------------------------------------------------------------------NL_IS_CRLF
 #if defined( SYSTEM_DOS )  ||  defined( SYSTEM_WIN ) || defined( SYSTEM_WINDLL )
 #   define NL_IS_CRLF 1
@@ -329,7 +270,7 @@ typedef Bool Sos_bool;  // Für Herrn Püschel
 #endif
 
 //---------------------------------------------------------------------------------------_Cdecl/__cdecl
-#if !defined __BORLANDC__ && !defined _Cdecl
+#if !defined _Cdecl
 #   define _Cdecl
 #endif
 
@@ -394,40 +335,8 @@ typedef Bool Sos_bool;  // Für Herrn Püschel
 #endif
 
 //----------------------------------------------------------------------------ZERO_RETURN_VALUE
-// Borland 4.5 ruft bei einer Exception den Destruktur für ein Element auf, das durch
-// einen Funktionsaufruf erst initialisiert werden soll.
-// Dieses Makro setzt das Funktionsergebnis auf binär 0.
-// Verwendung:
-// TYPE function (....)       // kann auch eine Methode sein
-// {
-//     ZERO_RETURN_VALUE( TYPE );
-//     ...
-// }
 
-#if defined __BORLANDC__ && defined SYSTEM_WIN16
-#   define ZERO_RETURN_VALUE( TYPE )                \
-    {                                               \
-        uint size = sizeof (TYPE);                  \
-        __asm  push es;                             \
-        __asm  push di;                             \
-        __asm  push ax;                             \
-        __asm  push cx;                             \
-        __asm  les di, ss:[bp+6];                   \
-        __asm  mov al, 0;                           \
-        __asm  mov cx, size;                        \
-        __asm  rep stosb;                           \
-        __asm  pop cx;                              \
-        __asm  pop ax;                              \
-        __asm  pop di;                              \
-        __asm  pop es;                              \
-    }                                               \
-    while( 0 )  return *(TYPE*)0;   /*check*/
-
-    void zero_return_value( unsigned int size );
-#else
-#   define ZERO_RETURN_VALUE( TYPE )
-    //inline void zero_return_value( unsigned int size ) {}
-#endif
+#define ZERO_RETURN_VALUE( TYPE )
 
 //-------------------------------------------------------------------BORLAND_STATIC_ELSE_INLINE
 
@@ -498,10 +407,6 @@ typedef unsigned char    bit;
 #   define MAXINT INT_MAX
 #endif
 
-//-------------------------------------------------------------------------------------PATH_MAX
-#if defined SYSTEM_WIN16
-#   define PATH_MAX 260
-#endif
 //----------------------------------------------------------------------------------------int64
 namespace sos
 {
@@ -652,14 +557,6 @@ inline Byte* significant_byte_ptr (uint4 *i, unsigned int byte_no) {
 #   include <typeinfo>
 #endif
 //-----------------------------------------------------------------------------MS-Windows-Typen
-
-#if defined SYSTEM_WIN16
-    #define SOS_DECLARE_MSWIN_HANDLE(name)    struct name##__; \
-                                              typedef const struct name##__ _near* name;
-
-    #define SOS_DECLARE_MSWIN_HANDLE32(name)  struct name##__; \
-                                              typedef const struct name##__ _far* name;
-#endif
 
 #if defined SYSTEM_WIN32
     #define SOS_DECLARE_MSWIN_HANDLE(name)    struct name##__; \

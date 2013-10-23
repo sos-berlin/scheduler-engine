@@ -9,28 +9,13 @@
 #if defined SYSTEM_WIN
 
 #   include <windows.h>
-#   if defined SYSTEM_WIN16
-#       include <toolhelp.h>
-#   endif
-
 
     using namespace std;
     namespace sos {
 
     int64 elapsed_msec()
     {
-#if 1 // defined __WIN32__
         return GetTickCount();
-# else
-        TIMERINFO timer_info;
-
-        timer_info.dwSize         = sizeof timer_info;
-        timer_info.dwmsSinceStart = 0;
-
-        TimerCount( &timer_info );
-
-        return timer_info.dwmsSinceStart;
-#endif
     }
 
     } //namespace sos

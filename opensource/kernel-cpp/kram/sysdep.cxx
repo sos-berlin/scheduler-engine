@@ -46,56 +46,8 @@
 using namespace std;
 namespace sos {
 
-
-
 #ifdef SYSTEM_WIN
     string filename_of_hinstance( HINSTANCE hinstance );
-#endif
-
-
-#if !defined SYSTEM_EXCEPTIONS
-
-/*
-void Exceptions_aborts::operator= ( const void* );
-{
-    SHOW_MSG( "Unbekannte Exception in << ". Abbruch." );
-    exit(9999);
-}
-*/
-
-void Exception_aborts::operator= ( const Xc* x )
-{
-    SHOW_MSG( "Abbruch wegen Exception " << *x
-              << "\nin " << _filename << ", Zeile " << _lineno << "(C++-Compiler kennt keine Exceptions)"
-            /*<< "\ntry-Block in << __try_source_filename << ", Zeile " << __try_lineno*/ );
-    exit(9999);
-}
-
-#endif
-//----------------------------------------------------------------------------zero_return_value
-#if defined __BORLANDC__ && defined SYSTEM_WIN16
-#pragma option -k
-
-void zero_return_value( uint size )
-{
-    __asm  push es;
-    __asm  push di;
-    __asm  push ax;
-    __asm  push bx;
-    __asm  push cx;
-    __asm  mov bx, ss:[bp];
-    __asm  and bx, -2;
-    __asm  les di, ss:[bx+6];
-    __asm  mov al, 0;
-    __asm  mov cx, size;
-    __asm  rep stosb;
-    __asm  pop cx;
-    __asm  pop bx;
-    __asm  pop ax;
-    __asm  pop di;
-    __asm  pop es;
-}
-#pragma option -k.
 #endif
 
 //--------------------------------------------------------------------delayed_loading_dll_notify
@@ -454,27 +406,6 @@ string make_absolute_filename( const string& dir, const string& filename )
     return fn + filename;
 }
 
-//--------------------------------------------------------------------------------get_temp_path
-
-//string get_temp_path()
-//{
-//#   ifdef SYSTEM_WIN
-//
-//        char buffer [_MAX_PATH+1];
-//
-//        int len = GetTempPath( sizeof buffer, buffer );
-//        if( len == 0 )  throw_mswin_error( "GetTempPath" );
-//
-//        return string( buffer, len );
-//
-//#    else
-//
-//        char* tmp = getenv( "TMP" );
-//        if( !tmp || !tmp[0] )  tmp = "/tmp";
-//        return tmp;
-//
-//#   endif
-//}
 //----------------------------------------------------------------------------------sos_mkstemp
 
 int sos_mkstemp( const string& name )
@@ -535,19 +466,7 @@ void _check_pointer( const void* ptr, uint length, const char* info )
     if( ptr == NULL )  return;
     if( length == 0 )  return;
 
-#   if defined SYSTEM_WIN16
-#       define CODE_OK
-        uint segment_size;
-
-        HGLOBAL handle = (HGLOBAL)GlobalHandle( (uint)( ((uint4)ptr) >> 16 ) );
-        //HGLOBAL handle = GlobalHandle( ptr );
-        if( !handle )  goto FEHLER;
-
-        segment_size = GlobalSize( handle );
-        if( (((uint4)ptr)  & 0xFFFF ) + length > segment_size )  goto FEHLER;
-
-        return;
-#   elif defined SYSTEM_WIN32
+#   if defined SYSTEM_WIN32
 #       define CODE_OK
         if( IsBadWritePtr( (void*)ptr, length ) )  goto FEHLER;
 #   endif

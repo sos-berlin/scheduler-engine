@@ -86,9 +86,6 @@ struct Sos_object : Sos_self_deleting
 
   protected:
     void                        obj_busy                ();
-#   if !defined SYSTEM_RTTI
-        void                   _obj_print               ( ::std::ostream* ) const;
-#   endif
     virtual void               _obj_print_status        ( ::std::ostream* ) const;
     Bool                       _obj_is_type             ( Sos_type_code t ) const   { return t == tc_Sos_object || Base_class::_obj_is_type( t ); }
     virtual Sos_object*        _obj_possession          ( int /*0..*/ ) const       { return 0; }

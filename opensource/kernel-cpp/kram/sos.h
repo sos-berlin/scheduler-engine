@@ -157,8 +157,7 @@ struct Has_constructions_module_name
 
 //---------------------------------------------------------------------------------BITWISE_ENUM
 
-#if !defined SYSTEM_GNU /* defined __BORLANDC__ */
-    // Borland 4.5 liefert int statt Enum
+#if !defined SYSTEM_GNU
 #   define BITWISE_ENUM( Enum )
 # else
 #   define BITWISE_ENUM( Enum )                                                                  \
@@ -532,36 +531,12 @@ namespace sos
 {
 
 
-#if defined SYSTEM_I386  &&  ( defined SYSTEM_DOS  ||  defined SYSTEM_WIN16 )   /* Intel */
-
-    extern "C" void _far* _cdecl _far xlat_asm (     // Wie memcpy, mit xlat
-        void  _far*       destination,
-        const void _far*  source,
-        uint2             length,
-        const Byte _far*  tabelle
-    );
-
-    inline void* xlat( void* d, const void* s, const uint2 l, const Byte* t )
-    {
-        return xlat_asm( d, s, l, t );
+inline void xlat( void* d, const void* s, unsigned int l, const Byte* t )
+{
+    for( unsigned int i = 0; i < l; i++ ) {
+        ((Byte*)d)[i] = t[ ((const Byte*)s)[ i ]];
     }
-
-#elif defined SYSTEM_WIN16
-
-    // Borland will __asm nicht inline übersetzen
-
-    void xlat( void* d, const void* s, unsigned int l, const Byte* t );
-
-#else
-
-    inline void xlat( void* d, const void* s, unsigned int l, const Byte* t )
-    {
-        for( unsigned int i = 0; i < l; i++ ) {
-            ((Byte*)d)[i] = t[ ((const Byte*)s)[ i ]];
-        }
-    }
-
-#endif
+}
 
 
 inline void xlat( void* dest, const void* source, unsigned int len, const char* table )
