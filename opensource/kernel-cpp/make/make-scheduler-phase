@@ -19,7 +19,7 @@ cpuArchitecture="$2"
 configurations="$3 $4"
 [ -n "$3" ] || fail "Missing third command argument: Debug or Release"
 
-os=$(if [ `uname` == "AIX" ]; then echo linux; else echo `uname -o`; fi)
+os=$(if [ `uname` == "AIX" -o `uname` == "SunOS" -o `uname` == "Solaris" ]; then echo linux; else echo `uname -o`; fi)
 [ "$os" == 'Cygwin' ] && os="windows"
 [ "$os" == 'GNU/Linux' ] && os="linux"
 echo Build for operating system $os
