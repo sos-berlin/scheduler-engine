@@ -86,7 +86,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                        set_command_for_scheduler            ( Transaction*, const string& command, const string& member_id );
     bool                        delete_dead_scheduler_record( const string& cluster_member_id );
     void                        show_active_schedulers      ( Transaction*, bool exclusive_only );
-    string                      tip_for_new_distributed_order(const Order&);
+    string                      tip_for_new_distributed_order(const Absolute_path&, const string& order_state);
 
     string                      http_url_of_member_id       ( const string& cluster_member_id );
     void                        check                       ();
@@ -2607,7 +2607,7 @@ void Cluster::show_active_schedulers( Transaction* outer_transaction, bool exclu
 
 //-----------------------------------------------------------Cluster::tip_for_new_distributed_order
 
-string Cluster::tip_for_new_distributed_order(const Order& order)
+string Cluster::tip_for_new_distributed_order(const Absolute_path& job_chain_path, const string& order_state)
 {
     try {
         string member_id = least_busy_member_id();
@@ -2616,8 +2616,8 @@ string Cluster::tip_for_new_distributed_order(const Order& order)
             if (Regex_submatches m = Regex("http://([^:]+:[0-9]+)").match_subresults(url)) {
                 xml::Xml_string_writer xml_writer;
                 xml_writer.begin_element( "job_chain.check_distributed" );
-                xml_writer.set_attribute_optional( "job_chain", order.job_chain_path());
-                xml_writer.set_attribute_optional( "order_state", order.string_state());
+                xml_writer.set_attribute_optional( "job_chain", job_chain_path);
+                xml_writer.set_attribute_optional( "order_state", order_state);
                 xml_writer.end_element( "job_chain.check_distributed" );
                 send_udp_message(Host_and_port(m[1]), xml_writer.to_string());
                 return url;

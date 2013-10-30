@@ -2504,7 +2504,7 @@ void Order::tip_next_node_for_new_distributed_order_state()
     if( is_processable() ) {
         bool ok = false;
         if (at().is_zero() && _spooler->_cluster && _spooler->settings()->_order_distributed_balanced) {
-            string url = _spooler->_cluster->tip_for_new_distributed_order(*this);
+            string url = _spooler->_cluster->tip_for_new_distributed_order(_job_chain_path, string_state());
             if (url != "") {
                 log()->info(message_string("SCHEDULER-723", url));
                 ok = true;
