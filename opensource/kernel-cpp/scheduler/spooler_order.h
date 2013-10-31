@@ -558,8 +558,10 @@ struct Node : Com_job_chain_node,
     void                    set_delay                       (const Duration& d)                     { _delay = d; }
     Duration                    delay                       () const                                { return _delay; }
     Action                      action                      () const                                { return _action; }
-    virtual void                set_action                  ( const string& );
-    string               string_action                      () const                                { return string_from_action( _action ); }
+    void                        set_action_string           (const string& o)                       { set_action(action_from_string(o)); }
+    virtual bool                set_action                  (Action);
+    void                        set_action_complete         (const string&);
+    string                      string_action               () const                                { return string_from_action(_action); }
     int                         priority                    () const                                { return _priority; }
     bool                        is_ready_for_order_processing() const;
     virtual bool                is_type                     ( Type ) const                          { return false; }
@@ -627,7 +629,7 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
-    void                    set_action                      ( const string& );
+    bool                    set_action                      (Action);
     void                        wake_orders                 ();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
     bool                        is_ready_for_order_processing ();
@@ -669,7 +671,7 @@ struct Job_node : Order_queue_node,
     string                      normalized_job_path         () const;
     Job*                        job                         () const;
     Job*                        job_or_null                 () const;
-    void                    set_action                      ( const string& );
+    bool                    set_action                      (Action);
     bool                     is_on_error_setback            () const                                { return _on_error_setback; }
     bool                     is_on_error_suspend            () const                                { return _on_error_suspend; }
 

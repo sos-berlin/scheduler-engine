@@ -823,7 +823,7 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
     STDMETHODIMP            put_Action                  ( BSTR );
     STDMETHODIMP            get_Action                  ( BSTR* );
 
-    virtual void            set_action                  ( const string& )                           = 0;
+    virtual void        set_action_complete             (const string&)                             = 0;
     virtual string       string_action                  () const                                    = 0;
     virtual void            database_record_store       ()                                          = 0;
 

@@ -5198,8 +5198,7 @@ STDMETHODIMP Com_job_chain_node::put_Action( BSTR action_bstr )
 
     try
     {
-        set_action( string_from_bstr( action_bstr ) );
-        database_record_store();
+        set_action_complete(string_from_bstr(action_bstr));
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 

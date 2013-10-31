@@ -9,5 +9,5 @@ public interface NodeCI {
     NodeC next_node();
     NodeC error_node();
     String string_action();
-    void set_action(String o);
+    void set_action_string(String o);
 }

@@ -1077,10 +1077,8 @@ void Node::set_error_state( const Order::State& error_state )
 
 //---------------------------------------------------------------------------------Node::set_action
 
-void Node::set_action( const string& action_string )
+bool Node::set_action(Action action)
 {
-    Action action = action_from_string( action_string );
-    
     if( _job_chain->is_distributed()  &&  action != act_process )  z::throw_xc( "SCHEDULER-404", action_string );
     
     if( _action != action )
@@ -1091,7 +1089,10 @@ void Node::set_action( const string& action_string )
         {
             _job_chain->check_job_chain_node( this );
         }
+        return true;
     }
+    else 
+        return false;
 }
 
 //--------------------------------------------------------------------------------Node::execute_xml
@@ -1104,14 +1105,21 @@ xml::Element_ptr Node::execute_xml( Command_processor* command_processor, const 
     {
         string action = element.getAttribute( "action" );
         if( action != "" ) {
-            set_action( action );
-            database_record_store();
+            set_action_complete(action);
         } 
 
         return command_processor->_answer.createElement( "ok" );
     }
     else
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
+}
+
+//------------------------------------------------------------------------Node::set_action_complete
+
+void Node::set_action_complete(const string& action) {
+    bool ok = set_action(action_from_string(action));
+    if (ok) 
+        database_record_store();
 }
 
 //----------------------------------------------------------------------Node::database_record_store
@@ -1229,14 +1237,10 @@ void Order_queue_node::close()
 
 //---------------------------------------------------------------------Order_queue_node::set_action
 
-void Order_queue_node::set_action( const string& action_string )
+bool Order_queue_node::set_action(Action action)
 {
-    Action action = action_from_string( action_string );
-    
-    if( _action != action )
-    {
-        Node::set_action( action_string );
-        
+    bool ok = Node::set_action(action);
+    if(ok) {
         if( _job_chain->state() >= Job_chain::s_active )
         {
             switch( _action )
@@ -1265,6 +1269,7 @@ void Order_queue_node::set_action( const string& action_string )
             }
         }
     }
+    return ok;
 }
 
 //--------------------------------------------------Order_queue_node::is_ready_for_order_processing
@@ -1417,14 +1422,10 @@ bool Job_node::on_requisite_loaded( File_based* file_based )
 
 //-----------------------------------------------------------------------------Job_node::set_action
 
-void Job_node::set_action( const string& action_string )
+bool Job_node::set_action(Action action)
 {
-    Action action = action_from_string( action_string );
-    
-    if( _action != action )
-    {
-        Order_queue_node::set_action( action_string );
-
+    bool ok = Order_queue_node::set_action(action);
+    if (ok) {
         if( _job_chain->state() >= Job_chain::s_active )
         {
             switch( _action )
@@ -1437,6 +1438,7 @@ void Job_node::set_action( const string& action_string )
             }
         }
     }
+    return ok;
 }
 
 //----------------------------------------------------------------------------Job_node::wake_orders
@@ -3039,7 +3041,7 @@ void Job_chain::database_record_load( Read_transaction* ta )
                 if( Node* node = node_from_state_or_null( record.as_string( "order_state" ) ) )
                 {
                     if( !record.null( "action" ) ) {
-                        node->set_action( record.as_string( "action" ) );
+                        node->set_action_string( record.as_string( "action" ) );
                     }
                     node->_db_action = node->_action;
                 }
