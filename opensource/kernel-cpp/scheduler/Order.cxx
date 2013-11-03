@@ -3076,7 +3076,7 @@ Time Order::next_start_time( bool first_call )
             }
         }
 
-        if( result < now )  result = Time(0);
+        if( result < now ) result = next_start_time(true);
     }
 
     return result;
