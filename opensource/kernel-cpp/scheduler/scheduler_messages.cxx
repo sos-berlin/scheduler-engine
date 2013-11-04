@@ -252,7 +252,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-399", "Error in $1:\n$2" },
     { "SCHEDULER-401", "Unknown '$1'" },
     { "SCHEDULER-403", "There is no valid state for job chain node state='$1', action='next_state' (circular next_state)" },
-    { "SCHEDULER-404", "action='$1' is not possible on a distributed job chain" },
     { "SCHEDULER-405", "Setting state='$1' is not possible while job chain has state '$2'" },
     { "SCHEDULER-406", "Error in job chain node state='$1': $2" },
     { "SCHEDULER-407", "Attribute $1 is empty" },

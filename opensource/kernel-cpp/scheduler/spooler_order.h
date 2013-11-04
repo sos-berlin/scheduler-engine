@@ -811,6 +811,7 @@ struct Job_chain : Com_job_chain,
     bool                     is_visible                     () const                                { return _visible == visible_yes; }
 
     bool                     is_distributed                 () const                                { return _is_distributed; }
+    string                      db_cluster_member_id        () const;
 
     void                    set_orders_are_recoverable      ( bool b )                              { _orders_are_recoverable = b; }
     bool                        orders_are_recoverable      () const                                { return _orders_are_recoverable; }
@@ -858,6 +859,8 @@ struct Job_chain : Com_job_chain,
     Order*                      blacklisted_order_or_null   ( const string& order_id );
     stdext::hash_set<string>    db_get_blacklisted_order_id_set( const File_path& directory, const Regex& );
 
+    void                        database_read_record        (const Record&);
+    void                        database_read_node_record   (job_chain::Node*, const Record&);
     string                      db_where_condition          () const;
 
     // F�r verschachtelte Jobketten, deren Auftragskennungsr�ume verbunden sind:
@@ -1046,6 +1049,9 @@ struct Order_subsystem: Object,
     virtual ptr<Job_chain_folder_interface> new_job_chain_folder( Folder* )                         = 0;
     virtual void                check_exception             ()                                      = 0;
     virtual bool                orders_are_distributed      ()                                      = 0;
+
+    virtual void                reread_distributed_job_chain_from_database(Job_chain* which = NULL) = 0;
+    virtual void                reread_distributed_job_chain_nodes_from_database(Job_chain* which_job_chain = NULL, job_chain::Node* which_node = NULL) = 0;
 
     virtual void                request_order               ()                                      = 0;
     virtual ptr<Order>          load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;

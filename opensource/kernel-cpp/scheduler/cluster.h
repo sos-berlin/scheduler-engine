@@ -64,6 +64,7 @@ struct Cluster_subsystem_interface : Object, Subsystem
     virtual bool                set_command_for_scheduler            ( Transaction*, const string& command, const string& member_id ) = 0;
     virtual bool                delete_dead_scheduler_record( const string& cluster_member_id )     = 0;
     virtual void                show_active_schedulers      ( Transaction*, bool exclusive_only = false ) = 0;
+    virtual void                tip_all_other_members_for_job_chain_node(const Absolute_path&, const string& order_state) = 0;
     virtual string              tip_for_new_distributed_order(const Absolute_path&, const string& order_state) = 0;
 
     virtual string              http_url_of_member_id       ( const string& cluster_member_id )     = 0;

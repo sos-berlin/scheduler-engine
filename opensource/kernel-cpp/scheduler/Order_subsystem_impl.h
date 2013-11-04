@@ -102,6 +102,9 @@ struct Order_subsystem_impl : Order_subsystem
 
     ptr<Job_chain_folder_interface> new_job_chain_folder    ( Folder* );
 
+    void                        reread_distributed_job_chain_from_database(Job_chain* which);
+    void                        reread_distributed_job_chain_nodes_from_database(Job_chain* which_job_chain, job_chain::Node* which_node);
+
     void                        request_order               ();
     ptr<Order>                  load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags );
     ptr<Order>              try_load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags );
