@@ -3069,14 +3069,16 @@ Time Order::next_start_time( bool first_call )
             // Aber gibt es ein single_start vorher?
 
             Period next_single_start_period = _schedule_use->next_period( now, schedule::wss_next_single_start );
-            if( next_single_start_period._single_start  &&  result > next_single_start_period.begin() )
+            if( next_single_start_period._single_start  )
             {
-                _period = next_single_start_period;
-                result  = next_single_start_period.begin();
+                if( result > next_single_start_period.begin() || result < now ) {
+                  _period = next_single_start_period;
+                  result  = next_single_start_period.begin();
+                }
             }
         }
 
-        if( result < now ) result = next_start_time(true);
+        if( result < now )  result = Time(0);
     }
 
     return result;
