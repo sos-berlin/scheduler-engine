@@ -317,7 +317,7 @@ void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_sche
     /*! \change JS-481 Es gibt bereits eine Verbindung und die neue Connection ist nicht dieselbe. Dass darf nicht sein. */
     if( _connection_operation  &&  _connection_operation != connection_operation ) {
         _log->warn( message_string( "SCHEDULER-714", host_and_port.as_string(), _connection_operation->_connection->obj_name(), connection_operation->_connection->obj_name() ) );
-        _connection_operation->_connection->close();
+        _connection_operation->_connection->remove_me();
         _connection_operation = NULL;
         _is_connected = false;
     }
