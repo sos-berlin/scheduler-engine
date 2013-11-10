@@ -12,8 +12,6 @@
 #   include <utime.h>           // utime()
 #endif
 
-#include "scheduler_test_code.h"  /*! \change JS-481 */
-
 namespace sos {
 namespace scheduler {
 namespace supervisor {
@@ -364,10 +362,6 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
             case s_registered:
             {
-#ifdef TESTCODE_ACTIVATED_JS481
-                Z_DEBUG_ONLY( z::throw_xc( "TEST-EXCEPTION" ); )     /*! \change JS-481 Testcode */
-                // Wird nach Verbindungsverlust nochmal durchlaufen    
-#endif
                 if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
 
@@ -432,16 +426,6 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
         if( _xml_client_connection ) 
         {
-/*! \change JS-481 Testcode */
-#ifdef TESTCODE_ACTIVATED_JS481
-#else
-            _xml_client_connection->set_async_manager( NULL );
-#endif
-        
-/*! \change JS-481 Testcode, Connection muﬂ bestehen bleiben. Das erreichen wir durch eine Kopie der Referenz */
-#ifdef TESTCODE_ACTIVATED_JS481
-            _xml_client_connection.copy();     
-#endif
             _xml_client_connection = NULL;
         }
 
