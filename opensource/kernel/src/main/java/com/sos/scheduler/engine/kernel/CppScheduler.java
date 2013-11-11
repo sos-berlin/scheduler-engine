@@ -19,7 +19,7 @@ public class CppScheduler {
     private String name = null;
 
     public static void loadModuleFromPath() {
-        System.loadLibrary("scheduler");
+        System.loadLibrary("jobscheduler-engine");
     }
 
     public final void loadModule(File moduleFile) {

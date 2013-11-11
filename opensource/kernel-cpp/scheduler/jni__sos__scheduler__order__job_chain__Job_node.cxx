@@ -119,12 +119,12 @@ static jobject JNICALL order_1queue(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static void JNICALL set_1action__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+static void JNICALL set_1action_1string__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::set_action()");
-        (o_->set_action(env.string_from_jstring(p0)));
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::set_action_string()");
+        (o_->set_action_string(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -208,7 +208,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"job_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1path },
     { (char*)"next_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/NodeC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1node },
     { (char*)"order_queue__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Order_queueC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order_1queue },
-    { (char*)"set_action__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1action__Ljava_lang_String_2 },
+    { (char*)"set_action_string__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1action_1string__Ljava_lang_String_2 },
     { (char*)"string_action__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1action },
     { (char*)"string_error_state__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1error_1state },
     { (char*)"string_next_state__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1next_1state },

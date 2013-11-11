@@ -40,6 +40,6 @@ class Node(cppProxy: NodeCI, injector: Injector) extends Sister {
   final def action = JobChainNodeAction.ofCppName(cppProxy.string_action)
 
   final def action_=(o: JobChainNodeAction) {
-    cppProxy.set_action(o.toCppName)
+    cppProxy.set_action_string(o.toCppName)
   }
 }

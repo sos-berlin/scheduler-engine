@@ -86,8 +86,9 @@ struct Cluster : Cluster_subsystem_interface
     bool                        set_command_for_scheduler            ( Transaction*, const string& command, const string& member_id );
     bool                        delete_dead_scheduler_record( const string& cluster_member_id );
     void                        show_active_schedulers      ( Transaction*, bool exclusive_only );
-    string                      tip_for_new_distributed_order(const Order&);
-
+    string                      tip_for_new_distributed_order(const Absolute_path&, const string& order_state);
+    string                      tip_for_job_chain_node      (const string& cluster_member_id, const Absolute_path&, const string& order_state);
+    void                        tip_all_other_members_for_job_chain_node(const Absolute_path&, const string& order_state);
     string                      http_url_of_member_id       ( const string& cluster_member_id );
     void                        check                       ();
 
@@ -143,6 +144,7 @@ struct Cluster : Cluster_subsystem_interface
     Cluster_member*             empty_member_record         ();
     void                        recommend_next_deadline_check_time( time_t );
     string                      least_busy_member_id        () const;
+    vector<string>              fetch_all_member_ids        () const;
 
     friend struct               Cluster_member;
     friend struct               Heart_beat_watchdog_thread;
@@ -1057,6 +1059,14 @@ bool Heart_beat::async_continue_( Continue_flags )
         throw;
     }
         
+    try {
+        _spooler->order_subsystem()->reread_distributed_job_chain_from_database();
+        _spooler->order_subsystem()->reread_distributed_job_chain_nodes_from_database();
+    }
+    catch (exception& x) {
+        _cluster->log()->warn(x.what());
+    }
+
     return true;
 }
 
@@ -2607,24 +2617,56 @@ void Cluster::show_active_schedulers( Transaction* outer_transaction, bool exclu
 
 //-----------------------------------------------------------Cluster::tip_for_new_distributed_order
 
-string Cluster::tip_for_new_distributed_order(const Order& order)
+string Cluster::tip_for_new_distributed_order(const Absolute_path& job_chain_path, const string& order_state)
 {
     try {
         string member_id = least_busy_member_id();
         if (member_id != _cluster_member_id) {
-            string url = http_url_of_member_id(member_id);
-            if (Regex_submatches m = Regex("http://([^:]+:[0-9]+)").match_subresults(url)) {
-                xml::Xml_string_writer xml_writer;
-                xml_writer.begin_element( "job_chain.check_distributed" );
-                xml_writer.set_attribute_optional( "job_chain", order.job_chain_path());
-                xml_writer.set_attribute_optional( "order_state", order.string_state());
-                xml_writer.end_element( "job_chain.check_distributed" );
-                send_udp_message(Host_and_port(m[1]), xml_writer.to_string());
-                return url;
-            }
+            string url = tip_for_job_chain_node(member_id, job_chain_path, order_state);
+            return url;
         }
     } catch (exception& x) {
-        _log->error(string("Error ignored when adverting a cluster member for a processable order: ") + x.what());
+        _log->warn(string("Error ignored when adverting a cluster member for a processable order: ") + x.what());
+    }
+    return "";
+}
+
+//------------------------------------------------Cluster::tip_all_other_members_for_job_chain_node
+
+void Cluster::tip_all_other_members_for_job_chain_node(const Absolute_path& job_chain_path, const string& order_state)
+{
+    try {
+        vector<string> ids = fetch_all_member_ids();
+        for (vector<string>::iterator i = ids.begin(); i != ids.end(); i++) {
+            string member_id = *i;
+            if (member_id != _cluster_member_id)
+                tip_for_job_chain_node(member_id, job_chain_path, order_state);
+        }
+    }
+    catch (exception& x) {
+        _log->warn(string("Error ignored when adverting cluster members for a changed job chain node: ") + x.what());
+    }
+}
+
+//------------------------------------------------------------------Cluster::tip_for_job_chain_node
+
+string Cluster::tip_for_job_chain_node(const string& member_id, const Absolute_path& job_chain_path, const string& order_state)
+{
+    string url = http_url_of_member_id(member_id);
+    if (Regex_submatches m = Regex("http://([^:]+:[0-9]+)").match_subresults(url)) {
+        Host_and_port host_and_port(m[1]);
+        try {
+            xml::Xml_string_writer xml_writer;
+            xml_writer.begin_element("job_chain.check_distributed");
+            xml_writer.set_attribute_optional("job_chain", job_chain_path);
+            xml_writer.set_attribute_optional("order_state", order_state);
+            xml_writer.end_element("job_chain.check_distributed");
+            send_udp_message(host_and_port, xml_writer.to_string());
+            return url;
+        }
+        catch (exception& x) {
+            _log->warn(S() << "Error ignored when adverting the cluster member '" << host_and_port << "' for a job chain node: " << x.what());
+        }
     }
     return "";
 }
@@ -2647,6 +2689,22 @@ string Cluster::least_busy_member_id() const {
         return r.as_string("member_id");
     } else 
         return "";
+}
+
+//--------------------------------------------------------------------Cluster::fetch_all_member_ids
+
+vector<string> Cluster::fetch_all_member_ids() const {
+    vector<string> result;
+    Read_transaction ta(db());
+    string select_sql = S() <<
+        "select c.`member_id`" <<
+        "  from " << db()->_clusters_tablename << " c"
+        "  where c.`active` is not null";
+    for (Any_file result_set = ta.open_result_set(select_sql, Z_FUNCTION); !result_set.eof();) {
+        Record r = result_set.get_record();
+        result.push_back(r.as_string("member_id"));
+    }
+    return result;
 }
 
 //---------------------------------------------------Cluster::scheduler_up_variable_name

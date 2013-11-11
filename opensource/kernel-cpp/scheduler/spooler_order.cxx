@@ -25,6 +25,7 @@ const string now_database_distributed_next_time         = "2000-01-01 00:00:00";
 const string never_database_distributed_next_time       = "3111-11-11 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
 const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";        // Auftrag ist auf der schwarzen Liste
 const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
+const string no_cluster_member_id = "-";
 // distributed_next_time is null => Auftrag ist nicht verteilt
 
 //--------------------------------------------------------------------------------------------const
@@ -528,6 +529,51 @@ xml::Element_ptr Order_subsystem_impl::new_file_baseds_dom_element( const xml::D
     xml::Element_ptr result = doc.createElement( "job_chains" );
     result.setAttribute( "count", (int64)_file_based_map.size() );
     return result;
+}
+
+//---------------------------------Order_subsystem_impl::reread_distributed_job_chain_from_database
+
+void Order_subsystem_impl::reread_distributed_job_chain_from_database(Job_chain* which_job_chain) {
+    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+        Any_file result_set = ta.open_result_set(
+            S() << "select `path`, `stopped`"
+            << "  from " << db()->_job_chains_table.sql_name()
+            << "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db())
+            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)   // Only distrubuted job chains
+            << (which_job_chain ? "and `path`=" + sql::quoted(which_job_chain->path().without_slash()) : ""),
+            Z_FUNCTION);
+        while (!result_set.eof()) {
+            Record record = result_set.get_record();
+            if (Job_chain* job_chain = job_chain_or_null(Absolute_path(root_path, record.as_string("path")))) {
+                job_chain->database_read_record(record);
+            }
+        }
+    }
+    catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_job_chain_nodes_table.sql_name() + " or " + db()->_job_chains_table.sql_name(), x), Z_FUNCTION); }
+}
+
+//---------------------------Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database
+
+void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_chain* which_job_chain, Node* which_node) {
+    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+        Any_file result_set = ta.open_result_set(
+            S() << "select `job_chain`, `order_state`, `action`"
+            << "  from " << db()->_job_chain_nodes_table.sql_name()
+            << "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db())
+            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)  // Only distrubuted job chains
+            << (which_job_chain ? "and `job_chain`=" + sql::quoted(which_job_chain->path().without_slash()) : "")
+            << (which_node ? "and `order_state`=" + sql::quoted(which_node->order_state().as_string()) : ""),
+            Z_FUNCTION);
+        while (!result_set.eof()) {
+            Record record = result_set.get_record();
+            if (Job_chain* job_chain = job_chain_or_null(Absolute_path(root_path, record.as_string("job_chain")))) {
+                if (Node* node = job_chain->node_from_state_or_null(record.as_string("order_state"))) {
+                    job_chain->database_read_node_record(node, record);
+                }
+            }
+        }
+    }
+    catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_job_chain_nodes_table.sql_name() + " or " + db()->_job_chains_table.sql_name(), x), Z_FUNCTION); }
 }
 
 //-----------------------------------------------Order_subsystem_impl::append_calendar_dom_elements
@@ -1077,12 +1123,8 @@ void Node::set_error_state( const Order::State& error_state )
 
 //---------------------------------------------------------------------------------Node::set_action
 
-void Node::set_action( const string& action_string )
+bool Node::set_action(Action action)
 {
-    Action action = action_from_string( action_string );
-    
-    if( _job_chain->is_distributed()  &&  action != act_process )  z::throw_xc( "SCHEDULER-404", action_string );
-    
     if( _action != action )
     {
         _action = action;
@@ -1091,7 +1133,10 @@ void Node::set_action( const string& action_string )
         {
             _job_chain->check_job_chain_node( this );
         }
+        return true;
     }
+    else 
+        return false;
 }
 
 //--------------------------------------------------------------------------------Node::execute_xml
@@ -1104,14 +1149,24 @@ xml::Element_ptr Node::execute_xml( Command_processor* command_processor, const 
     {
         string action = element.getAttribute( "action" );
         if( action != "" ) {
-            set_action( action );
-            database_record_store();
+            set_action_complete(action);
         } 
 
         return command_processor->_answer.createElement( "ok" );
     }
     else
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
+}
+
+//------------------------------------------------------------------------Node::set_action_complete
+
+void Node::set_action_complete(const string& action) {
+    bool ok = set_action(action_from_string(action));
+    if (ok) {
+        database_record_store();
+        if (cluster::Cluster_subsystem_interface* cluster = spooler()->_cluster)
+            cluster->tip_all_other_members_for_job_chain_node(_job_chain->path(), _order_state.as_string());
+    }
 }
 
 //----------------------------------------------------------------------Node::database_record_store
@@ -1129,7 +1184,7 @@ void Node::database_record_store()
                     sql::Update_stmt update ( &db()->_job_chain_nodes_table );
                 
                     update[ "spooler_id"        ] = _spooler->id_for_db();
-                    update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
+                    update[ "cluster_member_id" ] = _job_chain->db_cluster_member_id();
                     update[ "job_chain"         ] = _job_chain->path().without_slash();
                     update[ "order_state"       ] = _order_state.as_string();
                     update[ "action"            ] = _action == act_process? sql::Value() : string_action();
@@ -1229,14 +1284,10 @@ void Order_queue_node::close()
 
 //---------------------------------------------------------------------Order_queue_node::set_action
 
-void Order_queue_node::set_action( const string& action_string )
+bool Order_queue_node::set_action(Action action)
 {
-    Action action = action_from_string( action_string );
-    
-    if( _action != action )
-    {
-        Node::set_action( action_string );
-        
+    bool ok = Node::set_action(action);
+    if(ok) {
         if( _job_chain->state() >= Job_chain::s_active )
         {
             switch( _action )
@@ -1265,6 +1316,7 @@ void Order_queue_node::set_action( const string& action_string )
             }
         }
     }
+    return ok;
 }
 
 //--------------------------------------------------Order_queue_node::is_ready_for_order_processing
@@ -1417,14 +1469,10 @@ bool Job_node::on_requisite_loaded( File_based* file_based )
 
 //-----------------------------------------------------------------------------Job_node::set_action
 
-void Job_node::set_action( const string& action_string )
+bool Job_node::set_action(Action action)
 {
-    Action action = action_from_string( action_string );
-    
-    if( _action != action )
-    {
-        Order_queue_node::set_action( action_string );
-
+    bool ok = Order_queue_node::set_action(action);
+    if (ok) {
         if( _job_chain->state() >= Job_chain::s_active )
         {
             switch( _action )
@@ -1437,6 +1485,7 @@ void Job_node::set_action( const string& action_string )
             }
         }
     }
+    return ok;
 }
 
 //----------------------------------------------------------------------------Job_node::wake_orders
@@ -1916,7 +1965,11 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
     }
     else
     if (element.nodeName_is("job_chain.check_distributed")) {
-        tip_for_new_distributed_order(element.getAttribute_mandatory("order_state"), Time(0));
+        string order_state = element.getAttribute_mandatory("order_state");
+        Node* node = node_from_state(Order::State(order_state));
+        order_subsystem()->reread_distributed_job_chain_from_database(this);
+        order_subsystem()->reread_distributed_job_chain_nodes_from_database(this, node);
+        tip_for_new_distributed_order(order_state, Time(0));
         return command_processor->_answer.createElement( "ok" );
     }
     else
@@ -2071,6 +2124,13 @@ xml::Element_ptr Job_chain::why_dom_element(const xml::Document_ptr& doc) const 
         .setAttribute("running_orders", number_of_touched_orders());
     }
     return result;
+}
+
+//------------------------------------------------------------------Job_chain::db_cluster_member_id
+
+string Job_chain::db_cluster_member_id() const
+{ 
+    return _is_distributed ? no_cluster_member_id : _spooler->db_cluster_member_id();
 }
 
 //---------------------------------------------------------------------------------normalized_state
@@ -2942,7 +3002,7 @@ void Job_chain::database_record_store()
                     sql::Update_stmt update ( &db()->_job_chains_table );
                 
                     update[ "spooler_id"        ] = _spooler->id_for_db();
-                    update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
+                    update["cluster_member_id"  ] = db_cluster_member_id();
                     update[ "path"              ] = path().without_slash();
                     update[ "stopped"           ] = _is_stopped;
 
@@ -2971,7 +3031,7 @@ void Job_chain::database_record_remove()
                 sql::Delete_stmt delete_statement ( &db()->_job_chains_table );
                 
                 delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db() );
-                delete_statement.and_where_condition( "cluster_member_id", _spooler->db_distributed_member_id() );
+                delete_statement.and_where_condition( "cluster_member_id", db_cluster_member_id());
                 delete_statement.and_where_condition( "path"              , path().without_slash() );
 
                 ta.execute( delete_statement, Z_FUNCTION );
@@ -2981,7 +3041,7 @@ void Job_chain::database_record_remove()
                 sql::Delete_stmt delete_statement ( &db()->_job_chain_nodes_table );
                 
                 delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db() );
-                delete_statement.and_where_condition( "cluster_member_id", _spooler->db_distributed_member_id() );
+                delete_statement.and_where_condition( "cluster_member_id", db_cluster_member_id());
                 delete_statement.and_where_condition( "job_chain"        , path().without_slash() );
 
                 ta.execute( delete_statement, Z_FUNCTION );
@@ -3008,16 +3068,14 @@ void Job_chain::database_record_load( Read_transaction* ta )
                 S() << "select `stopped`"
                     << "  from " << db()->_job_chains_table.sql_name()
                     << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                    <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
+                    <<    " and `cluster_member_id`=" << sql::quoted(db_cluster_member_id())
                     <<    " and `path`="              << sql::quoted( path().without_slash() ), 
                 Z_FUNCTION 
             );
         
             if( !result_set.eof() )  
             {
-                Record record  = result_set.get_record();
-                _db_stopped = record.as_int( "stopped" ) != 0;
-                set_stopped( _db_stopped );
+                database_read_record(result_set.get_record());
             }
         }
 
@@ -3027,7 +3085,7 @@ void Job_chain::database_record_load( Read_transaction* ta )
                 S() << "select `order_state`, `action`"
                     << "  from " << db()->_job_chain_nodes_table.sql_name()
                     << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                    <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
+                    <<    " and `cluster_member_id`=" << sql::quoted(db_cluster_member_id())
                     <<    " and `job_chain`="         << sql::quoted( path().without_slash() ), 
                 Z_FUNCTION 
             );
@@ -3035,17 +3093,25 @@ void Job_chain::database_record_load( Read_transaction* ta )
             while( !result_set.eof() )  
             {
                 Record record  = result_set.get_record();
-
                 if( Node* node = node_from_state_or_null( record.as_string( "order_state" ) ) )
-                {
-                    if( !record.null( "action" ) ) {
-                        node->set_action( record.as_string( "action" ) );
-                    }
-                    node->_db_action = node->_action;
-                }
+                    database_read_node_record(node, record);
             }
         }
     }
+}
+
+//------------------------------------------------------------------Job_chain::database_read_record
+
+void Job_chain::database_read_record(const Record& record) {
+    _db_stopped = record.as_int("stopped") != 0;
+    set_stopped(_db_stopped);
+}
+
+//-------------------------------------------------------------Job_chain::database_read_node_record
+
+void Job_chain::database_read_node_record(Node* node, const Record& record) {
+    node->set_action(record.null("action") ? Node::act_process : Node::action_from_string(record.as_string("action")));
+    node->_db_action = node->_action;
 }
 
 //-----------------------------------------------------------------------Job_chain::order_subsystem

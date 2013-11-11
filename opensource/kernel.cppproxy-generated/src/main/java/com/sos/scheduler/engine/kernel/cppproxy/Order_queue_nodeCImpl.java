@@ -74,10 +74,10 @@ final class Order_queue_nodeCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.Order_queueC order_queue__native(long cppReference);
 
 
-    @Override public void set_action(java.lang.String p0) {
+    @Override public void set_action_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            set_action__native(cppReference(), p0);
+            set_action_string__native(cppReference(), p0);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
@@ -85,7 +85,7 @@ final class Order_queue_nodeCImpl
         }
     }
 
-    private static native void set_action__native(long cppReference, java.lang.String p0);
+    private static native void set_action_string__native(long cppReference, java.lang.String p0);
 
 
     @Override public java.lang.String string_action() {
