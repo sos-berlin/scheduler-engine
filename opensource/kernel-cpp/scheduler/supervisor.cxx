@@ -28,13 +28,13 @@ struct Remote_configurations;
 
 //--------------------------------------------------------------------------------------------const
 
-//const int                       supervisor_configuration_poll_interval = 60;
 const double                    udp_timeout                 = 10;
 const double                    udp_timeout_warn_period     = 5*60;
 const double                    udp_warn_timeout            = 60;
 const double                    max_hostname_age            = 15*60;                                // Nach dieser Zeit gethostbyname() erneut rufen
 const string                    directory_name_for_all_schedulers = "_all";
 const double                    allowed_directory_age       = 0.0;                                  // Verzeichnis nur lesen, wenn letztes Lesen länger her ist
+const int                       activation_timeout          = 2 * 60 * 60;                          // Frists, nach der <supervisor.configuration.fetch> nicht mehr aktiv ist.
 
 //------------------------------------------------------------------------------------Xml_file_info
 
@@ -60,16 +60,17 @@ struct Xml_file_info : Base_file_info
 struct Remote_scheduler : Remote_scheduler_interface, 
                           Scheduler_object
 {
-                                Remote_scheduler            ( Supervisor* supervisor );
+                                Remote_scheduler            (Supervisor* supervisor, const Host_and_port&);
 
     /*! \change JS-481 register_me prüft, registriert und ggf. überflüssige Connection schliessen */
-    void                        register_me                 ( const xml::Element_ptr&, Communication::Operation*, const Host_and_port& ); 
+    void                        register_me                 ( const xml::Element_ptr&, Communication::Operation*); 
     void                        connection_lost_event       ( const exception* );
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show );
 
     ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
     ptr<Command_response>       execute_configuration_fetch_updated_files( const xml::Element_ptr&, Command_processor* );
+    ptr<Command_response>       fetch_updated_files         (const xml::Element_ptr&);
     void                        write_updated_files_to_xml  ( Xml_writer*, Directory*, const xml::Element_ptr& reference_element );
     void                        write_file_to_xml           ( Xml_writer*, const Directory_entry&, const Xml_file_info* reference );
     bool                        check_remote_configuration  ();
@@ -77,6 +78,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     void                        check_timeout               ();
   //Directory*                  configuration_directory     ();
     Directory*                  configuration_directory_or_null();
+    bool                        is_yet_active               () const  { return _logged_on && (_is_connected || ::time(NULL) < _active_since + activation_timeout); }
     string                      obj_name                    () const;
 
     string                      async_state_text_           () const;
@@ -92,6 +94,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     string                     _scheduler_id;
     string                     _scheduler_version;
     time_t                     _connected_at;
+    time_t                     _active_since;
     time_t                     _disconnected_at;
     bool                       _logged_on;
     bool                       _is_connected;
@@ -193,6 +196,7 @@ struct Supervisor : Supervisor_interface
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* );
     ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
+    ptr<Command_response>       execute_configuration_fetch (const xml::Element_ptr&, Security::Level, const Host&);
 
 
     Remote_configurations*      remote_configurations       () const                                { return _remote_configurations; }
@@ -267,7 +271,13 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
 {
     ptr<Command_response> result;
 
-    if( string_begins_with( element.nodeName(), "supervisor.remote_scheduler." ) )
+    if (element.nodeName_is("supervisor.configuration.fetch")) {
+        Xml_operation* xml_processor = dynamic_cast<Xml_operation*>(command_processor->communication_operation());
+        if (!xml_processor)  z::throw_xc("SCHEDULER-222", element.nodeName());
+        return execute_configuration_fetch(element, command_processor->security_level(), xml_processor->connection()->peer_host());
+    }
+    else
+    if (string_begins_with(element.nodeName(), "supervisor.remote_scheduler."))
     {
         Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
         if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
@@ -283,6 +293,33 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
     return result;
 }
 
+//--------------------------------------------------------------------------Supervisor::execute_xml
+
+ptr<Command_response> Supervisor::execute_configuration_fetch(const xml::Element_ptr& element, Security::Level security_level, const Host& host)
+{
+    if (security_level < Security::seclev_no_add)  z::throw_xc("SCHEDULER-121");
+    assert(element.nodeName_is("supervisor.configuration.fetch"));
+
+    Host_and_port host_and_port(host, element.int_getAttribute("tcp_port"));
+    ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null(host_and_port);
+    if (!remote_scheduler) 
+        remote_scheduler = Z_NEW(Remote_scheduler(this, host_and_port));
+    remote_scheduler->_logged_on = true;
+    remote_scheduler->_is_connected = false;
+    remote_scheduler->_scheduler_id = element.getAttribute("scheduler_id");
+    remote_scheduler->_scheduler_version = element.getAttribute("version");
+    remote_scheduler->_is_cluster_member = element.bool_getAttribute("is_cluster_member", false);
+    remote_scheduler->_active_since = ::time(NULL);
+    remote_scheduler->_connected_at = remote_scheduler->_connected_at;
+    remote_scheduler->_error = NULL;
+    remote_scheduler->_udp_port = element.int_getAttribute("udp_port", 0);
+    
+    _remote_scheduler_register.add(remote_scheduler);
+    remote_scheduler->set_async_delay(activation_timeout);
+
+    return remote_scheduler->fetch_updated_files(element);
+}
+
 //----------------------------------------------------Supervisor::execute_register_remote_scheduler
 
 void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
@@ -290,16 +327,15 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
     Host_and_port host_and_port ( communication_operation->_connection->peer_host(), register_remote_scheduler_element.int_getAttribute( "tcp_port" ) );
 
     ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null( host_and_port );
-    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler( this ) );
+    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler(this, host_and_port) );
     
-    remote_scheduler->register_me( register_remote_scheduler_element, communication_operation, host_and_port );
+    remote_scheduler->register_me( register_remote_scheduler_element, communication_operation);
     _remote_scheduler_register.add( remote_scheduler );
 }
 
 //--------------------------------------------------------------------Remote_scheduler::register_me
 
-void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation, 
-    const Host_and_port& host_and_port  ) 
+void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation) 
 {
     Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( communication_operation );
     if( !xml_processor )  z::throw_xc( "SCHEDULER-222", register_remote_scheduler_element.nodeName() );
@@ -316,7 +352,7 @@ void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_sche
 
     /*! \change JS-481 Es gibt bereits eine Verbindung und die neue Connection ist nicht dieselbe. Dass darf nicht sein. */
     if( _connection_operation  &&  _connection_operation != connection_operation ) {
-        _log->warn( message_string( "SCHEDULER-714", host_and_port.as_string(), _connection_operation->_connection->obj_name(), connection_operation->_connection->obj_name() ) );
+        _log->warn( message_string( "SCHEDULER-714", _host_and_port.as_string(), _connection_operation->_connection->obj_name(), connection_operation->_connection->obj_name() ) );
         _connection_operation->_connection->remove_me();
         _connection_operation = NULL;
         _is_connected = false;
@@ -324,8 +360,6 @@ void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_sche
 
 
     _connection_operation = connection_operation; /*! \change JS-481 Connection merken */
-    _host_and_port = host_and_port;
-    _host_and_port._host.resolve_name();
     set_dom( register_remote_scheduler_element );
     _udp_port = register_remote_scheduler_element.int_getAttribute( "udp_port", 0 );
 
@@ -390,14 +424,16 @@ xml::Element_ptr Remote_scheduler_register::dom_element( const xml::Document_ptr
 
 //---------------------------------------------------------------Remote_scheduler::Remote_scheduler
 
-Remote_scheduler::Remote_scheduler( Supervisor* supervisor )              
+Remote_scheduler::Remote_scheduler(Supervisor* supervisor, const Host_and_port& host_and_port)
 : 
     Scheduler_object( supervisor->spooler(), this, type_remote_scheduler ),
     _zero_(this+1), 
     _supervisor(supervisor),
-    _remote_configurations(supervisor->remote_configurations())
+    _remote_configurations(supervisor->remote_configurations()),
+    _host_and_port(host_and_port)
 {
     assert( _remote_configurations );
+    _host_and_port._host.resolve_name();
 }
 
 //--------------------------------------------------------Remote_scheduler::configuration_directory
@@ -450,6 +486,7 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
         _scheduler_version = register_scheduler_element.     getAttribute( "version" );
         _is_cluster_member = register_scheduler_element.bool_getAttribute( "is_cluster_member", false );
         _connected_at      = ::time(NULL);
+        _active_since      = _connected_at;
     }
 
 
@@ -465,23 +502,27 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
 
 ptr<Command_response> Remote_scheduler::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
 {
-    if( element.nodeName_is( "supervisor.remote_scheduler.configuration.fetch_updated_files" ) )  
-        return execute_configuration_fetch_updated_files( element, command_processor );
+    if (element.nodeName_is("supervisor.remote_scheduler.configuration.fetch_updated_files"))
+        return execute_configuration_fetch_updated_files(element, command_processor);
     else
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
 }
 
 //--------------------------------------Remote_scheduler::execute_configuration_fetch_updated_files
 
-ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_files( const xml::Element_ptr& element, Command_processor* command_processor )
+ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_files(const xml::Element_ptr& element, Command_processor* command_processor)
 {
-    assert( element.nodeName_is( "supervisor.remote_scheduler.configuration.fetch_updated_files" ) );
-    if( command_processor->security_level() < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    if( !command_processor->communication_operation() )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
+    assert(element.nodeName_is("supervisor.remote_scheduler.configuration.fetch_updated_files"));
+    if (command_processor->security_level() < Security::seclev_no_add)  z::throw_xc("SCHEDULER-121");
+    if (!command_processor->communication_operation())  z::throw_xc("SCHEDULER-222", element.nodeName());
+    set_async_delay(double_time_max);   // UDP-Nachricht nicht mehr wiederholen
+    return fetch_updated_files(element);
+}
 
-    set_async_delay( double_time_max );   // UDP-Nachricht nicht mehr wiederholen
+//------------------------------------------------------------Remote_scheduler::fetch_updated_files
 
-
+ptr<Command_response> Remote_scheduler::fetch_updated_files(const xml::Element_ptr& element)
+{
     ptr<Directory_tree> empty_directory_tree = Z_NEW( Directory_tree( _spooler, File_path(), confdir_none ) );
     ptr<Directory>      directory;
     Directory*          all_directory        = NULL;
@@ -719,11 +760,13 @@ bool Remote_scheduler::check_remote_configuration()
 
 void Remote_scheduler::signal_remote_scheduler()
 {
-    Z_LOG("sending UDP command check_folders to " << Host_and_port( _host_and_port.host(), _udp_port ) << '\n' );
+    string command = "<check_folders/>";
+    Z_LOG2("scheduler", "Sending UDP command " << command << " to " << Host_and_port( _host_and_port.host(), _udp_port ) << '\n' );
     check_timeout();
-    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );
+    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), command);
     set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen, falls Nachricht verloren geht
 }
+
 //--------------------------------------------------------Remote_scheduler::check_timeout
 
 void Remote_scheduler::check_timeout()
@@ -747,8 +790,7 @@ void Remote_scheduler::check_timeout()
 
 bool Remote_scheduler::async_continue_( Continue_flags )
 {
-    if( _is_connected )
-    {
+    if (is_yet_active()) {
         // UDP-Nachricht nicht angekommen (fetch-Kommando vom Client fehlt)
         signal_remote_scheduler();
     }
@@ -826,6 +868,7 @@ void Remote_scheduler::connection_lost_event( const exception* x )
     Z_LOG2( "scheduler", Z_FUNCTION << " " << *this << "\n" ); /*! \change JS-481 */
 
     _disconnected_at = ::time(NULL);
+    _active_since = 0;
     _is_connected = false;
     _connection_operation = NULL;  /*! \change JS-481 Zugefügtes Objektreferenz wieder auflösen */
 
@@ -887,11 +930,8 @@ bool Remote_configurations::on_handle_directory( Directory_observer* )
     Z_FOR_EACH( Remote_scheduler_register::Map, _supervisor->_remote_scheduler_register._map, it )
     {
         Remote_scheduler* remote_scheduler = it->second;
-        
-        if( remote_scheduler->_is_connected )
-        {
+        if(remote_scheduler->is_yet_active())
             something_changed |= remote_scheduler->check_remote_configuration();
-        }
     }
    
     return something_changed;

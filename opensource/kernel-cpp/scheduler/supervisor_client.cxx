@@ -22,6 +22,10 @@ using namespace directory_observer;
 using xml::Xml_writer;
 struct Supervisor_client;
 
+//--------------------------------------------------------------------------------------------const
+
+const int supervisor_connect_retry_time = 60;
+
 //---------------------------------------------------------------------Supervisor_client_connection
 
 struct Abstract_supervisor_client_connection : Async_operation, Scheduler_object
@@ -31,7 +35,7 @@ private:
 
 protected:
     Supervisor_client_interface* const _supervisor_client;
-    Host_and_port _host_and_port;
+    Host_and_port const _host_and_port;
     ptr<Xml_client_connection> _xml_client_connection;
 
 protected:
@@ -46,10 +50,7 @@ protected:
 
 public:
     virtual ~Abstract_supervisor_client_connection() {
-        if (_xml_client_connection) {
-            _xml_client_connection->set_async_parent(NULL);
-            _xml_client_connection->set_async_manager(NULL);
-        }
+        close();
     }
 
     virtual bool is_ready() const = 0;
@@ -64,14 +65,32 @@ public:
         return _host_and_port; 
     }
 
+    void start() {
+        async_continue();
+    }
+
+protected:
     void connect() {
+        assert(!_xml_client_connection);
         _xml_client_connection = Z_NEW(Xml_client_connection(_spooler, _host_and_port));
         _xml_client_connection->set_async_manager(_spooler->_connection_manager);
         _xml_client_connection->set_async_parent(this);
         _xml_client_connection->connect();
     }
 
-protected:
+    void close() {
+        close_connection();
+    }
+
+    void close_connection() {
+        if (_xml_client_connection) {
+            _xml_client_connection->set_async_manager(NULL);
+            _xml_client_connection->set_async_parent(NULL);
+            _xml_client_connection->close();
+            _xml_client_connection = NULL;
+        }
+    }
+
     void write_directory_structure(xml::Xml_writer* xml_writer, const Absolute_path& path) {
         Folder_directory_lister dir(_log);
         bool ok = dir.open(_spooler->_configuration_directories[confdir_cache], path);
@@ -87,8 +106,7 @@ protected:
                     string name = Folder::object_name_of_filename(filename);
                     string extension = Folder::extension_of_filename(filename);
                     if (name != "") {
-                        //if( spooler()->folder_subsystem()->is_valid_extension( extension ) ) 
-                        {
+                        //if( spooler()->folder_subsystem()->is_valid_extension( extension ) ) {
                             File_path file_path(spooler()->_configuration_directories[confdir_cache], Absolute_path(path, filename));
                             Time      last_write_time(file_info->last_write_time(), Time::is_utc);
                             xml_writer->begin_element("configuration.file");
@@ -96,14 +114,14 @@ protected:
                             xml_writer->set_attribute("last_write_time", last_write_time.xml_value());
                             xml_writer->set_attribute("md5", md5(string_from_file(file_path)));
                             xml_writer->end_element("configuration.file");
-                        }
+                        //}
                     }
                 }
             }
         }
     }
 
-    void on_configuration_directory_receieved(const xml::Document_ptr& response_document) {
+    void on_configuration_directory_received(const xml::Document_ptr& response_document) {
         if (xml::Element_ptr directory_element = response_document.select_node("/spooler/answer/configuration.directory")) {
             _supervisor_client->set_using_central_configuration();
             update_directory_structure(root_path, directory_element);
@@ -180,6 +198,166 @@ protected:
     }
 };
 
+//--------------------------------------------------------------Simple_supervisor_client_connection
+
+struct Simple_supervisor_client_connection : Abstract_supervisor_client_connection {
+    enum State {
+        s_not_connected,
+        s_connecting,
+        s_fetching_configuration,
+        s_configuration_fetched
+    };
+
+private:
+    Fill_zero _zero_;
+    State _state;
+    bool _is_ready;
+    bool _connection_failed;
+    bool _start_update_configuration_delayed;
+
+    static string state_name(State state) {
+        switch (state) {
+            case s_not_connected:           return "not_connected";
+            case s_connecting:              return "connecting";
+            case s_fetching_configuration:  return "fetching_configuration";
+            case s_configuration_fetched:   return "configuration_fetched";
+            default:                        return "state=" + as_string(state);
+        }
+    }
+
+public:
+    Simple_supervisor_client_connection(Supervisor_client_interface* c, const Host_and_port& h) :
+        Abstract_supervisor_client_connection(c, h), 
+        _zero_(this + 1) 
+    {}
+
+    string obj_name() const {
+        return S() << "Supervisor_client_connection(" << _host_and_port << " " << state_name(_state) << ")";
+    }
+
+    State state() const { 
+        return _state; 
+    }
+
+    bool is_ready() const { 
+        return _is_ready; 
+    }
+
+    bool connection_failed() const { 
+        return _connection_failed; 
+    }
+
+    void try_connect() {
+        if (_state == s_not_connected)
+            async_wake();
+    }
+
+    void start_update_configuration() {
+        if (_state == s_not_connected) 
+            async_continue();
+        else
+            _start_update_configuration_delayed = true;
+    }
+
+protected:
+    bool async_continue_(Continue_flags) {
+        bool something_done = false;
+        try {
+            if (_xml_client_connection)  
+                _xml_client_connection->async_check_exception();
+            switch (_state) {
+                case s_not_connected: {
+                    _connection_failed = false;
+                    connect();
+                    _state = s_connecting;
+                    break;
+                }
+                case s_connecting: {
+                    if (_xml_client_connection->state() != Xml_client_connection::s_connected)  
+                        break;
+                    send_fetch_command();
+                    _state = s_fetching_configuration;
+                }
+                case s_fetching_configuration: {
+                    if (xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document()) {
+                        on_configuration_directory_received(response_document);
+                        _state = s_configuration_fetched;
+                    }
+                    if (_state != s_configuration_fetched)  
+                        break;
+                }
+                case s_configuration_fetched: {
+                    if (_start_update_configuration_delayed) {
+                        start_update_configuration();
+                        _start_update_configuration_delayed = false;
+                    }
+                    close_connection();
+                    _state = s_not_connected;
+                    set_async_delay(supervisor_connect_retry_time);
+                    _is_ready = true;   // Nach Wiederholung wegen Verbindungsverlusts bereits true
+                    break;
+                }
+                default:
+                    assert(0);
+            }
+        }
+        catch (exception& x) {
+            log()->warn(x.what());
+            close_connection();
+            _state = s_not_connected;
+            _connection_failed = true;
+            set_async_delay(supervisor_connect_retry_time);  // Nochmals probieren
+            something_done = true;
+        }
+
+        return something_done;
+    }
+
+    void send_fetch_command() {
+        ptr<io::String_writer> string_writer = Z_NEW(io::String_writer());
+        ptr<xml::Xml_writer>   xml_writer = Z_NEW(xml::Xml_writer(string_writer));
+
+        xml_writer->set_encoding(string_encoding);
+        xml_writer->write_prolog();
+
+        xml_writer->begin_element("supervisor.configuration.fetch");
+        xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
+
+        if (_spooler->_tcp_port)
+            xml_writer->set_attribute("tcp_port", _spooler->_tcp_port);
+
+        if (_spooler->_udp_port)
+            xml_writer->set_attribute("udp_port", _spooler->_udp_port);
+
+        if (_spooler->is_cluster())
+            xml_writer->set_attribute("is_cluster_member", "yes");
+
+        xml_writer->set_attribute("version", _spooler->_version);
+
+        write_directory_structure(xml_writer, root_path);
+        xml_writer->end_element("supervisor.configuration.fetch");
+
+        xml_writer->close();
+
+        _xml_client_connection->send(string_writer->to_string());
+    }
+
+    bool async_finished_() const {
+        return _state == s_not_connected;
+    }
+
+    string async_state_text_() const {
+        S result;
+        result << obj_name();
+        result << "(";
+        if (_is_ready)  result << ", ready";
+        if (_connection_failed)  result << ", connection failed";
+        if (_start_update_configuration_delayed)  result << ", start_update_configuration_delayed ";
+        result << ")";
+        return result;
+    }
+};
+
 //---------------------------------------------------------------------Supervisor_client_connection
 
 struct Supervisor_client_connection : Abstract_supervisor_client_connection
@@ -202,7 +380,6 @@ struct Supervisor_client_connection : Abstract_supervisor_client_connection
     virtual string              obj_name                    () const;
 
     State                       state                       () const                                { return _state; }
-    void                        connect                     ();
     bool                        is_ready                    () const                                { return _is_ready; }
     bool                        connection_failed           () const                                { return _connection_failed; }
     void                        start_update_configuration  ();
@@ -242,6 +419,7 @@ struct Supervisor_client : Supervisor_client_interface
     void                        try_connect                 ()                                      { if( _client_connection )  _client_connection->try_connect(); }
     void                        set_using_central_configuration()                                   { _is_using_central_configuration = true; }
     bool                        is_using_central_configuration() const                              { return _is_using_central_configuration; }
+    void                        change_to_connectionless    ();
     Host_and_port               host_and_port               () const                                { return _client_connection? _client_connection->host_and_port() : Host_and_port(); }
 
     // IDispatch_implementation
@@ -254,6 +432,7 @@ struct Supervisor_client : Supervisor_client_interface
     friend struct               Abstract_supervisor_client_connection;
 
     Fill_zero                  _zero_;
+    Host_and_port const        _host_and_port;
     ptr<Abstract_supervisor_client_connection> _client_connection;
     bool                       _is_using_central_configuration;
 
@@ -261,12 +440,9 @@ struct Supervisor_client : Supervisor_client_interface
     static const Com_method     _methods[];
 };
 
-//--------------------------------------------------------------------------------------------const
-    
-const int                               supervisor_connect_retry_time       = 60;
-Supervisor_client::Class_descriptor     Supervisor_client::class_descriptor ( &typelib, "Spooler.Supervisor", Supervisor_client::_methods );
-
 //----------------------------------------------------------------------Supervisor_client::_methods
+
+Supervisor_client::Class_descriptor Supervisor_client::class_descriptor(&typelib, "Spooler.Supervisor", Supervisor_client::_methods);
 
 const Com_method Supervisor_client::_methods[] =
 { 
@@ -300,10 +476,12 @@ ptr<Supervisor_client_interface> new_supervisor_client( Scheduler* scheduler, co
 Supervisor_client::Supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
 : 
     Supervisor_client_interface( scheduler, type_supervisor_client, &class_descriptor ),
-    _zero_(this+1)
+    _zero_(this+1),
+    _host_and_port(host_and_port)
 {
-    _log->set_prefix( S() << obj_name() << ' ' << host_and_port.as_string() );
-    _client_connection = Z_NEW( Supervisor_client_connection( this, host_and_port ) );
+    _log->set_prefix( S() << obj_name() << ' ' << _host_and_port.as_string() );
+    //_client_connection = Z_NEW( Simple_supervisor_client_connection( this, host_and_port ) );
+    _client_connection = Z_NEW(Supervisor_client_connection(this, _host_and_port));
 }
 
 //-------------------------------------------------------------------------Supervisor_client::close
@@ -323,6 +501,7 @@ bool Supervisor_client::subsystem_initialize()
 {
     _subsystem_state = subsys_initialized;
 
+    if (!_spooler->_udp_port)  log()->warn(message_string("SCHEDULER-899"));
 
     if( !_spooler->_configuration_directories[ confdir_cache ].exists() )
     {
@@ -337,9 +516,20 @@ bool Supervisor_client::subsystem_initialize()
     _spooler->folder_subsystem()->initialize_cache_directory();
 
     _client_connection->set_async_manager( _spooler->_connection_manager );
-    _client_connection->connect();
+    _client_connection->start();
 
     return true;
+}
+
+//------------------------------------------------------Supervisor_client::change_to_connectionless
+
+void Supervisor_client::change_to_connectionless()
+{
+    _client_connection->set_async_manager(NULL);
+    _client_connection = NULL;
+    _client_connection = Z_NEW(Simple_supervisor_client_connection(this, _host_and_port));
+    _client_connection->set_async_manager(_spooler->_connection_manager);
+    _client_connection->start();
 }
 
 //------------------------------------------------------------------Supervisor_client::get_Hostname
@@ -372,14 +562,6 @@ STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
-}
-
-//------------------------------------------------------------Supervisor_client_connection::connect
-
-void Supervisor_client_connection::connect()
-{
-    Abstract_supervisor_client_connection::connect();
-    _state = s_connecting;
 }
 
 //-----------------------------------------Supervisor_client_connection::start_update_configuration
@@ -422,6 +604,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
             case s_not_connected:
                 _connection_failed = false;
                 connect();
+                _state = s_connecting;
                 break;
 
 
@@ -461,7 +644,12 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
             {
                 if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
                 {
-                    log()->info( message_string( "SCHEDULER-950" ) );
+                    if (response_document.documentElement().select_node("/spooler/answer/ok[@recommended='supervisor.configuration.fetch']")) {
+                        close();
+                        _supervisor_client->change_to_connectionless();   // this wird ungültig
+                        return true;
+                    }
+                    log()->info(message_string("SCHEDULER-950"));
                     _state = s_registered;
                 }
 
@@ -482,8 +670,6 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
                 xml_writer->begin_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );
 
-                if( !_spooler->_udp_port )  log()->warn( message_string( "SCHEDULER-899" ) );//, supervisor_configuration_poll_interval ) );
-
                 write_directory_structure( xml_writer, root_path );
 
                 xml_writer->end_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );
@@ -498,8 +684,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
             {
                 if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
                 {
-                    //log()->info( message_string( "SCHEDULER-950" ) );
-                    on_configuration_directory_receieved(response_document);
+                    on_configuration_directory_received(response_document);
                     _state = s_configuration_fetched;
                 }
 

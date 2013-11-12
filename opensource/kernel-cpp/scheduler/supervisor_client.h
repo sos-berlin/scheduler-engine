@@ -18,6 +18,7 @@ struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_
     virtual void                set_using_central_configuration()                                   = 0;
     virtual bool                is_using_central_configuration() const                              = 0;
     virtual Host_and_port       host_and_port               () const                                = 0;
+    virtual void                change_to_connectionless    ()                                      = 0;
 };
 
 
