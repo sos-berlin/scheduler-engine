@@ -741,7 +741,7 @@ Settings* Spooler::modifiable_settings() const {
 //--------------------------------------------------------------------------------Spooler::settings
 
 const Settings* Spooler::settings() const {
-    if (!_settings)  z::throw_xc("settings");   // Sollte nicht passieren
+    if (!_settings)  z::throw_xc("settings is missing");   // Sollte nicht passieren
     return _settings;
 }
 

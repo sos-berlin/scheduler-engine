@@ -298,6 +298,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-455", "No configuration directory for '$1'" },
     { "SCHEDULER-456", "Invalid response from supervisor" },
     { "SCHEDULER-457", "Remote scheduler '$1' has not been registered" },
+    { "SCHEDULER-458", "Remote scheduler has not sent a notification for $1s and has been deregistered" },
     { "SCHEDULER-459", "Error in dependant after '$1' has been loaded:\n$2" },
     { "SCHEDULER-460", "$1 is centrally defined and cannot be locally overwritten" },
     { "SCHEDULER-461", "Path reaches beyond root (too many '..'): $1" },

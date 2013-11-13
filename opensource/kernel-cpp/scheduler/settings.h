@@ -27,6 +27,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     int                        _max_length_of_blob_entry;
     bool                       _use_java_persistence;
     bool                       _order_distributed_balanced;
+    int                        _supervisor_configuration_polling_interval;
 };
 
 }} //namespace sos::scheduler

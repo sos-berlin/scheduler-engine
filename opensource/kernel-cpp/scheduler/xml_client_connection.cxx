@@ -215,9 +215,6 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 {
                     _send_data = "";
                     _state = s_connected;
-
-                    //log()->info( "ANTWORT: " + _recv_data );
-                    //log()->info( message_string( "SCHEDULER-950" ) );   // "Scheduler ist registriert"
                 }
                 else
                 {

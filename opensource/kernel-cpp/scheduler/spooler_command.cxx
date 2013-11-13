@@ -1437,7 +1437,9 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
 
     _spooler->_supervisor->execute_register_remote_scheduler( register_remote_scheduler_element, _communication_operation );
 
-    return _answer.createElement( "ok" );
+    xml::Element_ptr e = _answer.createElement( "ok" );
+    e.setAttribute("recommended", "supervisor.configuration.fetch");   // <supervisor.remote_scheduler.configuration.fetch_updated_files> ist veraltet. <supervisor.configuration.fetch> ist neu
+    return e;
 }
 
 //-------------------------------------------------------Command_processor::execute_service_request
