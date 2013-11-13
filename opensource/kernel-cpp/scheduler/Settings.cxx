@@ -31,6 +31,7 @@ void Settings::set_from_variables(const Com_variable_set& p) {
     _keep_order_content_on_reschedule = p.get_bool("scheduler.order.keep_order_content_on_reschedule", true);
     _max_length_of_blob_entry = p.get_int("scheduler.max_kbyte_of_db_log_entry", default_kbyte_of_db_lob_entry) * 1024;
     _order_distributed_balanced = p.get_bool("scheduler.order.distributed.balanced", false);
+    _supervisor_configuration_polling_interval = p.get_int("scheduler.configuration.client.polling_interval", 15*60);
 }
 
 //------------------------------------------------------------------------------------Settings::set
@@ -56,6 +57,9 @@ void Settings::set(int number, const string& value) {
             break;
         case 7:
             _order_distributed_balanced = as_bool(value);
+            break;
+        case 8:
+            _supervisor_configuration_polling_interval = as_int(value);
             break;
         default:
             z::throw_xc("UNKNOWN_SETTING", number);

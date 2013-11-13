@@ -16,7 +16,9 @@ public enum SettingName {
     /** Datenbank über neue Java-Schnittstelle statt über die alte Hostware. */
     useJavaPersistence(5),
 
-    orderDistributedBalanced(7);
+    orderDistributedBalanced(7),
+
+    supervisorConfigurationPollingInterval(8);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;
