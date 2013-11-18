@@ -30,6 +30,7 @@ const int                       delay_after_error_default                 = INT_
 const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
 const int                       directory_file_order_source_max_default   = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
 const int                       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
+const bool                      alert_when_directory_missing_default      = true;
 
 #ifdef Z_WINDOWS
     const int   directory_file_order_source_repeat_default  = 60;
@@ -97,6 +98,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Event                      _notification_event;             // Nur Windows
     Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
     int                        _max_orders;
+    bool                       _alert_when_directory_missing;
 
     vector< ptr<zschimmer::file::File_info> > _new_files;
     int                        _new_files_index;
@@ -255,7 +257,8 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     _zero_(this+1),
     _delay_after_error(delay_after_error_default),
     _repeat(directory_file_order_source_repeat_default),
-    _max_orders(directory_file_order_source_max_default)
+    _max_orders(directory_file_order_source_max_default),
+    _alert_when_directory_missing(alert_when_directory_missing_default)
 {
     _path = subst_env( element.getAttribute( "directory" ) );
 
@@ -272,6 +275,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
 
     _max_orders = element.int_getAttribute( "max", _max_orders );
     _next_state = normalized_state( element.getAttribute( "next_state", _next_state.as_string() ) );
+    _alert_when_directory_missing = element.bool_getAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
 }
 
 //----------------------------------------Directory_file_order_source::~Directory_file_order_source
@@ -312,6 +316,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
 
         if (!delay_after_error().is_eternal())  element.setAttribute( "delay_after_error", delay_after_error().seconds() );
         if (!_repeat.is_eternal())              element.setAttribute( "repeat"           , _repeat.seconds());
+        element.setAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
         
         if( _directory_error )  append_error_element( element, _directory_error );
 
@@ -397,24 +402,27 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
 
             Z_LOG2( "scheduler.file_order", "FindFirstChangeNotification( \"" << _path.path() << "\", FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
             HANDLE h = FindFirstChangeNotification( _path.path().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-            if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
-
-            if( _notification_event.handle() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
-            {
-                _notification_event.wait( 0 );
-                if( _notification_event.signaled() )      
+            if (h == INVALID_HANDLE_VALUE) {
+                if (_alert_when_directory_missing)
+                    z::throw_mswin( "FindFirstChangeNotification", _path.path() );
+            } else {
+                if( _notification_event.handle() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
                 {
-                    _notification_event.set_signaled();     
-                    Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                    _notification_event.wait( 0 );
+                    if( _notification_event.signaled() )      
+                    {
+                        _notification_event.set_signaled();     
+                        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                    }
+
+                    close_notification();
                 }
 
-                close_notification();
-            }
-
-            _notification_event.set_handle( h );
-            _notification_event.set_name( "FindFirstChangeNotification " + _path );
+                _notification_event.set_handle( h );
+                _notification_event.set_name( "FindFirstChangeNotification " + _path );
         
-            add_to_event_manager( _spooler->_connection_manager );
+                add_to_event_manager( _spooler->_connection_manager );
+            }
         }
         else
         if( was_notified )
@@ -546,7 +554,7 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
             {
                 log()->info( message_string( "SCHEDULER-984", _path ) );
 
-                if( _send_recovered_mail )
+                if( _alert_when_directory_missing && _send_recovered_mail )
                 {
                     _send_recovered_mail = false;
                     send_mail( evt_file_order_source_recovered, NULL );
@@ -565,13 +573,20 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
             }
             else
             {
-                log()->warn( x.what() ); 
+				if ( _alert_when_directory_missing )
+				{
+					log()->warn( x.what() ); 
 
-                if( _spooler->_mail_on_error )
-                {
-                    _send_recovered_mail = true; 
-                    send_mail( evt_file_order_source_error, &x );
-                }
+					if( _spooler->_mail_on_error )
+					{
+						_send_recovered_mail = true; 
+						send_mail( evt_file_order_source_error, &x );
+					}
+				}
+				else
+				{
+					log()->info( x.what() );
+				}
             }
 
             _directory_error = x;
