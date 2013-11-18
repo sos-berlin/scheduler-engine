@@ -46,11 +46,11 @@ extern const string             scheduler_file_path_variable_name;
 
 typedef stdext::hash_set<Job_chain*>   Job_chain_set;
 
-//--------------------------------------------------------------------------------Virgin_is_allowed
+//--------------------------------------------------------------------------------Untouched_is_allowed
 
-enum Virgin_is_allowed {
-    virgin_not_allowed = false,
-    virgin_allowed = true
+enum Untouched_is_allowed {
+    untouched_not_allowed = false,
+    untouched_allowed = true
 };
 
 //--------------------------------------------------------------------------------------------Order
@@ -136,8 +136,8 @@ struct Order : Com_order,
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
 
-    bool                        is_virgin               () const                                    { return _is_virgin; }
-    bool                        is_touched              () const                                    { return !_is_virgin; }
+    void                        touch                   ()                                          { _is_touched = true; }
+    bool                        is_touched              () const                                    { return _is_touched; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -352,7 +352,7 @@ struct Order : Com_order,
     State                      _initial_state;          // F�r Wiederholung mit <run_time> oder <schedule>. Bei verschachtelten Jobkette in der �bergeordneten Jobkette
     ptr<Web_service>           _web_service;
 
-    bool                       _is_virgin;              // Noch von keiner Task ber�hrt
+    bool                       _is_touched;             // Von einer Task ber�hrt
     int                        _setback_count;
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
@@ -885,7 +885,7 @@ struct Job_chain : Com_job_chain,
     bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
-    Virgin_is_allowed           is_ready_for_new_order_processing() const;
+    Untouched_is_allowed        is_ready_for_new_order_processing() const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
     void                        check_max_orders            () const;
@@ -969,14 +969,14 @@ struct Order_queue : Com_order_queue,
     int                         touched_order_count         ();
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
-    Order*                      first_immediately_processable_order(Virgin_is_allowed, const Time& now ) const;
+    Order*                      first_immediately_processable_order(Untouched_is_allowed, const Time& now ) const;
     Order*                      fetch_order                 ( const Time& now );
-    Order*                      load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Virgin_is_allowed, const Time& now);
+    Order*                      load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Untouched_is_allowed, const Time& now);
     bool                        has_immediately_processable_order( const Time& now = Time(0) );
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
-    Order*                      fetch_and_occupy_order      ( Task* occupying_task, Virgin_is_allowed, const Time& now, const string& cause );
+    Order*                      fetch_and_occupy_order      ( Task* occupying_task, Untouched_is_allowed, const Time& now, const string& cause );
     Time                        next_time                   ();
     bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }
     time_t                      next_distributed_order_check_time() const                           { return _next_distributed_order_check_time; }

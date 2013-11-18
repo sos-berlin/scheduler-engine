@@ -80,7 +80,6 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        read_new_files_and_handle_deleted_files( const string& cause );
     bool                        read_new_files          ();
     bool                        clean_up_blacklisted_files();
-  //bool                        clean_up_virgin_orders  ();
     Duration                    delay_after_error       ();
     void                        clear_new_files         ();
     void                        read_known_orders       ( String_set* known_orders );
@@ -723,68 +722,6 @@ void Directory_file_order_source::read_known_orders( String_set* known_orders )
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_orders_tablename, x ), Z_FUNCTION ); }
 }
 
-//-----------------------------Directory_file_order_source::read_new_files_and_handle_deleted_files
-
-//void Directory_file_order_source::read_new_files_and_handle_deleted_files( const string& cause )
-//{
-//    hash_set<string> blacklisted_files         = _job_chain->blacklist_id_set();       int EXCEPTION;
-//    hash_set<string> removed_blacklisted_files = blacklisted_files;
-//    hash_set<string> virgin_known_files;
-//
-//
-//    Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
-//
-//
-//    read_new_files();
-//
-//    // removed_blacklisted_files: 
-//    // Aufträge in der Blacklist, deren Dateien nicht mehr da sind, entfernen
-//
-//    Z_FOR_EACH( hash_set<string>, removed_blacklisted_files, it ) 
-//    {
-//        ptr<Order> removed_file_order;
-//
-//        if( _job_chain->is_distributed() )
-//        {
-//            hash_set<string>::iterator it2 = blacklisted_files.find( *it );
-//            if( it2 != blacklisted_files.end() )
-//            {
-//                removed_file_order = order_subsystem()->try_load_order_from_database( (Transaction*)NULL, _job_chain->name(), *it2 );
-//            }
-//        }
-//        else
-//        {
-//            Job_chain::Blacklist_map::iterator it2 = _job_chain->_blacklist_map.find( *it );
-//            if( it2 != _job_chain->_blacklist_map.end() )
-//            {
-//                removed_file_order = it2->second;
-//            }
-//        }
-//
-//        if( removed_file_order )
-//        {
-//            removed_file_order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
-//            removed_file_order->remove_from_job_chain();   
-//        }
-//    }
-//
-//
-//    // virgin_known_files:
-//    // Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
-//
-//    Order_queue::Queue* queue = &_next_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
-//    for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
-//    {
-//        Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
-//
-//        if( order->is_virgin()  &&  virgin_known_files.find( order->string_id() ) == virgin_known_files.end()  &&  order->is_file_order() )
-//        {
-//            order->log()->warn( message_string( "SCHEDULER-982" ) );
-//            order->remove_from_job_chain();
-//        }
-//    }
-//}
-
 //-----------------------------------------------------Directory_file_order_source::clear_new_files
 
 void Directory_file_order_source::clear_new_files()
@@ -905,49 +842,6 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 
     return result;
 }
-
-//----------------------------------------------Directory_file_order_source::clean_up_virgin_orders
-
-//bool Directory_file_order_source::clean_up_virgin_orders()
-//
-//// Jungfräuliche Aufträge, denen die Datei abhanden gekommen sind, entfernen
-//
-//{
-//    bool result = false;
-//
-//    if( !_are_virgin_orders_cleaned_up )
-//    {
-//        hash_set<string> virgin_new_files;
-//
-//        for( int i = 0; i < _new_files.size(); i++ )
-//        {
-//            if( zschimmer::file::File_info* new_file = _new_files[ i ] )
-//            {
-//                string path  = new_file->path();
-//                Order* order = _job_chain->order_or_null( path );   // Kein Datenbankzugriff, also nicht für verteilte Aufträge
-//
-//                if( order  &&  order->is_virgin() )  virgin_new_files.insert( path );
-//            }
-//        }
-//
-//
-//        Order_queue::Queue* queue = &_next_order_queue->_queue;    // Zugriff mit Ausnahmegenehmigung. In _setback_queue verzögerte werden nicht beachtet
-//        for( Order_queue::Queue::iterator it = queue->begin(); it != queue->end(); )
-//        {
-//            Order* order = *it++;  // Hier schon weiterschalten, bevor it durch remove_from_job_chain ungültig wird
-//
-//            if( order->is_virgin()  &&  virgin_new_files.find( order->string_id() ) == virgin_new_files.end()  &&  order->is_file_order() )
-//            {
-//                order->log()->warn( message_string( "SCHEDULER-982" ) );
-//                order->remove_from_job_chain();
-//            }
-//        }
-//
-//        _are_virgin_orders_cleaned_up = true;
-//    }
-//
-//    return result;
-//}
 
 //-----------------------------------------------------------Directory_file_order_source::send_mail
 

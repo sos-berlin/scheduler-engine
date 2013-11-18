@@ -67,7 +67,6 @@ Order::Order( Standing_order_subsystem* subsystem )
     _com_log->set_log( log() );
 
     _created       = Time::now();
-    _is_virgin     = true;
     //_signaled_next_time = Time::never;
 
     _schedule_use = Z_NEW( Order_schedule_use( this ) );
@@ -322,10 +321,9 @@ void Order::occupy_for_task( Task* task, const Time& now )
     if( !_start_time )  _start_time = now;      
 
 
-    bool was_virgin = _is_virgin;
-    _is_virgin = false;
-    if( was_virgin )
-    {
+    bool was_touched = _is_touched;
+    touch();
+    if (!was_touched) {
         if ( _job_chain )   // JS-682
             _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
@@ -1262,7 +1260,7 @@ bool Order::order_is_removable_or_replaceable()
     else
     {
         result = job_chain_path() == ""  ||  
-                 is_virgin()             || 
+                 !is_touched()           || 
                  end_state_reached();
 
         if( !result )
@@ -1363,7 +1361,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( state_name       != "" )  set_state   ( state_name.c_str() );
     if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
-    _is_virgin = !element.bool_getAttribute( "touched" );
+    _is_touched = element.bool_getAttribute( "touched" );
 
 
     if( element.hasAttribute( "suspended" ) )
@@ -1629,7 +1627,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     if( _suspended       )  result.setAttribute( "suspended"   , "yes" );
     if( _is_replacement  )  result.setAttribute( "replacement" , "yes" ),
                             result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
-    if( !_is_virgin      )  result.setAttribute( "touched"     , "yes" );
+    if( _is_touched      )  result.setAttribute( "touched"     , "yes" );
 
     if( start_time().not_zero() )  result.setAttribute( "start_time", start_time().xml_value() );
     if( end_time().not_zero()   )  result.setAttribute( "end_time"  , end_time  ().xml_value() );
@@ -2147,7 +2145,7 @@ void Order::reset()
         set_state( _initial_state );
     }
     set_next_start_time();
-    _is_virgin = true;
+    _is_touched = false;
     prepare_for_next_roundtrip();
 }
 
@@ -2642,7 +2640,7 @@ void Order::handle_end_state()
         if( ( has_base_file()  ||  !next_start.is_never()  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
            (s != _initial_state || _initial_state == _end_state) )   // JS-730  
         {
-            _is_virgin = true;
+            _is_touched = false;
             handle_end_state_repeat_order( next_start );
         }
         else
@@ -3113,8 +3111,7 @@ void Order::handle_changed_schedule()
         _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_any_start )
                                              : Period();
     
-        if( is_virgin() )
-        {
+        if (!is_touched()) {
             //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
             set_next_start_time();      // Änderung von <run_time> Überschreibt Order.at
         }

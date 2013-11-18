@@ -1334,7 +1334,7 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
 
     if( is_ready_for_order_processing() )
     {
-        Virgin_is_allowed v = _job_chain->is_ready_for_new_order_processing();
+        Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing();
         result = order_queue()->fetch_and_occupy_order(occupying_task, v, now, cause);
     }
 
@@ -1861,7 +1861,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "file_order_source" ) )      // Wegen _is_on_blacklist und _is_virgin
+        if( e.nodeName_is( "file_order_source" ) )      // Wegen _is_on_blacklist und _is_touched
         {
             ptr<Directory_file_order_source_interface> d = new_directory_file_order_source( this, e );
             _order_sources._order_source_list.push_back( +d );
@@ -3144,12 +3144,12 @@ void Job_chain::check_max_orders() const
 
 //-----------------------------------------------------Job_chain::is_ready_for_new_order_processing
 
-Virgin_is_allowed Job_chain::is_ready_for_new_order_processing() const
+Untouched_is_allowed Job_chain::is_ready_for_new_order_processing() const
 {
     bool result = 
        is_ready_for_order_processing() &&
        !is_max_orders_reached();
-    return result? virgin_allowed : virgin_not_allowed;
+    return result? untouched_allowed : untouched_not_allowed;
 }
 
 //-----------------------------------------------------------------Job_chain::is_max_orders_reached
@@ -4157,13 +4157,13 @@ Order* Order_queue::first_processable_order() const
 
 bool Order_queue::has_immediately_processable_order(const Time& now)
 { 
-    Virgin_is_allowed v = _job_chain->is_ready_for_new_order_processing();
+    Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing();
     return first_immediately_processable_order(v, now) != NULL; 
 }
 
 //-------------------------------------------------Order_queue::first_immediately_processable_order
 
-Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin_is_allowed, const Time& now) const
+Order* Order_queue::first_immediately_processable_order(Untouched_is_allowed untouched_is_allowed, const Time& now) const
 {
     // now kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
 
@@ -4173,7 +4173,7 @@ Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin
     {
         Order* order = *o;
 
-        if( order->is_immediately_processable( now )  &&  (virgin_is_allowed  ||  !order->is_virgin()))
+        if( order->is_immediately_processable( now )  &&  (untouched_is_allowed  ||  order->is_touched()))
         {
             result = order;
             result->_setback = Time(0);
@@ -4205,7 +4205,7 @@ xml::Element_ptr Order_queue::why_dom_element(const xml::Document_ptr& doc, cons
 
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order
 
-Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allowed virgin_is_allowed,
+Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_allowed untouched_is_allowed,
     const Time& now, const string& cause)
 {
     assert( occupying_task );
@@ -4213,7 +4213,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
-    Order* order = first_immediately_processable_order(virgin_is_allowed, now);
+    Order* order = first_immediately_processable_order(untouched_is_allowed, now);
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
@@ -4222,7 +4222,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
     {
         withdraw_distributed_order_request();
 
-        order = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now );
+        order = load_and_occupy_next_distributed_order_from_database(occupying_task, untouched_is_allowed, now );
         // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
         if( order )  assert( order->_is_distributed );
     }
@@ -4230,7 +4230,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
     // Die Dateiaufträge (File_order_source)
 
-    if( !order && virgin_is_allowed)
+    if( !order && untouched_is_allowed)
     {
         Z_FOR_EACH( Order_source_list, _order_source_list, it )
         {
@@ -4263,9 +4263,9 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
 //--------------------------------Order_queue::load_and_occupy_next_distributed_order_from_database
 
-Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Virgin_is_allowed virgin_is_allowed, const Time& now)
+Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Untouched_is_allowed untouched_is_allowed, const Time& now)
 {
-    if (!virgin_is_allowed)  _job_chain->assert_is_not_distributed(Z_FUNCTION);
+    if (!untouched_is_allowed)  _job_chain->assert_is_not_distributed(Z_FUNCTION);
 
     Order* result    = NULL;
     S      select_sql;
