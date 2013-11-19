@@ -9,8 +9,10 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
+import org.junit.Ignore
 
-@RunWith(classOf[JUnitRunner])
+// @RunWith(classOf[JUnitRunner])
+@Ignore
 final class JS864IT extends ScalaSchedulerTest {
 
   private var eventPipe: EventPipe = _
