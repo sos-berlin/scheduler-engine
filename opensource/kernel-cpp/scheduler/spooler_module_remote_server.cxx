@@ -537,7 +537,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             _server->_file_logger = Z_NEW( File_logger( _log ) );
             _server->_file_logger->set_object_name( "Com_remote_module_instance_server" );   // Nur zur Info
             
-            if( _class_data->_task_process_element.bool_getAttribute( "log_stdout_and_stderr", false ) )
+            if( _class_data->_task_process_element.bool_getAttribute( "log_stdout_and_stderr", false ) )   // Remote_scheduler mit Monitor und Shell?
             {
                 _server->_file_logger->add_file( _class_data->_task_process_element.getAttribute( "stdout_path" ), "stdout" );
                 _server->_file_logger->add_file( _class_data->_task_process_element.getAttribute( "stderr_path" ), "stderr" );
@@ -549,6 +549,11 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
                 // Nur, wenn _module_instance eigene Dateien hat (sonst ""). So im remote_scheduler
                 _server->_file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );  // Process_module_instance::begin__start() hat die Dateien angelegt
                 _server->_file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
+
+                if (Com_task_proxy* task_proxy = dynamic_cast<Com_task_proxy*>(_server->_module_instance->object("spooler_task"))) {
+                    task_proxy->_stdout_path = _server->_module_instance->stdout_path();
+                    task_proxy->_stderr_path = _server->_module_instance->stderr_path();
+                }
             }
 
             if( _server->_file_logger->has_files() )  _server->_file_logger->start_thread();
