@@ -38,12 +38,12 @@ final class CppServletIT extends ScalaSchedulerTest {
                    Nil) {
     lazy val resource = cppResource(injector, testConf.client)
 
-    test("Kommando über POST "+testConf) {
+    test("Kommando ueber POST "+testConf) {
       val result = stringFromResponse(resource.`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[ClientResponse], "<show_state/>"))
       result should include ("<state")
     }
 
-    test("Kommando über POST ohne Authentifizierung "+testConf) {
+    test("Kommando ueber POST ohne Authentifizierung "+testConf) {
       val webClient = Client.create()
       val x = intercept[UniformInterfaceException] {
         cppResource(injector, webClient).`type`(TEXT_XML_TYPE).accept(TEXT_XML_TYPE).post(classOf[String], "<show_state/>")
@@ -52,7 +52,7 @@ final class CppServletIT extends ScalaSchedulerTest {
       x.getResponse.getStatus should equal(UNAUTHORIZED.getStatusCode)
     }
 
-    test("Kommando über GET "+testConf) {
+    test("Kommando ueber GET "+testConf) {
       val result = stringFromResponse(resource.path("<show_state/>").accept(TEXT_XML_TYPE).get(classOf[ClientResponse]))
       result should include ("<state")
     }
