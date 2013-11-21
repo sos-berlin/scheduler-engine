@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory
 import com.sos.scheduler.engine.common.system.Files.tryRemoveDirectoryRecursivly
 import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
-import com.sos.scheduler.engine.common.xml.XmlUtils.prettyXml
+import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.eventbus._
@@ -149,7 +149,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
       logger warn x.toString
       val cmd = "<show_state what='folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations'/>"
       logger warn cmd
-      logger warn prettyXml(scheduler.uncheckedExecuteXml(cmd))
+      logger warn prettyXml(loadXml(scheduler.uncheckedExecuteXml(cmd)))
       throw x
     }
   }
