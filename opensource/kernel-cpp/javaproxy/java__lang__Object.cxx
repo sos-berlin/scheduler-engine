@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "java__lang__Object.h"
+#include "java__lang__Class.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace java { namespace lang { 
@@ -14,6 +15,7 @@ struct Object__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Method const __constructor____method;
     ::zschimmer::javabridge::Method const _equals__Ljava_lang_Object_2__method;
+    ::zschimmer::javabridge::Method const _getClass____method;
     ::zschimmer::javabridge::Method const _hashCode____method;
     ::zschimmer::javabridge::Method const _notify____method;
     ::zschimmer::javabridge::Method const _notifyAll____method;
@@ -31,6 +33,7 @@ Object__class::Object__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor____method(this, "<init>", "()V")
     ,_equals__Ljava_lang_Object_2__method(this, "equals", "(Ljava/lang/Object;)Z")
+    ,_getClass____method(this, "getClass", "()Ljava/lang/Class;")
     ,_hashCode____method(this, "hashCode", "()I")
     ,_notify____method(this, "notify", "()V")
     ,_notifyAll____method(this, "notifyAll", "()V")
@@ -71,6 +74,14 @@ bool Object::equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::j
     parameter_list._jvalues[0].l = p0.get_jobject();
     Object__class* cls = _class.get();
     return 0 != cls->_equals__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
+}
+
+::javaproxy::java::lang::Class Object::getClass() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Object__class* cls = _class.get();
+    ::javaproxy::java::lang::Class result;
+    result.steal_local_ref(cls->_getClass____method.jobject_call(get_jobject(), parameter_list));
+    return result;
 }
 
 jint Object::hashCode() const {

@@ -42,12 +42,14 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.o\
  com__sos__scheduler__engine__kernel__order__jobchain__JobChain.o\
  com__sos__scheduler__engine__kernel__order__jobchain__Node.o\
+ com__sos__scheduler__engine__kernel__supervisor__CppWebClient.o\
  com__sos__scheduler__engine__kernel__time__TimeZones.o\
  com__sos__scheduler__engine__kernel__variable__VariableSet.o\
  com__sos__scheduler__engine__kernel__xml__CppXmlSchemaValidator.o\
  com__sos__scheduler__engine__kernel__xml__CppXsltStylesheet.o\
  com__sos__scheduler__engine__main__SchedulerControllerBridge.o\
  java__io__File.o\
+ java__lang__Class.o\
  java__lang__Object.o\
  java__lang__String.o\
  java__net__URI.o\
@@ -70,4 +72,5 @@ javaproxy_objects=\
  org__w3c__dom__Node.o\
  org__w3c__dom__NodeList.o\
  org__w3c__dom__Text.o\
- scala__Option.o
+ scala__Option.o\
+ scala__util__Try.o

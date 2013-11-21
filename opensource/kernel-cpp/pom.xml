@@ -94,6 +94,7 @@
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                                 <argument>com.sos.scheduler.engine.common.xml.XmlUtils</argument>
                                 <argument>com.sos.scheduler.engine.data.event.AbstractEvent</argument>
+                                <argument>java.lang.Class</argument>
                                 <argument>java.io.File</argument>
                                 <argument>java.net.URI</argument>
                                 <argument>java.net.URL</argument>
@@ -111,6 +112,7 @@
                                 <argument>org.w3c.dom.NodeList</argument>
                                 <argument>org.w3c.dom.Text</argument>
                                 <argument>scala.Option</argument>
+                                <argument>scala.util.Try</argument>
                             </arguments>
                         </configuration>
                     </execution>
