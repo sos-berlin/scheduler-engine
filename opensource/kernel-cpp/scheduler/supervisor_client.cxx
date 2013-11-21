@@ -196,9 +196,52 @@ protected:
     }
 };
 
-//----------------------------------------------------------------------------Connectionless_client
+//--------------------------------------------------------Abstract_connectionless_supervisor_client
 
-struct Connectionless_client : Abstract_supervisor_client_connection {
+struct Abstract_connectionless_client : Abstract_supervisor_client_connection {
+private:
+    Fill_zero _zero_;
+
+public:
+    Abstract_connectionless_client(Supervisor_client_interface* c, const Host_and_port& h) :
+        Abstract_supervisor_client_connection(c, h),
+        _zero_(this + 1)
+    {}
+
+protected:
+    string fetch_command() {
+        ptr<io::String_writer> string_writer = Z_NEW(io::String_writer());
+        ptr<xml::Xml_writer>   xml_writer = Z_NEW(xml::Xml_writer(string_writer));
+
+        xml_writer->set_encoding(string_encoding);
+        xml_writer->write_prolog();
+
+        xml_writer->begin_element("supervisor.configuration.fetch");
+        xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
+
+        if (_spooler->_tcp_port)
+            xml_writer->set_attribute("tcp_port", _spooler->_tcp_port);
+
+        if (_spooler->_udp_port)
+            xml_writer->set_attribute("udp_port", _spooler->_udp_port);
+
+        if (_spooler->is_cluster())
+            xml_writer->set_attribute("is_cluster_member", "yes");
+
+        xml_writer->set_attribute("version", _spooler->_version);
+        xml_writer->set_attribute("interval", _polling_interval.seconds());
+
+        write_directory_structure(xml_writer, root_path);
+        xml_writer->end_element("supervisor.configuration.fetch");
+
+        xml_writer->close();
+        return string_writer->to_string();
+    }
+};
+
+//------------------------------------------------------------------------Connectionless_tcp_client
+
+struct Connectionless_tcp_client : Abstract_connectionless_client {
     enum State {
         s_not_connected,
         s_connecting,
@@ -224,13 +267,13 @@ private:
     }
 
 public:
-    Connectionless_client(Supervisor_client_interface* c, const Host_and_port& h) :
-        Abstract_supervisor_client_connection(c, h), 
+    Connectionless_tcp_client(Supervisor_client_interface* c, const Host_and_port& h) :
+        Abstract_connectionless_client(c, h), 
         _zero_(this + 1) 
     {}
 
     string obj_name() const {
-        return S() << "Connectionless_client(" << _host_and_port << " " << state_name(_state) << ")";
+        return S() << "Connectionless_tcp_client(" << _host_and_port << " " << state_name(_state) << ")";
     }
 
     State state() const { 
@@ -312,33 +355,7 @@ protected:
     }
 
     void send_fetch_command() {
-        ptr<io::String_writer> string_writer = Z_NEW(io::String_writer());
-        ptr<xml::Xml_writer>   xml_writer = Z_NEW(xml::Xml_writer(string_writer));
-
-        xml_writer->set_encoding(string_encoding);
-        xml_writer->write_prolog();
-
-        xml_writer->begin_element("supervisor.configuration.fetch");
-        xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
-
-        if (_spooler->_tcp_port)
-            xml_writer->set_attribute("tcp_port", _spooler->_tcp_port);
-
-        if (_spooler->_udp_port)
-            xml_writer->set_attribute("udp_port", _spooler->_udp_port);
-
-        if (_spooler->is_cluster())
-            xml_writer->set_attribute("is_cluster_member", "yes");
-
-        xml_writer->set_attribute("version", _spooler->_version);
-        xml_writer->set_attribute("interval", _polling_interval.seconds());
-
-        write_directory_structure(xml_writer, root_path);
-        xml_writer->end_element("supervisor.configuration.fetch");
-
-        xml_writer->close();
-
-        _xml_client_connection->send(string_writer->to_string());
+        _xml_client_connection->send(fetch_command());
     }
 
     bool async_finished_() const {
@@ -513,7 +530,7 @@ bool Supervisor_client::subsystem_initialize()
 
     _spooler->folder_subsystem()->initialize_cache_directory();
 
-    _client_connection = Z_NEW(Connected_client(this, _host_and_port));   // Zuerst die alte Methode mit Dauerverbindung. Bei einem neuen Supervisor schalten wir Connectionless_client um.
+    _client_connection = Z_NEW(Connected_client(this, _host_and_port));   // Zuerst die alte Methode mit Dauerverbindung. Bei einem neuen Supervisor schalten wir Connectionless_tcp_client um.
     _client_connection->set_async_manager(_spooler->_connection_manager);
     _client_connection->start();
 
@@ -526,7 +543,7 @@ void Supervisor_client::change_to_connectionless()
 {
     _client_connection->set_async_manager(NULL);
     _client_connection = NULL;
-    _client_connection = Z_NEW(Connectionless_client(this, _host_and_port));
+    _client_connection = Z_NEW(Connectionless_tcp_client(this, _host_and_port));
     _client_connection->set_async_manager(_spooler->_connection_manager);
     _client_connection->start();
 }
