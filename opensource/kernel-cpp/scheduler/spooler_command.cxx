@@ -2290,6 +2290,16 @@ void File_buffered_command_response::write( const io::Char_sequence& seq )
     }
 }
 
+//----------------------------------------------------File_buffered_command_response::complete_text
+
+string File_buffered_command_response::complete_text() 
+{
+    if (_state == s_congested)
+        return _congestion_file.read_all();
+    else
+        return _buffer;
+}
+
 //---------------------------------------------------------File_buffered_command_response::get_part
 
 string File_buffered_command_response::get_part()

@@ -207,6 +207,7 @@ struct File_buffered_command_response : Command_response
     virtual string              async_state_text_           () const                                { return "File_buffered_xml_response"; }
 
     // Xml_response
+    string                      complete_text               ();
     string                      get_part                    ();
     void                        write                       ( const io::Char_sequence& );
 

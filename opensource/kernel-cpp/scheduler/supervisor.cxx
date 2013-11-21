@@ -201,7 +201,7 @@ struct Supervisor : Supervisor_interface
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* );
     ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
-    ptr<Command_response>       execute_configuration_fetch (const xml::Element_ptr&, Security::Level, const Host&);
+    ptr<Command_response>       execute_configuration_fetch (const xml::Element_ptr&, Security::Level);
 
 
     Remote_configurations*      remote_configurations       () const                                { return _remote_configurations; }
@@ -274,12 +274,8 @@ bool Supervisor::subsystem_activate()
 
 ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
 {
-    ptr<Command_response> result;
-
     if (element.nodeName_is("supervisor.configuration.fetch")) {
-        Xml_operation* xml_processor = dynamic_cast<Xml_operation*>(command_processor->communication_operation());
-        if (!xml_processor)  z::throw_xc("SCHEDULER-222", element.nodeName());
-        return execute_configuration_fetch(element, command_processor->security_level(), xml_processor->connection()->peer_host());
+        return execute_configuration_fetch(element, command_processor->security_level());
     }
     else
     if (string_begins_with(element.nodeName(), "supervisor.remote_scheduler.")) {
@@ -290,22 +286,20 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
         Remote_scheduler_interface* remote_scheduler = xml_processor->_operation_connection->_remote_scheduler; 
         if( !remote_scheduler )  z::throw_xc( "SCHEDULER-457", command_processor->communication_operation()->_connection->peer_host() );
 
-        result = remote_scheduler->execute_xml( element, command_processor );
+        return remote_scheduler->execute_xml( element, command_processor );
     }
     else
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
-
-    return result;
 }
 
 //--------------------------------------------------------------------------Supervisor::execute_xml
 
-ptr<Command_response> Supervisor::execute_configuration_fetch(const xml::Element_ptr& element, Security::Level security_level, const Host& host)
+ptr<Command_response> Supervisor::execute_configuration_fetch(const xml::Element_ptr& element, Security::Level security_level)
 {
     if (security_level < Security::seclev_no_add)  z::throw_xc("SCHEDULER-121");
     assert(element.nodeName_is("supervisor.configuration.fetch"));
 
-    Host_and_port host_and_port(host, element.int_getAttribute("tcp_port"));
+    Host_and_port host_and_port(element.getAttribute("host"), element.int_getAttribute("tcp_port"));
     ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null(host_and_port);
     if (!remote_scheduler) {
         remote_scheduler = Z_NEW(Remote_scheduler(this, host_and_port));

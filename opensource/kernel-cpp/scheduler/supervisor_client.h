@@ -14,11 +14,10 @@ struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_
     virtual bool                is_ready                    () const                                = 0;
     virtual bool                connection_failed           () const                                = 0;
     virtual void                start_update_configuration  ()                                      = 0;
-    virtual void                try_connect                 ()                                      = 0;
     virtual void                set_using_central_configuration()                                   = 0;
     virtual bool                is_using_central_configuration() const                              = 0;
     virtual Host_and_port       host_and_port               () const                                = 0;
-    virtual void                change_to_connectionless    ()                                      = 0;
+  //virtual void                change_to_old_connector     ()                                      = 0;
 };
 
 

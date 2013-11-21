@@ -18,7 +18,9 @@ public enum SettingName {
 
     orderDistributedBalanced(7),
 
-    supervisorConfigurationPollingInterval(8);
+    supervisorConfigurationPollingInterval(8),
+
+    supervisorConfigurationClientV1_3(9);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;
