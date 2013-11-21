@@ -27,7 +27,7 @@ final class CommandService @Inject private(xmlCommandExecutor: SchedulerXmlComma
     executeCommandWithSecurityLevel(command, SchedulerSecurityRequest.securityLevel(request))
 
   private def executeCommandWithSecurityLevel(command: String, securityLevel: SchedulerSecurityLevel) = {
-    val resultXml = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel)
+    val resultXml: String = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel)
     Response.ok(resultXml).cacheControl(noCache).build()
   }
 }
