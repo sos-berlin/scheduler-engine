@@ -266,7 +266,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-419", "New Process_class.max_processes=$1 is below current number of processes=$2" },
     { "SCHEDULER-420", "Negative value is not allowed for $1" },
     { "SCHEDULER-422", "'$1' has already been added" },
-    { "SCHEDULER-423", "There is no supervisor" },
     { "SCHEDULER-424", "'$1' is being removed before '$2'" },
     { "SCHEDULER-426", "'$2' and '$3' cannot be combined, because of duplicate order id '$1'" },
     { "SCHEDULER-427", "Invalid MD5 hexadecimal coded password for HTTP user '$1'" },
