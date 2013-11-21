@@ -65,10 +65,45 @@ static jstring JNICALL obj_1name(JNIEnv* jenv, jobject, jlong cppReference)
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static void JNICALL set_1value__Ljava_lang_Object_2(JNIEnv* jenv, jobject, jlong cppReference, jobject p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Timed_call* o_ = has_proxy< ::sos::scheduler::Timed_call >::of_cpp_reference(cppReference,"::sos::scheduler::Timed_call::set_value()");
+        (o_->set_value(::javaproxy::java::lang::Object(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL value(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Timed_call* o_ = has_proxy< ::sos::scheduler::Timed_call >::of_cpp_reference(cppReference,"::sos::scheduler::Timed_call::value()");
+        return (o_->value()).local_ref();
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
     { (char*)"at_millis__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::at_1millis },
     { (char*)"call__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::call },
-    { (char*)"obj_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::obj_1name }
+    { (char*)"obj_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::obj_1name },
+    { (char*)"set_value__native", (char*)"(JLjava/lang/Object;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1value__Ljava_lang_Object_2 },
+    { (char*)"value__native", (char*)"(J)Ljava/lang/Object;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::value }
 };
 
 namespace zschimmer { namespace javabridge { 
@@ -76,7 +111,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Timed_call >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Timed_call >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 3);
+        int ret = env->RegisterNatives(*cls, native_methods, 5);
         if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.Timed_callCImpl");
     }
 

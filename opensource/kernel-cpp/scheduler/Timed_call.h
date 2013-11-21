@@ -2,6 +2,7 @@
 #define __SCHEDULER_TIMED_CALL_H
 
 #include "../zschimmer/Call.h"
+#include "../zschimmer/java2.h"
 
 namespace sos {
 namespace scheduler {
@@ -13,6 +14,7 @@ struct Timed_call : z::Call, javabridge::has_proxy<Timed_call>
 {
   private:
     Time _at;
+    javabridge::Global_jobject2 _value;
 
   protected:
     Timed_call(const Time& at) : _at(at) {}
@@ -24,6 +26,14 @@ struct Timed_call : z::Call, javabridge::has_proxy<Timed_call>
     
     Time at() const { 
         return _at; 
+    }
+
+    void set_value(jobject jo) {
+        _value.assign_(jo);
+    }
+
+    const javabridge::Global_jobject2& value() const {
+        return _value;
     }
 
     virtual void call() const = 0;
