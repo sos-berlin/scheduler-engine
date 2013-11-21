@@ -127,6 +127,9 @@ with HasInjector {
     }
   }
 
+  @ForCpp private def instance[A](c: Class[A]): A =
+    injector.getInstance(c)
+
   @ForCpp private def getEventSubsystem =
     injector.getInstance(classOf[EventSubsystem])
 
