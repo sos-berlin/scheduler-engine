@@ -16,7 +16,9 @@ final class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, cppProxy: 
     catch { case e: CppProxyInvalidatedException => }   // Das passiert, wenn der TimedCall den Scheduler beendet und er beim signal() schon beendet ist.
   }
 
-  def tryCancel(o: TimedCall[_]) = delegate.tryCancel(o)
+  def tryCancel(o: TimedCall[_]) =
+    delegate.tryCancel(o)
 
-  def nextTime = delegate.nextTime
+  def nextTime =
+    delegate.nextTime
 }

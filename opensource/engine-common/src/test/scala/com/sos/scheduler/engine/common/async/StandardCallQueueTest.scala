@@ -8,7 +8,7 @@ import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
+final class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
   private val callQueue = new StandardCallQueue
 
   test("warm-up") {
@@ -32,7 +32,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     val call = TimedCall(TimedCall.shortTerm) { a += 1 }
     callQueue add call
     val c = callQueue.popMature().get
-    c should be theSameInstanceAs (call)
+    c should be theSameInstanceAs call
     c.onApply()
     a should equal (1)
     callQueue.popMature() should equal (None)
@@ -47,7 +47,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     callQueue.popMature() should equal (None)
     sleep(42.ms)
     val c = callQueue.popMature().get
-    c should be theSameInstanceAs (call)
+    c should be theSameInstanceAs call
     c.onApply()
     a should equal (1)
     callQueue.popMature() should equal (None)

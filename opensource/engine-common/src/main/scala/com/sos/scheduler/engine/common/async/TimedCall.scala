@@ -10,11 +10,12 @@ import scala.util.{Success, Try, Failure}
 
 trait TimedCall[A] extends Callable[A] {
 
-  def instant = new Instant(epochMillis)
-
   def epochMillis: Long
 
   def call(): A
+
+  final def instant =
+    new Instant(epochMillis)
 
   final def onApply() {
     logger debug s"Calling $toString"
@@ -46,9 +47,12 @@ trait TimedCall[A] extends Callable[A] {
       Some(s"at=$atString") filter { _ => epochMillis != shortTermMillis })
     .flatten mkString " "
 
-  final def atString = if (epochMillis == shortTermMillis) "short-term" else ISODateTimeFormat.dateTime.print(epochMillis)
+  final def atString =
+    if (epochMillis == shortTermMillis) "short-term"
+    else ISODateTimeFormat.dateTime.print(epochMillis)
 
-  def toStringPrefix = getClass.getSimpleName
+  def toStringPrefix =
+    getClass.getSimpleName
 }
 
 object TimedCall {
@@ -61,5 +65,5 @@ object TimedCall {
     def call() = f
   }
 
-  case class CancelledException protected[async]() extends RuntimeException
+  final case class CancelledException protected[async]() extends RuntimeException
 }

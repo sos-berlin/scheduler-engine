@@ -8,7 +8,7 @@ import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
-class CallRunnerTest extends FunSuite with OneInstancePerTest {
+final class CallRunnerTest extends FunSuite with OneInstancePerTest {
   private val callDispatcher = new CallRunner(new StandardCallQueue)
 
   test("(Warm up)") {  // Für die langsamen SOS-Rechner

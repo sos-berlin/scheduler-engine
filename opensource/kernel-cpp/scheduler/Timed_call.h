@@ -18,9 +18,13 @@ struct Timed_call : z::Call, javabridge::has_proxy<Timed_call>
     Timed_call(const Time& at) : _at(at) {}
 
   public:
-    int64 at_millis() const { return at().millis(); }
+    int64 at_millis() const { 
+        return at().millis(); 
+    }
     
-    Time at() const { return _at; }
+    Time at() const { 
+        return _at; 
+    }
 
     virtual void call() const = 0;
 };
@@ -30,14 +34,18 @@ struct Timed_call : z::Call, javabridge::has_proxy<Timed_call>
 
 struct Object_call : Timed_call {
   protected: 
-    Object_call(const Time& at = Time(0)) : Timed_call(at) {}
+    Object_call(const Time& at = Time(0)) : 
+        Timed_call(at) 
+    {}
 
     string obj_name() const;
 
   protected:
     virtual Scheduler_object* object() const = 0;
 
-    virtual string call_name() const { return name_of_type_info(typeid(*this)); }
+    virtual string call_name() const { 
+        return name_of_type_info(typeid(*this)); 
+    }
 };
 
 //-------------------------------------------------------------------------------------Type_int_map
@@ -62,17 +70,27 @@ struct object_call : Object_call {
     OBJECT* const _object;
 
   protected:
-    object_call(OBJECT* o) : _object(o) {}
-    object_call(const Time& at, OBJECT* o) : Object_call(at), _object(o) {}
+    object_call(OBJECT* o) : 
+        _object(o) 
+    {}
+    
+    object_call(const Time& at, OBJECT* o) : 
+        Object_call(at), 
+        _object(o) 
+    {}
 
-    Scheduler_object* object() const { return _object; }
+    Scheduler_object* object() const { 
+        return _object; 
+    }
 
   public:
     void call() const {
         _object->on_call(*(const CALL*)this);
     }
 
-    static int type_id() { return Type_int_map::static_singleton.type_to_int(typeid(CALL)); }
+    static int type_id() { 
+        return Type_int_map::static_singleton.type_to_int(typeid(CALL)); 
+    }
 };
 
 //-------------------------------------------------------------------------------DEFINE_SIMPLE_CALL
@@ -159,7 +177,10 @@ struct typed_call_register : Typed_call_register {
     OBJECT* _object;
     
   public:
-    typed_call_register(OBJECT* o) : Typed_call_register(o->spooler()), _object(o) {}
+    typed_call_register(OBJECT* o) : 
+        Typed_call_register(o->spooler()), 
+        _object(o) 
+    {}
 
     template<typename CALL>
     void cancel() {
