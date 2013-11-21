@@ -3285,10 +3285,11 @@ STDMETHODIMP Com_task_proxy::get_Stderr_text( BSTR* result )
     {
         *result = NULL;
 
+        if (_stderr_path != "")
+            hr = String_to_bstr(string_from_file(_stderr_path), result);
+        else
         if( xml::Element_ptr task_process_element = this->task_process_element() )
-        {
             hr = String_to_bstr( string_from_file( task_process_element.getAttribute( "stderr_path" ) ), result );
-        }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -3307,10 +3308,11 @@ STDMETHODIMP Com_task_proxy::get_Stderr_path( BSTR* result )
     {
         *result = NULL;
 
+        if (_stderr_path != "")
+            hr = String_to_bstr(_stderr_path, result);
+        else
         if( xml::Element_ptr task_process_element = this->task_process_element() )
-        {
             hr = String_to_bstr( task_process_element.getAttribute( "stderr_path" ), result );
-        }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -3329,10 +3331,11 @@ STDMETHODIMP Com_task_proxy::get_Stdout_text( BSTR* result )
     {
         *result = NULL;
 
+        if (_stdout_path != "")
+            hr = String_to_bstr(string_from_file(_stdout_path), result);
+        else
         if( xml::Element_ptr task_process_element = this->task_process_element() )
-        {
-            hr = String_to_bstr( string_from_file( task_process_element.getAttribute( "stdout_path" ) ), result );
-        }
+            hr = String_to_bstr(string_from_file(task_process_element.getAttribute("stdout_path")), result);
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -3351,10 +3354,11 @@ STDMETHODIMP Com_task_proxy::get_Stdout_path( BSTR* result )
     {
         *result = NULL;
 
+        if (_stdout_path != "")
+            hr = String_to_bstr(_stdout_path, result);
+        else
         if( xml::Element_ptr task_process_element = this->task_process_element() )
-        {
             hr = String_to_bstr( task_process_element.getAttribute( "stdout_path" ), result );
-        }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
