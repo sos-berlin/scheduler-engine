@@ -249,8 +249,20 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__async__CppCall.cxx" />
   <ClCompile Include="com__sos__scheduler__engine__common__scalautil__Resources.cxx" />
     <ClCompile Include="scala__util__Try.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__supervisor__CppWebClient.cxx" />
+    
     <ClCompile Include="java__lang__Class.cxx" />
+    
+    
+    
+    
+    
+    
+    
+    <ClCompile Include="com__sos__scheduler__engine__common__scalautil__Resources$.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils$.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler$.cxx" />
+    
+    <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones$.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

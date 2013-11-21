@@ -252,10 +252,28 @@
     <ClCompile Include="scala__util__Try.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="com__sos__scheduler__engine__kernel__supervisor__CppWebClient.cxx">
+    
+    <ClCompile Include="java__lang__Class.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="java__lang__Class.cxx">
+    
+    
+    
+    
+    
+    
+    
+    <ClCompile Include="com__sos__scheduler__engine__common__scalautil__Resources$.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__common__xml__XmlUtils$.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler$.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    
+    <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones$.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     </ItemGroup>
