@@ -230,7 +230,7 @@ public:
     {}
 
     string obj_name() const {
-        return S() << "Connected_client(" << _host_and_port << " " << state_name(_state) << ")";
+        return S() << "Connectionless_client(" << _host_and_port << " " << state_name(_state) << ")";
     }
 
     State state() const { 
