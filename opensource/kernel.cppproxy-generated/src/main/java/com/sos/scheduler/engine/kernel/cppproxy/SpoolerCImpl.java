@@ -1104,18 +1104,11 @@ final class SpoolerCImpl
     private static native java.lang.String setting__native(long cppReference, int p0);
 
 
-    @Override public void signal(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            signal__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
+    @Override public void signal() {
+            signal__native(cppReference());
     }
 
-    private static native void signal__native(long cppReference, java.lang.String p0);
+    private static native void signal__native(long cppReference);
 
 
     @Override public boolean signaled() {

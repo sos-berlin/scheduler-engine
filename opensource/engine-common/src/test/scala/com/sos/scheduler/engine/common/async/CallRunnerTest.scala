@@ -13,7 +13,7 @@ class CallRunnerTest extends FunSuite with OneInstancePerTest {
 
   test("(Warm up)") {  // Für die langsamen SOS-Rechner
     callDispatcher.queue add TimedCall(now()) {}
-    callDispatcher.execute()
+    callDispatcher.executeMatureCalls()
     1 should equal (1)
   }
 
@@ -23,10 +23,10 @@ class CallRunnerTest extends FunSuite with OneInstancePerTest {
     callDispatcher.queue add { () => a += 1 }
     callDispatcher.queue add TimedCall(now() + delay) { a += 10 }
     callDispatcher.queue add { () => a += 100 }
-    callDispatcher.execute()
+    callDispatcher.executeMatureCalls()
     a should equal (101)
     sleep(delay)
-    callDispatcher.execute()
+    callDispatcher.executeMatureCalls()
     a should equal (111)
   }
 }

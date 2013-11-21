@@ -19,7 +19,7 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
     val call = futureTimedCall(now()) {}
     queue.add(call)
     val future = call.future
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     future.isCompleted
   }
 
@@ -28,10 +28,10 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
     queue.add(call)
     val future = call.future
     (future.isCompleted, future.value) should be (false, None)
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     (future.isCompleted, future.value) should be (false, None)
     sleep(101.ms)
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     (future.isCompleted, future.value) should be (true, Some(Success("Hej!")))
   }
 
@@ -40,10 +40,10 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
     queue.add(call)
     val future = call.future
     (future.isCompleted, future.value) should be (false, None)
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     (future.isCompleted, future.value) should be (false, None)
     sleep(101.ms)
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     future.isCompleted should be (true)
     intercept[TestException] { future.value.get.get }
   }
@@ -53,7 +53,7 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
     queue.add(call)
     val future = call.future
     (future.isCompleted, future.value) should be (false, None)
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     (future.isCompleted, future.value) should be (true, Some(Success("Hej!")))
   }
 
@@ -62,7 +62,7 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
     queue.add(call)
     val future = call.future
     (future.isCompleted, future.value) should be (false, None)
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     future.isCompleted should be (true)
     intercept[TestException] { future.value.get.get }
   }
@@ -71,7 +71,7 @@ class FutureCompletionTest extends FunSuite with OneInstancePerTest {
     implicit val implicitQueue = queue
     val future = callFuture { throw new TestException }
     (future.isCompleted, future.value) should be (false, None)
-    dispatcher.execute()
+    dispatcher.executeMatureCalls()
     future.isCompleted should be (true)
     intercept[TestException] { future.value.get.get }
   }

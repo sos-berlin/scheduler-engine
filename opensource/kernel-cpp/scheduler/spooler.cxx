@@ -2770,6 +2770,13 @@ bool Spooler::run_continue( const Time& now )
 }
 
 //----------------------------------------------------------------------------------Spooler::signal
+// Thread-faehig
+void Spooler::signal()
+{
+    _event.signal("");
+}
+
+//----------------------------------------------------------------------------------Spooler::signal
 
 void Spooler::signal( const string& signal_name )       
 { 

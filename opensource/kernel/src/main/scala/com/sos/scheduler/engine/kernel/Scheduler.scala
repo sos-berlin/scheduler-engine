@@ -111,7 +111,7 @@ with HasInjector {
   /** Wird bei jedem Schleifendurchlauf aufgerufen. */
   @ForCpp private def onEnteringSleepState() = {
     eventBus.dispatchEvents()
-    val somethingDone = callRunner.execute()
+    val somethingDone = callRunner.executeMatureCalls()
     val nextTime = schedulerThreadCallQueue.nextTime
     if (somethingDone) -nextTime else nextTime
   }
@@ -139,7 +139,7 @@ with HasInjector {
   }
 
   @ForCpp private def cancelCall(o: CppCall) {
-    schedulerThreadCallQueue.tryRemove(o)
+    schedulerThreadCallQueue.tryCancel(o)
   }
 
   @ForCpp private def threadLock() {

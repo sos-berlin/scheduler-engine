@@ -1239,12 +1239,12 @@ static jstring JNICALL setting__I(JNIEnv* jenv, jobject, jlong cppReference, jin
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static void JNICALL signal__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+static void JNICALL signal(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
         ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::signal()");
-        (o_->signal(env.string_from_jstring(p0)));
+        (o_->signal());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -1543,7 +1543,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"send_cmd__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::send_1cmd },
     { (char*)"set_id__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1id__Ljava_lang_String_2 },
     { (char*)"setting__native", (char*)"(JI)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::setting__I },
-    { (char*)"signal__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::signal__Ljava_lang_String_2 },
+    { (char*)"signal__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::signal },
     { (char*)"signaled__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::signaled },
     { (char*)"start__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::start },
     { (char*)"state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::state_1name },

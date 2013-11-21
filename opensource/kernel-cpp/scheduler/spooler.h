@@ -520,6 +520,7 @@ struct Spooler : Object,
     void                        wait                        ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
 
+    void                        signal                      ();
     void                        signal                      ( const string& signal_name );
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }

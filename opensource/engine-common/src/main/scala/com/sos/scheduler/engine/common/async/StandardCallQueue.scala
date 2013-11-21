@@ -1,24 +1,42 @@
 package com.sos.scheduler.engine.common.async
 
+import StandardCallQueue._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import org.joda.time.DateTimeUtils.currentTimeMillis
 import scala.collection.mutable
+import scala.sys.error
 
 final class StandardCallQueue extends PoppableCallQueue {
-  private val queue = mutable.UnrolledBuffer[TimedCall[_]]()
+  private val queue = mutable.Buffer[TimedCall[_]]()
+//private val queue = mutable.UnrolledBuffer[TimedCall[_]]()    Scala 2.10.0 insert() terminiert nicht
+  private var closed = false
 
   def add(o: TimedCall[_]) {
+    logger debug s"Enqueue $o"
     synchronized {
+      if (closed)  error(s"CallQueue is closed. '$o' is rejected")
       val i = positionAfter(o.epochMillis)
       if (i < queue.size) queue.insert(i, o)
       else queue.append(o)  // Scala 2.10.0: queue.insert(queue.size, x) geht in eine Schleife
     }
   }
 
-  def tryRemove(o: TimedCall[_]): Boolean = {
+  def close() {
+    synchronized {
+      closed = true
+      queue dropWhile { o => o.onCancel(); true }
+    }
+  }
+
+  def tryCancel(o: TimedCall[_]): Boolean = {
     synchronized {
       indexOf(o) match {
-        case -1 => false
-        case i => queue.remove(i); true
+        case -1 =>
+          false
+        case i =>
+          o.onCancel()
+          queue.remove(i)
+          true
       }
     }
   }
@@ -41,11 +59,15 @@ final class StandardCallQueue extends PoppableCallQueue {
     matureHeadOption map { o => queue.remove(0) ensuring { _ == o } }
   }
 
-  private def matureHeadOption = headOption filter timedCallIsMature
+  def matureHeadOption = headOption filter timedCallIsMature
 
-  private def headOption = synchronized( queue.headOption )
+  private def headOption = synchronized { queue.headOption }
 
   private def timedCallIsMature(o: TimedCall[_]) = o.epochMillis <= currentTimeMillis()
 
   override def toString = s"${getClass.getSimpleName} with ${queue.size} operations, next=${queue.headOption}"
+}
+
+object StandardCallQueue {
+  private val logger = Logger(getClass)
 }
