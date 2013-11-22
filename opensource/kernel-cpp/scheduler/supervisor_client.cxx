@@ -29,6 +29,8 @@ using namespace directory_observer;
 using xml::Xml_writer;
 struct Http_connector;
 
+const Duration connection_retry_duration = Duration(60);
+
 DEFINE_SIMPLE_CALL(Http_connector, Supervisor_response_call)
 
 //-------------------------------------------------------------------------------Abstract_connector
@@ -42,6 +44,7 @@ protected:
     Supervisor_client_interface* const _supervisor_client;
     Host_and_port const _host_and_port;
     Duration const _polling_interval;
+    Duration const _connection_retry_duration;
     bool _start_update_configuration_delayed;
 
 protected:
@@ -50,7 +53,8 @@ protected:
         _zero_(this + 1),
         _supervisor_client(supervisor_client),
         _host_and_port(host_and_port),
-        _polling_interval(supervisor_client->spooler()->settings()->_supervisor_configuration_polling_interval)
+        _polling_interval(supervisor_client->spooler()->settings()->_supervisor_configuration_polling_interval),
+        _connection_retry_duration(min(connection_retry_duration, _polling_interval))
     {
         _log = supervisor_client->log();
     }
@@ -280,7 +284,7 @@ struct Http_connector : Abstract_connector {
             catch (exception& x) {
                 log()->warn(x.what());
                 _connection_failed = true;
-                set_async_delay(_polling_interval.as_double());
+                set_async_delay(_connection_retry_duration.as_double());
             }
             return true;
         } 
@@ -298,13 +302,14 @@ struct Http_connector : Abstract_connector {
             //}
             on_configuration_directory_received(doc);
             _is_ready = true;
+            set_async_delay(_polling_interval.as_double());
         }
         catch (exception& x) {
             log()->error(x.what());
             _exception = x;
+            set_async_delay(_connection_retry_duration.as_double());
         }
         _supervisor_response_call = NULL;
-        set_async_delay(_polling_interval.as_double());
         check_update_configuration_delayed();
         _spooler->signal("supervisor_client");
     }
@@ -698,7 +703,7 @@ bool Old_connected_connector::async_continue_( Continue_flags )
         _xml_client_connection = NULL;
         _state = s_not_connected;
         _connection_failed = true;
-        set_async_delay(_polling_interval.as_double());  // Nochmal probieren
+        set_async_delay(_connection_retry_duration.as_double());  // Nochmal probieren
         something_done = true;
     }
 
