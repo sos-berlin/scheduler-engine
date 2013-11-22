@@ -214,15 +214,22 @@ bool Order::is_immediately_processable( const Time& at )
 
 bool Order::is_processable()
 {
-    if( _is_on_blacklist ) return false;  
-    if( _suspended )       return false;
-    if( _task )            return false;               // Schon in Verarbeitung
-    if( _is_replacement )  return false;
-
+    if (!is_self_processable()) return false;
     if( _job_chain && !_job_chain->is_ready_for_order_processing())  return false;
     if( Node* node = job_chain_node() )
         if (!node->is_ready_for_order_processing())  return false;
 
+    return true;
+}
+
+//-----------------------------------------------------------------------Order::is_self_processable
+
+bool Order::is_self_processable()
+{
+    if (_is_on_blacklist) return false;
+    if (_suspended)       return false;
+    if (_task)            return false;               // Schon in Verarbeitung
+    if (_is_replacement)  return false;
     return true;
 }
 
@@ -1021,11 +1028,11 @@ string Order::calculate_db_distributed_next_time()
         if( _is_replacement  )  result = replacement_database_distributed_next_time;
         else
         {
-            Time next_time = this->next_time().rounded_to_next_second();
+            Time next_time = is_self_processable() ? _setback : Time::never;
 
             result = next_time.is_zero ()? now_database_distributed_next_time :
                      next_time.is_never()? never_database_distributed_next_time 
-                                         : next_time.db_string( time::without_ms );
+                                         : next_time.rounded_to_next_second().db_string( time::without_ms );
         }
     }
 
