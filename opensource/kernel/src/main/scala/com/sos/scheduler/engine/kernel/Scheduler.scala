@@ -175,10 +175,12 @@ with HasInjector {
   def uncheckedExecuteXml(xml: String): String = {
     if (closed) error("Scheduler is closed")
     inSchedulerThread { cppProxy.execute_xml(xml) }
+    .stripSuffix("\0")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
   }
 
   def uncheckedExecuteXml(xml: String, securityLevel: SchedulerSecurityLevel) =
-    cppProxy.execute_xml_with_security_level(xml, securityLevel.cppName)
+    inSchedulerThread { cppProxy.execute_xml_with_security_level(xml, securityLevel.cppName) }
+    .stripSuffix("\0")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
 
   //    /** @param text Sollte auf \n enden */
   //    public void writeToSchedulerLog(LogCategory category, String text) {
@@ -189,7 +191,8 @@ with HasInjector {
     cppProxy.tcp_port
   }
 
-  def isClosed = closed
+  def isClosed =
+    closed
 }
 
 @ForCpp

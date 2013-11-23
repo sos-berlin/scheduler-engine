@@ -116,6 +116,7 @@ struct Order : Com_order,
 
     bool                        is_immediately_processable  ( const Time& now );
     bool                        is_processable              ();
+    bool                        is_self_processable         ();
     void                        handle_changed_processable_state();
     void                        signal_job_when_order_has_become_processable();
 

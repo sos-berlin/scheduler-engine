@@ -2071,8 +2071,11 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
 {
     try 
     {
-        if( !_dont_log_command )  Z_LOG2( "scheduler", "Execute " << replace_regex( command_doc.xml(string_encoding), "\\?\\>\n", "?>", 1 ) << "\n" );
-
+        if( !_dont_log_command )  {
+            string line = replace_regex(command_doc.xml(string_encoding), "\\?\\>\n", "?>", 1);
+            string nl = !line.empty() && *line.rbegin() == '\n' ? "" : "\n";
+            Z_LOG2( "scheduler", "Execute " << line << nl);
+        }
         if( _spooler->_validate_xml  &&  _validate )  
         {
             _spooler->_schema.validate( command_doc );
