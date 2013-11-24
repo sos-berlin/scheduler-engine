@@ -188,11 +188,8 @@ void Xml_operation::put_request_part( const char* data, int length )
 
 void Xml_operation::begin()
 {
-    Command_processor command_processor ( _spooler, _connection->_security_level, this );
+    Command_processor command_processor ( _spooler, _connection->_security_level, _connection->peer_host(), this );
     command_processor.set_log( &_connection->_log );
-
-    //command_processor.set_communication_operation( this );
-    //command_processor.set_host( _connection->peer_host() );
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 

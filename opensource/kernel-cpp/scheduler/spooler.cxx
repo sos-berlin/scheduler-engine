@@ -3041,20 +3041,19 @@ void Spooler::suspend_machine()
 //-----------------------------------------------------------------------------Spooler::execute_xml
 
 string Spooler::execute_xml(const string& xml_command) {
-    return execute_xml_with_security_level(xml_command, Security::seclev_all);
+    return execute_xml_with_security_level(xml_command, Security::seclev_all, Host());
 }
 
 //----------------------------------------------------------Spooler::execute_xml_with_security_level
 
-string Spooler::execute_xml_with_security_level(const string& xml_command, const string& security_level) {
-   Command_processor cp ( _spooler, Security::as_level(security_level));
-    return cp.execute(xml_command);
+string Spooler::execute_xml_with_security_level(const string& xml_command, const string& security_level, const string& client_host) {
+    return execute_xml_with_security_level(xml_command, Security::as_level(security_level), Host(client_host));
 }
 
 //----------------------------------------------------------Spooler::execute_xml_with_security_level
 
-string Spooler::execute_xml_with_security_level(const string& xml_command, Security::Level security_level) {
-   Command_processor cp ( _spooler, security_level);
+string Spooler::execute_xml_with_security_level(const string& xml_command, Security::Level security_level, const Host& client_host) {
+    Command_processor cp ( _spooler, security_level, client_host);
     return cp.execute(xml_command);
 }
 

@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor
-import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.plugins.jetty.SchedulerSecurityRequest
 import com.sos.scheduler.engine.plugins.jetty.services.WebServices.noCache
 import javax.inject.Inject
@@ -17,17 +16,19 @@ final class CommandService @Inject private(xmlCommandExecutor: SchedulerXmlComma
   def post(
       command: String,
       @Context request: HttpServletRequest) =
-    executeCommandWithSecurityLevel(command, SchedulerSecurityRequest.securityLevel(request))
+    executeCommandWithSecurityLevel(command, request)
 
   @GET
   @Produces(Array(MediaType.TEXT_XML))
   def get(
       @DefaultValue("") @QueryParam("command") command: String,
       @Context request: HttpServletRequest) =
-    executeCommandWithSecurityLevel(command, SchedulerSecurityRequest.securityLevel(request))
+    executeCommandWithSecurityLevel(command, request)
 
-  private def executeCommandWithSecurityLevel(command: String, securityLevel: SchedulerSecurityLevel) = {
-    val resultXml: String = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel)
+  private def executeCommandWithSecurityLevel(command: String, request: HttpServletRequest ) = {
+    val securityLevel = SchedulerSecurityRequest.securityLevel(request)
+    val clientHost = Option(request.getHeader("x-forwarded-for")) map { _ takeWhile { _ != ',' } } getOrElse request.getRemoteHost
+    val resultXml: String = xmlCommandExecutor.uncheckedExecuteXml(command, securityLevel, clientHost)
     Response.ok(resultXml).cacheControl(noCache).build()
   }
 }

@@ -421,11 +421,11 @@ void Show_what::set_subsystems(const Scheduler& scheduler, const string& subsyst
 
 //-------------------------------------------------------------Command_processor::Command_processor
 
-Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, Communication::Operation* cp )
-: 
+Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, const Host& client_host, Communication::Operation* cp) : 
     _zero_(this+1),
     _spooler(spooler),
     _communication_operation( cp ),
+    _client_host(client_host),
     _validate(true),
     _security_level( security_level )
 {

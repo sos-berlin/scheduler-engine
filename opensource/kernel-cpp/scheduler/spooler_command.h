@@ -254,10 +254,11 @@ struct Get_events_command_response : File_buffered_command_response
 
 struct Command_processor
 {
-                                Command_processor           ( Spooler*, Security::Level, Communication::Operation* cp = NULL );
+                                Command_processor           ( Spooler*, Security::Level, const Host& client_host = Host(), Communication::Operation* = NULL);
                                ~Command_processor           ();
 
     Security::Level             security_level              () const                                { return _security_level; }
+    const Host&                 client_host                 () const                                { return _client_host; }
     Communication::Operation*   communication_operation     () const                                { return _communication_operation; }
 
     void                        execute_config_file         ( const string& xml_filename );
@@ -319,7 +320,6 @@ struct Command_processor
 
     void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );
 
-  //void                        set_communication_operation ( Communication::Operation* p )         { _communication_operation = p; }
     void                        set_validate                ( bool b )                              { _validate = b; }
     void                        set_variable_set            ( const string& name, Com_variable_set* v ) { _variable_set_map[ name ] = v; }
   //void                        set_subst                   ( Com_variable_set* env )               { set_variable_set( variable_set_name_for_substitution, env ); }
@@ -329,6 +329,7 @@ struct Command_processor
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Communication::Operation*  _communication_operation;
+    Host const                 _client_host;
     bool                       _load_base_config_immediately;
     bool                       _dont_log_command;
     xml::Document_ptr          _answer;
