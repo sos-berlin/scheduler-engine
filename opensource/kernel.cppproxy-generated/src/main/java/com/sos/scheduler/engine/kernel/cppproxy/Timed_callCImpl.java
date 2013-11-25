@@ -54,4 +54,34 @@ final class Timed_callCImpl
     private static native java.lang.String obj_name__native(long cppReference);
 
 
+    @Override public void set_value(java.lang.Object p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            set_value__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void set_value__native(long cppReference, java.lang.Object p0);
+
+
+    @Override public java.lang.Object value() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.Object result = value__native(cppReference());
+            checkIsNotReleased(java.lang.Object.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.Object value__native(long cppReference);
+
+
 }

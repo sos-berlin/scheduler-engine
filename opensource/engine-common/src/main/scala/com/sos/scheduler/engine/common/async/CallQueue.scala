@@ -5,7 +5,15 @@ import scala.sys._
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 
 trait CallQueue extends SosAutoCloseable {
+
   def close()
+
+  def add(o: TimedCall[_])
+
+  def tryCancel(o: TimedCall[_]): Boolean
+
+  def nextTime: Long
+
 
   final def add[A](f: () => A) {
     add(ShortTermCall(f))
@@ -19,14 +27,8 @@ trait CallQueue extends SosAutoCloseable {
     add(ShortTermCall(o))
   }
 
-  def add(o: TimedCall[_])
-
   final def remove(o: TimedCall[_]) {
     val removed = tryCancel(o)
     if (!removed) error(s"Unknown TimedCall '$o'")
   }
-
-  def tryCancel(o: TimedCall[_]): Boolean
-
-  def nextTime: Long
 }

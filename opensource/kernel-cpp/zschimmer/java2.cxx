@@ -478,7 +478,7 @@ void Abstract_jobject::steal_local_ref( jobject jo )
 
 //-------------------------------------------------------------------Abstract_jobject::local_ref_of
 
-jobject Abstract_jobject::local_ref()
+jobject Abstract_jobject::local_ref() const
 {
     jobject jo = get_jobject();
     return jo? Env().new_local_ref(jo) : NULL;

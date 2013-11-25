@@ -10,7 +10,7 @@ import org.scalatest.{OneInstancePerTest, FunSuite}
 import scala.util.Success
 
 @RunWith(classOf[JUnitRunner])
-class FutureCompletionTest extends FunSuite with OneInstancePerTest {
+final class FutureCompletionTest extends FunSuite with OneInstancePerTest {
 
   private lazy val queue: PoppableCallQueue = new StandardCallQueue
   private lazy val dispatcher = new CallRunner(queue)

@@ -41,31 +41,40 @@ final class StandardCallQueue extends PoppableCallQueue {
     }
   }
 
-  def isEmpty = synchronized { queue.isEmpty }
+  def isEmpty =
+    synchronized { queue.isEmpty }
 
   private def indexOf(o: TimedCall[_]) =
     queue indexWhere { _ eq o }
 
-  private def positionAfter(at: Long) = queue indexWhere { _.epochMillis > at } match {
-    case -1 => queue.size
-    case i => i
-  }
+  private def positionAfter(at: Long) =
+    queue indexWhere { _.epochMillis > at } match {
+      case -1 => queue.size
+      case i => i
+    }
 
-  def nextTime = headOption map { _.epochMillis } getOrElse Long.MaxValue
+  def nextTime =
+    headOption map { _.epochMillis } getOrElse Long.MaxValue
 
-  def isMature = matureHeadOption.nonEmpty
+  def isMature =
+    matureHeadOption.nonEmpty
 
-  def popMature(): Option[TimedCall[_]] = synchronized {
-    matureHeadOption map { o => queue.remove(0) ensuring { _ == o } }
-  }
+  def popMature(): Option[TimedCall[_]] =
+    synchronized {
+      matureHeadOption map { o => queue.remove(0) ensuring { _ == o } }
+    }
 
-  def matureHeadOption = headOption filter timedCallIsMature
+  def matureHeadOption =
+    headOption filter timedCallIsMature
 
-  private def headOption = synchronized { queue.headOption }
+  private def headOption =
+    synchronized { queue.headOption }
 
-  private def timedCallIsMature(o: TimedCall[_]) = o.epochMillis <= currentTimeMillis()
+  private def timedCallIsMature(o: TimedCall[_]) =
+    o.epochMillis <= currentTimeMillis()
 
-  override def toString = s"${getClass.getSimpleName} with ${queue.size} operations, next=${queue.headOption}"
+  override def toString =
+    s"${getClass.getSimpleName} with ${queue.size} operations, next=${queue.headOption}"
 }
 
 object StandardCallQueue {

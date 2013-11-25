@@ -16,6 +16,8 @@ public interface Timed_callC extends CppProxyWithSister<CppCall> {
     };
 
     long at_millis();
+    Object value();
+    void set_value(Object o);
     void call();
     String obj_name();
 }

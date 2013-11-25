@@ -310,7 +310,7 @@ struct Abstract_jobject : Object
     jobject                     take                        ()                                      { jobject result = get_jobject();  set_jobject(NULL);  return result; }
     void                        assign_                     ( jobject jo )                          { assign_jobject(jo); }
     void                        steal_local_ref             ( jobject jo );                         // lo wird danach ungültig!
-    jobject                     local_ref                   (); 
+    jobject                     local_ref                   () const; 
 
     //Local_value               loval_value_call                  ( const string& method, const Signature&, const Parameter_list& = Parameter_list::empty ) const;
 
