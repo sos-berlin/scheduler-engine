@@ -561,8 +561,8 @@ void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_
             << "  from " << db()->_job_chain_nodes_table.sql_name()
             << "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db())
             << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)  // Only distrubuted job chains
-            << (which_job_chain ? "and `job_chain`=" + sql::quoted(which_job_chain->path().without_slash()) : "")
-            << (which_node ? "and `order_state`=" + sql::quoted(which_node->order_state().as_string()) : ""),
+            << (which_job_chain ? " and `job_chain`=" + sql::quoted(which_job_chain->path().without_slash()) : "")
+            << (which_node ? " and `order_state`=" + sql::quoted(which_node->order_state().as_string()) : ""),
             Z_FUNCTION);
         while (!result_set.eof()) {
             Record record = result_set.get_record();
@@ -1127,6 +1127,7 @@ bool Node::set_action(Action action)
 {
     if( _action != action )
     {
+        Z_LOG2("scheduler", S() << obj_name() << " set_action " << string_from_action(action) << "\n");
         _action = action;
 
         if( _job_chain->state() >= Job_chain::s_active )
