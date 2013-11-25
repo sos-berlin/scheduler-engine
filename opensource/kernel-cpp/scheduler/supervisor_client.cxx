@@ -95,14 +95,9 @@ protected:
 
         xml_writer->begin_element("supervisor.configuration.fetch");
         xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
-        xml_writer->set_attribute("host", _spooler->_complete_hostname);
-        xml_writer->set_attribute("tcp_port", _spooler->_tcp_port);
 
         if (_spooler->_udp_port)
             xml_writer->set_attribute("udp_port", _spooler->_udp_port);
-
-        if (_spooler->is_cluster())
-            xml_writer->set_attribute("is_cluster_member", "yes");
 
         xml_writer->set_attribute("version", _spooler->_version);
         xml_writer->set_attribute("interval", _polling_interval.seconds());

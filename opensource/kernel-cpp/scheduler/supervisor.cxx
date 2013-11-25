@@ -78,7 +78,6 @@ struct Remote_scheduler : Remote_scheduler_interface,
     bool                        check_remote_configuration  ();
     void                        signal_remote_scheduler     ();
     void                        check_timeout               ();
-  //Directory*                  configuration_directory     ();
     Directory*                  configuration_directory_or_null();
     void                        set_alarm_clock             ();
     bool                        is_yet_active               () const  { return _is_active && (_is_connected || ::time(NULL) < _deactivate_at); }
@@ -93,7 +92,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     Remote_configurations*     _remote_configurations;
     Host_and_port              _host_and_port;
     int                        _udp_port;
-    bool                       _is_cluster_member;
+    bool                       _use_scheduler_id;
     string                     _scheduler_id;
     string                     _scheduler_version;
     time_t                     _connected_at;
@@ -298,7 +297,7 @@ ptr<Command_response> Supervisor::execute_configuration_fetch(const xml::Element
     if (security_level < Security::seclev_no_add)  z::throw_xc("SCHEDULER-121");
     assert(element.nodeName_is("supervisor.configuration.fetch"));
 
-    Host_and_port host_and_port(client_host, element.int_getAttribute("tcp_port"));
+    Host_and_port host_and_port(client_host, element.int_getAttribute("udp_port"));
     ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null(host_and_port);
     if (!remote_scheduler) {
         remote_scheduler = Z_NEW(Remote_scheduler(this, host_and_port));
@@ -318,7 +317,7 @@ void Remote_scheduler::update(const xml::Element_ptr& element) {
     _is_connected = false;
     _scheduler_id = element.getAttribute("scheduler_id");
     _scheduler_version = element.getAttribute("version");
-    _is_cluster_member = element.bool_getAttribute("is_cluster_member", false);
+    _use_scheduler_id = true;
     _active_since = ::time(NULL);
     _connected_at = _connected_at;
     _error = NULL;
@@ -443,15 +442,6 @@ Remote_scheduler::Remote_scheduler(Supervisor* supervisor, const Host_and_port& 
     _host_and_port._host.resolve_name();
 }
 
-//--------------------------------------------------------Remote_scheduler::configuration_directory
-    
-//Directory* Remote_scheduler::configuration_directory()
-//{
-//    Directory* result = configuration_directory_or_null();
-//    if( !result)  throw_xc( "SCHEDULER-455", obj_name() );
-//    return result;
-//}
-
 //------------------------------------------------Remote_scheduler::configuration_directory_or_null
 
 Directory* Remote_scheduler::configuration_directory_or_null()
@@ -466,8 +456,8 @@ Directory* Remote_scheduler::configuration_directory_or_null()
     
     if( !result )
     {
-        result = _is_cluster_member? _remote_configurations->directory_tree()->directory_or_null( _scheduler_id )
-                                   : _remote_configurations->configuration_directory_for_host_and_port( _host_and_port );
+        result = _use_scheduler_id? _remote_configurations->directory_tree()->directory_or_null( _scheduler_id )
+                                  : _remote_configurations->configuration_directory_for_host_and_port( _host_and_port );
     }
 
     _configuration_directory_name = result? result->name() : "";
@@ -492,7 +482,7 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
         _is_connected      = true;
         _scheduler_id      = register_scheduler_element.     getAttribute( "scheduler_id" );
         _scheduler_version = register_scheduler_element.     getAttribute( "version" );
-        _is_cluster_member = register_scheduler_element.bool_getAttribute( "is_cluster_member", false );
+        _use_scheduler_id  = register_scheduler_element.bool_getAttribute( "is_cluster_member", false );
         _connected_at      = ::time(NULL);
         _active_since      = _connected_at;
     }
