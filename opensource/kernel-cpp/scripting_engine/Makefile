@@ -29,6 +29,10 @@ MY_LIBS += $(PROD_DIR)/js/src/liveconnect/$(OBJDIR)/libjsj.a
 #MY_LIBS += $(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a
 #MY_LIBS += $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
 
+ifeq ($(OS),AIX)
+# AIX verlangt auch javaproxy (nicht klar, warum) -Zschimmer
+MY_LIBS += $(PROD_DIR)/javaproxy/Release/libjavaproxy.a
+endif
 
 libspidermonkey.a: $(objects)
 	$(AR) $(ARFLAGS) $@ $^

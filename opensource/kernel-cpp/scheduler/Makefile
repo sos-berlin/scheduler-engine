@@ -120,12 +120,16 @@ $(BIN_DIR)/libjobscheduler-engine.so: spooler_dll_java.o $(objects) ../kram/$(O_
 	chmod a+rx $@
 	$(PROD_DIR)/make/separate-debug-info "$@"
 
-#ifeq ($(cpuArchitecture),x64)
+ifeq ($(OS),AIX)
+bindLibjobchedulerengineso=$(BIN_DIR)/libjobscheduler-engine.so
+else
+bindLibjobchedulerengineso=-L$(BIN_DIR) -ljobscheduler-engine
+endif
+
 $(BIN_DIR)/scheduler: spooler_start_dll.o $(BIN_DIR)/libjobscheduler-engine.so
-	-$(CCPP) $(DEBUG) $(LINK_FLAGS) spooler_start_dll.o -L$(BIN_DIR) -ljobscheduler-engine $(LIBPATH) $(LIBS) -o $@
+	-$(CCPP) $(DEBUG) $(LINK_FLAGS) spooler_start_dll.o $(bindLibjobchedulerengineso) $(LIBPATH) $(LIBS) -o $@
 	chmod a+rx $@
 	$(PROD_DIR)/make/separate-debug-info "$@"
-#endif
 
 $(BIN_DIR)/setuid: setuid.o 
 	-$(CC) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH)  -o $@  -s

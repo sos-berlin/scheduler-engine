@@ -585,7 +585,7 @@ void Vm::start()
 
     new_instances( _new_instances );
 
-    load_standard_classes();           // Wirkt nat�rlich nur f�r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes()
+//    load_standard_classes();           // Wirkt nat�rlich nur f�r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes() TU 1.11.13
 }
 
 //----------------------------------------------------------------------------------Vm::load_module
@@ -629,10 +629,11 @@ Vm::JNI_CreateJavaVM_func* Vm::load_module(const string& module_filename) {
                 {
                     Z_LOG2( Vm::java_log_category, dlerror() << "\n" );
 
-                    module_filename.replace( module_filename.length() - 3, 3, ".a" );
-                    Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY\n" );
+                    string m = module_filename;
+                    m.replace( m.length() - 3, 3, ".a" );
+                    Z_LOG2( Vm::java_log_category, "dlopen " << m << ",RTLD_LAZY\n" );
 
-                    vm_module = dlopen( module_filename.c_str(), RTLD_LAZY );
+                    vm_module = dlopen( m.c_str(), RTLD_LAZY );
                 }
 #           endif
 #       endif
