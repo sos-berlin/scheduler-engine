@@ -1127,7 +1127,7 @@ bool Node::set_action(Action action)
 {
     if( _action != action )
     {
-        Z_LOG2("scheduler", S() << obj_name() << " set_action " << string_from_action(action) << "\n");
+        Z_LOG2("scheduler", obj_name() << " set_action " << string_from_action(action) << "\n");
         _action = action;
 
         if( _job_chain->state() >= Job_chain::s_active )
