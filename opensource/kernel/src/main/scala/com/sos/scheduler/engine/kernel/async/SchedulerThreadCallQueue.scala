@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.async.{PoppableCallQueue, CallQueue, Time
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 
-final class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, cppProxy: SpoolerC, val thread: Thread) extends CallQueue {
+final class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, spoolerC: SpoolerC, val cppThread: Thread) extends CallQueue {
 
   def close() {
     delegate.close()
@@ -12,7 +12,7 @@ final class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, cppProxy: 
 
   def add(o: TimedCall[_]) = {
     delegate.add(o)
-    try cppProxy.signal()
+    try spoolerC.signal()
     catch { case e: CppProxyInvalidatedException => }   // Das passiert, wenn der TimedCall den Scheduler beendet und er beim signal() schon beendet ist.
   }
 

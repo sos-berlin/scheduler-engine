@@ -23,13 +23,14 @@ import com.sos.scheduler.engine.kernel.async.{SchedulerThreadCallQueue, CppCall}
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
-import com.sos.scheduler.engine.kernel.cppproxy.{HttpResponseC, SpoolerC}
+import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
 import com.sos.scheduler.engine.kernel.log.CppLogger
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler._
+import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.lang.Thread.currentThread
@@ -38,8 +39,6 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
-import com.sos.scheduler.engine.kernel.http.{SchedulerHttpResponse, SchedulerHttpRequest}
-import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 
 @ForCpp
 @Singleton
@@ -198,7 +197,7 @@ object Scheduler {
     controllerBridge.getSettings.setSettingsInCpp(cppProxy.modifiable_settings)
 
     val injector = createInjector(Seq(
-      new SchedulerModule(cppProxy, controllerBridge, currentThread()),
+      new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),
       PluginModule(configurationXml)))
     injector.getInstance(classOf[Scheduler])
   }

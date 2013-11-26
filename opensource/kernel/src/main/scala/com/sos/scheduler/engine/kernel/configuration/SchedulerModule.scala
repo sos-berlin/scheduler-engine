@@ -24,9 +24,8 @@ import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import scala.collection.JavaConversions._
 
-class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
+final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
 extends ScalaAbstractModule {
-
 
   def configure() {
     bindInstance(cppProxy)

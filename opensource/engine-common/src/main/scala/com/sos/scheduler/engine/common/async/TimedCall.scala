@@ -17,13 +17,13 @@ trait TimedCall[A] extends Callable[A] {
   final def instant =
     new Instant(epochMillis)
 
-  final def onApply() {
+  private[async] final def onApply() {
     logger debug s"Calling $toString"
     val result = Try(call())
     callOnComplete(result)
   }
 
-  final def onCancel() {
+  private[async] final def onCancel() {
     logger debug s"Cancel $toString"
     callOnComplete(Failure(CancelledException()))
   }
@@ -56,7 +56,9 @@ trait TimedCall[A] extends Callable[A] {
 }
 
 object TimedCall {
+  /** So bald wie möglich. */
   private[async] val shortTermMillis = 0
+  /** So bald wie möglich. */
   private[async] val shortTerm = new Instant(0)
   private val logger = Logger(getClass)
 
