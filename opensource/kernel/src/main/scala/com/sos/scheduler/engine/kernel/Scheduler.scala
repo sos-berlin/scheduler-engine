@@ -204,7 +204,7 @@ object Scheduler {
     controllerBridge.getSettings.setSettingsInCpp(cppProxy.modifiable_settings)
 
     val injector = createInjector(Seq(
-      new SchedulerModule(cppProxy, controllerBridge, currentThread()),
+      new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),
       PluginModule(configurationXml)))
     injector.getInstance(classOf[Scheduler])
   }

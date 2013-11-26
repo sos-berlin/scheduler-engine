@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.common.async
 
 import CallRunner._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import scala.annotation.tailrec
-import org.joda.time.Instant._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import org.joda.time.Instant._
+import scala.annotation.tailrec
 
 final class CallRunner(val queue: PoppableCallQueue) extends Runnable {
 
@@ -50,10 +50,13 @@ final class CallRunner(val queue: PoppableCallQueue) extends Runnable {
     s"${getClass.getSimpleName} with $queue"
 }
 
+
 object CallRunner {
   private val logger = Logger(getClass)
 
   object EndCall extends ShortTermCall[Unit] {
-    def call() {}
+    def call() {
+      throw new UnsupportedOperationException
+    }
   }
 }
