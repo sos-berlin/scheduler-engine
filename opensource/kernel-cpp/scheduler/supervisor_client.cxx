@@ -2,6 +2,10 @@
 
 #include "spooler.h"
 #include "../zschimmer/base64.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__async__CppCall.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__supervisor__CppWebClient.h"
+#include "../javaproxy/java__lang__Class.h"
+#include "../javaproxy/scala__util__Try.h"
 
 #include <sys/stat.h>           // mkdir()
 
@@ -18,78 +22,85 @@ namespace supervisor {
 
 //-------------------------------------------------------------------------------------------------
 
+typedef ::javaproxy::scala::util::Try TryJ;
+typedef ::javaproxy::com::sos::scheduler::engine::kernel::supervisor::CppWebClient CppWebClientJ;
+
 using namespace directory_observer;
 using xml::Xml_writer;
-struct Supervisor_client;
+struct Http_connector;
 
-//---------------------------------------------------------------------Connected_client
+const Duration connection_retry_duration = Duration(60);
 
-struct Abstract_supervisor_client_connection : Async_operation, Scheduler_object
+DEFINE_SIMPLE_CALL(Http_connector, Supervisor_response_call)
+
+//-------------------------------------------------------------------------------Abstract_connector
+
+struct Abstract_connector : Async_operation, Scheduler_object
 {
-private:
-    Fill_zero _zero_;
+    private: Fill_zero _zero_;
 
-protected:
-    Supervisor_client_interface* const _supervisor_client;
-    Host_and_port const _host_and_port;
-    Duration const _polling_interval;
-    ptr<Xml_client_connection> _xml_client_connection;
+    protected: Supervisor_client_interface* const _supervisor_client;
+    protected: Duration const _polling_interval;
+    protected: Duration const _connection_retry_duration;
+    protected: bool _start_update_configuration_delayed;
 
-protected:
-    Abstract_supervisor_client_connection(Supervisor_client_interface* supervisor_client, const Host_and_port& host_and_port) :
+    protected: Abstract_connector(Supervisor_client_interface* supervisor_client) :
         Scheduler_object(supervisor_client->_spooler, this, type_supervisor_client_connection),
         _zero_(this + 1),
         _supervisor_client(supervisor_client),
-        _host_and_port(host_and_port),
-        _polling_interval(supervisor_client->spooler()->settings()->_supervisor_configuration_polling_interval)
+        _polling_interval(supervisor_client->spooler()->settings()->_supervisor_configuration_polling_interval),
+        _connection_retry_duration(min(connection_retry_duration, _polling_interval))
     {
         _log = supervisor_client->log();
     }
 
-public:
-    virtual ~Abstract_supervisor_client_connection() {
+    public: virtual ~Abstract_connector() {
         close();
     }
 
-    virtual bool is_ready() const = 0;
+    public: virtual bool is_ready() const = 0;
 
-    virtual bool connection_failed() const = 0;
+    public: virtual bool connection_failed() const = 0;
 
-    virtual void start_update_configuration() = 0;
-
-    virtual void try_connect() = 0;
-
-    const Host_and_port& host_and_port() const {
-        return _host_and_port; 
-    }
-
-    void start() {
+    public: void start() {
         async_continue();
     }
 
-protected:
-    void connect() {
-        assert(!_xml_client_connection);
-        _xml_client_connection = Z_NEW(Xml_client_connection(_spooler, _host_and_port));
-        _xml_client_connection->set_async_manager(_spooler->_connection_manager);
-        _xml_client_connection->set_async_parent(this);
-        _xml_client_connection->connect();
+    public: void start_update_configuration() {
+        _start_update_configuration_delayed = true;
+        check_update_configuration_delayed();
     }
 
-    void close() {
-        close_connection();
+    public: virtual void check_update_configuration_delayed() = 0;
+
+    protected: virtual void close() {}
+
+    protected: string new_fetch_command() {
+        ptr<io::String_writer> string_writer = Z_NEW(io::String_writer());
+        ptr<xml::Xml_writer>   xml_writer = Z_NEW(xml::Xml_writer(string_writer));
+
+        xml_writer->set_encoding(string_encoding);
+        xml_writer->write_prolog();
+
+        xml_writer->begin_element("supervisor.configuration.fetch");
+        assert(!_spooler->_spooler_id.empty());
+        xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
+        xml_writer->set_attribute_optional("cluster_member_id", _spooler->cluster_member_id());
+
+        if (_spooler->_udp_port)
+            xml_writer->set_attribute("udp_port", _spooler->_udp_port);
+
+        xml_writer->set_attribute("version", _spooler->_version);
+        xml_writer->set_attribute("interval", _polling_interval.seconds());
+
+        write_directory_structure(xml_writer, root_path);
+        xml_writer->end_element("supervisor.configuration.fetch");
+
+        xml_writer->close();
+        return string_writer->to_string();
     }
 
-    void close_connection() {
-        if (_xml_client_connection) {
-            _xml_client_connection->set_async_manager(NULL);
-            _xml_client_connection->set_async_parent(NULL);
-            _xml_client_connection->close();
-            _xml_client_connection = NULL;
-        }
-    }
-
-    void write_directory_structure(xml::Xml_writer* xml_writer, const Absolute_path& path) {
+    protected: void write_directory_structure(xml::Xml_writer* xml_writer, const Absolute_path& path) {
         Folder_directory_lister dir(_log);
         bool ok = dir.open(_spooler->_configuration_directories[confdir_cache], path);
         if (ok) {
@@ -119,15 +130,19 @@ protected:
         }
     }
 
-    void on_configuration_directory_received(const xml::Document_ptr& response_document) {
+    protected: void on_configuration_directory_received(const xml::Document_ptr& response_document) {
+        if (xml::Element_ptr error_element = response_document.select_node("/spooler/answer/ERROR")) {
+            z::throw_xc(string("From supervisor: ") + xc_from_dom_error(error_element)->what());
+        } 
+        else
         if (xml::Element_ptr directory_element = response_document.select_node("/spooler/answer/configuration.directory")) {
             _supervisor_client->set_using_central_configuration();
             update_directory_structure(root_path, directory_element);
             _spooler->folder_subsystem()->handle_folders();     // cache-Verzeichnis würde reichen
-        }
+        } 
     }
 
-    void update_directory_structure(const Absolute_path& directory_path, const xml::Element_ptr& element) {
+    protected: void update_directory_structure(const Absolute_path& directory_path, const xml::Element_ptr& element) {
         assert(element);
         assert(element.nodeName_is("configuration.directory"));
         assert(element.getAttribute("name") == directory_path.name());
@@ -196,156 +211,93 @@ protected:
     }
 };
 
-//----------------------------------------------------------------------------Connectionless_client
+//-----------------------------------------------------------------------------------Http_connector
 
-struct Connectionless_client : Abstract_supervisor_client_connection {
-    enum State {
-        s_not_connected,
-        s_connecting,
-        s_fetching_configuration,
-        s_configuration_fetched
-    };
+struct Http_connector : Abstract_connector {
+    private: Fill_zero _zero_;
+    private: string const _supervisor_uri;
+    private: CppWebClientJ const _webClientJ;
+    private: bool _is_ready;
+    private: bool _connection_failed;
+    private: Xc_copy _exception;
+    private: ptr<Supervisor_response_call> _supervisor_response_call;
 
-private:
-    Fill_zero _zero_;
-    State _state;
-    bool _is_ready;
-    bool _connection_failed;
-    bool _start_update_configuration_delayed;
+    public: Http_connector(Supervisor_client_interface* c, const string& supervisor_uri) :
+        Abstract_connector(c),
+        _zero_(this + 1),
+        _supervisor_uri(supervisor_uri),
+        _webClientJ(spooler()->schedulerJ().instance(CppWebClientJ::java_class_()->get_jobject()))
+    {
+        if (_spooler->_spooler_id.empty()) z::throw_xc(message_string("SCHEDULER-485", "supervisor"));
+    }
 
-    static string state_name(State state) {
-        switch (state) {
-            case s_not_connected:           return "not_connected";
-            case s_connecting:              return "connecting";
-            case s_fetching_configuration:  return "fetching_configuration";
-            case s_configuration_fetched:   return "configuration_fetched";
-            default:                        return "state=" + as_string(state);
+    public: ~Http_connector() {
+        _webClientJ.close();
+    }
+
+    public: string obj_name() const {
+        return S() << "Http_connector(" << _supervisor_uri << " " << _exception << ")";
+    }
+
+    public: bool is_ready() const {
+        return _is_ready;
+    }
+
+    public: bool connection_failed() const {
+        return _connection_failed;
+    }
+
+    protected: void check_update_configuration_delayed() {
+        if (_start_update_configuration_delayed && !_supervisor_response_call) {
+            _start_update_configuration_delayed = false;
+            async_wake();
         }
     }
 
-public:
-    Connectionless_client(Supervisor_client_interface* c, const Host_and_port& h) :
-        Abstract_supervisor_client_connection(c, h), 
-        _zero_(this + 1) 
-    {}
-
-    string obj_name() const {
-        return S() << "Connected_client(" << _host_and_port << " " << state_name(_state) << ")";
-    }
-
-    State state() const { 
-        return _state; 
-    }
-
-    bool is_ready() const { 
-        return _is_ready; 
-    }
-
-    bool connection_failed() const { 
-        return _connection_failed; 
-    }
-
-    void try_connect() {
-        if (_state == s_not_connected)
-            async_wake();
-    }
-
-    void start_update_configuration() {
-        if (_state == s_not_connected) 
-            async_continue();
-        else
-            _start_update_configuration_delayed = true;
-    }
-
-protected:
-    bool async_continue_(Continue_flags) {
-        bool something_done = false;
-        try {
-            if (_xml_client_connection)  
-                _xml_client_connection->async_check_exception();
-            switch (_state) {
-                case s_not_connected: {
-                    _connection_failed = false;
-                    connect();
-                    _state = s_connecting;
-                    break;
-                }
-                case s_connecting: {
-                    if (_xml_client_connection->state() != Xml_client_connection::s_connected)  
-                        break;
-                    send_fetch_command();
-                    _state = s_fetching_configuration;
-                }
-                case s_fetching_configuration: {
-                    if (xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document()) {
-                        on_configuration_directory_received(response_document);
-                        _state = s_configuration_fetched;
-                    }
-                    if (_state != s_configuration_fetched)  
-                        break;
-                }
-                case s_configuration_fetched: {
-                    if (_start_update_configuration_delayed) {
-                        start_update_configuration();
-                        _start_update_configuration_delayed = false;
-                    }
-                    close_connection();
-                    _state = s_not_connected;
-                    set_async_delay(_polling_interval.as_double());
-                    _is_ready = true;   // Nach Wiederholung wegen Verbindungsverlusts bereits true
-                    break;
-                }
-                default:
-                    assert(0);
+    protected: bool async_continue_(Continue_flags) {
+        if (_supervisor_response_call) {
+            assert(false);
+            return false;
+        } else {
+            try {
+                _supervisor_response_call = Z_NEW(Supervisor_response_call(this));
+                string uri = S() << _supervisor_uri << "/jobscheduler/engine/command";
+                _webClientJ.postXml(uri, new_fetch_command(), _supervisor_response_call->java_sister());
+                _connection_failed = false;
             }
+            catch (exception& x) {
+                log()->warn(x.what());
+                _connection_failed = true;
+                set_async_delay(_connection_retry_duration.as_double());
+            }
+            return true;
+        } 
+    }
+
+    public: void on_call(const Supervisor_response_call& call) {
+        assert(&call == _supervisor_response_call);
+        _exception = NULL;
+        try {
+            xml::Document_ptr doc = xml::Document_ptr(((TryJ)call.value()).get().get_jobject());   // get() wirft Exception, wenn call.value() ein Failure ist
+            on_configuration_directory_received(doc);
+            _is_ready = true;
+            set_async_delay(_polling_interval.as_double());
         }
         catch (exception& x) {
-            log()->warn(x.what());
-            close_connection();
-            _state = s_not_connected;
-            _connection_failed = true;
-            set_async_delay(_polling_interval.as_double());  // Nochmals probieren
-            something_done = true;
+            log()->error(x.what());
+            _exception = x;
+            set_async_delay(_connection_retry_duration.as_double());
         }
-
-        return something_done;
+        _supervisor_response_call = NULL;
+        check_update_configuration_delayed();
+        _spooler->signal("supervisor_client");
     }
 
-    void send_fetch_command() {
-        ptr<io::String_writer> string_writer = Z_NEW(io::String_writer());
-        ptr<xml::Xml_writer>   xml_writer = Z_NEW(xml::Xml_writer(string_writer));
-
-        xml_writer->set_encoding(string_encoding);
-        xml_writer->write_prolog();
-
-        xml_writer->begin_element("supervisor.configuration.fetch");
-        xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
-
-        if (_spooler->_tcp_port)
-            xml_writer->set_attribute("tcp_port", _spooler->_tcp_port);
-
-        if (_spooler->_udp_port)
-            xml_writer->set_attribute("udp_port", _spooler->_udp_port);
-
-        if (_spooler->is_cluster())
-            xml_writer->set_attribute("is_cluster_member", "yes");
-
-        xml_writer->set_attribute("version", _spooler->_version);
-        xml_writer->set_attribute("interval", _polling_interval.seconds());
-
-        write_directory_structure(xml_writer, root_path);
-        xml_writer->end_element("supervisor.configuration.fetch");
-
-        xml_writer->close();
-
-        _xml_client_connection->send(string_writer->to_string());
+    protected: bool async_finished_() const {
+        return true;
     }
 
-    bool async_finished_() const {
-        return _state == s_not_connected;
-    }
-
-    string async_state_text_() const {
+    protected: string async_state_text_() const {
         S result;
         result << obj_name();
         result << "(";
@@ -357,9 +309,45 @@ protected:
     }
 };
 
-//---------------------------------------------------------------------------------Connected_client
+//--------------------------------------------------------------------------Abstract_tcp_connector
 
-struct Connected_client : Abstract_supervisor_client_connection
+struct Abstract_tcp_connector : Abstract_connector {
+    private: Fill_zero _zero_;
+    protected: ptr<Xml_client_connection> _xml_client_connection;
+    protected: Host_and_port const _host_and_port;
+
+    public: Abstract_tcp_connector(Supervisor_client_interface* c, const Host_and_port& h) :
+        Abstract_connector(c),
+        _host_and_port(h),
+        _zero_(this + 1)
+    {}
+
+    public: void close() {
+        close_connection();
+        Abstract_connector::close();
+    }
+
+    public: void connect() {
+        assert(!_xml_client_connection);
+        _xml_client_connection = Z_NEW(Xml_client_connection(_spooler, _host_and_port));
+        _xml_client_connection->set_async_manager(_spooler->_connection_manager);
+        _xml_client_connection->set_async_parent(this);
+        _xml_client_connection->connect();
+    }
+
+    protected: void close_connection() {
+        if (_xml_client_connection) {
+            _xml_client_connection->set_async_manager(NULL);
+            _xml_client_connection->set_async_parent(NULL);
+            _xml_client_connection->close();
+            _xml_client_connection = NULL;
+        }
+    }
+};
+
+//---------------------------------------------------------------------------------Old_connected_connector
+
+struct Old_connected_connector : Abstract_tcp_connector
 {
     enum State
     {
@@ -374,18 +362,17 @@ struct Connected_client : Abstract_supervisor_client_connection
     static string               state_name                  ( State );
 
 
-                                Connected_client(Supervisor_client_interface* c, const Host_and_port& h) 
-                                    : Abstract_supervisor_client_connection(c, h), _zero_(this + 1) {}
+                                Old_connected_connector(Supervisor_client_interface* c, const Host_and_port& h) 
+                                    : Abstract_tcp_connector(c, h), _zero_(this + 1) {}
 
     virtual string              obj_name                    () const;
 
     State                       state                       () const                                { return _state; }
     bool                        is_ready                    () const                                { return _is_ready; }
     bool                        connection_failed           () const                                { return _connection_failed; }
-    void                        start_update_configuration  ();
-    void                        try_connect                 ();
 
   protected:
+    void                        check_update_configuration_delayed();
     string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             () const                                { return _state == s_not_connected  
@@ -404,7 +391,7 @@ struct Connected_client : Abstract_supervisor_client_connection
 
 struct Supervisor_client : Supervisor_client_interface
 {
-                                Supervisor_client           ( Scheduler*, const Host_and_port& );
+                                Supervisor_client           ( Scheduler*, const string& supervisor_address);
 
     // Subsystem
     void                        close                       ();
@@ -413,14 +400,12 @@ struct Supervisor_client : Supervisor_client_interface
                                 Subsystem::obj_name;
 
     // Supervisor_client_interface
-    bool                        is_ready                    () const                                { return _client_connection && _client_connection->is_ready(); }
-    bool                        connection_failed           () const                                { return _client_connection && _client_connection->connection_failed(); }
-    void                        start_update_configuration  ()                                      { if( _client_connection )  _client_connection->start_update_configuration(); }
-    void                        try_connect                 ()                                      { if( _client_connection )  _client_connection->try_connect(); }
+    bool                        is_ready                    () const                                { return _connector && _connector->is_ready(); }
+    bool                        connection_failed           () const                                { return _connector && _connector->connection_failed(); }
+    void                        start_update_configuration  ()                                      { if( _connector )  _connector->start_update_configuration(); }
     void                        set_using_central_configuration()                                   { _is_using_central_configuration = true; }
     bool                        is_using_central_configuration() const                              { return _is_using_central_configuration; }
-    void                        change_to_connectionless    ();
-    Host_and_port               host_and_port               () const                                { return _client_connection? _client_connection->host_and_port() : Host_and_port(); }
+    Host_and_port               host_and_port               () const                                { return _host_and_port; }
 
     // IDispatch_implementation
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -429,11 +414,10 @@ struct Supervisor_client : Supervisor_client_interface
     STDMETHODIMP            get_Tcp_port                    ( int* );
 
   private:
-    friend struct               Abstract_supervisor_client_connection;
-
     Fill_zero                  _zero_;
-    Host_and_port const        _host_and_port;
-    ptr<Abstract_supervisor_client_connection> _client_connection;
+    string const               _supervisor_address;
+    Host_and_port              _host_and_port;
+    ptr<Abstract_connector>    _connector;
     bool                       _is_using_central_configuration;
 
     static Class_descriptor     class_descriptor;
@@ -465,31 +449,34 @@ Supervisor_client_interface::Supervisor_client_interface( Scheduler* scheduler, 
 
 //----------------------------------------------------------------------------new_supervisor_client
 
-ptr<Supervisor_client_interface> new_supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
+ptr<Supervisor_client_interface> new_supervisor_client( Scheduler* scheduler, const string& supervisor_address)
 {
-    ptr<Supervisor_client> supervisor_client = Z_NEW( Supervisor_client( scheduler, host_and_port ) );
+    ptr<Supervisor_client> supervisor_client = Z_NEW(Supervisor_client(scheduler, supervisor_address));
     return +supervisor_client;
 }
 
 //-------------------------------------------------------------Supervisor_client::Supervisor_client
 
-Supervisor_client::Supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
+Supervisor_client::Supervisor_client( Scheduler* scheduler, const string& supervisor_address)
 : 
     Supervisor_client_interface( scheduler, type_supervisor_client, &class_descriptor ),
     _zero_(this+1),
-    _host_and_port(host_and_port)
+    _supervisor_address(supervisor_address)
 {
-    _log->set_prefix( S() << obj_name() << ' ' << _host_and_port.as_string() );
+    _log->set_prefix( S() << obj_name() << ' ' << supervisor_address);
+    if (Regex_submatches m = Regex("^([^:]+://)?([^:]+):([0-9]+)(/.+)?").match_subresults(_supervisor_address))   // Zerlegt "http://host:1234" und "host:1234"
+        _host_and_port = Host_and_port(m[2], as_int(m[3]));
+    else z::throw_xc("Invalid supervisor address", supervisor_address); 
 }
 
 //-------------------------------------------------------------------------Supervisor_client::close
     
 void Supervisor_client::close()
 {
-    if( _client_connection )
+    if( _connector )
     {
-        _client_connection->set_async_manager( NULL );
-        _client_connection = NULL;
+        _connector->set_async_manager( NULL );
+        _connector = NULL;
     }
 }
 
@@ -513,22 +500,17 @@ bool Supervisor_client::subsystem_initialize()
 
     _spooler->folder_subsystem()->initialize_cache_directory();
 
-    _client_connection = Z_NEW(Connected_client(this, _host_and_port));   // Zuerst die alte Methode mit Dauerverbindung. Bei einem neuen Supervisor schalten wir Connectionless_client um.
-    _client_connection->set_async_manager(_spooler->_connection_manager);
-    _client_connection->start();
+    if (strstr(_supervisor_address.c_str(), "://"))
+        _connector = Z_NEW(Http_connector(this, _supervisor_address));
+    else {
+        if (!_spooler->_tcp_port) z::throw_xc("tcp_port is mandatory for using the configuration server (supervisor)");
+        _connector = Z_NEW(Old_connected_connector(this, Host_and_port(_supervisor_address)));
+    }
+
+    _connector->set_async_manager(_spooler->_connection_manager);
+    _connector->start();
 
     return true;
-}
-
-//------------------------------------------------------Supervisor_client::change_to_connectionless
-
-void Supervisor_client::change_to_connectionless()
-{
-    _client_connection->set_async_manager(NULL);
-    _client_connection = NULL;
-    _client_connection = Z_NEW(Connectionless_client(this, _host_and_port));
-    _client_connection->set_async_manager(_spooler->_connection_manager);
-    _client_connection->start();
 }
 
 //------------------------------------------------------------------Supervisor_client::get_Hostname
@@ -539,8 +521,8 @@ STDMETHODIMP Supervisor_client::get_Hostname( BSTR* result )
 
     try
     {
-        string hostname = _client_connection->host_and_port().host().name();
-        if( hostname == "" )  hostname = _client_connection->host_and_port().host().ip_string();
+        string hostname = _host_and_port.host().name();
+        if( hostname == "" )  hostname = _host_and_port.host().ip_string();
         hr = String_to_bstr( hostname, result );
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
@@ -556,39 +538,26 @@ STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
 
     try
     {
-        *result = _client_connection->host_and_port().port();
+        *result = _host_and_port.port();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
 
-//-----------------------------------------------------Connected_client::start_update_configuration
+//--------------------------------------Old_connected_connector::check_update_configuration_delayed
 
-void Connected_client::start_update_configuration()
+void Old_connected_connector::check_update_configuration_delayed()
 {
-    if( _state == s_configuration_fetched )
-    {
+    if( _state == s_configuration_fetched ) {
         _state = s_registered;
-        async_continue();
-    }
-    else
-        _start_update_configuration_delayed = true;
-}
-
-//--------------------------------------------------------------------Connected_client::try_connect
-
-void Connected_client::try_connect()
-{
-    if( _state == s_not_connected )
-    {
         async_wake();
     }
 }
 
-//----------------------------------------------------------------Connected_client::async_continue_
+//---------------------------------------------------------Old_connected_connector::async_continue_
 
-bool Connected_client::async_continue_( Continue_flags )
+bool Old_connected_connector::async_continue_( Continue_flags )
 {
     Z_DEBUG_ONLY( Z_LOGI2( "zschimmer", Z_FUNCTION << "\n" ); )
 
@@ -643,11 +612,6 @@ bool Connected_client::async_continue_( Continue_flags )
             {
                 if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
                 {
-                    if (response_document.documentElement().select_node("/spooler/answer/ok[@recommended='supervisor.configuration.fetch']")) {
-                        close();
-                        _supervisor_client->change_to_connectionless();   // this wird ungültig
-                        return true;
-                    }
                     log()->info(message_string("SCHEDULER-950"));
                     _state = s_registered;
                 }
@@ -711,16 +675,16 @@ bool Connected_client::async_continue_( Continue_flags )
         _xml_client_connection = NULL;
         _state = s_not_connected;
         _connection_failed = true;
-        set_async_delay(_polling_interval.as_double());  // Nochmal probieren
+        set_async_delay(_connection_retry_duration.as_double());  // Nochmal probieren
         something_done = true;
     }
 
     return something_done;
 }
 
-//--------------------------------------------------------------Connected_client::async_state_text_
+//-------------------------------------------------------Old_connected_connector::async_state_text_
 
-string Connected_client::async_state_text_() const
+string Old_connected_connector::async_state_text_() const
 { 
     S result;
 
@@ -734,9 +698,9 @@ string Connected_client::async_state_text_() const
     return result;
 }
 
-//---------------------------------------------------------------------Connected_client::state_name
+//--------------------------------------------------------------Old_connected_connector::state_name
 
-string Connected_client::state_name( State state )
+string Old_connected_connector::state_name( State state )
 {
     switch( state )
     {
@@ -750,11 +714,11 @@ string Connected_client::state_name( State state )
     }
 }
 
-//------------------------------------------------------------------Connected_client::obj_name
+//----------------------------------------------------------------Old_connected_connector::obj_name
 
-string Connected_client::obj_name() const
+string Old_connected_connector::obj_name() const
 {
-    return S() << "Connected_client(" << _host_and_port << " " << state_name( _state ) << ")";
+    return S() << "Old_connected_connector(" << _host_and_port << " " << state_name( _state ) << ")";
 }
 
 //-------------------------------------------------------------------------------------------------

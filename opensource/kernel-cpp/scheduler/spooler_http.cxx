@@ -762,7 +762,7 @@ void Operation::begin()
                 // Auch könnte execute_http() von Command_processor nach Web_service, Http_file_directory oder Http_server verschoben werden.
             }
 
-            Command_processor command_processor ( _spooler, _connection->_security_level, this );
+            Command_processor command_processor ( _spooler, _connection->_security_level, _connection->peer_host(), this );
             command_processor.execute_http( request(), response(), http_file_directory );
             _response->set_ready();
         }

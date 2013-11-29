@@ -28,6 +28,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     bool                       _use_java_persistence;
     bool                       _order_distributed_balanced;
     int                        _supervisor_configuration_polling_interval;
+    bool                       _supervisor_configuration_client_v1_3;
 };
 
 }} //namespace sos::scheduler

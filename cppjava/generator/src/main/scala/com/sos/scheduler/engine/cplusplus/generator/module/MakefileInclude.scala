@@ -13,7 +13,7 @@ class MakefileInclude(prefix: String, modules: Iterable[Module]) extends Module 
         val content =
             "# " + commentLine + "\n" +
             prefix + "_objects=\\\n" + {
-                val objectNames = (modules map { _.name + ".o" }).toSeq.sorted
+                val objectNames = (modules map { _.name.replace("$", "$$") + ".o" }).toSeq.sorted
                 objectNames.mkString(" ", "\\\n ", "\n")
             }
     })

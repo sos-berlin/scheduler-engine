@@ -188,11 +188,8 @@ void Xml_operation::put_request_part( const char* data, int length )
 
 void Xml_operation::begin()
 {
-    Command_processor command_processor ( _spooler, _connection->_security_level, this );
+    Command_processor command_processor ( _spooler, _connection->_security_level, _connection->peer_host(), this );
     command_processor.set_log( &_connection->_log );
-
-    //command_processor.set_communication_operation( this );
-    //command_processor.set_host( _connection->peer_host() );
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
@@ -483,7 +480,7 @@ bool Communication::Connection::do_recv()
             if( len == 1  &&  buffer[0] == '\n'   
              || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )     // Leere Eingabe, zum Debuggen:
             { 
-                if( _spooler->_supervisor_client )  _spooler->_supervisor_client->try_connect();
+                if( _spooler->_supervisor_client )  _spooler->_supervisor_client->start_update_configuration();
                 if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )  _spooler->folder_subsystem()->handle_folders(Duration(1)); 
                 //_spooler->signal( "do_something!" );  
                 _spooler->_last_time_enter_pressed = Time::now().as_time_t(); 

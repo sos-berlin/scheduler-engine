@@ -134,9 +134,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
       //_free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
 
-        string host_and_port = config_element.getAttribute( "supervisor" );
-        if( host_and_port == "" )  host_and_port = config_element.getAttribute( "main_scheduler" );   //TODO Veraltetes Attribut
-        if( host_and_port != "" )  _supervisor_client = supervisor::new_supervisor_client( this, host_and_port );
+        string supervisor_address = config_element.getAttribute( "supervisor" );
+        if( supervisor_address == "" )  supervisor_address = config_element.getAttribute( "main_scheduler" );   //TODO Veraltetes Attribut
+        if( supervisor_address != "" )  _supervisor_client = supervisor::new_supervisor_client( this, supervisor_address );
 
         set_mail_xslt_stylesheet_path( subst_env( config_element.getAttribute( "mail_xslt_stylesheet" ) ) );
         _time_zone_name = config_element.getAttribute("time_zone", _time_zone_name);

@@ -9,6 +9,7 @@
 #include "../zschimmer/javaproxy.h"
 #include "../zschimmer/lazy.h"
 
+namespace javaproxy { namespace java { namespace lang { struct Class; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -45,6 +46,7 @@ struct Object : ::zschimmer::javabridge::proxy_jobject< Object >, ::zschimmer::j
   public:
 
     bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0) const;
+    ::javaproxy::java::lang::Class getClass() const;
     jint hashCode() const;
     void notify() const;
     void notifyAll() const;

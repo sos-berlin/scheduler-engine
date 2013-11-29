@@ -6,9 +6,9 @@ import javax.ws.rs.core.{MediaType, Variant, CacheControl}
 import scala.xml.Elem
 
 object WebServices {
-  val schedulerTextPlainVariant = new Variant(MediaType.TEXT_PLAIN_TYPE, null, schedulerEncoding.name())
-  val textPlainVariant = new Variant(MediaType.TEXT_PLAIN_TYPE, null, UTF_8.name)
-  val textXmlVariant = new Variant(MediaType.TEXT_PLAIN_TYPE, null, null)
+  private val nullLocale: java.util.Locale = null
+  val schedulerTextPlainVariant = new Variant(MediaType.TEXT_PLAIN_TYPE, nullLocale, schedulerEncoding.name)
+  val textPlainVariant = new Variant(MediaType.TEXT_PLAIN_TYPE, nullLocale, UTF_8.name)
 
   val noCache = {
     val result = new CacheControl

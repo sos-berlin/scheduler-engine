@@ -421,11 +421,11 @@ void Show_what::set_subsystems(const Scheduler& scheduler, const string& subsyst
 
 //-------------------------------------------------------------Command_processor::Command_processor
 
-Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, Communication::Operation* cp )
-: 
+Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, const Host& client_host, Communication::Operation* cp) : 
     _zero_(this+1),
     _spooler(spooler),
     _communication_operation( cp ),
+    _client_host(client_host),
     _validate(true),
     _security_level( security_level )
 {
@@ -1027,7 +1027,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
     ptr<Process> process = Z_NEW( Process( _spooler, Host_and_port()) );
 
-    process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
+    process->set_controller_address(Host_and_port(client_host(), tcp_port));
     process->set_run_in_thread( kind == "process" );
     process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst �ber COM/TCP protokollieren
     process->set_java_options(start_task_element.getAttribute("java_options"));
@@ -2287,6 +2287,16 @@ void File_buffered_command_response::write( const io::Char_sequence& seq )
         
         _congestion_file_write_position += seq.length();
     }
+}
+
+//----------------------------------------------------File_buffered_command_response::complete_text
+
+string File_buffered_command_response::complete_text() 
+{
+    if (_state == s_congested)
+        return _congestion_file.read_all();
+    else
+        return _buffer;
 }
 
 //---------------------------------------------------------File_buffered_command_response::get_part

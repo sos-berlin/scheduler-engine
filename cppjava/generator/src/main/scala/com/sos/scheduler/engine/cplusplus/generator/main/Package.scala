@@ -1,17 +1,17 @@
 package com.sos.scheduler.engine.cplusplus.generator.main
 
+import Package._
 import com.sos.scheduler.engine.cplusplus.generator.util.PackageOps._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 
-case class Package(name: String) {
-  import Package._
+final case class Package(name: String) {
 
   def relevantClasses = {
     val allClasses = classesOfPackage(name)
-    require(allClasses.nonEmpty, "Package '" + name + "' is empty")
+    require(allClasses.nonEmpty, s"Package '$name' is empty")
     val result = allClasses filter classIsRelevant
-    require(result.nonEmpty, "Package '" + name + "' contains no relevant class:\n" + info(allClasses))
+    require(result.nonEmpty, s"Package '$name' contains no relevant class:\n${info(allClasses)}")
     result
   }
 
@@ -26,12 +26,22 @@ case class Package(name: String) {
 }
 
 object Package {
-  private def classIsRelevant(c: Class[_]) = classIsCppProxy(c) || classIsForCpp(c)
+  private def classIsRelevant(c: Class[_]) =
+    classIsCppProxy(c) || classIsForCpp(c)
 
-  private def classIsCppProxy(c: Class[_]) = c.isInterface  &&  classOf[CppProxy].isAssignableFrom(c)  &&
+  private def classIsCppProxy(c: Class[_]) =
+    c.isInterface  &&  classOf[CppProxy].isAssignableFrom(c)  &&
     c.getPackage != classOf[CppProxy].getPackage
 
-  private def classIsForCpp(c: Class[_]) = c.getAnnotation(classOf[ForCpp]) != null && !isScalaSingletonClass(c)
+  private def classIsForCpp(c: Class[_]) =
+    c.getAnnotation(classOf[ForCpp]) != null && !classIsEmptyScalaSingleton(c)
 
-  private def isScalaSingletonClass(c: Class[_]) = c.getName endsWith "$"
+  private def classIsEmptyScalaSingleton(c: Class[_]) =
+    classIsScalaSingleton(c) && !classHasForCppMethod(c)
+
+  private def classIsScalaSingleton(c: Class[_]) =
+    c.getName endsWith "$"
+
+  private def classHasForCppMethod(c: Class[_]) =
+    c.getMethods exists { _.getAnnotation(classOf[ForCpp]) != null }
 }

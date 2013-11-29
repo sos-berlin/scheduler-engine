@@ -15,6 +15,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct SpoolerC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct EventSubsystem; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace main { struct SchedulerControllerBridge; }}}}}}
+namespace javaproxy { namespace java { namespace lang { struct Class; }}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -57,6 +58,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     void cancelCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
     void enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem() const;
+    ::javaproxy::java::lang::Object instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Class >& p0) const;
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void log(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;
     static ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler of(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::main::SchedulerControllerBridge >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2);

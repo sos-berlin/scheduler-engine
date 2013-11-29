@@ -8,6 +8,7 @@
 #include "com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "com__sos__scheduler__engine__main__SchedulerControllerBridge.h"
+#include "java__lang__Class.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -21,6 +22,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
+    ::zschimmer::javabridge::Method const _instance__Ljava_lang_Class_2__method;
     ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _log__Ljava_lang_String_2ILjava_lang_String_2__method;
     ::zschimmer::javabridge::Static_method const _of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method;
@@ -42,6 +44,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "cancelCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "enqueueCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
+    ,_instance__Ljava_lang_Class_2__method(this, "instance", "(Ljava/lang/Class;)Ljava/lang/Object;")
     ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
     ,_log__Ljava_lang_String_2ILjava_lang_String_2__method(this, "log", "(Ljava/lang/String;ILjava/lang/String;)V")
     ,_of__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_main_SchedulerControllerBridge_2Ljava_lang_String_2__method(this, "of", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/main/SchedulerControllerBridge;Ljava/lang/String;)Lcom/sos/scheduler/engine/kernel/Scheduler;")
@@ -90,6 +93,15 @@ void Scheduler::enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::java
     Scheduler__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem result;
     result.steal_local_ref(cls->_getEventSubsystem____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::java::lang::Object Scheduler::instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Class >& p0) const {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    Scheduler__class* cls = _class.get();
+    ::javaproxy::java::lang::Object result;
+    result.steal_local_ref(cls->_instance__Ljava_lang_Class_2__method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
