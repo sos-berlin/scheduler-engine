@@ -2054,7 +2054,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                 if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
-                Transaction ta ( +_spooler->_db );
+                for ( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
                 {
                     Any_file sel;
 
@@ -2166,8 +2166,9 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     }
 
                     sel.close();
+                    ta.commit(Z_FUNCTION);
                 }
-                ta.commit( Z_FUNCTION );
+                catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_job_history_tablename, x), Z_FUNCTION); }
             }
             catch( const _com_error& x )  { throw_com_error( x, "Job_history::read_tail" ); }
         }
