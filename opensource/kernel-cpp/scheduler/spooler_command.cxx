@@ -1031,7 +1031,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
     ptr<Process> process = Z_NEW( Process( _spooler ) );
 
-    process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
+    process->set_controller_address(Host_and_port(client_host(), tcp_port));
     process->set_run_in_thread( kind == "process" );
     process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst �ber COM/TCP protokollieren
     process->set_java_options(start_task_element.getAttribute("java_options"));

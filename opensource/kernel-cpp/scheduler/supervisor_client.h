@@ -17,11 +17,10 @@ struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_
     virtual void                set_using_central_configuration()                                   = 0;
     virtual bool                is_using_central_configuration() const                              = 0;
     virtual Host_and_port       host_and_port               () const                                = 0;
-  //virtual void                change_to_old_connector     ()                                      = 0;
 };
 
 
-ptr<Supervisor_client_interface> new_supervisor_client      ( Scheduler*, const Host_and_port& );
+ptr<Supervisor_client_interface> new_supervisor_client      ( Scheduler*, const string& supervisor_address);
 
 //-------------------------------------------------------------------------------------------------
 

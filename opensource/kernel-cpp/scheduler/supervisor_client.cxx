@@ -37,56 +37,45 @@ DEFINE_SIMPLE_CALL(Http_connector, Supervisor_response_call)
 
 struct Abstract_connector : Async_operation, Scheduler_object
 {
-private:
-    Fill_zero _zero_;
+    private: Fill_zero _zero_;
 
-protected:
-    Supervisor_client_interface* const _supervisor_client;
-    Host_and_port const _host_and_port;
-    Duration const _polling_interval;
-    Duration const _connection_retry_duration;
-    bool _start_update_configuration_delayed;
+    protected: Supervisor_client_interface* const _supervisor_client;
+    protected: Duration const _polling_interval;
+    protected: Duration const _connection_retry_duration;
+    protected: bool _start_update_configuration_delayed;
 
-protected:
-    Abstract_connector(Supervisor_client_interface* supervisor_client, const Host_and_port& host_and_port) :
+    protected: Abstract_connector(Supervisor_client_interface* supervisor_client) :
         Scheduler_object(supervisor_client->_spooler, this, type_supervisor_client_connection),
         _zero_(this + 1),
         _supervisor_client(supervisor_client),
-        _host_and_port(host_and_port),
         _polling_interval(supervisor_client->spooler()->settings()->_supervisor_configuration_polling_interval),
         _connection_retry_duration(min(connection_retry_duration, _polling_interval))
     {
         _log = supervisor_client->log();
     }
 
-public:
-    virtual ~Abstract_connector() {
+    public: virtual ~Abstract_connector() {
         close();
     }
 
-    virtual bool is_ready() const = 0;
+    public: virtual bool is_ready() const = 0;
 
-    virtual bool connection_failed() const = 0;
+    public: virtual bool connection_failed() const = 0;
 
-    const Host_and_port& host_and_port() const {
-        return _host_and_port; 
-    }
-
-    void start() {
+    public: void start() {
         async_continue();
     }
 
-    void start_update_configuration() {
+    public: void start_update_configuration() {
         _start_update_configuration_delayed = true;
         check_update_configuration_delayed();
     }
 
-    virtual void check_update_configuration_delayed() = 0;
+    public: virtual void check_update_configuration_delayed() = 0;
 
-protected:
-    virtual void close() {}
+    protected: virtual void close() {}
 
-    string new_fetch_command() {
+    protected: string new_fetch_command() {
         ptr<io::String_writer> string_writer = Z_NEW(io::String_writer());
         ptr<xml::Xml_writer>   xml_writer = Z_NEW(xml::Xml_writer(string_writer));
 
@@ -94,7 +83,9 @@ protected:
         xml_writer->write_prolog();
 
         xml_writer->begin_element("supervisor.configuration.fetch");
+        assert(!_spooler->_spooler_id.empty());
         xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
+        xml_writer->set_attribute_optional("cluster_member_id", _spooler->cluster_member_id());
 
         if (_spooler->_udp_port)
             xml_writer->set_attribute("udp_port", _spooler->_udp_port);
@@ -109,7 +100,7 @@ protected:
         return string_writer->to_string();
     }
 
-    void write_directory_structure(xml::Xml_writer* xml_writer, const Absolute_path& path) {
+    protected: void write_directory_structure(xml::Xml_writer* xml_writer, const Absolute_path& path) {
         Folder_directory_lister dir(_log);
         bool ok = dir.open(_spooler->_configuration_directories[confdir_cache], path);
         if (ok) {
@@ -139,14 +130,7 @@ protected:
         }
     }
 
-    //bool supervisor_does_not_know_command(const xml::Document_ptr& response_document) {
-    //    if (xml::Element_ptr error_element = response_document.select_node("/spooler/answer/ERROR")) {
-    //        return string(xc_from_dom_error(error_element)->code()) == "SCHEDULER-105";  // "Unknown command"
-    //    } else
-    //        return false;
-    //}
-
-    void on_configuration_directory_received(const xml::Document_ptr& response_document) {
+    protected: void on_configuration_directory_received(const xml::Document_ptr& response_document) {
         if (xml::Element_ptr error_element = response_document.select_node("/spooler/answer/ERROR")) {
             z::throw_xc(string("From supervisor: ") + xc_from_dom_error(error_element)->what());
         } 
@@ -158,7 +142,7 @@ protected:
         } 
     }
 
-    void update_directory_structure(const Absolute_path& directory_path, const xml::Element_ptr& element) {
+    protected: void update_directory_structure(const Absolute_path& directory_path, const xml::Element_ptr& element) {
         assert(element);
         assert(element.nodeName_is("configuration.directory"));
         assert(element.getAttribute("name") == directory_path.name());
@@ -231,24 +215,28 @@ protected:
 
 struct Http_connector : Abstract_connector {
     private: Fill_zero _zero_;
-    bool _is_ready;
-    bool _connection_failed;
-    Xc_copy _exception;
-    ptr<Supervisor_response_call> _supervisor_response_call;
-    CppWebClientJ _webClientJ;
+    private: string const _supervisor_uri;
+    private: CppWebClientJ const _webClientJ;
+    private: bool _is_ready;
+    private: bool _connection_failed;
+    private: Xc_copy _exception;
+    private: ptr<Supervisor_response_call> _supervisor_response_call;
 
-    public: Http_connector(Supervisor_client_interface* c, const Host_and_port& h) :
-        Abstract_connector(c, h),
+    public: Http_connector(Supervisor_client_interface* c, const string& supervisor_uri) :
+        Abstract_connector(c),
         _zero_(this + 1),
+        _supervisor_uri(supervisor_uri),
         _webClientJ(spooler()->schedulerJ().instance(CppWebClientJ::java_class_()->get_jobject()))
-    {}
+    {
+        if (_spooler->_spooler_id.empty()) z::throw_xc(message_string("SCHEDULER-485", "supervisor"));
+    }
 
     public: ~Http_connector() {
         _webClientJ.close();
     }
 
     public: string obj_name() const {
-        return S() << "Http_connector(" << _host_and_port << " " << _exception << ")";
+        return S() << "Http_connector(" << _supervisor_uri << " " << _exception << ")";
     }
 
     public: bool is_ready() const {
@@ -273,8 +261,9 @@ struct Http_connector : Abstract_connector {
         } else {
             try {
                 _supervisor_response_call = Z_NEW(Supervisor_response_call(this));
-                string uri = S() << "http://" << _host_and_port.host().name_or_ip() << ":" << _host_and_port.port() << "/jobscheduler/engine/command";
+                string uri = S() << _supervisor_uri << "/jobscheduler/engine/command";
                 _webClientJ.postXml(uri, new_fetch_command(), _supervisor_response_call->java_sister());
+                _connection_failed = false;
             }
             catch (exception& x) {
                 log()->warn(x.what());
@@ -290,11 +279,6 @@ struct Http_connector : Abstract_connector {
         _exception = NULL;
         try {
             xml::Document_ptr doc = xml::Document_ptr(((TryJ)call.value()).get().get_jobject());   // get() wirft Exception, wenn call.value() ein Failure ist
-            //if (supervisor_does_not_know_command(doc)) {
-            //    close();
-            //    _supervisor_client->change_to_old_connector();
-            //    return;
-            //}
             on_configuration_directory_received(doc);
             _is_ready = true;
             set_async_delay(_polling_interval.as_double());
@@ -330,15 +314,17 @@ struct Http_connector : Abstract_connector {
 struct Abstract_tcp_connector : Abstract_connector {
     private: Fill_zero _zero_;
     protected: ptr<Xml_client_connection> _xml_client_connection;
+    protected: Host_and_port const _host_and_port;
 
     public: Abstract_tcp_connector(Supervisor_client_interface* c, const Host_and_port& h) :
-        Abstract_connector(c, h),
+        Abstract_connector(c),
+        _host_and_port(h),
         _zero_(this + 1)
     {}
 
     public: void close() {
-                close_connection();
-                Abstract_connector::close();
+        close_connection();
+        Abstract_connector::close();
     }
 
     public: void connect() {
@@ -405,7 +391,7 @@ struct Old_connected_connector : Abstract_tcp_connector
 
 struct Supervisor_client : Supervisor_client_interface
 {
-                                Supervisor_client           ( Scheduler*, const Host_and_port& );
+                                Supervisor_client           ( Scheduler*, const string& supervisor_address);
 
     // Subsystem
     void                        close                       ();
@@ -419,8 +405,7 @@ struct Supervisor_client : Supervisor_client_interface
     void                        start_update_configuration  ()                                      { if( _connector )  _connector->start_update_configuration(); }
     void                        set_using_central_configuration()                                   { _is_using_central_configuration = true; }
     bool                        is_using_central_configuration() const                              { return _is_using_central_configuration; }
-  //void                        change_to_old_connector     ();
-    Host_and_port               host_and_port               () const                                { return _connector? _connector->host_and_port() : Host_and_port(); }
+    Host_and_port               host_and_port               () const                                { return _host_and_port; }
 
     // IDispatch_implementation
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -429,11 +414,10 @@ struct Supervisor_client : Supervisor_client_interface
     STDMETHODIMP            get_Tcp_port                    ( int* );
 
   private:
-    friend struct               Abstract_connector;
-
     Fill_zero                  _zero_;
-    Host_and_port const        _host_and_port;
-    ptr<Abstract_connector> _connector;
+    string const               _supervisor_address;
+    Host_and_port              _host_and_port;
+    ptr<Abstract_connector>    _connector;
     bool                       _is_using_central_configuration;
 
     static Class_descriptor     class_descriptor;
@@ -465,21 +449,24 @@ Supervisor_client_interface::Supervisor_client_interface( Scheduler* scheduler, 
 
 //----------------------------------------------------------------------------new_supervisor_client
 
-ptr<Supervisor_client_interface> new_supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
+ptr<Supervisor_client_interface> new_supervisor_client( Scheduler* scheduler, const string& supervisor_address)
 {
-    ptr<Supervisor_client> supervisor_client = Z_NEW( Supervisor_client( scheduler, host_and_port ) );
+    ptr<Supervisor_client> supervisor_client = Z_NEW(Supervisor_client(scheduler, supervisor_address));
     return +supervisor_client;
 }
 
 //-------------------------------------------------------------Supervisor_client::Supervisor_client
 
-Supervisor_client::Supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
+Supervisor_client::Supervisor_client( Scheduler* scheduler, const string& supervisor_address)
 : 
     Supervisor_client_interface( scheduler, type_supervisor_client, &class_descriptor ),
     _zero_(this+1),
-    _host_and_port(host_and_port)
+    _supervisor_address(supervisor_address)
 {
-    _log->set_prefix( S() << obj_name() << ' ' << _host_and_port.as_string() );
+    _log->set_prefix( S() << obj_name() << ' ' << supervisor_address);
+    if (Regex_submatches m = Regex("^([^:]+://)?([^:]+):([0-9]+)(/.+)?").match_subresults(_supervisor_address))   // Zerlegt "http://host:1234" und "host:1234"
+        _host_and_port = Host_and_port(m[2], as_int(m[3]));
+    else z::throw_xc("Invalid supervisor address", supervisor_address); 
 }
 
 //-------------------------------------------------------------------------Supervisor_client::close
@@ -500,7 +487,6 @@ bool Supervisor_client::subsystem_initialize()
     _subsystem_state = subsys_initialized;
 
     if (!_spooler->_udp_port)  log()->warn(message_string("SCHEDULER-899"));
-    if (!_spooler->_tcp_port) z::throw_xc("tcp_port is mandatory for using the configuration server (supervisor)");
 
     if( !_spooler->_configuration_directories[ confdir_cache ].exists() )
     {
@@ -514,27 +500,18 @@ bool Supervisor_client::subsystem_initialize()
 
     _spooler->folder_subsystem()->initialize_cache_directory();
 
-    if (_spooler->settings()->_supervisor_configuration_client_v1_3)
-        _connector = Z_NEW(Old_connected_connector(this, _host_and_port));
-    else
-        _connector = Z_NEW(Http_connector(this, _host_and_port));
+    if (strstr(_supervisor_address.c_str(), "://"))
+        _connector = Z_NEW(Http_connector(this, _supervisor_address));
+    else {
+        if (!_spooler->_tcp_port) z::throw_xc("tcp_port is mandatory for using the configuration server (supervisor)");
+        _connector = Z_NEW(Old_connected_connector(this, Host_and_port(_supervisor_address)));
+    }
 
     _connector->set_async_manager(_spooler->_connection_manager);
     _connector->start();
 
     return true;
 }
-
-//-------------------------------------------------------Supervisor_client::change_to_old_connector
-
-//void Supervisor_client::change_to_old_connector()
-//{
-//    _connector->set_async_manager(NULL);
-//    _connector = NULL;
-//    _connector = Z_NEW(Old_connected_connector(this, _host_and_port));
-//    _connector->set_async_manager(_spooler->_connection_manager);
-//    _connector->start();
-//}
 
 //------------------------------------------------------------------Supervisor_client::get_Hostname
 
@@ -544,8 +521,8 @@ STDMETHODIMP Supervisor_client::get_Hostname( BSTR* result )
 
     try
     {
-        string hostname = _connector->host_and_port().host().name();
-        if( hostname == "" )  hostname = _connector->host_and_port().host().ip_string();
+        string hostname = _host_and_port.host().name();
+        if( hostname == "" )  hostname = _host_and_port.host().ip_string();
         hr = String_to_bstr( hostname, result );
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
@@ -561,7 +538,7 @@ STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
 
     try
     {
-        *result = _connector->host_and_port().port();
+        *result = _host_and_port.port();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
