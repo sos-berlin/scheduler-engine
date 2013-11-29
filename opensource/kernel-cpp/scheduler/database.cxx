@@ -1300,13 +1300,13 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
     string  warn_msg;
 
     if (_db_name == "") throw;
-    if( _spooler->_is_reopening_database_after_error)  throw;
+    if( _is_reopening_database_after_error ) throw;
 
     In_recursion in_recursion = &_waiting; 
     if (in_recursion)  throw_xc( callers_exception );   
     
     try {
-        _spooler->_is_reopening_database_after_error = true;
+        _is_reopening_database_after_error = true;
         THREAD_LOCK( _error_lock )  _error = callers_exception.what();
 
         _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception, function ) );
@@ -1448,9 +1448,11 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
         if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->assert_is_still_active( Z_FUNCTION );
     }
     catch (exception&) {
-        _spooler->_is_reopening_database_after_error = false;
+        _is_reopening_database_after_error = false;
         throw;
     }
+
+    _is_reopening_database_after_error = false;
 }
 
 //----------------------------------------------------------------------------Database::lock_syntax
