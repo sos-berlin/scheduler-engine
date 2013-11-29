@@ -290,7 +290,7 @@ struct Http_connector : Abstract_connector {
         }
         _supervisor_response_call = NULL;
         check_update_configuration_delayed();
-        _spooler->signal("supervisor_client");
+        _spooler->signal();
     }
 
     protected: bool async_finished_() const {
