@@ -202,23 +202,17 @@ struct Communication
 
     void                        init                        ();
     void                        start_or_rebind             ();
-  //void                        start_thread                ();
     void                        close                       ( double wait_time );
     void                        finish_responses            ( double wait_time );                   // Antworten versenden (synchron)
     void                        bind                        ();
     void                        rebind                      ()                                      { bind(); }
-  //int                         thread_main                 ();
     bool                        started                     ()                                      { return _started; }
-  //bool                        main_thread_exists          ();
     void                        remove_connection           ( Connection* );
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& ) const;
 
   private:
-  //int                         run                         ();
-  //bool                        handle_socket               ( Connection* );
     int                         bind_socket                 ( SOCKET, struct sockaddr_in*, const string& tcp_or_udp );
-  //void                       _fd_set                      ( SOCKET, fd_set* );
 
   public:
     Fill_zero                  _zero_;
@@ -228,10 +222,6 @@ struct Communication
     Listen_socket              _listen_socket;
     Udp_socket                 _udp_socket;
     Connection_list            _connection_list;
-  //int                        _nfds;
-  //fd_set                     _read_fds;
-  //fd_set                     _write_fds;
-  //Thread_semaphore           _semaphore;
     bool                       _terminate;
     int                        _tcp_port;
     int                        _udp_port;
