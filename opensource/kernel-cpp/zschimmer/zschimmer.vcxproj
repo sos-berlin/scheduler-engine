@@ -299,7 +299,6 @@
     <ClCompile Include="Memory_allocator.cxx" />
     <ClCompile Include="message.cxx" />
     <ClCompile Include="mutex.cxx" />
-    <ClCompile Include="pipe_collector.cxx" />
     <ClCompile Include="reference.cxx" />
     <ClCompile Include="regex_class.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -522,7 +521,6 @@
     <ClInclude Include="message.h" />
     <ClInclude Include="mutex.h" />
     <ClInclude Include="mutex_base.h" />
-    <ClInclude Include="pipe_collector.h" />
     <ClInclude Include="regex_class.h" />
     <ClInclude Include="rtf\rtf.h" />
     <ClInclude Include="rtf\rtf_doc.h" />

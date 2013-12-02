@@ -55,7 +55,6 @@
 #include "../zschimmer/file_path.h"
 #include "../zschimmer/xml.h"
 #include "../zschimmer/z_io.h"
-#include "../zschimmer/pipe_collector.h"
 
 #include "settings.h"
 

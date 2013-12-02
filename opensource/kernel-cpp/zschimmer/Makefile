@@ -90,7 +90,6 @@ libzschimmer_objects = \
  file.o\
  file_path.o\
  md5.o\
- pipe_collector.o\
  system_command.o\
  scripting_engine.o\
  string_list.o\

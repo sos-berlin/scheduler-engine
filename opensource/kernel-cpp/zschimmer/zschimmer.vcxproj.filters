@@ -83,9 +83,6 @@
     <ClCompile Include="mutex.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
-    <ClCompile Include="pipe_collector.cxx">
-      <Filter>Quellcodedateien</Filter>
-    </ClCompile>
     <ClCompile Include="reference.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
@@ -284,9 +281,6 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="mutex_base.h">
-      <Filter>Header-Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="pipe_collector.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="regex_class.h">
