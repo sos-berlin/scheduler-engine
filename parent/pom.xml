@@ -28,6 +28,7 @@
         <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
         <test.forkCount>1</test.forkCount>
         <enginedoc.version>${project.version}</enginedoc.version> 
+        <argLine/>
     </properties>
 
     <profiles>
@@ -512,7 +513,7 @@
                 <configuration>
                     <printSummary>false</printSummary>
                     <forkCount>${test.forkCount}</forkCount>
-                    <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
+                    <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
                         <com.sos.scheduler.engine.test.underMaven />
@@ -527,7 +528,7 @@
                 <version>2.14</version>
                 <configuration>
                     <forkCount>${test.forkCount}</forkCount>
-                    <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
+                    <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
                         <com.sos.scheduler.engine.test.underMaven />
