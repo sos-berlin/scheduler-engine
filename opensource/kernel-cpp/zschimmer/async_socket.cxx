@@ -30,6 +30,7 @@ namespace zschimmer {
 
 const int                       default_buffer_size                 = 4096; //1024;
 const int                       Socket_stream::read_bytes_maximum   = 10000;
+const int                       poll_fd_maximum                     = 10000;
 
 static Message_code_text error_codes[] =
 {
@@ -278,28 +279,6 @@ bool Socket_operation::try_set_keepalive( bool b )
     return ok;
 }
 
-//----------------------------------------------------------------Socket_operation::set_tcp_nodelay
-/*
-    Nagles Algorithmus verzögert nur, wenn ein noch nicht bestätigtes Paket unterwegs ist.
-    Wenn wir immer nur ein Paket senden, kann der Algorithmus nicht verzögern.
-
-void Socket_operation::set_tcp_nodelay( bool b )
-{
-    int value = b;
-
-    if( _read_socket != SOCKET_ERROR )
-    {
-        Z_LOG2( "socket.setsockopt", "setsockopt(" << _read_socket << ",IPPROTO_TCP,TCP_NODELAY," << value << ")\n" );
-        ::setsockopt( _read_socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&value, sizeof value );
-    }
-
-    if( _write_socket != SOCKET_ERROR  &&  _write_socket != _read_socket )
-    {
-        Z_LOG2( "socket.setsockopt", "setsockopt(" << _write_socket << ",IPPROTO_TCP,TCP_NODELAY," << value << ")\n" );
-        ::setsockopt( _write_socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&value, sizeof value );
-    }
-}
-*/
 //---------------------------------------------------------------------------------------set_linger
 
 void Socket_operation::set_linger( bool on, int seconds )
@@ -778,19 +757,6 @@ bool Buffered_socket_operation::recv__continue()
     return something_done;
 }
 
-//---------------------------------------------------------------------------------------add_filenr
-
-//void Socket_wait::add_filenr( int file_nr, Read_or_write rw )
-//{
-//#   ifdef Z_WINDOWS
-//#       error "In Windows werden die Dateinummern sehr groß, sie beginnen nicht bei 0. Also kein _event_array verwenden!"
-//#   else
-//        if( _event_array.size() - 1 < filenr )  _event_array.resize( filenr < FD_SETSIZE? FD_SETSIZE : filenr + 1000 );
-//#   endif
-//    _event_array[ filenr ] = e;
-//    FD_SET( file_nr, rw == readfd? &_fds[read_fd] : &_fds[write_fd] );
-//}
-
 //-------------------------------------------------------------------------Socket_wait::Socket_wait
 #ifndef Z_WINDOWS
 
@@ -804,27 +770,8 @@ Socket_wait::Socket_wait( Socket_manager* m )
 
 //---------------------------------------------------------------------------------Socket_wait::add
 
-//void Socket_wait::add( int file_nr, Read_or_write rw, Has_set_signaled* s )
-//{
-//#   ifdef Z_WINDOWS
-//#       error "In Windows werden die Dateinummern sehr groß, sie beginnen nicht bei 0. Also kein _event_array verwenden!"
-//#   endif
-//    if( _signaled_array.size() - 1 < file_nr )  _signaled_array.resize( file_nr < FD_SETSIZE? FD_SETSIZE : file_nr + 1000 );
-//    _signaled_array[ file_nr ] = s;
-//    FD_SET( file_nr, &_fds[rw] );
-//}
-
-//---------------------------------------------------------------------------------Socket_wait::add
-
 void Socket_wait::add( Event_base* event )
 {
-//#   ifdef Z_WINDOWS
-//#       error "In Windows werden die Dateinummern sehr groß, sie beginnen nicht bei 0. Also kein _event_array verwenden!"
-//#   endif
-//    if( _signaled_array.size() - 1 < file_nr )  _signaled_array.resize( file_nr < FD_SETSIZE? FD_SETSIZE : file_nr + 1000 );
-//    _signaled_array[ file_nr ] = s;
-//    FD_SET( file_nr, &_fds[rw] );
-
     _event_list.push_back( event );
 }
 
@@ -833,13 +780,6 @@ void Socket_wait::add( Event_base* event )
 int Socket_wait::wait( double seconds )
 {
     bool   polling = !_event_list.empty();
-    
-    // In Linux wird exceptfd nicht gesetzt, wenn bei socketpair die Verbindung abbricht. 
-    // Also liefern wir bei Timeout eine 1, um com_remote.cxx die Verbindung prüfen zu lassen.
-    // Nicht effizient, aber so funktioniert es. Joacim 12.11.03
-    //bool   simulate_except = false;
-    //if( seconds > 0 )  for( int i = 0; i < FD_SETSIZE; i++ )  if( FD_ISSET( i, &_fds[exceptfd] ) )  { simulate_except = true;  polling = true; }
-
     double now   = double_from_gmtime();
     double until = polling? now + seconds : 0.0;
 
@@ -852,7 +792,6 @@ int Socket_wait::wait( double seconds )
 
         // Timeout
         if( !polling )  return 0;
-
 
         // Das war für Spooler::Directory_watcher gedacht, ist aber inzwischen in Spooler::Job selbst realisiert
         // (über _directory_watcher_next_time). 
@@ -874,6 +813,19 @@ int Socket_wait::wait( double seconds )
 
 #endif
 
+//----------------------------------------------------------------------------read_or_write_to_poll
+#if defined Z_UNIX
+
+static uint32 read_or_write_to_poll(Socket_manager::Read_or_write rw) {
+    switch (rw) {
+        case Socket_manager::read_fd: return POLLIN;
+        case Socket_manager::write_fd: return POLLOUT;
+        case Socket_manager::except_fd: return POLLERR;
+        default: z::throw_xc("read_or_write_to_poll", rw);
+    }
+}
+
+#endif
 //-------------------------------------------------------------------Socket_manager::Socket_manager
 
 Socket_manager::Socket_manager()
@@ -944,9 +896,11 @@ void Socket_manager::remove_socket_operation( Socket_operation* op )
 void Socket_manager::set_fd( Read_or_write rw, SOCKET s )
 { 
     //Z_LOG2( "socket", Z_FUNCTION << ( rw == read_fd? " read=" : rw == write_fd? " write=" : " except=" ) << s << "\n" );
-
-    if( s >= FD_SETSIZE )  z::throw_xc( "Z-ASYNC-SOCKET-001", s, FD_SETSIZE, Z_FUNCTION );
-    FD_SET( s, &_fds[rw] );  if( _n < s+1 )  _n = s+1; 
+    File_to_event_map::iterator i = _file_to_event_map.find(s);
+    bool is_new = i == _file_to_event_map.end();
+    uint32 events = read_or_write_to_poll(rw);
+    if (is_new) _file_to_event_map.insert(File_to_event_map::value_type(s, events));
+    else i->second |= events;
 }
 
 //-------------------------------------------------------------------------Socket_manager::clear_fd
@@ -955,8 +909,14 @@ void Socket_manager::clear_fd( Read_or_write rw, SOCKET s )
 { 
     //Z_LOG2( "socket", Z_FUNCTION << ( rw == read_fd? " read=" : rw == write_fd? " write=" : " except=" ) << s << "\n" );
 
-    if( s >= FD_SETSIZE )  z::throw_xc( "Z-ASYNC-SOCKET-001", s, FD_SETSIZE, Z_FUNCTION );
-    FD_CLR( s, &_fds[rw] ); 
+    File_to_event_map::iterator i = _file_to_event_map.find(s);
+    if (i != _file_to_event_map.end()) {
+        i->second &= ~read_or_write_to_poll(rw);
+        if (i->second == 0) {
+            _file_to_event_map.erase(i);
+            Z_LOG2("socket.poll", Z_FUNCTION << " delete " << s << "\n");
+        }
+    }
 }
 
 //----------------------------------------------------------------------Socket_manager::create_wait
@@ -1147,55 +1107,46 @@ int Socket_manager::wait( double wait_seconds )
 
 int Socket_manager::wait( double wait_seconds )
 {
-    {
-        int element_size = sizeof _fds[read_fd  ].fds_bits[0];
-        int bytes = ( ( _n + 7 ) / 8 + element_size - 1 ) / element_size * element_size;
-        assert( bytes <= sizeof _fds[read_fd  ].fds_bits );
-        memcpy( &_signaled_fds[read_fd  ].fds_bits, &_fds[read_fd  ].fds_bits, bytes );
-        memcpy( &_signaled_fds[write_fd ].fds_bits, &_fds[write_fd ].fds_bits, bytes );;
+    _signaled_fd_set.clear();
+    struct pollfd fds[poll_fd_maximum];
+    struct pollfd* f = fds;
+    Z_FOR_EACH_CONST(File_to_event_map, _file_to_event_map, i) {
+        if (f - fds == poll_fd_maximum) break;
+        f->fd = i->first;
+        f->events = i->second;
+        f->revents = 0;
+        f++;
     }
-
-
-    if( wait_seconds >= 0.000001 )  wait_seconds += 0.000002;     // Etwas länger, weil in Linux sonst select() zu kurz wartet (999ms statt 1s)
-    timeval t = timeval_from_seconds( wait_seconds );
-
-    if( Log_ptr log = "socket.select" )
-    {
-        log << "Socket_manager::wait: select(" << _n << ",";
-        print_fd_sets( log, &_signaled_fds[read_fd], &_signaled_fds[write_fd], &_signaled_fds[except_fd], _n );
-        log << ',' << ( (t.tv_sec*1000) + (t.tv_usec/1000) ) << printf_string( ".%03d", t.tv_usec%1000) << "ms)\n";
+    int wait_millis = (int)min(wait_seconds * 1000 + 1.5, (double)(INT_MAX - 1));    // +1.5, weil Linux gerne eine Millisekunde zu kurz wartet und wir in eine millisekundenlange Schleife gerieten
+    if (z::Log_ptr log = "socket.poll") {
+        log << Z_FUNCTION << " poll(";
+        Z_FOR_EACH_CONST(File_to_event_map, _file_to_event_map, i) 
+            log << i->first << ':' << i->second << ' ';
+        log << ", " << wait_millis << "ms)\n";
     }
-
-    _socket_signaled_count = 0;
-
-    int ret = select( _n, &_signaled_fds[read_fd], &_signaled_fds[write_fd], NULL, &t );
-
-    int err = ret == -1? errno : 0;
-
-    if( ret != 0  &&  err != EINTR )
-    {
-        if( Log_ptr log = "socket.select" )
-        {
-            log << "Socket_manager::wait: select() ret=" << ret;
-            if( ret == -1 )  log << " errno=" << err << " " << z_strerror(err);
-            if( ret > 0 )  log << "  ", print_fd_sets( log, &_signaled_fds[read_fd], &_signaled_fds[write_fd], &_signaled_fds[except_fd], _n );
-            log << '\n';
+    int n = ::poll(fds, f - fds, wait_millis);
+    if (z::Log_ptr log = "socket.poll") {
+        log << Z_FUNCTION << " poll() => " << n << ", ";
+        for (struct pollfd* g = fds; g != f; g++) {
+            if (g->revents)
+                log << g->fd << ':' << g->revents << ' ';
+        }
+        log << "\n";
+    }
+    if (n == -1) {
+        if (errno != EINTR) z::throw_errno(errno, "poll");
+        n = 0;
+    }
+    if (n > 0) {
+        int c = n;
+        for (struct pollfd* g = fds; g != f; g++) {
+            if (g->revents) {
+                _signaled_fd_set.insert(g->fd);
+                if (--c == 0) break;
+            }
         }
     }
-
-    if( ret == -1 ) 
-    {
-        if( err == EINTR )  return 0;
-        throw_socket( err, "select" );
-    }
-    else
-    if( ret > 0 )
-    {
-        _socket_signaled_count = ret;
-
-    }
-
-    return ret;
+    return n;
 }
 
 #endif
@@ -1204,11 +1155,7 @@ int Socket_manager::wait( double wait_seconds )
 
 bool Socket_manager::socket_signaled( SOCKET s )
 { 
-    if( s >= FD_SETSIZE )  z::throw_xc( "Z-ASYNC-SOCKET-001", s, FD_SETSIZE, Z_FUNCTION );
-
-    return FD_ISSET( s, &_signaled_fds[read_fd  ] ) ||
-           FD_ISSET( s, &_signaled_fds[write_fd ] ) ||
-           FD_ISSET( s, &_signaled_fds[except_fd] );   
+    return _signaled_fd_set.find(s) != _signaled_fd_set.end();
 }
 
 #endif
@@ -1217,11 +1164,7 @@ bool Socket_manager::socket_signaled( SOCKET s )
 
 void Socket_manager::clear_socket_signaled( SOCKET s )
 { 
-    if( s >= FD_SETSIZE )  z::throw_xc( "Z-ASYNC-SOCKET-001", s, FD_SETSIZE, Z_FUNCTION );
-
-    FD_CLR( s, &_signaled_fds[read_fd] );
-    FD_CLR( s, &_signaled_fds[write_fd] );
-    FD_CLR( s, &_signaled_fds[except_fd] ); 
+    _signaled_fd_set.erase(s);
 }
 
 #endif
@@ -1230,13 +1173,12 @@ void Socket_manager::clear_socket_signaled( SOCKET s )
 string Socket_manager::string_from_operations( const string& separator )
 {
     S result;
-
-    #ifdef Z_UNIX
-        result << "Socket_manager(";
-        print_fd_sets( &result, &_fds[read_fd], &_fds[write_fd], NULL, _n );
-        result << ")" << separator;
+    result << "Socket_manager(";
+    #if defined Z_UNIX
+        Z_FOR_EACH(File_to_event_map, _file_to_event_map, i)
+            result << i->first << ":" << i->second << " ";
     #endif
-
+    result << ")" << separator;
     result << Event_manager::string_from_operations( separator );
 
     return result;

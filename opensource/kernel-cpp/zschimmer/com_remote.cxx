@@ -462,16 +462,18 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
                 {
                     _connection->check_async( this );     // Warnung ausgeben, wenn asynchroner Betrieb verlangt ist
 
-                    fd_set fds;   FD_ZERO( &fds );
-
-                    #ifndef Z_WINDOWS
-                        if( _connection->_listen_socket >= FD_SETSIZE )  z::throw_xc( "Z-ASYNC-SOCKET-001", _connection->_listen_socket, FD_SETSIZE, Z_FUNCTION );
+                    #ifdef Z_UNIX
+                        struct pollfd my_pollfd;
+                        my_pollfd.fd = _connection->_listen_socket;
+                        my_pollfd.events = POLLIN;
+                        int rc = ::poll(&my_pollfd, 1, -1);
+                        if (rc == -1) z::throw_errno(errno, "poll");
+                    #else
+                        fd_set fds;   FD_ZERO( &fds );
+                        FD_SET( _connection->_listen_socket, &fds  );                    
+                        int ret = ::select( _connection->_listen_socket + 1, &fds, NULL, NULL, NULL );
+                        if( ret == -1 )  _connection->_last_errno = socket_errno(), _connection->_new_error = true;
                     #endif
-
-                    FD_SET( _connection->_listen_socket, &fds  );
-                    
-                    int ret = ::select( _connection->_listen_socket + 1, &fds, NULL, NULL, NULL );
-                    if( ret == -1 )  _connection->_last_errno = socket_errno(), _connection->_new_error = true;
                 }
 
 
@@ -882,21 +884,24 @@ void Connection::wait()
 {
     check_async( current_operation() );     // Warnung ausgeben, wenn asynchroner Betrieb verlangt ist
 
+    #ifdef Z_UNIX
+        struct pollfd my_pollfd;
+        my_pollfd.fd = _socket;
+        my_pollfd.events = POLLIN | POLLOUT | POLLERR;
+        int rc = ::poll(&my_pollfd, 1, -1);
+        if (rc == -1) z::throw_errno(errno, "poll");
+    #else
+        fd_set readfds;    FD_ZERO( &readfds  );
+        fd_set writefds;   FD_ZERO( &writefds );
+        fd_set exceptfds;  FD_ZERO( &exceptfds );
 
-    fd_set readfds;    FD_ZERO( &readfds  );
-    fd_set writefds;   FD_ZERO( &writefds );
-    fd_set exceptfds;  FD_ZERO( &exceptfds );
-
-    #ifndef Z_WINDOWS
-        if( _socket >= FD_SETSIZE )  z::throw_xc( "Z-ASYNC-SOCKET-001", _socket, FD_SETSIZE, Z_FUNCTION );
-    #endif
-
-    FD_SET( _socket, &readfds   );
-    FD_SET( _socket, &writefds  );
-    FD_SET( _socket, &exceptfds );
+        FD_SET( _socket, &readfds   );
+        FD_SET( _socket, &writefds  );
+        FD_SET( _socket, &exceptfds );
     
-    int ret = ::select( _socket + 1, &readfds, &writefds, &exceptfds, NULL );
-    if( ret == -1 )  check_socket_error( socket_errno(), "select" );
+        int ret = ::select( _socket + 1, &readfds, &writefds, &exceptfds, NULL );
+        if( ret == -1 )  check_socket_error( socket_errno(), "select" );
+    #endif
 }
 
 //---------------------------------------------------------------------------Connection::send_async

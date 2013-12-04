@@ -7,6 +7,9 @@
 #include "z_sockets.h"
 #include "z_io.h"
 #include "async_io.h"
+#ifdef Z_UNIX
+#   include <poll.h>
+#endif
 
 //-------------------------------------------------------------------------------------------------
 
@@ -63,7 +66,6 @@ struct Socket_operation : Event_operation
     void                        add_to_socket_manager       ( Socket_manager* );
     void                        remove_from_socket_manager  ();
     void                    set_blocking                    ( bool b )                              { _blocking = b; }
-  //void                        listen                      ();
     bool                        accept                      ( SOCKET listen_socket );
 
     void                        call_ioctl                  ( int what, unsigned long value );
@@ -179,8 +181,7 @@ struct Buffered_socket_operation : Socket_operation
 
 struct Socket_manager : Event_manager
 {
-    enum Read_or_write
-    { 
+    enum Read_or_write { 
         read_fd, 
         write_fd,
         except_fd
@@ -201,10 +202,6 @@ struct Socket_manager : Event_manager
 
                                 Socket_manager              ();
                                ~Socket_manager              ();
-
-
-    //void                        get_events                  ( std::vector<Socket_event*>* );
-
 
     // Event_manager
     string                      string_from_operations  ( const string& separator = ", " );
@@ -241,13 +238,11 @@ struct Socket_manager : Event_manager
 
     Fill_zero                  _zero_;
 
-
-#   ifndef Z_WINDOWS
-        SOCKET                 _n;
-        fd_set                 _fds[3];
-        
-        SOCKET                 _socket_signaled_count;
-        fd_set                 _signaled_fds[3];
+#   if defined Z_UNIX
+        typedef stdext::hash_set<int> Signaled_fd_set;
+        Signaled_fd_set        _signaled_fd_set;
+        typedef stdext::hash_map<int,uint32> File_to_event_map;
+        File_to_event_map      _file_to_event_map;          // Enthält pro File Handle POLLIN/OUT/ERR
 #   else
         bool                   _wsastartup_called;
 #   endif
