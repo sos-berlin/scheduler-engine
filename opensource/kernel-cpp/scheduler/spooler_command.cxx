@@ -1288,11 +1288,11 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     ptr<Order> order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
                                                   : job_chain->order( id );
 
-    order->set_is_modified( true );
+    order->set_modified( true );
 
     if( modify_order_element.getAttribute( "action" ) == "reset" ) {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
         order->reset();
-        order->set_is_modified( false );
+        order->set_modified( false );
     }
 
     for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {

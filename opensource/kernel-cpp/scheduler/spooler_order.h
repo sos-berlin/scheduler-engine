@@ -139,7 +139,7 @@ struct Order : Com_order,
 
     bool                        is_virgin               () const                                    { return _is_virgin; }
     bool                        is_touched              () const                                    { return !_is_virgin; }
-    void                    set_is_modified             ( bool b )                                  { _is_modified = b; }
+    void                    set_modified                ( bool b )                                  { _is_modified = b; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
