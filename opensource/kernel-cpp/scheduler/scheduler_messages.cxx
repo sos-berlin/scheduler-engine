@@ -149,7 +149,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-283", "Error when loading task $1 from database: $2" },
     { "SCHEDULER-284", "Ignoring cmd='$1' because job is to be removed" },
     { "SCHEDULER-285", "Max. $1 history records are being read" },
-    { "SCHEDULER-286", "More than $1 communication channels. Connection denied" },
     { "SCHEDULER-287", "TCP connection not allowed" },
     { "SCHEDULER-288", "-reuse-port (SO_REUSEADDR): using $1, but another application can use it too" },
     { "SCHEDULER-289", "$1 is blocked. Trying a further $2 seconds before giving up" },

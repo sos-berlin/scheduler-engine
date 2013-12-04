@@ -82,33 +82,7 @@ extern const int                max_open_log_files;
 extern const Duration           delete_temporary_files_delay;
 extern const Duration           delete_temporary_files_retry;
 
-#ifdef Z_WINDOWS
-/**
- * \change  JS-471 - Mit der Einf�hrung von sosMsgWaitForMultipleObjects k�nnen diese Begrenzungen jetzt aufgehoben werden.
- * \version 1.3.8
- * \author  Stefan Sch�dlich
- * \date    2010-04-01
- * \detail
- * Aus Kompatibilit�tsgr�nden mit Unix werden die gleichen Werte jetzt auch f�r Windows verwendet.
- *
- * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
- */
-//    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht �berschreiten
-//    const int                   max_communication_connections =    25;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht �berschreiten, inkl. udp und listen()
-
-// Diese Grenzen sind zun�chst f�r Testzwecke und sollten kurzfristig auf die UNIX-Grenzen angeglichen werden.
-// Dar�ber hinaus gehende Grenzen sollten extra beauftragt werden.
-//    const int                   max_processes                 =    1000;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht �berschreiten
-//    const int                   max_communication_connections =   10000;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht �berschreiten, inkl. udp und listen()
-    const int                   max_processes                 =    200;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht �berschreiten
-    const int                   max_communication_connections =    800;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht �berschreiten, inkl. udp und listen()
-                                                                          // 2007-09-11  Neues Handle f�r Folder_subsystem
-                                                                          // 2007-12-27  Neues Handle f�r supervisor::Configuration_observer
-                                                                          // 2008-02-06  Neues Handle f�r Remote_configuration_observer
-#else
-    const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
-    const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
-#endif
+const int                       max_processes                 = 10000;    // kein Limit (HP-UX erlaubt 64 aktive fork())
 
 #ifdef Z_HPUX
     extern string               static_ld_preload;                        // Inhalt der Umgebungsvariablen LD_PRELOAD
@@ -716,6 +690,7 @@ struct Spooler : Object,
     bool                       _central_configuration_directory_as_option_set;
 
     bool                       _executing_command;          // true: database wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
+    bool                       _is_reopening_database_after_error;       // true: database.cxx wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 
     bool                       _subprocess_own_process_group_default;
