@@ -66,7 +66,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
 
     ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
 
-    // Für Clients bis v1.5.3251:
+    // Für Clients vor v1.6
     ptr<Command_response>       execute_configuration_fetch_updated_files(const xml::Element_ptr&, Command_processor*);
     void                        register_me                 (const xml::Element_ptr&, Communication::Operation*);
     void                        connection_lost_event       (const exception*);
@@ -284,7 +284,7 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
     }
     else
     if (string_begins_with(element.nodeName(), "supervisor.remote_scheduler.")) {
-        // Für Clients bis v1.5.3251:
+        // Für Clients vor v1.6
         Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
         if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
 
@@ -337,7 +337,7 @@ void Remote_scheduler::update(const xml::Element_ptr& element) {
 }
 
 //----------------------------------------------------Supervisor::execute_register_remote_scheduler
-// Für Clients bis v1.5.3251:
+// Für Clients vor v1.6
 
 void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
 {
@@ -354,7 +354,7 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
 
 //--------------------------------------------------------------------Remote_scheduler::register_me
 
-// Für Clients bis v1.5.3251:
+// Für Clients vor v1.6
 void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation) 
 {
     Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( communication_operation );
@@ -478,7 +478,7 @@ Directory* Remote_scheduler::configuration_directory_or_null()
 
 //------------------------------------------------------------------------Remote_scheduler::set_dom
 
-// Für Clients bis v1.5.3251:
+// Für Clients vor v1.6
 void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_element )
 {
     if( !register_scheduler_element )  return;
@@ -520,7 +520,7 @@ ptr<Command_response> Remote_scheduler::execute_xml( const xml::Element_ptr& ele
 
 //--------------------------------------Remote_scheduler::execute_configuration_fetch_updated_files
 
-// Für Clients bis v1.5.3251:
+// Für Clients vor v1.6
 ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_files(const xml::Element_ptr& element, Command_processor* command_processor)
 {
     assert(element.nodeName_is("supervisor.remote_scheduler.configuration.fetch_updated_files"));
@@ -875,11 +875,10 @@ string Remote_scheduler::obj_name() const
 
 //----------------------------------------------------------Remote_scheduler::connection_lost_event
 
-// Für Clients bis v1.5.3251:
+// Für Clients vor v1.6
 void Remote_scheduler::connection_lost_event( const exception* x )
 {
     // x kann NULL sein
-
     
     Z_LOG2( "scheduler", Z_FUNCTION << " " << *this << "\n" ); /*! \change JS-481 */
 

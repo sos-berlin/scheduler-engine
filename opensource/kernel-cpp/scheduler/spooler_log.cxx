@@ -224,10 +224,11 @@ static void io_error( Spooler* spooler, const string& filename )
 
         scheduler_event.send_mail( mail_defaults );
 
-        while( spooler->_state_cmd != Spooler::sc_continue )
-        {
-            int wait_seconds = 1;
-            spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, wait_seconds );   // Kann ins scheduler.log schreiben!
+        if (spooler->_connection_manager) {
+            while (spooler->_state_cmd != Spooler::sc_continue) {
+                int wait_seconds = 1;
+                spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, wait_seconds );   // Kann ins scheduler.log schreiben!
+            }
         }
 
         spooler->_waiting_errno = 0;

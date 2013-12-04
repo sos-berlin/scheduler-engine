@@ -7,6 +7,9 @@
 #include "z_sockets.h"
 #include "z_io.h"
 #include "async_io.h"
+#ifdef Z_UNIX
+#   include <poll.h>
+#endif
 
 //-------------------------------------------------------------------------------------------------
 
@@ -19,26 +22,20 @@ struct Socket_manager;
 
 struct Socket_wait : Object
 {
-    enum Read_or_write
-    { 
+    enum Read_or_write { 
         readfd, 
         writefd,
         exceptfd
     };
 
                                 Socket_wait                 ( Socket_manager* );
-                              //Socket_wait                 ( Socket_manager*, int n, const fd_set& readfds, const fd_set& writefds, const fd_set& exceptfds );
 
-  //void                        add                         ( int file_nr, Read_or_write, Has_set_signaled* );
     void                        add                         ( Event_base* );
     int                         wait                        ( double seconds );
     void                    set_polling_interval            ( double seconds )                      { _polling_interval = seconds; }
 
     Fill_zero                  _zero_;
     Socket_manager*            _socket_manager;
-  //int                        _n;
-  //fd_set                     _fds[3];
-  //std::vector<Has_set_signaled*>  _signaled_array;
 
     typedef std::list<Event_base*>   Event_list;
     Event_list                 _event_list;
@@ -51,8 +48,7 @@ struct Socket_wait : Object
 
 struct Socket_operation : Event_operation
 {
-    enum Signals
-    {
+    enum Signals {
         sig_none   = 0,
         sig_read   = 0x01,
         sig_write  = 0x02,
@@ -70,7 +66,6 @@ struct Socket_operation : Event_operation
     void                        add_to_socket_manager       ( Socket_manager* );
     void                        remove_from_socket_manager  ();
     void                    set_blocking                    ( bool b )                              { _blocking = b; }
-  //void                        listen                      ();
     bool                        accept                      ( SOCKET listen_socket );
 
     void                        call_ioctl                  ( int what, unsigned long value );
@@ -84,17 +79,9 @@ struct Socket_operation : Event_operation
 
     void                        socket_expect_signals       ( Signals );
 
-  //void                    set_socket_signals              ( Signals signals )                     { _socket_signals = signals; }
-  //void                  clear_socket_signals              ()                                      { _socket_signals = sig_none; }
-
     bool                        async_signaled_             ();
     void                        async_clear_signaled_       ();
     string                      async_state_text_           () const;
-/*
-    bool                        socket_read_signaled        ()                                      { return ( _socket_signals & sig_read   ) != 0; }
-    bool                        socket_write_signaled       ()                                      { return ( _socket_signals & sig_write  ) != 0; }
-    bool                        socket_except_signaled      ()                                      { return ( _socket_signals & sig_except ) != 0; }
-*/
   //string                      obj_name                    () const                                { return "TCP " + _peer_host_and_port.as_string(); }
     Host_and_port&              peer                        ()                                      { return _peer_host_and_port; }
     const Host_and_port&        peer                        () const                                { return _peer_host_and_port; }
@@ -103,7 +90,6 @@ struct Socket_operation : Event_operation
     bool                        eof                         () const                                { return _eof; }
 
 //protected:
- // friend struct Socket_manager;
     void                        set_socket_event_name       ( const string& state );
 
     Fill_zero _zero_;
@@ -112,11 +98,9 @@ struct Socket_operation : Event_operation
     SOCKET                     _write_socket;               // _read_socket != _write_socket, nur wenn _read_socket==stdin und _write_socket==stdout
     bool                       _close_socket_at_end;
     bool                       _eof;                        // recv(_read_socket) hat 0 geliefert, also die Verbindung geschlossen
-  //Signals                    _socket_signals;
     Socket_manager*            _socket_manager;
     Socket_event               _socket_event;               // In Unix nur bei Http_response/Log_chunk_reader
 
-  //struct sockaddr_in         _peer_addr;
     Host_and_port              _peer_host_and_port;
     bool                       _blocking;
 
@@ -157,7 +141,6 @@ struct Buffered_socket_operation : Socket_operation
 
     int                         call_recv                   ( Byte* buffer, int size )              { return call_recv( (char*)buffer, size ); }
     int                         call_recv                   ( char* buffer, int size );
-  //void                        end_receiving               ();
     bool                        recv__start                 ();
     bool                        recv__continue              ();
     const string&               recv_data                   ()                                      { return _recv_data; }
@@ -198,8 +181,7 @@ struct Buffered_socket_operation : Socket_operation
 
 struct Socket_manager : Event_manager
 {
-    enum Read_or_write
-    { 
+    enum Read_or_write { 
         read_fd, 
         write_fd,
         except_fd
@@ -220,10 +202,6 @@ struct Socket_manager : Event_manager
 
                                 Socket_manager              ();
                                ~Socket_manager              ();
-
-
-    //void                        get_events                  ( std::vector<Socket_event*>* );
-
 
     // Event_manager
     string                      string_from_operations  ( const string& separator = ", " );
@@ -258,21 +236,14 @@ struct Socket_manager : Event_manager
     void                        add_socket_operation        ( Socket_operation* );
     void                        remove_socket_operation     ( Socket_operation* );
 
-    //bool                        async_continue_selected_    ( Operation_is_ok* );
-
-
     Fill_zero                  _zero_;
 
-    //typedef std::list< Socket_operation* >  Socket_operation_list;
-    //Socket_operation_list      _socket_operation_list;
-    //bool                       _socket_operation_list_modified;
-
-#   ifndef Z_WINDOWS
-        SOCKET                 _n;
-        fd_set                 _fds[3];
-        
-        SOCKET                 _socket_signaled_count;
-        fd_set                 _signaled_fds[3];
+#   if defined Z_UNIX
+        typedef stdext::hash_set<int> Signaled_fd_set;
+        Signaled_fd_set        _signaled_fd_set;
+        typedef stdext::hash_map<int,uint32> File_to_event_map;
+        File_to_event_map      _file_to_event_map;          // Enthält pro File Handle POLLIN/OUT/ERR
+        void                    print_file_to_event_map     (ostream*);
 #   else
         bool                   _wsastartup_called;
 #   endif

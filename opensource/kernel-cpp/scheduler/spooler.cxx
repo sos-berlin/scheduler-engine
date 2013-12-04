@@ -972,7 +972,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
     if( show_what.is_set( show_operations ) )
     {
-        state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
+        if (_connection_manager)
+            state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
         if (_java_subsystem)  state_element.appendChild(_java_subsystem->dom_element(dom));   // Das sollte vielleicht eingeordnet werden unter <subsystems>
 
         Memory_allocator::Allocation_map allocation_map = Memory_allocator::allocation_map();
@@ -1790,8 +1791,6 @@ void Spooler::new_subsystems()
     _http_server                = http::new_http_server( this );
     _web_services               = new_web_services( this );
     _supervisor                 = supervisor::new_supervisor( this );
-
-    _connection_manager = Z_NEW( object_server::Connection_manager );
 }
 
 //----------------------------------------------------------------------Spooler::destroy_subsystems
@@ -1838,6 +1837,7 @@ void Spooler::initialize_subsystems()
 
 void Spooler::initialize_subsystems_after_base_processing()
 {
+    _connection_manager = Z_NEW(object_server::Connection_manager);
     _supervisor                ->switch_subsystem_state( subsys_initialized );
     _job_subsystem             ->switch_subsystem_state( subsys_initialized );
     _scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );

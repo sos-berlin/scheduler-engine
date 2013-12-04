@@ -237,30 +237,14 @@ void Xml_response::signal_new_data()
 bool Communication::Listen_socket::async_continue_( Continue_flags )
 {
     bool something_done = false;
-
-    //if( socket_read_signaled() )
-    {
-        ptr<Connection> new_connection = Z_NEW( Connection( _communication ) );
-
-        bool ok = new_connection->do_accept( _read_socket );  
-        if( ok )
-        {
-            if( _communication->_connection_list.size() >= max_communication_connections )
-            {
-                _spooler->log()->error( message_string( "SCHEDULER-286", max_communication_connections ) );
-            }
-            else
-            {
-                _communication->_connection_list.push_back( new_connection );
-
-                new_connection->add_to_socket_manager( _spooler->_connection_manager );
-                new_connection->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
-            }
-
-            something_done = true;
-        }
+    ptr<Connection> new_connection = Z_NEW( Connection( _communication ) );
+    bool ok = new_connection->do_accept( _read_socket );  
+    if (ok) {
+        _communication->_connection_list.push_back( new_connection );
+        new_connection->add_to_socket_manager( _spooler->_connection_manager );
+        new_connection->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
+        something_done = true;
     }
-
     async_clear_signaled();
     return something_done;
 }

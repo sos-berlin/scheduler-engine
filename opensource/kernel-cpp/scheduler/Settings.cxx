@@ -32,7 +32,6 @@ void Settings::set_from_variables(const Com_variable_set& p) {
     _max_length_of_blob_entry = p.get_int("scheduler.max_kbyte_of_db_log_entry", default_kbyte_of_db_lob_entry) * 1024;
     _order_distributed_balanced = p.get_bool("scheduler.order.distributed.balanced", false);
     _supervisor_configuration_polling_interval = p.get_int("scheduler.configuration.client.polling_interval", 15*60);
-    _supervisor_configuration_client_v1_3 = p.get_bool("scheduler.configuration.client.v1.3", false);
 }
 
 //------------------------------------------------------------------------------------Settings::set
@@ -61,9 +60,6 @@ void Settings::set(int number, const string& value) {
             break;
         case 8:
             _supervisor_configuration_polling_interval = as_int(value);
-            break;
-        case 9:
-            _supervisor_configuration_client_v1_3 = as_bool(value);
             break;
         default:
             z::throw_xc("UNKNOWN_SETTING", number);

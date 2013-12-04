@@ -15,7 +15,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> <!-- für maven-failsafe-plugin -->
-        <scala.version>2.10.2</scala.version>
+        <scala.version>2.10.3</scala.version>
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <scalatest.scala.version>2.10</scalatest.scala.version>
         <jersey.version>1.17</jersey.version>
@@ -27,7 +27,8 @@
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
         <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
         <test.forkCount>1</test.forkCount>
-        <enginedoc.version>${project.version}</enginedoc.version> 
+        <enginedoc.version>${project.version}</enginedoc.version>
+        <argLine/>
     </properties>
 
     <profiles>
@@ -507,7 +508,7 @@
                 <configuration>
                     <printSummary>false</printSummary>
                     <forkCount>${test.forkCount}</forkCount>
-                    <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
+                    <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
                         <com.sos.scheduler.engine.test.underMaven />
@@ -522,7 +523,7 @@
                 <version>2.14</version>
                 <configuration>
                     <forkCount>${test.forkCount}</forkCount>
-                    <argLine>-Xms10m -Xmx50m</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
+                    <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
                         <com.sos.scheduler.engine.test.underMaven />
