@@ -136,6 +136,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     int                        _order_id_length_max;
     Transaction*               _transaction;
     time_t                     _reopen_time;
+    bool                       _is_reopening_database_after_error; // Rekursionsschutz; true: database.cxx wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
 
   public:
     static const int            seconds_before_reopen;

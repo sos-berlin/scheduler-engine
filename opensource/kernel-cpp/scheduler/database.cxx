@@ -1300,13 +1300,13 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
     string  warn_msg;
 
     if (_db_name == "") throw;
-    if( _spooler->_is_reopening_database_after_error)  throw;
+    if( _is_reopening_database_after_error ) throw;
 
     In_recursion in_recursion = &_waiting; 
     if (in_recursion)  throw_xc( callers_exception );   
     
     try {
-        _spooler->_is_reopening_database_after_error = true;
+        _is_reopening_database_after_error = true;
         THREAD_LOCK( _error_lock )  _error = callers_exception.what();
 
         _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception, function ) );
@@ -1448,9 +1448,11 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
         if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->assert_is_still_active( Z_FUNCTION );
     }
     catch (exception&) {
-        _spooler->_is_reopening_database_after_error = false;
+        _is_reopening_database_after_error = false;
         throw;
     }
+
+    _is_reopening_database_after_error = false;
 }
 
 //----------------------------------------------------------------------------Database::lock_syntax
@@ -2052,7 +2054,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                 if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
-                Transaction ta ( +_spooler->_db );
+                for ( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
                 {
                     Any_file sel;
 
@@ -2164,8 +2166,9 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     }
 
                     sel.close();
+                    ta.commit(Z_FUNCTION);
                 }
-                ta.commit( Z_FUNCTION );
+                catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_job_history_tablename, x), Z_FUNCTION); }
             }
             catch( const _com_error& x )  { throw_com_error( x, "Job_history::read_tail" ); }
         }
