@@ -62,6 +62,7 @@ Order::Order( Standing_order_subsystem* subsystem )
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
     javabridge::has_proxy<Order>(subsystem->spooler()),
     _zero_(this+1)
+    , _is_modified( false )
 {
     _com_log = new Com_log;
     _com_log->set_log( log() );
@@ -1262,7 +1263,7 @@ bool Order::order_is_removable_or_replaceable()
 {
     bool result;
 
-    if( _task )
+    if( _task || _is_modified )
     {
         result = false;
     }
@@ -1371,6 +1372,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_virgin = !element.bool_getAttribute( "touched" );
+    _is_modified = element.bool_getAttribute( "modified" );
 
 
     if( element.hasAttribute( "suspended" ) )
@@ -1637,6 +1639,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     if( _is_replacement  )  result.setAttribute( "replacement" , "yes" ),
                             result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
     if( !_is_virgin      )  result.setAttribute( "touched"     , "yes" );
+    if( _is_modified     )  result.setAttribute( "modified"    , "yes" );
 
     if( start_time().not_zero() )  result.setAttribute( "start_time", start_time().xml_value() );
     if( end_time().not_zero()   )  result.setAttribute( "end_time"  , end_time  ().xml_value() );

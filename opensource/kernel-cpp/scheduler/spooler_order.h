@@ -140,6 +140,7 @@ struct Order : Com_order,
 
     bool                        is_virgin               () const                                    { return _is_virgin; }
     bool                        is_touched              () const                                    { return !_is_virgin; }
+    void                    set_modified                ( bool b )                                  { _is_modified = b; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -355,6 +356,7 @@ struct Order : Com_order,
     ptr<Web_service>           _web_service;
 
     bool                       _is_virgin;              // Noch von keiner Task ber�hrt
+    bool                       _is_modified;            // Wenn Scheduler beendet wird, Order in DB halten, falls Order vom user modifiziert wurde
     int                        _setback_count;
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
