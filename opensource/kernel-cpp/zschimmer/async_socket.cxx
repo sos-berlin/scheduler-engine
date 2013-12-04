@@ -1120,8 +1120,7 @@ int Socket_manager::wait( double wait_seconds )
     int wait_millis = (int)min(wait_seconds * 1000 + 1.5, (double)(INT_MAX - 1));    // +1.5, weil Linux gerne eine Millisekunde zu kurz wartet und wir in eine millisekundenlange Schleife gerieten
     if (z::Log_ptr log = "socket.poll") {
         log << Z_FUNCTION << " poll(";
-        Z_FOR_EACH_CONST(File_to_event_map, _file_to_event_map, i) 
-            log << i->first << ':' << i->second << ' ';
+        print_file_to_event_map(log);
         log << ", " << wait_millis << "ms)\n";
     }
     int n = ::poll(fds, f - fds, wait_millis);
@@ -1175,8 +1174,7 @@ string Socket_manager::string_from_operations( const string& separator )
     S result;
     result << "Socket_manager(";
     #if defined Z_UNIX
-        Z_FOR_EACH(File_to_event_map, _file_to_event_map, i)
-            result << i->first << ":" << i->second << " ";
+        print_file_to_event_map(&result);
     #endif
     result << ")" << separator;
     result << Event_manager::string_from_operations( separator );
@@ -1184,6 +1182,21 @@ string Socket_manager::string_from_operations( const string& separator )
     return result;
 }
 
+//----------------------------------------------------------Socket_manager::print_file_to_event_map
+#ifdef Z_UNIX
+
+void Socket_manager::print_file_to_event_map(ostream* s) {
+    Z_FOR_EACH_CONST(File_to_event_map, _file_to_event_map, i) {
+        *s << i->first << ':';
+        uint32 events = i->second;
+        if (events & POLLIN) *s << 'I';
+        if (events & POLLOUT) *s << 'O';
+        if (events & POLLERR) *s << 'e';
+        *s << ' ';
+    }
+}
+
+#endif
 //-------------------------------------------------------------------Socket_manager::bind_free_port
 // Used_ports: Es gibt unter Windows interne Firewalls, die Verbindungsaufbau zu einem Port
 // verweigern, der bereits für eine andere Verbindung belegt ist, obwohl bind() und listen() möglich waren.

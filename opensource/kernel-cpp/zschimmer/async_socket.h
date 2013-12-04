@@ -243,6 +243,7 @@ struct Socket_manager : Event_manager
         Signaled_fd_set        _signaled_fd_set;
         typedef stdext::hash_map<int,uint32> File_to_event_map;
         File_to_event_map      _file_to_event_map;          // Enthält pro File Handle POLLIN/OUT/ERR
+        void                    print_file_to_event_map     (ostream*);
 #   else
         bool                   _wsastartup_called;
 #   endif
