@@ -300,13 +300,16 @@ string File_logger::File_line_reader::read_remainder()
 {
     string result;
     
-    File_logger_opener file (_path, _name);
-    if (file->opened()) {
-        file->seek( _read_length );
-        result = file->read_string( max_line_length );
-        _read_length += result.length();
-    } else {
-        result = file._error_message;
+    if (!_error) {
+        File_logger_opener file (_path, _name);
+        if (file->opened()) {
+            file->seek( _read_length );
+            result = file->read_string( max_line_length );
+            _read_length += result.length();
+        } else {
+            _error = true;
+            result = file._error_message;
+        }
     }
 
     return result;
