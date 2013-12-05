@@ -13,6 +13,7 @@ final class SchedulerTcpConnection(schedulerAddress: SocketAddress) extends SosA
   private lazy val inputStream = socket.getInputStream
 
   def connect() {
+    require(!socket.isConnected)
     socket.connect(schedulerAddress)
   }
 

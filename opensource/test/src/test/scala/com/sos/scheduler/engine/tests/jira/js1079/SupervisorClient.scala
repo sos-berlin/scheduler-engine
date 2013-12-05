@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1079
 
-import com.google.common.base.Charsets._
 import com.sos.scheduler.engine.common.client.SchedulerTcpConnection
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
+import java.io.ByteArrayInputStream
 import java.net.{DatagramPacket, InetSocketAddress, DatagramSocket}
 import org.scalatest.matchers.ShouldMatchers._
 
@@ -30,12 +30,12 @@ private[js1079] final class SupervisorClient(val index: Int, udpSocket: Datagram
     connection sendAndReceiveXML <supervisor.remote_scheduler.configuration.fetch_updated_files/>
   }
 
-  def expectUdp(expectedMessage: String) {
+  def expectUdp(expectedElem: xml.Elem) {
     val b = new Array[Byte](1000)
     val p = new DatagramPacket(b, b.length)
-    udpSocket.setSoTimeout(10 * 1000)
-    udpSocket.receive(p)
-    val receivedString = new String(b, 0, p.getLength, UTF_8)
-    receivedString should equal (expectedMessage)
+    udpSocket setSoTimeout 15 * 1000
+    udpSocket receive p
+    val receivedElem = xml.XML.load(new ByteArrayInputStream(b, 0, p.getLength))
+    receivedElem should equal (expectedElem)
   }
 }

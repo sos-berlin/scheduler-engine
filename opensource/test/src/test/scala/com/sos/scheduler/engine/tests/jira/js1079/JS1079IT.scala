@@ -50,7 +50,7 @@ final class JS1079IT extends ScalaSchedulerTest {
     checkTasks()
     clients.head.fetchUpdatedFiles()   // Einmal, damit Supervisor.activate() aufgerufen wird
     Files.write("<job><script>exit 0</script></job>", new File(allDirectory, "test.job.xml"), UTF_8)   // Datei im Konfigurationsserver erzeugen, die ausgeteilt werden soll
-    for (c <- clients) c expectUdp "<check_folders/>"
+    for (c <- clients) c expectUdp <check_folders/>
     for (c <- clients) c.close()
   }
 
