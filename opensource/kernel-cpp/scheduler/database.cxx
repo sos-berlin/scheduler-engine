@@ -2054,12 +2054,12 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                 if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
+                if (!_use_db)
+                    z::throw_xc("SCHEDULER-136");
+
                 for ( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
                 {
                     Any_file sel;
-
-                    if( !_use_db )
-                        z::throw_xc( "SCHEDULER-136" );
 
                     S prefix;
                     S clause;
