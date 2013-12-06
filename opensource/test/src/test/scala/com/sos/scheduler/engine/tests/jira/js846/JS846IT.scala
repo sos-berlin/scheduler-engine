@@ -15,7 +15,7 @@ class JS846IT extends ScalaSchedulerTest {
   override lazy val testConfiguration = TestConfiguration(
     database = Some(DefaultDatabaseConfiguration()))
 
-  for (titleLength <- Seq(201, 500)) {   // Bei 10000 Zeichen gbt es einen StackOverflowError
+  for (titleLength <- Seq(201, 10000)) {
     test(s"Order with title $titleLength characters should not lead to database error") {
       val orderKey = jobChainPath.orderKey("2")
       val eventPipe = controller.newEventPipe()
