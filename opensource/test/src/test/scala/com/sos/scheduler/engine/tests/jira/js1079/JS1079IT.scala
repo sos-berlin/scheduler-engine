@@ -67,7 +67,10 @@ final class JS1079IT extends ScalaSchedulerTest {
 
 
 private object JS1079IT {
-  private val connectionsMax = 5000   // Bei 16359 (Windows 8.1, 12GB): java.net.SocketException: No buffer space available (maximum connections reached?): connect; Bei 8000 (Unbuntu 12.04, 8GB): ERRNO-24 Too many open files
+  // Bei 16359 (Windows 8.1, 12GB): java.net.SocketException: No buffer space available (maximum connections reached?): connect
+  // Bei 3953 (Windows 2003 server, 2GB): java.net.SocketException: No buffer space available (maximum connections reached?): connect
+  // Bei 8000 (Unbuntu 12.04, 8GB): ERRNO-24 Too many open files
+  private val connectionsMax = 3500
   private val testJobPath = JobPath.of("/test")
 
   private def schedulerXml(tcpPort: Int) =
