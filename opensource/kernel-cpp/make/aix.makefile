@@ -9,6 +9,13 @@ CFLAGS += -O2
 CFLAGS += -fPIC
 CFLAGS += -D_THREAD_SAFE
 
+ifeq ($(cpuArchitecture),x86)
+CFLAGS += -DZ_AIX_32
+else
+CFLAGS += -DZ_AIX_64 -mpowerpc64 -maix64
+LINK_FLAGS += -mpowerpc64 -maix64
+ARFLAGS += -X64
+endif
 
 AR        = /usr/bin/ar
 

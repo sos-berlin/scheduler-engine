@@ -626,11 +626,11 @@ Vm::JNI_CreateJavaVM_func* Vm::load_module(const string& module_filename) {
                 if( !vm_module  &&  string_ends_with( module_filename, ".so" ) )        // Dateinamensendung .a probieren
                 {
                     Z_LOG2( Vm::java_log_category, dlerror() << "\n" );
+                    string m = module_filename;
+                    m.replace( m.length() - 3, 3, ".a" );
+                    Z_LOG2( Vm::java_log_category, "dlopen " << m << ",RTLD_LAZY\n" );
 
-                    module_filename.replace( module_filename.length() - 3, 3, ".a" );
-                    Z_LOG2( Vm::java_log_category, "dlopen " << module_filename << ",RTLD_LAZY\n" );
-
-                    vm_module = dlopen( module_filename.c_str(), RTLD_LAZY );
+                    vm_module = dlopen( m.c_str(), RTLD_LAZY );
                 }
 #           endif
 #       endif

@@ -199,7 +199,6 @@ Log_categories::Log_categories()
 {  
     _valid = true; 
     _modified_counter = 1;
-    set("stderr", false, Entry::e_explicit);
 }
 
 //--------------------------------------------------------------------------Log_categories::save_to
