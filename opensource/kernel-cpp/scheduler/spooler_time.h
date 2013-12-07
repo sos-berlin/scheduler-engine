@@ -82,7 +82,7 @@ struct Time
 
     explicit                    Time                        ( double t = 0.0 )              { set(t); }
                                 Time                        ( double t, Is_utc )            { set_utc( t ); }
-#if !defined Z_AIX
+#if !defined Z_AIX_32
     explicit                    Time                        ( time_t t )                    { set((double)t); }
 #endif
                                 Time                        ( time_t t, Is_utc )            { set_utc((double)t); }
@@ -132,7 +132,7 @@ public:
 
     static double               round                       ( double t );
     static double               normalize                   ( double t );
-#if !defined Z_AIX
+#if !defined Z_AIX_32
     void                        set                         ( int t )                       { set( (double)t ); }
 #endif
     void                        set                         ( time_t t )                    { set( (double)t ); }

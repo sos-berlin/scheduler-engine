@@ -90,7 +90,7 @@ struct Period
     Absolute_path               schedule_path               () const                                { return _schedule_path; }
     Time                        next_repeated               ( const Time& ) const;
     Time                        next_repeated_allow_after_end( const Time& ) const;
-    Time                        next_absolute_repeated      ( const Time&, int next ) const;
+    Time                        next_absolute_repeated      (const Time&) const;
 
     void                        check                       ( With_or_without_date ) const;
     string                      to_xml                      () const;
