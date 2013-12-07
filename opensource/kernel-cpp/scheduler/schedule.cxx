@@ -516,6 +516,7 @@ Period Schedule_use::next_period( const Time& t, With_single_start single_start,
     Period result = schedule()->next_local_period( this, t.local_time(_time_zone_name), single_start, before.local_time(_time_zone_name) ); 
     result._begin = result._begin.utc_from_time_zone(_time_zone_name);
     result._end = result._end.utc_from_time_zone(_time_zone_name);
+    result._absolute_repeat_begin = result._absolute_repeat_begin.utc_from_time_zone(_time_zone_name);
     return result;
 }
 
