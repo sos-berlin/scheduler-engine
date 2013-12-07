@@ -4,6 +4,7 @@ import org.joda.time.Duration.{millis, standardSeconds, standardHours, standardD
 import org.joda.time._
 import scala.annotation.tailrec
 import scala.math.abs
+import org.joda.time.base.AbstractInstant
 
 object ScalaJoda {
   @volatile var extraSleepCount = 0L
@@ -44,6 +45,13 @@ object ScalaJoda {
     def +(o: Duration) = delegate plus o
     def -(o: Duration) = delegate minus o
     def -(o: DateTime) = new Duration(o, delegate)
+  }
+
+  implicit class RichAbstractInstant(val delegate: AbstractInstant) extends AnyVal {
+    def <(o: AbstractInstant) = delegate isBefore o
+    def <=(o: AbstractInstant) = !(delegate isAfter o)
+    def >(o: AbstractInstant) = delegate isAfter o
+    def >=(o: AbstractInstant) = !(delegate isBefore o)
   }
 
   implicit class RichLocalTime(val delegate: LocalTime) extends AnyVal {
