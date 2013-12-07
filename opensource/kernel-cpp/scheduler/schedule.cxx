@@ -495,20 +495,7 @@ Time Schedule_use::next_single_start( const Time& time )
 { 
     Period period = next_period( time, wss_next_single_start );
 
-/**
- * \change 2.1.1 - //TODO JS-343 hier wird die Startzeit berechnet
- *
- * \detail
- * Mit dem bisherigen Aufruf von period.next_repeated( time ) wurde in der Folge ebenfalls
- * period.next_absolute_repeated aufgerufen, allerdings mit next = 1 (2. Parameter), was 
- * bewirkt hat, das der erste Startzeitpunkt einer Periode "ausgelassen" worden ist.
- *
- * Code gültig bis Version 2.1.0
- * \code
-    return !period.absolute_repeat().is_never()? period.next_repeated( time )
-   \endcode
- */
-    return !period.absolute_repeat().is_eternal()? period.next_absolute_repeated( time, 0 )
+    return !period.absolute_repeat().is_eternal()? period.next_absolute_repeated(time)
                                                  : period.begin();
 }
 
@@ -1731,8 +1718,7 @@ bool Period::is_coming( const Time& time_of_day, With_single_start single_start 
     if( single_start & wss_next_any_start  &&  ( _single_start         && time_of_day <= _begin ||
                                                   has_repeat_or_once() && time_of_day <  _end      ) )  result = true;
     else
-    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_eternal()  &&  !next_absolute_repeated( time_of_day, 0 ).is_never() )  result = true;
-                                                                                                                                                  // ^ Falls zwei Perioden direkt aufeinander folgen
+    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_eternal()  &&  !next_absolute_repeated(time_of_day).is_never() )  result = true;
     else
         result = false;
 
@@ -1775,8 +1761,7 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
     else
     if( !_absolute_repeat.is_eternal() )
     {
-        // JS-474: result = next_absolute_repeated( t, 1 );
-        result = next_absolute_repeated( t, 0 ); 
+        result = next_absolute_repeated(t); 
         // result ist never, wenn Ende der Periode erreicht ist. "allow_after_end" gilt nur für repeat, nicht für absolute_repeat.
     }
 
@@ -1785,12 +1770,9 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
 
 //-------------------------------------------------------------------Period::next_absolute_repeated
 
-Time Period::next_absolute_repeated( const Time& tim, int next ) const
+Time Period::next_absolute_repeated(const Time& tim) const
 {
-    //TODO next ausbauen, ist immer 0
-    assert( next == 0  ||  next == 1 );
     assert( !_absolute_repeat.is_eternal() );
-
 
     Time t      = tim;
     Time result = Time::never;
@@ -1799,9 +1781,9 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
 
     int n = (int)( ( t - _absolute_repeat_begin ).as_double() / _absolute_repeat.as_double() );
     result = Time(_absolute_repeat_begin.as_double() + (n + 1) * _absolute_repeat.as_double());
-    if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
+    if( result == t + _absolute_repeat)  result = t;
 
-    assert( next == 0? result >= t : result > t );
+    assert(result >= t);
 
     return result < _end? result : Time::never;  
 }
