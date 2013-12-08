@@ -2501,6 +2501,7 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
         {
             Time now = Time::now();
             calculate_next_time( now );
+            _spooler->signal("signal_earlier_order");
        }
     }
 }

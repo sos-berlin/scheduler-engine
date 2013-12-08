@@ -219,6 +219,7 @@ bool Order::is_processable()
     if( _suspended )       return false;
     if( _task )            return false;               // Schon in Verarbeitung
     if( _is_replacement )  return false;
+    if (_schedule_use->is_incomplete()) return false;
 
     if( _job_chain && !_job_chain->is_ready_for_order_processing())  return false;
     if( Node* node = job_chain_node() )
@@ -237,6 +238,7 @@ xml::Element_ptr Order::why_dom_element(const xml::Document_ptr& doc, const Time
     if (_suspended) append_obstacle_element(result, "suspended", as_bool_string(_suspended));
     if (_task)  append_obstacle_element(result, _task->dom_element(doc, Show_what()));
     if (_is_replacement)  append_obstacle_element(result, "is_replacement", as_bool_string(_is_replacement));
+    if (_schedule_use->is_incomplete())  append_obstacle_element(result, "schedule_is_missing", as_bool_string(true));
     //Schon oben aufrufen (sonst rekursiv): if (_job_chain) result.appendChild(_job_chain->why_dom_element(doc));
     //Schon oben aufrufen (sonst rekursiv): if (Node* node = job_chain_node()) result.appendChild(node->why_dom_element(doc, now));
     return result;
@@ -2460,7 +2462,11 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 void Order::activate_schedule()
 {
     bool ok = _schedule_use->try_load();
-    if( ok )  
+    if (!ok) {
+        if (_schedule_use->is_incomplete())
+            log()->debug("Named schedule is missing");
+    } 
+    else
     {
         if( _setback.not_zero() )  set_setback( _setback );
                   else  set_next_start_time();
