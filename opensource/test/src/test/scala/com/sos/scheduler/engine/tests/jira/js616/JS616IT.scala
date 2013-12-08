@@ -12,21 +12,23 @@ import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 
 @Ignore("Test versagt, weil Fehler nicht behoben ist")   // TODO Test versagt, weil Fehler nicht behoben ist
 @RunWith(classOf[JUnitRunner])
 final class JS616IT extends FunSuite with ScalaSchedulerTest {
   test("JS-616 Bug fix: Order Job does not start when having a single start schedule") {
-    val eventPipe = controller.newEventPipe()
-    val t = now + 3.s
-    scheduler executeXml
-      <job name="test-shell">
-        <script language="shell">exit 0</script>
-        <run_time>
-          <at at={ISODateTimeFormat.dateHourMinuteSecond.withZone(DateTimeZone.getDefault).print(t)}/>
-        </run_time>
-      </job>
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == shellOrderKey }
+    autoClosing(controller.newEventPipe()) { eventPipe =>
+      val t = now + 3.s
+      scheduler executeXml
+        <job name="test-shell">
+          <script language="shell">exit 0</script>
+          <run_time>
+            <at at={ISODateTimeFormat.dateHourMinuteSecond.withZone(DateTimeZone.getDefault).print(t)}/>
+          </run_time>
+        </job>
+      eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == shellOrderKey }
+    }
   }
 }
 
