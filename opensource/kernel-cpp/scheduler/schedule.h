@@ -92,7 +92,7 @@ struct Period
     Absolute_path               schedule_path               () const                                { return _schedule_path; }
     Time                        next_repeated               ( const Time& ) const;
     Time                        next_repeated_allow_after_end( const Time& ) const;
-    Time                        next_absolute_repeated      ( const Time&, int next ) const;
+    Time                        next_absolute_repeated      (const Time&) const;
 
     void                        check                       ( With_or_without_date ) const;
     string                      to_xml                      () const;
@@ -366,7 +366,6 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     xml::Document_ptr           dom_document                ( const Show_what& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                    set_scheduler_holidays_usage    ( Scheduler_holidays_usage u )          { _scheduler_holidays_usage = u; }
-    void                    set_default_schedule            ( Schedule* );
 
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     bool                     is_defined                     ()                                      { return _schedule != NULL; }

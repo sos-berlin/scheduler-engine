@@ -312,7 +312,7 @@ void Schedule_use::close()
 
 void Schedule_use::disconnect()
 {
-    set_schedule( _default_schedule );      // Möglicherweise NULL
+    set_schedule(NULL);
 }
 
 //-----------------------------------------------------------------------Schedule_use::set_schedule
@@ -337,13 +337,6 @@ Schedule* Schedule_use::schedule()
     if( !_schedule )  z::throw_xc( Z_FUNCTION );
 
     return _schedule;
-}
-
-//---------------------------------------------------------------Schedule_use::set_default_schedule
-
-void Schedule_use::set_default_schedule( Schedule* s )
-{ 
-    _default_schedule = s; 
 }
 
 //----------------------------------------------------------------------------Schedule_use::set_xml
@@ -423,7 +416,7 @@ xml::Element_ptr Schedule_use::dom_element( const xml::Document_ptr& document, c
 
 bool Schedule_use::try_load()
 {
-    if( !_schedule  ||  _schedule == _default_schedule )
+    if (!_schedule)
     {
         if( !_schedule_path.empty() )
         {
@@ -432,8 +425,6 @@ bool Schedule_use::try_load()
                 set_schedule( schedule );
             }
         }
-
-        if( !_schedule )  set_schedule( _default_schedule );
     }
 
     return _schedule != NULL;
@@ -464,7 +455,7 @@ bool Schedule_use::on_requisite_to_be_removed( File_based* )
 
     if( ok )                    // Stets true!
     {
-        disconnect();           // Schaltet auf _default_schedule um (möglicherweise NULL)
+        disconnect();
         // Das ist hier nicht ganz richtig: wenn ein on_requisite_to_be_removed() false liefert, 
         // sollte disconnect() nicht gerufen worden sein!
         // Das sollte nach on_requisite_removed()
@@ -495,20 +486,7 @@ Time Schedule_use::next_single_start( const Time& time )
 { 
     Period period = next_period( time, wss_next_single_start );
 
-/**
- * \change 2.1.1 - //TODO JS-343 hier wird die Startzeit berechnet
- *
- * \detail
- * Mit dem bisherigen Aufruf von period.next_repeated( time ) wurde in der Folge ebenfalls
- * period.next_absolute_repeated aufgerufen, allerdings mit next = 1 (2. Parameter), was 
- * bewirkt hat, das der erste Startzeitpunkt einer Periode "ausgelassen" worden ist.
- *
- * Code gültig bis Version 2.1.0
- * \code
-    return !period.absolute_repeat().is_never()? period.next_repeated( time )
-   \endcode
- */
-    return !period.absolute_repeat().is_eternal()? period.next_absolute_repeated( time, 0 )
+    return !period.absolute_repeat().is_eternal()? period.next_absolute_repeated(time)
                                                  : period.begin();
 }
 
@@ -529,6 +507,7 @@ Period Schedule_use::next_period( const Time& t, With_single_start single_start,
     Period result = schedule()->next_local_period( this, t.local_time(_time_zone_name), single_start, before.local_time(_time_zone_name) ); 
     result._begin = result._begin.utc_from_time_zone(_time_zone_name);
     result._end = result._end.utc_from_time_zone(_time_zone_name);
+    result._absolute_repeat_begin = result._absolute_repeat_begin.utc_from_time_zone(_time_zone_name);
     return result;
 }
 
@@ -1728,8 +1707,7 @@ bool Period::is_coming( const Time& time_of_day, With_single_start single_start 
     if( single_start & wss_next_any_start  &&  ( _single_start         && time_of_day <= _begin ||
                                                   has_repeat_or_once() && time_of_day <  _end      ) )  result = true;
     else
-    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_eternal()  &&  !next_absolute_repeated( time_of_day, 0 ).is_never() )  result = true;
-                                                                                                                                                  // ^ Falls zwei Perioden direkt aufeinander folgen
+    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_eternal()  &&  !next_absolute_repeated(time_of_day).is_never() )  result = true;
     else
         result = false;
 
@@ -1772,8 +1750,7 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
     else
     if( !_absolute_repeat.is_eternal() )
     {
-        // JS-474: result = next_absolute_repeated( t, 1 );
-        result = next_absolute_repeated( t, 0 ); 
+        result = next_absolute_repeated(t); 
         // result ist never, wenn Ende der Periode erreicht ist. "allow_after_end" gilt nur für repeat, nicht für absolute_repeat.
     }
 
@@ -1782,12 +1759,9 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
 
 //-------------------------------------------------------------------Period::next_absolute_repeated
 
-Time Period::next_absolute_repeated( const Time& tim, int next ) const
+Time Period::next_absolute_repeated(const Time& tim) const
 {
-    //TODO next ausbauen, ist immer 0
-    assert( next == 0  ||  next == 1 );
     assert( !_absolute_repeat.is_eternal() );
-
 
     Time t      = tim;
     Time result = Time::never;
@@ -1796,9 +1770,9 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
 
     int n = (int)( ( t - _absolute_repeat_begin ).as_double() / _absolute_repeat.as_double() );
     result = Time(_absolute_repeat_begin.as_double() + (n + 1) * _absolute_repeat.as_double());
-    if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
+    if( result == t + _absolute_repeat)  result = t;
 
-    assert( next == 0? result >= t : result > t );
+    assert(result >= t);
 
     return result < _end? result : Time::never;  
 }

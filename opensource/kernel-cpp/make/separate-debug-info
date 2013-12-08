@@ -7,10 +7,17 @@ executable="$1"
 executable_debug_info="$executable.debug-info"
 
 PATH=/opt/hp-gcc-4.1.1/bin/:$PATH
+
+if [ "$(uname)" == "AIX" ]; then :
+    STRIP_FLAGS="-X 32_64"
+else
+    STRIP_FLAGS=""
+fi
+
  
 if objcopy --version | grep 'GNU objcopy 2.14' >/dev/null; then :
     cp -p "$executable" "$executable_debug_info"  || exit
-    strip "$executable"
+    strip $STRIP_FLAGS "$executable"
 else
     objcopy --preserve-dates  --only-keep-debug  "$executable" "$executable_debug_info"  || exit
     objcopy --preserve-dates  --strip-debug  "$executable"  || exit

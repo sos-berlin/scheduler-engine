@@ -2600,6 +2600,7 @@ void Standard_job::signal_earlier_order( const Time& t, const string& order_name
         Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << order_name << "  " << order_name << " " << t.as_string(time_zone_name()) << "\n" );
         if (_call_register.at<Order_timed_call>() >= t)
             _call_register.call_at<Order_timed_call>(t);
+            _spooler->signal("signal_earlier_order");
     }
 }
 

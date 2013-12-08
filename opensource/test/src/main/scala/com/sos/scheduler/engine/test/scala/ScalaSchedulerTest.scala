@@ -1,8 +1,10 @@
 package com.sos.scheduler.engine.test.scala
 
+import ScalaSchedulerTest._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
-import com.sos.scheduler.engine.test.scala.Utils._
+import com.sos.scheduler.engine.test.scala.Utils.ignoreException
 import com.sos.scheduler.engine.test.{TestSchedulerController, SchedulerTest}
 import org.scalatest.{FunSuite, BeforeAndAfterAll}
 import scala.reflect.ClassTag
@@ -13,14 +15,20 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
   protected lazy final val controller = new TestSchedulerController(getClass, testConfiguration)
 
   override protected final def beforeAll(configMap: Map[String, Any]) {
-    try {
-      controller.getEventBus.registerAnnotated(this)
-      checkedBeforeAll(configMap)
-    }
-    catch {
-      case x: Throwable =>
-        ignoreException { afterAll(configMap) }
-        throw x
+    if (testNames.isEmpty) {
+      val line = s"EMPTY TEST SUITE ${getClass.getName}"
+      logger warn line
+      System.err.println(line)
+    } else {
+      try {
+        controller.getEventBus.registerAnnotated(this)
+        checkedBeforeAll(configMap)
+      }
+      catch {
+        case x: Throwable =>
+          ignoreException { afterAll(configMap) }
+          throw x
+      }
     }
   }
 
@@ -59,4 +67,8 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
 
   protected final def injector =
     scheduler.injector
+}
+
+private object ScalaSchedulerTest {
+  private val logger = Logger(getClass)
 }

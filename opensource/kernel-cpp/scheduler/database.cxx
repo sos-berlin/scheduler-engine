@@ -2030,15 +2030,13 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
     try {
         if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
-
         if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+        if (!_use_db) z::throw_xc("SCHEDULER-136");
+        if (_spooler->_db->_db_name == "") z::throw_xc("SCHEDULER-361", Z_FUNCTION);
 
         for ( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
         {
             Any_file sel;
-
-            if( !_use_db )
-                z::throw_xc( "SCHEDULER-136" );
 
             S prefix;
             S clause;
@@ -2062,8 +2060,6 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
             clause << " order by `id` ";  
             if( next < 0 )  clause << " desc";
                         
-            if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
-
             sel = ta.open_file( prefix + _spooler->_db->_db_name, 
                     S() << "select " <<
                     ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
