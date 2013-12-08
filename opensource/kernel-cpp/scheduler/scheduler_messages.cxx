@@ -323,6 +323,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-483", "Order parameter 'scheduler.remote_scheduler' cannot be used in a cluster (option -exclusive or -distributed-orders)" },
     { "SCHEDULER-484", "Order parameter 'scheduler.remote_scheduler' can be used only for shell script jobs" },
     { "SCHEDULER-485", "Missing JobScheduler ID (spooler_id=\"\" or -id)" },
+    { "SCHEDULER-486", "Self-referencing dependency $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

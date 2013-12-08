@@ -51,7 +51,7 @@ struct Dependant                // Abh�ngig von anderen File_based (Requisite)
     void                        add_accompanying_dependant   ( Dependant* );
     void                        remove_accompanying_dependant( Dependant* );
 
-    int                         append_requisite_dom_elements( const xml::Element_ptr& );
+    int                         append_requisite_dom_elements( const xml::Element_ptr&, int nesting = 0);
 
     virtual bool                on_requisite_loaded         ( File_based* )                         = 0;
     virtual bool                on_requisite_to_be_removed  ( File_based* );
