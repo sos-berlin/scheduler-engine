@@ -323,6 +323,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-480", "No appropriate config element found in scheduler.xml - please remove attribute @spooler_id of the config-element or start JS with the appropriate -id option." },
     { "SCHEDULER-481", "Method '$1' with signature '$2' is not implemented." },
     { "SCHEDULER-482", "Language '$1' is not supported on 64 bit. Please check the script element." },
+    { "SCHEDULER-486", "Self-referencing dependency $1" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

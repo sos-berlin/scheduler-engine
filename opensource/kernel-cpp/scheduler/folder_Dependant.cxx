@@ -41,6 +41,11 @@ void Dependant::remove_requisites()
 
 void Dependant::add_requisite( const Requisite_path& r )
 {
+    if (const File_based* f = dynamic_cast<const File_based*>(this)) {
+        if (f->subsystem() == r._subsystem && f->normalized_path() == f->subsystem()->normalized_path(r._path))
+            z::throw_xc("SCHEDULER-486", f->obj_name());
+    }
+
     _requisite_sets[ r._subsystem ].insert( r._subsystem->normalized_path( r._path ) );
     r._subsystem->dependencies()->add_requisite( this, r._path );
 }
@@ -146,35 +151,37 @@ void Dependant::remove_accompanying_dependant( Dependant* d )
 
 //---------------------------------------------------------Dependant::append_requisite_dom_elements
 
-int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
+int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element, int nesting)
 {
     int result = 0;
 
-    Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )  
-    {
-        File_based_subsystem* subsystem = ds->first;  // ->first = Key ist der Zeiger auf das Subsystem
-
-        Z_FOR_EACH_CONST( Requisite_set, ds->second, d ) // ->second = Values = Liste der Pfade zu den Requisiten??
+    if (nesting < 10) {  // Einfache Sperre gegen zikuläre Abhängigkeit
+        Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )  
         {
-            Absolute_path path      ( *d );
-            File_based*   requisite = subsystem->file_based_or_null( path );
+            File_based_subsystem* subsystem = ds->first;  // ->first = Key ist der Zeiger auf das Subsystem
 
-            // JS-775: default process_class should not displayed
-            if (requisite && requisite->is_visible_requisite()) {
-                xml::Element_ptr e = element.append_new_element( "requisite" );
-                e.setAttribute( "type", subsystem->object_type_name() );
-                e.setAttribute( "path", path );
+            Z_FOR_EACH_CONST( Requisite_set, ds->second, d ) // ->second = Values = Liste der Pfade zu den Requisiten??
+            {
+                Absolute_path path      ( *d );
+                File_based*   requisite = subsystem->file_based_or_null( path );
 
-                if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
-                result++;
-                if( requisite )  result += requisite->append_requisite_dom_elements( element );     // Auch indirekte Requisiten (möglicherweise doppelt, könnten identifiziert werden)
+                // JS-775: default process_class should not displayed
+                if (requisite && requisite->is_visible_requisite()) {
+                    xml::Element_ptr e = element.append_new_element( "requisite" );
+                    e.setAttribute( "type", subsystem->object_type_name() );
+                    e.setAttribute( "path", path );
+
+                    if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
+                    result++;
+                    if( requisite )  result += requisite->append_requisite_dom_elements(element, nesting + 1);     // Auch indirekte Requisiten (möglicherweise doppelt, könnten identifiziert werden)
+                }
             }
         }
-    }
 
-    Z_FOR_EACH_CONST( stdext::hash_set<Dependant*>, _accompanying_dependants, p )
-    {
-        result += (*p)->append_requisite_dom_elements( element );
+        Z_FOR_EACH_CONST( stdext::hash_set<Dependant*>, _accompanying_dependants, p )
+        {
+            result += (*p)->append_requisite_dom_elements(element, nesting + 1);
+        }
     }
 
     return result;
