@@ -2195,104 +2195,106 @@ void Task_history::append_tabbed( string value )
 
 void Task_history::write( bool start )
 {
-    string parameters;
+    if (_spooler->db()->opened()) {
+        string parameters;
     
-    _job_history->_last_task = _task;
+        _job_history->_last_task = _task;
 
-    if( start )  parameters = _task->has_parameters()? xml_as_string( _task->parameters_as_dom() )
-                                                     : "";
+        if( start )  parameters = _task->has_parameters()? xml_as_string( _task->parameters_as_dom() )
+                                                         : "";
 
-    string start_time = !start || !_task->_running_since.is_zero()? _task->_running_since.db_string(time::without_ms)
-                                                                  : Time::now().db_string(time::without_ms);
+        string start_time = !start || !_task->_running_since.is_zero()? _task->_running_since.db_string(time::without_ms)
+                                                                      : Time::now().db_string(time::without_ms);
 
-    while(1)
-    {
-        try
+        while(1)
         {
-            Transaction ta ( +_spooler->_db );
+            try
             {
-                if( start )
+                Transaction ta ( +_spooler->_db );
                 {
-                    sql::Insert_stmt insert ( ta.database_descriptor() );
-                        
-                    insert.set_table_name( _spooler->_db->_job_history_tablename );
-                        
-                    insert[ "id"                ] = _task->_id;
-                    insert[ "spooler_id"        ] = _spooler->id_for_db();
-
-                    if( _spooler->is_cluster() )
-                    insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
-
-                    insert[ "job_name"          ] = _task->job()->path().without_slash();
-                    insert[ "cause"             ] = start_cause_name( _task->_cause );
-                    insert.set_datetime( "start_time", start_time );
-                        
-                    if( int pid = _task->pid() )
-                    insert[ "pid"               ] = pid;
-
-                    ta.execute( insert, Z_FUNCTION );
-
-                    if( !parameters.empty() )
+                    if( start )
                     {
-                        Any_file blob = ta.open_file( "-out " + _spooler->_db->db_name(), " -table=" + _spooler->_db->_job_history_tablename + " -clob=parameters where \"ID\"=" + as_string( _task->_id ) );
-                        blob.put( parameters );
-                        blob.close();
-                    }
-                }
-                else
-                {
-                    sql::Update_stmt update ( _spooler->_db->database_descriptor(), _spooler->_db->_job_history_tablename  );
+                        sql::Insert_stmt insert ( ta.database_descriptor() );
                         
-                    update.and_where_condition( "id", _task->_id );
-                    update[ "start_time" ].set_datetime( start_time );
-                    update[ "end_time"   ].set_datetime( Time::now().db_string(time::without_ms) );
-                    update[ "steps"      ] = _task->_step_count;
-                    update[ "exit_code"  ] = _task->_exit_code;
-                    update[ "error"      ] = _task->has_error();
+                        insert.set_table_name( _spooler->_db->_job_history_tablename );
+                        
+                        insert[ "id"                ] = _task->_id;
+                        insert[ "spooler_id"        ] = _spooler->id_for_db();
 
-                    if( !_task->_error.code().empty() )  update[ "error_code" ] = _task->_error.code();
-                    if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, max_column_length );    // Für MySQL 249 statt 250. jz 7.1.04
+                        if( _spooler->is_cluster() )
+                        insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
 
-                    if( _extra_record.type() )
-                    {
-                        for( int i = 0; i < _extra_record.type()->field_count(); i++ )
+                        insert[ "job_name"          ] = _task->job()->path().without_slash();
+                        insert[ "cause"             ] = start_cause_name( _task->_cause );
+                        insert.set_datetime( "start_time", start_time );
+                        
+                        if( int pid = _task->pid() )
+                        insert[ "pid"               ] = pid;
+
+                        ta.execute( insert, Z_FUNCTION );
+
+                        if( !parameters.empty() )
                         {
-                            if( !_extra_record.null(i) )
+                            Any_file blob = ta.open_file( "-out " + _spooler->_db->db_name(), " -table=" + _spooler->_db->_job_history_tablename + " -clob=parameters where \"ID\"=" + as_string( _task->_id ) );
+                            blob.put( parameters );
+                            blob.close();
+                        }
+                    }
+                    else
+                    {
+                        sql::Update_stmt update ( _spooler->_db->database_descriptor(), _spooler->_db->_job_history_tablename  );
+                        
+                        update.and_where_condition( "id", _task->_id );
+                        update[ "start_time" ].set_datetime( start_time );
+                        update[ "end_time"   ].set_datetime( Time::now().db_string(time::without_ms) );
+                        update[ "steps"      ] = _task->_step_count;
+                        update[ "exit_code"  ] = _task->_exit_code;
+                        update[ "error"      ] = _task->has_error();
+
+                        if( !_task->_error.code().empty() )  update[ "error_code" ] = _task->_error.code();
+                        if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, max_column_length );    // Für MySQL 249 statt 250. jz 7.1.04
+
+                        if( _extra_record.type() )
+                        {
+                            for( int i = 0; i < _extra_record.type()->field_count(); i++ )
                             {
-                                string s = _extra_record.as_string(i);
-                                if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
-                                update [ _job_history->_extra_names[i] ] = s;
+                                if( !_extra_record.null(i) )
+                                {
+                                    string s = _extra_record.as_string(i);
+                                    if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
+                                    update [ _job_history->_extra_names[i] ] = s;
+                                }
                             }
                         }
-                    }
 
-                    ta.execute( update, Z_FUNCTION );
-
+                        ta.execute( update, Z_FUNCTION );
 
 
-                    // Task-Protokoll
-                    string log_filename = _task->_log->filename();
-                    if( _job_history->_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
-                    {
-                        try {
-                            ta.set_transaction_written();
 
-                            string blob_filename = _spooler->_db->db_name() + " -table=" + _spooler->_db->_job_history_tablename + " -blob='log' where \"ID\"=" + as_string( _task->_id );
-                            if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                            copy_file( "file -b " + log_filename, "-binary " + blob_filename );
+                        // Task-Protokoll
+                        string log_filename = _task->_log->filename();
+                        if( _job_history->_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+                        {
+                            try {
+                                ta.set_transaction_written();
+
+                                string blob_filename = _spooler->_db->db_name() + " -table=" + _spooler->_db->_job_history_tablename + " -blob='log' where \"ID\"=" + as_string( _task->_id );
+                                if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
+                                copy_file( "file -b " + log_filename, "-binary " + blob_filename );
+                            }
+                            catch( exception& x ) { _task->_log->warn( string("History: ") + x.what() ); }
                         }
-                        catch( exception& x ) { _task->_log->warn( string("History: ") + x.what() ); }
                     }
                 }
+
+                ta.commit( Z_FUNCTION );
+
+                break;
             }
-
-            ta.commit( Z_FUNCTION );
-
-            break;
-        }
-        catch( exception& x )
-        {
-            _spooler->_db->try_reopen_after_error( x, Z_FUNCTION );
+            catch( exception& x )
+            {
+                _spooler->_db->try_reopen_after_error( x, Z_FUNCTION );
+            }
         }
     }
 }
@@ -2316,7 +2318,6 @@ void Task_history::start()
     catch( exception& x )  
     { 
         _task->_log->warn( message_string( "SCHEDULER-266", x ) );      // "FEHLER BEIM SCHREIBEN DER HISTORIE: "
-        //_error = true;
     }
 }
 
