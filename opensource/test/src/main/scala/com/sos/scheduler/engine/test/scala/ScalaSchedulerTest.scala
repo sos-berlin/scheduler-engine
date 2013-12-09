@@ -36,6 +36,7 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
     checkedBeforeAll()
     if (!controller.isStarted)
       controller.activateScheduler(testConfiguration.mainArguments: _*)
+    onSchedulerActivated()
   }
 
   override def afterAll(configMap: Map[String, Any]) {
@@ -45,6 +46,8 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
     }
     finally super.afterAll(configMap)
   }
+
+  protected def onSchedulerActivated() {}
 
   protected final def instance[A](implicit c: ClassTag[A]) =
     scheduler.injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
