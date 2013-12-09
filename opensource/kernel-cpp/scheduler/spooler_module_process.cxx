@@ -237,15 +237,6 @@ void Process_module_instance::close_process()
 
     _stdout_file.close();
     _stderr_file.close();
-
-    /*
-    if( !_stdout_logged )
-    {
-        _log.log_file( _stdout_file.filename(), "stdout:" );
-        _log.log_file( _stderr_file.filename(), "stderr:" );
-        _stdout_logged = true;
-    }
-    */
 }
 
 //------------------------------------------------------------Process_module_instance::begin__start
@@ -256,8 +247,11 @@ Async_operation* Process_module_instance::begin__start()
     // Wegen open_inheritable sollte vor begin__end() kein anderer Prozess gestartet werden.
     // (Sowieso wird begin__end() gleich danach gerufen)
 
-    _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
-    _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+    if (_spooler) {   // JS-1039 - Wir sind im Hauptprozess, nicht in einem Task-Prozess, der schon stdout zugewiesen bekommen hat. Siehe Com_remote_module_instance_server::Begin()
+        _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+        _stdout_path = _stdout_file.path();
+        _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+    }
 
     return Module_instance::begin__start();
 }
@@ -288,8 +282,8 @@ bool Process_module_instance::begin__end()
     startup_info.cb          = sizeof startup_info;
     startup_info.dwFlags     = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
     startup_info.hStdInput   = stdin_file.handle();
-    startup_info.hStdOutput  = _stdout_file.handle();
-    startup_info.hStdError   = _stderr_file.handle();
+    startup_info.hStdOutput  = _stdout_file.opened()? _stdout_file.handle() : GetStdHandle(STD_OUTPUT_HANDLE);
+    startup_info.hStdError   = _stderr_file.opened()? _stderr_file.handle() : GetStdHandle(STD_ERROR_HANDLE);
     startup_info.wShowWindow = SW_MINIMIZE;            // Als Dienst mit Zugriff auf Desktop wird ein leeres Konsol-Fenster gezeigt. Das minimieren wir.
 
 
@@ -456,7 +450,7 @@ string Process_module_instance::get_first_line_as_state_text()
     }
     catch( exception& x )
     {
-        _log.warn( message_string( "SCHEDULER-881", x ) );
+        _log.warn( message_string( "SCHEDULER-881", x, "get_first_line_as_state_text" ) );
     }
 
     return result;
@@ -618,8 +612,8 @@ bool Process_module_instance::begin__end()
 
             ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kümmert sich der Haupt-Prozess)
 
-            dup2( _stdout_file.file_no(), STDOUT_FILENO );
-            dup2( _stderr_file.file_no(), STDERR_FILENO );
+            if (_stdout_file.opened()) dup2( _stdout_file.file_no(), STDOUT_FILENO );
+            if (_stderr_file.opened()) dup2( _stderr_file.file_no(), STDERR_FILENO );
 
             int n = sysconf( _SC_OPEN_MAX );
             for( int i = 3; i < n; i++ )  ::close(i);

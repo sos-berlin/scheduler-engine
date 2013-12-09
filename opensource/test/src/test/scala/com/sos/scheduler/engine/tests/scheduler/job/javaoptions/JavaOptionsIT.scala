@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.tests.scheduler.job.javaoptions
 
+import JavaOptionsIT._
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.Sockets.findAvailablePort
@@ -12,14 +14,10 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
-class JavaOptionsIT extends ScalaSchedulerTest {
+final class JavaOptionsIT extends ScalaSchedulerTest {
 
-  import JavaOptionsIT._
-
-  override def checkedBeforeAll() {
-    controller.activateScheduler("-tcp-port="+ findAvailablePort())
-    super.beforeAll()
-  }
+  protected override lazy val testConfiguration = TestConfiguration(
+    mainArguments = List("-tcp-port="+ findAvailablePort()))
 
   private val eventPipe = controller.newEventPipe()
 
@@ -40,7 +38,8 @@ class JavaOptionsIT extends ScalaSchedulerTest {
   }
 }
 
-object JavaOptionsIT {
+
+private object JavaOptionsIT {
   private val localJobPath = JobPath.of("/testLocal")
   private val remoteJobPath = JobPath.of("/testRemote")
 }

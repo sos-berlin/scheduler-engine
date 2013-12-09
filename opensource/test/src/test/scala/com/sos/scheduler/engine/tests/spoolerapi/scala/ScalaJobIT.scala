@@ -22,9 +22,8 @@ final class ScalaJobIT extends ScalaSchedulerTest {
   protected override lazy val testConfiguration = TestConfiguration(terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def checkedBeforeAll() {
+  override def onBeforeSchedulerActivation() {
     eventPipe
-    controller.activateScheduler()
   }
 
   List(SchedulerLogLevel.info, SchedulerLogLevel.error) foreach { logLevel =>

@@ -6,20 +6,20 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.junit.Ignore
+import org.scalatest.matchers.ShouldMatchers._
 
 // @RunWith(classOf[JUnitRunner])
 @Ignore
 final class JS864IT extends ScalaSchedulerTest {
 
-  private var eventPipe: EventPipe = _
+  private lazy val eventPipe = controller.newEventPipe()
 
-  override def checkedBeforeAll() {
-    controller.activateScheduler()
-    eventPipe = controller.newEventPipe()
+  override def onBeforeSchedulerActivation() {
+    eventPipe
+  }
+
+  override def onSchedulerActivated() {
     for (i <- 0 to 5)
       scheduler executeXml newOrderElem(new OrderId(i.toString))
   }

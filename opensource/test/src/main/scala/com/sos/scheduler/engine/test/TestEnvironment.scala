@@ -3,14 +3,15 @@ package com.sos.scheduler.engine.test
 import TestEnvironment._
 import _root_.scala.collection.immutable
 import com.google.common.base.Strings.nullToEmpty
+import com.google.common.io.Files
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.system.Files
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
 import com.sos.scheduler.engine.data.folder.{JobPath, TypedPath}
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.CppBinaries
 import com.sos.scheduler.engine.main.CppBinary
@@ -58,6 +59,9 @@ final class TestEnvironment(resourcePath: ResourcePath, val directory: File, nam
   /** @return Pfad der Auftragsprotokolldatei für einfache OrderKey */
   def orderLogFile(orderKey: OrderKey) =
     new File(logDirectory, s"order.${orderKey.getJobChainPath.withoutStartingSlash}.${orderKey.idString}.log")
+
+  def taskLogFileString(jobPath: JobPath): String =
+    Files.toString(taskLogFile(jobPath), schedulerEncoding)
 
   /** @return Pfad einer Task-Potokolldatei für einfachen JobPath. */
   def taskLogFile(jobPath: JobPath) =

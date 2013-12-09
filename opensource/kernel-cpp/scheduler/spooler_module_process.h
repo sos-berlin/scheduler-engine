@@ -53,8 +53,9 @@ struct Process_module_instance : Module_instance
     string                      step_result                 ();
     void                        transfer_back_order_params  ();
     void                        fetch_parameters_from_process( Com_variable_set* );
-    File_path                   stdout_path                 ()                                      { return _stdout_file.path(); }
+    File_path                   stdout_path                 ()                                      { return _stdout_path; }
     File_path                   stderr_path                 ()                                      { return _stderr_file.path(); }
+    void                    set_stdout_path                 (const File_path& path)                 { _stdout_path = path; }
     bool                        try_delete_files            ( Has_log* );
     std::list<File_path>        undeleted_files             ();
     bool                        is_kill_thread_running      ()                                      { return _kill_thread  &&  _kill_thread->thread_is_running(); }
@@ -67,9 +68,9 @@ struct Process_module_instance : Module_instance
 
 
     Fill_zero                  _zero_;
+    File_path                  _stdout_path;
     File                       _stdout_file;
     File                       _stderr_file;
-  //bool                       _stdout_logged;
     Mapped_file                _order_params_file;
 
     bool                       _is_killed;

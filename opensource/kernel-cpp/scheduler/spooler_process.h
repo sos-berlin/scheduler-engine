@@ -182,8 +182,6 @@ struct Process : zschimmer::Object, Scheduler_object
     Host_and_port              _remote_scheduler;
     Process_id                 _remote_process_id;
     pid_t                      _remote_pid;
-    //File                       _remote_stdout_file;
-    //File                       _remote_stderr_file;
     ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;

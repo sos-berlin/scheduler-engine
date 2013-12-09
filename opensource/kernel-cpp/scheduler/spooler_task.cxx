@@ -2662,6 +2662,7 @@ void Module_task::do_close__end()
 {
     if( _module_instance )
     {
+        _file_logger->flush();      // JS-986 JS-1039
         _module_instance->close__end();
         _file_logger->flush();
 
@@ -2705,12 +2706,6 @@ void Module_task::do_close__end()
             _exit_code = -termination_signal;
         }
  
-
-        //if( !_file_logger->has_files() )     // add_file() nicht aufgerufen? (Vielleicht wegen Fehler)  Dann selbst loggen:
-        //{
-        //    _log->log_file( _module_instance->stdout_path(), "stdout:" );
-        //    _log->log_file( _module_instance->stderr_path(), "stderr:" );
-        //}
 
         _file_logger->finish();
         _file_logger->close();
@@ -2820,6 +2815,7 @@ Variant Job_module_task::do_step__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
+    _file_logger->flush();      // JS-986 JS-1039
     return _module_instance->step__end();
 }
 
