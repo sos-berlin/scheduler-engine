@@ -34,9 +34,11 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
   /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
   protected def checkedBeforeAll(configMap: Map[String, Any]) {
     checkedBeforeAll()
-    if (!controller.isStarted)
+    if (!controller.isStarted) {
+      onBeforeSchedulerActivation()
       controller.activateScheduler(testConfiguration.mainArguments: _*)
-    onSchedulerActivated()
+      onSchedulerActivated()
+    }
   }
 
   override def afterAll(configMap: Map[String, Any]) {
@@ -46,6 +48,8 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
     }
     finally super.afterAll(configMap)
   }
+
+  protected def onBeforeSchedulerActivation() {}
 
   protected def onSchedulerActivated() {}
 
