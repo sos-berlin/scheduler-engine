@@ -33,12 +33,11 @@ final class JS1079IT extends ScalaSchedulerTest {
   private lazy val allDirectory = new File(controller.environment.configDirectory, "remote/_all")
   private lazy val serverTcpPort = findRandomFreePort(10000 until 20000)
 
-  override def checkedBeforeAll() {
+  override def onBeforeSchedulerActivation() {
     val schedulerXmlString = schedulerXml(serverTcpPort).toString()
     controller.prepare()
     Files.write(schedulerXmlString, new File(controller.environment.configDirectory, "scheduler.xml"), UTF_8)
     allDirectory.mkdirs()
-    super.beforeAll()
   }
 
   test(s"Configuration server with $connectionsMax permanently connected simulated clients (TCP, old v1.5 style)") {
