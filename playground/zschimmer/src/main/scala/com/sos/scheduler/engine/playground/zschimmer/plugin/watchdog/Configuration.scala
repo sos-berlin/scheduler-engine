@@ -1,24 +1,26 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
-import com.sos.scheduler.engine.common.time.Time
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import org.joda.time.Duration
 import scala.xml.Elem
 
-case class Configuration(checkEvery: Time, timeout: Time, warnEvery: Time)
+final case class Configuration(checkEvery: Duration, timeout: Duration, warnEvery: Duration)
 
 
 object Configuration {
     private val defaultElem = <plugin.config checkEvery="1" timeout="10" warnEvery="1"/>
 
-    def apply(e: Option[Elem]): Configuration = apply(e getOrElse defaultElem)
+    def apply(e: Option[Elem]): Configuration =
+      apply(e getOrElse defaultElem)
     
     def apply(e: Elem): Configuration = {
         def attribute(name: String) = (e.attribute(name) getOrElse defaultElem.attribute(name).get).text
-        def timeAttribute(name: String) = Time.of(java.lang.Double.parseDouble(attribute(name)))
+        def durationAttribute(name: String) = java.lang.Integer.parseInt(attribute(name)).s
 
         Configuration(
-            checkEvery = timeAttribute("checkEvery"),
-            timeout = timeAttribute("timeout"),
-            warnEvery = timeAttribute("warnEvery")
+            checkEvery = durationAttribute("checkEvery"),
+            timeout = durationAttribute("timeout"),
+            warnEvery = durationAttribute("warnEvery")
         )
     }
 }

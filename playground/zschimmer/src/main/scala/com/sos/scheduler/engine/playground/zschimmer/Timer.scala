@@ -1,17 +1,24 @@
 package com.sos.scheduler.engine.playground.zschimmer
 
-import com.sos.scheduler.engine.common.time.Time
-import java.util.Date
+import java.lang.System.currentTimeMillis
+import org.joda.time.Duration
 
-class Timer(timeout: Time) {
-    val startTime = now
-    val endTime = startTime + timeout.getMillis
-    def isElapsed = now >= endTime
-    def elapsedMs = now - startTime
-    private def now = new Date().getTime
-    override def toString = (elapsedMs / 1000.0) + "s"
+final class Timer(duration: Duration) {
+  val startTime = now
+  val endTime = startTime + duration.getMillis
+
+  def isElapsed =
+    now >= endTime
+
+  def elapsedMs =
+    now - startTime
+
+  private def now =
+    currentTimeMillis()
+
+  override def toString =
+    (elapsedMs / 1000.0) + "s"
 }
-
 
 //object Timer {
 //    @deprecated("") def time[A](timeout: Time)(f: => A) = {
