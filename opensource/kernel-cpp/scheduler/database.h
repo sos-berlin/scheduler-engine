@@ -305,7 +305,8 @@ struct Job_history
 
     void                        read_profile_settings   ();
     void                        set_dom_settings        ( xml::Element_ptr settings_element );
-    void                        on_load                 (  Transaction* );
+    void                        open                    (  Transaction* );
+    void                        close                   ();
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }
 
     xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, const Show_what&, bool use_task_schema = false );
@@ -321,6 +322,8 @@ struct Job_history
     bool                       _history_yes;
     int                        _on_process;             // Beim soundsovieltem _on_process Historiensatz schreiben
     With_log_switch            _with_log;
+    bool                       _use_db;
+    bool                       _error;
     bool                       _start_called;
 
     vector<string>             _extra_names;
