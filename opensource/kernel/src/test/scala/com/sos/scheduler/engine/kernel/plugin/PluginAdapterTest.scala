@@ -11,8 +11,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.startsWith
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 final class PluginAdapterTest extends FunSuite {
@@ -26,7 +26,7 @@ final class PluginAdapterTest extends FunSuite {
   }
 
   test("activate") {
-    pluginAdapter should not be ('active)
+    pluginAdapter should not be 'active
     pluginAdapter.activate()
     pluginAdapter should be ('active)
   }
@@ -41,16 +41,16 @@ final class PluginAdapterTest extends FunSuite {
     pluginAdapter.tryActivate()
     pluginAdapter should be ('active)
     errorPluginInstanceAdapter.tryActivate()
-    errorPluginInstanceAdapter should not be ('active)
+    errorPluginInstanceAdapter should not be 'active
   }
 
   test("tryClose") {
     pluginAdapter should be ('active)
     pluginAdapter.tryClose()
-    pluginAdapter should not be ('active)
-    errorPluginInstanceAdapter should not be ('active)
+    pluginAdapter should not be 'active
+    errorPluginInstanceAdapter should not be 'active
     errorPluginInstanceAdapter.tryClose()
-    errorPluginInstanceAdapter should not be ('active)
+    errorPluginInstanceAdapter should not be 'active
   }
 
   test("xmlState") {

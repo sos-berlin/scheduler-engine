@@ -24,8 +24,8 @@ import org.joda.time.DateTime.now
 import org.joda.time.Duration.{millis, standardSeconds}
 import org.joda.time.format.DateTimeFormat
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import scala.xml.XML
 
 @RunWith(classOf[JUnitRunner])

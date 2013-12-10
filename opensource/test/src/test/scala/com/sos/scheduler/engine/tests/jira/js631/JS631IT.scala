@@ -4,12 +4,12 @@ import JS631IT._
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStateChangedEvent, OrderState}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
-import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 
 @RunWith(classOf[JUnitRunner])
 final class JS631IT extends ScalaSchedulerTest {

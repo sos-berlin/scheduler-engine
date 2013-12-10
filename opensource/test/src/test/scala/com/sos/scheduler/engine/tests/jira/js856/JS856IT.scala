@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 
 /** JS-856 */
 abstract class JS856IT(testNamePrefix: String) extends ScalaSchedulerTest {

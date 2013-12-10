@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.xml
 
+import CppXmlSchemaValidatorTest._
 import com.google.common.io.Closeables.closeQuietly
 import com.google.common.io.Resources.getResource
 import java.net.URL
@@ -9,13 +10,12 @@ import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
 import org.junit.runner.RunWith
 import org.scalatest.FunSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.xml.sax.SAXParseException
 
 @RunWith(classOf[JUnitRunner])
 class CppXmlSchemaValidatorTest extends FunSpec {
-  import CppXmlSchemaValidatorTest._
 
   describe("CppXmlSchemaValidator") {
     lazy val validator = new CppXmlSchemaValidator(schemaResourceUrl.toExternalForm)

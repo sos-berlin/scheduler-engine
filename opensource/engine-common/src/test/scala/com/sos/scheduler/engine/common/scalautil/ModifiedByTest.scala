@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.common.scalautil
 import com.sos.scheduler.engine.common.scalautil.ModifiedBy.modifiedBy
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 class ModifiedByTest extends FunSuite {

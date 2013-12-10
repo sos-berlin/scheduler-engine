@@ -3,11 +3,10 @@ package com.sos.scheduler.engine.tests.jira.js864
 import JS864IT._
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.Ignore
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 
 // @RunWith(classOf[JUnitRunner])
 @Ignore

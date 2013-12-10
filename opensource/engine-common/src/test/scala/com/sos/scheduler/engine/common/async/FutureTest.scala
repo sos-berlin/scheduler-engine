@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.common.async
 
 import FutureTest._
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.slf4j.LoggerFactory
 import scala.collection.mutable
 import scala.concurrent._

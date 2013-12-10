@@ -9,8 +9,8 @@ import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.mutable
 
 /** Testet, ob die erwarteten Auftrags-Events in der richtigen Reihenfolge eintreffen,

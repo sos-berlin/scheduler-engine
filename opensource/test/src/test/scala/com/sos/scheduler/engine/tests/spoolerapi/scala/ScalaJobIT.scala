@@ -9,8 +9,8 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.scala._
 import org.junit.runner.RunWith
+import org.scalatest.Matchers.{value => _, _ }
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers.{value => _, _ }
 
 /** Prüft, ob alle Methoden eines Scala-Jobs aufgerufen werden.
  * Der Scala-Job wird mit den Log-Levels info und error gerufen, um den Aufruf von spooler_on_success() und spooler_on_error()
