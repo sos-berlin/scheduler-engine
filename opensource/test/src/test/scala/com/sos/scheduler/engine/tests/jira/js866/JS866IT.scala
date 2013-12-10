@@ -19,10 +19,6 @@ final class JS866IT extends FunSuite with ScalaSchedulerTest {
       mainArguments = List("-tcp-port="+ findAvailablePort()),
       terminateOnError = false)
 
-  override def checkedBeforeAll() {
-    controller.activateScheduler("-tcp-port="+ findAvailablePort())
-  }
-
   test("kill local API job") {
     checkedKillTask(localJobPath)
   }

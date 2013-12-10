@@ -2389,6 +2389,7 @@ Async_operation* Task::do_close__start()
 void Task::do_close__end()
 {
     if( _module_instance ) {
+        _file_logger->flush();      // JS-986 JS-1039
         _module_instance->close__end();
         _file_logger->flush();
 
@@ -2524,6 +2525,7 @@ Async_operation* Task::do_step__start()
 Variant Task::do_step__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
+    _file_logger->flush();      // JS-986 JS-1039
     return _module_instance->step__end();
 }
 

@@ -626,15 +626,6 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             {
                 Z_LOG2( "zschimmer", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
                 //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
-
-                //_remote_stdout_file.open_temporary( File::open_unlink_later );
-                //_remote_stdout_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stdout' and @encoding='hex' ]" ).text() ) );
-                //_remote_stdout_file.close();
-
-                //_remote_stderr_file.open_temporary( File::open_unlink_later );
-                //_remote_stderr_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stderr' and @encoding='hex' ]" ).text() ) );
-                //_remote_stderr_file.close();
-
                 something_done = true;
                 _async_remote_operation->_state = Async_remote_operation::s_closed;
             }
@@ -806,13 +797,6 @@ File_path Process::stdout_path()
     {
         result = c->stdout_path();
     }
-    //else
-    //if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
-    //{
-    //    assert(!"Connection_to_own_server_thread");
-    //}
-    //else
-    //    result = _remote_stdout_file.path();
 
     return result;
 }
@@ -827,13 +811,6 @@ File_path Process::stderr_path()
     {
         result = c->stderr_path();
     }
-    //else
-    //if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
-    //{
-    //    assert(!"Connection_to_own_server_thread");
-    //}
-    //else
-    //    result = _remote_stderr_file.path();
 
     return result;
 }
@@ -848,11 +825,6 @@ bool Process::try_delete_files( Has_log* log )
     {
         result = c->try_delete_files( log );
     }
-    //else
-    //{
-    //    if( _remote_stdout_file.is_to_be_unlinked() )  result &= _remote_stdout_file.try_unlink();
-    //    if( _remote_stderr_file.is_to_be_unlinked() )  result &= _remote_stderr_file.try_unlink();
-    //}
 
     return result;
 }
@@ -867,11 +839,6 @@ list<File_path> Process::undeleted_files()
     {
         result = c->undeleted_files();
     }
-    //else
-    //{
-    //    if( _remote_stdout_file.is_to_be_unlinked() )  result.push_back( _remote_stdout_file.path() );
-    //    if( _remote_stderr_file.is_to_be_unlinked() )  result.push_back( _remote_stderr_file.path() );
-    //}
 
     return result;
 }

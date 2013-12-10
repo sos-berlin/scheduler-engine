@@ -21,7 +21,7 @@ import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
-class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
+final class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
 
   private lazy val directory = new File(controller.environment.directory, "start_when_directory_changed")
   private lazy val file1 = new File(directory, "X")
@@ -29,10 +29,12 @@ class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
   private lazy val file_ = new File(directory, "X~")
   private lazy val eventPipe = controller.newEventPipe()
 
-  override def checkedBeforeAll() {
+  override def onBeforeSchedulerActivation() {
     directory.mkdir()
     eventPipe
-    controller.activateScheduler()
+  }
+
+  override def onSchedulerActivated() {
     scheduler executeXml jobElem(directory, """^.*[^~]$""")
   }
 
@@ -68,6 +70,7 @@ class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
     instance[SchedulerEventBus] publishCold TriggerEvent(files)
   }
 }
+
 
 object StartWhenDirectoryChangedIT {
   private val logger = Logger(getClass)

@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 /** JS-995 */
-@Ignore("Nicht gelöst")
+@Ignore("Nicht geloest")
 @RunWith(classOf[JUnitRunner])
 final class JS995IT extends ScalaSchedulerTest {
 

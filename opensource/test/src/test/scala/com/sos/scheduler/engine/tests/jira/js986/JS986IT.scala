@@ -1,11 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js986
 
 import JS986IT._
-import com.google.common.io.Files
 import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.{What, ShowOrderCommand, OrderCommand}
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -23,12 +21,9 @@ final class JS986IT extends FunSuite with ScalaSchedulerTest {
     val eventPipe = controller.newEventPipe()
     scheduler executeXml OrderCommand(testOrderKey)
     eventPipe.nextWithCondition { e: OrderFinishedEvent => e.orderKey == testOrderKey }
-    withClue("Task log") { taskLogFileString(testJobPath) should include (expectedJobOutput) }
+    withClue("Task log") { controller.environment.taskLogFileString(testJobPath) should include (expectedJobOutput) }
     withClue("Order log") { orderLogString(testOrderKey) should include (expectedJobOutput) }
   }
-
-  private def taskLogFileString(jobPath: JobPath): String =
-    Files.toString(controller.environment.taskLogFile(testJobPath), SchedulerConstants.defaultEncoding)
 
   private def orderLogString(orderKey: OrderKey): String =
     ((scheduler executeXml ShowOrderCommand(testOrderKey, what=List(What.Log)).xmlElem).answer \ "order" \ "log").text
