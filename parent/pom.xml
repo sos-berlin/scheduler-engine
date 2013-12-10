@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>parent</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6-M1</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
 
@@ -28,7 +28,7 @@
         <osArch>osArch-UNKNOWN-OPERATING-SYSTEM-OR-CPU</osArch>
         <test.forkCount>1</test.forkCount>
         <enginedoc.version>${project.version}</enginedoc.version>
-        <argLine/>
+        <argLine />
     </properties>
 
     <profiles>
@@ -174,32 +174,32 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.generator</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6-M1</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.scalautil.io</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6-M1</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>cppjava.runtime</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6-M1</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>engine-common</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6-M1</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>data</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6-M1</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>web</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6-M1</version>
             </dependency>
 
             <dependency>
