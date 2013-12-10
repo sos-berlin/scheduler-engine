@@ -7,8 +7,8 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 final class SchemaIT extends FunSuite {

@@ -4,8 +4,8 @@ import com.sos.scheduler.engine.common.async.FutureCompletion.{futureCall, futur
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import org.joda.time.Instant.now
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{OneInstancePerTest, FunSuite}
 import scala.util.Success
 

@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.common.scalautil
 
 import ScalaCollections.RichTraversable
+import ScalaCollectionsTest._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
-import ScalaCollectionsTest._
 
 @RunWith(classOf[JUnitRunner])
 class ScalaCollectionsTest extends FunSuite {

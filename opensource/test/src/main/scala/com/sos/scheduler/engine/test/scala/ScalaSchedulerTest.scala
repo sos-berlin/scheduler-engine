@@ -12,28 +12,20 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
   protected lazy val testConfiguration = TestConfiguration()
   protected lazy final val controller = new TestSchedulerController(getClass, testConfiguration)
 
-  override protected final def beforeAll(configMap: Map[String, Any]) {
+  override protected final def beforeAll() {
     try {
       controller.getEventBus.registerAnnotated(this)
-      checkedBeforeAll(configMap)
+      checkedBeforeAll()
     }
     catch {
       case x: Throwable =>
-        ignoreException { afterAll(configMap) }
+        ignoreException { afterAll() }
         throw x
     }
   }
 
-  override protected final def beforeAll() {
-    super.beforeAll()
-  }
-
   /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
-  protected def checkedBeforeAll() {}
-
-  /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
-  protected def checkedBeforeAll(configMap: Map[String, Any]) {
-    checkedBeforeAll()
+  protected def checkedBeforeAll() {
     if (!controller.isStarted) {
       onBeforeSchedulerActivation()
       controller.activateScheduler(testConfiguration.mainArguments: _*)
@@ -41,12 +33,12 @@ trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandl
     }
   }
 
-  override def afterAll(configMap: Map[String, Any]) {
+  override def afterAll() {
     try {
       controller.getEventBus.unregisterAnnotated(this)
       controller.close()
     }
-    finally super.afterAll(configMap)
+    finally super.afterAll()
   }
 
   protected def onBeforeSchedulerActivation() {}

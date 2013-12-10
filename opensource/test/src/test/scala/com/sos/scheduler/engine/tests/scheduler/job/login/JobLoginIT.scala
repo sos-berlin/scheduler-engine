@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.login
 
+import JobLoginIT._
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
 import com.sos.scheduler.engine.kernel.variable.VariableSet
@@ -7,15 +8,12 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.util.regex.Pattern
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
-import scala.collection.JavaConversions._
 import scala.util.matching.Regex
 
 @RunWith(classOf[JUnitRunner])
-class JobLoginIT extends ScalaSchedulerTest {
-
-  import JobLoginIT._
+final class JobLoginIT extends ScalaSchedulerTest {
 
   private val noLoginJobPath = JobPath.of("/testNoLogin")
   private val loginJobPath = JobPath.of("/testLogin")
@@ -33,7 +31,7 @@ class JobLoginIT extends ScalaSchedulerTest {
   }
 
   private def runJob(jobPath: JobPath) = {
-    val eventPipe = controller.newEventPipe
+    val eventPipe = controller.newEventPipe()
     startJob(jobPath)
     eventPipe.nextWithCondition[TaskEndedEvent] { _.jobPath == jobPath }
     jobPropertyMap(jobPath)

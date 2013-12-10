@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.common.time
 import ScalaJoda._
 import org.joda.time.{LocalTime, DateTime, Instant, Duration}
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 
 class ScalaJodaTest extends FunSpec {
   describe("Duration") {

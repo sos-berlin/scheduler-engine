@@ -8,8 +8,8 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 @RunWith(classOf[JUnitRunner])
@@ -31,7 +31,7 @@ final class EnvironmentFilesTest extends FunSuite {
   test("Spring getResources") {
     val r = new PathMatchingResourcePatternResolver
     val result = r.getResources(springPattern(classOf[EnvironmentFilesTest].getPackage, "config/scheduler.xml"))
-    result should have size(1)
+    result should have size 1
   }
 }
 

@@ -12,8 +12,8 @@ import org.joda.time.Instant.now
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{Instant, LocalTime, Duration}
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 /** JS-1081 */
 @RunWith(classOf[JUnitRunner])

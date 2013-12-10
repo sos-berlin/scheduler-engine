@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.common.async
 import com.sos.scheduler.engine.common.time.ScalaJoda.{DurationRichInt, RichInstant, sleep}
 import org.joda.time.Instant.now
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
@@ -32,7 +32,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     val call = TimedCall(TimedCall.shortTerm) { a += 1 }
     callQueue add call
     val c = callQueue.popMature().get
-    c should be theSameInstanceAs (call)
+    c should be theSameInstanceAs call
     c()
     a should equal (1)
     callQueue.popMature() should equal (None)
@@ -47,7 +47,7 @@ class StandardCallQueueTest extends FunSuite with OneInstancePerTest {
     callQueue.popMature() should equal (None)
     sleep(42.ms)
     val c = callQueue.popMature().get
-    c should be theSameInstanceAs (call)
+    c should be theSameInstanceAs call
     c()
     a should equal (1)
     callQueue.popMature() should equal (None)

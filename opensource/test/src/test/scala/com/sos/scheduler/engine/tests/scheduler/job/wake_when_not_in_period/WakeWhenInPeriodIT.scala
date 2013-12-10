@@ -11,8 +11,8 @@ import org.joda.time.DateTimeConstants.MILLIS_PER_DAY
 import org.joda.time._
 import org.joda.time.format.DateTimeFormat
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.mutable
 
 /** JS-948 */
@@ -41,7 +41,7 @@ class WakeWhenInPeriodIT extends ScalaSchedulerTest {
     scheduler executeXml <modify_job job={jobPath.string} cmd="wake_when_in_period"/>   // Nach der Periode: unwirksam
     sleepUntil(b.begin plusMillis 500)
 
-    startTimes should have size(2)
+    startTimes should have size 2
     assert(a contains startTimes(0))
     assert(a contains startTimes(1))
   }
