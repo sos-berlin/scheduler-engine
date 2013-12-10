@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.kernel.order._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
@@ -16,7 +17,7 @@ import scala.collection.mutable
 /** Testet, ob die erwarteten Auftrags-Events in der richtigen Reihenfolge eintreffen,
  * außerdem @EventHandler und @HotEventHandler. */
 @RunWith(classOf[JUnitRunner])
-final class OrderEventsIT extends ScalaSchedulerTest {
+final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
 
   private val eventPipe = controller.newEventPipe()
   private val hotEvents = new mutable.HashMap[String, Event] with mutable.SynchronizedMap[String, Event]

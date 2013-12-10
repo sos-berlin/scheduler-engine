@@ -7,11 +7,12 @@ import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS975IT extends ScalaSchedulerTest {
+final class JS975IT extends FunSuite with ScalaSchedulerTest {
   override lazy val testConfiguration = TestConfiguration(database = Some(DefaultDatabaseConfiguration()))
 
   test("JS-975 Answer of <show_history job='...' what='log'/> should contain the log element") {

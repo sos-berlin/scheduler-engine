@@ -6,10 +6,10 @@ import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.Utils.ignoreException
 import com.sos.scheduler.engine.test.{TestSchedulerController, SchedulerTest}
-import org.scalatest.{FunSuite, BeforeAndAfterAll}
+import org.scalatest.{Suite, BeforeAndAfterAll}
 import scala.reflect.ClassTag
 
-trait ScalaSchedulerTest extends FunSuite with BeforeAndAfterAll with EventHandlerAnnotated {
+trait ScalaSchedulerTest extends Suite with BeforeAndAfterAll with EventHandlerAnnotated {
 
   protected lazy val testConfiguration = TestConfiguration()
   protected lazy final val controller = new TestSchedulerController(getClass, testConfiguration)

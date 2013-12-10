@@ -8,11 +8,12 @@ import com.sos.scheduler.engine.test.EventPipe
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS578IT extends ScalaSchedulerTest {
+final class JS578IT extends FunSuite with ScalaSchedulerTest {
   private lazy val orderSubsystem = scheduler.injector.getInstance(classOf[OrderSubsystem])
 
   test("<modify_order at='now'/>") {

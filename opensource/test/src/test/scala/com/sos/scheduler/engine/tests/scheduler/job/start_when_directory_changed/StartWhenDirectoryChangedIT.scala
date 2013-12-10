@@ -16,12 +16,13 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
-final class StartWhenDirectoryChangedIT extends ScalaSchedulerTest {
+final class StartWhenDirectoryChangedIT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val directory = new File(controller.environment.directory, "start_when_directory_changed")
   private lazy val file1 = new File(directory, "X")

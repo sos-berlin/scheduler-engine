@@ -6,11 +6,12 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.Ignore
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 
 // @RunWith(classOf[JUnitRunner])
 @Ignore
-final class JS864IT extends ScalaSchedulerTest {
+final class JS864IT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val eventPipe = controller.newEventPipe()
 
@@ -98,14 +99,14 @@ final class JS864IT extends ScalaSchedulerTest {
 }
 
 private object JS864IT {
-  val jobChainPath = JobChainPath.of("/test")
-  val aState = OrderState("A")
-  val bState = OrderState("B")
-  val cState = OrderState("C")
-  val processAction = "process"
-  val nextStateAction = "next_state"
+  private val jobChainPath = JobChainPath.of("/test")
+  private val aState = OrderState("A")
+  private val bState = OrderState("B")
+  private val cState = OrderState("C")
+  private val processAction = "process"
+  private val nextStateAction = "next_state"
 
-  def newOrderElem(orderId: OrderId) =
+  private def newOrderElem(orderId: OrderId) =
     <order job_chain={jobChainPath.string} id={orderId.string} suspended="true">
       <params>
         <param name="count" value="0"/>

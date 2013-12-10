@@ -11,13 +11,14 @@ import org.joda.time.DateTimeConstants.MILLIS_PER_DAY
 import org.joda.time._
 import org.joda.time.format.DateTimeFormat
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
 /** JS-948 */
 @RunWith(classOf[JUnitRunner])
-class WakeWhenInPeriodIT extends ScalaSchedulerTest {
+final class WakeWhenInPeriodIT extends FunSuite with ScalaSchedulerTest {
 
   private val startTimes = mutable.Buffer[LocalTime]()
 
@@ -53,20 +54,20 @@ class WakeWhenInPeriodIT extends ScalaSchedulerTest {
 }
 
 private object WakeWhenInPeriodIT {
-  val jobPath = JobPath.of("/a")
-  val hhmmssFormat = DateTimeFormat.forPattern("HH:mm:ss")
+  private val jobPath = JobPath.of("/a")
+  private val hhmmssFormat = DateTimeFormat.forPattern("HH:mm:ss")
 
-  def jobElem(periods: Iterable[SchedulerPeriod]) =
+  private def jobElem(periods: Iterable[SchedulerPeriod]) =
     <job name={jobPath.getName}>
       <script language="shell">exit 0</script>
       <run_time>{ periods map { o => <period begin={hhmmssFormat.print(o.begin)} end={hhmmssFormat.print(o.end)}/>} }</run_time>
     </job>
 
-  case class SchedulerPeriod(begin: LocalTime, end: LocalTime) {
+  private case class SchedulerPeriod(begin: LocalTime, end: LocalTime) {
     def contains(t: LocalTime) = !(t isBefore begin) && (t isBefore end)
   }
 
-  def sleepUntil(t: LocalTime) {
+  private def sleepUntil(t: LocalTime) {
     sleep(t.getMillisOfDay - (new LocalTime).getMillisOfDay)
   }
 }

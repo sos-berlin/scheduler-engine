@@ -8,11 +8,12 @@ import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS631IT extends ScalaSchedulerTest {
+final class JS631IT extends FunSuite with ScalaSchedulerTest {
   override protected lazy val testConfiguration = TestConfiguration(
     database = Some(DefaultDatabaseConfiguration()))
 

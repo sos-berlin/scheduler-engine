@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js832
 
+import JS832IT._
 import com.google.common.io.Files
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
@@ -8,14 +9,13 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
-final class JS832IT extends ScalaSchedulerTest {
-
-  import JS832IT._
+final class JS832IT extends FunSuite with ScalaSchedulerTest {
 
   test("When order is finished, Order log should be closed and reopened for next repetition") {
     def logFile(o: OrderKey) = instance[OrderSubsystem].order(o).getLog.getFile

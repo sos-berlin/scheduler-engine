@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.util.regex.Pattern
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.util.matching.Regex
@@ -19,7 +20,7 @@ import scala.util.matching.Regex
   * Prüft, ob Task.stdout_text und Task.stderr_text die Ausgaben vom Shell-Prozess enthalten
   * und ob die Ausgaben des Shell-Prozesses und des Monitors im Task-Log erscheinen. */
 @RunWith(classOf[JUnitRunner])
-final class JS1039TaskStdoutIT extends ScalaSchedulerTest {
+final class JS1039TaskStdoutIT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val tcpPort = FreeTcpPortFinder.findRandomFreePort(10000 until 20000)
   protected override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$tcpPort"))

@@ -10,11 +10,12 @@ import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS1003IT extends ScalaSchedulerTest {
+final class JS1003IT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val orderSubsystem = instance[OrderSubsystem]
   private lazy val jobChain = orderSubsystem.jobChain(testJobChainPath)

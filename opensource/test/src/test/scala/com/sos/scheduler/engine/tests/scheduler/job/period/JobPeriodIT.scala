@@ -10,12 +10,13 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.joda.time.Instant.now
 import org.joda.time.{Instant, Duration}
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.{immutable, mutable}
 
 @RunWith(classOf[JUnitRunner])
-class JobPeriodIT extends ScalaSchedulerTest {
+final class JobPeriodIT extends FunSuite with ScalaSchedulerTest {
 
   private val counts = mutable.HashMap[JobPath, Int]() ++ (jobConfigs map { _.path -> 0 })
   private val n = 3

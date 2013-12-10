@@ -14,11 +14,12 @@ import org.joda.time.DateTimeZone
 import org.joda.time.Instant.now
 import org.joda.time.format.ISODateTimeFormat
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 /** JS-1031 FIXED: An order with a missing schedule starts immediately after the JobScheduler starts. */
 @RunWith(classOf[JUnitRunner])
-final class JS1031IT extends ScalaSchedulerTest {
+final class JS1031IT extends FunSuite with ScalaSchedulerTest {
   override protected lazy val testConfiguration = TestConfiguration(terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
 
