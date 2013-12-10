@@ -18,11 +18,12 @@ import java.util.zip.GZIPInputStream
 import javax.ws.rs.core.MediaType._
 import javax.ws.rs.core.Response.Status._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class CppServletIT extends ScalaSchedulerTest {
+final class CppServletIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(testPackage = Some(JettyPluginTests.getClass.getPackage))
 

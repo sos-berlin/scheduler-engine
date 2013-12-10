@@ -10,6 +10,7 @@ import com.sun.jersey.api.client.WebResource
 import java.io.{BufferedReader, Reader}
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.slf4j.LoggerFactory
 
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory
 //TODO Datei selbst löschen, wenn Servlet länger lebt als Prefix_log?
 
 @RunWith(classOf[JUnitRunner])
-final class LogServletIT extends ScalaSchedulerTest {
+final class LogServletIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(testPackage = Some(JettyPluginTests.getClass.getPackage))
 
@@ -53,10 +54,11 @@ final class LogServletIT extends ScalaSchedulerTest {
   }
 }
 
-private object LogServletIT {
-  val logger = LoggerFactory.getLogger(classOf[LogServletIT])
 
-  def logReader(reader: Reader) {
+private object LogServletIT {
+  private val logger = LoggerFactory.getLogger(classOf[LogServletIT])
+
+  private def logReader(reader: Reader) {
     val r = new BufferedReader(reader)
     while (true) {
       val line = r.readLine()

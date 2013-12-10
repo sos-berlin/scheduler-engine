@@ -20,12 +20,12 @@ import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting._
 import org.joda.time.Duration.millis
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
-final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
+final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
 
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
 
@@ -106,14 +106,14 @@ final class SpoolerProcessAfterIT extends ScalaSchedulerTest {
   }
 }
 
+
 private object SpoolerProcessAfterIT {
-  val logger = LoggerFactory.getLogger(classOf[SpoolerProcessAfterIT])
+  private class MyMutableMultiMap[A,B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
 
-  class MyMutableMultiMap[A,B] extends mutable.HashMap[A, mutable.Set[B]] with mutable.MultiMap[A, B]
-
-  case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
+  private case class MyFinishedEvent(orderKey: OrderKey, state: OrderState, spoolerProcessAfterParameterOption: Option[Boolean]) extends Event
 
   /** Wegen JUnitRunner? Klammern lassen Surefire Klassen- und Testnamen durcheinanderbringen */
-  def renameTestForSurefire(name: String) = name.replace('(', '[').replace(')', ']')
+  private def renameTestForSurefire(name: String) =
+    name.replace('(', '[').replace(')', ']')
       .replace(',', ' ')  // Surefire zeigt Komma als \u002C
 }

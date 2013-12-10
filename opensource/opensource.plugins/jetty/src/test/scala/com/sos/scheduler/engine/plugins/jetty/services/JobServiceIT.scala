@@ -6,11 +6,12 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JobServiceIT extends ScalaSchedulerTest {
+final class JobServiceIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
 
@@ -31,7 +32,3 @@ final class JobServiceIT extends ScalaSchedulerTest {
     log should include ("SCHEDULER-893")
   }
 }
-
-//object JobServiceIT {
-//  private val logger = Logger.getLogger(classOf[JobServiceIT])
-//}

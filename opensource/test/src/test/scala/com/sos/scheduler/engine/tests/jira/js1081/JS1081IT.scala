@@ -12,12 +12,13 @@ import org.joda.time.Instant.now
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{Instant, LocalTime, Duration}
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /** JS-1081 */
 @RunWith(classOf[JUnitRunner])
-final class JS1081IT extends ScalaSchedulerTest {
+final class JS1081IT extends FunSuite with ScalaSchedulerTest {
 
   test("period with begin and absolute_repeat=1") {
     autoClosing(controller.newEventPipe()) { eventPipe =>

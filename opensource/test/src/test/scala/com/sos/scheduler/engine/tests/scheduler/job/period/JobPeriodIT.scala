@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.period
 
 import JobPeriodIT._
-import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
@@ -11,12 +10,13 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.joda.time.Instant.now
 import org.joda.time.{Instant, Duration}
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.{immutable, mutable}
 
 @RunWith(classOf[JUnitRunner])
-class JobPeriodIT extends ScalaSchedulerTest {
+final class JobPeriodIT extends FunSuite with ScalaSchedulerTest {
 
   private val counts = mutable.HashMap[JobPath, Int]() ++ (jobConfigs map { _.path -> 0 })
   private val n = 3
@@ -42,22 +42,18 @@ class JobPeriodIT extends ScalaSchedulerTest {
 }
 
 private object JobPeriodIT {
-  val logger = Logger(getClass)
-  val apiJobPath = JobPath.of("/test-api")
-  val shellJobPath = JobPath.of("/test-shell")
-
   private def durationUntilNextInterval(interval: Duration, shift: Duration) = {
     val i = interval.getMillis
     val nw = now() - shift
     new Instant(nw.getMillis / i * i + i) - nw
   }
 
-  trait JobConfig {
+  private trait JobConfig {
     val interval: Duration
     val xmlElem: xml.Elem
   }
 
-  val jobConfigs = immutable.Seq(
+  private val jobConfigs = immutable.Seq(
     new JobConfig {
       val path = JobPath.of("/test-shell")
       val interval = 1.s

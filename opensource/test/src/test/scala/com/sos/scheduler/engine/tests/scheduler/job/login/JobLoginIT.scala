@@ -8,12 +8,13 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.util.regex.Pattern
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.util.matching.Regex
 
 @RunWith(classOf[JUnitRunner])
-final class JobLoginIT extends ScalaSchedulerTest {
+final class JobLoginIT extends FunSuite with ScalaSchedulerTest {
 
   private val noLoginJobPath = JobPath.of("/testNoLogin")
   private val loginJobPath = JobPath.of("/testLogin")

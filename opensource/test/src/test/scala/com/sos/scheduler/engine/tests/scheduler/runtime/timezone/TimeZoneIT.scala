@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.runtime.timezone
 
+import TimeZoneIT._
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -8,13 +9,12 @@ import org.joda.time.DateTimeZone.UTC
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeZone, LocalTime, DateTime}
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.xml.Elem
 
 @RunWith(classOf[JUnitRunner])
-final class TimeZoneIT extends ScalaSchedulerTest {
-
-  import TimeZoneIT._
+final class TimeZoneIT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val now = new DateTime
   private lazy val calendarEntryMap: Map[SchedulerObjectId, CalendarEntry] = (fetchCalendarEntries() map { e => e.obj -> e }).toMap
@@ -35,8 +35,8 @@ final class TimeZoneIT extends ScalaSchedulerTest {
   }
 }
 
-object TimeZoneIT {
-  type SchedulerObjectId = Any
+private object TimeZoneIT {
+  private type SchedulerObjectId = Any
 
   private val expectedTimes = List(
       ExpectedObjectTime(JobPath.of("/a")      , new LocalTime(12, 12), DateTimeZone.forID("Pacific/Honolulu")),

@@ -8,10 +8,11 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.Reader
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class FolderServiceIT extends ScalaSchedulerTest {
+final class FolderServiceIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
 

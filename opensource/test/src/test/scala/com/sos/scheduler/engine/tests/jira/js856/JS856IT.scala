@@ -6,10 +6,11 @@ import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 
 /** JS-856 */
-abstract class JS856IT(testNamePrefix: String) extends ScalaSchedulerTest {
+abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedulerTest {
 
   val finallyExpectedParameters: Map[String, String]
   val whenSuspendedExpectedParameters: Map[String, String]
