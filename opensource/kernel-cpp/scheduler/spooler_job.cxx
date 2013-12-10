@@ -615,6 +615,7 @@ void Job::close()
     }
 
     _log->finish_log();
+    _history.close();
     _log->close();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
@@ -705,7 +706,7 @@ bool Job::on_load() // Transaction* ta )
             for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
             {
                 if( db()->opened() )  database_record_load( &ta );
-                _history.on_load( &ta );
+                _history.open( &ta );
                 if( db()->opened() )  load_tasks( &ta );
             }
             catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }

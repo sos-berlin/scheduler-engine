@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.order.events
 
+import OrderEventsIT._
 import com.sos.scheduler.engine.data.event.Event
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order._
@@ -15,17 +16,15 @@ import scala.collection.mutable
 /** Testet, ob die erwarteten Auftrags-Events in der richtigen Reihenfolge eintreffen,
  * außerdem @EventHandler und @HotEventHandler. */
 @RunWith(classOf[JUnitRunner])
-class OrderEventsIT extends ScalaSchedulerTest {
-
-  import OrderEventsIT._
+final class OrderEventsIT extends ScalaSchedulerTest {
 
   private val eventPipe = controller.newEventPipe()
-  private val hotEvents = new mutable.HashMap[String,Event]
-  private val coldEvents = new mutable.HashMap[String,Event]
+  private val hotEvents = new mutable.HashMap[String, Event] with mutable.SynchronizedMap[String, Event]
+  private val coldEvents = new mutable.HashMap[String, Event] with mutable.SynchronizedMap[String, Event]
 
   test("Persistent order") {
     checkOrderStates(persistentOrderKey)
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (persistentOrderKey); assert(e.previousState === new OrderState("end")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (persistentOrderKey); assert(e.previousState === OrderState("end")) }
   }
 
   test("Temporary order") {
@@ -42,7 +41,7 @@ class OrderEventsIT extends ScalaSchedulerTest {
     scheduler.executeXml(<add_order job_chain={jobChainPath.asString} id={orderKey.getId.toString}/>)
     eventPipe.nextAny[OrderTouchedEvent].orderKey should equal (orderKey)
     eventPipe.nextAny[OrderSuspendedEvent].orderKey should equal (orderKey)
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state1")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (OrderState("state1")) }
     scheduler.executeXml(<remove_order job_chain={jobChainPath.asString} order={orderKey.getId.toString}/>)
     //eventPipe.next[OrderEvent] match { case e: OrderFinishedEvent => e.getKey should equal (orderKey) }
   }
@@ -54,40 +53,40 @@ class OrderEventsIT extends ScalaSchedulerTest {
 
   private def expectOrderEventsAndResumeOrder(orderKey: OrderKey) {
     eventPipe.nextAny[OrderEvent] match { case e: OrderTouchedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (new OrderState("state1")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (OrderState("state1")) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderSuspendedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state1")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (OrderState("state1")) }
     scheduler.executeXml(<modify_order job_chain={jobChainPath.asString} order={orderKey.getId.toString} suspended="no"/>)
     eventPipe.nextAny[OrderEvent] match { case e: OrderResumedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (new OrderState("state2")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (OrderState("state2")) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
-    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (new OrderState("state2")) }
+    eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (OrderState("state2")) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderFinishedEvent => e.orderKey should equal (orderKey) }
   }
 
   private def checkCollectedOrderEvents(orderKey: OrderKey) {
     controller.getEventBus.dispatchEvents()  // Das letzte OrderFinishedEvent kann sonst verloren gehen.
     coldEvents should equal (Map(
-      "OrderTouched"   -> new OrderTouchedEvent(orderKey),
-      "OrderFinished"  -> new OrderFinishedEvent(orderKey),
-      "OrderSuspended" -> new OrderSuspendedEvent(orderKey),
-      "OrderResumed"   -> new OrderResumedEvent(orderKey)
+      "OrderTouched"   -> OrderTouchedEvent(orderKey),
+      "OrderFinished"  -> OrderFinishedEvent(orderKey),
+      "OrderSuspended" -> OrderSuspendedEvent(orderKey),
+      "OrderResumed"   -> OrderResumedEvent(orderKey)
     ))
     hotEvents should equal (Map(
-      "OrderTouched UnmodifiableOrder"            -> new OrderTouchedEvent(orderKey),
-      "OrderTouched Order"                        -> new OrderTouchedEvent(orderKey),
-      "OrderFinished UnmodifiableOrder"           -> new OrderFinishedEvent(orderKey),
-      "OrderStepStarted UnmodifiableOrder state1" -> new OrderStepStartedEvent(orderKey, new OrderState("state1")),
-      "OrderStepStarted Order state1"             -> new OrderStepStartedEvent(orderKey, new OrderState("state1")),
-      "OrderStepEnded UnmodifiableOrder state1"   -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
-      "OrderStepEnded Order state1"               -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
-      "OrderStepStarted UnmodifiableOrder state2" -> new OrderStepStartedEvent(orderKey, new OrderState("state2")),
-      "OrderStepStarted Order state2"             -> new OrderStepStartedEvent(orderKey, new OrderState("state2")),
-      "OrderStepEnded UnmodifiableOrder state2"   -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
-      "OrderStepEnded Order state2"               -> new OrderStepEndedEvent(orderKey, OrderStateTransition.success),
-      "OrderSuspended UnmodifiableOrder"          -> new OrderSuspendedEvent(orderKey),
-      "OrderResumed UnmodifiableOrder"            -> new OrderResumedEvent(orderKey)))
+      "OrderTouched UnmodifiableOrder"            -> OrderTouchedEvent(orderKey),
+      "OrderTouched Order"                        -> OrderTouchedEvent(orderKey),
+      "OrderFinished UnmodifiableOrder"           -> OrderFinishedEvent(orderKey),
+      "OrderStepStarted UnmodifiableOrder state1" -> OrderStepStartedEvent(orderKey, OrderState("state1")),
+      "OrderStepStarted Order state1"             -> OrderStepStartedEvent(orderKey, OrderState("state1")),
+      "OrderStepEnded UnmodifiableOrder state1"   -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderStepEnded Order state1"               -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderStepStarted UnmodifiableOrder state2" -> OrderStepStartedEvent(orderKey, OrderState("state2")),
+      "OrderStepStarted Order state2"             -> OrderStepStartedEvent(orderKey, OrderState("state2")),
+      "OrderStepEnded UnmodifiableOrder state2"   -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderStepEnded Order state2"               -> OrderStepEndedEvent(orderKey, OrderStateTransition.success),
+      "OrderSuspended UnmodifiableOrder"          -> OrderSuspendedEvent(orderKey),
+      "OrderResumed UnmodifiableOrder"            -> OrderResumedEvent(orderKey)))
   }
 
   @EventHandler def handleEvent(e: OrderTouchedEvent) {
@@ -161,8 +160,9 @@ class OrderEventsIT extends ScalaSchedulerTest {
   }
 }
 
-object OrderEventsIT {
+
+private object OrderEventsIT {
   private val jobChainPath = JobChainPath.of("/a")
-  private val persistentOrderKey = new OrderKey(jobChainPath, new OrderId("persistentOrder"))
-  private val temporaryOrderKey = new OrderKey(jobChainPath, new OrderId("1"))
+  private val persistentOrderKey = jobChainPath orderKey "persistentOrder"
+  private val temporaryOrderKey = jobChainPath orderKey "1"
 }
