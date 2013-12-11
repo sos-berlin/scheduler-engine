@@ -95,6 +95,7 @@ to run without maven integration.
             <include name="scala-reflect-*.jar"/>
             <include name="slf4j*.jar"/>
             <include name="xercesImpl*.jar"/>
+            <include name="xml-apis*.jar"/>
             
             <!-- additional jars for jetty integration -->
             <include name="aopalliance-*.jar"/>
