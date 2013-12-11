@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import java.net._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 /** JS-1079: Test des Supervisors mit vielen bestehenden TCP-Verbindungen.
@@ -26,7 +27,7 @@ import org.scalatest.junit.JUnitRunner
   * </pre>
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1079IT extends ScalaSchedulerTest {
+final class JS1079IT extends FunSuite with ScalaSchedulerTest {
   override protected lazy val testConfiguration = TestConfiguration(
     binariesDebugMode = Some(CppBinariesDebugMode.release))  // debug ist zu langsam
   private val nextUdpSocket = new UdpSocketGenerator
