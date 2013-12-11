@@ -9,12 +9,13 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.util.concurrent.{TimeUnit, ArrayBlockingQueue}
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
-class NewJobIT extends ScalaSchedulerTest {
+final class NewJobIT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val job = instance[JobSubsystem].job(jobPath)
   private val blockingQueue = new ArrayBlockingQueue[Boolean](1)

@@ -17,10 +17,11 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.jira.js973.JS973IT.OrderFinishedWithResultEvent
 import java.io.File
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import scala.concurrent.Await
 
-final class JS973IT extends ScalaSchedulerTest {
+final class JS973IT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val aSlave = newSlave()
   private lazy val bSlave = newSlave()

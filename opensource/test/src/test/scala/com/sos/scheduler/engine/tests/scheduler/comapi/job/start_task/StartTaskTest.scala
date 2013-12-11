@@ -7,11 +7,13 @@ import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
-class StartTaskTest extends ScalaSchedulerTest {
+final class StartTaskTest extends FunSuite with ScalaSchedulerTest {
+
   test("job.start_task") {
     controller.waitForTermination(shortTimeout)
   }
