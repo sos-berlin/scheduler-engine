@@ -5,11 +5,11 @@ import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.test.util.time.WaitForCondition._
 import java.lang.System.currentTimeMillis
 import org.joda.time.DateTime.now
+import org.joda.time.Duration
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
-import org.joda.time.Duration
 
 @RunWith(classOf[JUnitRunner])
 final class WaitForConditionTest extends FunSuite {
@@ -20,9 +20,9 @@ final class WaitForConditionTest extends FunSuite {
     val t0 = now().getMillis
     val (t1, t2, t3) = (t0 + 500, t0 + 1500, t0 + 2000)
     val i = realTimeIterator(Seq(t1, t2, t3))
-    meterElapsedTime { i.next() } .getMillis should be (t1 - t0 plusOrMinus 400)
-    meterElapsedTime { i.next() } .getMillis should be (t2 - t1 plusOrMinus 400)
-    meterElapsedTime { i.next() } .getMillis should be (t3 - t2 plusOrMinus 400)
+    meterElapsedTime { i.next() } .getMillis should be (t1 - t0 +- 400)
+    meterElapsedTime { i.next() } .getMillis should be (t2 - t1 +- 400)
+    meterElapsedTime { i.next() } .getMillis should be (t3 - t2 +- 400)
   }
 
   test("waitForCondition(TimeoutWithSteps) 0 steps (time-critical test)") {

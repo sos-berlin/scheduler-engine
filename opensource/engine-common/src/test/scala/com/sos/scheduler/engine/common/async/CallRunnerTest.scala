@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.common.async
 import com.sos.scheduler.engine.common.time.ScalaJoda.{DurationRichInt, RichInstant, sleep}
 import org.joda.time.Instant.now
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{OneInstancePerTest, FunSuite}
 
 @RunWith(classOf[JUnitRunner])

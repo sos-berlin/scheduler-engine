@@ -10,11 +10,12 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.Sockets.findAvailablePort
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
-final class JavaOptionsIT extends ScalaSchedulerTest {
+final class JavaOptionsIT extends FunSuite with ScalaSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(
     mainArguments = List("-tcp-port="+ findAvailablePort()))

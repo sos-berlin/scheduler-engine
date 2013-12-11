@@ -8,8 +8,8 @@ import com.sos.scheduler.engine.test.SchedulerTest
 import com.sos.scheduler.engine.test.binary.ResourcesAsFilesProvider.provideResourcesAsFiles
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 @RunWith(classOf[JUnitRunner])

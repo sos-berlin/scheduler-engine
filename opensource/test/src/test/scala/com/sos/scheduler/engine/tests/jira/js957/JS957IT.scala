@@ -11,8 +11,8 @@ import com.sos.scheduler.engine.test.TestSchedulerController
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
 
 /** Jira-Tickets JS-956 und JS-957. */

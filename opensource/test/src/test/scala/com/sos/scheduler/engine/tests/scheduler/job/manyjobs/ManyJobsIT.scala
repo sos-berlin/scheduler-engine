@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 import scala.math._
@@ -19,7 +20,7 @@ import scala.sys.error
 import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
-class ManyJobsIT extends ScalaSchedulerTest {
+final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
     database = Some(DefaultDatabaseConfiguration()),   // Nur damit die History-Dateien nicht die File-handles aufbrauchen.

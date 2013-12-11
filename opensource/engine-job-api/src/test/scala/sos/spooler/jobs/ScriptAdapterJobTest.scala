@@ -1,10 +1,10 @@
 package sos.spooler.jobs
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import ScriptAdapterJob._
-import org.scalatest.matchers.ShouldMatchers._
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class ScriptAdapterJobTest extends FunSuite {

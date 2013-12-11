@@ -4,8 +4,8 @@ import Sockets._
 import java.net.ServerSocket
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 class SocketsTest extends FunSuite {
@@ -16,7 +16,7 @@ class SocketsTest extends FunSuite {
     val aSocket = new ServerSocket(aPort, backlog)
     try {
       val bPort = findAvailablePort()
-      aPort should not equal (bPort)
+      aPort should not equal bPort
       new ServerSocket(bPort, backlog).close()
     }
     finally {
@@ -26,7 +26,7 @@ class SocketsTest extends FunSuite {
 
   test("findAvailablePort() should return randomly different port numbers") {
     val ports = for (i <- 0 until 100) yield findAvailablePort()
-    ports.toSet.size should be > (10)
+    ports.toSet.size should be > 10
   }
 
   test("findAvailablePort() should throw an exception when no port is available") {

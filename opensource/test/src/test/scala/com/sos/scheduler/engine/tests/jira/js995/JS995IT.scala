@@ -4,12 +4,13 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import org.junit.Ignore
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 /** JS-995 */
 @Ignore("Nicht geloest")
 @RunWith(classOf[JUnitRunner])
-final class JS995IT extends ScalaSchedulerTest {
+final class JS995IT extends FunSuite with ScalaSchedulerTest {
 
   test("Schedule wirkt, ob Job vor oder nach Schedule gelesen wird") {
     // Prüfen, ob Jobs trotz SCHEDULER-161 die richtige Startzeit aus dem <schedule> haben.

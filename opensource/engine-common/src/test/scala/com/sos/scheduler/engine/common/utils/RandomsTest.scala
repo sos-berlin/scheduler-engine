@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.common.utils
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 final class RandomsTest extends FunSuite {

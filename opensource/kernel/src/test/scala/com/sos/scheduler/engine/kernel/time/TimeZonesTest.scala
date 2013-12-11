@@ -4,7 +4,7 @@ import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeZone.UTC
 import org.joda.time.{DateTimeZone, LocalDateTime, DateTime}
 import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 import scala.collection.immutable
 
 final class TimeZonesTest extends FunSuite {

@@ -1,25 +1,20 @@
 package com.sos.scheduler.engine.test.scala
 
-import org.scalatest.BeforeAndAfterAll
 import com.sos.scheduler.engine.test.scala.Utils.ignoreException
+import org.scalatest.BeforeAndAfterAll
 
 trait CheckedBeforeAll {
   this: BeforeAndAfterAll =>
 
-  override protected final def beforeAll(configMap: Map[String, Any]) {
-    try checkedBeforeAll(configMap)
+  override protected final def beforeAll() {
+    try checkedBeforeAll()
     catch {
       case x: Throwable =>
-        ignoreException { afterAll(configMap) }
+        ignoreException { afterAll() }
         throw x
     }
   }
 
   /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
   protected def checkedBeforeAll() {}
-
-  /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
-  protected def checkedBeforeAll(configMap: Map[String, Any]) {
-    checkedBeforeAll()
-  }
 }

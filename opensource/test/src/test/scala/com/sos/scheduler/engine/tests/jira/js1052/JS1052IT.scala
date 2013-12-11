@@ -8,15 +8,16 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.{OutputStreamWriter, InputStreamReader}
 import java.net.Socket
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import scala.collection.mutable
 
 /** JS-1052
  * @author Florian
  */
 @RunWith(classOf[JUnitRunner])
-final class JS1052IT extends ScalaSchedulerTest {
+final class JS1052IT extends FunSuite with ScalaSchedulerTest {
   private lazy val supervisorPortNumber = findRandomFreePort(10000 until 20000)
   override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$supervisorPortNumber"))
 

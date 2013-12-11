@@ -11,10 +11,11 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS1008IT extends ScalaSchedulerTest {
+final class JS1008IT extends FunSuite with ScalaSchedulerTest {
   test("file_order_source") {
     // Ob Fehler in FindFirstChangeNotification ignoriert werden, testen wir manuell durch vorübergehenden Eingriff in den C++-Code. Dazu Polling-Intervall mit repeat="5" verkürzen
     val eventPipe = controller.newEventPipe()

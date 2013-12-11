@@ -10,12 +10,13 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sun.jersey.api.client.WebResource
 import java.io.{BufferedReader, IOException, Reader}
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
 import org.slf4j.LoggerFactory
 
 @RunWith(classOf[JUnitRunner])
-final class EventsServiceIT extends ScalaSchedulerTest {
+final class EventsServiceIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(testPackage = Some(Tests.testPackage))
   private lazy val eventsResource = javaResource(injector).path("TESTONLY/events")

@@ -13,10 +13,11 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS1029IT extends ScalaSchedulerTest {
+final class JS1029IT extends FunSuite with ScalaSchedulerTest {
 
   override protected lazy val testConfiguration = TestConfiguration(terminateOnError = false)
 

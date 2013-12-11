@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import java.net._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 /** JS-1079: Test des Supervisors mit vielen bestehenden TCP-Verbindungen.
@@ -26,19 +27,18 @@ import org.scalatest.junit.JUnitRunner
   * </pre>
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1079IT extends ScalaSchedulerTest {
+final class JS1079IT extends FunSuite with ScalaSchedulerTest {
   override protected lazy val testConfiguration = TestConfiguration(
     binariesDebugMode = Some(CppBinariesDebugMode.release))  // debug ist zu langsam
   private val nextUdpSocket = new UdpSocketGenerator
   private lazy val allDirectory = new File(controller.environment.configDirectory, "remote/_all")
   private lazy val serverTcpPort = findRandomFreePort(10000 until 20000)
 
-  override def checkedBeforeAll() {
+  override def onBeforeSchedulerActivation() {
     val schedulerXmlString = schedulerXml(serverTcpPort).toString()
     controller.prepare()
     Files.write(schedulerXmlString, new File(controller.environment.configDirectory, "scheduler.xml"), UTF_8)
     allDirectory.mkdirs()
-    super.beforeAll()
   }
 
   test(s"Configuration server with $connectionsMax permanently connected simulated clients (TCP, old v1.5 style)") {

@@ -9,15 +9,16 @@ import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.scala._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers.{value => _, _ }
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers.{value => _, _ }
 
 /** Prüft, ob alle Methoden eines Scala-Jobs aufgerufen werden.
  * Der Scala-Job wird mit den Log-Levels info und error gerufen, um den Aufruf von spooler_on_success() und spooler_on_error()
  * zu prüfen.
  * Der Job schreibt in Spooler.variables für jeden Log-Level und jeden Aufruf eine Variable mit der Anzahl der Aufrufe.*/
 @RunWith(classOf[JUnitRunner])
-final class ScalaJobIT extends ScalaSchedulerTest {
+final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
@@ -42,7 +43,8 @@ final class ScalaJobIT extends ScalaSchedulerTest {
   }
 }
 
-object ScalaJobIT {
+
+private object ScalaJobIT {
   private val jobPath = JobPath.of("/scala")
   private val VariableNamePattern = """test[.](\d+)[.]([a-z_]+)""".r  // "test.0.spooler_process"
 

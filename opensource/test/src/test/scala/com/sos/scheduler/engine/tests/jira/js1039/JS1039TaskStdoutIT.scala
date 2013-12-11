@@ -9,17 +9,18 @@ import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
-import scala.util.matching.Regex
 import java.util.regex.Pattern
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
+import scala.util.matching.Regex
 
 /** JS-1039 FIXED: API functions stdout_text and stderr_text return empty strings when used in monitor of shell-job.
   * Prüft, ob Task.stdout_text und Task.stderr_text die Ausgaben vom Shell-Prozess enthalten
   * und ob die Ausgaben des Shell-Prozesses und des Monitors im Task-Log erscheinen. */
 @RunWith(classOf[JUnitRunner])
-final class JS1039TaskStdoutIT extends ScalaSchedulerTest {
+final class JS1039TaskStdoutIT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val tcpPort = FreeTcpPortFinder.findRandomFreePort(10000 until 20000)
   protected override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$tcpPort"))
