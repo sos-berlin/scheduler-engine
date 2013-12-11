@@ -14,9 +14,6 @@ final case class TestConfiguration(
 
     binariesDebugMode: Option[CppBinariesDebugMode] = None,
 
-    nameMap: Map[String, String] = Map(),
-    /** Kommandozeilenargumente für den Scheduler */
-
     /** Kommandozeilenparameter des C++-Codes. */
     mainArguments: Seq[String] = Seq(),
 
