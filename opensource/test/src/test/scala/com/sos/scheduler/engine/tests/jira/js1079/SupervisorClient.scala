@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.client.SchedulerTcpConnection
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import java.io.ByteArrayInputStream
 import java.net.{DatagramPacket, InetSocketAddress, DatagramSocket}
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 
 private[js1079] final class SupervisorClient(val index: Int, udpSocket: DatagramSocket, serverAddress: InetSocketAddress) extends SosAutoCloseable {
   require(udpSocket.isBound)
