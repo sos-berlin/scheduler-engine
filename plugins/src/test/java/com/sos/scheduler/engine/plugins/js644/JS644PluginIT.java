@@ -60,6 +60,6 @@ public final class JS644PluginIT extends SchedulerTest {
     }
 
     private File fileBasedFile(Job o) {
-        return new File(controller().environment().configDirectory(), o.getPath().asString() + ".job.xml");
+        return new File(controller().environment().liveDirectory(), o.getPath().asString() + ".job.xml");
     }
 }

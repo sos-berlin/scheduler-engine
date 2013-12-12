@@ -18,8 +18,14 @@ import com.sos.scheduler.engine.main.CppBinary
 import java.io.File
 
 /** Build the environment for the scheduler binary. */
-final class TestEnvironment(resourcePath: ResourcePath, val directory: File, nameMap: Map[String, String], fileTransformer: ResourceToFileTransformer) {
+final class TestEnvironment(
+    resourcePath: ResourcePath,
+    val directory: File,
+    nameMap: Map[String, String],
+    fileTransformer: ResourceToFileTransformer) {
+
   val configDirectory = new File(directory, configSubdir)
+  val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
 

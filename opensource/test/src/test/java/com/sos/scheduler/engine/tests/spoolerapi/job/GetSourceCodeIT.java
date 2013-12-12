@@ -45,7 +45,7 @@ public class GetSourceCodeIT extends SchedulerTest {
     }
 
     private String getExpectedSourceCode() throws IOException {
-        File f = new File(controller().environment().configDirectory(), expectedFilename);
+        File f = new File(controller().environment().liveDirectory(), expectedFilename);
         return Files.toString(f, UTF_8).trim();
     }
 
