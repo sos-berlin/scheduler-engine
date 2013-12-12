@@ -528,18 +528,23 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         }
 
 
+        string stdout_path = _class_data->_task_process_element.getAttribute("stdout_path");
+        string stderr_path = _class_data->_task_process_element.getAttribute("stderr_path");
+        if (!stdout_path.empty())
+            if (Process_module_instance *o = dynamic_cast<Process_module_instance*>(+_server->_module_instance)) 
+                o->set_stdout_path(stdout_path);  // Für Process_module_instance::get_first_line_as_state_text() und verhindert das Öffnen eigener stdout/stderr-Dateien (s. Process_module_instance::begin__start())
+        
         Async_operation* operation = _server->_module_instance->begin__start();
 
         if( _log ) {
             assert( !_server->_file_logger );
-
             _server->_file_logger = Z_NEW( File_logger( _log ) );
             _server->_file_logger->set_object_name( "Com_remote_module_instance_server" );   // Nur zur Info
 
-            string stdout_path = _class_data->_task_process_element.getAttribute("stdout_path");
-            string stderr_path = _class_data->_task_process_element.getAttribute("stderr_path");
-            if (Process_module_instance *o = dynamic_cast<Process_module_instance*>(+_server->_module_instance))
-                o->set_stdout_path(stdout_path);  // Für Process_module_instance::get_first_line_as_state_text()
+            if (stdout_path.empty()) {
+                stdout_path = _server->_module_instance->stdout_path();
+                stderr_path = _server->_module_instance->stderr_path();
+            }
             if (_class_data->_task_process_element.bool_getAttribute("log_stdout_and_stderr", false)) {
                 // Von einem Remote_scheduler gestartet
                 _server->_file_logger->add_file(stdout_path, "stdout");
@@ -549,17 +554,16 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
                 task_proxy->_stdout_path = stdout_path;
                 task_proxy->_stderr_path = stderr_path;
             }
-
-            if( _server->_file_logger->has_files() )  _server->_file_logger->start_thread();
+            if (_server->_file_logger->has_files()) 
+                _server->_file_logger->start_thread();
 
             // Bei einer Exception in dieser Methode Begin() bekommt Task::do_something() ok=false zurück und
             // gibt dann selbst stdout und stderr aus (soweit nicht remote)
         }
 
         operation->async_finish();
-
-        result->vt = VT_BOOL, V_BOOL( result ) = _server->_module_instance->begin__end();
-
+        result->vt = VT_BOOL;
+        V_BOOL(result) = _server->_module_instance->begin__end();
 
         assert( !_class_data->_remote_instance_pid );
         _class_data->_remote_instance_pid = _server->_module_instance->pid();
