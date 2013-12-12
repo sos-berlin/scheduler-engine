@@ -128,7 +128,7 @@ public class JS428Test extends SchedulerTest {
         for (String orderParam : orderParams.getNames()) {
             String orderParamValue = orderParams.apply(orderParam);
             if (orderParam.startsWith(stepId))
-                order.getParameters().put(orderParam.replace(stepId, ""), orderParamValue);
+                order.getParameters().update(orderParam.replace(stepId, ""), orderParamValue);
         }
     }
 

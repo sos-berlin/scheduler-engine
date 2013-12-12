@@ -48,7 +48,7 @@ extends UnmodifiableVariableSet with Sister with Iterable[(String, String)] {
 //  private def get(name: String): Option[String] =
 //    Option(cppProxy.get_string(name))
 
-  def put(name: String, value: String) {
+  def update(name: String, value: String) {
     cppProxy.set_var(name, value)
   }
 }

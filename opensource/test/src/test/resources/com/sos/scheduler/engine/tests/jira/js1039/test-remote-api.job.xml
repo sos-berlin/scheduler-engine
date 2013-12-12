@@ -6,15 +6,4 @@
         java.lang.System.out.println("/script STDOUT/")
         java.lang.System.err.println("/script STDERR/")
     </script>
-
-    <monitor>
-        <script language="java:javascript"><![CDATA[
-function spooler_task_after() {
-     spooler.variables.set_value("STDOUT", "stdout_text=" + spooler_task.stdout_text);
-     java.lang.System.out.println("/spooler_task_after STDOUT/\n");
-     spooler.variables.set_value("STDERR", "stderr_text=" + spooler_task.stderr_text);
-     java.lang.System.out.println("/spooler_task_after STDERR/\n");
-}
-        ]]></script>
-    </monitor>
 </job>
