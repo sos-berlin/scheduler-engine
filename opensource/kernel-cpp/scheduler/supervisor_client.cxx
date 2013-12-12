@@ -268,6 +268,7 @@ struct Http_connector : Abstract_connector {
             catch (exception& x) {
                 log()->warn(x.what());
                 _connection_failed = true;
+                _spooler->signal("supervisor_client");
                 set_async_delay(_connection_retry_duration.as_double());
             }
             return true;
@@ -286,6 +287,8 @@ struct Http_connector : Abstract_connector {
         catch (exception& x) {
             log()->error(x.what());
             _exception = x;
+            _connection_failed = true;
+            _spooler->signal("supervisor_client");
             set_async_delay(_connection_retry_duration.as_double());
         }
         _supervisor_response_call = NULL;
