@@ -47,8 +47,8 @@ class JS802IT extends SchedulerTest {
 
     @EventHandler def handleEvent(event: TaskEndedEvent) {
         assertTrue("Job "+event.jobPath+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
-        if (event.jobPath.getName == jobName)
-            collector.add(event.jobPath.getName)
+        if (event.jobPath.name == jobName)
+            collector.add(event.jobPath.name)
     }
 }
 

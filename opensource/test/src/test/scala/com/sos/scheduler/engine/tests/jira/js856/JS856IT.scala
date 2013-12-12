@@ -82,8 +82,8 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
 }
 
 object JS856IT {
-  val testJobChain = JobChainPath.of("/test")
-  val suspendedJobChain = JobChainPath.of("/testSuspended")
+  val testJobChain = JobChainPath("/test")
+  val suspendedJobChain = JobChainPath("/testSuspended")
   val originalParameters = Map("a" -> "a-original")
   val modifiedParameters = Map("a" -> "a-job", "b" -> "b-job")
   val suspendedParameterName = "suspended"

@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel.order;
 
+import javax.annotation.Nullable;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -10,8 +12,6 @@ import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem;
-
-import javax.annotation.Nullable;
 
 public class OrderSubsystem implements Subsystem {
     private final Order_subsystemC cppProxy;
@@ -33,7 +33,7 @@ public class OrderSubsystem implements Subsystem {
     }
 
     public final JobChain jobChain(JobChainPath o) {
-        JobChain result = cppProxy.java_file_based_or_null(o.asString());
+        JobChain result = cppProxy.java_file_based_or_null(o.string());
         if (result == null)
             throw new SchedulerException("Unknown '"+o+"'");
         return result;

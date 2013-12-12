@@ -1,20 +1,20 @@
 package com.sos.scheduler.engine.plugins.jetty
 
-import java.net.URI
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.plugins.jetty.Config._
-import com.sun.jersey.api.client.{Client, WebResource}
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
+import com.sun.jersey.api.client.{Client, WebResource}
+import java.net.URI
 import org.joda.time.Duration
-import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
 
 object JettyPluginTests {
 
   private val defaultTimeout = 60.s
-  val aJobChainPath = JobChainPath.of("/a")
-  val orderJobPath = JobPath.of("/order")
+  val aJobChainPath = JobChainPath("/a")
+  val orderJobPath = JobPath("/order")
 
   def javaResource(injector: Injector) =
     newAuthentifyingClient().resource(javaContextUri(injector))

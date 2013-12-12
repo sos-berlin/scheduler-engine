@@ -32,7 +32,7 @@ final class JS1008IT extends FunSuite with ScalaSchedulerTest {
 }
 
 object JS1008IT {
-  private val testJobChainPath = JobChainPath.of("/test")
+  private val testJobChainPath = JobChainPath("/test")
 
   private def jobChainElem(directory: File) =
     <job_chain name="test">

@@ -181,7 +181,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="300" action="stop"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
       nodes should have size 2
-      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
+      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
       nodes(0) should have ('orderState ("200"), 'action ("next_state"))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))
     }
@@ -189,7 +189,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
       nodes should have size 2
-      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
+      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
       nodes(0) should have ('orderState ("200"), 'action (null))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))
     }
@@ -227,15 +227,15 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   def tryFetchJobChainEntity(path: JobChainPath) =
     entityManager.fetchOption[JobChainEntity]("select j from JobChainEntity j where j.jobChainPath = :jobChainPath",
-      Seq("jobChainPath" -> jobChainPath.withoutStartingSlash()))
+      Seq("jobChainPath" -> jobChainPath.withoutStartingSlash))
 
   private def fetchJobChainNodeEntities(path: JobChainPath) =
     entityManager.fetchSeq[JobChainNodeEntity]("select n from JobChainNodeEntity n where n.jobChainPath = :jobChainPath order by n.orderState",
-      Seq("jobChainPath" -> jobChainPath.withoutStartingSlash()))
+      Seq("jobChainPath" -> jobChainPath.withoutStartingSlash))
 
   private def fetchTaskEntities(jobPath: JobPath): Seq[TaskEntity] =
     entityManager.fetchSeq[TaskEntity]("select t from TaskEntity t where t.jobPath = :jobPath order by t.taskId",
-      Seq("jobPath" -> jobPath.withoutStartingSlash()))
+      Seq("jobPath" -> jobPath.withoutStartingSlash))
 
   private def stopJobAndWait(jobPath: JobPath) {
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
@@ -244,10 +244,10 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object EntitiesIT {
-  val jobChainPath = JobChainPath.of("/test-job-chain")
+  val jobChainPath = JobChainPath("/test-job-chain")
   val orderId = new OrderId("ORDER-1")
-  val orderJobPath = JobPath.of("/test-order-job")
-  val simpleJobPath = JobPath.of("/test-simple-job")
+  val orderJobPath = JobPath("/test-order-job")
+  val simpleJobPath = JobPath("/test-simple-job")
   val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
   val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ") withZone schedulerTimeZone
 }

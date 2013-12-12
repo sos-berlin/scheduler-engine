@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
-import javax.inject.Inject
-import javax.ws.rs._
-import javax.ws.rs.core.{MediaType, Response}
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.services.WebServices._
+import javax.inject.Inject
+import javax.ws.rs._
+import javax.ws.rs.core.{MediaType, Response}
 
 @Path("order")
 class OrderService @Inject()(
@@ -16,7 +16,7 @@ class OrderService @Inject()(
     orderSubsystem: OrderSubsystem,
     schedulerInstanceId: SchedulerInstanceId) {
 
-  private lazy val jobChain = orderSubsystem.jobChain(JobChainPath.of(jobChainPathString))
+  private lazy val jobChain = orderSubsystem.jobChain(JobChainPath(jobChainPathString))
   private lazy val order = jobChain.order(orderId)
 
   @GET @Path("log.snapshot")

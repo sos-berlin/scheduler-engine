@@ -1,9 +1,19 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.data.folder.JobChainPath
-import scala.Predef.String
+import OrderKey._
+import com.sos.scheduler.engine.data.folder.{FileBasedType, TypedPath, JobChainPath}
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.annotation.{JsonProperty, JsonCreator}
 
-final case class OrderKey(jobChainPath: JobChainPath, id: OrderId) {
+@JsonSerialize(using = classOf[OrderKeySerializer])
+final case class OrderKey(jobChainPath: JobChainPath, id: OrderId)
+extends TypedPath {
+
+  def typ =
+    FileBasedType.order
+
+  def string =
+    jobChainPath.string + separator + id
 
   @Deprecated
   def getJobChainPath: JobChainPath =
@@ -19,16 +29,28 @@ final case class OrderKey(jobChainPath: JobChainPath, id: OrderId) {
 
   @Deprecated
   def idString: String =
-    id.asString
+    id.string
 
   override def toString =
     s"${jobChainPath.string}:$id"
 }
 
+
 object OrderKey {
-  def apply(jobChainPath: String, id: String): OrderKey =
-    OrderKey(JobChainPath.of(jobChainPath), new OrderId(id))
+  private val separator = ','
+
+  def apply(o: String): OrderKey = {
+    val i = o indexOf ','
+    require(i > 0, "OrderKey TypedPath needs comma ',' to separate job chain path from order key")
+    apply(o.substring(0, i), o.substring(i + 1))
+  }
+
+  @JsonCreator
+  def apply(
+      @JsonProperty("jobChainPath") jobChainPath: String,
+      @JsonProperty("id") id: String): OrderKey =
+    OrderKey(JobChainPath(jobChainPath), new OrderId(id))
 
   def of(jobChainPath: String, id: String): OrderKey =
-    OrderKey(JobChainPath.of(jobChainPath), new OrderId(id))
+    OrderKey(JobChainPath(jobChainPath), new OrderId(id))
 }

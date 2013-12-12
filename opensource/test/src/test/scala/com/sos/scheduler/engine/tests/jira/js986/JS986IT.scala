@@ -31,6 +31,6 @@ final class JS986IT extends FunSuite with ScalaSchedulerTest {
 
 object JS986IT {
   private val expectedJobOutput = "*** EXPECTED JOB OUTPUT ***"
-  private val testJobPath = JobPath.of("/test")
-  private val testOrderKey = JobChainPath.of("/test").orderKey("1")
+  private val testJobPath = JobPath("/test")
+  private val testOrderKey = JobChainPath("/test").orderKey("1")
 }

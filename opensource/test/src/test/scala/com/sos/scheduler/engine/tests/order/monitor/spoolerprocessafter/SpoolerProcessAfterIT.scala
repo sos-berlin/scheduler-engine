@@ -76,7 +76,7 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
     }
 
     private def cleanUpAfterTest() {
-      scheduler executeXml <modify_job job={setting.jobPath.asString} cmd="unstop"/>
+      scheduler executeXml <modify_job job={setting.jobPath.string} cmd="unstop"/>
       messageCodes.clear()
     }
   }

@@ -65,7 +65,7 @@ final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
   private def checkJobs(testName: String, predicate: JobSetting => Boolean = _ => true)(f: (JobResult, String) => Unit) {
     describe(testName) {
       for (jobSetting <- jobSettings if predicate(jobSetting)) {
-        describe(s"Job ${jobSetting.jobPath.getName}") {
+        describe(s"Job ${jobSetting.jobPath.name}") {
           for (outOrErr <- stdOutErrList) {
             it(outOrErr.toLowerCase) {
               f(jobResults(jobSetting.jobPath), outOrErr)
@@ -94,12 +94,12 @@ private object JS1039TaskStdoutIT {
   private case class JobResult(taskLog: String, variableMap: Map[String, String])
 
   private val jobSettings = List(
-    JobSetting(JobPath.of("/test-local-shell")),
-    JobSetting(JobPath.of("/test-local-shell-monitor"), hasMonitor = true),
-    JobSetting(JobPath.of("/test-local-api")),
-    JobSetting(JobPath.of("/test-local-api-monitor"), hasMonitor = true),
-    JobSetting(JobPath.of("/test-remote-shell")),
-    JobSetting(JobPath.of("/test-remote-shell-monitor"), hasMonitor = true),
-    JobSetting(JobPath.of("/test-remote-api")),
-    JobSetting(JobPath.of("/test-remote-api-monitor"), hasMonitor = true))
+    JobSetting(JobPath("/test-local-shell")),
+    JobSetting(JobPath("/test-local-shell-monitor"), hasMonitor = true),
+    JobSetting(JobPath("/test-local-api")),
+    JobSetting(JobPath("/test-local-api-monitor"), hasMonitor = true),
+    JobSetting(JobPath("/test-remote-shell")),
+    JobSetting(JobPath("/test-remote-shell-monitor"), hasMonitor = true),
+    JobSetting(JobPath("/test-remote-api")),
+    JobSetting(JobPath("/test-remote-api-monitor"), hasMonitor = true))
 }

@@ -1,12 +1,14 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.google.common.base.Optional;
+import javax.annotation.Nullable;
+
+import org.joda.time.Instant;
+
 import com.sos.scheduler.engine.common.Lazy;
 import com.sos.scheduler.engine.common.time.CppTime;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.FileBasedType;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderId;
@@ -20,10 +22,7 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
-import org.joda.time.Instant;
 import scala.Option;
-
-import javax.annotation.Nullable;
 
 @ForCpp
 public final class Order extends FileBased implements UnmodifiableOrder, HasUnmodifiableDelegate<UnmodifiableOrder>, Sister {
@@ -88,8 +87,8 @@ public final class Order extends FileBased implements UnmodifiableOrder, HasUnmo
         return FileBasedType.order;
     }
 
-    @Override public AbsolutePath getPath() {
-        return new AbsolutePath(cppProxy.path());
+    @Override public OrderKey getPath() {
+        return OrderKey.apply(cppProxy.path());
     }
 
     public JobChainPath getJobChainPath() {

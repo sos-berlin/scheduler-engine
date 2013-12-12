@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.persistence.entities
 import com.google.common.base.Strings
 import com.google.common.base.Strings.emptyToNull
 import com.sos.scheduler.engine.data.base.IsString.stringOrNull
-import com.sos.scheduler.engine.data.folder.{JobChainPath, AbsolutePath}
+import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderState, OrderId, OrderPersistent, OrderKey}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.persistence.SchedulerDatabases._
@@ -14,7 +14,7 @@ trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistent, OrderK
   protected val schedulerId: SchedulerId
 
   final def toObject(e: OrderEntity) = OrderPersistent(
-      jobChainPath = new JobChainPath(AbsolutePath.of(e.jobChainPath)),
+      jobChainPath = JobChainPath(e.jobChainPath),
       orderId = new OrderId(e.orderId),
       distributedNextTimeOption = Option(e.distributedNextTime) map databaseToInstant,
       occupyingClusterIdOption = Option(e.occupyingClusterMemberId) map ClusterMemberId,

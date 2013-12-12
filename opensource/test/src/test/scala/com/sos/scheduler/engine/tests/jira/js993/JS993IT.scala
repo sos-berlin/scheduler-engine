@@ -22,7 +22,7 @@ final class JS993IT extends FunSuite with ScalaSchedulerTest {
 
   List("spidermonkey", "javascript") foreach { language =>
     test(s"language=$language should work on 32bit and rejected on 64bit") {
-      val jobPath = JobPath.of(s"/test-$language")
+      val jobPath = JobPath(s"/test-$language")
       controller.getEventBus.dispatchEvents()   // Ruft ggf. handle(ErrorLogEvent)
       bitness match {
         case Bits64 =>
@@ -45,6 +45,6 @@ final class JS993IT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def startJob(jobPath: JobPath) {
-    scheduler executeXml <start_job job={jobPath}/>
+    scheduler executeXml <start_job job={jobPath.string}/>
   }
 }

@@ -34,7 +34,7 @@ trait TaskEntityConverter extends ObjectEntityConverter[TaskPersistent, TaskId, 
   def toObject(e: TaskEntity) =
     TaskPersistent(
       taskId = TaskId(e.taskId),
-      jobPath = JobPath.of("/"+ e.jobPath),
+      jobPath = JobPath("/"+ e.jobPath),
       enqueueTime = databaseToInstant(e.enqueueTime),
       startTimeOption = Option(e.startTime) map databaseToInstant,
       parametersXml = nullToEmpty(e.parameterXml),

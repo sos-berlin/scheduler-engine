@@ -1,5 +1,16 @@
 package com.sos.scheduler.engine.tests.jira.js644.v3;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static java.lang.Thread.sleep;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.common.time.Time;
@@ -10,16 +21,6 @@ import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-
-import static com.google.common.base.Charsets.UTF_8;
-import static java.lang.Thread.sleep;
-import static org.junit.Assert.fail;
 
 public final class JS644v3IT extends SchedulerTest {
     private static final Logger logger = LoggerFactory.getLogger(JS644v3IT.class);
@@ -58,8 +59,8 @@ public final class JS644v3IT extends SchedulerTest {
     }
 
     private void runOrders() throws InterruptedException {
-        scheduler().executeXml("<modify_order job_chain='"+ lowerCaseJobChainPath.asString() +"' order='1' at='now'/>");
-        scheduler().executeXml("<modify_order job_chain='"+ upperCaseJobChainPath.asString() +"' order='1' at='now'/>");
+        scheduler().executeXml("<modify_order job_chain='"+ lowerCaseJobChainPath.string() +"' order='1' at='now'/>");
+        scheduler().executeXml("<modify_order job_chain='"+ upperCaseJobChainPath.string() +"' order='1' at='now'/>");
         waitForFinishedOrder(lowerCaseGate);
         waitForFinishedOrder(upperCaseGate);
     }

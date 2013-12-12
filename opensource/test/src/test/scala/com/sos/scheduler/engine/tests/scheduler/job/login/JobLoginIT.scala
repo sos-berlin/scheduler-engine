@@ -16,8 +16,8 @@ import scala.util.matching.Regex
 @RunWith(classOf[JUnitRunner])
 final class JobLoginIT extends FunSuite with ScalaSchedulerTest {
 
-  private val noLoginJobPath = JobPath.of("/testNoLogin")
-  private val loginJobPath = JobPath.of("/testLogin")
+  private val noLoginJobPath = JobPath("/testNoLogin")
+  private val loginJobPath = JobPath("/testLogin")
 
   test("Job without <login>") {
     val expectedPropertyMap = (propertyNames map { name => name -> System.getProperty(name) }).toMap
@@ -39,11 +39,11 @@ final class JobLoginIT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def startJob(jobPath: JobPath) {
-    scheduler executeXml <start_job job={jobPath.asString}/>
+    scheduler executeXml <start_job job={jobPath.string}/>
   }
 
   private def jobPropertyMap(jobPath: JobPath) = {
-    val namePrefix = jobPath.getName +"."
+    val namePrefix = jobPath.name +"."
     val NamePattern = new Regex(Pattern.quote(namePrefix) +"(.*)")
     val result = instance[VariableSet] collect { case (NamePattern(propertyName), v) => propertyName -> v }
     result.toMap

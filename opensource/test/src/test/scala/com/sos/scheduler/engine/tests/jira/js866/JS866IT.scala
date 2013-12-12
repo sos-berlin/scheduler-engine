@@ -39,6 +39,6 @@ final class JS866IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS866IT {
-  val localJobPath = JobPath.of("/test")
-  val remoteJobPath = JobPath.of("/test-remote")
+  val localJobPath = JobPath("/test")
+  val remoteJobPath = JobPath("/test-remote")
 }

@@ -55,10 +55,10 @@ private object JobPeriodIT {
 
   private val jobConfigs = immutable.Seq(
     new JobConfig {
-      val path = JobPath.of("/test-shell")
+      val path = JobPath("/test-shell")
       val interval = 1.s
       val xmlElem =
-        <job name={path.getName}>
+        <job name={path.name}>
           <script language="shell">exit 0</script>
           <run_time>
             <period absolute_repeat={interval.getStandardSeconds.toString}/>
@@ -66,10 +66,10 @@ private object JobPeriodIT {
         </job>
     },
     new JobConfig {
-      val path = JobPath.of("/test-api")
+      val path = JobPath("/test-api")
       val interval = 4.s  // Eine API-Task braucht schon 1s zum Start (je nach Rechner) 2013-05-15
       val xmlElem =
-        <job name={path.getName}>
+        <job name={path.name}>
           <script java_class="com.sos.scheduler.engine.test.jobs.SingleStepJob"/>
           <run_time>
             <period absolute_repeat={interval.getStandardSeconds.toString}/>

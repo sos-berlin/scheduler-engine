@@ -53,8 +53,8 @@ final class JS631IT extends FunSuite with ScalaSchedulerTest {
 }
 
 object JS631IT {
-  private val aJobChainPath = JobChainPath.of("/test-nested-a")
-  private val bJobChainPath = JobChainPath.of("/test-nested-b")
+  private val aJobChainPath = JobChainPath("/test-nested-a")
+  private val bJobChainPath = JobChainPath("/test-nested-b")
   private val aOrderKey = aJobChainPath orderKey "1"
   private val bOrderKey = bJobChainPath orderKey "1"
   private val a1State = OrderState("A-1")

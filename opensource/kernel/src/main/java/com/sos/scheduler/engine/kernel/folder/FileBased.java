@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.kernel.folder;
 
+import java.util.UUID;
+
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.data.folder.AbsolutePath;
 import com.sos.scheduler.engine.data.folder.FileBasedType;
 import com.sos.scheduler.engine.data.folder.TypedPath;
 import com.sos.scheduler.engine.eventbus.EventSource;
-
-import java.util.UUID;
 
 @ForCpp
 public abstract class FileBased implements Sister, EventSource {
@@ -19,7 +19,7 @@ public abstract class FileBased implements Sister, EventSource {
     }
 
     public final TypedPath getTypedPath() {
-        return TypedPath.of(getFileBasedType(), getPath());
+        return getFileBasedType().typedPath(getPath().string());
     }
 
     public abstract FileBasedType getFileBasedType();

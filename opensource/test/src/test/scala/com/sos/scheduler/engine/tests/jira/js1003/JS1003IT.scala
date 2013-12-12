@@ -60,7 +60,7 @@ final class JS1003IT extends FunSuite with ScalaSchedulerTest {
 }
 
 object JS1003IT {
-  private val testJobChainPath = JobChainPath.of("/test")
+  private val testJobChainPath = JobChainPath("/test")
   private val state100 = OrderState("100")
   private val state200 = OrderState("200")
   private val state300 = OrderState("300")

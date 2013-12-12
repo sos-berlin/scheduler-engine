@@ -99,7 +99,7 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS864IT {
-  private val jobChainPath = JobChainPath.of("/test")
+  private val jobChainPath = JobChainPath("/test")
   private val aState = OrderState("A")
   private val bState = OrderState("B")
   private val cState = OrderState("C")

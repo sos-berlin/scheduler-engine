@@ -1,5 +1,15 @@
 package com.sos.scheduler.engine.tests.excluded.ss.json;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
@@ -14,15 +24,6 @@ import com.sos.scheduler.engine.kernel.job.UnmodifiableTask;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import static org.junit.Assert.assertEquals;
 
 public class SimpleTest extends SchedulerTest {
     private static final JobPath jobPath = JobPath.of("/job1");
@@ -76,7 +77,7 @@ public class SimpleTest extends SchedulerTest {
         JsonNode n = mapper.readTree(outputStream.toString());
         assertEquals(TaskStartedEvent.class.getSimpleName(),n.get("TYPE").asText());
         assertEquals("1",n.get("taskId").asText());
-        assertEquals(jobPath.asString(), n.get("jobPath").asText());
+        assertEquals(jobPath.string(), n.get("jobPath").asText());
 	}
     
 	/** Das Objekt t.getOrder() ist hier null. */

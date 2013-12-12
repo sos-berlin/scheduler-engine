@@ -17,7 +17,7 @@ class JobService @Inject private(
     schedulerInstanceId: SchedulerInstanceId,
     @QueryParam("job") @DefaultValue("") pathString: String)
 {
-  private lazy val path = new JobPath(AbsolutePath.of(pathString))
+  private lazy val path = JobPath.makeAbsolute(pathString)
 
   private lazy val job =
     try jobSubsystem.job(path)

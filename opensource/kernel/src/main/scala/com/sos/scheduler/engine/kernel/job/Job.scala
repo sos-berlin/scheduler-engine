@@ -30,7 +30,7 @@ import org.joda.time.DateTime
 
   def getFileBasedType = FileBasedType.job
 
-  def getPath = JobPath.of(cppProxy.path)
+  def getPath = JobPath(cppProxy.path)
 
   def getName = cppProxy.name
 
@@ -121,7 +121,7 @@ import org.joda.time.DateTime
 
   def isPermanentlyStopped = cppProxy.is_permanently_stopped
 
-  override def toString = getClass.getSimpleName + " " + getPath.asString
+  override def toString = getClass.getSimpleName + " " + getPath.string
 }
 
 object Job {

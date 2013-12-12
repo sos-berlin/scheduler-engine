@@ -1,5 +1,15 @@
 package com.sos.scheduler.engine.tests.spoolerapi.job;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
@@ -7,15 +17,6 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.google.common.base.Charsets.UTF_8;
-import static org.junit.Assert.assertEquals;
 
 /**
  * see JS-898
@@ -51,7 +52,7 @@ public class GetSourceCodeIT extends SchedulerTest {
 
     @EventHandler
     public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
-        String jobName = e.jobPath().getName();
+        String jobName = e.jobPath().name();
         String scriptCode = instance(VariableSet.class).apply(jobName).trim();
         resultMap.put(jobName,scriptCode);
         taskCount++;

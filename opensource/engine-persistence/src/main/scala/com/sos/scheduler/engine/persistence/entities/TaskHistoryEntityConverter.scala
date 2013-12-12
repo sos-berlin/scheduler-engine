@@ -32,7 +32,7 @@ trait TaskHistoryEntityConverter extends ObjectEntityConverter[TaskHistoryEntry,
     val id = e.id
     val schedulerId = schedulerIdFromDatabase(e.schedulerId)
     val clusterMemberId = new ClusterMemberId(nullToEmpty(e.clusterMemberId))
-    val jobPath = JobPath.of("/" + e.jobPath)
+    val jobPath = JobPath("/" + e.jobPath)
     val startTime = databaseToInstant(e.startTime)
     val endTimeOption = Option(e.startTime) map databaseToInstant
     val cause = nullToEmpty(e.cause)

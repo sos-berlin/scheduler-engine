@@ -12,10 +12,10 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert._
 import org.junit.Test
+import org.slf4j.LoggerFactory
 import scala.collection.mutable
 import scala.xml.Elem
 import scala.xml.Utility.trim
-import org.slf4j.LoggerFactory
 
 /** Ticket JS-803.
  * @see <a href='http://www.sos-berlin.com/jira/browse/JS-803'>JS-803</a>
@@ -69,7 +69,7 @@ object JS803IT {
   private val logger = LoggerFactory.getLogger(classOf[JS803IT])
   private val shortTimeout = SchedulerTest.shortTimeout
   private val orderDelay = 3+1
-  private val jobChainPath = JobChainPath.of("/super")
+  private val jobChainPath = JobChainPath("/super")
   private val expectedEndState = new OrderState("state.nestedC.end")
   private val hhmmssFormatter = DateTimeFormat.forPattern("HH:mm:ss")
   private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")

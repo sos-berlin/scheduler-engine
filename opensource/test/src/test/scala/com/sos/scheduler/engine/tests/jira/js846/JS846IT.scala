@@ -35,5 +35,5 @@ final class JS846IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS846IT {
-  val jobChainPath = JobChainPath.of("/test")
+  val jobChainPath = JobChainPath("/test")
 }

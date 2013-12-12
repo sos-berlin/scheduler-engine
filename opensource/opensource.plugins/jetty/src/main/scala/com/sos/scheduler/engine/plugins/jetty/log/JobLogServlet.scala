@@ -11,7 +11,7 @@ import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 class JobLogServlet @Inject()(jobSubsystem: JobSubsystem) extends HttpServlet {
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     val operation = getOrSetAttribute(request, classOf[JobLogServlet].getName) {
-      val job = jobSubsystem.job(JobPath.of(Option(request.getParameter("job")).get))
+      val job = jobSubsystem.job(JobPath(Option(request.getParameter("job")).get))
       LogServletAsyncOperation(request, response, job.getLog)
     }
     operation.continue()

@@ -24,5 +24,5 @@ final class JS975IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS975IT {
-  private val jobPath = JobPath.of("/test")
+  private val jobPath = JobPath("/test")
 }

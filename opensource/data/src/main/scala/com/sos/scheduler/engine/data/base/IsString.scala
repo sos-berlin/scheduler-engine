@@ -5,7 +5,7 @@ import javax.annotation.Nullable
 
 @JsonSerialize(using = classOf[IsStringSerializer])
 trait IsString {
-  val string: String
+  def string: String
 
   final def isEmpty = string.isEmpty
 

@@ -29,12 +29,12 @@ final class JobEntityConverterTest extends FunSuite {
     val testKey = "clusterMemberId="+ testClusterMemberId + ", stopped=" + testStopped +" "
 
     test(testKey +"toEntityKey") {
-      converter.toEntityKey(JobPath.of("/path/name")) should equal (JobEntityKey("SCHEDULER-ID", entityClusterMemberId, "path/name"))
+      converter.toEntityKey(JobPath("/path/name")) should equal (JobEntityKey("SCHEDULER-ID", entityClusterMemberId, "path/name"))
     }
 
     test(testKey +"toEntity ") {
       val timestamp = new DateTime(2012, 10, 2, 22, 33, 44)
-      val e =  converter.toEntity(JobPersistent(JobPath.of("/path/name"), testStopped, Some(timestamp)))
+      val e =  converter.toEntity(JobPersistent(JobPath("/path/name"), testStopped, Some(timestamp)))
       e.schedulerId should equal("SCHEDULER-ID")
       e.clusterMemberId should equal (entityClusterMemberId)
       e.jobPath should equal ("path/name")
@@ -44,13 +44,13 @@ final class JobEntityConverterTest extends FunSuite {
 
     test(testKey +"toObject") {
       val timestamp = new DateTime(2012, 10, 2, 22, 33, 44, databaseTimeZone)   // DateTime.equals() vergleicht auch die Zeitzone
-      val e =  converter.toEntity(JobPersistent(JobPath.of("/path/name"), true, Some(timestamp)))
+      val e =  converter.toEntity(JobPersistent(JobPath("/path/name"), true, Some(timestamp)))
       e.schedulerId = "SCHEDULER-ID"
       e.clusterMemberId = null
       e.jobPath = "path/name"
       e.isStopped = testStopped
       e.nextStartTime = new JavaDate(timestamp.getMillis)
-      converter.toObject(e) should equal (JobPersistent(JobPath.of("/path/name"), testStopped, Some(timestamp)))
+      converter.toObject(e) should equal (JobPersistent(JobPath("/path/name"), testStopped, Some(timestamp)))
     }
   }
 }

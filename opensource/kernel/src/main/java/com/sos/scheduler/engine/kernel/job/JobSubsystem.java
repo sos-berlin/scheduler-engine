@@ -13,7 +13,7 @@ public final class JobSubsystem implements FileBasedSubsystem {
     }
     
     public Job job(JobPath path) {
-        return cppproxy.job_by_string(path.asString()).getSister();
+        return cppproxy.job_by_string(path.string()).getSister();
     }
 
     public ImmutableList<String> getNames() {

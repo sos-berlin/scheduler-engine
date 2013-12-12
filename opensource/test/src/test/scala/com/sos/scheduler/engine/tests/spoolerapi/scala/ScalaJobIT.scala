@@ -45,7 +45,7 @@ final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
 
 
 private object ScalaJobIT {
-  private val jobPath = JobPath.of("/scala")
+  private val jobPath = JobPath("/scala")
   private val VariableNamePattern = """test[.](\d+)[.]([a-z_]+)""".r  // "test.0.spooler_process"
 
   private val expectedCallFrequencies = Map(
@@ -65,7 +65,7 @@ private object ScalaJobIT {
       "spooler_on_error" -> 1))
 
   private def startJobElem(logLevel: SchedulerLogLevel) =
-    <start_job job={jobPath.asString}>
+    <start_job job={jobPath.string}>
       <params>
           <param name="logLevel" value={logLevel.cppNumber.toString}/>
       </params>

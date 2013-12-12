@@ -31,7 +31,7 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
   test("Temporary order") {
     hotEvents.clear()
     coldEvents.clear()
-    scheduler.executeXml(<add_order job_chain={jobChainPath.asString} id={temporaryOrderKey.id.toString}/>)
+    scheduler.executeXml(<add_order job_chain={jobChainPath.string} id={temporaryOrderKey.id.toString}/>)
     checkOrderStates(temporaryOrderKey)
   }
 
@@ -39,11 +39,11 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
     hotEvents.clear()
     coldEvents.clear()
     val orderKey = temporaryOrderKey
-    scheduler.executeXml(<add_order job_chain={jobChainPath.asString} id={orderKey.id.toString}/>)
+    scheduler.executeXml(<add_order job_chain={jobChainPath.string} id={orderKey.id.toString}/>)
     eventPipe.nextAny[OrderTouchedEvent].orderKey should equal (orderKey)
     eventPipe.nextAny[OrderSuspendedEvent].orderKey should equal (orderKey)
     eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (OrderState("state1")) }
-    scheduler.executeXml(<remove_order job_chain={jobChainPath.asString} order={orderKey.id.toString}/>)
+    scheduler.executeXml(<remove_order job_chain={jobChainPath.string} order={orderKey.id.toString}/>)
     //eventPipe.next[OrderEvent] match { case e: OrderFinishedEvent => e.getKey should equal (orderKey) }
   }
 
@@ -58,7 +58,7 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderSuspendedEvent => e.orderKey should equal (orderKey) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStateChangedEvent => e.orderKey should equal (orderKey); e.previousState should equal (OrderState("state1")) }
-    scheduler.executeXml(<modify_order job_chain={jobChainPath.asString} order={orderKey.id.toString} suspended="no"/>)
+    scheduler.executeXml(<modify_order job_chain={jobChainPath.string} order={orderKey.id.toString} suspended="no"/>)
     eventPipe.nextAny[OrderEvent] match { case e: OrderResumedEvent => e.orderKey should equal (orderKey) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepStartedEvent => e.orderKey should equal (orderKey); e.state should equal (OrderState("state2")) }
     eventPipe.nextAny[OrderEvent] match { case e: OrderStepEndedEvent => e.orderKey should equal (orderKey) }
@@ -163,7 +163,7 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
 
 
 private object OrderEventsIT {
-  private val jobChainPath = JobChainPath.of("/a")
+  private val jobChainPath = JobChainPath("/a")
   private val persistentOrderKey = jobChainPath orderKey "persistentOrder"
   private val temporaryOrderKey = jobChainPath orderKey "1"
 }

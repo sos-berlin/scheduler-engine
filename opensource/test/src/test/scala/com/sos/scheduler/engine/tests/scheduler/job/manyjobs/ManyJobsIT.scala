@@ -80,10 +80,10 @@ private object ManyJobsIT {
   private val tasksPerSecond = 40.0
 
   case class JobDefinition(name: Int) {
-    def path = JobPath.of(s"/a-$name")
+    def path = JobPath(s"/a-$name")
 
     def xmlElem =
-      <job name={path.getName} enabled="false">
+      <job name={path.name} enabled="false">
         <script language="shell">exit 0</script>
         <run_time repeat="1"/>
       </job>

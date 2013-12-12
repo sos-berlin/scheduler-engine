@@ -54,11 +54,11 @@ final class WakeWhenInPeriodIT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object WakeWhenInPeriodIT {
-  private val jobPath = JobPath.of("/a")
+  private val jobPath = JobPath("/a")
   private val hhmmssFormat = DateTimeFormat.forPattern("HH:mm:ss")
 
   private def jobElem(periods: Iterable[SchedulerPeriod]) =
-    <job name={jobPath.getName}>
+    <job name={jobPath.name}>
       <script language="shell">exit 0</script>
       <run_time>{ periods map { o => <period begin={hhmmssFormat.print(o.begin)} end={hhmmssFormat.print(o.end)}/>} }</run_time>
     </job>
