@@ -13,6 +13,7 @@ public enum CppEventCode {
     orderFinishedEvent,
     orderSuspendedEvent,
     orderResumedEvent,
+    orderSetBackEvent,
 
     orderStepStartedEvent,
 }
