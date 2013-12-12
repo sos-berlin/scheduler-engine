@@ -13,8 +13,8 @@ final case class ModifyOrderCommand(
 extends XmlCommand {
 
   def xmlElem = <modify_order
-    job_chain={orderKey.jobChainPathString}
-    order={orderKey.idString}
+    job_chain={orderKey.jobChainPath.string}
+    order={orderKey.id.string}
     action={(action map { _.toString }).orNull}
     at={(at map { _.string }).orNull}
     />

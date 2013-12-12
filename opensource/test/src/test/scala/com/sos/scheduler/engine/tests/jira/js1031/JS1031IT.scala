@@ -44,5 +44,5 @@ final class JS1031IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS1031IT {
-  private val testOrderKey = OrderKey.of("/test", "1")
+  private val testOrderKey = OrderKey("/test", "1")
 }

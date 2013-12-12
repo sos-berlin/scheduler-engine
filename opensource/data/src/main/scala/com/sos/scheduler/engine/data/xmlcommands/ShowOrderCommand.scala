@@ -10,8 +10,8 @@ extends XmlCommand {
 
   def xmlElem =
       <show_order
-        job_chain={orderKey.jobChainPathString}
-        order={orderKey.idString}
+        job_chain={orderKey.jobChainPath.string}
+        order={orderKey.id.string}
         history_id={(historyId map { _.toString }).orNull}
         what={what mkString " "}/>
 }

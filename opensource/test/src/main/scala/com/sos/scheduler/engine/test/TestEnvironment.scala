@@ -58,7 +58,7 @@ final class TestEnvironment(resourcePath: ResourcePath, val directory: File, nam
 
   /** @return Pfad der Auftragsprotokolldatei für einfache OrderKey */
   def orderLogFile(orderKey: OrderKey) =
-    new File(logDirectory, s"order.${orderKey.getJobChainPath.withoutStartingSlash}.${orderKey.idString}.log")
+    new File(logDirectory, s"order.${orderKey.jobChainPath.withoutStartingSlash}.${orderKey.id.string}.log")
 
   def taskLogFileString(jobPath: JobPath): String =
     Files.toString(taskLogFile(jobPath), schedulerEncoding)

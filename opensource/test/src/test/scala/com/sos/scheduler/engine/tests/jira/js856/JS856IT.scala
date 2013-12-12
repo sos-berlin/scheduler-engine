@@ -58,7 +58,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
     def startOrder(parameters: Iterable[(String, String)] = Nil)
 
     final def resetOrder() {
-      scheduler executeXml <modify_order job_chain={orderKey.jobChainPathString} order={orderKey.idString} action="reset"/>
+      scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} action="reset"/>
     }
 
     final def orderParameters = order.getParameters.toMap filterKeys { _ != suspendedParameterName }
@@ -66,17 +66,17 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
     final def order = instance[OrderSubsystem].order(orderKey)
   }
 
-  class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(new OrderKey(jobChainPath, new OrderId("1"))) {
+  class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(OrderKey(jobChainPath, new OrderId("1"))) {
     final def startOrder(parameters: Iterable[(String, String)]) {
       orderParameters should equal (originalParameters)
       scheduler executeXml
-          <modify_order job_chain={orderKey.jobChainPathString} order={orderKey.idString} at="now">{paramsElem(parameters)}</modify_order>
+          <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} at="now">{paramsElem(parameters)}</modify_order>
     }
   }
 
-  class TemporaryOrderContext(jobChainPath: JobChainPath) extends OrderContext(new OrderKey(jobChainPath, new OrderId("temporary"))) {
+  class TemporaryOrderContext(jobChainPath: JobChainPath) extends OrderContext(OrderKey(jobChainPath, new OrderId("temporary"))) {
     final def startOrder(parameters: Iterable[(String, String)]) {
-      scheduler executeXml <order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>{paramsElem(parameters)}</order>
+      scheduler executeXml <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>{paramsElem(parameters)}</order>
     }
   }
 }

@@ -5,15 +5,19 @@ import scala.Predef.String
 
 final case class OrderKey(jobChainPath: JobChainPath, id: OrderId) {
 
+  @Deprecated
   def getJobChainPath: JobChainPath =
     jobChainPath
 
+  @Deprecated
   def jobChainPathString: String =
-    jobChainPath.asString
+    jobChainPath.string
 
+  @Deprecated
   def getId: OrderId =
     id
 
+  @Deprecated
   def idString: String =
     id.asString
 
@@ -22,7 +26,9 @@ final case class OrderKey(jobChainPath: JobChainPath, id: OrderId) {
 }
 
 object OrderKey {
-  def of(jobChainPath: String, id: String): OrderKey =
-    new OrderKey(JobChainPath.of(jobChainPath), new OrderId(id))
-}
+  def apply(jobChainPath: String, id: String): OrderKey =
+    OrderKey(JobChainPath.of(jobChainPath), new OrderId(id))
 
+  def of(jobChainPath: String, id: String): OrderKey =
+    OrderKey(JobChainPath.of(jobChainPath), new OrderId(id))
+}

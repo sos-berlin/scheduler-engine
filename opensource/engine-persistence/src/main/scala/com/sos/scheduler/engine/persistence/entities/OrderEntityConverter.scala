@@ -48,6 +48,6 @@ trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistent, OrderK
 
   final def toEntityKey(k: OrderKey) = OrderEntityKey(
     schedulerIdToDatabase(schedulerId),
-    k.getJobChainPath.withoutStartingSlash,
-    k.getId.string)
+    k.jobChainPath.withoutStartingSlash,
+    k.id.string)
 }

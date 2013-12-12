@@ -68,13 +68,13 @@ class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with 
 
   private def executeShowOrder() =
     controller.scheduler executeXml
-          <show_order job_chain={repeatOrderKey.jobChainPathString} order={repeatOrderKey.idString} what="source"/>
+          <show_order job_chain={repeatOrderKey.jobChainPath.string} order={repeatOrderKey.id.string} what="source"/>
 
   private def repeatOrder =
     controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(repeatOrderKey)
 }
 
 private object JS957IT {
-  val repeatOrderKey = new OrderKey(JobChainPath.of("/test1"), new OrderId("orderWithRepeat"))
+  val repeatOrderKey = OrderKey(JobChainPath.of("/test1"), new OrderId("orderWithRepeat"))
   val alteredTitle = "ALTERED TITLE"
 }

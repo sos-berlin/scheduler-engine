@@ -94,7 +94,7 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def resumeOrder(o: OrderKey) {
-    scheduler executeXml <modify_order job_chain={o.jobChainPathString} order={o.idString} suspended="false"/>
+    scheduler executeXml <modify_order job_chain={o.jobChainPath.string} order={o.id.string} suspended="false"/>
   }
 }
 

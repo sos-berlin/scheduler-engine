@@ -23,5 +23,5 @@ case class OrderPersistent(
 
 extends HasKey[OrderKey] {
 
-  def key = new OrderKey(jobChainPath, orderId)
+  def key = OrderKey(jobChainPath, orderId)
 }
