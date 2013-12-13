@@ -42,7 +42,7 @@ static Message_code_text error_codes[] =
     { "Z-JAVA-102", "Error '$1' occurred in Java at: $2" },
     { "Z-JAVA-103", "Missing entry [java] vm= in file sos.ini" },
     { "Z-JAVA-104", "COM variant type $1 cannot be converted to any Java type" },
-    { "Z-JAVA-105", "Java exception $1(\"$2\"), method=$3" },
+    { "Z-JAVA-105", "Java exception $1, method=$2" },
     { "Z-JAVA-106", "Java reference is NULL (\"NullPointerException\")" },
     { "Z-JAVA-107", "Type '$1' expected, not '$2'" },
     { "Z-JAVA-109", "set_jvm: A Java Virtual Machine has alreade been started" },
@@ -1157,49 +1157,34 @@ Z_NORETURN void throw_java_ret( int return_value, const string& text1, const str
 
 void Env::throw_java( const string& text1, const string& text2 )
 {
-    JNIEnv* jenv = jni_env();
-
-#   if !defined Z_AIX  // VMJNCK028E JNI error in PushLocalFrame: This function cannot be called when an exception is pending
-        Local_frame local_frame ( 10 );
-#   endif
-
     Java_exception xc ( "Z-JAVA-105" );
-    
-    xc._exception_name = "Unbekannt";
+    xc._exception_name = "unknown";
 
-    if( jenv )
-    {
-        jthrowable x = jenv->ExceptionOccurred();
-        if( x )
-        {
+    if (JNIEnv* jenv = jni_env()) {
+        #if !defined Z_AIX  // VMJNCK028E JNI error in PushLocalFrame: This function cannot be called when an exception is pending
+            Local_frame local_frame(10);
+        #endif
+
+        if (jthrowable x = jenv->ExceptionOccurred()) {
             Z_LOG2( Vm::java_log_category, "Vm::static_vm=" << (void*)Vm::static_vm << "  _debug=" << ( Vm::static_vm? Vm::static_vm->_debug : false ) << "\n" );
             if( Vm::static_vm && Vm::static_vm->_debug )  { Z_LOG2( Vm::java_log_category, "jenv->ExceptionDescribe()\n" ); jenv->ExceptionDescribe(); }     // Ausgabe �ber java_vfprintf()
             jenv->ExceptionClear();
 
-            jclass c = jenv->GetObjectClass(x);
-            if( c ) 
-            {
+            if (jclass c = jenv->GetObjectClass(x)) {
                 Local_jobject cls ( jenv->CallObjectMethod( x, jenv->GetMethodID( c, "getClass", "()Ljava/lang/Class;" ) ) );
-                if( !jenv->ExceptionCheck() )  
-                {
+                if (!jenv->ExceptionCheck()) {
                     Local_jstring name_j ( (jstring)jenv->CallObjectMethod( cls, jenv->GetMethodID( cls.get_jclass(), "getName", "()Ljava/lang/String;" ) ) );
-                    if( !jenv->ExceptionCheck() )  
-                    {
+                    if (!jenv->ExceptionCheck()) {
                         xc._exception_name = string_from_jstring( name_j );
-
-                        while(1)
-                        {
+                        while(1) {
                             jthrowable x2 = NULL;
-                            jmethodID get_message_id = jenv->GetMethodID( c, "getMessage", "()Ljava/lang/String;" );
-                            if( !get_message_id )  break;
+                            jmethodID toString_id = jenv->GetMethodID( c, "toString", "()Ljava/lang/String;" );
+                            if( !toString_id )  break;
 
-                            Local_jstring message_id_j ( (jstring)jenv->CallObjectMethod( x, get_message_id ) );
-                            if( !message_id_j || jenv->ExceptionCheck() )  break;
+                            Local_jstring string_j ( (jstring)jenv->CallObjectMethod( x, toString_id ) );
+                            if( !string_j || jenv->ExceptionCheck() )  break;
                             
-                            xc._message += string_from_jstring( message_id_j );
-                          //xc._message += replace_regex_ext( string_from_jstring( Local_jstring( Vm::static_vm, (jstring)jenv->CallObjectMethod( x, get_message_id ) ) ),
-                          //                                  "^(.*)\r?\n?$", "\\1" );  // Der Regex greift nicht.
-
+                            xc._message += string_from_jstring( string_j );
                             jmethodID get_cause_id = jenv->GetMethodID( c, "getCause", "()Ljava/lang/Throwable;" );
                             if( !get_cause_id )  break;
 
@@ -1207,7 +1192,7 @@ void Env::throw_java( const string& text1, const string& text2 )
                             if( jenv->ExceptionCheck() )  break;
                             if( !x2 )  break;
 
-                            xc._message += Z_NL;
+                            xc._message += " - caused by - ";
 
                             jenv->DeleteLocalRef( x );
                             x = x2;
@@ -1223,13 +1208,9 @@ void Env::throw_java( const string& text1, const string& text2 )
         }
     }
 
-    //if( xc._message.empty() )  xc._message = "java";
-
-    xc.insert( 1, xc._exception_name );
-    xc.insert( 2, xc._message );
-    xc.insert( 3, text1 );
-    xc.insert( 4, text2 );
-
+    xc.insert( 1, xc._message );
+    xc.insert( 2, text1 );
+    xc.insert( 3, text2 );
     throw xc;
 }
 
