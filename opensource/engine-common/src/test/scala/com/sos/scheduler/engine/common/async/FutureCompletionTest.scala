@@ -24,13 +24,13 @@ final class FutureCompletionTest extends FunSuite with OneInstancePerTest {
   }
 
   test("Success") {
-    val call = futureTimedCall(now() + 100.ms) { "Hej!" }
+    val call = futureTimedCall(now() + 200.ms) { "Hej!" }
     queue.add(call)
     val future = call.future
     (future.isCompleted, future.value) should be (false, None)
     dispatcher.executeMatureCalls()
     (future.isCompleted, future.value) should be (false, None)
-    sleep(101.ms)
+    sleep(220.ms)
     dispatcher.executeMatureCalls()
     (future.isCompleted, future.value) should be (true, Some(Success("Hej!")))
   }
