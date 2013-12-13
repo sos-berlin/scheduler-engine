@@ -25,7 +25,7 @@ import scala.util.matching.Regex
 @RunWith(classOf[JUnitRunner])
 final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
 
-  private lazy val tcpPort = FreeTcpPortFinder.findRandomFreePort(10000 until 20000)
+  private lazy val tcpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
   protected override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val schedulerVariables = scheduler.instance[VariableSet]
 

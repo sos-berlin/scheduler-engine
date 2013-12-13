@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1052
 
 import JS1052IT._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreePort
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.{findRandomFreeTcpPort, alternateTcpPortRange}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.{OutputStreamWriter, InputStreamReader}
@@ -18,7 +18,7 @@ import scala.collection.mutable
  */
 @RunWith(classOf[JUnitRunner])
 final class JS1052IT extends FunSuite with ScalaSchedulerTest {
-  private lazy val supervisorPortNumber = findRandomFreePort(10000 until 20000)
+  private lazy val supervisorPortNumber = findRandomFreeTcpPort(alternateTcpPortRange)
   override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$supervisorPortNumber"))
 
   test("JS-1052") {

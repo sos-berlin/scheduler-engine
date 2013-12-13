@@ -28,7 +28,7 @@ class ServerBuilder(pluginElement: Element, schedulerConfiguration: SchedulerCon
     val loginServiceOption = childElementOption(pluginElement, "loginService") map PluginLoginService.apply
     val contextHandler = jobSchedulerContextHandler(contextPath, loginServiceOption)
     newServer(
-      config.tryUntilPortOption map { until => findRandomFreePort(config.portOption.get until until) } orElse config.portOption,
+      config.tryUntilPortOption map { until => findRandomFreeTcpPort(config.portOption.get until until) } orElse config.portOption,
       config.jettyXmlFileOption map { f => new XmlConfiguration(f.toURI.toURL) },
       newHandlerCollection(Iterable(
         newRequestLogHandler(new NCSARequestLog(config.accessLogFile.toString)),
