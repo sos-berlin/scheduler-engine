@@ -11,7 +11,7 @@ trait JobChainEntityConverter extends ObjectEntityConverter[JobChainPersistentSt
   protected val clusterMemberId: ClusterMemberId
 
   final def toObject(e: JobChainEntity) = JobChainPersistentState(
-    JobChainPath(e.jobChainPath),
+    JobChainPath("/"+ e.jobChainPath),
     isStopped = e.isStopped)
 
   final def toEntity(o: JobChainPersistentState) = {

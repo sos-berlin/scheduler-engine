@@ -4,13 +4,13 @@ import com.sos.scheduler.engine.data.base.IsString
 
 trait Path extends IsString {
 
-  final def assertIsAbsolute() {
-    if (!isAbsolute) throw new RuntimeException(s"Absolute path expected: $toString")
+  final def assertIsEmptyOrAbsolute() {
+    if (!isEmpty)
+      assertIsAbsolute()
   }
 
-  final def assertIsEmptyOrAbsolute() {
-    val ok = isEmpty || isAbsolute
-    if (!ok) throw new RuntimeException(s"Absolute path expected: $toString")
+  final def assertIsAbsolute() {
+    require(isAbsolute, s"Absolute path expected: $toString")
   }
 
   final def isAbsolute =

@@ -14,7 +14,7 @@ trait JobChainNodeEntityConverter extends ObjectEntityConverter[JobChainNodePers
   protected lazy val clusterMemberIdDBString = if (clusterMemberId.isEmpty) "-" else clusterMemberId.string
 
   final def toObject(e: JobChainNodeEntity) = JobChainNodePersistentState(
-    JobChainPath(e.jobChainPath),
+    JobChainPath("/"+ e.jobChainPath),
     OrderState(e.orderState),
     if (e.action == null) JobChainNodeAction.process else JobChainNodeAction.ofCppName(e.action))
 

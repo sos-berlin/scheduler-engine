@@ -14,7 +14,7 @@ trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistent, OrderK
   protected val schedulerId: SchedulerId
 
   final def toObject(e: OrderEntity) = OrderPersistent(
-      jobChainPath = JobChainPath(e.jobChainPath),
+      jobChainPath = JobChainPath("/"+ e.jobChainPath),
       orderId = new OrderId(e.orderId),
       distributedNextTimeOption = Option(e.distributedNextTime) map databaseToInstant,
       occupyingClusterIdOption = Option(e.occupyingClusterMemberId) map ClusterMemberId,

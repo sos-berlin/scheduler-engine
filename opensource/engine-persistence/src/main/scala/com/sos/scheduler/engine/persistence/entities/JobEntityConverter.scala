@@ -12,7 +12,7 @@ trait JobEntityConverter extends ObjectEntityConverter[JobPersistent, JobPath, J
 
   final def toObject(e: JobEntity) =
     JobPersistent(
-      jobPath = JobPath.makeAbsolute(e.jobPath),
+      jobPath = JobPath("/"+ e.jobPath),
       isPermanentlyStopped = e.isStopped,
       nextStartTimeOption = Option(e.nextStartTime) map databaseToInstant)
 
