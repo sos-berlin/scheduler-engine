@@ -293,7 +293,7 @@ void Xml_writer::write_element( const Element_ptr& element )
     if( !element )  z::throw_xc( Z_FUNCTION );
 
     close_tag();
-    write_through( element.xml_without_prolog(string_encoding) );
+    write_through( element.xml_bytes_without_prolog(string_encoding) );
 }
 
 //--------------------------------------------------------------------------------Xml_writer::flush

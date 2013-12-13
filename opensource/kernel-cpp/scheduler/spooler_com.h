@@ -208,7 +208,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP            get__NewEnum                    ( IUnknown** );    
     STDMETHODIMP            put_Xml                         ( BSTR xml_text );
     STDMETHODIMP            get_Xml                         ( BSTR* xml_text );
-    void                    set_xml                         ( const string& xml_text );
+    void                    set_xml_string                  ( const string& xml_text );
   //STDMETHODIMP            get_Names_array                 ( SAFEARRAY** );
     STDMETHODIMP            get_Names                       ( BSTR* );
     STDMETHODIMP                Substitute                  ( BSTR, BSTR* );

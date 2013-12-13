@@ -880,12 +880,12 @@ void Process_module_instance::fill_process_environment_with_params()
         vector<Variant> parameters;
         xml = com_invoke( DISPATCH_PROPERTYGET, task, "Params_xml", &parameters );
         task_params = new Com_variable_set();
-        task_params->set_xml( xml.as_string() );
+        task_params->set_xml_string( xml.as_string() );
 
         xml = com_invoke( DISPATCH_PROPERTYGET, task, "Order_params_xml", &parameters );
         if( !xml.is_null_or_empty_string() ) {
             order_params = new Com_variable_set();
-            order_params->set_xml( xml.as_string() );
+            order_params->set_xml_string( xml.as_string() );
         }
     }
 

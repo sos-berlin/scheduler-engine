@@ -486,10 +486,10 @@ final class SpoolerCImpl
     private static native void execute_state_cmd__native(long cppReference);
 
 
-    @Override public java.lang.String execute_xml(java.lang.String p0) {
+    @Override public java.lang.String execute_xml_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = execute_xml__native(cppReference(), p0);
+            java.lang.String result = execute_xml_string__native(cppReference(), p0);
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
@@ -499,13 +499,13 @@ final class SpoolerCImpl
         }
     }
 
-    private static native java.lang.String execute_xml__native(long cppReference, java.lang.String p0);
+    private static native java.lang.String execute_xml_string__native(long cppReference, java.lang.String p0);
 
 
-    @Override public java.lang.String execute_xml_with_security_level(java.lang.String p0, java.lang.String p1, java.lang.String p2) {
+    @Override public java.lang.String execute_xml_string_with_security_level(java.lang.String p0, java.lang.String p1, java.lang.String p2) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = execute_xml_with_security_level__native(cppReference(), p0, p1, p2);
+            java.lang.String result = execute_xml_string_with_security_level__native(cppReference(), p0, p1, p2);
             checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
@@ -515,7 +515,7 @@ final class SpoolerCImpl
         }
     }
 
-    private static native java.lang.String execute_xml_with_security_level__native(long cppReference, java.lang.String p0, java.lang.String p1, java.lang.String p2);
+    private static native java.lang.String execute_xml_string_with_security_level__native(long cppReference, java.lang.String p0, java.lang.String p1, java.lang.String p2);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC folder_subsystem() {

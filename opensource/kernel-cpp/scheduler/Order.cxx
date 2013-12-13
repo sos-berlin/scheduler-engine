@@ -151,7 +151,7 @@ void Order::load_blobs( Read_transaction* ta )
 void Order::load_order_xml_blob( Read_transaction* ta )
 {
     string order_xml = db_read_clob( ta, "order_xml" );
-    if( order_xml != "" )  set_dom( xml::Document_ptr( order_xml ).documentElement() );
+    if( order_xml != "" )  set_dom( xml::Document_ptr::from_xml_string( order_xml ).documentElement() );
 }
 
 //------------------------------------------------------------------------Order::load_run_time_blob
@@ -159,7 +159,7 @@ void Order::load_order_xml_blob( Read_transaction* ta )
 void Order::load_run_time_blob( Read_transaction* ta )
 {
     string run_time_xml = db_read_clob( ta, "run_time" );
-    if( run_time_xml != "" )  set_schedule( (File_based*)NULL, xml::Document_ptr( run_time_xml ).documentElement() );
+    if( run_time_xml != "" )  set_schedule( (File_based*)NULL, xml::Document_ptr::from_xml_string(run_time_xml).documentElement() );
 }
 
 //-------------------------------------------------------------------------Order::load_payload_blob
@@ -723,12 +723,12 @@ bool Order::db_try_insert( bool throw_exists_exception )
             xml::Document_ptr order_document = dom( show_for_database_only );
             xml::Element_ptr  order_element  = order_document.documentElement();
             if( order_element.hasAttributes()  ||  order_element.firstChild() )
-                db_update_clob( &ta, "order_xml", order_document.xml() );
+                db_update_clob( &ta, "order_xml", order_document.xml_string() );
 
             if( _schedule_use->is_defined() )
             {
                 xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
-                if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
+                if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml_string() );
             }
 
             ta.commit( Z_FUNCTION );
@@ -882,7 +882,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     if( _schedule_use->is_defined() ) 
                     {
                         xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
-                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
+                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml_string() );
                                                                                                           else  update[ "run_time" ].set_direct( "null" );
                     }
                     else
@@ -892,7 +892,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     {
                         xml::Document_ptr order_document = dom( show_for_database_only );
                         xml::Element_ptr  order_element  = order_document.documentElement();
-                        if( order_element.hasAttributes()  ||  order_element.firstChild() )  db_update_clob( &ta, "order_xml", order_document.xml() );
+                        if( order_element.hasAttributes()  ||  order_element.firstChild() )  db_update_clob( &ta, "order_xml", order_document.xml_string() );
                                                                                        else  update[ "order_xml" ].set_direct( "null" );
                     }
 
@@ -1425,7 +1425,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         {
             DOM_FOR_EACH_ELEMENT( e, ee )
             {
-                set_xml_payload( ee.xml() );
+                set_payload_xml_string(ee.xml_string());
                 break;
             }
         }
@@ -1596,13 +1596,13 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _log )  result.appendChild( _log->dom_element( dom_document, log_show_what ) );
     }
 
-    if( show_what.is_set( show_payload | show_for_database_only )  &&  _xml_payload != "" )
+    if( show_what.is_set( show_payload | show_for_database_only )  &&  _payload_xml_string != "" )
     {
         xml::Element_ptr xml_payload_element = result.append_new_element( "xml_payload" );
 
         try
         {
-            xml::Document_ptr doc (_xml_payload, string_encoding);
+            xml::Document_ptr doc = xml::Document_ptr::from_xml_string(_payload_xml_string);
 
             if( doc.documentElement() )
             {
@@ -1986,29 +1986,27 @@ void Order::set_payload( const VARIANT& payload )
     _payload = payload;
 }
 
-//---------------------------------------------------------------------------Order::set_xml_payload
+//--------------------------------------------------------------------Order::set_payload_xml_string
 
-void Order::set_xml_payload( const string& xml_string )
+void Order::set_payload_xml_string( const string& xml_string )
 { 
     //Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
 
     if( xml_string == "" )
     {
-        _xml_payload = "";
+        _payload_xml_string = "";
     }
     else
     {
-        xml::Document_ptr doc ( xml_string, string_encoding);
-
-        set_xml_payload( doc.documentElement() );
+        set_payload_xml(xml::Document_ptr::from_xml_string(_payload_xml_string).documentElement());
     }
 }
 
-//---------------------------------------------------------------------------Order::set_xml_payload
+//---------------------------------------------------------------------------Order::set_payload_xml
 
-void Order::set_xml_payload( const xml::Element_ptr& element )
+void Order::set_payload_xml( const xml::Element_ptr& element )
 { 
-    _xml_payload = element? element.xml() : "";     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
+    _payload_xml_string = element ? element.xml_string() : "";     // _xml_payload kann in order_xml <order> eingefügt werden, unabhängig von der Codierung (ist nur 7bit-Ascii)
     _order_xml_modified = true; 
 }
 

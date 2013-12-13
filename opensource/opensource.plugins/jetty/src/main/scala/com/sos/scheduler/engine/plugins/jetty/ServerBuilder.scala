@@ -4,7 +4,7 @@ import ServerBuilder._
 import com.google.inject.servlet.GuiceFilter
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.common.xml.XmlUtils.childElementOrNull
+import com.sos.scheduler.engine.common.xml.XmlUtils.childElementOption
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.Config._
 import java.net.URL
@@ -139,7 +139,4 @@ object ServerBuilder {
     result.setConstraintMappings(Array(constraintMapping))
     result
   }
-
-  private def childElementOption(e: Element, name: String) =
-    Option(childElementOrNull(e, name))
 }

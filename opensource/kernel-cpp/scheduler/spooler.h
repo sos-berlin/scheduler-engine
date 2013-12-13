@@ -392,9 +392,9 @@ struct Spooler : Object,
 
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
-    string                      execute_xml                 (const string& xml);
-    string                      execute_xml_with_security_level (const string& xml, const string& security_level, const string& client_host);
-    string                      execute_xml_with_security_level (const string& xml, Security::Level security_level, const Host& client_host);
+    string                      execute_xml_string          (const string& xml);
+    string                      execute_xml_string_with_security_level (const string& xml, const string& security_level, const string& client_host);
+    string                      execute_xml_string_with_security_level (const string& xml, Security::Level security_level, const Host& client_host);
     http::Java_response*        java_execute_http           (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&);
     http::Java_response*        java_execute_http_with_security_level (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&, const string& security_level);
     void                        cmd_reload                  ();
@@ -641,8 +641,8 @@ struct Spooler : Object,
     bool                       _manual;
   //string                     _job_name;                   // Bei manuellem Betrieb
 
-    string                     _send_cmd;                   // Der Spooler soll nur dem eigentlichen Spooler dieses Kommando schicken und sich dann beenden.
-    string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuf�hrendes Kommando.
+    string                     _send_cmd_xml_bytes;         // Der Spooler soll nur dem eigentlichen Spooler dieses Kommando schicken und sich dann beenden.
+    string                     _cmd_xml_bytes;              // Parameter -cmd, ein zuerst auszuf�hrendes Kommando.
     string                     _pid_filename;
 
 

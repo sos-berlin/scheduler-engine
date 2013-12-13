@@ -291,9 +291,9 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
             if( mail_dom  &&  mail_dom.documentElement()  &&  mail_dom.documentElement().bool_getAttribute( "attach_xml" ) )
             {
                 if( event_dom )
-                mail->add_attachment( event_dom.xml(), "event.xml", "text/xml", "quoted-printable" );
+                mail->add_attachment( event_dom.xml_bytes(string_encoding), "event.xml", "text/xml", "quoted-printable" );
 
-                mail->add_attachment( mail_dom.xml(), "mail.xml", "text/xml", "quoted-printable" );
+                mail->add_attachment( mail_dom.xml_bytes(string_encoding), "mail.xml", "text/xml", "quoted-printable" );
             }
 
 
@@ -381,12 +381,7 @@ void Scheduler_event::make_xml()
 {
     S s;
     print_xml( &s );
-    _xml = s;
-
-#   ifdef Z_DEBUG
-        try { xml::Document_ptr doc = _xml; }
-        catch( exception& x )  { _spooler->log()->error( S() << Z_FUNCTION << " " << x.what() << "\n" << _xml );  assert(("Scheduler_event::make_xml()",false)); }
-#   endif
+    _xml_bytes = s;
 }
 
 //--------------------------------------------------------------------Scheduler_event_manager::open
@@ -437,7 +432,7 @@ void Scheduler_event_manager::report_event( Scheduler_event* event )
         if( _event_file.opened() )
         {
             //TODO Was tun wir bei einen Fehler, z.B. wenn die Platte erschöpft ist? *********************************************************
-            _event_file.print( event->xml() );
+            _event_file.print( event->xml_bytes() );
             _event_file.print( "\n" );        // Platz für '\0' schaffen
         }
 

@@ -2190,7 +2190,7 @@ string Task::remote_process_step__end()
     {
         result = do_step__end().as_string();
 
-        xml::Document_ptr dom_document           ( result );
+        xml::Document_ptr dom_document = xml::Document_ptr::from_xml_string(result);
         xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/" "process.result" );
 
         _module_instance->set_spooler_process_result( process_result_element.bool_getAttribute( "spooler_process_result" ) );
@@ -2505,7 +2505,7 @@ void Task::process_on_exit_commands()
                 catch( exception& x )
                 {
                     _log->error( x.what() );
-                    _log->error( message_string( "SCHEDULER-327", c.xml() ) );
+                    _log->error( message_string( "SCHEDULER-327", c.xml_string() ) );
                 }
             }
         }

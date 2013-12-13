@@ -439,7 +439,7 @@ File_based* File_based::replace_now()
     if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte �bernommen
     {                                       
         set_base_file_info( file_info );        // Alte Werte ge�nderten Objekts �berschreiben
-        _source_xml        = replacement->_source_xml;
+        _source_xml_bytes  = replacement->_source_xml_bytes;
         _base_file_xc      = zschimmer::Xc();
         _base_file_xc_time = 0;
         if( file_based_state() == s_undefined )  set_file_based_state( File_based::s_not_initialized );     // Wenn altes fehlerhaft war
@@ -529,19 +529,18 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, co
         result.insertBefore( replacement_element, original_first_node );
     }
 
-    if( show_what.is_set( show_source )  &&  _source_xml != "" )
+    if( show_what.is_set( show_source )  &&  _source_xml_bytes != "")
     {
         xml::Element_ptr source_element = result.ownerDocument().createElement( "source" );
         result.insertBefore( source_element, original_first_node );
 
         xml::Document_ptr source_dom;
-        source_dom.create();
         try {
-            source_dom.load_xml(_source_xml);
+            source_dom.load_xml_bytes(_source_xml_bytes);
         }
         catch (exception& x) {
             source_dom = xml::Document_ptr();
-            source_element.appendChild( result.ownerDocument().createTextNode( _source_xml ) );
+            //Bytes können nicht als Zeichen eingefügt werden: source_element.appendChild( result.ownerDocument().createTextNode( _source_xml ) );
             append_error_element( source_element, x );
         }
         if (source_dom)

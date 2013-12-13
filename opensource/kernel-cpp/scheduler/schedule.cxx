@@ -339,11 +339,11 @@ Schedule* Schedule_use::schedule()
     return _schedule;
 }
 
-//----------------------------------------------------------------------------Schedule_use::set_xml
+//---------------------------------------------------------------------Schedule_use::set_xml_string
 
-void Schedule_use::set_xml( File_based* source_file_based, const string& xml )
+void Schedule_use::set_xml_string( File_based* source_file_based, const string& xml )
 {
-    xml::Document_ptr doc ( xml );
+    xml::Document_ptr doc = xml::Document_ptr::from_xml_string(xml);
     if( _spooler->_validate_xml )  _spooler->_schema.validate( doc );
 
     set_dom( source_file_based, doc.documentElement() );
@@ -586,7 +586,7 @@ string Schedule_use::obj_name() const
 
 STDMETHODIMP Schedule_use::put_Xml( BSTR xml )
 {
-    Z_COM_IMPLEMENT( set_xml( (File_based*)NULL, string_from_bstr( xml ) ) );
+    Z_COM_IMPLEMENT( set_xml_string( (File_based*)NULL, string_from_bstr( xml ) ) );
 }
 
 //-----------------------------------------------------------------------Schedule_use::get_Schedule
@@ -1128,11 +1128,11 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
     return result;
 }
 
-//--------------------------------------------------------------------------------Schedule::set_xml
+//-------------------------------------------------------------------------Schedule::set_xml_string
 
-void Schedule::set_xml( File_based* source_file_based, const string& xml_string )
+void Schedule::set_xml_string( File_based* source_file_based, const string& xml_string )
 {
-    xml::Document_ptr doc ( xml_string );
+    xml::Document_ptr doc = xml::Document_ptr::from_xml_string(xml_string);
     if( _spooler->_validate_xml )  _spooler->_schema.validate( doc );
 
     set_dom( source_file_based, doc.documentElement() );
@@ -1162,7 +1162,7 @@ void Schedule::set_dom( File_based* source_file_based, const xml::Element_ptr& e
 
 STDMETHODIMP Schedule::put_Xml( BSTR xml_bstr )
 {
-    Z_COM_IMPLEMENT( set_xml( (File_based*)NULL, string_from_bstr( xml_bstr ) ) );
+    Z_COM_IMPLEMENT( set_xml_string( (File_based*)NULL, string_from_bstr( xml_bstr ) ) );
 }
 
 //--------------------------------------------------------------------------------Schedule::get_Xml
@@ -1176,7 +1176,7 @@ STDMETHODIMP Schedule::get_Xml( BSTR* result )
         xml::Document_ptr dom_document;
         dom_document.create();
 
-        hr = String_to_bstr( _inlay->dom_element( dom_document, Show_what() ).xml(), result );
+        hr = String_to_bstr(_inlay->dom_element(dom_document, Show_what()).xml_string(), result);
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -2142,11 +2142,10 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
 
                 try
                 {
-                    string xml_text = include_command.read_content();
-                    Z_LOG2( "scheduler", Z_FUNCTION << "  " << xml_text << "\n" );
+                    string xml_bytes = include_command.read_content_bytes();
+                    Z_LOG2( "scheduler", Z_FUNCTION << "  " << xml_bytes << "\n" );
 
-                    xml::Document_ptr doc;
-                    doc.load_xml( xml_text );
+                    xml::Document_ptr doc = xml::Document_ptr::from_xml_bytes(xml_bytes);
                     if( _spooler->_validate_xml )  _spooler->_schema.validate( doc );
 
                     if( !doc.documentElement() )  z::throw_xc( "SCHEDULER-239", "holidays" );

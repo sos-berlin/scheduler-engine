@@ -182,10 +182,10 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                     ignore_duplicate_configuration_file( current_file_based, (File_based*)NULL, *directory_entry );
                 } else {
                     z::Xc content_xc;
-                    string source_xml;
+                    string source_xml_bytes;
 
                     try {
-                        source_xml = string_from_file( directory_entry->_file_info->path() );
+                        source_xml_bytes = string_from_file( directory_entry->_file_info->path() );
                     }
                     catch( exception& x ) { content_xc = x; }
 
@@ -224,16 +224,16 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                         if( !content_xc.is_empty() )  throw content_xc;
 
-                        xml::Document_ptr dom_document ( source_xml );
+                        xml::Document_ptr dom_document = xml::Document_ptr::from_xml_bytes(source_xml_bytes);
                         xml::Element_ptr  element      = dom_document.documentElement();
                         subsystem()->assert_xml_element_name( element );
                         if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
 
                         assert_empty_attribute( element, "spooler_id" );
                         if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
-                        Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml << "\n" );
+                        Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml_bytes << "\n" );
 
-                        file_based->_source_xml = source_xml;   
+                        file_based->_source_xml_bytes = source_xml_bytes;   
                         file_based->set_dom( element );
                         file_based->set_file_based_state( File_based::s_not_initialized );
                         file_based->initialize();

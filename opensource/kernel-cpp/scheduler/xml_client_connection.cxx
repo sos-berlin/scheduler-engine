@@ -91,17 +91,17 @@ xml::Document_ptr Xml_client_connection::fetch_received_dom_document()
     {
         result.create();
 
-        string xml = _received_data.to_string();
+        string xml_bytes = _received_data.to_string();
         _received_data.clear();
-        if (!xml.empty() && *xml.rbegin() == '\0')  xml.erase(xml.length() - 1);   // '\0' am Ende abschneiden (kennzeichnet das Ende der Übertragung)
-        result.load_xml(xml);
+        if (!xml_bytes.empty() && *xml_bytes.rbegin() == '\0')  xml_bytes.erase(xml_bytes.length() - 1);   // '\0' am Ende abschneiden (kennzeichnet das Ende der Übertragung)
+        result.load_xml_bytes(xml_bytes);
         DOM_FOR_EACH_ELEMENT( result.documentElement(), e1 )
             if( e1.nodeName_is( "answer" ) )
                 DOM_FOR_EACH_ELEMENT( e1, e2 )
                     if( e2.nodeName_is( "ERROR" ) )  z::throw_xc( "SCHEDULER-223", _host_and_port.as_string(), e2.getAttribute( "text" ) );
     }
 
-    if (result)  Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " result=" << result.xml() << "\n");
+    if (result)  Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " result=" << result.xml_string() << "\n");
     return result;
 }
 

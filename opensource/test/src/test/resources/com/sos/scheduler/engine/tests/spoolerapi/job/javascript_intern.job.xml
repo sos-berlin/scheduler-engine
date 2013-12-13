@@ -4,13 +4,10 @@
 >
     <script language="java" java_class="com.sos.scheduler.engine.tests.spoolerapi.job.GetSourceJob">
         <![CDATA[
-<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <version>4.0.0</version>
-    <name>myPlugin</name>
-    <parameters>
-        <parameter name="myParam" value="test" />
-    </parameters>
+    <test>
+        <parameter name="myParam" value="test הצü ס ו"/>
+    </test>
 </root>
         ]]>
     </script>

@@ -486,10 +486,10 @@ AGAIN:
                 params_array[ nr++ ] = "java_class_path=" + _module->_java_class_path;  // JS-540
 
                 params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
-                params_array[ nr++ ] = "script="          + _module->_text_with_includes.includes_resolved().xml();
+                params_array[ nr++ ] = "script="          + _module->_text_with_includes.includes_resolved().xml_string();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
-                params_array[ nr++ ] = "environment="     + _process_environment->dom( "environment", "variable" ).xml();  // Wird bisher nur von Process_module_instance benutzt 2008-10-31
+                params_array[ nr++ ] = "environment="     + _process_environment->dom( "environment", "variable" ).xml_string();  // Wird bisher nur von Process_module_instance benutzt 2008-10-31
 
                 if( _has_order )
                 params_array[ nr++ ] = "has_order=1";
@@ -538,7 +538,7 @@ AGAIN:
                       params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.xml();    // Muss der letzte Parameter sein!
                       \oldcodeend
                     * \newcode */
-                      params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.includes_resolved().xml();    // Muss der letzte Parameter sein!
+                      params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.includes_resolved().xml_string();    // Muss der letzte Parameter sein!
                     /* \newcodeend */
 
                 }

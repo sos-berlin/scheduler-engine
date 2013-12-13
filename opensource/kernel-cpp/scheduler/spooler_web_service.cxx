@@ -229,8 +229,8 @@ bool Web_services::subsystem_initialize()
     if (_spooler->_jobs_allowed_for_licence) {
         Command_processor command_processor ( _spooler, Security::seclev_all );
 
-        command_processor.execute_2( job_xml       );
-        command_processor.execute_2( job_chain_xml );
+        command_processor.execute_xml_string( job_xml       );
+        command_processor.execute_xml_string( job_chain_xml );
     }
     
     _subsystem_state = subsys_initialized;
@@ -548,8 +548,8 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
         if( _debug )
         {
             _log->debug( message_string( "SCHEDULER-954","forward_xslt_stylesheet", _forward_xslt_stylesheet_path ) );
-            _log->debug( command_document.xml( string_encoding, "  " ) );
-            if( _log_xml )  File( _log_filename_prefix + ".forward.xml", "w" ).print( command_document.xml() );
+            _log->debug( command_document.xml_bytes( string_encoding, true ) );
+            if( _log_xml )  File( _log_filename_prefix + ".forward.xml", "w" ).print( command_document.xml_bytes(string_encoding) );
         }
 
         
@@ -564,7 +564,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
     catch( exception& x )
     {
         _log->error( "Forward: " + string(x.what()) );
-        _log->info( payload_dom.xml( string_encoding, "  " ) );
+        _log->info( payload_dom.xml_string() );
     }
 }
 
@@ -762,7 +762,7 @@ void Web_service_operation::execute_stylesheets()
         //hr = com_invoke( DISPATCH_PROPERTYGET, this, "String_content", &request_data_variant );
         //if( FAILED(hr) )  return hr;
 
-        bool ok = request_document.try_load_xml( http_request()->body(), http_request()->charset_name() );
+        bool ok = request_document.try_load_xml_bytes( http_request()->body(), http_request()->charset_name() );
         if( !ok )
             throw http::Http_exception( http::status_404_bad_request );
     }
@@ -796,9 +796,9 @@ void Web_service_operation::execute_stylesheets()
     if( _web_service->_debug )
     {
         _log->debug( "service_request.xml:\n" );
-        _log->debug( request_document.xml( string_encoding, "  " ) );
+        _log->debug( request_document.xml_string() );
         _log->debug( "\n" );
-        if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_request.xml", "w" ).print( request_document.xml() );
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_request.xml", "w" ).print( request_document.xml_bytes(string_encoding) );
     }
 
 
@@ -810,8 +810,8 @@ void Web_service_operation::execute_stylesheets()
     if( _web_service->_debug )
     {
         _log->debug( message_string( "SCHEDULER-954","request_xslt_stylesheet", _web_service->_request_xslt_stylesheet_path ) );
-        _log->debug( command_document.xml( string_encoding, "  " ) );
-        if( _web_service->_log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml() );
+        _log->debug( command_document.xml_string() );
+        if( _web_service->_log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml_bytes(string_encoding) );
     }
 
 
@@ -838,12 +838,12 @@ void Web_service_operation::execute_stylesheets()
         if( _web_service->_debug )
         {
             _log->debug( "Command response:\n" );
-            _log->debug( command_processor._answer.xml( string_encoding, "  " ) );
+            _log->debug( command_processor._answer.xml_string() );
         }
     }
 
 
-    if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_response.xml", "w" ).print( response_document.xml() );
+    if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_response.xml", "w" ).print( response_document.xml_bytes(string_encoding) );
 
     //if( _web_service->_debug )
     //{
@@ -855,7 +855,7 @@ void Web_service_operation::execute_stylesheets()
     xml::Node_ptr data_node = response_document.select_node( "/service_response/content/*" );
     if( !data_node )  z::throw_xc( "SCHEDULER-244" );
 
-    http_response()->set_chunk_reader( Z_NEW( http::String_chunk_reader( data_node.xml(), "text/xml" ) ) );
+    http_response()->set_chunk_reader(Z_NEW(http::String_chunk_reader( data_node.xml_bytes(string_encoding), "text/xml" ) ) );
 
     // Es soll nur ein Element geben!
     data_node = data_node.nextSibling();

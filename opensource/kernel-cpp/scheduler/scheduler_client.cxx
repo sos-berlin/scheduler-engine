@@ -121,7 +121,7 @@ struct Client
             if( *text.rbegin() == '\0' )  break;
         }
 
-        xml::Document_ptr response_document ( response );
+        xml::Document_ptr response_document = xml::Document_ptr::from_xml_bytes(response);
 
         if( xml::Element_ptr error_element = response_document.select_node( "/spooler/answer/ERROR" ) )
         {

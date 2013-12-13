@@ -129,7 +129,7 @@ STDMETHODIMP Xslt_stylesheet::Apply_xml( BSTR xml_or_file_bstr, BSTR* result )
 
     try
     {
-        hr = String_to_bstr( apply( xml::Document_ptr( xml_or_file_bstr ) ).xml(), result );
+        hr = String_to_bstr( apply( xml::Document_ptr( xml_or_file_bstr ) ).xml_string(), result );
     }
     catch( exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 

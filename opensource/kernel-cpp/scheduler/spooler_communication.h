@@ -286,7 +286,7 @@ struct Xml_operation : Communication::Operation
     Xml_operation_connection*  _operation_connection;
     bool                       _request_is_complete;
     Xml_end_finder             _xml_end_finder;
-    string                     _request;
+    string                     _request_bytes;
     ptr<Xml_response>          _response;
 };
 

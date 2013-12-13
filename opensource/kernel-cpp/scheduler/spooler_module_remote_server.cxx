@@ -153,15 +153,15 @@ Com_remote_module_instance_server::Class_data::Class_data()
 {
 }
 
-//----------------------------------------Com_remote_module_instance_server::Class_data::initialize
+//------------------------------------Com_remote_module_instance_server::Class_data::read_xml_bytes
 
-void Com_remote_module_instance_server::Class_data::read_xml( const string& xml_text )
+void Com_remote_module_instance_server::Class_data::read_xml_bytes( const string& xml_text )
 {
     if( xml_text != "" )
     {
         //Z_LOG2( "zschimmer", Z_FUNCTION << xml_text << "\n" );
         
-        _stdin_dom_document.load_xml( xml_text );
+        _stdin_dom_document.load_xml_bytes( xml_text );
 
         _task_process_element = _stdin_dom_document.documentElement();
         if( !_task_process_element  ||  !_task_process_element.nodeName_is( "task_process" ) )  z::throw_xc( Z_FUNCTION, "<task_process> expected" );
@@ -206,7 +206,7 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
     else
     {
         _class_data = Z_NEW( Class_data );
-        _class_data->read_xml( _session->connection()->server()->stdin_data() );
+        _class_data->read_xml_bytes( _session->connection()->server()->stdin_data() );
 
         *class_object_ptr = _class_data;
     }
@@ -326,7 +326,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "recompile"        )  _server->_module->_recompile       = value[0] == '1';
                 else
-                if( key_word == "script"           )  _server->_module->set_xml_text_with_includes( value );    // 2008-02-25 JS-215: <include> sind schon vom Client aufgelöst worden
+                if( key_word == "script"           )  _server->_module->set_xml_string_text_with_includes( value );    // 2008-02-25 JS-215: <include> sind schon vom Client aufgelöst worden
                 else
                 if( key_word == "job"              )  job_name                          = value;
                 else
@@ -334,7 +334,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "environment"      )  
                 {
-                    xml::Document_ptr dom_document ( value, string_encoding);
+                    xml::Document_ptr dom_document = xml::Document_ptr::from_xml_string(value);
                     _server->_module->_process_environment = new Com_variable_set();
                     _server->_module->_process_environment->set_dom( dom_document.documentElement(), (Variable_set_map*)NULL, "variable" );
                 }
@@ -374,7 +374,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( monitor  &&  key_word == "monitor.script"     )  // Muss der letzte Paraemter sein!
                 {
-                    monitor->_module->set_xml_text_with_includes( value );
+                    monitor->_module->set_xml_string_text_with_includes(value);
                     _server->_module->_monitors->add_monitor( monitor );
                 }
                 else

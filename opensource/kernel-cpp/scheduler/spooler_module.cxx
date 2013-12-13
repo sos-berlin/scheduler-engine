@@ -42,7 +42,7 @@ Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based
 
 void Text_with_includes::initialize()
 {
-    _dom_document.load_xml( "<source/>" );
+    _dom_document.load_xml_string( "<source/>" );
 }
 
 //--------------------------------------------------------------------Text_with_includes::append_dom
@@ -141,7 +141,9 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
             try
             {
                 xml::Element_ptr part_element = result.createElement( "source_part" );
-                part_element.appendChild( result.createTextNode( include_command.read_content() ) );
+                string xml_bytes = include_command.read_content_bytes();
+                string xml_string = xml::Document_ptr::from_xml_bytes(xml_bytes).xml_string();
+                part_element.appendChild( result.createTextNode(xml_string));
                 element.replace_with( part_element );
             }
             catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
@@ -153,13 +155,13 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
 
 //--------------------------------------------------------------------Text_with_includes::read_text
 
-string Text_with_includes::read_text() 
+string Text_with_includes::read_text(bool xml_expected)
 {
     String_list result;
 
     DOM_FOR_EACH_ELEMENT( dom_element(), element )
     {
-        result.append( read_text_element( element ) );
+        result.append( read_text_element( element, xml_expected ) );
     }
 
     return result;
@@ -167,29 +169,32 @@ string Text_with_includes::read_text()
 
 //------------------------------------------------------------Text_with_includes::read_text_element
 
-string Text_with_includes::read_text_element( const xml::Element_ptr& element )
+string Text_with_includes::read_text_element( const xml::Element_ptr& element, bool xml_expected )
 {
-    string result;
-
     if( element.nodeName_is( "source_part" ) )
-    {
-        result = element.text();
-    }
+        return element.text();
     else
     if( element.nodeName_is( "include" ) )
     {
         Include_command include_command ( _spooler, _file_based, element, _include_path );
 
-        try
-        {
-            result = include_command.read_content();
+        try {
+            string bytes = include_command.read_content_bytes();
+            if (xml_expected)
+                return xml::Document_ptr::from_xml_bytes(bytes).xml_string();
+            else {
+                try {
+                    return xml::Document_ptr::from_xml_bytes(bytes).xml_string();  // Vielleicht ist es doch ein XML? (JS-898, <script><include file=".xml">)
+                }
+                catch (exception&) {
+                    return bytes;  // Datei wird in string_encoding codiert erwartet
+                }
+            }
         }
         catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
     }
     else
         z::throw_xc( Z_FUNCTION, element.nodeName() );
-
-    return result;
 }
 
 //----------------------------------------------------------Text_with_includes::text_element_linenr
@@ -373,11 +378,11 @@ void Module::set_dom( const xml::Element_ptr& element )
     _set = true;
 }
 
-//---------------------------------------------------------------Module::set_xml_text_with_includes
+//--------------------------------------------------------Module::set_xml_string_text_with_includes
 
-void Module::set_xml_text_with_includes( const string& x )
+void Module::set_xml_string_text_with_includes(const string& x)
 {
-    _text_with_includes.set_xml( x );
+    _text_with_includes.set_xml_string( x );
     _set = true;
 }
 

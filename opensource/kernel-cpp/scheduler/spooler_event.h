@@ -59,7 +59,7 @@ struct Scheduler_event
     xml::Document_ptr           mail_dom                    ( const xml::Document_ptr& event = xml::Document_ptr() );  // Default: dom()
     void                        make_xml                    ();
     void                        print_xml                   ( String_stream* );
-    const string&               xml                         () const                                { return _xml; }
+    const string&               xml_bytes                   () const                                { return _xml_bytes; }
   //int                         send_mail                   ( const xml::Document_ptr& mail  = xml::Document_ptr() );  // Default: mail_dom()
     int                         send_mail                   ( const Mail_defaults& );
 
@@ -77,7 +77,7 @@ struct Scheduler_event
     string                     _message;
     int                        _count;
     ptr<Com_mail>              _mail;                       
-    string                     _xml;
+    string                     _xml_bytes;
 };
 
 //-------------------------------------------------------------------------Scheduler_event_manager 

@@ -33,7 +33,7 @@ public class GetSourceCodeIT extends SchedulerTest {
     public void test() throws IOException {
         CommandBuilder cmd = new CommandBuilder();
         controller().prepare();
-        String expectedCode = getExpectedSourceCode();
+        String expectedCode = getExpectedSourceCode().replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "").trim();  // Ohne Prolog <? ..?>
         controller().activateScheduler();
         for (String jobName : jobs) {
             controller().scheduler().executeXml(cmd.startJobImmediately(jobName).getCommand());
@@ -41,7 +41,7 @@ public class GetSourceCodeIT extends SchedulerTest {
         controller().waitForTermination(shortTimeout);
         for (String jobName : jobs) {
             String scriptCode = resultMap.get(jobName);
-            assertEquals(expectedCode, scriptCode);
+            assertEquals("<include> in job "+ jobName + " is not as expected:", expectedCode, scriptCode);
         }
     }
 
@@ -53,7 +53,7 @@ public class GetSourceCodeIT extends SchedulerTest {
     @EventHandler
     public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
         String jobName = e.jobPath().name();
-        String scriptCode = instance(VariableSet.class).apply(jobName).trim();
+        String scriptCode = instance(VariableSet.class).apply(jobName).trim().replace("\r\n", "\n");
         resultMap.put(jobName,scriptCode);
         taskCount++;
         if (taskCount == jobs.size())
