@@ -35,6 +35,7 @@ trait ScalaSchedulerTest extends Suite with BeforeAndAfterAll with EventHandlerA
   /** Wie <code>BeforeAndAfterAll.beforeAll</code>, aber bei einer Exception wird <code>afterAll()</code> aufgerufen. */
   protected def checkedBeforeAll() {
     if (!controller.isStarted) {
+      controller.prepare()
       onBeforeSchedulerActivation()
       controller.activateScheduler(testConfiguration.mainArguments: _*)
       onSchedulerActivated()
