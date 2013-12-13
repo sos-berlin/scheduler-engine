@@ -31,9 +31,9 @@ final class JS803IT extends SchedulerTest {
   @Test def test() {
     controller.activateScheduler()
     startTime = secondNow() plusSeconds orderDelay
-    addOrder(new OrderKey(jobChainPath, new OrderId("dailyOrder")), addDailyOrderElem)
-    addOrder(new OrderKey(jobChainPath, new OrderId("singleOrder")), addSingleOrderElem)
-    addOrder(new OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), addSingleRuntimeOrderElem)
+    addOrder(OrderKey(jobChainPath, new OrderId("dailyOrder")), addDailyOrderElem)
+    addOrder(OrderKey(jobChainPath, new OrderId("singleOrder")), addSingleOrderElem)
+    addOrder(OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), addSingleRuntimeOrderElem)
     try controller.waitForTermination(shortTimeout)
     finally (expectedOrders diff terminatedOrders).toList match {
       case List() =>
@@ -43,7 +43,7 @@ final class JS803IT extends SchedulerTest {
 
   private def addOrder(orderKey: OrderKey, orderElemFunction: (OrderKey, DateTime) => Elem) {
     execute(orderElemFunction(orderKey, startTime))
-    expectedOrders.add(orderKey.getId)
+    expectedOrders.add(orderKey.id)
   }
 
   private def execute(command: Elem) {
@@ -60,7 +60,7 @@ final class JS803IT extends SchedulerTest {
   }
 
   @EventHandler def handleEvent(event: OrderFinishedEvent) {
-    terminatedOrders.add(event.orderKey.getId)
+    terminatedOrders.add(event.orderKey.id)
     if (terminatedOrders == expectedOrders)  controller.terminateScheduler()
   }
 }
@@ -80,18 +80,18 @@ object JS803IT {
   }
 
   private def addDailyOrderElem(orderKey: OrderKey, startTime: DateTime) =
-    <add_order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>
+    <add_order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>
       <run_time>
         <period single_start={hhmmssFormatter.print(startTime)}/>
       </run_time>
     </add_order>
 
   private def addSingleOrderElem(orderKey: OrderKey, startTime: DateTime) =
-    <add_order job_chain={orderKey.jobChainPathString} id={orderKey.idString}
+    <add_order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}
                at={yyyymmddhhmmssFormatter.print(startTime)}/>
 
   private def addSingleRuntimeOrderElem(orderKey: OrderKey, startTime: DateTime) =
-    <add_order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>
+    <add_order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>
       <run_time>
         <at at={yyyymmddhhmmssFormatter.print(startTime)}/>
       </run_time>

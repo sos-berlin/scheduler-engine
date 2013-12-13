@@ -91,7 +91,7 @@ public class JmsEventFilterTest extends JMSConnection {
                 textMessage.acknowledge();
                 OrderTouchedEvent ev = mapper.readValue(jsonContent, OrderTouchedEvent.class);
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                result = ev.orderKey().getId().string();
+                result = ev.orderKey().id().string();
             } catch (IOException e1) {
                 String msg = "could not deserialize " + jsonContent;
                 logger.error(msg);

@@ -87,7 +87,7 @@ final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
 
 private object JS1039TaskStdoutIT {
 
-  private val stdOutErrList = List("STDOUT", "STDERR")  // Nach stdout und stderr geschriebene Strings und zugleich Namen globaler Scheudler-Variablen.
+  private val stdOutErrList = List("STDOUT", "STDERR")  // Nach stdout und stderr geschriebene Strings und zugleich Namen globaler Scheduler-Variablen.
 
   private case class JobSetting(jobPath: JobPath, hasMonitor: Boolean = false)
 

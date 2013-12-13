@@ -2949,6 +2949,7 @@ bool Order::setback()
         Duration delay = _task->job()->get_delay_order_after_setback( _setback_count );
         _setback = delay.not_zero()? Time::now() + delay : Time(0);
         _log->info( message_string( "SCHEDULER-946", _setback_count, _setback ) );   // "setback(): Auftrag zum $1. Mal zurückgestellt, bis $2"
+        report_event_code(orderSetBackEvent, java_sister());
         result = true;
     }
     else

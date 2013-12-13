@@ -40,11 +40,11 @@ public class OrderSubsystem implements Subsystem {
     }
 
     @Nullable public final Order orderOrNull(OrderKey orderKey) {
-        return jobChain(orderKey.getJobChainPath()).orderOrNull(orderKey.getId());
+        return jobChain(orderKey.jobChainPath()).orderOrNull(orderKey.id());
     }
 
     public final Order order(OrderKey orderKey) {
-        return jobChain(orderKey.getJobChainPath()).order(orderKey.getId());
+        return jobChain(orderKey.jobChainPath()).order(orderKey.id());
     }
 
     public  final void tryRemoveOrder(OrderKey k) {

@@ -1,0 +1,50 @@
+package com.sos.scheduler.engine.kernel.event
+
+import EventSubsystem._
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.data.event.AbstractEvent
+import com.sos.scheduler.engine.eventbus.EventSource
+import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegates.tryUnmodifiableEventSource
+import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.kernel.scheduler.Subsystem
+import javax.inject.{Inject, Singleton}
+
+@ForCpp @Singleton
+final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends Subsystem {
+
+  /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event]],
+    *         weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+  @ForCpp private def report(e: AbstractEvent) {
+    eventBus.publish(e)
+  }
+
+  /** @param e [[com.sos.scheduler.engine.data.event.AbstractEvent]] statt [[com.sos.scheduler.engine.data.event.Event}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtigt.]]
+    * @param eventSource { @link Object} statt { @link EventSource}, weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
+  @ForCpp private def report(e: AbstractEvent, eventSource: AnyRef) {
+    eventBus.publish(e, eventSource.asInstanceOf[EventSource])
+  }
+
+  @ForCpp private def checkNumberOfEventCodes(count: Int) {
+    require(count == CppEventCode.values.length, "C++-Event_code does not match CppEventCode")
+  }
+
+  @ForCpp private def reportEventClass(cppEventCode: Int, eventSource: AnyRef) {
+    try {
+      val o = eventSource.asInstanceOf[EventSource]
+      val e = CppEventFactory.newInstance(CppEventCode.values()(cppEventCode), o)
+      eventBus.publish(e, tryUnmodifiableEventSource(e, o))
+    }
+    catch {
+      case x: Exception => logger.error(s"EventSubsystem.reportEventClass($cppEventCode):", x)
+    }
+  }
+
+  override def toString =
+    getClass.getSimpleName
+}
+
+
+object EventSubsystem {
+  private val logger = Logger(getClass)
+}

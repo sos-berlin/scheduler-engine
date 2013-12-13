@@ -36,7 +36,7 @@ final class JS1031IT extends FunSuite with ScalaSchedulerTest {
       <schedule>
         <at at={ISODateTimeFormat.dateHourMinuteSecond withZone DateTimeZone.getDefault print at}/>
       </schedule>
-    Files.write(scheduleElem.toString(), new File(controller.environment.configDirectory, "test.schedule.xml"), UTF_8)
+    Files.write(scheduleElem.toString(), new File(controller.environment.liveDirectory, "test.schedule.xml"), UTF_8)
     instance[FolderSubsystem].updateFolders()
     //controller.getEventBus.dispatchEvents()   // Nur bis v1.6 nötig
     eventPipe.nextKeyed[OrderTouchedEvent](testOrderKey)
@@ -44,5 +44,5 @@ final class JS1031IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS1031IT {
-  private val testOrderKey = OrderKey.of("/test", "1")
+  private val testOrderKey = OrderKey("/test", "1")
 }

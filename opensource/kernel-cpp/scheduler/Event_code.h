@@ -18,6 +18,7 @@ enum Event_code {
     orderFinishedEvent,
     orderSuspendedEvent,
     orderResumedEvent,
+    orderSetBackEvent,
 
     orderStepStartedEvent,
 

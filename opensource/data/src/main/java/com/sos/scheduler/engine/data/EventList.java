@@ -6,7 +6,14 @@ import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
-import com.sos.scheduler.engine.data.order.*;
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
+import com.sos.scheduler.engine.data.order.OrderResumedEvent;
+import com.sos.scheduler.engine.data.order.OrderSetBackEvent;
+import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
+import com.sos.scheduler.engine.data.order.OrderStepEndedEvent;
+import com.sos.scheduler.engine.data.order.OrderStepStartedEvent;
+import com.sos.scheduler.engine.data.order.OrderSuspendedEvent;
+import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
 
 public final class EventList {
     public static final ImmutableList<Class<? extends Event>> eventClassList = ImmutableList.<Class<? extends Event>>of(
@@ -20,7 +27,8 @@ public final class EventList {
             OrderResumedEvent.class,
             OrderStepStartedEvent.class,
             OrderStepEndedEvent.class,
-            OrderStateChangedEvent.class);
+            OrderStateChangedEvent.class,
+            OrderSetBackEvent.class);
 
     public static Class<?>[] eventClassArray() {
         return eventClassList.toArray(new Class<?>[0]);

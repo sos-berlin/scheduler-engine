@@ -40,7 +40,7 @@ private object TimeZoneIT {
 
   private val expectedTimes = List(
       ExpectedObjectTime(JobPath.of("/a")      , new LocalTime(12, 12), DateTimeZone.forID("Pacific/Honolulu")),
-      ExpectedObjectTime(OrderKey.of("/A", "1"), new LocalTime(12, 12), DateTimeZone.forID("Asia/Shanghai")))
+      ExpectedObjectTime(OrderKey("/A", "1"), new LocalTime(12, 12), DateTimeZone.forID("Asia/Shanghai")))
 
   private def dateTimeToXml(o: DateTime) = o.toDateTime(UTC).toString(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
 
@@ -59,7 +59,7 @@ private object TimeZoneIT {
       def atDateTime = DateTime.parse(atElem.attribute("at").get.text)
       atElem.attribute("job") match {
         case Some(a) => new CalendarEntry(JobPath.of(a.text), atDateTime, atElem)
-        case None => new CalendarEntry(OrderKey.of(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime, atElem)
+        case None => new CalendarEntry(OrderKey(atElem.attribute("job_chain").get.text, atElem.attribute("order").get.text), atDateTime, atElem)
       }
     }
   }
