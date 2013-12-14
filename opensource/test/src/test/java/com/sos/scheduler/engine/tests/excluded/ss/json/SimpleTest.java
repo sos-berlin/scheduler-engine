@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
+import com.sos.scheduler.engine.data.configuration.EngineJacksonConfiguration;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
@@ -33,13 +33,7 @@ public class SimpleTest extends SchedulerTest {
 	private final CommandBuilder util = new CommandBuilder();
 
     // This object is needed for serializing and deserializing of the event objects
-    private final ObjectMapper mapper = newObjectMapper();
-
-    private static ObjectMapper newObjectMapper() {
-        ObjectMapper result = new ObjectMapper();
-        result.registerModule(DefaultScalaModule$.MODULE$);
-        return result;
-    }
+    private final ObjectMapper mapper = EngineJacksonConfiguration.newObjectMapper();
 
 	@BeforeClass
     public static void setUpBeforeClass() throws Exception {

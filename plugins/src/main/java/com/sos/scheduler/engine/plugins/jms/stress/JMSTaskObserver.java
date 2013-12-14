@@ -1,25 +1,27 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
-import com.sos.scheduler.engine.data.EventList;
-import com.sos.scheduler.engine.data.event.Event;
-import com.sos.scheduler.engine.data.job.TaskEndedEvent;
-import com.sos.scheduler.engine.data.job.TaskStartedEvent;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import com.sos.scheduler.engine.plugins.jms.JMSConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Arrays.asList;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import static java.util.Arrays.asList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sos.scheduler.engine.data.EventList;
+import com.sos.scheduler.engine.data.configuration.EngineJacksonConfiguration;
+import com.sos.scheduler.engine.data.event.Event;
+import com.sos.scheduler.engine.data.job.TaskEndedEvent;
+import com.sos.scheduler.engine.data.job.TaskStartedEvent;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+import com.sos.scheduler.engine.plugins.jms.JMSConnection;
 
 public class JMSTaskObserver extends JMSConnection implements MessageListener, TaskInfo {
 
@@ -39,8 +41,7 @@ public class JMSTaskObserver extends JMSConnection implements MessageListener, T
 		super(providerUrl, eventsToListen);
 		setMessageListener(this);
 
-        mapper = new ObjectMapper();
-        mapper.registerModule(DefaultScalaModule$.MODULE$);
+        mapper = EngineJacksonConfiguration.newObjectMapper();
         mapper.registerSubtypes(EventList.eventClassArray());
 
 		listener.clear();

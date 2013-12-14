@@ -1,8 +1,23 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
+import static java.net.InetAddress.getLocalHost;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.jms.Message;
+import javax.jms.TextMessage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
 import com.google.common.collect.ImmutableSet;
+import com.sos.scheduler.engine.data.configuration.EngineJacksonConfiguration;
 import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -11,19 +26,6 @@ import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.plugin.Plugin;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.sos.scheduler.engine.common.xml.XmlUtils.stringXPath;
-import static java.net.InetAddress.getLocalHost;
 
 /**
  * JS Plugin to connect the JMS
@@ -56,8 +58,7 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
 		connector = Connector.newInstance(providerUrl, persistenceDir);
 		logger.info( getClass().getName() + ": providerUrl=" + providerUrl);
 		prefixLog.info("Providing messages to " + providerUrl);
-        mapper = new ObjectMapper();
-        mapper.registerModule(DefaultScalaModule$.MODULE$);
+        mapper = EngineJacksonConfiguration.newObjectMapper();
         registerDefaultEventPackages();
 	}
     
