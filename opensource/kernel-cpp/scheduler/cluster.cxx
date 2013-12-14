@@ -21,9 +21,7 @@ const int                       heart_beat_period                       = Z_NDEB
 const int                       heart_beat_period_at_startup            = 5;                            // Zu Beginn Herz schneller schlagen lassen, dann werden wir früher erkannt
 const int                       startup_period                          = heart_beat_period;            // Frist für heart_beat_period_at_startup
 const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
-//const int                       active_heart_beat_check_period          = heart_beat_period + _cluster->_heart_beat_warn_timeout + 2;
 //const int                       database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
-//const int                       precedence_check_period                 = active_heart_beat_check_period + 5;
 const int                       backup_startup_delay                    = 60;                           // Nach eigenem Start des Backup-Schedulers auf Start des non-backup-Schedulers warten
 const int                       first_dead_orders_check_period          = 60;
 
@@ -37,8 +35,6 @@ const int                       default_heart_beat_own_timeout          = Z_NDEB
 const int                       default_heart_beat_warn_timeout         = Z_NDEBUG_DEBUG( 10,  3 );
 
 
-//const time_t                    accepted_clock_difference       = Z_NDEBUG_DEBUG(  5,  2 );     // Die Uhren sollten noch besser übereinstimmen! ntp verwenden!
-//const time_t                    warned_clock_difference         = Z_NDEBUG_DEBUG(  1,  1 ); 
 //const int                       trauerfrist                             = 12*3600;                      // Trauerzeit, nach der Mitgliedssätze gelöscht werden
 
 //-------------------------------------------------------------------------------------------------
@@ -134,7 +130,6 @@ struct Cluster : Cluster_subsystem_interface
     bool                        check_my_member_record      ( Transaction*, bool force_error = false );
     bool                        check_heart_beat_is_in_time ( time_t expected_next_heart_beat );
     void                        lock_member_records         ( Transaction*, const string& member1_id, const string& member2_id );
-  //bool                        check_database_integrity    ();
     bool                        heartbeat_member_record     ();
     bool                        set_command_for_all_schedulers_but_me( Transaction*, const string& command, const string& where_condition );
     void                        read_and_execute_command    ();
@@ -334,9 +329,7 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Has_ala
     void                        set_alarm                   ();
 
     void                        try_to_become_exclusive     ();
-  //void                        check_clock_difference      ( time_t last_heart_beat, time_t now );
     bool                        check_has_backup_precedence ();
-  //string                      read_cluster_session_id     ();
   //bool                        restart_when_active_scheduler_has_started();
 
   private:
@@ -345,7 +338,6 @@ struct Exclusive_scheduler_watchdog : Async_operation, Scheduler_object, Has_ala
     bool                       _announced_to_become_exclusive; // Wenn eine Meldung ausgegeben oder ein Datensatz zu ändern versucht wurde 
     time_t                     _next_precedence_check;                      // Um herauszufinden, welcher inaktive Scheduler exklusiv wird
     time_t                     _wait_for_backup_scheduler_start_until;      // Der non-backup-Scheduler hat Vorrang, auch wenn etwas später kommt
-  //string                     _cluster_session_id;
     bool                       _is_starting;
     Cluster*                   _cluster;
   //time_t                     _set_exclusive_until;           // Nur für Access (kennt keine Sperre): Aktivierung bis dann (now+database_commit_visible_time) verzögern, dann nochmal prüfen
@@ -812,103 +804,6 @@ bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
     return ok;
 }
 
-//---------------------------------------------------------Distributed::shift_exclusiveness_from_to
-
-//bool Distributed::shift_exclusiveness_from_to( Cluster_member* from, Cluster_member* to, bool delete_from_record, bool delete_empty_member_record )
-//{
-//    Z_LOGI2( "scheduler.cluster", Z_FUNCTION << "\n" );
-//    assert( from );
-//    assert( from->_is_exclusive );
-//    assert( to );
-//    assert( !to->_is_exclusive );
-//    assert( !delete_empty_member_record || delete_inactive_record );
-//    assert( from->_is_active || delete_from_record );
-//
-//    bool   ok;
-//    time_t now = ::time(NULL);
-//
-//    calculate_next_heart_beat( now );
-//
-//    time_t new_db_last_heart_beat = now;
-//    time_t new_db_next_heart_beat = _next_heart_beat;
-//
-//
-//    if( to == _my_scheduler )  _log->info( message_string( "SCHEDULER-835" ) );  // "This Scheduler becomes exclusive"
-//
-//    try
-//    {
-//        Transaction ta ( db() );
-//
-//        lock_member_records( &ta, from->_member_id, to->_member_id );
-//
-//
-//        // Dem bisher exklusiven Scheduler die Exklusivität nehmen
-//
-//        {
-//            sql::Update_stmt update ( ta.database_descriptor(), db()->_clusters_tablename );
-//        
-//            update[ "exclusive" ] = sql::null_value;
-//            if( from != _my_scheduler   )  update[ "deactivating_member_id" ] = my_member_id();
-//            if( from->is_empty_member() )  update[ "active" ] = 1;
-//            update.and_where_condition( "member_id", from->_member_id );
-//            update.add_where( " and `exclusive` is not null" );
-//            
-//            if( !from->is_empty_member() )
-//            {
-//                update.and_where_condition( "last_heart_beat", from->_db_last_heart_beat );
-//                update.and_where_condition( "next_heart_beat", from->_db_next_heart_beat );
-//            }
-//
-//            ok = ta.try_execute_single( update, Z_FUNCTION );
-//        }
-//
-//
-//        if( ok )
-//        {
-//            sql::Update_stmt update ( ta.database_descriptor(), db()->_clusters_tablename );
-//        
-//            update[ "active"          ] = 1;
-//            update[ "exclusive"       ] = 1;
-//            update[ "last_heart_beat" ] = new_db_last_heart_beat;
-//            update[ "next_heart_beat" ] = new_db_next_heart_beat;
-//            update.and_where_condition( "member_id", my_member_id() );
-//            update.and_where_condition( "exclusive"          , sql::null_value );
-//            update.add_where( S() << " and `active`" << ( to->_is_active? " is not null" : " is null" ) );
-//
-//            ok = ta.try_execute_single( update, Z_FUNCTION );
-//        }
-//
-//        if( ok )  ta.commit( Z_FUNCTION );
-//    }
-//    catch( exception& x )   // Bei optimistischer Sperrung kann es eine Exception geben
-//    { 
-//        ok = false;
-//        _log->debug3( S() << x.what() << ", in " << Z_FUNCTION );
-//    }
-//
-//    if( ok )
-//    {
-//        _db_last_heart_beat = new_db_last_heart_beat;
-//        _db_next_heart_beat = new_db_next_heart_beat;
-//
-//        _is_active         = true;
-//        _has_exclusiveness = true;
-//
-//        //_active_schedulers_map.erase( _exclusive_scheduler->my_member_id() );
-//        _exclusive_scheduler = NULL;
-//        //check_schedulers_heart_beat();
-//        int ACTIVE_SCHEDULER_MAP_AKTUALISIEREN;
-//        //_set_exclusive_until = ::time(NULL);
-//        //if( db_mode == use_commit_visible_time )  _set_exclusive_until += database_commit_visible_time + 1;     // Nachfolgende Sekunde
-//    }
-//
-//    if( ok )  assert_database_integrity( Z_FUNCTION );
-//    if( ok )  ok = do_a_heart_beat();
-//    if( ok )  _log->info( message_string( "SCHEDULER-806" ) );
-//
-//    return ok;
-//}
-
 //--------------------------------------------------------------Cluster_member::delete_dead_record
 
 bool Cluster_member::delete_dead_record()
@@ -1090,7 +985,6 @@ Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog( Cluster* m )
     _cluster(m)
 {
     _log = m->_log;
-  //_cluster_session_id = read_cluster_session_id();
     _is_starting = true;
     set_alarm();
 }
@@ -1099,20 +993,7 @@ Exclusive_scheduler_watchdog::Exclusive_scheduler_watchdog( Cluster* m )
 
 string Exclusive_scheduler_watchdog::async_state_text_() const
 {
-    S result;
-
-    result << "Exclusive_scheduler_watchdog";
-
-    //if( _set_exclusive_until )
-    //{
-    //    result << " (becoming exclusive at " << xml_of_time_t( _set_exclusive_until) << ")";
-    //}
-    //else
-    //{
-    //    result << " (inexclusive)";
-    //}
-
-    return result;
+    return "Exclusive_scheduler_watchdog";
 }
 
 //----------------------------------------------------Exclusive_scheduler_watchdog::async_continue_
@@ -1123,30 +1004,22 @@ bool Exclusive_scheduler_watchdog::async_continue_( Continue_flags )
 
     Has_alarm::on_alarm();
 
-    if( !db()->opened() )
-    {
+    if( !db()->opened() ) {
         _cluster->async_wake();       // Datenbank ist geschlossen worden
         return true;
     }
 
-    try
-    {
-        //bool ok = restart_when_active_scheduler_has_started(); 
-        //if( !ok )  
+    try {
         try_to_become_exclusive();
     }
-    catch( exception& )
-    {
+    catch( exception& ) {
         _cluster->async_wake();       // Cluster wird die Exception übernehmen
         throw;
     }
 
-    if( _cluster->has_exclusiveness() )
-    {
+    if (_cluster->has_exclusiveness() ) {
         _cluster->async_wake();       // Wir sind aktives Mitglied geworden, Exclusive_scheduler_watchdog beenden
-    }
-    else
-    {
+    } else {
         calculate_next_check_time();
         set_alarm();                                // Wir sind weiterhin inaktives Mitglied
     }
@@ -1162,15 +1035,7 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
 
     _next_check_time = now + _cluster->_active_heart_beat_check_period;
 
-    //if( _set_exclusive_until  &&  _next_check_time > _set_exclusive_until )
-    //{
-    //    _next_check_time = _set_exclusive_until;
-    //    extra_log << ", warten, bis Datenbank Änderungen für alle sichtbar gemacht hat";
-    //}
-    //else
-    
-    if( Cluster_member* watched_scheduler = _cluster->exclusive_scheduler() )
-    {
+    if( Cluster_member* watched_scheduler = _cluster->exclusive_scheduler() ) {
         time_t delay          = _cluster->_heart_beat_warn_timeout + 1;   // Erst in der folgenden Sekunde prüfen
         time_t new_next_check = watched_scheduler->_db_next_heart_beat + delay;
 
@@ -1187,21 +1052,11 @@ void Exclusive_scheduler_watchdog::calculate_next_check_time()
 
 void Exclusive_scheduler_watchdog::set_alarm()
 {
-    //if( _cluster->_db_next_heart_beat < _next_check_time )
-    //{
-    //    Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next heart beat at " << string_of_time_t( _cluster->_db_next_heart_beat ) << "\n" );
-    //    set_async_next_gmtime( _cluster->_db_next_heart_beat );
-    //}
-    //else
-    {
-        //Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next check at " << string_of_time_t( _next_check_time ) << "\n" );
-
-        time_t t = _next_check_time;
-
-        if( t > _recommended_next_check_time )  t = _recommended_next_check_time;
-
-        set_async_next_gmtime( t );
-    }
+    //Z_LOG2( "scheduler.cluster", Z_FUNCTION << "  Next check at " << string_of_time_t( _next_check_time ) << "\n" );
+    time_t t = _next_check_time;
+    if( t > _recommended_next_check_time )  
+        t = _recommended_next_check_time;
+    set_async_next_gmtime( t );
 }
 
 //--------------------------------------------Exclusive_scheduler_watchdog::try_to_become_exclusive
@@ -1827,27 +1682,15 @@ bool Cluster::do_a_heart_beat()
 
     if( _spooler->_db_check_integrity )  assert_database_integrity( Z_FUNCTION );
 
-    if( ok )
-    {
-        //if( Not_in_recursion not_in_recursion = &_is_in_do_a_heart_beat )   
-        //// commit() und reopen_database_after_error() rufen _spooler->check(), der nach Fristablauf wieder in diese Routine steigen kann
-        //{
-            time_t old_next_heart_beat = _db_next_heart_beat;
-
-            ok = heartbeat_member_record();
-            if( ok )  check_heart_beat_is_in_time( old_next_heart_beat );  // Verspätung wird nur gemeldet
-        //}
-        //else
-        //{
-        //    Z_LOG2( "zschimmer", Z_FUNCTION << "  Rekursiver Aufruf\n" );
-        //    ok = true;
-        //}
+    if( ok ) {
+        time_t old_next_heart_beat = _db_next_heart_beat;
+        ok = heartbeat_member_record();
+        if( ok )  check_heart_beat_is_in_time( old_next_heart_beat );  // Verspätung wird nur gemeldet
     }
     
-    if( !ok )
-    {
-        if( had_exclusiveness )  _is_exclusiveness_lost = true;
-        
+    if( !ok ) {
+        if( had_exclusiveness )  
+            _is_exclusiveness_lost = true;
         bool force_error = true;
         check_my_member_record( (Transaction*)NULL, force_error );
     }
@@ -2289,9 +2132,6 @@ bool Cluster::mark_as_exclusive()
         if( _exclusive_scheduler ) _exclusive_scheduler->_is_exclusive = false;
 
         _exclusive_scheduler = _my_scheduler;
-
-        //_set_exclusive_until = ::time(NULL);
-        //if( db_mode == use_commit_visible_time )  _set_exclusive_until += database_commit_visible_time + 1;     // Nachfolgende Sekunde
     }
 
     if( ok )  assert_database_integrity( Z_FUNCTION );
@@ -2709,13 +2549,6 @@ vector<string> Cluster::fetch_all_member_ids() const {
     return result;
 }
 
-//---------------------------------------------------Cluster::scheduler_up_variable_name
-
-//string Cluster::scheduler_up_variable_name()
-//{
-//    return "scheduler/" + _spooler->id_for_db() + "/up";
-//}
-
 //-------------------------------------------------------------------------Cluster::empty_member_id
 
 string Cluster::empty_member_id()
@@ -2749,7 +2582,7 @@ string Cluster::exclusive_member_id()
 
 bool Cluster::check_is_active( Transaction* outer_transaction )
 {
-    if( _is_active )   // &&  !_is_in_do_a_heart_beat )  
+    if( _is_active )
     {
         bool is_in_time = check_heart_beat_is_in_time( _next_heart_beat );
         if( !is_in_time )      // Nicht in laufender Transaction
@@ -2810,12 +2643,6 @@ void Cluster::make_cluster_member_id()
 {
     set_my_member_id( S() << _spooler->id_for_db() 
                           << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() );
-
-    // Wenn jeder Scheduler-Lauf eindeutig sein soll (wie bis 2007-07-11, von Andreas Püschel nicht gewünscht)
-    //set_my_member_id( S() << _spooler->id_for_db() 
-    //                      << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() 
-    //                      << "/" << getpid() 
-    //                      << "." << ( as_string( 1000000 + (uint64)( double_from_gmtime() * 1000000 ) % 1000000 ).substr( 1 ) ) );  // Mikrosekunden, sechsstellig
 }
 
 //---------------------------------------------------------------------Cluster::empty_member_record
