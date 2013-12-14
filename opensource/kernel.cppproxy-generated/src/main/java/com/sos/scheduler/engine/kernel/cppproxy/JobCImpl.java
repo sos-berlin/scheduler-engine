@@ -174,11 +174,11 @@ final class JobCImpl
     private static native void set_state_cmd__native(long cppReference, java.lang.String p0);
 
 
-    @Override public java.lang.String source_xml() {
+    @Override public byte[] source_xml_bytes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            java.lang.String result = source_xml__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
+            byte[] result = source_xml_bytes__native(cppReference());
+            checkIsNotReleased(byte[].class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
@@ -187,7 +187,7 @@ final class JobCImpl
         }
     }
 
-    private static native java.lang.String source_xml__native(long cppReference);
+    private static native byte[] source_xml_bytes__native(long cppReference);
 
 
     @Override public java.lang.String state_name() {

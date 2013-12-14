@@ -204,7 +204,7 @@ Job_subsystem_impl::Job_subsystem_impl( Scheduler* scheduler )
     Job_subsystem( scheduler, type_job_subsystem )
 {
     _default_schedule = _spooler->schedule_subsystem()->new_schedule();
-    _default_schedule->set_xml( (File_based*)NULL, "<run_time/>" );
+    _default_schedule->set_xml_string( (File_based*)NULL, "<run_time/>" );
 }
 
 //------------------------------------------------------------------------Job_subsystem_impl::close
@@ -682,7 +682,7 @@ bool Standard_job::on_initialize()
         
         if( !_schedule_use->is_defined()  &&  _schedule_use->schedule_path() == "" )            // Standard_job ohne <run_time>?
         {
-            _schedule_use->set_dom( (File_based*)NULL, xml::Document_ptr( "<run_time/>" ).documentElement() );     // Dann ist das der Default
+            _schedule_use->set_dom( (File_based*)NULL, xml::Document_ptr::from_xml_string("<run_time/>").documentElement() );     // Dann ist das der Default
         }
 
         set_next_start_time( Time::never );
@@ -900,7 +900,7 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
             {
                 try 
                 { 
-                    _description = Text_with_includes( _spooler, this, _spooler->include_path(), e ).read_text(); 
+                    _description = Text_with_includes( _spooler, this, _spooler->include_path(), e ).read_plain_string();
                 }
                 catch( const exception& x  ) { _log->warn( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }
@@ -1451,7 +1451,7 @@ void Standard_job::load_tasks_from_db( Read_transaction* ta )
             string parameters_xml = file_as_string( "-binary " + _spooler->db()->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
                                                                                        " where \"TASK_ID\"=" + as_string( task_id ), 
                                                     "" );
-            if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
+            if( !parameters_xml.empty() )  parameters->set_xml_string( parameters_xml );
 
 
             string xml = file_as_string( "-binary " + _spooler->db()->db_name() + " -table=" + db()->_tasks_tablename + " -clob='task_xml'"
@@ -1460,7 +1460,7 @@ void Standard_job::load_tasks_from_db( Read_transaction* ta )
 
             if( !xml.empty() )
             {
-                task_dom = xml::Document_ptr( xml );
+                task_dom = xml::Document_ptr::from_xml_string( xml );
                 force_start = task_dom.documentElement().bool_getAttribute( "force_start", force_start );
             }
 
@@ -1501,7 +1501,7 @@ void Standard_job::Task_queue::enqueue_task( const ptr<Task>& task )
         if (_spooler->settings()->_use_java_persistence)
             _job->typed_java_sister().persistEnqueuedTask(task->_id, task->_enqueue_time.millis(), task->_start_at.millis(), 
                 task->has_parameters()? xml_as_string(task->parameters_as_dom()) : "", 
-                has_xml? xml_as_string(task_document.xml()) : "");
+                has_xml? xml_as_string(task_document) : "");
         else
         if (_spooler->db()->opened() ) {
             while(1) try {
@@ -1526,15 +1526,15 @@ void Standard_job::Task_queue::enqueue_task( const ptr<Task>& task )
 
                 if( task->has_parameters() )
                 {
-                    Any_file blob;
-                    blob = ta.open_file( "-out " + _spooler->db()->db_name(), " -table=" + _spooler->db()->_tasks_tablename + " -clob='parameters'"
+                    Any_file clob;
+                    clob = ta.open_file( "-out " + _spooler->db()->db_name(), " -table=" + _spooler->db()->_tasks_tablename + " -clob='parameters'"
                             "  where \"TASK_ID\"=" + as_string( task->_id ) );
-                    blob.put( xml_as_string( task->parameters_as_dom() ) );
-                    blob.close();
+                    clob.put( xml_as_string( task->parameters_as_dom() ) );
+                    clob.close();
                 }
 
                 if (has_xml)
-                    ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
+                    ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml_string() );
 
                 ta.commit( Z_FUNCTION );
 
@@ -1796,13 +1796,13 @@ void Standard_job::enqueue_task(const TaskPersistentJ& taskPersistentJ)
 
     ptr<Com_variable_set> parameters = new Com_variable_set;
     string parameters_xml = taskPersistentJ.parametersXml();
-    if( !parameters_xml.empty() )  parameters->set_xml(parameters_xml);
+    if( !parameters_xml.empty() )  parameters->set_xml_string(parameters_xml);
 
     xml::Document_ptr task_dom;
     bool force_start = force_start_default;
     string xml = taskPersistentJ.xml();
     if (!xml.empty()) {
-        task_dom = xml::Document_ptr(xml);
+        task_dom = xml::Document_ptr::from_xml_string(xml);
         force_start = task_dom.documentElement().bool_getAttribute("force_start", force_start);
     }
 

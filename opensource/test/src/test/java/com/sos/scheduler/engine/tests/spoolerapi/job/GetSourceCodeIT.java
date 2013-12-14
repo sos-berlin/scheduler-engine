@@ -1,5 +1,15 @@
 package com.sos.scheduler.engine.tests.spoolerapi.job;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
@@ -7,15 +17,6 @@ import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.variable.VariableSet;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.google.common.base.Charsets.UTF_8;
-import static org.junit.Assert.assertEquals;
 
 /**
  * see JS-898
@@ -32,7 +33,7 @@ public class GetSourceCodeIT extends SchedulerTest {
     public void test() throws IOException {
         CommandBuilder cmd = new CommandBuilder();
         controller().prepare();
-        String expectedCode = getExpectedSourceCode();
+        String expectedCode = getExpectedSourceCode().replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "").trim();  // Ohne Prolog <? ..?>
         controller().activateScheduler();
         for (String jobName : jobs) {
             controller().scheduler().executeXml(cmd.startJobImmediately(jobName).getCommand());
@@ -40,19 +41,19 @@ public class GetSourceCodeIT extends SchedulerTest {
         controller().waitForTermination(shortTimeout);
         for (String jobName : jobs) {
             String scriptCode = resultMap.get(jobName);
-            assertEquals(expectedCode, scriptCode);
+            assertEquals("<include> in job "+ jobName + " is not as expected:", expectedCode, scriptCode);
         }
     }
 
     private String getExpectedSourceCode() throws IOException {
-        File f = new File(controller().environment().configDirectory(), expectedFilename);
+        File f = new File(controller().environment().liveDirectory(), expectedFilename);
         return Files.toString(f, UTF_8).trim();
     }
 
     @EventHandler
     public void handleTaskEnded(TaskEndedEvent e) throws InterruptedException {
-        String jobName = e.jobPath().getName();
-        String scriptCode = instance(VariableSet.class).apply(jobName).trim();
+        String jobName = e.jobPath().name();
+        String scriptCode = instance(VariableSet.class).apply(jobName).trim().replace("\r\n", "\n");
         resultMap.put(jobName,scriptCode);
         taskCount++;
         if (taskCount == jobs.size())

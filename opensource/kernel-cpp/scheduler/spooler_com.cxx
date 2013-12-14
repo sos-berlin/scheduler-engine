@@ -432,7 +432,7 @@ void Com_variable_set::register_include_and_set_dom( Scheduler* scheduler, File_
 
             try
             {
-                xml::Document_ptr included_doc   = include_command.register_include_and_read_content( source_file_based );  // Registrierung nur wenn source_file_based != NULL
+                    xml::Document_ptr included_doc   = xml::Document_ptr::from_xml_bytes(include_command.register_include_and_read_content_bytes(source_file_based));  // Registrierung nur wenn source_file_based != NULL
                 xml::Node_list    nodes          = included_doc.select_nodes( xpath );
 
                 for( int i = 0; i < nodes.count(); i++ )
@@ -901,9 +901,9 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
     return NOERROR;                                            
 }
 
-//------------------------------------------------------------------------Com_variable_set::set_xml
+//-----------------------------------------------------------------Com_variable_set::set_xml_string
 
-void Com_variable_set::set_xml( const string& xml_text )  
+void Com_variable_set::set_xml_string( const string& xml_text )  
 { 
     HRESULT hr = put_Xml( Bstr( xml_text ) );
     if( FAILED(hr) )  throw_ole( hr, "Variable_set::xml" );
@@ -918,7 +918,7 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
     try
     {
         xml::Document_ptr doc; // = dom( "params", "param" );
-        doc.load_xml( string_from_bstr( xml_text ) );
+        doc.load_xml_string(xml_text);
 
         DOM_FOR_EACH_ELEMENT( doc.documentElement(), e )
         {
@@ -957,7 +957,7 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
 
     try
     {
-        hr = String_to_bstr( dom( xml_element_name(), "variable" ).xml(), xml_doc );
+        hr = String_to_bstr(dom(xml_element_name(), "variable").xml_string(), xml_doc);
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -2291,7 +2291,7 @@ STDMETHODIMP Com_job::get_Script_code( BSTR* result )
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        hr = String_to_bstr( trim(_job->module()->_text_with_includes.read_text()), result );
+        hr = String_to_bstr( trim(_job->module()->_text_with_includes.read_plain_string()), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
@@ -3962,7 +3962,7 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
     {
         //TODO Spooler::execute_xml() nutzen!
         Command_processor cp ( _spooler, Security::seclev_all );
-        hr = String_to_bstr( cp.execute( string_from_bstr( xml ) ), result );
+        hr = String_to_bstr( cp.execute_xml_string( string_from_bstr( xml ) ), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -5339,7 +5339,7 @@ STDMETHODIMP Com_order::get_Xml( BSTR, BSTR* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = String_to_bstr( _order->dom( Show_what( show_payload | show_schedule | show_log ) ).xml(), result );
+        hr = String_to_bstr(_order->dom(Show_what(show_payload | show_schedule | show_log)).xml_string(), result);
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
@@ -5428,7 +5428,7 @@ STDMETHODIMP Com_order::put_Xml_payload( BSTR xml_payload )
     {
         if( !_order )  return E_POINTER;
 
-        _order->set_xml_payload( string_from_bstr( xml_payload ) );
+        _order->set_payload_xml_string( string_from_bstr( xml_payload ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -5446,7 +5446,7 @@ STDMETHODIMP Com_order::get_Xml_payload( BSTR* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = String_to_bstr( _order->xml_payload(), result );
+        hr = String_to_bstr( _order->xml_payload_string(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }

@@ -1,5 +1,16 @@
 package com.sos.scheduler.engine.plugins.js644;
 
+import static com.sos.scheduler.engine.plugins.js644.JS644PluginIT.M.jobActivated;
+import static com.sos.scheduler.engine.plugins.js644.JS644PluginIT.M.jobchainActivated;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import org.junit.Test;
+
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
@@ -10,16 +21,6 @@ import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
-import static com.sos.scheduler.engine.plugins.js644.JS644PluginIT.M.jobActivated;
-import static com.sos.scheduler.engine.plugins.js644.JS644PluginIT.M.jobchainActivated;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class JS644PluginIT extends SchedulerTest {
     private static final JobPath jobPath = JobPath.of("/a");
@@ -60,6 +61,6 @@ public final class JS644PluginIT extends SchedulerTest {
     }
 
     private File fileBasedFile(Job o) {
-        return new File(controller().environment().configDirectory(), o.getPath().asString() + ".job.xml");
+        return new File(controller().environment().liveDirectory(), o.getPath().string() + ".job.xml");
     }
 }

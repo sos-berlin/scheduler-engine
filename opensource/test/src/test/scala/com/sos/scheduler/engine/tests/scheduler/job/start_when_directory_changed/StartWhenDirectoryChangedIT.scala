@@ -76,11 +76,11 @@ final class StartWhenDirectoryChangedIT extends FunSuite with ScalaSchedulerTest
 object StartWhenDirectoryChangedIT {
   private val logger = Logger(getClass)
   private val responseTime = (if (isWindows) 0.s else 10.s) + 4.s
-  private val aJobPath = JobPath.of("/a")
+  private val aJobPath = JobPath("/a")
   val triggeredFilesName = "triggeredFiles"
 
   private def jobElem(directory: File, regex: String) =
-    <job name={aJobPath.getName}>
+    <job name={aJobPath.name}>
       <script java_class="com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_changed.AJob"/>
       <start_when_directory_changed directory={directory.toString} regex={regex}/>
     </job>

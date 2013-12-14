@@ -88,34 +88,6 @@ Xslt_stylesheet::Xslt_stylesheet()
 {
 }
 
-//-----------------------------------------------------------------Xslt_stylesheet::Xslt_stylesheet
-
-Xslt_stylesheet::Xslt_stylesheet( const string& xml_or_filename )
-{
-    if( is_xml( xml_or_filename ) )
-    {
-        load( Document_ptr( xml_or_filename ) );
-    }
-    else
-    {
-        load_file( xml_or_filename );
-    }
-}
-
-//-----------------------------------------------------------------Xslt_stylesheet::Xslt_stylesheet
-
-Xslt_stylesheet::Xslt_stylesheet( const BSTR xml_or_filename_bstr )
-{
-    if( is_xml( xml_or_filename_bstr ) )
-    {
-        load( Document_ptr( xml_or_filename_bstr ) );
-    }
-    else
-    {
-        load_file( string_from_bstr( xml_or_filename_bstr ) );
-    }
-}
-
 //----------------------------------------------------------------Xslt_stylesheet::~Xslt_stylesheet
 
 Xslt_stylesheet::~Xslt_stylesheet()
@@ -140,7 +112,7 @@ bool Xslt_stylesheet::is_xml( const BSTR bstr )
 void Xslt_stylesheet::load_file( const string& path )
 {
     _path = path;   // Auch im Fehlerfall
-    _stylesheetJ = CppXsltStylesheetJ::new_instance(Document_ptr(file::string_from_file(path)).ref());
+    _stylesheetJ = CppXsltStylesheetJ::new_instance(Document_ptr::from_xml_bytes(file::string_from_file(path)).ref());
 }
 
 //------------------------------------------------------------------------Xslt_stylesheet::load_xml

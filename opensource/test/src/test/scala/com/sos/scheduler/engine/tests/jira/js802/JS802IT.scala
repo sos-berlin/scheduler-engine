@@ -47,15 +47,15 @@ class JS802IT extends SchedulerTest {
 
     @EventHandler def handleEvent(event: TaskEndedEvent) {
         assertTrue("Job "+event.jobPath+ " has been started before expected time "+startTime, new DateTime() isAfter startTime)
-        if (event.jobPath.getName == jobName)
-            collector.add(event.jobPath.getName)
+        if (event.jobPath.name == jobName)
+            collector.add(event.jobPath.name)
     }
 }
 
 object JS802IT {
     private val shortTimeout = SchedulerTest.shortTimeout
     private val orderDelay = 3+1
-    private val orderKey = OrderKey.of("/a", "atOrder")
+    private val orderKey = OrderKey("/a", "atOrder")
     private val jobName = "job"
     private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
 
@@ -65,7 +65,7 @@ object JS802IT {
     }
 
     private def orderElem(orderKey: OrderKey, startTime: DateTime) =
-        <order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>
+        <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>
             <run_time>
                 <at at={yyyymmddhhmmssFormatter.print(startTime)}/>
             </run_time>

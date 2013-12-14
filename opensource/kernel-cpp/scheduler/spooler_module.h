@@ -42,19 +42,23 @@ struct Text_with_includes : Non_cloneable
 
     bool                        is_empty                    () const;
 
-    string                      read_text                   ();
-    string                      read_text_element           ( const xml::Element_ptr& );
+    string                      read_xml_string             ()                                      { return read_text(true); }
+    string                      read_plain_string           ()                                      { return read_text(false); }
+    string                      read_plain_text_element     (const xml::Element_ptr& e)             { return read_text_element(e, false); }
     int                         text_element_linenr         ( const xml::Element_ptr& );
     string                      text_element_filepath       ( const xml::Element_ptr& );
 
-    string                      xml                         () const                                { return _xml; }
-    void                    set_xml                         ( const string& x )                     { _xml = x; }
+    string                      xml_string                  () const                                { return _xml; }
+    void                    set_xml_string                  ( const string& x )                     { _xml = x; }
     xml::Document_ptr           includes_resolved           () const;
 
     xml::Element_ptr            dom_element                 () const                                { return xml::Document_ptr(_xml).documentElement(); }
     void                        append_dom                  ( const xml::Element_ptr& dom );
 
   private:
+    string                      read_text                   (bool xml_expected);
+    string                      read_text_element           (const xml::Element_ptr&, bool xml_expected);
+
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     File_based*                _file_based;
@@ -88,7 +92,7 @@ struct Module : Object
     void                        set_log                     ( Has_log* log )                        { _log.set_log( log ); }
     void                        set_folder_path             ( const Absolute_path& p )              { _folder_path = p; }
     void                        set_dom                     ( const xml::Element_ptr& );
-    void                        set_xml_text_with_includes  ( const string& xml );
+    void                        set_xml_string_text_with_includes(const string& xml);
     void                        set_process                 ();                                     // F�r <process>
     void                        init0                       ();
     void                        init                        ();
@@ -102,7 +106,7 @@ struct Module : Object
     void                        set_priority                ( const string& );
 
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
-    string                      read_source_script          ()                                      { return _text_with_includes.read_text(); }
+    string                      read_source_script          ()                                      { return _text_with_includes.read_xml_string(); }
 
     Process_class*              process_class               () const;
     Process_class*              process_class_or_null       () const;

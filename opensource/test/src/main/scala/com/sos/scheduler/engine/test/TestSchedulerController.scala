@@ -176,7 +176,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
 
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
-    if (!configuration.expectedErrorLogEventPredicate(e) && configuration.terminateOnError && !suppressTerminatedOnError)
+    if (configuration.terminateOnError  && !suppressTerminatedOnError && !configuration.ignoreError(e.getCodeOrNull) && !configuration.errorLogEventIsExpected(e))
       terminateAfterException(error(s"Test terminated after error log line: ${e.getLine}"))
   }
 
@@ -194,13 +194,12 @@ with EventHandlerAnnotated with SosAutoCloseable {
       override def run() {
         try runnable.run()
         catch {
-          case t: Throwable => {
+          case t: Throwable =>
             terminateAfterException(t)
             throw propagate(t)
           }
         }
       }
-    }
 
   /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
   def newEventPipe(): EventPipe = {

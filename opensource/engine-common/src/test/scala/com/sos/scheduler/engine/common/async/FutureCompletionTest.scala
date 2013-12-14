@@ -24,27 +24,27 @@ final class FutureCompletionTest extends FunSuite with OneInstancePerTest {
   }
 
   test("Success") {
-    val call = futureTimedCall(now() + 100.ms) { "Hej!" }
+    val call = futureTimedCall(now() + 200.ms) { "Hej!" }
     queue.add(call)
     val future = call.future
-    (future.isCompleted, future.value) should be (false, None)
+    (future.isCompleted, future.value) shouldBe (false, None)
     dispatcher.executeMatureCalls()
-    (future.isCompleted, future.value) should be (false, None)
-    sleep(101.ms)
+    (future.isCompleted, future.value) shouldBe (false, None)
+    sleep(220.ms)
     dispatcher.executeMatureCalls()
-    (future.isCompleted, future.value) should be (true, Some(Success("Hej!")))
+    (future.isCompleted, future.value) shouldBe (true, Some(Success("Hej!")))
   }
 
   test("Failure") {
     val call = futureTimedCall(now() + 100.ms) { throw new TestException }
     queue.add(call)
     val future = call.future
-    (future.isCompleted, future.value) should be (false, None)
+    (future.isCompleted, future.value) shouldBe (false, None)
     dispatcher.executeMatureCalls()
-    (future.isCompleted, future.value) should be (false, None)
+    (future.isCompleted, future.value) shouldBe (false, None)
     sleep(101.ms)
     dispatcher.executeMatureCalls()
-    future.isCompleted should be (true)
+    future.isCompleted shouldBe true
     intercept[TestException] { future.value.get.get }
   }
 
@@ -52,30 +52,29 @@ final class FutureCompletionTest extends FunSuite with OneInstancePerTest {
     val call = futureCall { "Hej!" }
     queue.add(call)
     val future = call.future
-    (future.isCompleted, future.value) should be (false, None)
+    (future.isCompleted, future.value) shouldBe (false, None)
     dispatcher.executeMatureCalls()
-    (future.isCompleted, future.value) should be (true, Some(Success("Hej!")))
+    (future.isCompleted, future.value) shouldBe (true, Some(Success("Hej!")))
   }
 
   test("ShortTermCall Failure") {
     val call = futureCall { throw new TestException }
     queue.add(call)
     val future = call.future
-    (future.isCompleted, future.value) should be (false, None)
+    (future.isCompleted, future.value) shouldBe (false, None)
     dispatcher.executeMatureCalls()
-    future.isCompleted should be (true)
+    future.isCompleted shouldBe true
     intercept[TestException] { future.value.get.get }
   }
 
   test("callFuture") {
     implicit val implicitQueue = queue
     val future = callFuture { throw new TestException }
-    (future.isCompleted, future.value) should be (false, None)
+    (future.isCompleted, future.value) shouldBe (false, None)
     dispatcher.executeMatureCalls()
-    future.isCompleted should be (true)
+    future.isCompleted shouldBe true
     intercept[TestException] { future.value.get.get }
   }
 
   private case class TestException() extends RuntimeException
 }
-

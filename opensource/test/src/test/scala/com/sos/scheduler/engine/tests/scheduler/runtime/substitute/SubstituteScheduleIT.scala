@@ -39,7 +39,7 @@ final class SubstituteScheduleIT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object SubstituteScheduleIT {
-  private val jobPath = JobPath.of("/a")
+  private val jobPath = JobPath("/a")
 
   private def dt(o: String) =
     ISODateTimeFormat.dateHourMinute().parseDateTime(o)

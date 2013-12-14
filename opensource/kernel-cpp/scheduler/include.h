@@ -16,8 +16,8 @@ struct Include_command
     bool                        denotes_configuration_file  () const                                { return !_path.empty(); }
     File_path                   file_path                   () const                                { return _file_path; }
     Absolute_path               path                        () const                                { return _path; }
-    string                      register_include_and_read_content( File_based* source_file_based );
-    string                      read_content                ();
+    string                      register_include_and_read_content_bytes( File_based* source_file_based );
+    string                      read_content_bytes          ();
   //file::File_info*            file_info                   ();
     void                        initialize                  ();
     string                      obj_name                    () const;

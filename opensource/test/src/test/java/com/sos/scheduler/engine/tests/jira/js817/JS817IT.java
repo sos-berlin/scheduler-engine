@@ -22,7 +22,7 @@ public class JS817IT extends SchedulerTest {
     }
 
     @EventHandler public void handleEvent(OrderFinishedEvent e) {
-        if (e.orderKey().getId().equals(orderId))
+        if (e.orderKey().id().equals(orderId))
             controller().terminateScheduler();
     }
 }

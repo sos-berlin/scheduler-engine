@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.common.xml
 
 import com.google.common.base.Objects.firstNonNull
-import com.google.common.collect.ImmutableList
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.ModifiedBy.modifiedBy
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
@@ -16,9 +15,9 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.{Result, TransformerFactory}
 import javax.xml.xpath.{XPathConstants, XPathFactory}
-import org.w3c.dom.Node.DOCUMENT_NODE
 import org.w3c.dom.{Document, Element, Node, NodeList}
 import org.xml.sax.InputSource
+import scala.collection.JavaConversions._
 import scala.sys.error
 
 @ForCpp object XmlUtils {
@@ -31,17 +30,26 @@ import scala.sys.error
 
   private var static_xPathNullPointerLogged = false
 
-  @ForCpp def newDocument(): Document = {
+  @ForCpp
+  def newDocument(): Document = {
     val result = documentBuilder.newDocument()
     postInitializeDocument(result)
     result
   }
 
   def prettyXml(document: Document): String =
-    writingString { w => writeXmlTo(document, new StreamResult(w), None, indent=true) }
+    writingString { w => writeXmlTo(document, new StreamResult(w), encoding = None, indent = true) }
 
-  @ForCpp def loadXml(xml: Array[Byte], encoding: String): Document =
-    loadXml(new InputStreamReader(new ByteArrayInputStream(xml), Charset.forName(encoding)))
+  /** @param encoding "": Codierung steht im XML-Prolog. */
+  @ForCpp
+  def loadXml(xml: Array[Byte], encoding: String): Document =
+    loadXml(new ByteArrayInputStream(xml), encoding)
+
+  private def loadXml(in: InputStream, encoding: String): Document =
+    encoding match {
+      case "" => loadXml(in)
+      case _ => loadXml(new InputStreamReader(in, Charset forName encoding))
+    }
 
   def loadXml(xml: String): Document =
     loadXml(new StringReader(xml))
@@ -50,7 +58,7 @@ import scala.sys.error
     documentBuilder.parse(new InputSource(in)) modifiedBy postInitializeDocument
 
   def loadXml(in: InputStream): Document = {
-    val result = documentBuilder.parse(in)
+    val result = documentBuilder parse in
     postInitializeDocument(result)
     result
   }
@@ -59,41 +67,46 @@ import scala.sys.error
     doc.setXmlStandalone(true)
   }
 
-  @ForCpp def toXmlBytes(n: Node, encoding: String, indent: Boolean): Array[Byte] = {
+  @ForCpp
+  def toXmlBytes(n: Node, encoding: String, indent: Boolean): Array[Byte] = {
     val o = new ByteArrayOutputStream
-    writeXmlTo(n, o, Charset.forName(encoding), indent)
+      writeXmlTo(n, o, Charset.forName(encoding), indent = indent)
     o.toByteArray
   }
 
-  def toXml(n: Node): String = {
-    val result = writingString { w => writeXmlTo(n, w) }
-    if (n.getNodeType == DOCUMENT_NODE) result
-    else removeXmlProlog(result)
+  def toXml(n: Node): String =
+    toXml(n, indent = false)
+
+  @ForCpp
+  def toXml(n: Node, indent: Boolean): String = {
+    val result = writingString { w => writeXmlTo(n, w, indent = indent) }
+    removeXmlProlog(result)
   }
 
   private def removeXmlProlog(xml: String) =
     if (xml startsWith "<?") xml.replaceFirst("^<[?][xX][mM][lL].+[?][>]\\w*", "") else xml
 
   def writeXmlTo(n: Node, o: OutputStream, encoding: Charset, indent: Boolean) {
-    writeXmlTo(n, new StreamResult(o), Some(encoding), indent)
+    writeXmlTo(n, new StreamResult(o), Some(encoding), indent = indent)
   }
 
-  def writeXmlTo(n: Node, w: Writer) {
-    writeXmlTo(n, new StreamResult(w), None)
+  def writeXmlTo(n: Node, w: Writer, indent: Boolean = false) {
+    writeXmlTo(n, new StreamResult(w), encoding = None, indent = indent)
   }
 
-  private def writeXmlTo(n: Node, r: Result, encoding: Option[Charset], indent: Boolean = false) {
+  private def writeXmlTo(node: Node, result: Result, encoding: Option[Charset], indent: Boolean) {
     val transformer = transformerFactory.newTransformer()
     for (o <- encoding) transformer.setOutputProperty(ENCODING, o.name)
-    transformer.setOutputProperty(OMIT_XML_DECLARATION, if (n.getNodeType == DOCUMENT_NODE) "no" else "yes")
+    transformer.setOutputProperty(OMIT_XML_DECLARATION, if (encoding.isDefined) "no" else "yes")
     if (indent) {
       transformer.setOutputProperty(INDENT, "yes")
       transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4")
     }
-    transformer.transform(new DOMSource(n), r)
+    transformer.transform(new DOMSource(node), result)
   }
 
-  @ForCpp def booleanXmlAttribute(xmlElement: Element, attributeName: String, defaultValue: Boolean): Boolean = {
+  @ForCpp
+  def booleanXmlAttribute(xmlElement: Element, attributeName: String, defaultValue: Boolean): Boolean = {
     val value = xmlElement.getAttribute(attributeName)
     booleanOptionOf(value, defaultValue) getOrElse error(s"Invalid Boolean value in <${xmlElement.getNodeName} $attributeName=${xmlQuoted(value)}>")
   }
@@ -107,10 +120,12 @@ import scala.sys.error
     case _ => None
   }
 
-  @ForCpp def intXmlAttribute(xmlElement: Element, attributeName: String): Int =
+  @ForCpp
+  def intXmlAttribute(xmlElement: Element, attributeName: String): Int =
     intXmlAttribute(xmlElement, attributeName, null.asInstanceOf[Integer])
 
-  @ForCpp def intXmlAttribute(xmlElement: Element, attributeName: String, @Nullable defaultValue: Integer): Int = {
+  @ForCpp
+  def intXmlAttribute(xmlElement: Element, attributeName: String, @Nullable defaultValue: Integer): Int = {
     val value = xmlAttribute(xmlElement, attributeName, "")
     if (!value.isEmpty) {
       try Integer.parseInt(value)
@@ -125,7 +140,8 @@ import scala.sys.error
     }
   }
 
-  @ForCpp def xmlAttribute(xmlElement: Element, attributeName: String, @Nullable defaultValue: String): String = {
+  @ForCpp
+  def xmlAttribute(xmlElement: Element, attributeName: String, @Nullable defaultValue: String): String = {
     val result = xmlElement.getAttribute(attributeName)
     if (!result.isEmpty) result
     else {
@@ -140,7 +156,8 @@ import scala.sys.error
   def elementXPath(baseNode: Node, xpathExpression: String): Element =
     elementXPathOption(baseNode, xpathExpression) getOrElse error(s"XPath does not return an element: $xpathExpression")
 
-  @Nullable def elementXPathOrNull(baseNode: Node, xpathExpression: String): Element =
+  @Nullable
+  def elementXPathOrNull(baseNode: Node, xpathExpression: String): Element =
     elementXPathOption(baseNode, xpathExpression).orNull
 
   def elementXPathOption(baseNode: Node, xpathExpression: String): Option[Element] =
@@ -166,29 +183,27 @@ import scala.sys.error
   def booleanXPath(baseNode: Node, xpathExpression: String): Boolean =
     xPath.evaluate(xpathExpression, baseNode, XPathConstants.BOOLEAN).asInstanceOf[Boolean]
 
-  def childElements(element: Element): ImmutableList[Element] =
-    ImmutableList.copyOf(new SiblingElementIterator(element.getFirstChild))
+  def childElements(element: Element): Iterable[Element] =
+    new SiblingElementIterator(element.getFirstChild).toIterable
 
-  @Nullable def childElementOrNull(e: Element, name: String): Element = {
-    val i = new NamedChildElements(name, e).iterator
-    if (i.hasNext) i.next else null
-  }
+  def childElementOption(e: Element, name: String): Option[Element] =
+    new NamedChildElements(name, e).headOption
 
-  @ForCpp def xpathNodeList(baseNode: Node, xpathExpression: String): NodeList = {
+  @ForCpp
+  def xpathNodeList(baseNode: Node, xpathExpression: String): NodeList = {
     xPath.evaluate(xpathExpression, baseNode, XPathConstants.NODESET).asInstanceOf[NodeList]
   }
 
-  @ForCpp def xpathNode(baseNode: Node, xpathExpression: String): Node =
+  @ForCpp
+  def xpathNode(baseNode: Node, xpathExpression: String): Node =
     xPath.evaluate(xpathExpression, baseNode, XPathConstants.NODE).asInstanceOf[Node]
 
-  private def newXPathFactory(): XPathFactory = {
-    try XPathFactory.newInstance
+  private def newXPathFactory(): XPathFactory =
+    try XPathFactory.newInstance()
     catch {
-      case e: NullPointerException =>
-        // JSSIXFOUR-8: Passiert als Dienst unter Windows 2008 mit JDK 1.7.0_09 (64bit?).
+      case e: NullPointerException => // JSSIXFOUR-8: Passiert als Dienst unter Windows 2008 mit JDK 1.7.0_09 (64bit?).
         workaroundNewXPathFactory(e)
     }
-  }
 
   private def workaroundNewXPathFactory(e: NullPointerException): XPathFactory = {
     val workAroundClassName = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl"
@@ -197,27 +212,25 @@ import scala.sys.error
       static_xPathNullPointerLogged = true
     }
     try {
-      @SuppressWarnings(Array("unchecked")) val result = Class.forName(workAroundClassName).asInstanceOf[Class[XPathFactory]].newInstance
+      @SuppressWarnings(Array("unchecked"))
+      val result = Class.forName(workAroundClassName).asInstanceOf[Class[XPathFactory]].newInstance
       result
     }
     catch {
-      case ee: Throwable => {
+      case ee: Throwable =>
         logger.debug("Workaround failed", ee)
         throw e
       }
     }
-  }
 
   def xmlQuoted(value: String): String = {
     val result = new StringBuilder(value.length + 20)
     value foreach {
-      _ match {
-        case '"' => result.append("&quot;")
-        case '&' => result.append("&amp;")
-        case '<' => result.append("&lt;")
-        case o => result.append(o)
+      case '"' => result append "&quot;"
+      case '&' => result append "&amp;"
+      case '<' => result append "&lt;"
+      case o => result append o
       }
-    }
     "\""+ result +"\""
   }
 }

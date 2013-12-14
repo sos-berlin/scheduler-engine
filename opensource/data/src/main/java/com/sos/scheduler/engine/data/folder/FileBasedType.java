@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.folder;
 
-import java.io.File;
+import com.sos.scheduler.engine.data.order.OrderKey;
 
 public enum FileBasedType {
     folder("folder", "Folder"),
@@ -25,20 +25,28 @@ public enum FileBasedType {
     }
 
     public TypedPath typedPath(String absolutePath) {
-        return new TypedPath(this, new AbsolutePath(absolutePath));
+        switch (this) {
+            case job:
+                return new JobPath(absolutePath);
+            case jobChain:
+                return new JobChainPath(absolutePath);
+            //case schedule => new TypedPath(t, absolutePath)
+            //case folder =>
+            //case lock =>
+            case order:
+                return OrderKey.apply(absolutePath);
+            //case processClass =>
+        }
+        throw new IllegalArgumentException();
     }
 
-    public TypedPath typedPath(AbsolutePath p) {
-        return new TypedPath(this, p);
-    }
-
-    public File file(File baseDirectory, Path path) {
-        return new File(baseDirectory, filename(path.asString()));
-    }
-
-    public String filename(String name) {
-        return this == folder? name +"/" : name +"."+ cppName +".xml";
-    }
+//    public File file(File baseDirectory, Path path) {
+//        return new File(baseDirectory, filename(path.string()));
+//    }
+//
+//    public String filename(String name) {
+//        return this == folder? name +"/" : name +"."+ cppName +".xml";
+//    }
 
     @Override public String toString() {
         return printName;

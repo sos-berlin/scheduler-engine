@@ -82,16 +82,16 @@ void Include_command::initialize()
     }
 }
 
-//--------------------------------------------------------------------Include_command::read_content
+//--------------------------------------------------------------Include_command::read_content_bytes
 
-string Include_command::read_content()
+string Include_command::read_content_bytes()
 { 
-    return register_include_and_read_content( (File_based*)NULL ); 
+    return register_include_and_read_content_bytes( (File_based*)NULL );
 }
 
-//-----------------------------------------------Include_command::register_include_and_read_content
-    
-string Include_command::register_include_and_read_content( File_based* source_file_based )
+//-----------------------------------------Include_command::register_include_and_read_content_bytes
+
+string Include_command::register_include_and_read_content_bytes( File_based* source_file_based )
 {
     //Z_LOG2( "zschimmer", Z_FUNCTION << " " << obj_name() << "\n" );
 

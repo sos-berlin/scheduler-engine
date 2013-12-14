@@ -2255,9 +2255,9 @@ void Task_history::write( bool start )
 
                         if( !parameters.empty() )
                         {
-                            Any_file blob = ta.open_file( "-out " + _spooler->_db->db_name(), " -table=" + _spooler->_db->_job_history_tablename + " -clob=parameters where \"ID\"=" + as_string( _task->_id ) );
-                            blob.put( parameters );
-                            blob.close();
+                            Any_file clob = ta.open_file( "-out " + _spooler->_db->db_name(), " -table=" + _spooler->_db->_job_history_tablename + " -clob=parameters where \"ID\"=" + as_string( _task->_id ) );
+                            clob.put( parameters );
+                            clob.close();
                         }
                     }
                     else

@@ -165,7 +165,7 @@ string Xml_operation::async_state_text_() const
     result << Operation::async_state_text_();
     result << ", Xml_operation";
 
-    if( _request != "" )  result << " " << quoted_string( truncate_to_one_line_with_ellipsis( _request, 100 ) );
+    if( _request_bytes != "" )  result << " " << quoted_string( truncate_to_one_line_with_ellipsis( _request_bytes, 100 ) );
 
     return result;
 }
@@ -181,7 +181,7 @@ void Xml_operation::put_request_part( const char* data, int length )
         _operation_connection->_indent_string = "  ";      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
     }
 
-    _request.append( data, length );
+    _request_bytes.append( data, length );
 }
 
 //-----------------------------------------------------------------------------Xml_operation::begin
@@ -191,11 +191,11 @@ void Xml_operation::begin()
     Command_processor command_processor ( _spooler, _connection->_security_level, _connection->peer_host(), this );
     command_processor.set_log( &_connection->_log );
 
-    if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
+    if( string_begins_with( _request_bytes, " " ) )  _request_bytes = ltrim( _request_bytes );
 
-    //_connection->_log.info( message_string( "SCHEDULER-932", _request ) );
+    //_connection->_log.info( message_string( "SCHEDULER-932", _request_bytes ) );
 
-    _response = command_processor.response_execute( _request, _operation_connection->_indent_string );
+    _response = command_processor.response_execute_xml_bytes( _request_bytes, _operation_connection->_indent_string );
     _response->set_connection( _connection );
 
     //if( _operation_connection->_indent )  _response->_response = replace_regex( response->_response, "\n", "\r\n" );      // Für Windows-telnet
@@ -277,7 +277,7 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
                 //command_processor.set_host( host );
                 string cmd ( buffer, len );
                 _spooler->log()->info( message_string( "SCHEDULER-955", host.as_string(), cmd ) );
-                command_processor.execute( cmd );
+                command_processor.execute_xml_bytes( cmd );
             }
             
             something_done = true;

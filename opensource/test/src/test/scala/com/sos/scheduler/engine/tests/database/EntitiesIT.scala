@@ -183,7 +183,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="300" action="stop"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
       nodes should have size 2
-      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
+      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
       nodes(0) should have ('orderState ("200"), 'action ("next_state"))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))
     }
@@ -191,7 +191,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
     fetchJobChainNodeEntities(jobChainPath) match { case nodes =>
       nodes should have size 2
-      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash()))
+      for (n <- nodes) n should have ('schedulerId (schedulerId.string), 'clusterMemberId ("-"), 'jobChainPath (jobChainPath.withoutStartingSlash))
       nodes(0) should have ('orderState ("200"), 'action (null))
       nodes(1) should have ('orderState ("300"), 'action ("stop"))
     }
@@ -246,10 +246,10 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object EntitiesIT {
-  private val jobChainPath = JobChainPath.of("/test-job-chain")
+  private val jobChainPath = JobChainPath("/test-job-chain")
   private val orderId = new OrderId("ORDER-1")
-  private val orderJobPath = JobPath.of("/test-order-job")
-  private val simpleJobPath = JobPath.of("/test-simple-job")
+  private val orderJobPath = JobPath("/test-order-job")
+  private val simpleJobPath = JobPath("/test-simple-job")
   private val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
   private val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ") withZone schedulerTimeZone
 }

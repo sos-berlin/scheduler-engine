@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1079
 import JS1079IT._
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreePort
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
@@ -32,7 +32,7 @@ final class JS1079IT extends FunSuite with ScalaSchedulerTest {
     binariesDebugMode = Some(CppBinariesDebugMode.release))  // debug ist zu langsam
   private val nextUdpSocket = new UdpSocketGenerator
   private lazy val allDirectory = new File(controller.environment.configDirectory, "remote/_all")
-  private lazy val serverTcpPort = findRandomFreePort(10000 until 20000)
+  private lazy val serverTcpPort = findRandomFreeTcpPort()
 
   override def onBeforeSchedulerActivation() {
     val schedulerXmlString = schedulerXml(serverTcpPort).toString()

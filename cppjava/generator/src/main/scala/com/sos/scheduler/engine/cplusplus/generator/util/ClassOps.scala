@@ -40,21 +40,24 @@ object ClassOps {
     types filter { t => typeIsValidClass(t) && t != clas }
   }
 
-  def validConstructors(c: JavaClass) = c.getConstructors.toList filter memberIsValid
+  def validConstructors(c: JavaClass) =
+    c.getConstructors.toList filter memberIsValid
 
   def validMethods(c: JavaClass) = withoutOverriddenVariantMethods(c.getDeclaredMethods.toList filter memberIsValid)
 
-  /** Wenn die Klasse mit {@link ForCpp} annotiert ist, werden nur ebenso annotierte Member für C++ übernommen. */
+  /** Wenn die Klasse mit [[com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp]] annotiert ist, werden nur ebenso annotierte Member für C++ übernommen. */
   private def memberIsValid(m: Member) =
     memberIsAnnotated(m, classOf[ForCpp]) ||
         !classIsAnnotated(m.getDeclaringClass, classOf[ForCpp]) && Modifier.isPublic(m.getModifiers)
 
-  private def classIsAnnotated(c: Class[_], a: Class[_ <: Annotation]) = c.getAnnotation(a) != null
+  private def classIsAnnotated(c: Class[_], a: Class[_ <: Annotation]) =
+    c.getAnnotation(a) != null
 
-  private def memberIsAnnotated(m: Member, clas: Class[_ <: Annotation]) = m match {
-    case c: Constructor[_] => c.getAnnotation(clas) != null
-    case m: Method => m.getAnnotation(clas) != null
-  }
+  private def memberIsAnnotated(m: Member, clas: Class[_ <: Annotation]) =
+    m match {
+      case c: Constructor[_] => c.getAnnotation(clas) != null
+      case m: Method => m.getAnnotation(clas) != null
+    }
 
   def typeIsValidClass(t: JavaClass) =
     !t.isPrimitive &&
@@ -92,8 +95,8 @@ object ClassOps {
     (map.values map methodWithBestReturnType).toList
   }
 
-
-  def neededClasses(clas: JavaClass) = superclasses(clas).toSet - clas
+  def neededClasses(clas: JavaClass) =
+    superclasses(clas).toSet - clas
 
   def superclasses(clas: JavaClass) = {
     def superclassList(clas: JavaClass): List[JavaClass] = clas.getSuperclass match {
@@ -116,10 +119,17 @@ object ClassOps {
   def parameterizedTypes(types: Seq[Type]): List[ParameterizedType] =
     types.toList filter { _.isInstanceOf[ParameterizedType] } map { _.asInstanceOf[ParameterizedType]}
 
-  def isVoid(t: Class[_]) = t == classOf[Void]  ||  t.getName == "void"
-  def isClass(t: Class[_]) = classOf[Object] isAssignableFrom t
-  def classIsString(t: Class[_]) = classOf[String] isAssignableFrom t
-  def classIsByteArray(t: Class[_]) = t.isArray && t.getComponentType.getName == "byte"
+  def isVoid(t: Class[_]) =
+    t == classOf[Void]  ||  t.getName == "void"
+
+  def isClass(t: Class[_]) =
+    classOf[Object] isAssignableFrom t
+
+  def classIsString(t: Class[_]) =
+    classOf[String] isAssignableFrom t
+
+  def classIsByteArray(t: Class[_]) =
+    t.isArray && t.getComponentType.getName == "byte"
 
   def compareClassSeqs(a: Seq[Class[_]], b: Seq[Class[_]]): Int =
     a zip b map { x => compareClasses(x._1, x._2) } find { _ != 0 } match {
@@ -127,5 +137,6 @@ object ClassOps {
       case Some(c) => c
     }
 
-  def compareClasses(a: Class[_], b: Class[_]): Int = a.getName compare b.getName
+  def compareClasses(a: Class[_], b: Class[_]): Int =
+    a.getName compare b.getName
 }

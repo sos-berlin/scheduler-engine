@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js948;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
 import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author ss
@@ -63,7 +64,7 @@ public class JS948IT extends SchedulerTest {
     public void handleEvent(TaskEndedEvent e) {
         tasksCompleted++;
         if (tasksCompleted == 1)
-            assertEquals("repeat", e.jobPath().getName());       // läuft beim Start des JobScheduler automatisch an
+            assertEquals("repeat", e.jobPath().name());       // läuft beim Start des JobScheduler automatisch an
 
         // Erneuter Start durch wake_when_in_period
         if (modifyCommands < maxModifyCommands) {          // absolute_repeat.job wird beim Start des JobScheduler 1x ausgeführt

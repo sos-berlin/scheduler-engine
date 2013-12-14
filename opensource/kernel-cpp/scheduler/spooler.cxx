@@ -1303,7 +1303,7 @@ void Spooler::send_cmd()
 {
     xml::Document_ptr xml_doc;
     try {
-        xml_doc.load_xml( _send_cmd );      // Haben wir ein gültiges XML-Dokument?
+        xml_doc.load_xml_bytes( _send_cmd_xml_bytes );      // Haben wir ein gültiges XML-Dokument?
     } catch (exception& x) {
         _spooler->log()->error(x.what());       // Log ist möglicherweise noch nicht geöffnet
         throw;
@@ -1332,8 +1332,8 @@ void Spooler::send_cmd()
     int ret = connect( sock, (sockaddr*)&addr, sizeof addr );
     if( ret == -1 )  z::throw_socket( socket_errno(), "connect", ip_string.c_str() );
 
-    const char* p     = _send_cmd.data();
-    const char* p_end = p + _send_cmd.length();
+    const char* p     = _send_cmd_xml_bytes.data();
+    const char* p_end = p + _send_cmd_xml_bytes.length();
 
     while( p < p_end )
     {
@@ -1529,9 +1529,9 @@ void Spooler::read_command_line_arguments()
             //else
             if( opt.with_value( "program-file"     ) )  _my_program_filename = opt.value();        // .../scheduler.exe
             else
-            if( opt.with_value( "send-cmd"         ) )  _send_cmd = opt.value();
+            if( opt.with_value( "send-cmd"         ) )  _send_cmd_xml_bytes = opt.value();
             else
-            if( opt.with_value( "cmd"              ) )  _xml_cmd = opt.value();
+            if (opt.with_value( "cmd"              ) )  _cmd_xml_bytes = opt.value();
             else
             if( opt.with_value( "port"             ) )  _tcp_port = _udp_port = opt.as_int(),  _tcp_port_as_option_set = _udp_port_as_option_set = true;
             else
@@ -1752,7 +1752,7 @@ void Spooler::read_xml_configuration()
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
     if( _configuration_is_job_script )
-        cp.execute( configuration_for_single_job_script() );
+        cp.execute_xml_string( configuration_for_single_job_script() );
     else
         cp.execute_config_file( _configuration_file_path );
 
@@ -2048,11 +2048,11 @@ void Spooler::activate()
     load_subsystems();
     activate_subsystems();
 
-    if( !_xml_cmd.empty() )
+    if (!_cmd_xml_bytes.empty())
     {
         Command_processor cp ( this, Security::seclev_all );
-        cout << cp.execute( _xml_cmd, "  " );          // Bei einem Fehler Abbruch
-        _xml_cmd = "";
+        cout << cp.execute_xml_bytes(_cmd_xml_bytes, "  ");          // Bei einem Fehler Abbruch
+        _cmd_xml_bytes = "";
     }
 
     execute_config_commands();                                                                          
@@ -2081,7 +2081,7 @@ void Spooler::execute_config_commands()
             {
                 Message_string m ( "SCHEDULER-966" );
                 m.set_max_insertion_length( INT_MAX );
-                m.insert( 1, result.xml( string_encoding, true ) );
+                m.insert( 1, result.xml_string() );
                 _log->info( m );
             }
         }
@@ -2924,23 +2924,23 @@ void Spooler::suspend_machine()
 #   endif
 }
 
-//-----------------------------------------------------------------------------Spooler::execute_xml
+//----------------------------------------------------------------------Spooler::execute_xml_string
 
-string Spooler::execute_xml(const string& xml_command) {
-    return execute_xml_with_security_level(xml_command, Security::seclev_all, Host());
+string Spooler::execute_xml_string(const string& xml_command) {
+    return execute_xml_string_with_security_level(xml_command, Security::seclev_all, Host());
 }
 
-//----------------------------------------------------------Spooler::execute_xml_with_security_level
+//--------------------------------------------------Spooler::execute_xml_string_with_security_level
 
-string Spooler::execute_xml_with_security_level(const string& xml_command, const string& security_level, const string& client_host) {
-    return execute_xml_with_security_level(xml_command, Security::as_level(security_level), Host(client_host));
+string Spooler::execute_xml_string_with_security_level(const string& xml_command, const string& security_level, const string& client_host) {
+    return execute_xml_string_with_security_level(xml_command, Security::as_level(security_level), Host(client_host));
 }
 
-//----------------------------------------------------------Spooler::execute_xml_with_security_level
+//--------------------------------------------------Spooler::execute_xml_string_with_security_level
 
-string Spooler::execute_xml_with_security_level(const string& xml_command, Security::Level security_level, const Host& client_host) {
+string Spooler::execute_xml_string_with_security_level(const string& xml_command, Security::Level security_level, const Host& client_host) {
     Command_processor cp ( _spooler, security_level, client_host);
-    return cp.execute(xml_command);
+    return cp.execute_xml_string(xml_command);
 }
 
 //-----------------------------------------------------------------------Spooler::java_execute_http
@@ -3223,7 +3223,7 @@ void Spooler::log_show_state( Prefix_log* log )
     try
     {
         Command_processor cp     ( this, Security::seclev_all );
-        string xml = cp.execute( "<show_state what='folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations' />", "  " );
+        string xml = cp.execute_xml_string( "<show_state what='folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations' />", "  " );
 
         if( log )
         {
@@ -3304,7 +3304,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 
 
-    if( _send_cmd != "" ) { 
+    if( _send_cmd_xml_bytes != "" ) { 
         send_cmd();  
         stop(); 
     }

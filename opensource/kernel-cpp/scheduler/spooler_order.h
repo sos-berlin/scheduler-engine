@@ -194,9 +194,9 @@ struct Order : Com_order,
     void                    set_param                   ( const string& name, const Variant& value );
     Variant                     param                   ( const string& name );
 
-    void                    set_xml_payload             ( const string& xml );
-    void                    set_xml_payload             ( const xml::Element_ptr& );
-    string                      xml_payload             () const                                    { return _xml_payload; }
+    void                    set_payload_xml_string      ( const string& xml );
+    void                    set_payload_xml             ( const xml::Element_ptr& );
+    string                      xml_payload_string      () const                                    { return _payload_xml_string; }
     void                    set_web_service             ( const string&, bool force = false );
     void                    set_web_service             ( Web_service*, bool force = false );
     Web_service*                web_service             () const;
@@ -350,7 +350,7 @@ struct Order : Com_order,
     State                      _outer_job_chain_state;
     Payload                    _payload;
     ptr<Com_variable_set>      _original_params;
-    string                     _xml_payload;
+    string                     _payload_xml_string;
     State                      _initial_state;          // F�r Wiederholung mit <run_time> oder <schedule>. Bei verschachtelten Jobkette in der �bergeordneten Jobkette
     ptr<Web_service>           _web_service;
 

@@ -115,7 +115,7 @@ void                            append_error_element        ( const xml::Element
 void                            append_error_element        ( const xml::Element_ptr&, const zschimmer::Xc& );
 Xc_copy                         xc_from_dom_error           ( const xml::Element_ptr& );
 void                            dom_append_nl               ( const xml::Element_ptr& );
-string                          xml_as_string               ( const xml::Document_ptr&, const string& indent_string = "" );
+string                          xml_as_string               ( const xml::Document_ptr&);
 
 //---------------------------------------------------------------------------------Command_response
 
@@ -263,13 +263,15 @@ struct Command_processor
 
     void                        execute_config_file         ( const string& xml_filename );
     void                        execute_http                ( http::Request*, http::Response*, Http_file_directory* );
-    ptr<Command_response>       response_execute            ( const string& xml_text, const string& indent_string = "" );
-    string                      execute                     ( const string& xml_text, const string& indent_string = "" );
-    xml::Document_ptr           execute                     ( const xml::Document_ptr& );
-    void                        execute_2                   ( const string& xml_text );
+    ptr<Command_response>       response_execute_xml_string (const string& xml_text, const string& indent_string = "") { return response_execute(xml_text, false, indent_string); }
+    ptr<Command_response>       response_execute_xml_bytes  (const string& xml_text, const string& indent_string = "") { return response_execute(xml_text, true, indent_string); }
+    ptr<Command_response>       response_execute            (const string& xml_text, bool is_bytes, const string& indent_string);
+    string                      execute_xml_string          (const string& xml_text, const string& indent_string = "");
+    string                      execute_xml_bytes           (const string& xml_text, const string& indent_string = "");
+    xml::Document_ptr           execute                     (const xml::Document_ptr&);
     void                        execute_2                   ( const xml::Document_ptr& );
     void                        execute_2                   ( const xml::Element_ptr& );
-    xml::Document_ptr           dom_from_xml                ( const string& xml_text );
+    xml::Document_ptr           dom_from_xml                ( const string& xml_text, bool is_bytes );
     void                        execute_commands            ( const xml::Element_ptr& );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
     xml::Element_ptr            execute_command_in_java     ( const xml::Element_ptr& );

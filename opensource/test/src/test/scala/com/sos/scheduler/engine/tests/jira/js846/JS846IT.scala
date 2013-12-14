@@ -21,7 +21,7 @@ final class JS846IT extends FunSuite with ScalaSchedulerTest {
       val orderKey = jobChainPath.orderKey("2")
       val eventPipe = controller.newEventPipe()
       val longTitle = "x" * titleLength
-      scheduler executeXml <order job_chain={orderKey.jobChainPathString} id={orderKey.idString} title={longTitle}/>
+      scheduler executeXml <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string} title={longTitle}/>
       eventPipe.nextWithCondition { e: OrderFinishedEvent => e.orderKey == orderKey }
     }
   }
@@ -29,11 +29,11 @@ final class JS846IT extends FunSuite with ScalaSchedulerTest {
   test("Order with title growing longer than 200 characters should not lead to database error") {
     val orderKey = jobChainPath.orderKey("1")
     val eventPipe = controller.newEventPipe()
-    scheduler executeXml <modify_order job_chain={orderKey.jobChainPathString} order={orderKey.idString} suspended="false"/>
+    scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} suspended="false"/>
     eventPipe.nextWithCondition { e: OrderFinishedEvent => e.orderKey == orderKey }
   }
 }
 
 private object JS846IT {
-  val jobChainPath = JobChainPath.of("/test")
+  val jobChainPath = JobChainPath("/test")
 }

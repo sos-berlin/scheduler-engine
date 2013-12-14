@@ -31,8 +31,8 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     String string_need_db();
     void log_show_state();
     void assign_stdout ();
-    String execute_xml(String xml);
-    String execute_xml_with_security_level(String xml, String security_level, String clientHostName);
+    String execute_xml_string(String xml);
+    String execute_xml_string_with_security_level(String xml, String security_level, String clientHostName);
     HttpResponseC java_execute_http(SchedulerHttpRequest request, SchedulerHttpResponse response);
     HttpResponseC java_execute_http_with_security_level(SchedulerHttpRequest request, SchedulerHttpResponse response, String security_level);
     void cmd_pause();

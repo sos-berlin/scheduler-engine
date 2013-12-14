@@ -32,5 +32,5 @@ final class JS616IT extends FunSuite with ScalaSchedulerTest {
 
 
 private object JS616IT {
-  private val shellOrderKey = OrderKey.of("/test-shell", "1")
+  private val shellOrderKey = OrderKey("/test-shell", "1")
 }

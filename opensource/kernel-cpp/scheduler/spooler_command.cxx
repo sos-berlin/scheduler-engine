@@ -569,7 +569,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
 
         // Einstellung der Dokumentation ï¿½bernehmen
 
-        xml::Document_ptr doc                        ( java_resource_as_string("com/sos/scheduler/enginedoc/common/log_categories.xml"));
+        xml::Document_ptr doc = xml::Document_ptr::from_xml_string(java_resource_as_string("com/sos/scheduler/enginedoc/common/log_categories.xml"));
         xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
 
         execute_scheduler_log__append( doc_log_categories_element, "", result );
@@ -1011,7 +1011,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
-    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << start_task_element.xml() << "\n");
+    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << start_task_element.xml_string() << "\n");
 //    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !_spooler->_remote_commands_allowed_for_licence ) {
         if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
@@ -1044,7 +1044,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     xml::Element_ptr result = _answer.createElement( "process" ); 
     result.setAttribute( "process_id", process->process_id() );
     if( process->pid() )  result.setAttribute( "pid", process->pid() );
-    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " result=" << result.xml() << "\n");
+    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " result=" << result.xml_string() << "\n");
     return result;
 }
 
@@ -1311,7 +1311,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
     if( xml::Element_ptr xml_payload_element = modify_order_element.select_node( "xml_payload" ) )
     {
-        order->set_xml_payload( xml_payload_element.first_child_element() );
+            order->set_payload_xml( xml_payload_element.first_child_element() );
     }
 
     if( priority != "" )  order->set_priority( as_int( priority ) );
@@ -1454,7 +1454,7 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
     ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
 
     order->set_state( Web_service::forwarding_job_chain_forward_state );
-    order->set_payload( Variant( service_request_element.xml() ) );
+    order->set_payload(Variant(service_request_element.xml_string()));
     order->place_in_job_chain( _spooler->root_folder()->job_chain_folder()->job_chain( Web_service::forwarding_job_chain_name ) );
     
     return _answer.createElement( "ok" );
@@ -1515,7 +1515,7 @@ void Get_events_command_response::close()
 
 void Get_events_command_response::write_event( const Scheduler_event& event )
 {
-    write( event.xml() );
+    write( event.xml_bytes() );
 
     if( _append_0_byte )  write( io::Char_sequence( "\0", 1 ) );       // 0-Byte anhï¿½ngen
                     else  write( "\n" );
@@ -1531,7 +1531,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     {
         Message_string m ( "SCHEDULER-965" );
         //m.set_max_insertion_length( INT_MAX );
-        m.insert( 1, element.xml(string_encoding) );
+        m.insert(1, element.xml_string());
         _log->info( m );
     }
 
@@ -1670,21 +1670,21 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 //-------------------------------------------------------Command_processor::execute_command_in_java
 
 xml::Element_ptr Command_processor::execute_command_in_java(const xml::Element_ptr& element) {
-    string result = _spooler->schedulerJ().javaExecuteXml(element.xml());;
+    string result = _spooler->schedulerJ().javaExecuteXml(element.xml_string());;
     if (result == "UNKNOWN_COMMAND")  z::throw_xc("SCHEDULER-105", element.nodeName());   //Provisorisch, bis Java ordentliche Scheduler-Exceptions liefert
-    return result == ""? xml::Element_ptr() : _answer.importNode(xml::Document_ptr(result).documentElement());
+    return result == ""? xml::Element_ptr() : _answer.importNode(xml::Document_ptr::from_xml_string(result).documentElement());
 }
 
 //------------------------------------------------------------------------------------xml_as_string
 
-string xml_as_string( const xml::Document_ptr& document, const string& indent_string )
+string xml_as_string( const xml::Document_ptr& document)
 {
     string result;
 
     try 
     {
-        result = document.xml( string_encoding, indent_string );
-        if( indent_string != "" && result.find('\r') == string::npos)  result = replace_regex( result, "\n", "\r\n" );      // Fï¿½r Windows-telnet
+        result = document.xml_string();
+        //if( indent_string != "" && result.find('\r') == string::npos)  result = replace_regex( result, "\n", "\r\n" );      // Fï¿½r Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
@@ -1710,12 +1710,12 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
         if( http_request->http_method() == "GET" )
         {
-            if( string_begins_with( path, "/<" ) )   // direct XML command, e.g. <show_state/>
+            if( string_begins_with( path, "/<" ) )   // direct XML command, e.g. <show_state/>, ASCII
             {
                 string xml = path.substr( 1 );
                 http_response->set_header( "Cache-Control", "no-cache" );
-                response_body = execute( xml, "  " );  // JS-486, the security level will be checked here, too (with error message)
-                response_content_type = "text/xml";
+                response_body = execute_xml_string( xml, "  " );  // JS-486, the security level will be checked here, too (with error message)
+                response_content_type = "text/xml; charset=" + string_encoding;
             }
             else
             if( string_ends_with( path, "?" ) )
@@ -1855,7 +1855,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                 else
                 if( string_ends_with( path, "/show_config?" ) )
                 {
-                    if( _spooler->_config_document )  response_body = _spooler->_config_document.xml();
+                    if( _spooler->_config_document )  response_body = _spooler->_config_document.xml_bytes(string_encoding);
 
                     response_content_type = "text/xml";
                 }
@@ -1929,8 +1929,8 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
         else
         if( http_request->http_method() == "POST" )
         {
-            response_body = execute( http_request->body(), "  " );
-            response_content_type = "text/xml";
+            response_body = execute_xml_string( http_request->body(), "  " );   // Anders als bei Jetty ist der C++-Body ist eine Bytefolge, kein String. Die Bytefolge sollte ISO-8859-1-codiert sein, damit das funktioniert.
+            response_content_type = "text/xml; charset=" + string_encoding;
         }
         else
             throw http::Http_exception( http::status_501_not_implemented );
@@ -1938,8 +1938,8 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
         if( response_body.empty() )
         {
-            response_body = execute( "<show_state what=\"all,orders\"/>", "  " );
-            response_content_type = "text/xml";
+            response_body = execute_xml_string( "<show_state what=\"all,orders\"/>", "  " );
+            response_content_type = "text/xml; charset=" + string_encoding;
         }
 
         http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
@@ -1957,9 +1957,9 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
     }
 }
 
-//--------------------------------------------------------------Command_processor::response_execute
+//---------------------------------------------------Command_processor::response_execute_xml_string
 
-ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, const string& indent_string )
+ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, bool is_bytes, const string& indent_string )
 {
     try 
     {
@@ -1968,7 +1968,9 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
         string xml_text = xml_text_par;
         if( strchr( xml_text.c_str(), '<' ) == NULL )  xml_text = "<" + xml_text + "/>";
 
-        execute_2( xml_text );
+        try {
+            execute_2(dom_from_xml(xml_text, is_bytes));
+        } catch (const _com_error& com_error) { throw_com_error(com_error, "DOM/XML"); }
 
         if( !_answer.documentElement().firstChild().hasChildNodes()  &&  !_response )  z::throw_xc( "SCHEDULER-353" );
     }
@@ -1979,18 +1981,25 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
     if( !result )
     {
         //_spooler->signal("execute_xml");    // Sonst schläft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
-        ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( xml_as_string( _answer, indent_string ) ) );
+        ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( _answer.xml_bytes(string_encoding, indent_string != "") ) );
         result = +r;
     }
     
     return +result;
 }
 
-//------------------------------------------------------------------------Command_processor::execute
+//------------------------------------------------------------Command_processor::execute_xml_string
 
-string Command_processor::execute( const string& xml_text_par, const string& indent_string )
+string Command_processor::execute_xml_string( const string& xml_text_par, const string& indent_string )
 {
-    return response_execute( xml_text_par, indent_string )->complete_text();
+    return response_execute_xml_string( xml_text_par, indent_string )->complete_text();
+}
+
+//--------------------------------------------------------------Command_processor::execute_xml_bytes
+
+string Command_processor::execute_xml_bytes(const string& xml_text_par, const string& indent_string)
+{
+  return response_execute_xml_bytes(xml_text_par, indent_string)->complete_text();
 }
 
 //------------------------------------------------------------------------Command_processor::execute
@@ -2022,7 +2031,7 @@ void Command_processor::execute_config_file( const string& filename )
 
         Z_LOGI2( "scheduler", Z_FUNCTION << "\n" << filename << ":\n" << content << "\n" );
 
-        xml::Document_ptr dom_document = dom_from_xml( content );
+        xml::Document_ptr dom_document = dom_from_xml( content, true );
         dom_document.select_node_strict( "/spooler/config" );
 
         _dont_log_command = true;
@@ -2035,9 +2044,9 @@ void Command_processor::execute_config_file( const string& filename )
     }
 }
 
-//------------------------------------------------------------------Command_processor::dom_from_xml
+//------------------------------------------------------------Command_processor::dom_from_xml
 
-xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
+xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text, bool is_bytes )
 {
     Z_LOGI2( "scheduler.xml", "XML-Dokument wird gelesen ...\n" );
 
@@ -2045,7 +2054,8 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
     command_doc.create();
 
     try {
-        command_doc.load_xml( xml_text );
+        if (is_bytes) command_doc.load_xml_bytes( xml_text );
+                 else command_doc.load_xml_string(xml_text);
     } catch (exception& x) {
         _spooler->log()->error(x.what());       // Log ist möglicherweise noch nicht geöffnet
         throw;
@@ -2058,23 +2068,12 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
 
 //----------------------------------------------------------------------Command_processor::execute_2
 
-void Command_processor::execute_2( const string& xml_text )
-{
-    try 
-    {
-        execute_2( dom_from_xml( xml_text ) );
-    }
-    catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
-}
-
-//----------------------------------------------------------------------Command_processor::execute_2
-
 void Command_processor::execute_2( const xml::Document_ptr& command_doc )
 {
     try 
     {
         if( !_dont_log_command )  {
-            string line = replace_regex(command_doc.xml(string_encoding), "\\?\\>\n", "?>", 1);
+            string line = replace_regex(command_doc.xml_string(), "\\?\\>\n", "?>", 1);
             string nl = !line.empty() && *line.rbegin() == '\n' ? "" : "\n";
             Z_LOG2( "scheduler", "Execute " << line << nl);
         }
@@ -2088,7 +2087,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
     // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
-    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml(string_encoding));
+    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml_string());
 }
 
 //---------------------------------------------------------------------Command_processor::execute_2

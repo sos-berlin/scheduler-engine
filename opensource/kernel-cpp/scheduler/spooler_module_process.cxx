@@ -243,7 +243,7 @@ Async_operation* Process_module_instance::begin__start()
     // Wegen open_inheritable sollte vor begin__end() kein anderer Prozess gestartet werden.
     // (Sowieso wird begin__end() gleich danach gerufen)
 
-    if (_spooler) {   // JS-1039 - Wir sind im Hauptprozess, nicht in einem Task-Prozess, der schon stdout zugewiesen bekommen hat. Siehe Com_remote_module_instance_server::Begin()
+    if (_stdout_path.empty()) {  // JS-1039 - set_stdout_path() ist nicht aufgerufen worden, also öffenen wir selbst die stdout/stderr-Dateien. Siehe Com_remote_module_instance_server::Begin()
         _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
         _stdout_path = _stdout_file.path();
         _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
@@ -877,12 +877,12 @@ void Process_module_instance::fill_process_environment_with_params()
         vector<Variant> parameters;
         xml = com_invoke( DISPATCH_PROPERTYGET, task, "Params_xml", &parameters );
         task_params = new Com_variable_set();
-        task_params->set_xml( xml.as_string() );
+        task_params->set_xml_string( xml.as_string() );
 
         xml = com_invoke( DISPATCH_PROPERTYGET, task, "Order_params_xml", &parameters );
         if( !xml.is_null_or_empty_string() ) {
             order_params = new Com_variable_set();
-            order_params->set_xml( xml.as_string() );
+            order_params->set_xml_string( xml.as_string() );
         }
     }
 

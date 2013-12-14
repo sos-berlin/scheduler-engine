@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.common.xml;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -10,6 +11,7 @@ import static com.google.common.base.Charsets.US_ASCII;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static scala.collection.JavaConversions.asJavaIterable;
 
 public final class XmlUtilsTest {
     @Test public void testLoadXml_String() {
@@ -107,7 +109,7 @@ public final class XmlUtilsTest {
 
     private static void testChildElements(String xml, String... expected) {
         Element e = XmlUtils.loadXml(xml).getDocumentElement();
-        List<Element> list = XmlUtils.childElements(e);
+        List<Element> list = ImmutableList.copyOf(asJavaIterable(XmlUtils.childElements(e)));
         assertThat(list, hasSize(expected.length));
         for (int i = 0; i < list.size(); i++)
             assertThat(list.get(i).getTagName(), equalTo(expected[i]));

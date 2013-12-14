@@ -21,6 +21,7 @@ struct XmlUtils__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Static_method const _intXmlAttribute__Lorg_w3c_dom_Element_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Static_method const _loadXml___3BLjava_lang_String_2__method;
     ::zschimmer::javabridge::Static_method const _newDocument____method;
+    ::zschimmer::javabridge::Static_method const _toXml__Lorg_w3c_dom_Node_2Z__method;
     ::zschimmer::javabridge::Static_method const _toXmlBytes__Lorg_w3c_dom_Node_2Ljava_lang_String_2Z__method;
     ::zschimmer::javabridge::Static_method const _xmlAttribute__Lorg_w3c_dom_Element_2Ljava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Static_method const _xpathNode__Lorg_w3c_dom_Node_2Ljava_lang_String_2__method;
@@ -37,6 +38,7 @@ XmlUtils__class::XmlUtils__class(const string& class_name) :
     ,_intXmlAttribute__Lorg_w3c_dom_Element_2Ljava_lang_String_2__method(this, "intXmlAttribute", "(Lorg/w3c/dom/Element;Ljava/lang/String;)I")
     ,_loadXml___3BLjava_lang_String_2__method(this, "loadXml", "([BLjava/lang/String;)Lorg/w3c/dom/Document;")
     ,_newDocument____method(this, "newDocument", "()Lorg/w3c/dom/Document;")
+    ,_toXml__Lorg_w3c_dom_Node_2Z__method(this, "toXml", "(Lorg/w3c/dom/Node;Z)Ljava/lang/String;")
     ,_toXmlBytes__Lorg_w3c_dom_Node_2Ljava_lang_String_2Z__method(this, "toXmlBytes", "(Lorg/w3c/dom/Node;Ljava/lang/String;Z)[B")
     ,_xmlAttribute__Lorg_w3c_dom_Element_2Ljava_lang_String_2Ljava_lang_String_2__method(this, "xmlAttribute", "(Lorg/w3c/dom/Element;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;")
     ,_xpathNode__Lorg_w3c_dom_Node_2Ljava_lang_String_2__method(this, "xpathNode", "(Lorg/w3c/dom/Node;Ljava/lang/String;)Lorg/w3c/dom/Node;")
@@ -92,6 +94,16 @@ jint XmlUtils::intXmlAttribute(const ::zschimmer::javabridge::proxy_jobject< ::j
     XmlUtils__class* cls = XmlUtils__class::class_factory.clas();
     ::javaproxy::org::w3c::dom::Document result;
     result.steal_local_ref(cls->_newDocument____method.jobject_call(cls->get_jclass(), parameter_list));
+    return result;
+}
+
+::javaproxy::java::lang::String XmlUtils::toXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, jboolean p1) {
+    ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    parameter_list._jvalues[1].z = p1;
+    XmlUtils__class* cls = XmlUtils__class::class_factory.clas();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_toXml__Lorg_w3c_dom_Node_2Z__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 

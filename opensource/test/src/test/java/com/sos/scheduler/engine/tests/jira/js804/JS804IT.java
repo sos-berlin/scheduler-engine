@@ -61,7 +61,8 @@ public final class JS804IT extends SchedulerTest {
     private void showCalendar() {
     	showCalendarAnswer = loadXml(scheduler().executeXml(util.showCalendar(ONE_DAY, What.orders).getCommand()));
         StringWriter sw = new StringWriter();
-        writeXmlTo(showCalendarAnswer.getFirstChild(), sw);
+        boolean notIndent = false;
+        writeXmlTo(showCalendarAnswer.getFirstChild(), sw, notIndent);
     }
 
     private boolean isSetback(String order) {

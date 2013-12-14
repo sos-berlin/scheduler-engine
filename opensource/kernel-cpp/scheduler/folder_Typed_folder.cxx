@@ -182,10 +182,10 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                     ignore_duplicate_configuration_file( current_file_based, (File_based*)NULL, *directory_entry );
                 } else {
                     z::Xc content_xc;
-                    string source_xml;
+                    string source_xml_bytes;
 
                     try {
-                        source_xml = string_from_file( directory_entry->_file_info->path() );
+                        source_xml_bytes = string_from_file( directory_entry->_file_info->path() );
                     }
                     catch( exception& x ) { content_xc = x; }
 
@@ -224,9 +224,9 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                         if( !content_xc.is_empty() )  throw content_xc;
 
-                        Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml << "\n" );
+                        Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml_bytes << "\n" );
                         file_based->set_xml(source_xml);         // Ruft clear_source_xml()
-                        file_based->_source_xml = source_xml;   
+                        file_based->_source_xml_bytes = source_xml_bytes;   
                         file_based->set_file_based_state( File_based::s_not_initialized );
                         file_based->initialize();
 

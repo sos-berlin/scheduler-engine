@@ -38,7 +38,7 @@ final class JS1081IT extends FunSuite with ScalaSchedulerTest {
 
 
 private object JS1081IT {
-  private val testJobChainPath = JobChainPath.of("/test")
+  private val testJobChainPath = JobChainPath("/test")
   private val aOrderKey = testJobChainPath orderKey "A"
   private val hhmmssFormatter = DateTimeFormat forPattern "HH:mm:ss"
 
@@ -46,7 +46,7 @@ private object JS1081IT {
     Stream from 0 map { i => new Instant(((start.toDateTime + 999.ms) withMillisOfSecond 0) + i * absoluteRepeat ) }
 
   private def orderElem(orderKey: OrderKey, begin: LocalTime, absoluteRepeat: Duration) =
-    <order job_chain={orderKey.jobChainPathString} id={orderKey.idString}>
+    <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>
       <run_time>
          <period absolute_repeat={absoluteRepeat.getStandardSeconds.toString} begin={hhmmssFormatter print begin}/>
       </run_time>

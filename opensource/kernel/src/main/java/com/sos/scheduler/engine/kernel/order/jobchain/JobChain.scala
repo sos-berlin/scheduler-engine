@@ -4,8 +4,8 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.folder.FileBasedType
 import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.data.order.jobchain.JobChainPersistentState
+import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
 import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
@@ -78,8 +78,8 @@ with UnmodifiableJobchain {
   def getFileBasedType: FileBasedType =
     FileBasedType.jobChain
 
-  def getPath: JobChainPath =
-    JobChainPath.of(cppProxy.path)
+  def getPath: JobChainPath = 
+    JobChainPath(cppProxy.path)
 
   def file: File =
     cppProxy.file match {

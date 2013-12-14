@@ -201,16 +201,16 @@ static void JNICALL set_1state_1cmd__Ljava_lang_String_2(JNIEnv* jenv, jobject, 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jstring JNICALL source_1xml(JNIEnv* jenv, jobject, jlong cppReference)
+static jobject JNICALL source_1xml_1bytes(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::source_xml()");
-        return env.jstring_from_string(o_->source_xml());
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::source_xml_bytes()");
+        return java_byte_array_from_c(o_->source_xml_bytes());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
-        return jstring();
+        return jobject();
     }
 }
 
@@ -245,7 +245,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::path },
     { (char*)"set_force_file_reread__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1force_1file_1reread },
     { (char*)"set_state_cmd__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1state_1cmd__Ljava_lang_String_2 },
-    { (char*)"source_xml__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::source_1xml },
+    { (char*)"source_xml_bytes__native", (char*)"(J)[B", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::source_1xml_1bytes },
     { (char*)"state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::state_1name }
 };
 

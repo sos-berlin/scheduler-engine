@@ -15,7 +15,6 @@ import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.folder.FileBasedState
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore, HibernateTaskStore}
-import com.sos.scheduler.engine.kernel.util.SchedulerXmlUtils.byteArrayFromCppByteString
 import javax.annotation.Nullable
 import javax.persistence.EntityManager
 import org.joda.time.DateTime
@@ -30,7 +29,7 @@ import org.joda.time.DateTime
 
   def getFileBasedType = FileBasedType.job
 
-  def getPath = JobPath.of(cppProxy.path)
+  def getPath = JobPath(cppProxy.path)
 
   def getName = cppProxy.name
 
@@ -46,7 +45,8 @@ import org.joda.time.DateTime
     cppProxy.set_force_file_reread()
   }
 
-  def getConfigurationXmlBytes = byteArrayFromCppByteString(cppProxy.source_xml)
+  def getConfigurationXmlBytes =
+    cppProxy.source_xml_bytes
 
   def getDescription = cppProxy.description
 
@@ -121,7 +121,7 @@ import org.joda.time.DateTime
 
   def isPermanentlyStopped = cppProxy.is_permanently_stopped
 
-  override def toString = getClass.getSimpleName + " " + getPath.asString
+  override def toString = getClass.getSimpleName + " " + getPath.string
 }
 
 object Job {

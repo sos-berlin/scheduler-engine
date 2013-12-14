@@ -126,9 +126,9 @@ struct Simple_node_ptr
     Simple_node_ptr             appendChild_if              ( const Simple_node_ptr& newChild ) const             { return newChild? appendChild( newChild ) : Simple_node_ptr(NULL); }
     bool                        hasChildNodes               () const;
     string                      getTextContent              () const;
-    string                      xml_without_prolog          ( const string& encoding, bool indented = false ) const;
-    string                      xml                         ( const string& encoding, bool indented = false ) const;
-    string                      xml                         () const                                { return xml( string_encoding, false ); }
+    string                      xml_bytes_without_prolog    ( const string& encoding, bool indented = false ) const;
+    string                      xml_bytes                   ( const string& encoding, bool indented = false ) const;
+    string                      xml_string                  (bool indent = false) const;
 
     int                         line_number                 () const;
     Node_list                   select_nodes                ( const string& xpath_expression ) const;
@@ -147,10 +147,21 @@ private:
 
 struct Document_ptr : Simple_node_ptr
 {
-                                Document_ptr                ( const DocumentJ& doc = NULL )         { assign( doc ); }
+    static Document_ptr from_xml_string(const string& xml_string) {
+        Document_ptr result;
+        result.load_xml_string(xml_string);
+        return result;
+    }
+
+    static Document_ptr from_xml_bytes(const string& xml_bytes) {
+        Document_ptr result;
+        result.load_xml_bytes(xml_bytes);
+        return result;
+    }
+
+                                Document_ptr                ( const DocumentJ& doc = NULL )         { assign(doc); }
                                 Document_ptr                ( const Document_ptr& doc )             { assign( doc.ref() ); }
-                                Document_ptr                ( const string& xml, const string& encoding = string_encoding ) { load_xml( xml, encoding ); }
-                                Document_ptr                ( const BSTR xml )                      { load_xml( xml ); }
+                                Document_ptr                ( const BSTR xml )                      { load_xml_string( xml ); }
 
     Document_ptr&               operator =                  ( const Document_ptr& doc )             { assign( doc.ref() );  return *this; }
     Document_ptr&               operator =                  (const DocumentJ& doc )                 { assign( doc       );  return *this; }
@@ -162,12 +173,10 @@ struct Document_ptr : Simple_node_ptr
     virtual bool                is_type                     ( NodeType type )                       { return nodeType() == DOCUMENT_NODE || Simple_node_ptr::is_type( type ); }
 
     Document_ptr&               create                      ();
-    bool                        try_load_xml                ( const string& text, const string& encoding = string_encoding);
-    bool                        try_load_xml                ( const BSTR text );
-    void                        load_xml                    ( const string& text, const string& encoding = string_encoding );
-    void                        load_xml                    ( const BSTR text );
-    string                      xml                         ( const string& encoding, const string& indent_string = "" ) const;
-    string                      xml                         () const                                { return xml( string_encoding ); }
+    bool                        try_load_xml_bytes          ( const string& text, const string& encoding);
+    void                        load_xml_string             (BSTR);
+    void                        load_xml_string             (const string& text)                    { load_xml_bytes(text, string_encoding); }
+    void                        load_xml_bytes              (const string& bytes, const string& encoding = "");  // encoding="", wenn es dem XML-Prolog entnommen werden soll.
 
     Element_ptr                 createElement               ( const string& tagName ) const;
     Text_ptr                    createTextNode              ( const string& data ) const;

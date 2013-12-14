@@ -40,8 +40,6 @@ struct Xslt_parameters : Non_cloneable
 
 struct Xslt_stylesheet {
                                 Xslt_stylesheet             ();
-                                Xslt_stylesheet             ( const string& xml_or_filename );
-                                Xslt_stylesheet             ( const BSTR xml_or_filename );
                                ~Xslt_stylesheet             ();
 
     void                        release                     ()                                      {}

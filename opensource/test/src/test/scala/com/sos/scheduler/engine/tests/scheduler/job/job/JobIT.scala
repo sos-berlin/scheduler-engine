@@ -20,7 +20,7 @@ class JobIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("job.path") {
-    assert(job.getPath.asString === "/a")
+    assert(job.getPath.string === "/a")
   }
 
   test("job.isFileBasedReread") {
@@ -40,5 +40,5 @@ class JobIT extends FunSuite with ScalaSchedulerTest {
 
 
 private object JobIT {
-  private val jobPath = JobPath.of("/a")
+  private val jobPath = JobPath("/a")
 }

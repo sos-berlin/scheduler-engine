@@ -33,14 +33,14 @@ final class JavaOptionsIT extends FunSuite with ScalaSchedulerTest {
   }
 
   private def runJob(j: JobPath) {
-    scheduler executeXml <start_job job={j.asString}/>
+    scheduler executeXml <start_job job={j.string}/>
     eventPipe.nextWithCondition { e: TaskClosedEvent => e.jobPath == j }
-    instance[VariableSet].apply(j.getName +".myJavaOption") should equal ("TEST")
+    instance[VariableSet].apply(j.name +".myJavaOption") should equal ("TEST")
   }
 }
 
 
 private object JavaOptionsIT {
-  private val localJobPath = JobPath.of("/testLocal")
-  private val remoteJobPath = JobPath.of("/testRemote")
+  private val localJobPath = JobPath("/testLocal")
+  private val remoteJobPath = JobPath("/testRemote")
 }

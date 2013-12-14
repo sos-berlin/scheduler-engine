@@ -215,7 +215,7 @@ struct File_based : Scheduler_object,
     string                      normalized_name             () const;
     string                      normalized_path             () const;
     File_path                   configuration_root_directory() const;
-    const string&               source_xml                  () const                                { return _source_xml; }
+    const string&               source_xml_bytes            () const                                { return _source_xml_bytes; }
     File_path                   file                        () const                                { return _base_file_info._path; }
 
     State                       file_based_state            () const                                { return _state; }
@@ -309,7 +309,7 @@ struct File_based : Scheduler_object,
     Absolute_path              _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
     Typed_folder*              _typed_folder;
     File_based_subsystem*      _file_based_subsystem;
-    string                     _source_xml;
+    string                     _source_xml_bytes;
 };
 
 //-------------------------------------------------------------------------------------file_based<>

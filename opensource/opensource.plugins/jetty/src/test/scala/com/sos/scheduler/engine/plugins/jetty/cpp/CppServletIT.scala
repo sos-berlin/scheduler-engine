@@ -68,7 +68,7 @@ final class CppServletIT extends FunSuite with ScalaSchedulerTest {
 
     test("show_log?task=... "+testConf) {
       val eventPipe = controller.newEventPipe()
-      scheduler.executeXml(<order job_chain={orderKey.jobChainPathString} id={orderKey.getId.string}/>)
+      scheduler.executeXml(<order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}/>)
       val taskId = eventPipe.nextWithCondition { e: TaskStartedEvent => e.jobPath == orderJobPath } .taskId
       val result = stringFromResponse(resource.path("show_log").queryParam("task", taskId.string).accept(TEXT_HTML_TYPE).get(classOf[ClientResponse]))
       result should include ("SCHEDULER-918  state=closed")

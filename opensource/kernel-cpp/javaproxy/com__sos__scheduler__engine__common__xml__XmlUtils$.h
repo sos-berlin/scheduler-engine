@@ -57,6 +57,7 @@ struct XmlUtils$ : ::zschimmer::javabridge::proxy_jobject< XmlUtils$ >, ::javapr
     jint intXmlAttribute(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) const;
     ::javaproxy::org::w3c::dom::Document loadXml(const ::zschimmer::javabridge::Local_java_byte_array& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) const;
     ::javaproxy::org::w3c::dom::Document newDocument() const;
+    ::javaproxy::java::lang::String toXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, jboolean p1) const;
     string toXmlBytes(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jboolean p2) const;
     ::javaproxy::java::lang::String xmlAttribute(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;
     ::javaproxy::org::w3c::dom::Node xpathNode(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Node >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1) const;

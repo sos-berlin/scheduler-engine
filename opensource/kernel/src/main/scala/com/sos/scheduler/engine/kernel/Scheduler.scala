@@ -174,15 +174,15 @@ with HasInjector {
     result
   }
 
-  /** execute_xml() der C++-Klasse Spooler */
+  /** execute_xml_string() der C++-Klasse Spooler */
   def uncheckedExecuteXml(xml: String): String = {
     if (closed) error("Scheduler is closed")
-    inSchedulerThread { cppProxy.execute_xml(xml) }
+    inSchedulerThread { cppProxy.execute_xml_string(xml) }
     .stripSuffix("\0")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
   }
 
   def uncheckedExecuteXml(xml: String, securityLevel: SchedulerSecurityLevel, clientHostName: String) =
-    inSchedulerThread { cppProxy.execute_xml_with_security_level(xml, securityLevel.cppName, clientHostName) }
+    inSchedulerThread { cppProxy.execute_xml_string_with_security_level(xml, securityLevel.cppName, clientHostName) }
     .stripSuffix("\0")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
 
   //    /** @param text Sollte auf \n enden */

@@ -505,12 +505,12 @@ static void JNICALL execute_1state_1cmd(JNIEnv* jenv, jobject, jlong cppReferenc
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jstring JNICALL execute_1xml__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+static jstring JNICALL execute_1xml_1string__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_xml()");
-        return env.jstring_from_string(o_->execute_xml(env.string_from_jstring(p0)));
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_xml_string()");
+        return env.jstring_from_string(o_->execute_xml_string(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -522,12 +522,12 @@ static jstring JNICALL execute_1xml__Ljava_lang_String_2(JNIEnv* jenv, jobject, 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jstring JNICALL execute_1xml_1with_1security_1level__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1, jstring p2)
+static jstring JNICALL execute_1xml_1string_1with_1security_1level__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1, jstring p2)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_xml_with_security_level()");
-        return env.jstring_from_string(o_->execute_xml_with_security_level(env.string_from_jstring(p0), env.string_from_jstring(p1), env.string_from_jstring(p2)));
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_xml_string_with_security_level()");
+        return env.jstring_from_string(o_->execute_xml_string_with_security_level(env.string_from_jstring(p0), env.string_from_jstring(p1), env.string_from_jstring(p2)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -1321,8 +1321,8 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"end_waiting_tasks__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::end_1waiting_1tasks },
     { (char*)"execute_config_commands__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1config_1commands },
     { (char*)"execute_state_cmd__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1state_1cmd },
-    { (char*)"execute_xml__native", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1xml__Ljava_lang_String_2 },
-    { (char*)"execute_xml_with_security_level__native", (char*)"(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1xml_1with_1security_1level__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2 },
+    { (char*)"execute_xml_string__native", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1xml_1string__Ljava_lang_String_2 },
+    { (char*)"execute_xml_string_with_security_level__native", (char*)"(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::execute_1xml_1string_1with_1security_1level__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2 },
     { (char*)"folder_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Folder_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::folder_1subsystem },
     { (char*)"has_any_task__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::has_1any_1task },
     { (char*)"has_exclusiveness__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::has_1exclusiveness },

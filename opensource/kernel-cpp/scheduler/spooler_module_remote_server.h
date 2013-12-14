@@ -35,7 +35,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     struct Class_data : Object
     {
                                 Class_data                  ();
-        void                    read_xml                    ( const string& );
+        void                    read_xml_bytes              ( const string& );
 
         Fill_zero              _zero_;
         xml::Document_ptr      _stdin_dom_document;

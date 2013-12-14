@@ -8,6 +8,9 @@ import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.{noCache, s
 import javax.inject.Inject
 import javax.ws.rs._
 import javax.ws.rs.core.{MediaType, Response}
+import javax.inject.Inject
+import javax.ws.rs._
+import javax.ws.rs.core.{MediaType, Response}
 
 @Path("order")
 class OrderService @Inject()(
@@ -16,7 +19,7 @@ class OrderService @Inject()(
     orderSubsystem: OrderSubsystem,
     schedulerInstanceId: SchedulerInstanceId) {
 
-  private lazy val jobChain = orderSubsystem.jobChain(JobChainPath.of(jobChainPathString))
+  private lazy val jobChain = orderSubsystem.jobChain(JobChainPath(jobChainPathString))
   private lazy val order = jobChain.order(orderId)
 
   @GET @Path("log.snapshot")

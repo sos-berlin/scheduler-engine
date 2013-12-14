@@ -46,7 +46,7 @@ final class JS1029IT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object JS1029IT {
-  private val testJobPath = JobPath.of("/test")
+  private val testJobPath = JobPath("/test")
 
   private case class MyTaskStartedEvent(taskId: TaskId, stdoutFile: File) extends Event
 }

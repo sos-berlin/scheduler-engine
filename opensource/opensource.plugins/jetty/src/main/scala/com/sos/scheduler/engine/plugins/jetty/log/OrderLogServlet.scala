@@ -13,7 +13,7 @@ class OrderLogServlet @Inject()(orderSubsystem: OrderSubsystem) extends HttpServ
     val attributeName = classOf[OrderLogServlet].getName
     Option(request.getAttribute(attributeName).asInstanceOf[FileServletAsyncOperation]) match {
       case None =>
-        val jobChainPath = JobChainPath.of(Option(request.getParameter("job_chain")).get)
+        val jobChainPath = JobChainPath(Option(request.getParameter("job_chain")).get)
         val orderIdString = Option(request.getParameter("order")).get
         val jobChain = orderSubsystem.jobChain(jobChainPath)
         val order = jobChain.order(new OrderId(orderIdString))

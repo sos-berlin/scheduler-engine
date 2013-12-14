@@ -29,7 +29,7 @@ class Node(cppProxy: NodeCI, injector: Injector) extends Sister {
 
   final def persistentState = new JobChainNodePersistentState(jobChainPath, orderState, action)
 
-  final def jobChainPath = JobChainPath.of(cppProxy.job_chain_path)
+  final def jobChainPath = JobChainPath(cppProxy.job_chain_path)
 
   final def orderState = OrderState(cppProxy.string_order_state)
 

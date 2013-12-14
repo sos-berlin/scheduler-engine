@@ -138,7 +138,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                        heartbeat_member_record     ();
     bool                        set_command_for_all_schedulers_but_me( Transaction*, const string& command, const string& where_condition );
     void                        read_and_execute_command    ();
-    void                        execute_command             ( const string& command );
+    void                        execute_xml_string_command  ( const string& command );
     void                        make_cluster_member_id      ();
     Cluster_member*             exclusive_scheduler         ();                                     // NULL, wenn _exclusive_scheduler->is_empty_member()
     Cluster_member*             empty_member_record         ();
@@ -946,7 +946,7 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
     xml::Element_ptr  result;
 
     if (xml != "") {
-        if (xml::Element_ptr e = xml::Document_ptr(xml).documentElement())  
+        if (xml::Element_ptr e = xml::Document_ptr::from_xml_string(xml).documentElement())
             result = dom_document.importNode(e);
     }
 
@@ -2063,19 +2063,19 @@ void Cluster::read_and_execute_command()
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_clusters_tablename, x ), Z_FUNCTION ); }
 
 
-    if( command != "" )  execute_command( command );
+    if( command != "" )  execute_xml_string_command( command );
 }
 
-//-------------------------------------------------------------------------Cluster::execute_command
+//--------------------------------------------------------------Cluster::execute_xml_string_command
 
-void Cluster::execute_command( const string& command )
+void Cluster::execute_xml_string_command( const string& command )
 {
     _log->info( message_string( "SCHEDULER-811", command ) );
 
     try
     {
         Command_processor cp ( _spooler, Security::seclev_all );
-        string xml = cp.execute( "<cluster_member_command>" + command + "</cluster_member_command>", "  " );  // Siehe scheduler.xsd
+        string xml = cp.execute_xml_string( "<cluster_member_command>" + command + "</cluster_member_command>", "  " );  // Siehe scheduler.xsd
         _log->info( xml );   // Fehler werden im XML gemeldet
     }
     catch( exception& x )
@@ -2412,7 +2412,7 @@ void Cluster::check_empty_member_record()
                 ta.execute( stmt, "The empty member record" );
 
 
-                ta.update_clob( db()->_clusters_tablename, "xml", my_member_dom_document().xml(), where_clause );
+                ta.update_clob( db()->_clusters_tablename, "xml", my_member_dom_document().xml_string(), where_clause );
             }
 
             ta.commit( Z_FUNCTION );
@@ -2457,7 +2457,7 @@ void Cluster::insert_member_record()
 
         ta.execute( insert, Z_FUNCTION );
 
-        ta.update_clob( db()->_clusters_tablename, "xml", my_member_dom_document().xml(), "where `member_id`=" + sql::quoted( my_member_id() ) );
+        ta.update_clob( db()->_clusters_tablename, "xml", my_member_dom_document().xml_string(), "where `member_id`=" + sql::quoted( my_member_id() ) );
 
         ta.commit( Z_FUNCTION );
 
@@ -2586,7 +2586,7 @@ void Cluster::show_active_schedulers( Transaction* outer_transaction, bool exclu
 
             if( xml != "" ) // Satz nicht zwischenzeitlich gelöscht?
             {
-                xml::Document_ptr dom_document = xml;
+                xml::Document_ptr dom_document = xml::Document_ptr::from_xml_string(xml);
                 xml::Element_ptr  dom_element  = dom_document.documentElement();
 
 
@@ -2657,6 +2657,8 @@ string Cluster::tip_for_job_chain_node(const string& member_id, const Absolute_p
         Host_and_port host_and_port(m[1]);
         try {
             xml::Xml_string_writer xml_writer;
+            xml_writer.set_encoding(string_encoding);
+            xml_writer.write_prolog();
             xml_writer.begin_element("job_chain.check_distributed");
             xml_writer.set_attribute_optional("job_chain", job_chain_path);
             xml_writer.set_attribute_optional("order_state", order_state);

@@ -67,44 +67,31 @@ void Document_ptr::assign(const DocumentJ& doc) {
     Simple_node_ptr::assign(NodeJ(doc));
 }
 
-//-----------------------------------------------------------------------Document_ptr::try_load_xml
+//-----------------------------------------------------------------Document_ptr::try_load_xml_bytes
 
-bool Document_ptr::try_load_xml( const BSTR xml_text_bstr ) {
-    return try_load_xml( com::string_from_bstr( xml_text_bstr ) );
-}
-
-//-----------------------------------------------------------------------Document_ptr::try_load_xml
-
-bool Document_ptr::try_load_xml( const string& xml_text, const string& encoding ) {
+bool Document_ptr::try_load_xml_bytes( const string& xml_text, const string& encoding ) {
     try {
-        load_xml(xml_text, encoding);
+        load_xml_bytes(xml_text, encoding);
         return true;
     } catch (exception&x) {
-        Z_LOG("try_load_xml() ==> " << x.what() << "\n");
+        Z_LOG("try_load_xml_bytes() ==> " << x.what() << "\n");
         return false;
     }
 }
 
-//---------------------------------------------------------------------------Document_ptr::load_xml
+//---------------------------------------------------------------------Document_ptr::load_xml_bytes
 
-void Document_ptr::load_xml(const string& xml_text, const string& encoding) 
+void Document_ptr::load_xml_bytes(const string& xml_text, const string& encoding)
 {
-    javabridge::Local_java_byte_array array (xml_text);
-    assign(XmlUtilsJ::loadXml(array, encoding));        //TOOD encoding berücksichtigen
+    javabridge::Local_java_byte_array array(xml_text);
+    assign(XmlUtilsJ::loadXml(array, encoding));
 }
 
-//---------------------------------------------------------------------------Document_ptr::load_xml
+//--------------------------------------------------------------------Document_ptr::load_xml_string
 
-void Document_ptr::load_xml( const BSTR xml_text )
+void Document_ptr::load_xml_string( const BSTR xml_text )
 {
-    load_xml( com::string_from_bstr( xml_text ) );
-}
-
-//--------------------------------------------------------------------------------Document_ptr::xml
-
-string Document_ptr::xml( const string& encoding, const string& indent_string ) const
-{ 
-    return XmlUtilsJ::toXmlBytes(Simple_node_ptr::ref(), encoding, !indent_string.empty());
+    load_xml_string( com::string_from_bstr( xml_text ) );
 }
 
 //----------------------------------------------------------------------Document_ptr::createElement
@@ -359,11 +346,11 @@ Simple_node_ptr Simple_node_ptr::cloneNode( bool deep ) const
     return _nodeJ.cloneNode(deep);
 }
 
-//--------------------------------------------------------------Simple_node_ptr::xml_without_prolog
+//--------------------------------------------------------Simple_node_ptr::xml_bytes_without_prolog
 
-string Simple_node_ptr::xml_without_prolog( const string& encoding, bool indented ) const
+string Simple_node_ptr::xml_bytes_without_prolog( const string& encoding, bool indented ) const
 {
-    string result = xml( encoding, indented );
+    string result = xml_bytes( encoding, indented );
     
     if( string_begins_with( result, "<?" ) )
     {
@@ -379,11 +366,18 @@ string Simple_node_ptr::xml_without_prolog( const string& encoding, bool indente
     return result;
 }
 
-//-----------------------------------------------------------------------------Simple_node_ptr::xml
+//-----------------------------------------------------------------------Simple_node_ptr::xml_bytes
 
-string Simple_node_ptr::xml( const string& encoding, bool indented ) const
-{ 
+string Simple_node_ptr::xml_bytes(const string& encoding, bool indented) const
+{
     return XmlUtilsJ::toXmlBytes(Simple_node_ptr::ref(), encoding, indented);
+}
+
+//----------------------------------------------------------------------Simple_node_ptr::xml_string
+
+string Simple_node_ptr::xml_string(bool indent) const
+{
+    return XmlUtilsJ::toXml(Simple_node_ptr::ref(), indent);
 }
 
 //--------------------------------------------------------------------Simple_node_ptr::select_nodes
