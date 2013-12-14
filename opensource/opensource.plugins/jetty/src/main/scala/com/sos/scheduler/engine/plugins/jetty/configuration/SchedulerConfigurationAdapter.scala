@@ -28,7 +28,4 @@ object SchedulerConfigurationAdapter {
 
   private def xmlAttributeIntOption(e: Element, name: String) =
     if (e.hasAttribute(name)) Some(intXmlAttribute(e, name)) else None
-
-  private def childElementOption(e: Element, name: String) =
-    Option(childElementOrNull(e, name))
 }

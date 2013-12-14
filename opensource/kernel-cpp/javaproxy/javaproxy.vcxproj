@@ -257,6 +257,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__time__TimeZones$.cxx" />
     <ClCompile Include="java__lang__Class.cxx" />
     <ClCompile Include="scala__util__Try.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory$.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

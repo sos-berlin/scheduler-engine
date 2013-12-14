@@ -273,6 +273,9 @@
     <ClCompile Include="scala__util__Try.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory$.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h">
