@@ -4,14 +4,10 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
-import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
-import com.sos.scheduler.engine.plugins.jetty.Config._
-import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
 import com.sos.scheduler.engine.plugins.jetty.WebServer
 import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
 import com.sos.scheduler.engine.plugins.jetty.configuration.ObjectMapperJacksonJsonProvider
 import com.sun.jersey.api.client.config.DefaultClientConfig
-import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
 import com.sun.jersey.api.client.{Client, WebResource}
 import java.net.URI
@@ -34,7 +30,7 @@ object JettyPluginTests {
 
   def jettyPortNumber(injector: Injector) =
     WebServer.tcpPortNumber
-    //Macht abh‰ngig vom Scheduler: injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).tcpPortNumber
+    //Macht abh√§ngig vom Scheduler: injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).tcpPortNumber
 
   def newAuthResource(uri: URI): WebResource = {
     val client = newAuthentifyingClient(defaultTimeout)
