@@ -198,7 +198,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                     } else {   
                         something_changed = true;
 
-                        file_based = subsystem()->call_new_file_based(source_xml);
+                        file_based = subsystem()->call_new_file_based(source_xml_bytes);
                         file_based->set_reread(!is_new);
                         file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
                         file_based->set_base_file_info( Base_file_info( *directory_entry ) );
@@ -225,7 +225,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         if( !content_xc.is_empty() )  throw content_xc;
 
                         Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml_bytes << "\n" );
-                        file_based->set_xml(source_xml);         // Ruft clear_source_xml()
+                        file_based->set_xml_bytes(source_xml_bytes);         // Ruft clear_source_xml()
                         file_based->_source_xml_bytes = source_xml_bytes;   
                         file_based->set_file_based_state( File_based::s_not_initialized );
                         file_based->initialize();

@@ -34,7 +34,7 @@ Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based
     _file_based(file_based),
     _include_path(include_path)
 { 
-    _xml = "<source/>";
+    _xml_string = "<source/>";
     if( e )  append_dom( e ); 
 }
 
@@ -42,7 +42,7 @@ Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
-    xml::Document_ptr dom_document (_xml);
+    xml::Document_ptr dom_document = xml::Document_ptr::from_xml_string(_xml_string);
     size_t linenr_base = element.line_number();
 
     for( xml::Node_ptr node = element.firstChild(); node; node = node.nextSibling() )
@@ -113,7 +113,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
         }
     }
 
-    _xml = dom_document.xml();
+    _xml_string = dom_document.xml_string();
 }
 
 //------------------------------------------------------------Text_with_includes::includes_resolved
@@ -122,7 +122,7 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
 {
     // Löst die <include> auf und macht sie zu <source_part>
 
-    xml::Document_ptr result (_xml);
+    xml::Document_ptr result = xml::Document_ptr::from_xml_string(_xml_string);
 
     DOM_FOR_EACH_ELEMENT( result.documentElement(), element )
     {
@@ -209,7 +209,7 @@ string Text_with_includes::text_element_filepath( const xml::Element_ptr& elemen
 
 bool Text_with_includes::is_empty() const
 { 
-    if (_xml.empty()) return true;
+    if (_xml_string.empty()) return true;
     return !dom_element().first_child_element();
 }
 

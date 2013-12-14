@@ -57,7 +57,7 @@ struct CppNewJob__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _setOrderControlled____method;
     ::zschimmer::javabridge::Method const _setScheduleDOM__Lorg_w3c_dom_Element_2__method;
     ::zschimmer::javabridge::Method const _setStateText__Ljava_lang_String_2__method;
-    ::zschimmer::javabridge::Method const _setXML___3B__method;
+    ::zschimmer::javabridge::Method const _setXmlBytes___3B__method;
     ::zschimmer::javabridge::Method const _signalEarlierOrder__JLjava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _startTask__Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2JZLjava_lang_String_2Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _stateString____method;
@@ -107,7 +107,7 @@ CppNewJob__class::CppNewJob__class(const string& class_name) :
     ,_setOrderControlled____method(this, "setOrderControlled", "()V")
     ,_setScheduleDOM__Lorg_w3c_dom_Element_2__method(this, "setScheduleDOM", "(Lorg/w3c/dom/Element;)V")
     ,_setStateText__Ljava_lang_String_2__method(this, "setStateText", "(Ljava/lang/String;)V")
-    ,_setXML___3B__method(this, "setXML", "([B)V")
+    ,_setXmlBytes___3B__method(this, "setXmlBytes", "([B)V")
     ,_signalEarlierOrder__JLjava_lang_String_2Ljava_lang_String_2__method(this, "signalEarlierOrder", "(JLjava/lang/String;Ljava/lang/String;)V")
     ,_startTask__Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2Lcom_sos_scheduler_engine_kernel_cppproxy_Variable_1setC_2JZLjava_lang_String_2Ljava_lang_String_2__method(this, "startTask", "(Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;JZLjava/lang/String;Ljava/lang/String;)Lcom/sos/scheduler/engine/data/job/TaskId;")
     ,_stateString____method(this, "stateString", "()Ljava/lang/String;")
@@ -371,11 +371,11 @@ void CppNewJob::setStateText(const ::zschimmer::javabridge::proxy_jobject< ::jav
     cls->_setStateText__Ljava_lang_String_2__method.call(get_jobject(), parameter_list);
 }
 
-void CppNewJob::setXML(const ::zschimmer::javabridge::Local_java_byte_array& p0) const {
+void CppNewJob::setXmlBytes(const ::zschimmer::javabridge::Local_java_byte_array& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jbyteArray();
     CppNewJob__class* cls = _class.get();
-    cls->_setXML___3B__method.call(get_jobject(), parameter_list);
+    cls->_setXmlBytes___3B__method.call(get_jobject(), parameter_list);
 }
 
 void CppNewJob::signalEarlierOrder(jlong p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const {

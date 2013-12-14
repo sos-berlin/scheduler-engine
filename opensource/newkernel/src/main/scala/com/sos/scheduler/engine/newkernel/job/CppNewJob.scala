@@ -37,7 +37,7 @@ extends Sister {
     for (j <- jobOption) j.close()
   }
 
-  @ForCpp def setXML(bytes: Array[Byte]) = {
+  @ForCpp def setXmlBytes(bytes: Array[Byte]) = {
     val inputFactory = XMLInputFactory.newInstance()
     val reader = inputFactory.createXMLEventReader(new ByteArrayInputStream(bytes))
     reader.nextEvent().asInstanceOf[StartDocument]

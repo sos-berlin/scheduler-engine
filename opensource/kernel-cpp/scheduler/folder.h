@@ -253,7 +253,7 @@ struct File_based : Scheduler_object,
     void                        handle_event                ( Base_file_event );
 
     virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
-    virtual void                set_xml                     (const string&);
+    virtual void                set_xml_bytes               (const string&);
     virtual void                set_dom                     (const xml::Element_ptr&);              // Falls Unterklasse set_xml() nicht implementiert
 
     // Alle on_xxx() sollten protected sein.

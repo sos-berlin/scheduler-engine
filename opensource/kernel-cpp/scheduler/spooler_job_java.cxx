@@ -32,8 +32,8 @@ struct Java_job : Job {
         return _cppNewJobJ.close();
     }
 
-    void set_xml(const string& o) {
-        _cppNewJobJ.setXML(o);
+    void set_xml_bytes(const string& o) {
+        _cppNewJobJ.setXmlBytes(o);
     }
 
     bool on_initialize() {

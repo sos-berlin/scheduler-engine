@@ -90,7 +90,7 @@ struct CppNewJob : ::zschimmer::javabridge::proxy_jobject< CppNewJob >, ::javapr
     void setOrderControlled() const;
     void setScheduleDOM(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Element >& p0) const;
     void setStateText(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
-    void setXML(const ::zschimmer::javabridge::Local_java_byte_array& p0) const;
+    void setXmlBytes(const ::zschimmer::javabridge::Local_java_byte_array& p0) const;
     void signalEarlierOrder(jlong p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;
     ::javaproxy::com::sos::scheduler::engine::data::job::TaskId startTask(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Variable_setC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Variable_setC >& p1, jlong p2, jboolean p3, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p4, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p5) const;
     ::javaproxy::java::lang::String stateString() const;

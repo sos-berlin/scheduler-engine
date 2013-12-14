@@ -569,11 +569,11 @@ xml::Element_ptr File_based::execute_xml( Command_processor* command_processor, 
     return command_processor->_answer.createElement( "ok" );
 }
 
-//-----------------------------------------------------------------------------File_based::set_xml
+//------------------------------------------------------------------------File_based::set_xml_bytes
 
-void File_based::set_xml(const string& x) 
+void File_based::set_xml_bytes(const string& x) 
 {
-    xml::Document_ptr dom_document (x);
+    xml::Document_ptr dom_document = xml::Document_ptr::from_xml_bytes(x);
     xml::Element_ptr  element      = dom_document.documentElement();
     subsystem()->assert_xml_element_name( element );
     if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );

@@ -48,11 +48,11 @@ struct Text_with_includes : Non_cloneable
     int                         text_element_linenr         ( const xml::Element_ptr& );
     string                      text_element_filepath       ( const xml::Element_ptr& );
 
-    string                      xml_string                  () const                                { return _xml; }
-    void                    set_xml_string                  ( const string& x )                     { _xml = x; }
+    string                      xml_string                  () const                                { return _xml_string; }
+    void                    set_xml_string                  ( const string& x )                     { _xml_string = x; }
     xml::Document_ptr           includes_resolved           () const;
 
-    xml::Element_ptr            dom_element                 () const                                { return xml::Document_ptr(_xml).documentElement(); }
+    xml::Element_ptr            dom_element                 () const                                { return xml::Document_ptr::from_xml_string(_xml_string).documentElement(); }
     void                        append_dom                  ( const xml::Element_ptr& dom );
 
   private:
@@ -63,7 +63,7 @@ struct Text_with_includes : Non_cloneable
     Spooler*                   _spooler;
     File_based*                _file_based;
     File_path                  _include_path;
-    string                     _xml;
+    string                     _xml_string;
 };
 
 //-------------------------------------------------------------------------------------------Module
