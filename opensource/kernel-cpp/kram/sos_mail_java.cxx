@@ -299,7 +299,7 @@ void Java_message::send2()
     env->CallVoidMethod( get_jobject(), _send_method.id() );
     if( env->ExceptionCheck() )  env.throw_java( "send" );
 
-    LOG( "JavaMail Send fertig\n" );
+    LOG( "JavaMail Send finished\n" );
 }
 
 //------------------------------------------------------------------------Java_message::rfc822_text

@@ -418,7 +418,7 @@ void Process::debug()
 
                 if( !debug_event.u.Exception.dwFirstChance ) 
                 {
-                    Z_LOG( "TerminateProcess() nach Exception\n" );
+                    Z_LOG( "TerminateProcess() after exception\n" );
                     TerminateProcess( _handle, 99 );
                     exit = true;
                 }
@@ -651,7 +651,7 @@ bool Process::try_kill( int signal )
         kill( signal );
         result = true;
     }
-    catch( const exception& x ) { Z_LOG( "FEHLER  " << x << "\n" ); }
+    catch( const exception& x ) { Z_LOG( "ERROR " << x << "\n" ); }
 
     return result;
 }

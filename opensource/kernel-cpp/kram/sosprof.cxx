@@ -277,7 +277,7 @@ static Sos_string ini_filename( const Sos_string& filename_ )
             {
                 sos_static_ptr()->_profile        = p;
                 sos_static_ptr()->_profile_source = source_environment;
-                Z_LOG2( "ini", "Umgebungsvariable SOS_INI sos.ini=" << sos_static_ptr()->_profile << "\n" );  // Normalerweise ist die .log-Datei noch geschlossen
+                Z_LOG2( "ini", "Environment variable SOS_INI sos.ini=" << sos_static_ptr()->_profile << "\n" );  // Normalerweise ist die .log-Datei noch geschlossen
             }
 
             sos_static_ptr()->_profile_source_checked |= source_environment;

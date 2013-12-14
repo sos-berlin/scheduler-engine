@@ -912,7 +912,7 @@ void Jdbc_file::describe_columns()
             catch( const Java_exception& x )
             {
                 // java.lang.NumberFormatException: 4294967295 von Oracles Thin-Driver
-                Z_LOG2( "jdbc", "jdbc: Für CLOB und BLOB getPrecision(" << i << ") wird durch getColumnDisplaySize() ersetzt wegen des Fehlers " << x.what() << "\n" );
+                Z_LOG2( "jdbc", "jdbc: For CLOB und BLOB access, call to getPrecision(" << i << ") will be replaced with getColumnDisplaySize() due to error " << x.what() << "\n" );
                 session()->_lob_get_precision_not_implemented = true;
             }
         }

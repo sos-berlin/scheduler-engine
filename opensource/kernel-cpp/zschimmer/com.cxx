@@ -567,7 +567,7 @@ HRESULT CoGetClassObject( const CLSID& clsid, DWORD dwClsContext, COSERVERINFO*,
             ok = m->_DllMain( (HANDLE)1, Z_DLL_COM_ATTACH, p );     // Eigene Erweiterung
             if( !ok )  
             {
-                Z_LOG( "\n*** " << m->_module_filename << " ist nicht kompatibel zu diesem Programm ***\n\n" );
+                Z_LOG( "\n*** " << m->_module_filename << " is not compatible with this program binary (DllMain returns false) ***\n\n" );
                 return CO_E_DLLNOTFOUND;
             }
 

@@ -577,7 +577,7 @@ void Vm::start()
 
     Z_LOG2( Vm::java_log_category, "setlocale(LC_ALL,\"C\")\n" );
     const char* java_locale = setlocale( LC_ALL, "C" );
-    if( strcmp( java_locale, "C" ) != 0 )  Z_LOG2( Vm::java_log_category, "Javas locale war " << java_locale << "\n" );
+    if( strcmp( java_locale, "C" ) != 0 )  Z_LOG2( Vm::java_log_category, "Javas locale was " << java_locale << "\n" );
 
     if( ret < 0 )  throw_java_ret( ret, "JNI_CreateJavaVM", module_filename );
 

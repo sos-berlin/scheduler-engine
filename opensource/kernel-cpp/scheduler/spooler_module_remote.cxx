@@ -66,7 +66,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
             }
             catch( exception& x )
             {
-                Z_LOG2( "scheduler", "Fehler wird ignoriert: " << x.what() << "\n" );       // Z.B. ERRNO-32 Broken pipe
+                Z_LOG2( "scheduler", "Error ignored: " << x.what() << "\n" );       // Z.B. ERRNO-32 Broken pipe
             }
         }
 

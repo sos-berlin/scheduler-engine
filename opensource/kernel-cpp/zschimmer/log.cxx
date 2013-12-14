@@ -26,7 +26,7 @@ ostream*                Log_ptr::static_stream_ptr      = &Log_ptr::static_strea
 
 static Message_code_text error_codes[] =
 {
-    { "Z-LOG-001", "Ungültiger Log-Level $1: Nur error, warn, info und debug1 bis debug9 sind möglich" },
+    { "Z-LOG-001", "Invalid log level $1: possible are error, warn, info and debug1 through debug9" },
     { NULL       , NULL }
 };
 

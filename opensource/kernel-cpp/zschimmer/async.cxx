@@ -31,7 +31,7 @@ Async_operation::~Async_operation()
 { 
     if( _child )  
     {
-        Z_LOG( "*** Async_operation::set_async_parent(NULL): Superoperation wird geschlossen vor " + _child->async_state_text() + "\n" );
+        Z_LOG( "*** Async_operation::set_async_parent(NULL): Superoperation is being closed before " + _child->async_state_text() + "\n" );
 
         _child->async_abort();
 
@@ -237,7 +237,7 @@ void Async_operation::async_abort_()
         return;
     }
     
-    Z_LOG( "Async_operation::async_abort_() ist nicht implementiert: " << async_state_text() << "\n" ); 
+    Z_LOG( "Async_operation::async_abort_() is not implemented: " << async_state_text() << "\n" ); 
     return; 
 }
 
@@ -247,7 +247,7 @@ bool Async_operation::async_kill_()
 { 
     if( _child )  return _child->async_kill();  
     
-    Z_LOG( "Async_operation::async_kill_() ist nicht implementiert: " << async_state_text() << "\n" ); 
+    Z_LOG( "Async_operation::async_kill_() is not implemented: " << async_state_text() << "\n" ); 
     return false; 
 }
 

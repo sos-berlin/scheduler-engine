@@ -122,8 +122,6 @@ void Event::reset()
 {
     Z_MUTEX( _mutex )
     {
-      //Z_DEBUG_ONLY( Z_LOG( "Ereignis " << _name << "  reset()\n" ) );
-
         _signaled = false;
         _signal_name = "";
 
@@ -154,7 +152,7 @@ void Event::wait()
         }
         else
         {
-            Z_DEBUG_ONLY( Z_LOG( "pthread_cond_wait: " << as_text() << " signalisiert!\n" ) );
+            Z_DEBUG_ONLY( Z_LOG( "pthread_cond_wait: " << as_text() << " signalled!\n" ) );
         }
     }
 }
@@ -195,7 +193,7 @@ bool Event::wait( double seconds )
             throw_errno( err, "pthread_cond_timedwait", _name.c_str() );
         }
 
-        Z_DEBUG_ONLY( Z_LOG( "pthread_cond_timedwait: " << as_text() << " signalisiert!\n" ) );
+        Z_DEBUG_ONLY( Z_LOG( "pthread_cond_timedwait: " << as_text() << " signalled!\n" ) );
     }
 
     return true;

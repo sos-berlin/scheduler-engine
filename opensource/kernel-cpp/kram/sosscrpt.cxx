@@ -175,13 +175,13 @@ STDMETHODIMP_( HRESULT ) Script_site::GetItemInfo( LPCOLESTR pstrName, DWORD dwR
         IProvideClassInfo* pClassInfo = NULL;
 
         hr = it->second->QueryInterface( IID_IProvideClassInfo, (void**)&pClassInfo );
-        if( FAILED( hr ) )  { LOG( "IProvideClassInfo::QueryInterface versagt\n" );  return hr; } //throw_ole( hr, "IProvideClassInfo::QueryInterface" );  // E_NOINTERFACE
+        if( FAILED( hr ) )  { LOG( "IProvideClassInfo::QueryInterface failed\n" );  return hr; } //throw_ole( hr, "IProvideClassInfo::QueryInterface" );  // E_NOINTERFACE
 
         hr = pClassInfo->GetClassInfo( ppTypeInfo );
 
         pClassInfo->Release();
 
-        if( FAILED( hr ) )  { LOG( "IProvideClassInfo::GetClassInfo versagt\n" );  return hr; }  //throw_ole( hr, "IProvideClassInfo::GetClassInfo" );
+        if( FAILED( hr ) )  { LOG( "IProvideClassInfo::GetClassInfo failed\n" );  return hr; }  //throw_ole( hr, "IProvideClassInfo::GetClassInfo" );
     }
 
     return S_OK;
@@ -282,7 +282,7 @@ void Script_site::close_engine()
     { 
         Z_LOG2( "zschimmer", "IActiveScript::Close()\n" );
         hr = _script->Close();
-        if( FAILED( hr ) )  LOG( "Script_site::close_engine: IActiveScript::Close versagt\n" );
+        if( FAILED( hr ) )  LOG( "Script_site::close_engine: IActiveScript::Close failed\n" );
         _script->Release();  
         _script = NULL; 
     }

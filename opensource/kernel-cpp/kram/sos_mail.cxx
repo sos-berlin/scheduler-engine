@@ -234,7 +234,7 @@ void Message::enqueue()
         if( errno != EEXIST )  throw_errno( errno, email_filename.c_str() );
     }
 
-    LOG( "eMail wird gespeichert in " << email_filename << "\n" );
+    LOG( "Email will be stored in " << email_filename << "\n" );
 
     int ret = write( file, text.c_str(), text.length() );
     if( ret != text.length() )  close(file), throw_errno( errno, email_filename.c_str() );
@@ -256,7 +256,7 @@ void Message::enqueue()
         if( err  &&  errno == EEXIST )  continue;
         if( err )  throw_errno( errno, "rename", filename.c_str() );
 
-        LOG( "eMail-Datei umbenannt in  " << filename << "\n" );
+        LOG( "Email file has been renamed to " << filename << "\n" );
         break;
     }
 }

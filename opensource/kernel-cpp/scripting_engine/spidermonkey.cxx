@@ -2505,7 +2505,7 @@ void Spidermonkey::release_js_scripts()
     }
     else
     {
-        if( _js_scripts.size() > 0 )  Z_LOG( "*** ERROR in " << __FUNCTION__ << ": _jscontext ist schon freigegeben ***\n" );
+        if( _js_scripts.size() > 0 )  Z_LOG( "*** ERROR in " << __FUNCTION__ << ": _jscontext has been released already ***\n" );
     }
 
     _js_scripts.clear();

@@ -412,7 +412,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
                     if( _notification_event.signaled() )      
                     {
                         _notification_event.set_signaled();     
-                        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Old directory watchers signal has been transferd to new watcher.\n" );
                     }
 
                     close_notification();
@@ -845,7 +845,7 @@ bool Directory_file_order_source::read_new_files()
         }
     }
 
-    Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
+    Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << "  " << _new_files.size() << " filenames has been read\n" );
 
     sort( _new_files.begin(), _new_files.end(), zschimmer::file::File_info::quick_last_write_less );
 

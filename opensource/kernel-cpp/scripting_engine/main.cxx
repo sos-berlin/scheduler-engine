@@ -170,7 +170,7 @@ void Script_site::close()
     if( _script ) 
     { 
         hr = _script->Close();
-        if( FAILED( hr ) )  Z_LOG( "Script_site::close_engine: IActiveScript::Close versagt\n" );
+        if( FAILED( hr ) )  Z_LOG( "Script_site::close_engine: IActiveScript::Close failed\n" );
 
         _script = NULL; 
     }

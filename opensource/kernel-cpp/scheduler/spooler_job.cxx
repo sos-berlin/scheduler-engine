@@ -2022,7 +2022,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
             if( old_directory_watcher->signaled() ) 
             {
                 new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
-                Z_LOG2( "scheduler",  Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                Z_LOG2( "scheduler",  Z_FUNCTION << " old directory watchers signal has been transfered to new watcher.\n" );
             }
         }
         catch( exception& x ) { log()->warn( string(x.what()) + ", in old_directory_watcher->wait(0)" ); }      // Vorsichtshalber
@@ -2080,7 +2080,6 @@ bool Job::check_for_changed_directory( const Time& now )
 #   endif
 
 
-    //Z_LOG2( "zschimmer", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
     _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
                                                                      : Time::never;
     calculate_next_time( now );
@@ -2114,7 +2113,6 @@ bool Job::check_for_changed_directory( const Time& now )
         it++;
     }
 
-    //Z_LOG2( "zschimmer", obj_name() << " " << Z_FUNCTION << " something_done=" << something_done << "  _changed_directories="  << _changed_directories << "\n" ); 
     return something_done;
 }
 

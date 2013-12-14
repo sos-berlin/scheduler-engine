@@ -3584,7 +3584,7 @@ void spooler_restart( Log* log, bool is_service )
 
             default: 
             {
-                Z_LOG2( "scheduler", "waitpid(" << pid << ")  Scheduler restart\n" );
+                Z_LOG2( "scheduler", "waitpid(" << pid << ")  JobScheduler restart\n" );
                 //waitpid( pid, NULL, 0 );
                 Z_LOG2( "scheduler", "waitpid(" << pid << ")  OK\n" );
             }
@@ -4071,7 +4071,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                     {
                         scheduler::is_daemon = true;
 
-                        Z_LOG2( "scheduler", "Scheduler wird Daemon. Pid wechselt\n");
+                        Z_LOG2( "scheduler", "JobScheduler becomes daemon, and process ID changes\n");
                         scheduler::be_daemon();
                     }
 
