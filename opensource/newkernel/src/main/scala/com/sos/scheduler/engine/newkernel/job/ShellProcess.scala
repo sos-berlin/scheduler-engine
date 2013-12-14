@@ -79,7 +79,7 @@ extends SosAutoCloseable {
 }
 
 object ShellProcess {
-  private val logger = Logger[ShellProcess]
+  private val logger = Logger(getClass)
 
   def startShellScript(shellScript: ShellScript) = {
   }

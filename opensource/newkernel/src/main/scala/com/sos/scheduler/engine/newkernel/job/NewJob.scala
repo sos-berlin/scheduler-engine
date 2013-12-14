@@ -104,6 +104,6 @@ final class NewJob(
 */
 }
 
-object NewJob {
-  private val logger = Logger[NewJob]
+private object NewJob {
+  private val logger = Logger(getClass)
 }

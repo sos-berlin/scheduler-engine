@@ -43,16 +43,16 @@ class NewJobTest extends FunSuite with EventHandlerAnnotated {
   }
 
   @EventHandler def handle(e: TaskStartedEvent) {
-    logger info e
+    logger info e.toString
   }
 
   @EventHandler def handle(e: TaskEndedEvent) {
-    logger info e
+    logger info e.toString
     callRunner.end()
   }
 }
 
-object NewJobTest {
-  val logger = Logger(getClass)
-  val jobPath = JobPath.of("/a")
+private object NewJobTest {
+  private val logger = Logger(getClass)
+  private val jobPath = JobPath.of("/a")
 }

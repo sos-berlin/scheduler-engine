@@ -42,7 +42,7 @@ final class JobConfigurationXMLParserTest extends FunSuite {
 }
 
 private object JobConfigurationXMLParserTest {
-  val logger = Logger[JobConfigurationXMLParserTest]
+  private val logger = Logger(getClass)
 }
 
 /*
