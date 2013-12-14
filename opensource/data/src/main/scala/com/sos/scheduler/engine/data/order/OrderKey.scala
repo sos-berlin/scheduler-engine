@@ -15,22 +15,6 @@ with TypedPath {
   def string =
     jobChainPath.string + separator + id
 
-  @Deprecated
-  def getJobChainPath: JobChainPath =
-    jobChainPath
-
-  @Deprecated
-  def jobChainPathString: String =
-    jobChainPath.string
-
-  @Deprecated
-  def getId: OrderId =
-    id
-
-  @Deprecated
-  def idString: String =
-    id.string
-
   override def toString =
     s"${jobChainPath.string}:$id"
 }
