@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.configuration
 
 import JettyConfiguration._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreePort
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.plugins.jetty.configuration.JettyConfiguration.WebAppContextConfiguration
 import java.io.File
 import java.net.URL
@@ -37,7 +37,7 @@ object JettyConfiguration {
     }
 
     def random() = new TcpPortNumber {
-      lazy val value = findRandomFreePort(testPortRange)
+      lazy val value = findRandomFreeTcpPort(testPortRange)
     }
   }
 }

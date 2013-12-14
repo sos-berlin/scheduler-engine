@@ -101,7 +101,7 @@ final class JS973IT extends FunSuite with ScalaSchedulerTest {
 //  }
 
   private def newSlave(): Slave = {
-    val tcpPort = findRandomFreePort(20000 until 30000)
+    val tcpPort = findRandomFreeTcpPort()
     val args = List(
       controller.cppBinaries.file(CppBinary.exeFilename).getPath,
       s"-sos.ini=${controller.environment.sosIniFile}",
@@ -167,7 +167,7 @@ private object JS973IT {
   private val logger = Logger(getClass)
 
   private def newOrder(orderKey: OrderKey, remoteSchedulerOption: Option[SchedulerAddress]) =
-    <order job_chain={orderKey.jobChainPathString} id={orderKey.getId}>
+    <order job_chain={orderKey.jobChainPath.string} id={orderKey.id}>
       <params>{
         remoteSchedulerOption.toList map { o => <param name={remoteSchedulerParameterName} value={o.string}/>}
       }</params>
