@@ -2347,7 +2347,13 @@ bool Job_chain::on_load()
 
                 Z_FOR_EACH(list<Order_queue_node*>, node_list, it)
                     (*it)->order_queue()->_is_loaded = true;
-            } 
+            } else {
+                assert(!orders_are_recoverable());
+                for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                    ta.execute(S() << "DELETE from " << db()->_orders_tablename << "  where " << db_where_condition(), "not orders_are_recoverable");
+                    ta.commit(Z_FUNCTION);
+                } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
+            }
         }
 
         set_state( s_loaded );
