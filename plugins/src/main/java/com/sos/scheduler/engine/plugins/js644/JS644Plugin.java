@@ -1,5 +1,9 @@
 package com.sos.scheduler.engine.plugins.js644;
 
+import static scala.collection.JavaConversions.asJavaIterable;
+
+import javax.inject.Inject;
+
 import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
@@ -9,8 +13,6 @@ import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
-
-import javax.inject.Inject;
 
 public class JS644Plugin extends AbstractPlugin implements EventHandlerAnnotated {
     private final SchedulerThreadCallQueue callQueue;
@@ -27,7 +29,7 @@ public class JS644Plugin extends AbstractPlugin implements EventHandlerAnnotated
         if (job.isFileBasedReread()) {
             callQueue.add(new Runnable() {
                 @Override public void run() {
-                    for (JobChain jobChain : orderSubsystem.jobchainsOfJob(job)) jobChain.forceFileReread();
+                    for (JobChain jobChain : asJavaIterable(orderSubsystem.jobChainsOfJob(job))) jobChain.forceFileReread();
                     folderSubsystem.updateFolders();
                 }
             });

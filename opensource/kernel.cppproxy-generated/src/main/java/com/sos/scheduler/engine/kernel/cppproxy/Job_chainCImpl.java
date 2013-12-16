@@ -120,6 +120,20 @@ final class Job_chainCImpl
     private static native java.lang.String path__native(long cppReference);
 
 
+    @Override public void remove() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            remove__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native void remove__native(long cppReference);
+
+
     @Override public void set_force_file_reread() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

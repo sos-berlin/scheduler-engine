@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
+import java.util.List;
+
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
@@ -7,8 +9,6 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.order.jobchain.Node;
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector;
-
-import java.util.List;
 
 @CppClass(clas="sos::scheduler::order::Job_chain", directory="scheduler", include="spooler.h")
 public interface Job_chainC extends CppProxyWithSister<JobChain> {
@@ -27,4 +27,5 @@ public interface Job_chainC extends CppProxyWithSister<JobChain> {
     OrderC order_or_null(String orderID);
     boolean is_stopped();
     void set_stopped(boolean o);
+    void remove();
 }

@@ -111,6 +111,10 @@ with UnmodifiableJobchain {
     cppProxy.set_stopped(o)
   }
 
+  private[order] def remove() {
+    cppProxy.remove()
+  }
+
   override def toString =
     classOf[JobChain].getSimpleName +" "+ getPath
 }
