@@ -461,7 +461,7 @@ int Heart_beat_watchdog_thread::thread_main()
 
             _cluster->_spooler->kill_all_processes( Spooler::kill_registered_pids_only );
             _log->error( message_string( "SCHEDULER-386", string_local_from_time_t( heart_beat_time ), ::time(NULL) - heart_beat_time ) );
-            _cluster->_spooler->abort_immediately( true );
+            _cluster->_spooler->abort_immediately(_spooler->settings()->_cluster_restart_after_emergency_abort);
         }
     }
 
