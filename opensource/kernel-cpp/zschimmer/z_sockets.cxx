@@ -22,8 +22,8 @@ namespace zschimmer {
     
 static Message_code_text error_codes[] =
 {
-    { "Z-SOCKET-001", "Hostname $1 hat keine eindeutige IP-Nummer: $2" },
-    { "Z-SOCKET-002", "Unerwartet Daten über TCP empfangen" },
+    { "Z-SOCKET-001", "Hostname $1 does not have a unique IP number: $2" },
+    { "Z-SOCKET-002", "Received unexepected data over TCP" },
     { NULL }
 };
 

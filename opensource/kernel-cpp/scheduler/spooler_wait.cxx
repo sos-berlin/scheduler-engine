@@ -652,7 +652,7 @@ ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::get()
         if( name == ".." )  continue;
         if( !_regex || _regex->match( name ) )  break;
 
-        Z_DEBUG_ONLY( Z_LOG2( "scheduler.directory", Z_FUNCTION << "    " << name << " nicht übernommen\n" ); ) 
+        Z_DEBUG_ONLY( Z_LOG2( "scheduler.directory", Z_FUNCTION << "    " << name << " suppressed\n" ); ) 
     }
 
     //Z_DEBUG_ONLY( Z_LOG2( "zschimmer", Z_FUNCTION << " => " << result << "\n" ); ) 

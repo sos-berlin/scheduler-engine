@@ -663,7 +663,7 @@ void Vm::close()
         {
             if( _dont_destroy  ||  unloading_module )
             {
-                Z_LOG2( Vm::java_log_category, "DestroyJavaVM() unterdr�ckt\n" );
+                Z_LOG2( Vm::java_log_category, "DestroyJavaVM() suppressed\n" );
                 //_vm = NULL;
             }
             else
@@ -680,7 +680,7 @@ void Vm::close()
 
                 Z_LOG2( Vm::java_log_category, "DestroyJavaVM()  OK\n" );            
 
-                if( ret < 0 )  _log.error( "DestroyJavaVM() liefert " + as_string(ret) + ". Java l�sst sich nicht entladen" );
+                if( ret < 0 )  _log.error( "DestroyJavaVM() returns " + as_string(ret) + ". Java could not be unloaded" );
                          else  _vm = NULL;
             }
 

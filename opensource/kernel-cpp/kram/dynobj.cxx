@@ -687,7 +687,7 @@ void Dyn_obj::negate()
 
 void Dyn_obj::print( ostream* s, char quote, char quote_quote ) const
 {
-    if( !_type  ||  _type->null( _ptr ) )  *s << "«NULL»";
+    if( !_type  ||  _type->null( _ptr ) )  *s << "<NULL>";
                                      else  _type->print( _ptr, s, std_text_format, quote, quote_quote );
 }
 

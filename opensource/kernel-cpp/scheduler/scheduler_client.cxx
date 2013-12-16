@@ -208,7 +208,7 @@ struct Client
                 _variables.push_back( pair<string,string>( string( arg, equal - arg ), equal + 1 ) );
             }
             else
-                z::throw_xc( "Ungültiger Parameter" );
+                z::throw_xc("Invalid argument");
         }
     }
 

@@ -274,7 +274,7 @@ void CoTaskMemFree( void* p )
 
 static const Com_class_entry* class_entry_from_clsid( const CLSID& clsid )
 {
-    if( !clsid_table->_class_name )  fprintf( stderr, "*** Die statischen Variablen sind nicht initialisiert! ***\n" );
+    if( !clsid_table->_class_name )  fprintf( stderr, "*** Static variables are not initialized! ***\n" );
 
     for( Com_class_entry* c = clsid_table; c->_class_name; c++ )  
     {
@@ -330,7 +330,7 @@ HRESULT CLSIDFromProgID( const OLECHAR* progid_w, CLSID* clsid )
 
     *clsid = CLSID_NULL;
 
-    if( !clsid_table->_class_name )  fprintf( stderr, "*** Die statischen Variablen sind nicht initialisiert! ***\n" );
+    if( !clsid_table->_class_name )  fprintf( stderr, "*** Static variables are not initialized! ***\n" );
     Com_class_entry* c;
     for( c = clsid_table; c->_class_name; c++ )  if( stricmp( progid.c_str(), c->_class_name ) == 0 )  break;
 
@@ -482,7 +482,7 @@ HRESULT CoGetClassObject( const CLSID& clsid, DWORD dwClsContext, COSERVERINFO*,
     const Com_class_entry* e = class_entry_from_clsid( clsid );
     if( !e )  
     {
-        fprintf( stderr, "CoGetClassObject(\"%s\")  CLSID nicht registriert\n", string_from_clsid( clsid ).c_str() );
+        fprintf( stderr, "CoGetClassObject(\"%s\")  CLSID is not registered\n", string_from_clsid( clsid ).c_str() );
         return REGDB_E_CLASSNOTREG;
     }
 
@@ -490,7 +490,7 @@ HRESULT CoGetClassObject( const CLSID& clsid, DWORD dwClsContext, COSERVERINFO*,
 
     if( !m )
     {
-        fprintf( stderr, "CoGetClassObject(\"%s\")  Modul nicht eingtragen\n", string_from_clsid( clsid ).c_str() );
+        fprintf( stderr, "CoGetClassObject(\"%s\")  Missing module\n", string_from_clsid( clsid ).c_str() );
         return REGDB_E_CLASSNOTREG;
     }
 

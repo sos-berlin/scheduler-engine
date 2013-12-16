@@ -557,8 +557,6 @@ void _check_pointer( const void* ptr, uint length, const char* info )
 
 #   ifdef CODE_OK
       FEHLER:
-        SHOW_ERR( "Programmfehler - Ungültige Adresse " << (void*)ptr << ' ' << info
-                  << "\nBitte beenden Sie sofort die Anwendung!" );
         throw_xc( "SOS-INVALID-POINTER" );
 #   endif
 }

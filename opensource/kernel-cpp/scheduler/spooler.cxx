@@ -3642,7 +3642,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
             sos_sleep( renew_wait_interval );
         }
 
-        if( !is_service )  fprintf( stderr, "Der Scheduler ist ausgetauscht und wird neu gestartet\n\n" );
+        if( !is_service )  fprintf( stderr, "Scheduler has been changed and will be restarted now\n\n" );
     }
 
     if( is_service )  scheduler::service_start( service_name );
@@ -4150,7 +4150,7 @@ int sos_main( int argc, char** argv )
         // HP-UX und eingebundenes Hostjava: Irgendein atexit() stürzt in InterlockedIncrement() (AddRef()?") ab.
         // Deshalb beenden wir den Scheduler hier mit _exit(), schließen aber alle Dateien vorher
 
-        Z_LOG2( "scheduler", "_exit(" << ret << ") für Hostjava\n" );
+        Z_LOG2( "scheduler", "_exit(" << ret << ") for Hostjava\n" );
 
         int n = sysconf( _SC_OPEN_MAX );
         for( int i = 0; i < n; i++ )  ::close(i);

@@ -447,7 +447,7 @@ void Log::log( Log_level level, const string& prefix, const string& line )
     catch( const exception& x ) 
     {
         fprintf( stderr, "%s\n", line.c_str() );
-        fprintf( stderr, "Fehler beim Schreiben des Protokolls: %s\n", x.what() );
+        fprintf( stderr, "Error when writing log file: %s\n", x.what() );
         Z_LOG2( "scheduler", "Error when writing log file: " << x.what() << "\n" );
         
         if( level < log_error )  throw;     // Bei error() Exception ignorieren, denn die Funktion wird gerne in Exception-Handlern gerufen

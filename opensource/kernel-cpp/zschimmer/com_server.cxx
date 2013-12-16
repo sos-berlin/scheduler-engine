@@ -358,7 +358,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
               //case VT_CLSID:
 
                 default:
-                    fprintf(stderr,"Com_invoke() Ungültiger Parametertyp %s für %d. Parameter der Methode %s\n", vartype_name(t).c_str(), i, (m->_name?m->_name:"") );
+                    fprintf(stderr,"Com_invoke() Invalid argument type %s for %d, method %s\n", vartype_name(t).c_str(), i, (m->_name?m->_name:"") );
                     if( argnr ) *argnr = dispparams->cArgs - 1 - i; 
                     return DISP_E_TYPEMISMATCH;
             }

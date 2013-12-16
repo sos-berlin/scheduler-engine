@@ -214,7 +214,7 @@ void Licence_key_file::check_rights()
 
 void Licence_key_file::open( const char* fn, Open_mode open_mode, const File_spec& )
 {
-    if( !SOS_LICENCE( licence_licence_key ) )  throw_xc( "SOS-1000", "Lizenzgenerator" );
+    if( !SOS_LICENCE( licence_licence_key ) )  throw_xc( "SOS-1000", "Licence generator" );
 
     bool products = false;
 

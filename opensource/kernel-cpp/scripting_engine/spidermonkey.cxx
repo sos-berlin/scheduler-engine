@@ -957,7 +957,7 @@ JSObject* Spidermonkey::Object_register::jsobject_from_iunknown( IUnknown* iunkn
         return jsobject_from_idispatch( idispatch );
     }
     else
-        _spidermonkey->throw_spidermonkey( "jsobject_from_iunknown: Unbekannter Objekt-Typ" );
+        _spidermonkey->throw_spidermonkey( "jsobject_from_iunknown: Unknown object type" );
 
     return result;
 }
@@ -1047,7 +1047,7 @@ ptr<IDispatch> Spidermonkey::Object_register::idispatch_from_jsobject( JSObject*
         }
         else
         {
-            _spidermonkey->throw_spidermonkey( "Ein Javascript-Objekt kann nicht an COM übergeben werden" );
+            _spidermonkey->throw_spidermonkey( "A Javascript object cannot be transferred with COM" );
             // JS_AddNamedRoot():
             // You should use JS_AddNamedRoot to root only JS objects, JS strings, or JS doubles, 
             // and then only if they are derived from calls to their respective JS_NewXXX creation functions.
@@ -1299,7 +1299,7 @@ void Spidermonkey::set_js_exception( const string& error_text )
         JS_SetPendingException( _jscontext, val );
     }
     else
-        fprintf( stderr, "Fehler bei JS_CallFunctionName( \"Error\", %s )\n", error_text.c_str() );
+        fprintf( stderr, "Error at JS_CallFunctionName( \"Error\", %s )\n", error_text.c_str() );
 }
 
 //-------------------------------------------------------------------Spidermonkey::set_js_exception
@@ -1810,8 +1810,8 @@ JSBool Spidermonkey::com_no_such_method_call( JSContext* cx, JSObject* jsobject,
     try
     {
         if( argc != 2 )                    throw_spidermonkey( "com_no_such_method_call: argc != 2" );
-        if( !JSVAL_IS_STRING( argv[0] ) )  throw_spidermonkey( "com_no_such_method_call: 1. Parameter ist kein String" );
-        if( !JSVAL_IS_OBJECT( argv[1] ) )  throw_spidermonkey( "com_no_such_method_call: 2. Parameter ist kein Array" );
+        if( !JSVAL_IS_STRING( argv[0] ) )  throw_spidermonkey( "com_no_such_method_call: First argument should be a string" );
+        if( !JSVAL_IS_OBJECT( argv[1] ) )  throw_spidermonkey( "com_no_such_method_call: Second argument should be an array" );
 
 
         HRESULT     hr;
@@ -2264,7 +2264,7 @@ JSBool Spidermonkey::activeXObject_jsfunction( JSObject*, uintN argc, jsval* arg
     try
     {
         if( argc != 1 )                     throw_spidermonkey( "activeXObject_jsfunction():  argc != 1" );
-        if( !JSVAL_IS_STRING( argv[0] ) )   throw_spidermonkey( "1. Parameter ist nicht String" );
+        if( !JSVAL_IS_STRING( argv[0] ) )   throw_spidermonkey( "First argument should be a string" );
 
         string com_class_name = JS_GetStringBytes( jsstring_from_jsval( argv[0] ) );
 
@@ -2779,7 +2779,7 @@ JSBool Spidermonkey::declare_java_package_jsfunction( JSObject*, uintN argc, jsv
     try
     {
         if( argc != 1 )                     throw_spidermonkey( "declare_java_package_jsfunction():  argc != 1" );
-        if( !JSVAL_IS_STRING( argv[0] ) )   throw_spidermonkey( "1. Parameter ist nicht String" );
+        if( !JSVAL_IS_STRING( argv[0] ) )   throw_spidermonkey( "First argument should be a string" );
 
         if( !_java_vm )  _java_vm = javabridge::Vm::get_vm();
 

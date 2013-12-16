@@ -329,13 +329,13 @@ int Message::dequeue()
 #           endif
 
             if( file == -1 ) {
-                if( errno == ENOENT ) { dequeue_log( "Message::dequeue: Jemand hat " + email_filename + " gelöscht" );  continue; }
-                if( errno == EACCES ) { dequeue_log( "Message::dequeue: Jemand sperrt " + email_filename );  continue; }
+                if( errno == ENOENT ) { dequeue_log( "Message::dequeue: Something has deleted " + email_filename);  continue; }
+                if( errno == EACCES ) { dequeue_log( "Message::dequeue: Something locks " + email_filename );  continue; }
                 else throw_errno( errno, email_filename.c_str() );
             }
 
             
-            dequeue_log( "Message::dequeue: Versende aus Warteschlange " + email_filename );
+            dequeue_log( "Message::dequeue: Send from queue " + email_filename );
 
             
             int size = z_filelength( file );

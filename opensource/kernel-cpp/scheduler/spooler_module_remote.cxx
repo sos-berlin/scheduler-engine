@@ -697,7 +697,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_() const
 string Remote_module_instance_proxy::Operation::async_state_text_() const
 { 
     string text = "Remote_module_instance_proxy(state=" + state_name();
-    if( _call_state == c_begin  &&  !_proxy->_process )  text += ",Warten auf verfügbaren Prozess der Prozessklasse";
+    if( _call_state == c_begin  &&  !_proxy->_process )  text += ", waiting for available process in process class";
   //if( _operation )  text += "," + _operation->async_state_text();
     text += ")";
 

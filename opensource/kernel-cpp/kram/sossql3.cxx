@@ -221,7 +221,7 @@ void Sql_stmt::prepare_join_expr( Sql_expr_with_operands* expr )
                     {
                         if( f0->_table_index < f1->_table_index ) {                // Reihenfolge in FROM beachten
                             exchg = true;     
-                            grund = "beide Operanden Schlüsselfelder sind, und das rechte in einer vorrangig genannten Tabelle ist";
+                            grund = "beide Operanden Schluesselfelder sind, und das rechte in einer vorrangig genannten Tabelle ist";
                         } else {
                             //grund = "beide Operanden Schlüsselfelder sind, und das linke in einer vorrangig genannten Tabelle ist";
                         }

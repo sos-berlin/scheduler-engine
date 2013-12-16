@@ -41,11 +41,11 @@ const int                       read_line_block_size        = 10*1024;
 
 static Message_code_text error_codes[] =
 {
-    { "Z-FILE-101", "open mode ist nicht korrekt angegeben: $1" },
-    { "Z-FILE-102", "Datei ist schon geöffnet (doppeltes open)" },
-    { "Z-FILE-103", "Dateiposition >= 2GB wird auf diesem Betriebsystem nicht unterstützt" },
-    { "Z-FILE-104", "Dateigröße >= 2GB wird nicht unterstützt" },
-    { "Z-FILE-105", "Datei ist geschlossen" },
+    { "Z-FILE-101", "Invalid open mode: $1" },
+    { "Z-FILE-102", "File has already been opened (duplicate open)" },
+    { "Z-FILE-103", "File posision >= 2GB is not supported on this operating system" },
+    { "Z-FILE-104", "File posision >= 2GB is not supported" },
+    { "Z-FILE-105", "Operation on file, but file is closed" },
     { NULL         , NULL }
 };
 

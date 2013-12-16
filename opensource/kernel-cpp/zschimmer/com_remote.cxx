@@ -1318,7 +1318,7 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
                                                      << _controller_address._port );
     }
 
-    if( args_vector.size() > NO_OF(argv) - 2 )  throw_xc( Z_FUNCTION, "Zu viele Parameter" );
+    if( args_vector.size() > NO_OF(argv) - 2 )  throw_xc( Z_FUNCTION, "Too many arguments" );
 
     argv[0] = object_server_filename.c_str();
     for( uint i = 0; i < args_vector.size(); i++ )  argv[1+i] = args_vector[i].c_str();
@@ -1930,7 +1930,7 @@ void Object_entry::obj_print( ostream* s ) const
           //if( p )  *s << name_of_type( *_iunknown ) << " " << p->title();
           //   else  *s << "Lokal " << name_of_type( *_iunknown ); 
         }
-        catch( ... ) { *s << "(Keine Typinformation)"; }    // typeid stürzt bei manchen Adressen ab (Microsoft)
+        catch( ... ) { *s << "(no type information)"; }    // typeid stürzt bei manchen Adressen ab (Microsoft)
 #   endif
 
     //_iunknown ist manchmal, nach Exception, ungültig.   *s << ", " << ( _iunknown->AddRef(), _iunknown->Release() ) << " references";
@@ -4368,7 +4368,7 @@ void Server::server( int server_port )
         switch( pid )
         {
             case -1:
-                fprintf( stderr, "Fehler bei fork(): ERRNO-%d %s\n", errno, strerror(errno) );
+                fprintf( stderr, "fork() returns ERRNO-%d %s\n", errno, strerror(errno) );
                 _connection->close_socket( &_connection->_socket );
                 //_connection->_socket = SOCKET_ERROR;
                 break;
@@ -4386,7 +4386,7 @@ void Server::server( int server_port )
 
             default:
             {
-                fprintf( stderr, "Prozess %d gestartet für %s\n", pid, _connection->_peer.as_string().c_str() );
+                fprintf( stderr, "Process %d has been started for %s\n", pid, _connection->_peer.as_string().c_str() );
                 //?closesocket( _connection->_socket );
                 _connection->_socket = SOCKET_ERROR;
             }

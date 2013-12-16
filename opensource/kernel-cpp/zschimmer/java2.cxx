@@ -410,7 +410,7 @@ Type Parameter_list_signature::return_type() const
 {
     size_t end = _string.rfind( ')' );
     if( end == string::npos )
-        throw_xc( Z_FUNCTION, "Ungültige Signatur" );
+        throw_xc( Z_FUNCTION, "Invalid java method signature" );
 
     return Type::of_type_signature_string( _string.substr( end + 1 ) );
 }
