@@ -49,21 +49,29 @@ with UnmodifiableJobchain {
     }
   }
 
-  private def persistentState = JobChainPersistentState(getPath, isStopped)
+  private def persistentState =
+    JobChainPersistentState(getPath, isStopped)
 
-  private def entityManager = injector.getInstance(classOf[EntityManager])
+  private def entityManager =
+    injector.getInstance(classOf[EntityManager])
 
-  //private def entityManagerFactory = injector.getInstance(classOf[EntityManagerFactory])
+  //private def entityManagerFactory =
+  // injector.getInstance(classOf[EntityManagerFactory])
 
-  private def persistentStateStore = injector.getInstance(classOf[HibernateJobChainStore])
+  private def persistentStateStore =
+    injector.getInstance(classOf[HibernateJobChainStore])
 
-  private def nodeStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
+  private def nodeStore =
+    injector.getInstance(classOf[HibernateJobChainNodeStore])
 
-  def getName = cppProxy.name
+  def getName =
+    cppProxy.name
 
-  def getFileBasedType = FileBasedType.jobChain
+  def getFileBasedType =
+    FileBasedType.jobChain
 
-  def getPath = JobChainPath(cppProxy.path)
+  def getPath =
+    JobChainPath(cppProxy.path)
 
   def file = cppProxy.file match {
     case "" => sys.error(this+ " has no source file")
@@ -87,17 +95,22 @@ with UnmodifiableJobchain {
 
   lazy val nodes = immutable.Seq() ++ cppProxy.java_nodes
 
-  def order(id: OrderId) = orderOption(id) getOrElse sys.error(this+" does not contain order '"+id+"'")
+  def order(id: OrderId) =
+    orderOption(id) getOrElse sys.error(this+" does not contain order '"+id+"'")
 
-  @Nullable def orderOrNull(id: OrderId): Order = orderOption(id).orNull
+  @Nullable def orderOrNull(id: OrderId): Order =
+    orderOption(id).orNull
 
-  def orderOption(id: OrderId): Option[Order] = Option(cppProxy.order_or_null(id.asString)) map { _.getSister }
+  def orderOption(id: OrderId): Option[Order] =
+    Option(cppProxy.order_or_null(id.asString)) map { _.getSister }
 
-  def isStopped = cppProxy.is_stopped
+  def isStopped =
+    cppProxy.is_stopped
 
   def isStopped_=(o: Boolean) {
     cppProxy.set_stopped(o)
   }
 
-  override def toString = classOf[JobChain].getSimpleName +" "+ getPath
+  override def toString =
+    classOf[JobChain].getSimpleName +" "+ getPath
 }
