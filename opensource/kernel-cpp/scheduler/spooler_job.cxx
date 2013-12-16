@@ -2166,7 +2166,7 @@ void Standard_job::start_when_directory_changed( const string& directory_name, c
             if( old_directory_watcher->signaled() ) 
             {
                 new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
-                Z_LOG2( "scheduler",  Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                Z_LOG2( "scheduler",  Z_FUNCTION << " old directory watchers signal has been transfered to new watcher.\n" );
             }
         }
         catch( exception& x ) { log()->warn( string(x.what()) + ", in old_directory_watcher->wait(0)" ); }      // Vorsichtshalber
