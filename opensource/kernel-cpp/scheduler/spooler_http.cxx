@@ -1109,7 +1109,7 @@ void Response::finish()
     {
         if( _chunk_reader )
         {
-            Z_LOG2( "scheduler", "_chunk_reader entfernt\n" ); 
+            Z_LOG2( "scheduler", "_chunk_reader has been removed\n" ); 
             _chunk_reader = NULL;
         }
     }

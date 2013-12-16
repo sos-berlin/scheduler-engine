@@ -398,7 +398,7 @@ void My_scheduler_service::set_service_status( int spooler_error, int state )
 
 static uint __stdcall call_pending_watchdog_thread(void* o)
 {
-    Z_LOG2( "scheduler.service", "pending_watchdog_thread (Überwachung des Zustands SERVICE_START_PENDING) startet\n" );
+    Z_LOG2( "scheduler.service", "pending_watchdog_thread (watching state SERVICE_START_PENDING) starts\n" );
     return scheduler_service->pending_watchdog_thread(o);
 }
 
@@ -425,7 +425,7 @@ uint My_scheduler_service::pending_watchdog_thread( void* )
         {
             if( _current_state == state )   
             {
-                Z_LOG2( "scheduler.service", "Weil der Dienst zu lange im Zustand " + state_name(state) + " ist, wird der Dienst-Zustand geändert\n" );
+                Z_LOG2( "scheduler.service", "Service has been too long in state '" + state_name(state) + "' so state is being changed\n" );
                 _pending_timed_out = true;
                 set_service_status( 0, _current_state );
             }
@@ -434,7 +434,7 @@ uint My_scheduler_service::pending_watchdog_thread( void* )
         }
     }
 
-    Z_LOG2( "scheduler.service", "pending_watchdog_thread endet\n" );
+    Z_LOG2( "scheduler.service", "pending_watchdog_thread terminates\n" );
 
     return 0;
 }
@@ -451,7 +451,7 @@ static uint __stdcall call_self_destruction_thread(void* o)
 uint My_scheduler_service::self_destruction_thread(void*) {
     SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
 
-    Z_LOG2( "scheduler.service", "Selbstzerstörung in " << stop_timeout << " Sekunden (ohne weitere Ankündigung) ...\n" );
+    Z_LOG2( "scheduler.service", "Self destruction in " << stop_timeout << " seconds, without further notice ...\n" );
 
     sos_sleep( stop_timeout );      // exit() sollte diesen Thread abbrechen. 25.11.2002
     {

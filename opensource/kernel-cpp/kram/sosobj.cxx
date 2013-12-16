@@ -322,7 +322,7 @@ void Sos_object::_request_msg( Request_msg* m )
 
                             //if( exception() )  throw Xc( _XC.name() );
                             if( !_busy )  break;
-                            LOG( *this << " ist beschäftigt\n" );
+                            LOG( *this << " is busy\n" );
                         }
                         else
                         {

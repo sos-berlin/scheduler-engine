@@ -234,7 +234,7 @@ void Message::enqueue()
         if( errno != EEXIST )  throw_errno( errno, email_filename.c_str() );
     }
 
-    LOG( "eMail wird gespeichert in " << email_filename << "\n" );
+    LOG( "Email will be stored in " << email_filename << "\n" );
 
     int ret = write( file, text.c_str(), text.length() );
     if( ret != text.length() )  close(file), throw_errno( errno, email_filename.c_str() );
@@ -256,7 +256,7 @@ void Message::enqueue()
         if( err  &&  errno == EEXIST )  continue;
         if( err )  throw_errno( errno, "rename", filename.c_str() );
 
-        LOG( "eMail-Datei umbenannt in  " << filename << "\n" );
+        LOG( "Email file has been renamed to " << filename << "\n" );
         break;
     }
 }
@@ -329,13 +329,13 @@ int Message::dequeue()
 #           endif
 
             if( file == -1 ) {
-                if( errno == ENOENT ) { dequeue_log( "Message::dequeue: Jemand hat " + email_filename + " gelöscht" );  continue; }
-                if( errno == EACCES ) { dequeue_log( "Message::dequeue: Jemand sperrt " + email_filename );  continue; }
+                if( errno == ENOENT ) { dequeue_log( "Message::dequeue: Something has deleted " + email_filename);  continue; }
+                if( errno == EACCES ) { dequeue_log( "Message::dequeue: Something locks " + email_filename );  continue; }
                 else throw_errno( errno, email_filename.c_str() );
             }
 
             
-            dequeue_log( "Message::dequeue: Versende aus Warteschlange " + email_filename );
+            dequeue_log( "Message::dequeue: Send from queue " + email_filename );
 
             
             int size = z_filelength( file );

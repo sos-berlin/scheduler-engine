@@ -1547,7 +1547,7 @@ bool Task::do_something()
                                 } else {
                                     _idle_timeout_at = now + _job->_idle_timeout;
                                     set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
-                                    Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << 
+                                    Z_LOG2( "scheduler", obj_name() << ": idle_timeout has been elapsed but force_idle_timeout=\"no\" and not more than min_tasks tasks are running, now=" << 
                                         now.as_string(_job->time_zone_name()) << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     something_done = true;

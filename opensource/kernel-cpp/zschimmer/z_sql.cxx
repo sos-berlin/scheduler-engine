@@ -10,8 +10,8 @@ namespace sql {
 
 static Message_code_text error_codes[] =
 {
-    { "Z-SQL-001", "Wert für Schlüssel '$1' für UPDATE-Statement nicht angegeben" },
-    { "Z-SQL-002", "SQL-Operand lässt sich nicht als Zeichenkette darstellen" },
+    { "Z-SQL-001", "Value of key '$1' for UPDATE state is missing" },
+    { "Z-SQL-002", "SQL operand could not be represented as a string" },
     {}
 };
 

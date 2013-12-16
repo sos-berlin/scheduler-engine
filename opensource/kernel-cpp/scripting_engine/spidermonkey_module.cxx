@@ -83,7 +83,7 @@ extern "C" HRESULT APIENTRY DllGetClassObject( const CLSID& clsid, const IID& ii
 
     if( CLSID_Spidermonkey == CLSID_NULL )
     {
-        fprintf( stderr, "*** Die statischen Variablen im Spidermonkey-Modul sind nicht initialisiert! ***\n" );
+        fprintf( stderr, "*** Static variable in Spidermonkey module are not initialized! ***\n" );
     }
 
     #ifdef Z_WINDOWS

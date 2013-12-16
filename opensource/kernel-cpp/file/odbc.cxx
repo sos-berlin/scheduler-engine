@@ -934,7 +934,7 @@ Odbc_static::~Odbc_static()
     // hostole.dll stürzt in Win95 (nicht NT) in FreeLibrary() (kernel32.dll) ab. 
     // Das seit 11.97. Darum vermeiden wir den Aufruf von FreeLibrary().
 
-    LOG( "FreeLibrary(" << _lib.handle() << ") unterdrückt wegen Problems in Win95\n" );
+    LOG( "FreeLibrary(" << _lib.handle() << ") suppressed because of problen with Windows 95\n" );
     _lib.set_handle( 0 );
 
 #   ifdef SYSTEM_WIN
@@ -1264,19 +1264,6 @@ void Odbc_session::_open_postprocessing()
     if( _debug ) if( retcode == SQL_SUCCESS )  *log_ptr << string << '\n';
                                          else  log_retcode( retcode ), remove_errors();
     _sql_need_long_data_len = string[ 0 ] != 'N';
-
-
-
-
-
-
-#   if defined SYSTEM_UNIX
-        if( _driver_name == "liboraodbc.so" && !oracle_module ) 
-        {
-            LOG( "*** dlopen(\"libclntsh.so\")  Der Oracle-Treiber ruft atexit(), er darf also nicht entladen werden, sonst stürzt exit() ab.\n" );
-            oracle_module = dlopen( "libclntsh.so", RTLD_LAZY );
-        }
-#   endif
 
 /*
     if( _dbms == dbms_oracle )
@@ -1782,7 +1769,7 @@ void Odbc_file::prepare_stmt( const Sos_string& stmt )
     if( _has_result_set )
     {
         if( _column_count == 0 ) {
-            LOG( "SQLColAttributes liefert column_count = 0. SQLExecute wird jetzt ausgeführt\n" );
+            LOG( "SQLColAttributes returns column_count = 0. Executing SQLExecute\n" );
 
             execute_stmt();
 

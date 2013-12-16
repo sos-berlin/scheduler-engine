@@ -269,7 +269,7 @@ bool Web_services::is_request_authorized( http::Request* http_request )
     
     if( !string_begins_with( authorization, "Basic " ) )
     {
-        Z_LOG2( "scheduler", Z_FUNCTION << "  Nur Basic wird akzeptiert: " << authorization << "\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << " Only 'Basic' authorization is accepted: " << authorization << "\n" );
         return false;
     }
 
@@ -278,7 +278,7 @@ bool Web_services::is_request_authorized( http::Request* http_request )
 
     if( colon == string::npos )  
     {
-        Z_LOG2( "scheduler", Z_FUNCTION << "  Doppelpunkt fehlt im decodiertem Text: " << authorization << "\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << " Colon is missing in decoded header line: " << authorization << "\n" );
         return false;
     }
 
@@ -288,13 +288,13 @@ bool Web_services::is_request_authorized( http::Request* http_request )
     Users_map::iterator it = _users_map.find( user_name );
     if( it == _users_map.end() )
     {
-        Z_LOG2( "scheduler", Z_FUNCTION << "  Benutzer '" << user_name << "' ist unbekannt\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  User '" << user_name << "' is unknown\n" );
         return false;
     }
 
     if( it->second->_password_md5 != password_md5 )
     {
-        Z_LOG2( "scheduler", Z_FUNCTION << "  Kennwort f�r Benutzer '" << user_name << "' stimmt nicht\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  Password for user '" << user_name << "' does not match\n" );
         return false;
     }
 

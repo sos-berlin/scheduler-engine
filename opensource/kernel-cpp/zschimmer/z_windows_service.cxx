@@ -266,7 +266,7 @@ uint Service::self_destruction_thread()
 {
     SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
 
-    Z_LOG( "Selbstzerstörung in " << _self_destruction_timeout << " Sekunden (ohne weitere Ankündigung) ...\n" );
+    Z_LOG( "Self-destruction within " << _self_destruction_timeout << " seconds, without further notice ...\n" );
 
     sleep( _self_destruction_timeout );      // exit() sollte diesen Thread abbrechen. 25.11.2002
 

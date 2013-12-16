@@ -365,9 +365,9 @@ void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_sche
 
     if ( Remote_scheduler_interface* r = connection_operation->_remote_scheduler ) {
         if ( r != this )
-            Z_LOG2("scheduler",*this << ": Der Verbindung ist bereits ein ANDERER remote scheduler zugeordnet: " << *r << " <-- " << *connection_operation << "\n" );
+            Z_LOG2("scheduler",*this << ": The TCP connection is already linked with ANOTHER remote JobScheduler: " << *r << " <-- " << *connection_operation << "\n" );
         else
-            Z_LOG2("scheduler","Der Verbindung ist bereits der SELBE remote scheduler zugeordnet: " << *r << " <-- " << *connection_operation << "\n" );
+            Z_LOG2("scheduler", "The TCP connection is linked with the SAME remote JobScheduler: " << *r << " <-- " << *connection_operation << "\n" );
     }
 
     /*! \change JS-481 Es gibt bereits eine Verbindung und die neue Connection ist nicht dieselbe. Dass darf nicht sein. */

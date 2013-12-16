@@ -3607,7 +3607,7 @@ STDMETHODIMP Com_spooler::put_Var( BSTR name, VARIANT* value )
 
         if( ( name == NULL || SysStringLen(name) == 0 )  &&  string_from_variant(*value) == crash_string )
         {
-            _spooler->log()->error( "spooler.var(\"\")=\"" + string(crash_string) + "\"  l�sst Scheduler jetzt abbrechen." );
+            _spooler->log()->error( "spooler.var(\"\")=\"" + string(crash_string) + "\" WILL LET CRASH JOBSCHEDULER NOW!" );
             dummy = *(int*)NULL;
         }
 #   endif

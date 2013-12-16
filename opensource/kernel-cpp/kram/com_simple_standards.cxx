@@ -1118,7 +1118,7 @@ bool com_name_exists( const ptr<IDispatch>& dispatch, const string& name )
     Bstr        name_bstr;
 
     if( name == "()" )  throw_xc( "com_name_exists(\"()\") ???" );
-    if( name.empty() )  throw_xc( "com_name_exists", "Leerer Name" );
+    if( name.empty() )  throw_xc( "com_name_exists", "Empty name" );
 
     size_t pos = name.find( '(' );  if( pos == string::npos )  pos = name.length();        // Java-Signatur abschneiden, die ignorieren wir (s. spooler_module_java.cxx)
     name_bstr.assign( name.c_str(), z::int_cast(pos) );
