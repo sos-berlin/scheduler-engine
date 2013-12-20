@@ -74,7 +74,8 @@ public class ScriptAdapterJob extends Job_impl {
     }
 
     @Override public final boolean spooler_process() throws Exception {
-        return adapter.callProcess(super.spooler_process());
+        boolean defaultResult = (spooler_task.order() != null);
+        return adapter.callProcess(defaultResult);
     }
 
     @Override public final void spooler_on_error() throws Exception {

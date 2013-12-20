@@ -39,12 +39,13 @@ public class JS498RhinoOrderIT extends SchedulerTest {
 
     @Test
     public void test() throws IOException {
-        // controller().activateScheduler("-e","-log-level=info");
+        // controller().activateScheduler(Arrays.asList("-e","-log-level=info"));
         controller().activateScheduler();
         File resultFile = prepareResultFile();
         controller().scheduler().executeXml(util.addOrder(jobchain).getCommand());
         controller().waitForTermination(shortTimeout);
         resultMap = getResultMap(resultFile);
+        checkScriptOnlyJob();
         checkJobObjects();
         checkJobFunctions();
     }
@@ -71,6 +72,10 @@ public class JS498RhinoOrderIT extends SchedulerTest {
     @EventHandler
     public void handleOrderEnd(OrderFinishedEvent e)  {
         controller().terminateScheduler();
+    }
+
+    private void checkScriptOnlyJob() {
+        assertObject("script_only", "script_only_order");
     }
 
     private void checkJobObjects() {
