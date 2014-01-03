@@ -102,8 +102,8 @@ function visualStudio_compile() {
 
 function msbuild() {
     for c in $configurations; do :
-        echo $msbuild /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" $*
-        "$msbuild" /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" $*
+        echo $msbuild /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" /property:VCTargetsPath="C:\\Program Files (x86)\\MSBuild\\Microsoft.Cpp\\v4.0\\V120\\" $*
+        "$msbuild" /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" /property:VCTargetsPath="C:\\Program Files (x86)\\MSBuild\\Microsoft.Cpp\\v4.0\\V120\\" $*
     done
 }
 
