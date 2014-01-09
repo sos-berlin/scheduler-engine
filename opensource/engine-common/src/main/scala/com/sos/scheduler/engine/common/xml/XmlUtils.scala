@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.common.xml
 
 import com.google.common.base.Objects.firstNonNull
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ModifiedBy.modifiedBy
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
 import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -16,7 +16,7 @@ import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.{Result, TransformerFactory}
 import javax.xml.xpath.{XPathConstants, XPathFactory}
 import org.w3c.dom.{Document, Element, Node, NodeList}
-import org.xml.sax.InputSource
+import org.xml.sax.{SAXParseException, ErrorHandler, InputSource}
 import scala.collection.JavaConversions._
 import scala.sys.error
 
@@ -25,7 +25,14 @@ import scala.sys.error
   private lazy val xPath = threadLocal { xPathFactory.newXPath() }
 
   private val logger = Logger(getClass)
-  private val documentBuilder = threadLocal { (DocumentBuilderFactory.newInstance() modifiedBy { _.setNamespaceAware(true) }).newDocumentBuilder() }
+  private val documentBuilder = threadLocal {
+    val factory = DocumentBuilderFactory.newInstance() sideEffect { _ setNamespaceAware true }
+    factory.newDocumentBuilder() sideEffect { _ setErrorHandler new ErrorHandler {
+      def warning(exception: SAXParseException) = logger.debug(exception.toString, exception)
+      def error(exception: SAXParseException) = throw exception
+      def fatalError(exception: SAXParseException) = throw exception
+    } }
+  }
   private val transformerFactory = threadLocal { TransformerFactory.newInstance() }
 
   private var static_xPathNullPointerLogged = false
@@ -55,13 +62,10 @@ import scala.sys.error
     loadXml(new StringReader(xml))
 
   def loadXml(in: Reader): Document =
-    documentBuilder.parse(new InputSource(in)) modifiedBy postInitializeDocument
+    documentBuilder.parse(new InputSource(in)) sideEffect postInitializeDocument
 
-  def loadXml(in: InputStream): Document = {
-    val result = documentBuilder parse in
-    postInitializeDocument(result)
-    result
-  }
+  def loadXml(in: InputStream): Document =
+    documentBuilder.parse(in) sideEffect postInitializeDocument
 
   private def postInitializeDocument(doc: Document) {
     doc.setXmlStandalone(true)
