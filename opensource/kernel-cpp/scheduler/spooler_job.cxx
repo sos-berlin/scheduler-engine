@@ -876,7 +876,7 @@ void Job::set_dom( const xml::Element_ptr& element )
             {
                 try 
                 { 
-                    _description = Text_with_includes( _spooler, this, _spooler->include_path(), e ).read_plain_string();
+                    _description = Text_with_includes( _spooler, this, _spooler->include_path(), e ).read_plain_or_xml_string();
                 }
                 catch( const exception& x  ) { _log->warn( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }

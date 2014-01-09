@@ -43,7 +43,7 @@ struct Text_with_includes : Non_cloneable
     bool                        is_empty                    () const;
 
     string                      read_xml_string             ()                                      { return read_text(true); }
-    string                      read_plain_string           ()                                      { return read_text(false); }
+    string                      read_plain_or_xml_string    ()                                      { return read_text(false); }
     string                      read_plain_text_element     (const xml::Element_ptr& e)             { return read_text_element(e, false); }
     int                         text_element_linenr         ( const xml::Element_ptr& );
     string                      text_element_filepath       ( const xml::Element_ptr& );
@@ -57,8 +57,8 @@ struct Text_with_includes : Non_cloneable
     void                        initialize                  ();
 
   private:
-    string                      read_text                   (bool xml_expected);
-    string                      read_text_element           (const xml::Element_ptr&, bool xml_expected);
+    string                      read_text                   (bool xml_only);
+    string                      read_text_element           (const xml::Element_ptr&, bool xml_only);
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -107,7 +107,7 @@ struct Module : Object
     void                        set_priority                ( const string& );
 
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
-    string                      read_source_script          ()                                      { return _text_with_includes.read_xml_string(); }
+    string                      read_source_script          ()                                      { return _text_with_includes.read_plain_or_xml_string(); }
     bool                        needs_java                  ();
 
     Process_class*              process_class               () const;

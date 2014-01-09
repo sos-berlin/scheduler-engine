@@ -17,6 +17,7 @@ struct Include_command
     File_path                   file_path                   () const                                { return _file_path; }
     Absolute_path               path                        () const                                { return _path; }
     string                      register_include_and_read_content_bytes( File_based* source_file_based );
+    string                      read_decoded_string         (bool xml_only);
     string                      read_content_bytes          ();
   //file::File_info*            file_info                   ();
     void                        initialize                  ();
