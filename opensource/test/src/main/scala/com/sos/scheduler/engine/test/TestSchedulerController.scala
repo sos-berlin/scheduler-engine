@@ -56,6 +56,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
   private val closingRunnables = mutable.Buffer[() => Unit]()
+  private var suppressTerminatedOnError = false
 
   setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")))
 
@@ -166,9 +167,16 @@ with EventHandlerAnnotated with SosAutoCloseable {
     if (!lastErrorLine.isEmpty) error("Test terminated after error log line: " + lastErrorLine)
   }
 
+  def suppressingTerminateOnError[A](f: => A): A = {
+    require(!suppressTerminatedOnError)
+    suppressTerminatedOnError = true
+    try f
+    finally suppressTerminatedOnError = false
+  }
+
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
-    if (configuration.terminateOnError && !configuration.ignoreError(e.getCodeOrNull) && !configuration.errorLogEventIsExpected(e))
+    if (configuration.terminateOnError && !suppressTerminatedOnError && !configuration.ignoreError(e.getCodeOrNull) && !configuration.errorLogEventIsExpected(e))
       terminateAfterException(error(s"Test terminated after error log line: ${e.getLine}"))
   }
 
