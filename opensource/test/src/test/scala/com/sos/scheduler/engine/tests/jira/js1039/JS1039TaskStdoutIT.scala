@@ -15,6 +15,7 @@ import org.scalatest.FunSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.util.matching.Regex
+import com.sos.scheduler.engine.test.SchedulerTestHelpers
 
 /** JS-1039 FIXED: API functions stdout_text and stderr_text return empty strings when used in monitor of shell-job.
   * Prüft, ob Task.stdout_text und Task.stderr_text die Ausgaben vom Shell-Prozess enthalten
@@ -23,23 +24,16 @@ import scala.util.matching.Regex
   * 32 Tests: Shell oder API, mit oder ohne Monitor, lokal oder fern, stdout oder stderr:
   * Skript schreibt, spooler_task_after() schreibt, spooler_task_after() liest spooler_task.stdxxx_text. */
 @RunWith(classOf[JUnitRunner])
-final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
+final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest with SchedulerTestHelpers {
 
   private lazy val tcpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
   protected override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$tcpPort"))
   private lazy val schedulerVariables = scheduler.instance[VariableSet]
 
   private lazy val jobResults: Map[JobPath, JobResult] = {
-    def runJob(jobPath: JobPath) {
-      autoClosing(controller.newEventPipe()) { eventPipe =>
-        scheduler executeXml <start_job job={jobPath.string}/>
-        eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == jobPath }
-      }
-    }
-
     (jobSettings map { _.jobPath } map { jobPath =>
       for (o <- stdOutErrList) schedulerVariables(o) = ""
-      runJob(jobPath)
+      runJobAndWaitForEnd(jobPath)
       jobPath -> JobResult(
         taskLog = controller.environment.taskLogFileString(jobPath),
         variableMap = Map() ++ schedulerVariables)

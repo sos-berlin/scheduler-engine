@@ -15,6 +15,7 @@ import java.net._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import com.sos.scheduler.engine.test.SchedulerTestHelpers
 
 /** JS-1079: Test des Supervisors mit vielen bestehenden TCP-Verbindungen.
   * Der Scheduler läuft im selben Prozess wie Scala, weshalb die Client-Sockets mitzählen.
@@ -27,7 +28,7 @@ import org.scalatest.junit.JUnitRunner
   * </pre>
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1079IT extends FunSuite with ScalaSchedulerTest {
+final class JS1079IT extends FunSuite with ScalaSchedulerTest with SchedulerTestHelpers {
   override protected lazy val testConfiguration = TestConfiguration(
     binariesDebugMode = Some(CppBinariesDebugMode.release))  // debug ist zu langsam
   private val nextUdpSocket = new UdpSocketGenerator
@@ -57,10 +58,8 @@ final class JS1079IT extends FunSuite with ScalaSchedulerTest {
   /** Auch bei den vielen Verbindungen soll com_remote.cxx noch funktionieren. */
   private def checkTasks() {
     val eventPipe = controller.newEventPipe()
-    for (i <- 1 to 2) {
-      scheduler executeXml <start_job job={testJobPath.string}/>
-      eventPipe.nextWithCondition[TaskEndedEvent] { _.jobPath == testJobPath }
-    }
+    for (i <- 1 to 2)
+      runJobAndWaitForEnd(testJobPath)
     eventPipe.close()
   }
 }
