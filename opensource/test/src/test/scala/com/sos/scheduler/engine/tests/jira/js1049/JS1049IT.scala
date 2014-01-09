@@ -48,6 +48,18 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest with SchedulerTest
     runJobAndWaitForEnd(textIncludeJobPath)
   }
 
+  "XML Schema check" in {
+    controller.suppressingTerminateOnError {
+      intercept[Exception] {scheduler executeXml <show_state INVALID-ATTRIBUTE="xx"/> } .getMessage should include ("INVALID-ATTRIBUTE")
+    }
+  }
+
+  "Invalid XML" in {
+    controller.suppressingTerminateOnError {
+      intercept[Exception] { scheduler executeXml "<>" } .getMessage should include ("SAXParseException")
+    }
+  }
+
   def job(o: JobPath): Job =
     instance[JobSubsystem].job(o)
 }
