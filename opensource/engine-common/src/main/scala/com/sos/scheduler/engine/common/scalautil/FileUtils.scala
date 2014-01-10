@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.common.scalautil
 
+import com.google.common.base.Charsets.UTF_8
+import com.google.common.io.Files
 import java.io.File
 import java.nio.charset.Charset
-import com.google.common.io.Files
 
 object FileUtils {
   object implicits {
@@ -21,8 +22,13 @@ object FileUtils {
       def contentString(encoding: Charset) =
         Files.toString(delegate, encoding)
 
-      def write(string: String, encoding: Charset) =
+      def write(string: String, encoding: Charset = UTF_8) {
         Files.write(string, delegate, encoding)
+      }
+
+      def append(o: String, encoding: Charset = UTF_8) {
+        Files.append(o, delegate, encoding)
+      }
     }
   }
 }
