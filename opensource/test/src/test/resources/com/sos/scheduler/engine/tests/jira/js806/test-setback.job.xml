@@ -3,5 +3,6 @@
     order="true"
 >
     <script java_class="com.sos.scheduler.engine.tests.jira.js806.TestJob"/>
-    <delay_order_after_setback setback_count="1" delay="30" is_maximum="true"/>
+    <delay_order_after_setback setback_count="1" delay="1"/>
+    <delay_order_after_setback setback_count="15" is_maximum="true"/>
 </job>
