@@ -24,6 +24,9 @@ extends XmlCommand {
 object ModifyOrderCommand {
 //  private val yyyymmddhhmmssFormatter = DateTimeFormat forPattern "yyyy-MM-dd HH:mm:ss'Z'"
 
+  def startNow(o: OrderKey) =
+    new ModifyOrderCommand(o, at = Some(ModifyOrderCommand.NowAt))
+
   object Action extends Enumeration {
     val reset = Value
   }
