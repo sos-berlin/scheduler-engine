@@ -37,8 +37,8 @@ Sos_object_base* Sos_object_base::obj_cast( Sos_type_code type_code, const char*
 {
     if( !this  ||  !obj_is_type( type_code ) ) {
         char line_text [ 17 ];
-        sprintf( line_text, ", Zeile %.0d", lineno );
-        LOG( "SOS_CAST(" << type_name << ',' << *this << ") in " << text << ", Zeile " << lineno << " nicht möglich. " );
+        sprintf( line_text, ", line %.0d", lineno );
+        LOG( "SOS_CAST(" << type_name << ',' << *this << ") in " << text << ", line " << lineno << " inpossible. " );
         //throw_xc( "SOS-1130", Msg_insertions( this, text, line_text ) );
         throw_xc( "SOS-1130", this, type_name );
     }

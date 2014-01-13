@@ -376,7 +376,7 @@ library Spooler
         [id(6)]
         HRESULT                 Wait_until_terminated       ( [in,defaultvalue(999999999)] double* wait_time, [out,retval] VARIANT_BOOL* ok );
 
-        [id(7),propput,helpstring("Task nach der Anzahl Sekunden erneut starten")]
+        [id(7),propput]
         HRESULT                 Repeat                      ( [in] double* seconds );
 
         [id(8)]
@@ -627,22 +627,22 @@ library Spooler
         [id(23)]
         HRESULT                 Abort_immediately_and_restart();
 
-        [id(24),propget,helpstring("Name der Datenbanktabelle f�r die internen Variablen des Schedulers")]
+        [id(24),propget]
         HRESULT                 Db_variables_table_name ( [out,retval] BSTR* );
 
-        [id(25),propget,helpstring("Name der Datenbanktabelle f�r die Tasks")]
+        [id(25),propget]
         HRESULT                 Db_tasks_table_name     ( [out,retval] BSTR* );
 
-        [id(26),propget,helpstring("Name der Datenbanktabelle f�r die Auftr�ge")]
+        [id(26),propget]
         HRESULT                 Db_orders_table_name    ( [out,retval] BSTR* );
 
-        [id(27),propget,helpstring("Name der Datenbanktabelle f�r die Historie")]
+        [id(27),propget]
         HRESULT                 Db_history_table_name   ( [out,retval] BSTR* );
 
-        [id(28),propget,helpstring("Name der Datenbanktabelle f�r die Auftragshistorie")]
+        [id(28),propget]
         HRESULT                 Db_order_history_table_name( [out,retval] BSTR* );
 
-        [id(29),propget,helpstring("Option -ini= (Pfadname der factory.ini)")]
+        [id(29),propget]
         HRESULT                 Ini_path                ( [out,retval] BSTR* );
 
         [id(30)]

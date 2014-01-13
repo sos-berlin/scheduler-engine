@@ -601,7 +601,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document();
             if( !dom_document )  break;
                                                               
-            Z_LOG2( "scheduler", Z_FUNCTION << " XML-Antwort: " << dom_document.xml_string() );
+            Z_LOG2( "scheduler", Z_FUNCTION << " XML response: " << dom_document.xml_string() );
 
             //if( _spooler->_validate_xml )  _spooler->_schema.validate( dom_document );
 
@@ -624,7 +624,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         {
             if( xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document() )  
             {
-                Z_LOG2( "zschimmer", Z_FUNCTION << " XML-Antwort: " << dom_document.xml_string() );
+                Z_LOG2( "zschimmer", Z_FUNCTION << " XML response " << dom_document.xml_string() );
                 //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
                 something_done = true;
                 _async_remote_operation->_state = Async_remote_operation::s_closed;

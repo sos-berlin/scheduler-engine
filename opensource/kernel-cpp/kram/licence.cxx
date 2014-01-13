@@ -767,7 +767,7 @@ bool Sos_licence::is_demo_version()
        Sos_licence lic;
        lic.read_key( *it );
        Sos_seriennr* s = &lic._seriennr[ 1 ];
-       Z_LOG2("scheduler","Key: " << lic.key() << ", Kunde: " << s->_kundenkuerzel << "\n");
+       Z_LOG2("scheduler", "Key: " << lic.key() << ", customer: " << s->_kundenkuerzel << "\n");
        if ( strcmp(s->_kundenkuerzel,"DEMO")!=0 && strcmp(s->_kundenkuerzel,"SOS")!=0 ) 
        {
           result = false;

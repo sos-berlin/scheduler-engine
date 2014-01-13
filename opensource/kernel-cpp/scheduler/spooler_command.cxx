@@ -2061,7 +2061,7 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text, bool 
         throw;
     }
 
-    Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );
+    Z_LOG2( "scheduler.xml", "XML document has been read\n" );
 
     return command_doc;
 }

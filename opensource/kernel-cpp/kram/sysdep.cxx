@@ -476,8 +476,6 @@ void _check_pointer( const void* ptr, uint length, const char* info )
 
 #   ifdef CODE_OK
       FEHLER:
-        SHOW_ERR( "Programmfehler - Ungültige Adresse " << (void*)ptr << ' ' << info
-                  << "\nBitte beenden Sie sofort die Anwendung!" );
         throw_xc( "SOS-INVALID-POINTER" );
 #   endif
 }
@@ -486,42 +484,7 @@ void _check_pointer( const void* ptr, uint length, const char* info )
 
 time_t sos_time( time_t *timer )
 {
-    static Bool     profile_read = false;
-    static time_t   offset       = 0;
     time_t          tim          = time( timer );
-
-    if( !profile_read )
-    {
-        profile_read = true;
-        try {
-            Sos_string  today_string;
-            Sos_date    date;
-            struct tm   t;
-
-            today_string = read_profile_string( "", "debug", "today" );
-            if( !empty( today_string ) )
-            {
-                date.assign( today_string );
-
-                t.tm_year  = date.year();
-                t.tm_mon   = date.month()- 1;
-                t.tm_mday  = date.day();
-                t.tm_hour  = 0;
-                t.tm_min   = 0;
-                t.tm_sec   = 0;
-                t.tm_isdst = 0;
-
-                offset = mktime( &t ) - tim / ( 24L*60L*60L ) * ( 24L*60L*60L );
-            }
-        }
-        catch( const Xc& x )
-        {
-            SHOW_MSG( "Fehlerhafter Eintrag in der sos.ini: [debug] date=\n" << x );
-        }
-    }
-
-    tim += offset;
-
     if( timer )  *timer = tim;
     return tim;
 }

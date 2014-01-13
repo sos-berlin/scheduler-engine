@@ -81,7 +81,7 @@ const char* std_date_time_format_array [ 16 ] =
 const uint1 monatstage [ 1+12 ] = { 0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 const char monthnames3  [ 12 ][4] = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
-const char monatsnamen3 [ 12 ][4] = { "jan", "feb", "mär", "apr", "mai", "jun", "jul", "aug", "sep", "okt", "nov", "dez" };
+const char monatsnamen3 [ 12 ][4] = { "jan", "feb", "mar", "apr", "mai", "jun", "jul", "aug", "sep", "okt", "nov", "dez" };
 
 const int zero_day = Sos_date( 1970, 1, 1 ).day_count();
 

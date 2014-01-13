@@ -44,9 +44,9 @@ void Mutex_guard::enter_( Mutex* m, const char* function, const char* file, int 
         //fprintf( stderr, "%s %s %s %s %d\n", Z_FUNCTION.c_str(), m->_name.c_str(), _function.c_str(), _file, _line_nr );
         if( !m->try_enter() )
         {
-            Z_LOG( "Mutex_guard::enter() " << m->_name << " in " << _function << "(), " << _file << ":" << _line_nr << " gesperrt von Thread " << m->locking_thread_id() << "...\n" );
+            Z_LOG( "Mutex_guard::enter() " << m->_name << " in " << _function << "(), " << _file << ":" << _line_nr << " locked by thread " << m->locking_thread_id() << "...\n" );
             m->enter();
-            Z_LOG( "Mutex_guard::enter() " << m->_name << " in " << _function << "(), ok\n" );
+            Z_LOG( "Mutex_guard::enter() " << m->_name << " in " << _function << "(), OK\n" );
         }
         
     }
@@ -87,7 +87,7 @@ bool My_thread_only::is_owners_thread() const
     bool result = current_thread_id() == _owners_thread_id; 
 
     if( !result )
-        Z_LOG( "Objekt My_thread_only(0x" << hex_from_int(_owners_thread_id) << ") wird von Thread 0x" << hex_from_int(current_thread_id()) << " benutzt.\n" );
+        Z_LOG( "Object My_thread_only(0x" << hex_from_int(_owners_thread_id) << ") is in use by thread 0x" << hex_from_int(current_thread_id()) << ".\n" );
 
     return result;
 }

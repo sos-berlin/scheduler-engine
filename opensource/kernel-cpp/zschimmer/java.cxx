@@ -577,7 +577,7 @@ void Vm::start()
 
     Z_LOG2( Vm::java_log_category, "setlocale(LC_ALL,\"C\")\n" );
     const char* java_locale = setlocale( LC_ALL, "C" );
-    if( strcmp( java_locale, "C" ) != 0 )  Z_LOG2( Vm::java_log_category, "Javas locale war " << java_locale << "\n" );
+    if( strcmp( java_locale, "C" ) != 0 )  Z_LOG2( Vm::java_log_category, "Javas locale was " << java_locale << "\n" );
 
     if( ret < 0 )  throw_java_ret( ret, "JNI_CreateJavaVM", module_filename );
 
@@ -663,7 +663,7 @@ void Vm::close()
         {
             if( _dont_destroy  ||  unloading_module )
             {
-                Z_LOG2( Vm::java_log_category, "DestroyJavaVM() unterdr�ckt\n" );
+                Z_LOG2( Vm::java_log_category, "DestroyJavaVM() suppressed\n" );
                 //_vm = NULL;
             }
             else
@@ -680,7 +680,7 @@ void Vm::close()
 
                 Z_LOG2( Vm::java_log_category, "DestroyJavaVM()  OK\n" );            
 
-                if( ret < 0 )  _log.error( "DestroyJavaVM() liefert " + as_string(ret) + ". Java l�sst sich nicht entladen" );
+                if( ret < 0 )  _log.error( "DestroyJavaVM() returns " + as_string(ret) + ". Java could not be unloaded" );
                          else  _vm = NULL;
             }
 

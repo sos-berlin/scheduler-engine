@@ -190,7 +190,7 @@ void Sos_ole_object::_obj_print( ostream* s ) const
 
 void Sos_ole_object::fill_excepinfo( const Xc& x, EXCEPINFO* excepinfo )
 {
-    LOG( "Fehler: " << x << '\n' );
+    LOG( "Errpr: " << x << '\n' );
 
     if( !excepinfo )  return;
 
@@ -216,7 +216,7 @@ void Sos_ole_object::fill_excepinfo( const Xc& x, EXCEPINFO* excepinfo )
 
 void Sos_ole_object::fill_excepinfo( const exception& x, EXCEPINFO* excepinfo )
 {
-    LOG( "Fehler: " << x << '\n' );
+    LOG( "Error: " << x << '\n' );
 
     if( !excepinfo )  return;
 
@@ -451,7 +451,7 @@ STDMETHODIMP_(ULONG) Sos_ole_object::AddRef()
 STDMETHODIMP_(ULONG) Sos_ole_object::Release()
 {
     if( _ref_count == 0 )  {
-        LOG( "***FEHLER*** Sos_ole_object._ref_count ist schon 0!\n" ); 
+        LOG( "***ERROR*** Sos_ole_object._ref_count is already 0!\n" ); 
 #       if defined _DEBUG && defined SYSTEM_WIN
             DebugBreak();
 #       endif
@@ -863,8 +863,8 @@ HRESULT Typelib_descr::register_server()
         }
         catch( const Xc& x ) 
         {
-            LOG( "hostOLE: Fehler bei der Registrierung: " << x << '\n' );
-            SHOW_MSG( "Fehler: " << x );
+            LOG( "hostOLE: Error when registering: " << x << '\n' );
+            SHOW_MSG( "Error: " << x );
             return SELFREG_E_TYPELIB;
         }
 
@@ -880,7 +880,7 @@ HRESULT Typelib_descr::register_server()
         }
         catch( const Xc& x ) 
         {
-            LOG( "Fehler bei der Registrierung: " << x << '\n' );
+            LOG( "Error when registering: " << x << '\n' );
             SHOW_ERR( "Fehler: " << x );
             return SELFREG_E_CLASS;
         }
@@ -1061,7 +1061,7 @@ HRESULT Ole_class_descr::create_instance( IUnknown* pUnkOuter, const IID& iid, I
 
 HRESULT Ole_class_descr::create_simple( IUnknown** )
 {
-    LOG( *this << ".create_simple() ist nicht implementiert\n" );
+    LOG( *this << ".create_simple() is not implemented\n" );
     return (HRESULT)E_NOINTERFACE;
 }
 
@@ -1096,7 +1096,7 @@ STDMETHODIMP Ole_factory::set_clsid( const IID& clsid )
 
     if( !cls->_creatable )  
     {
-        LOG( cls->_clsid << " ist nicht kreierbar\n" );
+        LOG( cls->_clsid << " is not creatable\n" );
         hr = CLASS_E_CLASSNOTAVAILABLE;
         goto FEHLER;
     }

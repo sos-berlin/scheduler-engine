@@ -305,12 +305,12 @@ void Sos_database_session::open( Sos_database_file* first_file )
 
                 if( now >= wait_until )  
                 {
-                    Z_LOG2( "sosdb", "Wartezeit -time=" << first_file->_connection_wait << " ist abgelaufen.\n" );
+                    Z_LOG2( "sosdb", "Waiting time -time=" << first_file->_connection_wait << " has been expired.\n" );
                     throw;
                 }
 
                 int sleep_time = min( interval, (int)( wait_until - now ) );
-                Z_LOG2( "sosdb", sleep_time << "s warten bis zum nächsten Versuch ...\n" );
+                Z_LOG2( "sosdb", "Waiting " << sleep_time << "s until next try ...\n" );
                 sos_sleep( sleep_time );
                 interval = min( 5*60, interval + interval / 2 );
             }
@@ -1359,7 +1359,7 @@ void Sos_database_file::get_session()
     {
         _session = session;
         _session->_ref_count++;
-        Z_LOG2( "sosdb", "Vorhandene DB-Session wird verwendet: " << *session << '\n' );
+        Z_LOG2( "sosdb", "Using existing database session " << *session << '\n' );
     }
 
     _session->_transaction_used = true;

@@ -60,6 +60,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>cppjava.scalautil.io</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>

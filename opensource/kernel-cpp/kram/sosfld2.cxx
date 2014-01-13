@@ -7,7 +7,7 @@
 #undef  MODULE_NAME // wegen Templates in Solaris 4.0.1
 #define MODULE_NAME "sosfld2"
 #undef  COPYRIGHT
-#define COPYRIGHT   "© 1995 SOS GmbH Berlin"
+#define COPYRIGHT   "(C) 1995 SOS GmbH Berlin"
 #undef  AUTHOR
 #define AUTHOR      "Joacim Zschimmer"
 

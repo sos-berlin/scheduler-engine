@@ -3492,7 +3492,7 @@ void spooler_restart( Log* log, bool is_service )
 
             default: 
             {
-                Z_LOG2( "scheduler", "waitpid(" << pid << ")  Scheduler restart\n" );
+                Z_LOG2( "scheduler", "waitpid(" << pid << ")  JobScheduler restart\n" );
                 //waitpid( pid, NULL, 0 );
                 Z_LOG2( "scheduler", "waitpid(" << pid << ")  OK\n" );
             }
@@ -3550,7 +3550,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
             sos_sleep( renew_wait_interval );
         }
 
-        if( !is_service )  fprintf( stderr, "Der Scheduler ist ausgetauscht und wird neu gestartet\n\n" );
+        if( !is_service )  fprintf( stderr, "Scheduler has been changed and will be restarted now\n\n" );
     }
 
     if( is_service )  scheduler::service_start( service_name );
@@ -3979,7 +3979,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                     {
                         scheduler::is_daemon = true;
 
-                        Z_LOG2( "scheduler", "Scheduler wird Daemon. Pid wechselt\n");
+                        Z_LOG2( "scheduler", "JobScheduler becomes daemon, and process ID changes\n");
                         scheduler::be_daemon();
                     }
 
@@ -4058,7 +4058,7 @@ int sos_main( int argc, char** argv )
         // HP-UX und eingebundenes Hostjava: Irgendein atexit() stürzt in InterlockedIncrement() (AddRef()?") ab.
         // Deshalb beenden wir den Scheduler hier mit _exit(), schließen aber alle Dateien vorher
 
-        Z_LOG2( "scheduler", "_exit(" << ret << ") für Hostjava\n" );
+        Z_LOG2( "scheduler", "_exit(" << ret << ") for Hostjava\n" );
 
         int n = sysconf( _SC_OPEN_MAX );
         for( int i = 0; i < n; i++ )  ::close(i);

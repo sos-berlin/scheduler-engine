@@ -16,7 +16,7 @@ namespace windows {
 
 static Message_code_text error_codes[] =
 {
-    { "Z-SHOWWINDOW-01", "Ungültiger Wert für ShowWindow(): " },
+    { "Z-SHOWWINDOW-01", "Invalid value for ShowWindow(): " },
     {}
 };
 

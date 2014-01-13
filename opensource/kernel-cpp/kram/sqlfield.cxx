@@ -400,8 +400,6 @@ void Sql_parser::read_token()
     case 'q':  case 'r':  case 's':  case 't':  case 'u':  case 'v':  case 'w':  case 'x':
     case 'Y':  case 'Z':
     case 'y':  case 'z':
-    case 'Ä':  case 'Ö':  case 'Ü':
-    case 'ä':  case 'ö':  case 'ü':
     case '_':
     {
         //char buffer[ 2 ];

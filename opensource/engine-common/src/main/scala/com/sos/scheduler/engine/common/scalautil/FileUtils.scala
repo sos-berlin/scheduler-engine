@@ -11,6 +11,13 @@ object FileUtils {
       def /(filename: String) =
         new File(delegate, filename)
 
+      def contentBytes: Array[Byte] =
+        Files.toByteArray(delegate)
+
+      def contentBytes_=(o: Array[Byte]) {
+        Files.write(o, delegate)
+      }
+
       def contentString(encoding: Charset) =
         Files.toString(delegate, encoding)
 

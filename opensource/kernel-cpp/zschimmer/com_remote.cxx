@@ -308,7 +308,7 @@ Async_operation* Connection::close__start()
 
     while( !_operation_stack.empty() )
     {
-        Z_LOG( "pid=" << pid() << " Connection::close: Operation liegt auf dem Stack: " << _operation_stack.top()->async_state_text() << "\n" );
+        Z_LOG( "pid=" << pid() << " Connection::close: Operation is on top of stack: " << _operation_stack.top()->async_state_text() << "\n" );
         _operation_stack.pop();
     }
 
@@ -1070,7 +1070,7 @@ void Connection::check_connection_error()
             _broken = 0;
             _manager->clear_fd( Socket_manager::except_fd, _socket );
 
-            Z_LOG( "\npid=" << pid() << " *** VERBINDUNGSFEHLER *** errno=" << _last_errno << "\n\n" );
+            Z_LOG( "\npid=" << pid() << " *** CONNECTION ERROR *** errno=" << _last_errno << "\n\n" );
         }
 
 
@@ -1170,7 +1170,7 @@ bool Connection_to_own_server_process::Wait_for_process_termination::async_conti
                 return false; 
             }
             
-            if( _connection->_exit_code != 0 )  Z_LOG( "pid=" << pid() << " *** GetExitCodeProcess() => " << printf_string("0x%X",_connection->_exit_code) << ", Prozess hat geendet\n" );
+            if( _connection->_exit_code != 0 )  Z_LOG( "pid=" << pid() << " *** GetExitCodeProcess() => " << printf_string("0x%X",_connection->_exit_code) << ", process has been terminated\n" );
                                           else  Z_LOG( "pid=" << pid() << " GetExitCodeProcess() => 0, Prozess hat geendet\n" );
         }
 
@@ -1320,7 +1320,7 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
                                                      << _controller_address._port );
     }
 
-    if( args_vector.size() > NO_OF(argv) - 2 )  throw_xc( Z_FUNCTION, "Zu viele Parameter" );
+    if( args_vector.size() > NO_OF(argv) - 2 )  throw_xc( Z_FUNCTION, "Too many arguments" );
 
     argv[0] = object_server_filename.c_str();
     for( uint i = 0; i < args_vector.size(); i++ )  argv[1+i] = args_vector[i].c_str();
@@ -1932,7 +1932,7 @@ void Object_entry::obj_print( ostream* s ) const
           //if( p )  *s << name_of_type( *_iunknown ) << " " << p->title();
           //   else  *s << "Lokal " << name_of_type( *_iunknown ); 
         }
-        catch( ... ) { *s << "(Keine Typinformation)"; }    // typeid stürzt bei manchen Adressen ab (Microsoft)
+        catch( ... ) { *s << "(no type information)"; }    // typeid stürzt bei manchen Adressen ab (Microsoft)
 #   endif
 
     //_iunknown ist manchmal, nach Exception, ungültig.   *s << ", " << ( _iunknown->AddRef(), _iunknown->Release() ) << " references";
@@ -2082,7 +2082,7 @@ Session::~Session()
 {
     try
     {
-        if( !_object_table.empty() )  Z_LOG( "pid=" << pid() << " Offene Objekte:\n" << _object_table << "\n" );
+        if( !_object_table.empty() )  Z_LOG( "pid=" << pid() << " Open objects:\n" << _object_table << "\n" );
         _object_table.clear();
 
         //close__start() -> async_finish();
@@ -2098,7 +2098,7 @@ Async_operation* Session::close__start()
     _sync_operation = Z_NEW(Sync_operation);
     Async_operation* operation = _sync_operation;
 
-    if( !_object_table.empty() )  Z_LOG( "pid=" << pid() << " Offene Objekte:\n" << _object_table << "\n" );
+    if( !_object_table.empty() )  Z_LOG( "pid=" << pid() << " Open objects:\n" << _object_table << "\n" );
 
     _object_table.clear();
 
@@ -3266,7 +3266,7 @@ ptr<IUnknown> Input_message::read_iunknown()
                 }
             }                
             else
-                Z_LOG( "*** com_remote: Proxy-CLSID ist nicht bekannt.\n" );
+                Z_LOG( "*** com_remote: Proxy CLSID is unknown.\n" );
         }
 
 
@@ -3548,7 +3548,7 @@ void Simple_operation::close()
 {
     if( _on_stack )
     {
-        Z_LOG( "\npid=" << pid() << " *** Simple_operation::close(): Operation liegt auf dem Stack: " << async_state_text() << "\n\n" );
+        Z_LOG( "\npid=" << pid() << " *** Simple_operation::close(): Operation is on top of stack: " << async_state_text() << "\n\n" );
 
         if( _session )
         {
@@ -3564,7 +3564,7 @@ void Simple_operation::close()
                 else
                 if( conn->current_operation() )
                 {
-                    Z_LOG( "\npid=" << pid() << " *** Oben auf dem Stack liegt eine andere Operation: " << conn->current_operation()->async_state_text() << "\n\n" );
+                    Z_LOG( "\npid=" << pid() << " *** Not the same operation on top of stack: " << conn->current_operation()->async_state_text() << "\n\n" );
                 }
             }
         }
@@ -4372,7 +4372,7 @@ void Server::server( int server_port )
         switch( pid )
         {
             case -1:
-                fprintf( stderr, "Fehler bei fork(): ERRNO-%d %s\n", errno, strerror(errno) );
+                fprintf( stderr, "fork() returns ERRNO-%d %s\n", errno, strerror(errno) );
                 _connection->close_socket( &_connection->_socket );
                 //_connection->_socket = SOCKET_ERROR;
                 break;
@@ -4390,7 +4390,7 @@ void Server::server( int server_port )
 
             default:
             {
-                fprintf( stderr, "Prozess %d gestartet für %s\n", pid, _connection->_peer.as_string().c_str() );
+                fprintf( stderr, "Process %d has been started for %s\n", pid, _connection->_peer.as_string().c_str() );
                 //?closesocket( _connection->_socket );
                 _connection->_socket = SOCKET_ERROR;
             }

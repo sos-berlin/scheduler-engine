@@ -67,7 +67,7 @@ extern "C" BOOL WINAPI DllMain( HANDLE hInst, DWORD ul_reason_being_called, void
 
 extern "C" HRESULT APIENTRY DllGetClassObject( const CLSID& clsid, const IID& iid, void** result )
 {
-    if( CLSID_PerlScript == CLSID_NULL )    {        fprintf( stderr, "*** Die statischen Variablen im PerlScript-Modul sind nicht initialisiert! ***\n" );    }
+    if( CLSID_PerlScript == CLSID_NULL )    {        fprintf( stderr, "*** Static variables in module PerlScript are not initialized! ***\n" );    }
 
     //if( clsid == CLSID_PerlScript )  return com_get_class_object( perl_class_descriptor, clsid, iid, result );
     //if( clsid == CLSID_PerlScript )  return com_get_class_object( create_perl_scripting_engine, clsid, iid, result );

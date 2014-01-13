@@ -46,11 +46,11 @@ int Thread_base::call_thread_main()
 {
     try
     {
-        Z_LOG( "Thread " << _thread_name << " startet\n" );
+        Z_LOG( "Thread " << _thread_name << " starts\n" );
 
         int ret = thread_main();
 
-        Z_LOG( "Thread " << _thread_name << " beendet\n" );
+        Z_LOG( "Thread " << _thread_name << " terminated\n" );
 
         return ret;
     }

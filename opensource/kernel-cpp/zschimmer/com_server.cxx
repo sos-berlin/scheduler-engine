@@ -52,15 +52,15 @@ HRESULT Com_get_class_object( const Com_class_descriptor* class_descriptor, cons
         if( !class_descriptor )
         {
             string name = string_from_clsid( clsid );
-            Z_LOG2( "com", Z_FUNCTION << " CLASS_E_CLASSNOTAVAILABLE  Klasse " << name  << " ist nicht eingebunden\n" );
-            fprintf( stderr, "Klasse %s ist nicht eingebunden\n", name.c_str() );
+            Z_LOG2( "com", Z_FUNCTION << " CLASS_E_CLASSNOTAVAILABLE  Class " << name  << " is not embedded\n" );
+            fprintf( stderr, "Class %s is not embedded\n", name.c_str() );
             return CLASS_E_CLASSNOTAVAILABLE;
         }
 
         if( clsid != class_descriptor->clsid() )
         {
             string name = string_from_clsid( clsid );
-            Z_LOG2( "com", Z_FUNCTION << " Klasse " << name << ": clsid != class_descriptor->clsid()\n" );
+            Z_LOG2( "com", Z_FUNCTION << " Class " << name << ": clsid != class_descriptor->clsid()\n" );
             return CLASS_E_CLASSNOTAVAILABLE;
         }
 
@@ -223,7 +223,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
         else 
         {
             //jz 13.10.04  Sollten hier nicht auch mehrere Parameter möglich sein: obj.prop(47) = 23?
-            Z_LOG2( "com.invoke", "Com_invoke: DISPATCH_PROPERTYPUT, aber nicht cNamedArgs == 1 oder rgdispidNamedArgs[0] == DISPID_PROPERTYPUT\n" );
+            Z_LOG2( "com.invoke", "Com_invoke: DISPATCH_PROPERTYPUT, but not cNamedArgs == 1 or rgdispidNamedArgs[0] == DISPID_PROPERTYPUT\n" );
             return DISP_E_BADPARAMCOUNT;
         }
     }
@@ -260,7 +260,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
 
             if( safearray_vartype != ( p->vt & ~VT_ARRAY ) )  // Hier sind wir erstmal pingelig, obwohl p->vt vielleicht egal sein kann, wichtig ist safearray_vartype
             {
-                Z_LOG2( "com.invoke", "Pingelige Prüfung: safearray_vartype=" << vartype_name( safearray_vartype ) << " != p->vt=" << vartype_name( p->vt ) << "\n" );
+                Z_LOG2( "com.invoke", "Picky check: safearray_vartype=" << vartype_name( safearray_vartype ) << " != p->vt=" << vartype_name( p->vt ) << "\n" );
                 return DISP_E_TYPEMISMATCH;    
             }
 
@@ -358,7 +358,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
               //case VT_CLSID:
 
                 default:
-                    fprintf(stderr,"Com_invoke() Ungültiger Parametertyp %s für %d. Parameter der Methode %s\n", vartype_name(t).c_str(), i, (m->_name?m->_name:"") );
+                    fprintf(stderr,"Com_invoke() Invalid argument type %s for %d, method %s\n", vartype_name(t).c_str(), i, (m->_name?m->_name:"") );
                     if( argnr ) *argnr = dispparams->cArgs - 1 - i; 
                     return DISP_E_TYPEMISMATCH;
             }
@@ -401,7 +401,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
 
     if( dispparams->cArgs < i - m->_default_arg_count ) 
     {
-        Z_LOG2( "com.invoke", "Com_invoke: " << dispparams->cArgs << " Parameter übergeben, aber " << ( i - m->_default_arg_count ) << " erwartet\n" );
+        Z_LOG2( "com.invoke", "Com_invoke: " << dispparams->cArgs << " argument got but " << ( i - m->_default_arg_count ) << " expected\n" );
         return DISP_E_BADPARAMCOUNT;  // Zu wenige Parameter
     }
 

@@ -6,12 +6,12 @@ final class Logger(val delegate: Slf4jLogger) extends AnyVal {
 
   @inline def error(line: => String) {
     if (delegate.isErrorEnabled)
-      delegate.warn(line)
+      delegate.error(line)
   }
 
   @inline def error(line: => String, t: Throwable) {
     if (delegate.isErrorEnabled)
-      delegate.warn(line, t)
+      delegate.error(line, t)
   }
 
   @inline def warn(line: => String) {

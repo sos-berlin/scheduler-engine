@@ -431,7 +431,7 @@ void Subprocess_register::add( Subprocess* subprocess )
 
     if( entry )
     {
-        Z_LOG2( "scheduler", "Subprocess_register::add(" << subprocess->_process.pid() << "): Prozess mit gleicher Pid wird entfernt: " << subprocess->_process.obj_name() << "\n" );
+        Z_LOG2( "scheduler", "Subprocess_register::add(" << subprocess->_process.pid() << "): Process entry with same process ID is being removed: " << subprocess->_process.obj_name() << "\n" );
         entry->_registered = false;
     }
 

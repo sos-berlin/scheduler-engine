@@ -52,7 +52,7 @@ const char allowed_xml_latin1_characters[ 256 ] =
        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // f0
 };
 
-const char unicode_substition_character = '¿';
+const char unicode_substition_character = '?';
 
 //------------------------------------------------------------non_xml_latin1_characters_substituted
 

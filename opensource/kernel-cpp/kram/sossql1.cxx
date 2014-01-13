@@ -278,7 +278,7 @@ void Sql_field_expr::_obj_print( ostream* s ) const
         if( _table->_null_values_for_outer_join_read
          || _field_descr->null( _table->_base ) )
         {
-            *s << "«NULL»";
+            *s << "<NULL>";
         }
         else
         {
@@ -882,7 +882,7 @@ void Sql_select::set_result_key_len()
         // Der LOOP-Index wird als letztes Feld dem Schlüssel angehängt und von Sql_select::get_key genutzt
         _loop->_result_key_offset = result_offset;
         result_offset += sizeof _system->_sys_loop_index;
-        LOG( "build_result_key_type: LOOP-Index ist Schlüssel\n ");
+        LOG( "build_result_key_type: LOOP-Index ist Schluessel\n ");
     }
 
     _key_len = result_offset;

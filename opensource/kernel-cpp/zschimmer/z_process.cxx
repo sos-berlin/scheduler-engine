@@ -72,7 +72,7 @@ int priority_class_from_string( const string& priority )
       //if( p == "24"  ||  p == "realtime"     )  result = REALTIME_PRIORITY_CLASS;       // 0x00000100   2..31  idle: 16 time critical: 31
       //else
         {
-            Z_LOG( "ERROR  Unbekannte Priorität: " << priority << "\n" );
+            Z_LOG( "ERROR  Unknown priority: " << priority << "\n" );
             return 0;
         }
     }

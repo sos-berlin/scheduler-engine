@@ -2404,7 +2404,7 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
     
     if( order )  
     {
-        Z_LOG2( "scheduler", "Auftrag aus Datenbank aendert " << order->path() << "\n" );
+        Z_LOG2( "scheduler", "Order from database changes " << order->path() << "\n" );
         assert( !order->_job_chain );
         assert( !order->_task );
     }
@@ -2675,7 +2675,7 @@ int Job_chain::remove_all_pending_orders( bool leave_in_database )
         {
             string task = "(deleted task)";
             if( _spooler->_task_subsystem  &&  _spooler->_task_subsystem->has_tasks() )  task = order->_task->obj_name();  
-            Z_LOG2( "scheduler", Z_FUNCTION << ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << task << "\n" );
+            Z_LOG2( "scheduler", Z_FUNCTION << ": " << order->obj_name() << " has not been removed because it is being processed by " << task << "\n" );
         }
     }
 

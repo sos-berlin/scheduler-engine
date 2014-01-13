@@ -151,7 +151,7 @@ string Thread::thread_as_text() const
     ok = GetExitCodeThread( _thread_handle, &exit_code );
     if( ok )  if( exit_code == STILL_ACTIVE )  result += "active";
                                          else  result = "terminated with exit code " + as_string(exit_code);
-        else  result = "Unbekannter Thread " + printf_string( "%lX", (long)_thread_handle.handle() );
+        else  result = "Unknown thread " + printf_string( "%lX", (long)_thread_handle.handle() );
 
     ok = GetThreadTimes( _thread_handle, &creation_time, &exit_time, &kernel_time, &user_time );
     if( ok )
