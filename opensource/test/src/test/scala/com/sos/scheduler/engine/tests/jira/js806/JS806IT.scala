@@ -70,6 +70,7 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
       eventPipe.nextKeyed[OrderSetBackEvent](myOrderKey).state shouldEqual OrderState("200")
       eventPipe.nextKeyed[OrderStepEndedEvent](myOrderKey)
       myOrderKey.file(liveDirectory).xml = <order title={changedTitle}><run_time/></order>
+      variableSet("TestJob.setback") = false.toString
       eventPipe.nextKeyed[OrderFinishedEvent](myOrderKey)
       eventPipe.nextKeyed[FileBasedActivatedEvent](myOrderKey)
       orderSubsystem.order(myOrderKey).getTitle shouldEqual changedTitle

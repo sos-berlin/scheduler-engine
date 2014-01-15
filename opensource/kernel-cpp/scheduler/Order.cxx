@@ -1265,7 +1265,7 @@ bool Order::order_is_removable_or_replaceable()
 {
     bool result;
 
-    if( _task || _is_modified )
+    if( _task )
     {
         result = false;
     }
