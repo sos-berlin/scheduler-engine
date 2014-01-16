@@ -1,11 +1,13 @@
 package com.sos.scheduler.engine.main.event;
 
+import javax.annotation.Nullable;
+
 public final class TerminatedEvent extends MainEvent {
     private final int exitCode;
-    private final Throwable throwable;
+    @Nullable private final Throwable throwable;
 
     /** @param x can be null */
-    public TerminatedEvent(int exitCode, Throwable x) {
+    public TerminatedEvent(int exitCode, @Nullable Throwable x) {
         this.exitCode = exitCode;
         this.throwable = x;
     }
@@ -15,7 +17,7 @@ public final class TerminatedEvent extends MainEvent {
     }
 
     /** @return null, when scheduler terminated without exception */
-    public Throwable getThrowable() {
+    @Nullable public Throwable getThrowable() {
         return throwable;
     }
 
