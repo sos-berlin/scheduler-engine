@@ -18,27 +18,36 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore,
 import javax.annotation.Nullable
 import javax.persistence.EntityManager
 import org.joda.time.DateTime
+import Job._
 
-@ForCpp final class Job(cppProxy: JobC, injector: Injector) extends FileBased with Sister with UnmodifiableJob {
-
-  import Job._
+@ForCpp final class Job(cppProxy: JobC, injector: Injector)
+extends FileBased
+with Sister
+with UnmodifiableJob {
 
   def onCppProxyInvalidated() {}
 
-  implicit private def schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
+  implicit private def schedulerThreadCallQueue =
+    injector.instance[SchedulerThreadCallQueue]
 
-  def getFileBasedType = FileBasedType.job
+  def getFileBasedType =
+    FileBasedType.job
 
-  def getPath = JobPath(cppProxy.path)
+  def getPath =
+    JobPath(cppProxy.path)
 
-  def getName = cppProxy.name
+  def getName =
+    cppProxy.name
 
-  def getFileBasedState = FileBasedState.ofCppName(cppProxy.file_based_state_name)
+  def getFileBasedState =
+    FileBasedState.ofCppName(cppProxy.file_based_state_name)
 
   /** @return true, wenn das [[com.sos.scheduler.engine.kernel.folder.FileBased]] nach einer Änderung erneut geladen worden ist. */
-  def isFileBasedReread = cppProxy.is_file_based_reread
+  def isFileBasedReread =
+    cppProxy.is_file_based_reread
 
-  def getLog = cppProxy.log.getSister
+  def getLog =
+    cppProxy.log.getSister
 
   /** Markiert, dass das [[com.sos.scheduler.engine.kernel.folder.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
   def forceFileReread() {
@@ -48,9 +57,11 @@ import org.joda.time.DateTime
   def getConfigurationXmlBytes =
     cppProxy.source_xml_bytes
 
-  def getDescription = cppProxy.description
+  def getDescription =
+    cppProxy.description
 
-  def state = JobState.valueOf(cppProxy.state_name)
+  def state =
+    JobState.valueOf(cppProxy.state_name)
 
   def endTasks() {
     setStateCommand(JobStateCommand.endTasks)
@@ -82,12 +93,15 @@ import org.joda.time.DateTime
       persistentStateStore.tryFetchAverageStepDuration(getPath)
     }
   }
-  private def persistentStateStore = injector.getInstance(classOf[HibernateJobStore])
 
-  private def persistentState = new JobPersistent(
-    getPath,
-    isPermanentlyStopped,
-    eternalMillisToNone(cppProxy.next_start_time_millis))
+  private def persistentStateStore =
+    injector.getInstance(classOf[HibernateJobStore])
+
+  private def persistentState =
+    new JobPersistent(
+      getPath,
+      isPermanentlyStopped,
+      eternalMillisToNone(cppProxy.next_start_time_millis))
 
   @ForCpp private def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
     transaction(entityManager) { implicit entityManager =>
@@ -115,14 +129,19 @@ import org.joda.time.DateTime
     }
   }
 
-  private def entityManager = injector.getInstance(classOf[EntityManager])
+  private def entityManager =
+    injector.getInstance(classOf[EntityManager])
 
-  private def taskStore = injector.getInstance(classOf[HibernateTaskStore])
+  private def taskStore =
+    injector.getInstance(classOf[HibernateTaskStore])
 
-  def isPermanentlyStopped = cppProxy.is_permanently_stopped
+  def isPermanentlyStopped =
+    cppProxy.is_permanently_stopped
 
-  override def toString = getClass.getSimpleName + " " + getPath.string
+  override def toString =
+    getClass.getSimpleName + " " + getPath.string
 }
+
 
 object Job {
   private def eternalMillisToNone(millis: Long): Option[DateTime] = {
