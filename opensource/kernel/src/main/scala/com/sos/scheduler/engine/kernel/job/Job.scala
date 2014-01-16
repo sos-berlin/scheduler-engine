@@ -1,29 +1,24 @@
 package com.sos.scheduler.engine.kernel.job
 
-import Job._
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.configuration.SchedulerDataConstants.eternalMillis
 import com.sos.scheduler.engine.data.folder.FileBasedType
 import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.{TaskPersistent, TaskId, JobPersistent}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.folder.FileBasedState
-import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore, HibernateTaskStore}
-import javax.annotation.Nullable
-import javax.persistence.EntityManager
-import org.joda.time.DateTime
+import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
+import org.joda.time.Instant
 
-@ForCpp final class Job(cppProxy: JobC, injector: Injector)
+@ForCpp final class Job(protected val cppProxy: JobC, protected val injector: Injector)
 extends FileBased
 with Sister
-with UnmodifiableJob {
+with UnmodifiableJob
+with JobPersistence {
 
   def onCppProxyInvalidated() {}
 
@@ -63,6 +58,9 @@ with UnmodifiableJob {
   def state =
     JobState.valueOf(cppProxy.state_name)
 
+  protected def nextStartInstantOption: Option[Instant] =
+    eternalMillisToNone(cppProxy.next_start_time_millis)
+
   def endTasks() {
     setStateCommand(JobStateCommand.endTasks)
   }
@@ -71,81 +69,6 @@ with UnmodifiableJob {
     schedulerThreadFuture { cppProxy.set_state_cmd(c.cppValue) }
   }
 
-  @ForCpp @Nullable private def tryFetchPersistentState =
-    transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.tryFetch(path).orNull
-    }
-
-  @ForCpp private def persistState() {
-    transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.store(persistentState)
-    }
-  }
-
-  @ForCpp private def deletePersistentState() {
-    transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.delete(path)
-    }
-  }
-
-  @ForCpp def tryFetchAverageStepDuration() = {
-    transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.tryFetchAverageStepDuration(path)
-    }
-  }
-
-  private def persistentStateStore =
-    injector.getInstance(classOf[HibernateJobStore])
-
-  private def persistentState =
-    new JobPersistent(
-      path,
-      isPermanentlyStopped,
-      eternalMillisToNone(cppProxy.next_start_time_millis))
-
-  @ForCpp private def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
-    transaction(entityManager) { implicit entityManager =>
-      taskStore.insert(TaskPersistent(
-        TaskId(taskId),
-        path,
-        new DateTime(enqueueTimeMillis),
-        zeroMillisToNone(startTimeMillis),
-        parametersXml,
-        xml))
-    }
-  }
-
-  @ForCpp private def deletePersistedTask(taskId: Int) {
-    transaction(entityManager) { implicit entityManager =>
-      taskStore.delete(TaskId(taskId))
-    }
-  }
-
-  @ForCpp private def loadPersistentTasks() {
-    transaction(entityManager) { implicit entityManager =>
-      for (t <- taskStore.fetchByJobOrderedByTaskId(path)) {
-        cppProxy.enqueue_task(t)
-      }
-    }
-  }
-
-  private def entityManager =
-    injector.getInstance(classOf[EntityManager])
-
-  private def taskStore =
-    injector.getInstance(classOf[HibernateTaskStore])
-
   def isPermanentlyStopped =
     cppProxy.is_permanently_stopped
-}
-
-
-object Job {
-  private def eternalMillisToNone(millis: Long): Option[DateTime] = {
-    require(millis > 0, "Timestamp from C++ is not greater than zero: "+millis)
-    Some(millis) filter { _ != eternalMillis } map { o => new DateTime(o) }
-  }
-
-  private def zeroMillisToNone(millis: Long): Option[DateTime] =
-    Some(millis) filter { _ != 0 } map { o => new DateTime(o) }
 }

@@ -27,10 +27,10 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native java.lang.String description__native(long cppReference);
 
 
-    @Override public void enqueue_task(com.sos.scheduler.engine.data.job.TaskPersistent p0) {
+    @Override public void enqueue_taskPersistentState(com.sos.scheduler.engine.data.job.TaskPersistentState p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            enqueue_task__native(cppReference(), p0);
+            enqueue_taskPersistentState__native(cppReference(), p0);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
@@ -38,7 +38,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
         }
     }
 
-    private static native void enqueue_task__native(long cppReference, com.sos.scheduler.engine.data.job.TaskPersistent p0);
+    private static native void enqueue_taskPersistentState__native(long cppReference, com.sos.scheduler.engine.data.job.TaskPersistentState p0);
 
 
     @Override public java.lang.String file_based_state_name() {

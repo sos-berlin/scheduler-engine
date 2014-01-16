@@ -4,16 +4,16 @@ import com.google.common.base.Strings
 import com.google.common.base.Strings.emptyToNull
 import com.sos.scheduler.engine.data.base.IsString.stringOrNull
 import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderState, OrderId, OrderPersistent, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderState, OrderId, OrderPersistentState, OrderKey}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.persistence.SchedulerDatabases._
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.instantToDatabase
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter
 
-trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistent, OrderKey, OrderEntity] {
+trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistentState, OrderKey, OrderEntity] {
   protected val schedulerId: SchedulerId
 
-  final def toObject(e: OrderEntity) = OrderPersistent(
+  final def toObject(e: OrderEntity) = OrderPersistentState(
       jobChainPath = JobChainPath("/"+ e.jobChainPath),
       orderId = OrderId(e.orderId),
       distributedNextTimeOption = Option(e.distributedNextTime) map databaseToInstant,
@@ -29,7 +29,7 @@ trait OrderEntityConverter extends ObjectEntityConverter[OrderPersistent, OrderK
       runtimeXmlOption =  Option(e.runtime),
       xmlOption = Option(e.xml))
 
-  final def toEntity(o: OrderPersistent): OrderEntity = {
+  final def toEntity(o: OrderPersistentState): OrderEntity = {
     val e = new OrderEntity(toEntityKey(o.key))
     e.distributedNextTime = (o.distributedNextTimeOption map instantToDatabase).orNull
     e.occupyingClusterMemberId = stringOrNull(o.occupyingClusterIdOption)

@@ -5,7 +5,9 @@
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
-#include "../javaproxy/com__sos__scheduler__engine__data__job__JobPersistent.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__JobPersistentState.h"
+
+typedef ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistentState JobPersistentStateJ;
 
 #ifndef Z_WINDOWS
 #   include <signal.h>
@@ -703,7 +705,7 @@ bool Job::on_load() // Transaction* ta )
 
         try {
             if (_spooler->settings()->_use_java_persistence) {
-                if (::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent persistentState = typed_java_sister().tryFetchPersistentState()) {
+                if (JobPersistentStateJ persistentState = typed_java_sister().tryFetchPersistentState()) {
                     _is_permanently_stopped = persistentState.isPermanentlyStopped();
                     //_db_next_start_time = persistentState.nextStartTimeDouble();
                 }
@@ -1742,22 +1744,22 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
     return task;
 }
 
-//--------------------------------------------------------------------------------Job::enqueue_task
+//-----------------------------------------------------------------Job::enqueue_taskPersistentState
 
-void Job::enqueue_task(const TaskPersistentJ& taskPersistentJ) {
+void Job::enqueue_taskPersistentState(const TaskPersistentStateJ& taskPersistentStateJ) {
 
-    int task_id = taskPersistentJ.taskId().value();
+    int task_id = taskPersistentStateJ.taskId().value();
 
-    Time start_at = Time::of_millis(taskPersistentJ.startTimeMillis());
+    Time start_at = Time::of_millis(taskPersistentStateJ.startTimeMillis());
     _log->info( message_string( "SCHEDULER-917", task_id, start_at.not_zero()? start_at.as_string(time_zone_name()) : "period" ) );
 
     ptr<Com_variable_set> parameters = new Com_variable_set;
-    string parameters_xml = taskPersistentJ.parametersXml();
+    string parameters_xml = taskPersistentStateJ.parametersXml();
     if( !parameters_xml.empty() )  parameters->set_xml_string(parameters_xml);
 
     xml::Document_ptr task_dom;
     bool force_start = force_start_default;
-    string xml = taskPersistentJ.xml();
+    string xml = taskPersistentStateJ.xml();
     if (!xml.empty()) {
         task_dom = xml::Document_ptr::from_xml_string(xml);
         force_start = task_dom.documentElement().bool_getAttribute("force_start", force_start);
@@ -1767,7 +1769,7 @@ void Job::enqueue_task(const TaskPersistentJ& taskPersistentJ) {
     if( task_dom )  task->set_dom( task_dom.documentElement() );
     task->_is_in_database = true;
     task->_let_run        = true;
-    task->_enqueue_time = Time::of_millis(taskPersistentJ.enqueueTime().getMillis());
+    task->_enqueue_time = Time::of_millis(taskPersistentStateJ.enqueueTime().getMillis());
     
     if (!start_at && !_schedule_use->period_follows(Time::now())) {
         try { z::throw_xc( "SCHEDULER-143" ); } 

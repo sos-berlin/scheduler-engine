@@ -11,7 +11,6 @@
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}

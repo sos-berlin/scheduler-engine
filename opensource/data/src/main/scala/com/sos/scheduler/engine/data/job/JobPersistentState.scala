@@ -7,14 +7,16 @@ import org.joda.time.ReadableInstant
 import scala.annotation.meta.getter
 
 @ForCpp
-case class JobPersistent(
+final case class JobPersistentState(
     jobPath: JobPath,
     @(ForCpp @getter) isPermanentlyStopped: Boolean,
     nextStartTimeOption: Option[ReadableInstant])
 extends HasKey[JobPath]
-with HasIsDefault{
+with HasIsDefault {
 
-  def key = jobPath
+  def key =
+    jobPath
 
-  def isDefault = nextStartTimeOption.isEmpty && !isPermanentlyStopped
+  def isDefault =
+    nextStartTimeOption.isEmpty && !isPermanentlyStopped
 }

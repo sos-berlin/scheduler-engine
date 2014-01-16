@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
 import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.JobPersistent
+import com.sos.scheduler.engine.data.job.JobPersistentState
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.schedulerIdToDatabase
@@ -15,7 +15,7 @@ final class HibernateJobStore @Inject()(
     protected val schedulerId: SchedulerId,
     protected val clusterMemberId: ClusterMemberId,
     protected val entityManagerFactory: EntityManagerFactory)
-extends AbstractHibernateStore[JobPersistent, JobPath, JobEntity]
+extends AbstractHibernateStore[JobPersistentState, JobPath, JobEntity]
 with JobEntityConverter {
 
   def tryFetchAverageStepDuration(jobPath: JobPath)(implicit em: EntityManager): Option[Duration] = {

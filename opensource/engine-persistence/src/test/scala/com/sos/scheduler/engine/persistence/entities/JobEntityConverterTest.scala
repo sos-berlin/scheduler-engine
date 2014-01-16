@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.persistence.entities
 
 import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.JobPersistent
+import com.sos.scheduler.engine.data.job.JobPersistentState
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.databaseTimeZone
 import java.util.{Date => JavaDate}
@@ -34,7 +34,7 @@ final class JobEntityConverterTest extends FunSuite {
 
     test(testKey +"toEntity ") {
       val timestamp = new DateTime(2012, 10, 2, 22, 33, 44)
-      val e =  converter.toEntity(JobPersistent(JobPath("/path/name"), testStopped, Some(timestamp)))
+      val e =  converter.toEntity(JobPersistentState(JobPath("/path/name"), testStopped, Some(timestamp)))
       e.schedulerId should equal("SCHEDULER-ID")
       e.clusterMemberId should equal (entityClusterMemberId)
       e.jobPath should equal ("path/name")
@@ -44,13 +44,13 @@ final class JobEntityConverterTest extends FunSuite {
 
     test(testKey +"toObject") {
       val timestamp = new DateTime(2012, 10, 2, 22, 33, 44, databaseTimeZone)   // DateTime.equals() vergleicht auch die Zeitzone
-      val e =  converter.toEntity(JobPersistent(JobPath("/path/name"), true, Some(timestamp)))
+      val e =  converter.toEntity(JobPersistentState(JobPath("/path/name"), true, Some(timestamp)))
       e.schedulerId = "SCHEDULER-ID"
       e.clusterMemberId = null
       e.jobPath = "path/name"
       e.isStopped = testStopped
       e.nextStartTime = new JavaDate(timestamp.getMillis)
-      converter.toObject(e) should equal (JobPersistent(JobPath("/path/name"), testStopped, Some(timestamp)))
+      converter.toObject(e) should equal (JobPersistentState(JobPath("/path/name"), testStopped, Some(timestamp)))
     }
   }
 }

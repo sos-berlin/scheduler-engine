@@ -2,10 +2,10 @@ package com.sos.scheduler.engine.data.order
 
 import com.sos.scheduler.engine.data.base.HasKey
 import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import org.joda.time.ReadableInstant
 
-case class OrderPersistent(
+final case class OrderPersistentState(
   jobChainPath: JobChainPath,
   orderId: OrderId,
   distributedNextTimeOption: Option[ReadableInstant],
@@ -23,5 +23,6 @@ case class OrderPersistent(
 
 extends HasKey[OrderKey] {
 
-  def key = OrderKey(jobChainPath, orderId)
+  def key =
+    OrderKey(jobChainPath, orderId)
 }
