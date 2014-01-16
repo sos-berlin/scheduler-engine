@@ -1,60 +1,43 @@
 package com.sos.scheduler.engine.kernel.job
 
-import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.job.{TaskId, TaskPersistentState, JobPersistentState}
-import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateTaskStore, HibernateJobStore}
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
 import javax.annotation.Nullable
-import javax.persistence.EntityManagerFactory
 import org.joda.time.{Duration, Instant}
 
 private[job] trait JobPersistence {
   this: Job =>
 
-  protected def injector: Injector
-  protected def cppProxy: JobC
+  protected val jobSubsystem: JobSubsystem
 
-  protected def nextStartInstantOption: Option[Instant]
+  import jobSubsystem.{entityManagerFactory, jobStore, taskStore}
 
-
-  private implicit def entityManagerFactory =
-    injector.getInstance(classOf[EntityManagerFactory])
-
-  @ForCpp @Nullable private[job] def tryFetchPersistentState: JobPersistentState =
-    transaction { implicit entityManager =>
-      persistentStateStore.tryFetch(path).orNull
+  @ForCpp @Nullable private[job] final def tryFetchPersistentState(): JobPersistentState =
+    transaction(entityManagerFactory) { implicit entityManager =>
+      jobStore.tryFetch(path).orNull
     }
 
-  @ForCpp private[job] def persistState() {
-    transaction { implicit entityManager =>
-      persistentStateStore.store(persistentState)
+  @ForCpp private[job] final def persistState() {
+    transaction(entityManagerFactory) { implicit entityManager =>
+      jobStore.store(persistentState)
     }
   }
 
-  @ForCpp private[job] def deletePersistentState() {
-    transaction { implicit entityManager =>
-      persistentStateStore.delete(path)
+  @ForCpp private[job] final def deletePersistentState() {
+    transaction(entityManagerFactory) { implicit entityManager =>
+      jobStore.delete(path)
     }
   }
 
-  @ForCpp def tryFetchAverageStepDuration(): Option[Duration] =
-    transaction { implicit entityManager =>
-      persistentStateStore.tryFetchAverageStepDuration(path)
+  @ForCpp final def tryFetchAverageStepDuration(): Option[Duration] =
+    transaction(entityManagerFactory) { implicit entityManager =>
+      jobStore.tryFetchAverageStepDuration(path)
     }
 
-  private def persistentStateStore =
-    injector.getInstance(classOf[HibernateJobStore])
-
-  private def persistentState = JobPersistentState(
-      path,
-      isPermanentlyStopped,
-      nextStartInstantOption)
-
-  @ForCpp private[job] def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
-    transaction { implicit entityManager =>
+  @ForCpp private[job] final def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
+    transaction(entityManagerFactory) { implicit entityManager =>
       taskStore.insert(TaskPersistentState(
         TaskId(taskId),
         path,
@@ -65,20 +48,20 @@ private[job] trait JobPersistence {
     }
   }
 
-  @ForCpp private[job] def deletePersistedTask(taskId: Int) {
-    transaction { implicit entityManager =>
+  @ForCpp private[job] final def deletePersistedTask(taskId: Int) {
+    transaction(entityManagerFactory) { implicit entityManager =>
       taskStore.delete(TaskId(taskId))
     }
   }
 
-  @ForCpp private[job] def loadPersistentTasks() {
-    transaction { implicit entityManager =>
-      for (t <- taskStore.fetchByJobOrderedByTaskId(path)) {
-        cppProxy.enqueue_taskPersistentState(t)
-      }
+  @ForCpp private[job] final def loadPersistentTasks() {
+    transaction(entityManagerFactory) { implicit entityManager =>
+      taskStore.fetchByJobOrderedByTaskId(path) foreach enqueueTaskPersistentState
     }
   }
 
-  private def taskStore =
-    injector.getInstance(classOf[HibernateTaskStore])
+  private def persistentState = JobPersistentState(
+    path,
+    isPermanentlyStopped,
+    nextStartInstantOption)
 }

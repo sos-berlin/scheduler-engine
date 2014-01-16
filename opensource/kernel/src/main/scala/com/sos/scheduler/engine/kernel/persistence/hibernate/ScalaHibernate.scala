@@ -9,6 +9,9 @@ object ScalaHibernate {
   private val logger = Logger("com.sos.scheduler.engine.kernel.job.ScalaHibernate")
 
   def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A =
+    transaction(entityManagerFactory)(f)
+
+  def transaction[A](entityManagerFactory: EntityManagerFactory)(f: EntityManager => A): A =
     autoClosing(entityManagerFactory.createEntityManager()) { entityManager =>
       transaction(entityManager)(f)
     }

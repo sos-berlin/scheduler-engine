@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.folder.FileBasedState
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
 import org.joda.time.Instant
+import com.sos.scheduler.engine.data.job.{TaskPersistentState, JobPersistentState}
 
 @ForCpp final class Job(protected val cppProxy: JobC, protected val injector: Injector)
 extends FileBased
@@ -20,10 +21,12 @@ with Sister
 with UnmodifiableJob
 with JobPersistence {
 
-  def onCppProxyInvalidated() {}
+  protected val jobSubsystem = injector.apply[JobSubsystem]
 
-  implicit private def schedulerThreadCallQueue =
-    injector.instance[SchedulerThreadCallQueue]
+  private def schedulerThreadCallQueue =
+    injector.apply[SchedulerThreadCallQueue]
+
+  def onCppProxyInvalidated() {}
 
   def fileBasedType =
     FileBasedType.job
@@ -66,9 +69,13 @@ with JobPersistence {
   }
 
   def setStateCommand(c: JobStateCommand) {
-    schedulerThreadFuture { cppProxy.set_state_cmd(c.cppValue) }
+    schedulerThreadFuture { cppProxy.set_state_cmd(c.cppValue) } (schedulerThreadCallQueue)
   }
 
   def isPermanentlyStopped =
     cppProxy.is_permanently_stopped
+
+  private[job] def enqueueTaskPersistentState(t: TaskPersistentState) {
+    cppProxy.enqueue_taskPersistentState(t)
+  }
 }

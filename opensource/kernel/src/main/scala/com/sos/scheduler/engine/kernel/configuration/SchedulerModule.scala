@@ -11,10 +11,9 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers, CommandSubsystem}
-import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.sos.scheduler.engine.kernel.cppproxy.{Order_subsystemC, Job_subsystemC, SpoolerC}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.scheduler._
@@ -30,6 +29,8 @@ extends ScalaAbstractModule {
 
   def configure() {
     bindInstance(cppProxy)
+    provideSingleton[Job_subsystemC] { cppProxy.job_subsystem }
+    provideSingleton[Order_subsystemC] { cppProxy.order_subsystem }
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
@@ -40,8 +41,6 @@ extends ScalaAbstractModule {
     provideSingleton { new SchedulerId(cppProxy.id) }
     provideSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideSingleton { new FolderSubsystem(cppProxy.folder_subsystem) }
-    provideSingleton { new JobSubsystem(cppProxy.job_subsystem) }
-    provideSingleton { new OrderSubsystem(cppProxy.order_subsystem) }
     provideSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideSingleton[VariableSet] { cppProxy.variables.getSister }
   }
