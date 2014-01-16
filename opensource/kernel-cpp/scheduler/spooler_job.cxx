@@ -701,15 +701,22 @@ bool Job::on_load() // Transaction* ta )
         if( _lock_requestor )  _lock_requestor->load();       // Verbindet mit bekannten Sperren
 
 
-        try
-        {
-            for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-            {
-                if( db()->opened() )  database_record_load( &ta );
-                _history.open( &ta );
-                if( db()->opened() )  load_tasks( &ta );
+        try {
+            if (_spooler->settings()->_use_java_persistence) {
+                if (::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent persistentState = typed_java_sister().tryFetchPersistentState()) {
+                    _is_permanently_stopped = persistentState.isPermanentlyStopped();
+                    //_db_next_start_time = persistentState.nextStartTimeDouble();
+                }
+                typed_java_sister().loadPersistentTasks();
+                _history.open(NULL);
+            } else {
+                for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try {
+                    if( db()->opened() )  database_record_load( &ta );
+                    _history.open( &ta );
+                    if( db()->opened() )  load_tasks_from_db( &ta );
+                }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
             }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
         }
         catch( exception& x )
         {
@@ -1369,23 +1376,6 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, bool force, const Time& start_at )
 {
     return create_task( params, name, force, start_at, _spooler->db()->get_task_id() );
-}
-
-//----------------------------------------------------------------------------------Job::load_tasks
-
-void Job::load_tasks(Read_transaction* ta)
-{
-    if (_spooler->settings()->_use_java_persistence) 
-        load_tasks_with_java();
-    else
-        load_tasks_from_db(ta);
-}
-
-//------------------------------------------------------------------------Job::load_tasks_with_java
-
-void Job::load_tasks_with_java()
-{
-    typed_java_sister().loadPersistentTasks();
 }
 
 //--------------------------------------------------------------------------Job::load_tasks_from_db
@@ -2223,28 +2213,22 @@ void Job::database_record_load( Read_transaction* ta )
 {
     assert( file_based_state() == File_based::s_initialized );
 
-    if (_spooler->settings()->_use_java_persistence) {
-        if (::javaproxy::com::sos::scheduler::engine::data::job::JobPersistent persistentState = typed_java_sister().tryFetchPersistentState())
-            _is_permanently_stopped = persistentState.isPermanentlyStopped();
-    }
-    else {
-        // Lesen aus Tabelle scheduler_jobs
-        Any_file result_set = ta->open_result_set
-        ( 
-            S() << "select `stopped`, `next_start_time`"
-                << "  from " << db()->_jobs_table.sql_name()
-                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
-                <<    " and `path`="              << sql::quoted( path().without_slash() ), 
-            Z_FUNCTION 
-        );
+    // Lesen aus Tabelle scheduler_jobs
+    Any_file result_set = ta->open_result_set
+    ( 
+        S() << "select `stopped`, `next_start_time`"
+            << "  from " << db()->_jobs_table.sql_name()
+            << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
+            <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
+            <<    " and `path`="              << sql::quoted( path().without_slash() ), 
+        Z_FUNCTION 
+    );
     
-        if( !result_set.eof() )  
-        {
-            Record record  = result_set.get_record();
-            _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
-            _db_next_start_time = record.null( "next_start_time" )? Time::never :  Time::of_utc_date_time( record.as_string( "next_start_time" ) );
-        }
+    if( !result_set.eof() )  
+    {
+        Record record  = result_set.get_record();
+        _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
+        _db_next_start_time = record.null( "next_start_time" )? Time::never :  Time::of_utc_date_time( record.as_string( "next_start_time" ) );
     }
 }
 

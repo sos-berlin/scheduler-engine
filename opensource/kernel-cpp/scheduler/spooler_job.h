@@ -225,8 +225,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        database_record_store       ();
     void                        database_record_remove      ();
     void                        database_record_load        ( Read_transaction* );
-    void                        load_tasks                  ( Read_transaction* );
-    void                        load_tasks_with_java        ();
     void                        load_tasks_from_db          ( Read_transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
