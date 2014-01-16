@@ -9,7 +9,7 @@ import com.sos.scheduler.engine.data.order.jobchain.{JobChainNodeAction, JobChai
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateJobChainNodeStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import javax.persistence.EntityManager
+import javax.persistence.EntityManagerFactory
 
 /** @author Zschimmer.sos */
 @ForCpp
@@ -17,27 +17,35 @@ class Node(cppProxy: NodeCI, injector: Injector) extends Sister {
 
   def onCppProxyInvalidated() {}
 
+  private implicit def entityManagerFactory =
+    injector.getInstance(classOf[EntityManagerFactory])
+
   @ForCpp private def persistState() {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       persistentStateStore.store(persistentState)
     }
   }
 
-  protected def persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
+  protected def persistentStateStore =
+    injector.getInstance(classOf[HibernateJobChainNodeStore])
 
-  private def entityManager = injector.getInstance(classOf[EntityManager])
+  final def persistentState =
+    new JobChainNodePersistentState(jobChainPath, orderState, action)
 
-  final def persistentState = new JobChainNodePersistentState(jobChainPath, orderState, action)
+  final def jobChainPath =
+    JobChainPath(cppProxy.job_chain_path)
 
-  final def jobChainPath = JobChainPath(cppProxy.job_chain_path)
+  final def orderState =
+    OrderState(cppProxy.string_order_state)
 
-  final def orderState = OrderState(cppProxy.string_order_state)
+  final def nextState =
+    OrderState(cppProxy.string_next_state)
 
-  final def nextState = OrderState(cppProxy.string_next_state)
+  final def errorState =
+    OrderState(cppProxy.string_error_state)
 
-  final def errorState = OrderState(cppProxy.string_error_state)
-
-  final def action = JobChainNodeAction.ofCppName(cppProxy.string_action)
+  final def action =
+    JobChainNodeAction.ofCppName(cppProxy.string_action)
 
   final def action_=(o: JobChainNodeAction) {
     cppProxy.set_action_string(o.toCppName)

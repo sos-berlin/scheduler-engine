@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateTaskStore, HibernateJobStore}
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
 import javax.annotation.Nullable
-import javax.persistence.EntityManager
+import javax.persistence.EntityManagerFactory
 import org.joda.time.{Duration, Instant}
 
 private[job] trait JobPersistence {
@@ -19,25 +19,29 @@ private[job] trait JobPersistence {
 
   protected def nextStartInstantOption: Option[Instant]
 
+
+  private implicit def entityManagerFactory =
+    injector.getInstance(classOf[EntityManagerFactory])
+
   @ForCpp @Nullable private[job] def tryFetchPersistentState: JobPersistentState =
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       persistentStateStore.tryFetch(path).orNull
     }
 
   @ForCpp private[job] def persistState() {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       persistentStateStore.store(persistentState)
     }
   }
 
   @ForCpp private[job] def deletePersistentState() {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       persistentStateStore.delete(path)
     }
   }
 
   @ForCpp def tryFetchAverageStepDuration(): Option[Duration] =
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       persistentStateStore.tryFetchAverageStepDuration(path)
     }
 
@@ -50,7 +54,7 @@ private[job] trait JobPersistence {
       nextStartInstantOption)
 
   @ForCpp private[job] def persistEnqueuedTask(taskId: Int, enqueueTimeMillis: Long, startTimeMillis: Long, parametersXml: String, xml: String) {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       taskStore.insert(TaskPersistentState(
         TaskId(taskId),
         path,
@@ -62,21 +66,18 @@ private[job] trait JobPersistence {
   }
 
   @ForCpp private[job] def deletePersistedTask(taskId: Int) {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       taskStore.delete(TaskId(taskId))
     }
   }
 
   @ForCpp private[job] def loadPersistentTasks() {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       for (t <- taskStore.fetchByJobOrderedByTaskId(path)) {
         cppProxy.enqueue_taskPersistentState(t)
       }
     }
   }
-
-  private def entityManager =
-    injector.getInstance(classOf[EntityManager])
 
   private def taskStore =
     injector.getInstance(classOf[HibernateTaskStore])

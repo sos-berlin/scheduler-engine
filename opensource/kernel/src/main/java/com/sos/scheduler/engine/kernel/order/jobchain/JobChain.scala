@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
 import java.io.File
 import javax.annotation.Nullable
-import javax.persistence.EntityManager
+import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 
@@ -25,8 +25,11 @@ with UnmodifiableJobChain {
 
   def onCppProxyInvalidated() {}
 
+  private implicit def entityManagerFactory =
+    injector.getInstance(classOf[EntityManagerFactory])
+
   @ForCpp private def loadPersistentState() {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       for (persistentState <- nodeStore.fetchAll(path); node <- nodeMap.get(persistentState.state)) {
         node.action = persistentState.action
       }
@@ -37,13 +40,13 @@ with UnmodifiableJobChain {
   }
 
   @ForCpp private def persistState() {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       persistentStateStore.store(persistentState)
     }
   }
 
   @ForCpp private def deletePersistentState() {
-    transaction(entityManager) { implicit entityManager =>
+    transaction { implicit entityManager =>
       persistentStateStore.delete(path)
       nodeStore.deleteAll(path)
     }
@@ -51,12 +54,6 @@ with UnmodifiableJobChain {
 
   private def persistentState =
     JobChainPersistentState(path, isStopped)
-
-  private def entityManager =
-    injector.getInstance(classOf[EntityManager])
-
-  //private def entityManagerFactory =
-  // injector.getInstance(classOf[EntityManagerFactory])
 
   private def persistentStateStore =
     injector.getInstance(classOf[HibernateJobChainStore])

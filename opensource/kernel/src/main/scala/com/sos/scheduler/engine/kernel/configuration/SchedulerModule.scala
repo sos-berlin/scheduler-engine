@@ -22,6 +22,7 @@ import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.util.UUID.randomUUID
 import javax.inject.Singleton
+import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 
 final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
@@ -45,11 +46,8 @@ extends ScalaAbstractModule {
     provideSingleton[VariableSet] { cppProxy.variables.getSister }
   }
 
-  @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem) =
+  @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
     databaseSubsystem.entityManagerFactory
-
-  @Provides @Singleton def provideEntityManager(databaseSubsystem: DatabaseSubsystem) =
-    databaseSubsystem.entityManagerFactory.createEntityManager
 
   @Provides @Singleton def provideSchedulerClusterMemberKey(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId) =
     new SchedulerClusterMemberKey(schedulerId, clusterMemberId)
