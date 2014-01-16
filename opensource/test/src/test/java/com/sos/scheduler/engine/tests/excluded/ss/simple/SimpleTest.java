@@ -42,7 +42,7 @@ public class SimpleTest extends SchedulerTest {
 	
 	@HotEventHandler
 	public void handleTaskStartedEvent(TaskStartedEvent e, UnmodifiableTask t) throws IOException {
-		logger.debug("TASKEVENT: " + t.getOrderOrNull().getId().asString());
+		logger.debug("TASKEVENT: " + t.getOrderOrNull().id().string());
 	}
 	
 	/**
@@ -54,13 +54,13 @@ public class SimpleTest extends SchedulerTest {
 	 */
 	@HotEventHandler
 	public void handleTaskEndedEvent(TaskEndedEvent e, UnmodifiableTask t) throws IOException {
-		logger.debug("TASKEVENT: " + t.job().getName());
+		logger.debug("TASKEVENT: " + t.job().name());
 	}
 	
 	@HotEventHandler
 	public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
-		logger.debug("ORDERFINISHED: " + order.getId().asString());
-		if (order.getId().asString().equals("jobchain1"))
+		logger.debug("ORDERFINISHED: " + order.id().string());
+		if (order.id().string().equals("jobchain1"))
 			controller().terminateScheduler();
 	}
 }

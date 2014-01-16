@@ -61,12 +61,12 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
       scheduler executeXml <modify_order job_chain={orderKey.jobChainPath.string} order={orderKey.id.string} action="reset"/>
     }
 
-    final def orderParameters = order.getParameters.toMap filterKeys { _ != suspendedParameterName }
+    final def orderParameters = order.parameters.toMap filterKeys { _ != suspendedParameterName }
 
     final def order = instance[OrderSubsystem].order(orderKey)
   }
 
-  class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(OrderKey(jobChainPath, new OrderId("1"))) {
+  class StandingOrderContext(jobChainPath: JobChainPath) extends OrderContext(OrderKey(jobChainPath, OrderId("1"))) {
     final def startOrder(parameters: Iterable[(String, String)]) {
       orderParameters should equal (originalParameters)
       scheduler executeXml
@@ -74,7 +74,7 @@ abstract class JS856IT(testNamePrefix: String) extends FunSuite with ScalaSchedu
     }
   }
 
-  class TemporaryOrderContext(jobChainPath: JobChainPath) extends OrderContext(OrderKey(jobChainPath, new OrderId("temporary"))) {
+  class TemporaryOrderContext(jobChainPath: JobChainPath) extends OrderContext(OrderKey(jobChainPath, OrderId("temporary"))) {
     final def startOrder(parameters: Iterable[(String, String)]) {
       scheduler executeXml <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>{paramsElem(parameters)}</order>
     }

@@ -51,16 +51,16 @@ public final class JS644PluginIT extends SchedulerTest {
     }
 
     @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, Job job) throws InterruptedException {
-        if (schedulerIsActive && job.getPath().equals(jobPath))
+        if (schedulerIsActive && job.path().equals(jobPath))
             gate.put(jobActivated);
     }
 
     @HotEventHandler public void handleEvent(FileBasedActivatedEvent e, JobChain jobChain) throws InterruptedException {
-        if (schedulerIsActive && jobChain.getPath().equals(jobChainPath))
+        if (schedulerIsActive && jobChain.path().equals(jobChainPath))
             gate.put(jobchainActivated);
     }
 
     private File fileBasedFile(Job o) {
-        return new File(controller().environment().liveDirectory(), o.getPath().string() + ".job.xml");
+        return new File(controller().environment().liveDirectory(), o.path().string() + ".job.xml");
     }
 }

@@ -31,9 +31,9 @@ final class JS803IT extends SchedulerTest {
   @Test def test() {
     controller.activateScheduler()
     startTime = secondNow() plusSeconds orderDelay
-    addOrder(OrderKey(jobChainPath, new OrderId("dailyOrder")), addDailyOrderElem)
-    addOrder(OrderKey(jobChainPath, new OrderId("singleOrder")), addSingleOrderElem)
-    addOrder(OrderKey(jobChainPath, new OrderId("singleRuntimeOrder")), addSingleRuntimeOrderElem)
+    addOrder(OrderKey(jobChainPath, OrderId("dailyOrder")), addDailyOrderElem)
+    addOrder(OrderKey(jobChainPath, OrderId("singleOrder")), addSingleOrderElem)
+    addOrder(OrderKey(jobChainPath, OrderId("singleRuntimeOrder")), addSingleRuntimeOrderElem)
     try controller.waitForTermination(shortTimeout)
     finally (expectedOrders diff terminatedOrders).toList match {
       case List() =>
@@ -56,7 +56,7 @@ final class JS803IT extends SchedulerTest {
   }
 
   @HotEventHandler def handleHotEvent(event: OrderFinishedEvent, order: UnmodifiableOrder) {
-    assertThat("Wrong end state of order "+event.orderKey, order.getState, equalTo(expectedEndState))
+    assertThat("Wrong end state of order "+event.orderKey, order.state, equalTo(expectedEndState))
   }
 
   @EventHandler def handleEvent(event: OrderFinishedEvent) {

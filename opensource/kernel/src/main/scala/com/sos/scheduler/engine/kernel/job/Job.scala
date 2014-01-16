@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.job
 
+import Job._
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
@@ -18,7 +19,6 @@ import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore,
 import javax.annotation.Nullable
 import javax.persistence.EntityManager
 import org.joda.time.DateTime
-import Job._
 
 @ForCpp final class Job(cppProxy: JobC, injector: Injector)
 extends FileBased
@@ -30,23 +30,23 @@ with UnmodifiableJob {
   implicit private def schedulerThreadCallQueue =
     injector.instance[SchedulerThreadCallQueue]
 
-  def getFileBasedType =
+  def fileBasedType =
     FileBasedType.job
 
-  def getPath =
+  def path =
     JobPath(cppProxy.path)
 
-  def getName =
+  def name =
     cppProxy.name
 
-  def getFileBasedState =
+  def fileBasedState =
     FileBasedState.ofCppName(cppProxy.file_based_state_name)
 
   /** @return true, wenn das [[com.sos.scheduler.engine.kernel.folder.FileBased]] nach einer Änderung erneut geladen worden ist. */
-  def isFileBasedReread =
+  def fileBasedIsReread =
     cppProxy.is_file_based_reread
 
-  def getLog =
+  def log =
     cppProxy.log.getSister
 
   /** Markiert, dass das [[com.sos.scheduler.engine.kernel.folder.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
@@ -54,10 +54,10 @@ with UnmodifiableJob {
     cppProxy.set_force_file_reread()
   }
 
-  def getConfigurationXmlBytes =
+  def configurationXmlBytes =
     cppProxy.source_xml_bytes
 
-  def getDescription =
+  def description =
     cppProxy.description
 
   def state =
@@ -73,7 +73,7 @@ with UnmodifiableJob {
 
   @ForCpp @Nullable private def tryFetchPersistentState =
     transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.tryFetch(getPath).orNull
+      persistentStateStore.tryFetch(path).orNull
     }
 
   @ForCpp private def persistState() {
@@ -84,13 +84,13 @@ with UnmodifiableJob {
 
   @ForCpp private def deletePersistentState() {
     transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.delete(getPath)
+      persistentStateStore.delete(path)
     }
   }
 
   @ForCpp def tryFetchAverageStepDuration() = {
     transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.tryFetchAverageStepDuration(getPath)
+      persistentStateStore.tryFetchAverageStepDuration(path)
     }
   }
 
@@ -99,7 +99,7 @@ with UnmodifiableJob {
 
   private def persistentState =
     new JobPersistent(
-      getPath,
+      path,
       isPermanentlyStopped,
       eternalMillisToNone(cppProxy.next_start_time_millis))
 
@@ -107,7 +107,7 @@ with UnmodifiableJob {
     transaction(entityManager) { implicit entityManager =>
       taskStore.insert(TaskPersistent(
         TaskId(taskId),
-        getPath,
+        path,
         new DateTime(enqueueTimeMillis),
         zeroMillisToNone(startTimeMillis),
         parametersXml,
@@ -123,7 +123,7 @@ with UnmodifiableJob {
 
   @ForCpp private def loadPersistentTasks() {
     transaction(entityManager) { implicit entityManager =>
-      for (t <- taskStore.fetchByJobOrderedByTaskId(getPath)) {
+      for (t <- taskStore.fetchByJobOrderedByTaskId(path)) {
         cppProxy.enqueue_task(t)
       }
     }
@@ -137,9 +137,6 @@ with UnmodifiableJob {
 
   def isPermanentlyStopped =
     cppProxy.is_permanently_stopped
-
-  override def toString =
-    getClass.getSimpleName + " " + getPath.string
 }
 
 

@@ -123,7 +123,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("TaskEntity is read as expected") {
-    val queuedTasksElem = (scheduler executeXml <show_job job={simpleJob.getPath.string} what="task_queue"/>).elem \ "answer" \ "job" \ "queued_tasks"
+    val queuedTasksElem = (scheduler executeXml <show_job job={simpleJob.path.string} what="task_queue"/>).elem \ "answer" \ "job" \ "queued_tasks"
     (queuedTasksElem \ "@length").text.toInt should equal (3)
     val queuedTaskElems = queuedTasksElem \ "queued_task"
     queuedTaskElems should have size 3
@@ -245,7 +245,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
 private object EntitiesIT {
   val jobChainPath = JobChainPath("/test-job-chain")
-  val orderId = new OrderId("ORDER-1")
+  val orderId = OrderId("ORDER-1")
   val orderJobPath = JobPath("/test-order-job")
   val simpleJobPath = JobPath("/test-simple-job")
   val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2

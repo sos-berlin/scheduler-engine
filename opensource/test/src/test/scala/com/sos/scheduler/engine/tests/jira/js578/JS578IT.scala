@@ -27,7 +27,7 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
     setJobChainNodeStop(true)
     startOrderAt("now")
     eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
-    orderSubsystem.order(orderKey).getState should equal (OrderState("200"))
+    orderSubsystem.order(orderKey).state should equal (OrderState("200"))
 
     startOrderAt("now")
     setJobChainNodeStop(false)
@@ -49,7 +49,7 @@ final class JS578IT extends FunSuite with ScalaSchedulerTest {
       setJobChainNodeStop(true)
       startOrderAt("next")
       eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey }
-      orderSubsystem.order(orderKey).getState should equal (OrderState("200"))
+      orderSubsystem.order(orderKey).state should equal (OrderState("200"))
 
       startOrderAt("next")
       setJobChainNodeStop(false)

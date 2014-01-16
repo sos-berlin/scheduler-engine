@@ -16,15 +16,15 @@ class JobIT extends FunSuite with ScalaSchedulerTest {
   private lazy val job = instance[JobSubsystem].job(jobPath)
 
   test("job.name") {
-    assert(job.getName === "a")
+    assert(job.name === "a")
   }
 
   test("job.path") {
-    assert(job.getPath.string === "/a")
+    assert(job.path.string === "/a")
   }
 
-  test("job.isFileBasedReread") {
-    assert(job.isFileBasedReread === false)
+  test("job.fileBasedIsReread") {
+    assert(job.fileBasedIsReread === false)
   }
 
   test("jobSubsystem.visibleNames") {

@@ -31,7 +31,7 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
     val myOrderKey = setbackJobChainPath orderKey "A"
     autoClosing(controller.newEventPipe()) { eventPipe =>
       variableSet("TestJob.setback") = true.toString
-      orderSubsystem.order(myOrderKey).getTitle shouldEqual originalTitle
+      orderSubsystem.order(myOrderKey).title shouldEqual originalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.nextKeyed[OrderSetBackEvent](myOrderKey).state shouldEqual OrderState("200")
       eventPipe.nextKeyed[OrderStepEndedEvent](myOrderKey)
@@ -40,14 +40,14 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand(myOrderKey, action = Some(ModifyOrderCommand.Action.reset))
 
       eventPipe.nextKeyed[FileBasedActivatedEvent](myOrderKey)
-      orderSubsystem.order(myOrderKey).getTitle shouldEqual changedTitle
+      orderSubsystem.order(myOrderKey).title shouldEqual changedTitle
     }
   }
 
   test("Change of order configuration file while order is running should be effective when order is finished") {
     val myOrderKey = suspendJobChainPath orderKey "A"
     autoClosing(controller.newEventPipe()) { eventPipe =>
-      orderSubsystem.order(myOrderKey).getTitle shouldEqual originalTitle
+      orderSubsystem.order(myOrderKey).title shouldEqual originalTitle
       scheduler executeXml <job_chain_node.modify job_chain={suspendJobChainPath.string} state="200" action="stop"/>
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.nextKeyed[OrderStepEndedEvent](myOrderKey)
@@ -56,7 +56,7 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
       scheduler executeXml <job_chain_node.modify job_chain={suspendJobChainPath.string} state="200" action="process"/>
       eventPipe.nextKeyed[OrderFinishedEvent](myOrderKey)
       eventPipe.nextKeyed[FileBasedActivatedEvent](myOrderKey)
-      orderSubsystem.order(myOrderKey).getTitle shouldEqual changedTitle
+      orderSubsystem.order(myOrderKey).title shouldEqual changedTitle
     }
   }
 
@@ -65,7 +65,7 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
     val myOrderKey = setbackJobChainPath orderKey "B"
     autoClosing(controller.newEventPipe()) { eventPipe =>
       variableSet("TestJob.setback") = true.toString
-      orderSubsystem.order(myOrderKey).getTitle shouldEqual originalTitle
+      orderSubsystem.order(myOrderKey).title shouldEqual originalTitle
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.nextKeyed[OrderSetBackEvent](myOrderKey).state shouldEqual OrderState("200")
       eventPipe.nextKeyed[OrderStepEndedEvent](myOrderKey)
@@ -73,7 +73,7 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
       variableSet("TestJob.setback") = false.toString
       eventPipe.nextKeyed[OrderFinishedEvent](myOrderKey)
       eventPipe.nextKeyed[FileBasedActivatedEvent](myOrderKey)
-      orderSubsystem.order(myOrderKey).getTitle shouldEqual changedTitle
+      orderSubsystem.order(myOrderKey).title shouldEqual changedTitle
     }
   }
 }

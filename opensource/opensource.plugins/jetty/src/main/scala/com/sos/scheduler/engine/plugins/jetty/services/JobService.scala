@@ -25,7 +25,7 @@ class JobService @Inject private(
       case x: CppException if x.getCode == "SCHEDULER-161" => throw new WebApplicationException(x, NOT_FOUND)
     }
 
-  private lazy val jobTag = new EntityTag(job.getUuid.toString)
+  private lazy val jobTag = new EntityTag(job.uuid.toString)
 
   @GET
   @Produces(Array(APPLICATION_JSON))
@@ -33,13 +33,13 @@ class JobService @Inject private(
 
   @GET @Path("configuration")
   @Produces(Array(TEXT_XML))
-  def getConfiguration = Response.ok(job.getConfigurationXmlBytes).tag(jobTag).build()
+  def getConfiguration = Response.ok(job.configurationXmlBytes).tag(jobTag).build()
 
   @GET @Path("description")
   @Produces(Array(TEXT_PLAIN))
-  def getDescription = Response.ok(job.getDescription, textPlainVariant).tag(jobTag).build()
+  def getDescription = Response.ok(job.description, textPlainVariant).tag(jobTag).build()
 
   @GET @Path("log.snapshot")
   @Produces(Array(TEXT_PLAIN))
-  def getLogSnapshot = Response.ok(job.getLog.getFile, schedulerTextPlainVariant).cacheControl(noCache).build()
+  def getLogSnapshot = Response.ok(job.log.getFile, schedulerTextPlainVariant).cacheControl(noCache).build()
 }

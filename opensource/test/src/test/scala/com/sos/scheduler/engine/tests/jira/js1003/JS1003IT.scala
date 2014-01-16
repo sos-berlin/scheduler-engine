@@ -44,8 +44,8 @@ final class JS1003IT extends FunSuite with ScalaSchedulerTest {
       eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state100)
     eventPipe.nextKeyed[OrderStateChangedEvent](orderKey).previousState should equal (state200)
     def order = orderSubsystem.order(orderKey)
-    order.getState should be (state300)
-    order.setSuspended(true)
+    order.state should be (state300)
+    order.isSuspended = true
     order should be ('suspended)
     scheduler executeXml ModifyOrderCommand(orderKey, action = Some(Action.reset))
     order should not be 'suspended

@@ -49,8 +49,8 @@ object OrderKey {
   def apply(
       @JsonProperty("jobChainPath") jobChainPath: String,
       @JsonProperty("id") id: String): OrderKey =
-    OrderKey(JobChainPath(jobChainPath), new OrderId(id))
+    OrderKey(JobChainPath(jobChainPath), OrderId(id))
 
   def of(jobChainPath: String, id: String): OrderKey =
-    OrderKey(JobChainPath(jobChainPath), new OrderId(id))
+    OrderKey(JobChainPath(jobChainPath), OrderId(id))
 }

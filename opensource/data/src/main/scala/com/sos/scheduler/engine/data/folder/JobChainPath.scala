@@ -13,7 +13,7 @@ extends TypedPath {
     FileBasedType.jobChain
 
   def orderKey(o: String): OrderKey =
-    orderKey(new OrderId(o))
+    orderKey(OrderId(o))
 
   def orderKey(o: OrderId): OrderKey =
     new OrderKey(this, o)

@@ -26,7 +26,7 @@ public class JS644Plugin extends AbstractPlugin implements EventHandlerAnnotated
     }
 
     @HotEventHandler public final void handleEvent(FileBasedActivatedEvent e, final Job job) {
-        if (job.isFileBasedReread()) {
+        if (job.fileBasedIsReread()) {
             callQueue.add(new Runnable() {
                 @Override public void run() {
                     for (JobChain jobChain : asJavaIterable(orderSubsystem.jobChainsOfJob(job))) jobChain.forceFileReread();

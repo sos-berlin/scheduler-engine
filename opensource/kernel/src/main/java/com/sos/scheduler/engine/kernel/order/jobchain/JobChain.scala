@@ -21,16 +21,16 @@ import scala.collection.immutable
 @ForCpp
 final class JobChain(cppProxy: Job_chainC, injector: Injector)
 extends FileBased
-with UnmodifiableJobchain {
+with UnmodifiableJobChain {
 
   def onCppProxyInvalidated() {}
 
   @ForCpp private def loadPersistentState() {
     transaction(entityManager) { implicit entityManager =>
-      for (persistentState <- nodeStore.fetchAll(getPath); node <- nodeMap.get(persistentState.state)) {
+      for (persistentState <- nodeStore.fetchAll(path); node <- nodeMap.get(persistentState.state)) {
         node.action = persistentState.action
       }
-      for (persistentState <- persistentStateStore.tryFetch(getPath)) {
+      for (persistentState <- persistentStateStore.tryFetch(path)) {
         isStopped = persistentState.isStopped
       }
     }
@@ -44,13 +44,13 @@ with UnmodifiableJobchain {
 
   @ForCpp private def deletePersistentState() {
     transaction(entityManager) { implicit entityManager =>
-      persistentStateStore.delete(getPath)
-      nodeStore.deleteAll(getPath)
+      persistentStateStore.delete(path)
+      nodeStore.deleteAll(path)
     }
   }
 
   private def persistentState =
-    JobChainPersistentState(getPath, isStopped)
+    JobChainPersistentState(path, isStopped)
 
   private def entityManager =
     injector.getInstance(classOf[EntityManager])
@@ -64,17 +64,17 @@ with UnmodifiableJobchain {
   private def nodeStore =
     injector.getInstance(classOf[HibernateJobChainNodeStore])
 
-  def getName =
-    cppProxy.name
-
-  def getFileBasedType =
+  def fileBasedType =
     FileBasedType.jobChain
 
-  def getPath =
+  def name =
+    cppProxy.name
+
+  def path =
     JobChainPath(cppProxy.path)
 
   def file = cppProxy.file match {
-    case "" => sys.error(this+ " has no source file")
+    case "" => sys.error(s"$toString has no source file")
     case o => new File(o)
   }
 
@@ -96,13 +96,13 @@ with UnmodifiableJobchain {
   lazy val nodes = immutable.Seq() ++ cppProxy.java_nodes
 
   def order(id: OrderId) =
-    orderOption(id) getOrElse sys.error(this+" does not contain order '"+id+"'")
+    orderOption(id) getOrElse sys.error(s"$toString does not contain order '$id'")
 
   @Nullable def orderOrNull(id: OrderId): Order =
     orderOption(id).orNull
 
   def orderOption(id: OrderId): Option[Order] =
-    Option(cppProxy.order_or_null(id.asString)) map { _.getSister }
+    Option(cppProxy.order_or_null(id.string)) map { _.getSister }
 
   def isStopped =
     cppProxy.is_stopped
@@ -114,7 +114,4 @@ with UnmodifiableJobchain {
   private[order] def remove() {
     cppProxy.remove()
   }
-
-  override def toString =
-    classOf[JobChain].getSimpleName +" "+ getPath
 }

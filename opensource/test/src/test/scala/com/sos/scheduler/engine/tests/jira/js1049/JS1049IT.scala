@@ -30,13 +30,13 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest with SchedulerTest
     }
 
     "job.xml in UTF-8" in {
-      job(JobPath("/test-a")).getDescription shouldEqual "å"
+      job(JobPath("/test-a")).description shouldEqual "å"
     }
 
     for (j <- JobIncludeSettings; i = j.descriptionInclude)
       s"Include $i" in {
         (controller.environment.liveDirectory / i.filename).contentString(i.encoding) shouldEqual i.content
-        job(j.jobPath).getDescription shouldEqual i.content
+        job(j.jobPath).description shouldEqual i.content
       }
   }
 

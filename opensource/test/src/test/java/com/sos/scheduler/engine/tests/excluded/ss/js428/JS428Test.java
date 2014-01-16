@@ -94,24 +94,24 @@ public class JS428Test extends SchedulerTest {
 
     @HotEventHandler
     public void handleOrderTouched(OrderTouchedEvent e, Order order) throws IOException {
-        orderParams = order.getParameters();
+        orderParams = order.parameters();
     }
 
     @HotEventHandler
     public void handleStepStart(OrderStepStartedEvent e, Order order) throws IOException, InterruptedException {
-        logger.debug("STEP_START=" + order.getState().string());
-        setStepParameter(order, order.getState());
-        showOrderParameter(order, order.getState());
+        logger.debug("STEP_START=" + order.state().string());
+        setStepParameter(order, order.state());
+        showOrderParameter(order, order.state());
     }
 
     @HotEventHandler
     public void handleStepEnd(OrderStepEndedEvent e, Order order) throws IOException, InterruptedException {
-        logger.debug("STEP_END=" + order.getState().string());
+        logger.debug("STEP_END=" + order.state().string());
     }
 
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
-        logger.debug("ORDERFINISHED: " + order.getId().asString());
+        logger.debug("ORDERFINISHED: " + order.id().string());
         resultSet = instance(VariableSet.class).toGuavaMap();
         controller().terminateScheduler();
     }
@@ -128,7 +128,7 @@ public class JS428Test extends SchedulerTest {
         for (String orderParam : orderParams.getNames()) {
             String orderParamValue = orderParams.apply(orderParam);
             if (orderParam.startsWith(stepId))
-                order.getParameters().update(orderParam.replace(stepId, ""), orderParamValue);
+                order.parameters().update(orderParam.replace(stepId, ""), orderParamValue);
         }
     }
 

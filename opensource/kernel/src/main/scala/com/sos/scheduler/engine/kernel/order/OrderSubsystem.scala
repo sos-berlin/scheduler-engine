@@ -15,7 +15,7 @@ final class OrderSubsystem(cppProxy: Order_subsystemC) extends Subsystem {
 //      jobChainOption(key)
 //
 //    def iterator =
-//      jobChains.iterator map { o => o.getPath -> o }
+//      jobChains.iterator map { o => o.path -> o }
 //
 //    def -(key: JobChainPath) =
 //      throw new NotImplementedError
