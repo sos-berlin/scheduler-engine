@@ -2,15 +2,9 @@ package com.sos.scheduler.engine.main;
 
 import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
-import com.sos.scheduler.engine.kernel.settings.Settings;
 
 /** Steuerung für den C++-Scheduler in einem eigenen nebenläufigen Thread. */
 public interface SchedulerController {
-    /** @throws IllegalStateException, wenn nach {@link #startScheduler(Iterable)}} aufgerufen. */
-    void setSettings(Settings o);
-
-    Settings getSettings();
-
     /** Startet den Scheduler ohne zu warten. */
     void startScheduler(Iterable<String> arguments);
 

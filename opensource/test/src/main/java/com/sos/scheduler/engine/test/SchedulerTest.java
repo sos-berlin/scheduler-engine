@@ -22,7 +22,7 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     }
 
     protected SchedulerTest(TestConfiguration c) {
-        controller = new TestSchedulerController(getClass(), c);
+        controller = TestSchedulerController.apply(getClass(), c);
     }
 
     protected SchedulerTest(TestSchedulerController controller) {

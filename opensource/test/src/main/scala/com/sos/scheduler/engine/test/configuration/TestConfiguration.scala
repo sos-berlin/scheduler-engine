@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test.configuration
 
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.test.ResourceToFileTransformer
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 
@@ -27,4 +28,6 @@ final case class TestConfiguration(
 
     errorLogEventIsExpected: ErrorLogEvent => Boolean = _ => false,
 
-    ignoreError: String => Boolean = _ => false)
+    ignoreError: String => Boolean = _ => false,
+
+    cppSettings: Map[CppSettingName, String] = Map())

@@ -1,18 +1,30 @@
 package com.sos.scheduler.engine.test.scala
 
-import ScalaSchedulerTest._
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest.logger
 import com.sos.scheduler.engine.test.scala.Utils.ignoreException
-import com.sos.scheduler.engine.test.{TestSchedulerController, SchedulerTest}
+import com.sos.scheduler.engine.test.{StandardTestDirectory, TestSchedulerController, SchedulerTest}
 import org.scalatest.{Suite, BeforeAndAfterAll}
 import scala.reflect.ClassTag
 
-trait ScalaSchedulerTest extends Suite with BeforeAndAfterAll with EventHandlerAnnotated {
+trait ScalaSchedulerTest
+    extends Suite
+    with BeforeAndAfterAll
+    with EventHandlerAnnotated
+    with HasCloser
+    with StandardTestDirectory
+{
 
-  protected lazy val testConfiguration = TestConfiguration()
-  protected lazy final val controller = new TestSchedulerController(getClass, testConfiguration)
+  protected lazy val testName =
+    getClass.getName
+
+  protected lazy val testConfiguration =
+    TestConfiguration()
+
+  protected lazy final val controller =
+    TestSchedulerController(getClass, testConfiguration, testDirectory)
 
   override protected final def beforeAll() {
     if (testNames.isEmpty) {
@@ -46,6 +58,7 @@ trait ScalaSchedulerTest extends Suite with BeforeAndAfterAll with EventHandlerA
     try {
       controller.getEventBus.unregisterAnnotated(this)
       controller.close()
+      close()
     }
     finally super.afterAll()
   }

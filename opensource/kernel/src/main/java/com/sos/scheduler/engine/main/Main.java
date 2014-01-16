@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.main;
 
-import com.sos.scheduler.engine.common.time.Time;
-import com.sos.scheduler.engine.kernel.CppScheduler;
-
 import static java.util.Arrays.asList;
 
+import com.sos.scheduler.engine.common.time.Time;
+import com.sos.scheduler.engine.kernel.CppScheduler;
+import com.sos.scheduler.engine.kernel.settings.CppSettings;
+
 class Main {
-    private final SchedulerController schedulerController = new SchedulerThreadController(Main.class.getName());
+    private final SchedulerController schedulerController = new SchedulerThreadController(Main.class.getName(), CppSettings.empty());
 
     private int apply(String[] args) {
         CppScheduler.loadModuleFromPath();  // TODO Methode nur provisorisch. Besser den genauen Pfad übergeben, als Kommandozeilenparameter.

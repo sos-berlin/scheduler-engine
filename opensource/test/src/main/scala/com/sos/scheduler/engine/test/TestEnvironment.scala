@@ -5,7 +5,7 @@ import _root_.scala.collection.immutable
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
+import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
 import com.sos.scheduler.engine.data.folder.{JobPath, TypedPath}
@@ -15,6 +15,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEnc
 import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.CppBinaries
 import com.sos.scheduler.engine.main.CppBinary
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
 
 /** Build the environment for the scheduler binary. */
@@ -77,15 +78,28 @@ final class TestEnvironment(
     new File(directory, name) sideEffect makeDirectory
 }
 
+
 object TestEnvironment {
   val schedulerId = new SchedulerId("test")
   private val jobJavaOptions = "-Xms5m -Xmx10m"
   private val configSubdir = "config"
+
+  def apply(testClass: Class[_], configuration: TestConfiguration, directory: File) = new TestEnvironment(
+    resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
+    directory = directory,
+    nameMap = configuration.resourceNameMap.toMap,
+    fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
+
 
   /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
   private def libraryPathEnv(directory: File): String = {
     val varName = operatingSystem.getDynamicLibraryEnvironmentVariableName
     val previous = nullToEmpty(System.getenv(varName))
     s"$varName="+ OperatingSystem.concatFileAndPathChain(directory, previous)
+  }
+
+  private def makeCleanDirectory(directory: File) {
+    makeDirectory(directory)
+    removeDirectoryContentRecursivly(directory)
   }
 }

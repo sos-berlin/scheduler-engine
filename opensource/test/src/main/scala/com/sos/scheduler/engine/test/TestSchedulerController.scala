@@ -7,11 +7,7 @@ import _root_.scala.sys.error
 import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.system.Files
-import com.sos.scheduler.engine.common.system.Files.makeTemporaryDirectory
-import com.sos.scheduler.engine.common.system.Files.tryRemoveDirectoryRecursivly
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
@@ -20,13 +16,9 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.log.PrefixLog
-import com.sos.scheduler.engine.kernel.settings.SettingName
-import com.sos.scheduler.engine.kernel.settings.Settings
-import com.sos.scheduler.engine.kernel.util.Hostware
-import com.sos.scheduler.engine.kernel.util.ResourcePath
-import com.sos.scheduler.engine.main.CppBinaries
-import com.sos.scheduler.engine.main.CppBinary
-import com.sos.scheduler.engine.main.SchedulerState
+import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
+import com.sos.scheduler.engine.kernel.util.{Hostware, ResourcePath}
+import com.sos.scheduler.engine.main.{SchedulerThreadController, CppBinaries, CppBinary, SchedulerState}
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.binary.TestCppBinaries
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
@@ -35,18 +27,27 @@ import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 
-final class TestSchedulerController(
-    testClass: Class[_],
-    configuration: TestConfiguration)
-extends DelegatingSchedulerController(testClass.getName)
-with EventHandlerAnnotated with SosAutoCloseable {
+abstract class TestSchedulerController
+extends DelegatingSchedulerController
+with EventHandlerAnnotated
+with SosAutoCloseable
+with HasCloser {
 
-  private val testName = testClass.getName
+  def testClass: Class[_]
+
+  def configuration: TestConfiguration
+
+  def testDirectory: File
+
+
+  final val testName = testClass.getName
+  protected final val delegate = new SchedulerThreadController(testName, cppSettings(testName, configuration))
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
+
   lazy val environment = new TestEnvironment(
     resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
-    directory = workDirectory(testClass),
+    directory = testDirectory,
     nameMap = configuration.resourceNameMap.toMap,
     fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
@@ -58,36 +59,17 @@ with EventHandlerAnnotated with SosAutoCloseable {
   private val closingRunnables = mutable.Buffer[() => Unit]()
   private var suppressTerminatedOnError = false
 
-  setSettings(Settings.of(SettingName.jobJavaClasspath, System.getProperty("java.class.path")))
-
-  val jdbcUrlOption: Option[String] = configuration.database match {
-    case Some(c: JdbcDatabaseConfiguration) =>
-      Class.forName(c.jdbcClassName)
-      val jdbcUrl = c.testJdbcUrl(testName)
-      setSettings(Settings.of(SettingName.dbName, Hostware.databasePath(c.jdbcClassName, jdbcUrl)))
-      Some(jdbcUrl)
-    case Some(c: HostwareDatabaseConfiguration) =>
-      setSettings(Settings.of(SettingName.dbName, c.hostwareString))
-      None
-    case None =>
-      None
-  }
-
-  private def workDirectory(testClass: Class[_]): File = {
-    System.getProperty(workDirectoryPropertyName) match {
-      case null =>
-        makeTemporaryDirectory() sideEffect { o =>
-          closingRunnables += { () => tryRemoveDirectoryRecursivly(o) }
-        }
-      case workDir =>
-        new File(workDir).mkdir
-        new File(workDir, testName) sideEffect makeCleanDirectory
+  private val jdbcUrlOption: Option[String] =
+    configuration.database collect {
+      case c: JdbcDatabaseConfiguration =>
+        Class forName c.jdbcClassName
+        c.testJdbcUrl(testName)
     }
-  }
 
-  def close() {
-    try getDelegate.close()
+  override def close() {
+    try delegate.close()
     finally for (r <- closingRunnables.view.reverse) r()
+    super.close()
   }
 
   /** Startet den Scheduler und wartet, bis er aktiv ist. */
@@ -115,14 +97,14 @@ with EventHandlerAnnotated with SosAutoCloseable {
     prepare()
     val extraOptions = nullToEmpty(System.getProperty(classOf[TestSchedulerController].getName + ".options"))
     val allArgs = environment.standardArgs(cppBinaries, logCategories) ++ Splitter.on(",").omitEmptyStrings.split(extraOptions) ++ args
-    getDelegate.startScheduler(Seq() ++ allArgs)
+    delegate.startScheduler(Seq() ++ allArgs)
   }
 
   def prepare() {
     if (!isPrepared) {
       registerEventHandler(this)
       environment.prepare()
-      getDelegate.loadModule(cppBinaries.file(CppBinary.moduleFilename))
+      delegate.loadModule(cppBinaries.file(CppBinary.moduleFilename))
       isPrepared = true
     }
   }
@@ -138,7 +120,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
   /** Wartet, bis das Objekt [[com.sos.scheduler.engine.kernel.Scheduler]] verfügbar ist. */
   def waitUntilSchedulerIsActive() {
     val previous = _scheduler
-    _scheduler = getDelegate.waitUntilSchedulerState(SchedulerState.active)
+    _scheduler = delegate.waitUntilSchedulerState(SchedulerState.active)
     if (_scheduler == null) throw new RuntimeException("Scheduler aborted before startup")
     if (previous == null && configuration.terminateOnError) checkForErrorLogLine()
   }
@@ -156,7 +138,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
   }
 
   private def automaticStart() {
-    if (!getDelegate.isStarted) {
+    if (!delegate.isStarted) {
       if (Thread.currentThread ne thread)  throw new IllegalStateException("TestSchedulerController.automaticStart() must be called in constructing thread")
       error("JobScheduler is not active yet")
     }
@@ -214,7 +196,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
   }
 
   def isStarted =
-    getDelegate.isStarted
+    delegate.isStarted
 
   def cppBinaries: CppBinaries =
     TestCppBinaries.cppBinaries(debugMode)
@@ -226,10 +208,45 @@ with EventHandlerAnnotated with SosAutoCloseable {
 object TestSchedulerController {
   final val shortTimeout = Time.of(15.0)
   private val logger = Logger(getClass)
-  private val workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory"
 
-  private def makeCleanDirectory(directory: File) {
-    Files.makeDirectory(directory)
-    Files.removeDirectoryContentRecursivly(directory)
+  def apply(testClass: Class[_]): TestSchedulerController =
+    apply(testClass, TestConfiguration())
+
+  def apply(testClass: Class[_], configuration: TestConfiguration): TestSchedulerController = {
+    val _testClass = testClass
+    val _configuration = configuration
+
+    new TestSchedulerController with StandardTestDirectory {
+      def testClass = _testClass
+      def configuration = _configuration
+    }
   }
+
+  def apply(testClass: Class[_], configuration: TestConfiguration, testDirectory: File): TestSchedulerController = {
+    val _testClass = testClass
+    val _configuration = configuration
+    val _testDirectory = testDirectory
+
+    new TestSchedulerController  {
+      def testClass = _testClass
+      def configuration = _configuration
+      def testDirectory = _testDirectory
+    }
+  }
+
+  private def cppSettings(testName: String, configuration: TestConfiguration): CppSettings =
+    CppSettings(
+      configuration.cppSettings
+        + (CppSettingName.jobJavaClasspath -> System.getProperty("java.class.path"))
+        ++ dbNameCppSetting(testName, configuration))
+
+  private def dbNameCppSetting(testName: String, configuration: TestConfiguration): Option[(CppSettingName, String)] =
+    configuration.database match {
+      case Some(c: JdbcDatabaseConfiguration) =>
+        Some(CppSettingName.dbName -> Hostware.databasePath(c.jdbcClassName, c.testJdbcUrl(testName)))
+      case Some(c: HostwareDatabaseConfiguration) =>
+        Some(CppSettingName.dbName -> c.hostwareString)
+      case None =>
+        None
+    }
 }

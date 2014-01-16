@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.settings;
 
-public enum SettingName {
+public enum CppSettingName {
     /** Wie -db= */
     dbName(1),
 
@@ -25,7 +25,7 @@ public enum SettingName {
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;
 
-    SettingName(int number) {
+    CppSettingName(int number) {
         this.number = number;
     }
 

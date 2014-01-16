@@ -36,7 +36,7 @@ final class SchemaIT extends FunSuite {
 
 object SchemaIT {
   private def runScheduler(f: TestSchedulerController => Unit) {
-    val controller = new TestSchedulerController(classOf[SchemaIT], TestConfiguration())
+    val controller = TestSchedulerController(classOf[SchemaIT], TestConfiguration())
     try f(controller)
     finally if (controller.isStarted) {
       controller.terminateScheduler()

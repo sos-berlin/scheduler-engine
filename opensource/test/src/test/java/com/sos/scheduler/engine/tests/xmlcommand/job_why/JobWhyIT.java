@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.tests.xmlcommand.job_why;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.sos.scheduler.engine.test.TestSchedulerController;
-import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +24,7 @@ import static org.hamcrest.Matchers.equalTo;
 public final class JobWhyIT {
     private static final Logger logger = LoggerFactory.getLogger(JobWhyIT.class);
 
-    private static final TestSchedulerController controller = new TestSchedulerController(JobWhyIT.class, new TestConfigurationBuilder().build());
+    private static final TestSchedulerController controller = TestSchedulerController.apply(JobWhyIT.class);
     private static Map<String,Element> results = null;
 
     @BeforeClass public static void beforeClass() {
@@ -35,6 +34,7 @@ public final class JobWhyIT {
 
     @AfterClass public static void afterClass() {
         controller.close();
+        results = null;
     }
 
     private static Map<String,Element> executeJobWhy() {

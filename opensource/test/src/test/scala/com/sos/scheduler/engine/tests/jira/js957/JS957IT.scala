@@ -18,7 +18,7 @@ import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
 @RunWith(classOf[JUnitRunner])
 final class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with EventHandlerAnnotated {
 
-  private lazy val controller = new TestSchedulerController(
+  private lazy val controller = TestSchedulerController(
     getClass,
     TestConfiguration(
       logCategories = "scheduler java.stackTrace-",

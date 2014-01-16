@@ -200,7 +200,7 @@ object Scheduler {
 
   @ForCpp def of(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
-    controllerBridge.getSettings.setSettingsInCpp(cppProxy.modifiable_settings)
+    controllerBridge.cppSettings.setSettingsInCpp(cppProxy.modifiable_settings)
 
     val injector = createInjector(Seq(
       new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),

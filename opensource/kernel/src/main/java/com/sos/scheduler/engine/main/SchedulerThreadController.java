@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.settings.Settings;
+import com.sos.scheduler.engine.kernel.settings.CppSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,19 +22,15 @@ public class SchedulerThreadController implements SchedulerController {
 
     private final String name;
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
-    private final Settings settings = new Settings();
     private boolean isStarted = false;
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
-    private final SchedulerThreadControllerBridge controllerBridge = new SchedulerThreadControllerBridge(this, eventBus);
-    private final SchedulerThread thread = new SchedulerThread(controllerBridge);
+    private final SchedulerThreadControllerBridge controllerBridge;
+    private final SchedulerThread thread;
 
-    public SchedulerThreadController(String name) {
+    public SchedulerThreadController(String name, CppSettings cppSettings) {
         this.name = name;
-    }
-
-    @Override public final void setSettings(Settings o) {
-        checkIsNotStarted();
-        settings.setAll(o);
+        controllerBridge = new SchedulerThreadControllerBridge(this, eventBus, cppSettings);
+        thread = new SchedulerThread(controllerBridge);
     }
 
     public final void loadModule(File cppModuleFile) {
@@ -122,10 +118,6 @@ public class SchedulerThreadController implements SchedulerController {
 
     @Override public final SchedulerEventBus getEventBus() {
         return eventBus;
-    }
-
-    public final Settings getSettings() {
-        return settings;
     }
 
     public String getName() {
