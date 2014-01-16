@@ -56,7 +56,6 @@ with HasCloser {
 
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
-  private val closingRunnables = mutable.Buffer[() => Unit]()
   private var suppressTerminatedOnError = false
 
   private val jdbcUrlOption: Option[String] =
@@ -68,7 +67,6 @@ with HasCloser {
 
   override def close() {
     try delegate.close()
-    finally for (r <- closingRunnables.view.reverse) r()
     super.close()
   }
 
@@ -192,7 +190,7 @@ with HasCloser {
 
   private def registerEventHandler(o: EventHandlerAnnotated) {
     eventBus registerAnnotated o
-    closingRunnables += { () =>  eventBus.unregisterAnnotated(o) }
+    onClose { eventBus unregisterAnnotated o }
   }
 
   def isStarted =
