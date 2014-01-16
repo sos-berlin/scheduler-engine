@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.database
 
 import EntitiesIT._
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, FileBasedActivatedEvent, JobChainPath, JobPath}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
@@ -37,27 +38,29 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     logCategories = "java.stackTrace-")  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
 
   private val testStartTime = now() withMillisOfSecond 0
-  private lazy val jobSubsystem = controller.scheduler.instance[JobSubsystem]
-  private lazy val orderJob = jobSubsystem.job(orderJobPath)
-  private def simpleJob = scheduler.instance[JobSubsystem].job(simpleJobPath)
 
-  override def checkedBeforeAll() {
+  override def onBeforeSchedulerActivation() {
     controller.setSettings(Settings.of(SettingName.useJavaPersistence, "true"))
-    controller.activateScheduler()
-    val eventPipe = controller.newEventPipe()
-    scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
-    eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
-    scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
-    scheduler executeXml <start_job job={simpleJobPath.string} at="2029-10-11 22:33:44"/>
-    scheduler executeXml <start_job job={simpleJobPath.string} at="2029-11-11 11:11:11"><params><param name="myJobParameter" value="myValue"/></params></start_job>
-    simpleJob.forceFileReread()
-    scheduler.instance[FolderSubsystem].updateFolders()
-    eventPipe.nextWithCondition[FileBasedActivatedEvent] { _.typedPath == simpleJobPath }
   }
 
-  def entityManager = controller.scheduler.instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
+  override def onSchedulerActivated() {
+    autoClosing(controller.newEventPipe()) { eventPipe =>
+      scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
+      eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
+      scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
+      scheduler executeXml <start_job job={simpleJobPath.string} at="2029-10-11 22:33:44"/>
+      scheduler executeXml <start_job job={simpleJobPath.string} at="2029-11-11 11:11:11"><params><param name="myJobParameter" value="myValue"/></params></start_job>
+      job(simpleJobPath).forceFileReread()
+      instance[FolderSubsystem].updateFolders()
+      eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
+    }
+  }
 
-  private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
+  def entityManager =
+    instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
+
+  private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] =
+    entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
 
   test("TaskHistoryEntity") {
     taskHistoryEntities should have size 2
@@ -76,8 +79,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
         'errorCode (null),
         'errorText (null)
       )
-      assert(e.startTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be before testStartTime="+testStartTime)
-      now() match { case n => assert(e.startTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be after now="+n) }
+      assert(e.startTime.getTime >= testStartTime.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be before testStartTime=$testStartTime")
+      now() match { case n => assert(e.startTime.getTime <= n.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be after now=$n") }
     }
   }
 
@@ -93,8 +96,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
         'errorCode (null),
         'errorText (null)
       )
-      assert(e.startTime.getTime >= testStartTime.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be before testStartTime="+testStartTime)
-      now() match { case n => assert(e.startTime.getTime <= n.getMillis, "TaskHistoryEntity.startTime="+e.startTime+" should not be after now="+n) }
+      assert(e.startTime.getTime >= testStartTime.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be before testStartTime=$testStartTime")
+      now() match { case n => assert(e.startTime.getTime <= n.getMillis, s"TaskHistoryEntity.startTime=${e.startTime} should not be after now=$n") }
     }
   }
 
@@ -110,21 +113,21 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       'startTime (null),
       'parameterXml (null)
     )
-    XML.loadString(e(0).xml) should equal (<task force_start="no"/>)
-    assert(e(0).enqueueTime.getTime >= testStartTime.getMillis, "TaskEntity._enqueueTime="+ e(0).enqueueTime +" should not be before testStartTime="+testStartTime)
-    assert(e(0).enqueueTime.getTime <= now().getMillis, "TaskEntity._enqueueTime="+ e(0).enqueueTime +" should not be after now")
+    XML.loadString(e(0).xml) shouldEqual <task force_start="no"/>
+    assert(e(0).enqueueTime.getTime >= testStartTime.getMillis, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be before testStartTime=$testStartTime")
+    assert(e(0).enqueueTime.getTime <= now().getMillis, s"TaskEntity._enqueueTime=${e(0).enqueueTime} should not be after now")
 
-    XML.loadString(e(1).xml) should equal (<task force_start="yes"/>)
-    new DateTime(e(1).startTime) should equal (new DateTime(2029, 10, 11, 22, 33, 44))
+    XML.loadString(e(1).xml) shouldEqual <task force_start="yes"/>
+    new DateTime(e(1).startTime) shouldEqual new DateTime(2029, 10, 11, 22, 33, 44)
 
-    XML.loadString(e(2).xml) should equal (<task force_start="yes"/>)
-    XML.loadString(e(2).parameterXml) should equal (<sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>)
-    new DateTime(e(2).startTime) should equal (new DateTime(2029, 11, 11, 11, 11, 11))
+    XML.loadString(e(2).xml) shouldEqual <task force_start="yes"/>
+    XML.loadString(e(2).parameterXml) shouldEqual <sos.spooler.variable_set count="1"><variable value="myValue" name="myJobParameter"/></sos.spooler.variable_set>
+    new DateTime(e(2).startTime) shouldEqual new DateTime(2029, 11, 11, 11, 11, 11)
   }
 
   test("TaskEntity is read as expected") {
-    val queuedTasksElem = (scheduler executeXml <show_job job={simpleJob.path.string} what="task_queue"/>).elem \ "answer" \ "job" \ "queued_tasks"
-    (queuedTasksElem \ "@length").text.toInt should equal (3)
+    val queuedTasksElem = (scheduler executeXml <show_job job={simpleJobPath.string} what="task_queue"/>).elem \ "answer" \ "job" \ "queued_tasks"
+    (queuedTasksElem \ "@length").text.toInt shouldEqual 3
     val queuedTaskElems = queuedTasksElem \ "queued_task"
     queuedTaskElems should have size 3
     for (q <- queuedTaskElems) {
@@ -133,14 +136,14 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       assert(!(t isBefore testStartTime), "<queued_task enqueued="+enqueuedString+"> should not be before testStartTime="+testStartTime)
       assert(!(t isAfter now()), "<queued_task enqueued="+enqueuedString+"> should not be after now")
     }
-    queuedTaskElems(0).attribute("start_at") should be ('empty)
-    queuedTaskElems(1).attribute("start_at").head.text should equal ("2029-10-11T20:33:44.000Z")
-    queuedTaskElems(2).attribute("start_at").head.text should equal ("2029-11-11T10:11:11.000Z")
-    (queuedTaskElems(2) \ "params").head should equal (<params count="1"><param value="myValue" name="myJobParameter"/></params>)
+    queuedTaskElems(0).attribute("start_at") shouldBe 'empty
+    queuedTaskElems(1).attribute("start_at").head.text shouldEqual "2029-10-11T20:33:44.000Z"
+    queuedTaskElems(2).attribute("start_at").head.text shouldEqual "2029-11-11T10:11:11.000Z"
+    (queuedTaskElems(2) \ "params").head shouldEqual <params count="1"><param value="myValue" name="myJobParameter"/></params>
   }
 
   test("JobEntity is from "+orderJobPath) {
-    tryFetchJobEntity(orderJobPath) should be (None)
+    tryFetchJobEntity(orderJobPath) shouldBe None
 
     stopJobAndWait(orderJobPath)
     tryFetchJobEntity(orderJobPath).get match { case e =>
@@ -155,12 +158,12 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("Job.tryFetchAverageStepDuration()") {
-    val duration = simpleJob.tryFetchAverageStepDuration().get
+    val duration = job(simpleJobPath).tryFetchAverageStepDuration().get
     duration.getMillis should (be >= 0L and be <= 10*1000L)
   }
 
   test("JobChainEntity") {
-    tryFetchJobChainEntity(jobChainPath) should be ('empty)
+    tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
 
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
     tryFetchJobChainEntity(jobChainPath).get should have (
@@ -171,11 +174,11 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     )
 
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="running"/>
-    tryFetchJobChainEntity(jobChainPath) should be ('empty)
+    tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
   }
 
   test("JobChainNodeEntity") {
-    fetchJobChainNodeEntities(jobChainPath) should be ('empty)
+    fetchJobChainNodeEntities(jobChainPath) shouldBe 'empty
 
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="next_state"/>
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="300" action="stop"/>
@@ -198,28 +201,30 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   ignore("After re-read of JobChain its state should be restored - IGNORED, DOES NOT WORK") {
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
-    val eventPipe = controller.newEventPipe()
-    scheduler.instance[OrderSubsystem].jobChain(jobChainPath).forceFileReread()
-    scheduler.instance[FolderSubsystem].updateFolders()
-    eventPipe.nextWithCondition[FileBasedActivatedEvent] { _.typedPath == jobChainPath }
-    val jobChain = scheduler.instance[OrderSubsystem].jobChain(jobChainPath)
-    pendingUntilFixed {   // Der Scheduler stellt den Zustand wird nicht wieder her
-      jobChain should be ('stopped)
-      jobChain.nodeMap(OrderState("100")).action should equal (JobChainNodeAction.nextState)
-      jobChain.nodeMap(OrderState("200")).action should equal (JobChainNodeAction.process)
-      jobChain.nodeMap(OrderState("300")).action should equal (JobChainNodeAction.stop)
+    autoClosing(controller.newEventPipe()) { eventPipe =>
+      instance[OrderSubsystem].jobChain(jobChainPath).forceFileReread()
+      instance[FolderSubsystem].updateFolders()
+      eventPipe.nextKeyed[FileBasedActivatedEvent](jobChainPath)
+    }
+    val jobChain = instance[OrderSubsystem].jobChain(jobChainPath)
+    pendingUntilFixed {   // FIXME Der Scheduler stellt den Zustand aus der Datenbank wird nicht wieder her
+      jobChain shouldBe 'stopped
+      jobChain.node(OrderState("100")).action shouldEqual JobChainNodeAction.nextState
+      jobChain.node(OrderState("200")).action shouldEqual JobChainNodeAction.process
+      jobChain.node(OrderState("300")).action shouldEqual JobChainNodeAction.stop
     }
   }
 
   test("After JobChain removal database should contain no record") {
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>    // Macht einen Datenbanksatz
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="next_state"/>
-    val eventPipe = controller.newEventPipe()
-    scheduler.instance[OrderSubsystem].jobChain(jobChainPath).file.delete() || sys.error("JobChain configuration file could not be deleted")
-    scheduler.instance[FolderSubsystem].updateFolders()
-    eventPipe.nextWithCondition[FileBasedRemovedEvent] { _.typedPath == jobChainPath }
-    tryFetchJobChainEntity(jobChainPath) should be ('empty)
-    fetchJobChainNodeEntities(jobChainPath) should be ('empty)
+    autoClosing(controller.newEventPipe()) { eventPipe =>
+      instance[OrderSubsystem].jobChain(jobChainPath).file.delete() || sys.error("JobChain configuration file could not be deleted")
+      instance[FolderSubsystem].updateFolders()
+      eventPipe.nextKeyed[FileBasedRemovedEvent](jobChainPath)
+      tryFetchJobChainEntity(jobChainPath) shouldBe 'empty
+      fetchJobChainNodeEntities(jobChainPath) shouldBe 'empty
+    }
   }
 
   private def tryFetchJobEntity(jobPath: JobPath) =
@@ -239,15 +244,18 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   private def stopJobAndWait(jobPath: JobPath) {
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
-    waitForCondition(TimeoutWithSteps(standardSeconds(3), millis(10))) { orderJob.state == JobState.stopped }
+    waitForCondition(TimeoutWithSteps(standardSeconds(3), millis(10))) { job(orderJobPath).state == JobState.stopped }
   }
+
+  private def job(o: JobPath) =
+    instance[JobSubsystem].job(o)
 }
 
 private object EntitiesIT {
-  val jobChainPath = JobChainPath("/test-job-chain")
-  val orderId = OrderId("ORDER-1")
-  val orderJobPath = JobPath("/test-order-job")
-  val simpleJobPath = JobPath("/test-simple-job")
-  val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
-  val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ") withZone schedulerTimeZone
+  private val jobChainPath = JobChainPath("/test-job-chain")
+  private val orderId = OrderId("ORDER-1")
+  private val orderJobPath = JobPath("/test-order-job")
+  private val simpleJobPath = JobPath("/test-simple-job")
+  private val firstTaskHistoryEntityId = 2  // Scheduler zählt ID ab 2
+  private val xmlDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ") withZone schedulerTimeZone
 }
