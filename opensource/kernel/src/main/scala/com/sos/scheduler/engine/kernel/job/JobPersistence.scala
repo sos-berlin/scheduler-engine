@@ -59,7 +59,7 @@ private[job] trait JobPersistence {
         TaskId(taskId),
         path,
         new Instant(enqueueTimeMillis),
-        zeroMillisToNone(startTimeMillis),
+        zeroCppMillisToNoneInstant(startTimeMillis),
         parametersXml,
         xml))
     }

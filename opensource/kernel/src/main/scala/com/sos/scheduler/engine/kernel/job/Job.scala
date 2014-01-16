@@ -59,7 +59,7 @@ with JobPersistence {
     JobState.valueOf(cppProxy.state_name)
 
   protected def nextStartInstantOption: Option[Instant] =
-    eternalMillisToNone(cppProxy.next_start_time_millis)
+    eternalCppMillisToNoneInstant(cppProxy.next_start_time_millis)
 
   def endTasks() {
     setStateCommand(JobStateCommand.endTasks)

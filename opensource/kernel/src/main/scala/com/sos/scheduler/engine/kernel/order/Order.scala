@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.common.time.CppTime
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -15,6 +14,7 @@ import com.sos.scheduler.engine.kernel.folder.FileBased
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
+import com.sos.scheduler.engine.kernel.time.CppJodaConversions.eternalCppMillisToNoneInstant
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import org.joda.time.Instant
 
@@ -84,7 +84,7 @@ with Sister {
     cppProxy.log.getSister
 
   def nextInstantOption: Option[Instant] =
-    CppTime.cppTimeToInstantOption(cppProxy.next_time_millis)
+    eternalCppMillisToNoneInstant(cppProxy.next_time_millis)
 
   override def toString = {
     val result = getClass.getSimpleName
