@@ -271,6 +271,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory$.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistentState.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__data__job__TaskPersistentState.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__job__JobSubsystem.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

@@ -8,7 +8,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
 class JobIT extends FunSuite with ScalaSchedulerTest {
@@ -28,13 +27,11 @@ class JobIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("jobSubsystem.visibleNames") {
-    val list = instance[JobSubsystem].getVisibleNames.toList
-    list.toSet should equal (Set("a", "b"))
+    instance[JobSubsystem].visibleNames.toSet shouldEqual Set("a", "b")
   }
 
   test("jobSubsystem.names") {
-    val list = instance[JobSubsystem].getNames.toList
-    list.toSet should equal (Set("scheduler_file_order_sink", "scheduler_service_forwarder", "a", "b"))
+    instance[JobSubsystem].names.toSet shouldEqual Set("scheduler_file_order_sink", "scheduler_service_forwarder", "a", "b")
   }
 }
 
