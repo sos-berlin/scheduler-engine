@@ -3,10 +3,9 @@ package com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas
 import com.sos.scheduler.engine.cplusplus.generator.Configuration
 import com.sos.scheduler.engine.cplusplus.generator.cpp._
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.procedure._
-import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
+import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
-import java.lang.Class
 
 class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends CppCode {
   private val isCppProxy = classOf[CppProxy] isAssignableFrom javaClass
@@ -30,11 +29,18 @@ class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends
 
   val cppProcedures = cppConstructors ++ cppMethods
 
-  private def parameterTypesAreKnown(types: Seq[Class[_]]) = types forall parameterTypeIsKnown
+  val directlyUsedJavaClasses: Set[Class[_]] =
+    ( ClassOps.directlyUsedJavaClasses(javaClass) filter { t => typeIsValidClass(t) && t != javaClass && returnTypeIsKnown(t) } ) +
+        classOf[String]  // Für obj_name()
 
-  private def parameterTypeIsKnown(t: Class[_]) = returnTypeIsKnown(t)
+  private def parameterTypesAreKnown(types: Seq[Class[_]]) =
+    types forall parameterTypeIsKnown
 
-  private def returnTypeIsKnown(t: Class[_]) = t.isPrimitive || classIsByteArray(t) || typeIsValidClass(t) && knownClasses.contains(t)
+  private def parameterTypeIsKnown(t: Class[_]) =
+    returnTypeIsKnown(t)
+
+  private def returnTypeIsKnown(t: Class[_]) =
+    t.isPrimitive || classIsByteArray(t) || typeIsValidClass(t) && knownClasses.contains(t)
 
   def headerPreprocessorMacro =
     ("_" + Configuration.generatedJavaProxyNamespace.simpleName + "_" + javaClass.getName.replace('.', '_') + "_H_").toUpperCase
@@ -46,20 +52,19 @@ class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends
     cppName.namespace.nestedCode("struct " + cppName.simpleName + "; ")
   }
 
-  def javaSuperclasses = superclasses(javaClass)
+  def javaSuperclasses =
+    superclasses(javaClass)
 
-  val directlyUsedJavaClasses: Set[Class[_]] =
-    ( ClassOps.directlyUsedJavaClasses(javaClass) filter { t => typeIsValidClass(t) && t != javaClass && returnTypeIsKnown(t) } ) +
-    classOf[String]  // Für obj_name()
+  override def headerCode =
+    name.namespace.nestedCode(
+      cppObjectClass.forwardDeclaration + "\n" +
+      cppClassClass.headerCode + "\n\n" +
+      cppObjectClass.headerCode
+    )
 
-  override def headerCode = name.namespace.nestedCode(
-    cppObjectClass.forwardDeclaration + "\n" +
-    cppClassClass.headerCode + "\n\n" +
-    cppObjectClass.headerCode
-  )
-
-  override def sourceCode = name.namespace.nestedCode(
-    cppClassClass.sourceCode + "\n\n" +
-    cppObjectClass.sourceCode
-  )
+  override def sourceCode =
+    name.namespace.nestedCode(
+      cppClassClass.sourceCode + "\n\n" +
+      cppObjectClass.sourceCode
+    )
 }
