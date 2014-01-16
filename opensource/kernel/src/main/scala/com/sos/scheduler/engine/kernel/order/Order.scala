@@ -48,7 +48,7 @@ with Sister {
     OrderState(cppProxy.string_state)
 
   def endState: OrderState =
-    new OrderState(cppProxy.string_end_state)
+    OrderState(cppProxy.string_end_state)
 
   def endState_=(s: OrderState) {
     cppProxy.set_end_state(s.string)

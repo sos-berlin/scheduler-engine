@@ -70,7 +70,7 @@ object JS803IT {
   private val shortTimeout = SchedulerTest.shortTimeout
   private val orderDelay = 3+1
   private val jobChainPath = JobChainPath("/super")
-  private val expectedEndState = new OrderState("state.nestedC.end")
+  private val expectedEndState = OrderState("state.nestedC.end")
   private val hhmmssFormatter = DateTimeFormat.forPattern("HH:mm:ss")
   private val yyyymmddhhmmssFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
 

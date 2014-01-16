@@ -205,9 +205,9 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     val jobChain = scheduler.instance[OrderSubsystem].jobChain(jobChainPath)
     pendingUntilFixed {   // Der Scheduler stellt den Zustand wird nicht wieder her
       jobChain should be ('stopped)
-      jobChain.nodeMap(new OrderState("100")).action should equal (JobChainNodeAction.nextState)
-      jobChain.nodeMap(new OrderState("200")).action should equal (JobChainNodeAction.process)
-      jobChain.nodeMap(new OrderState("300")).action should equal (JobChainNodeAction.stop)
+      jobChain.nodeMap(OrderState("100")).action should equal (JobChainNodeAction.nextState)
+      jobChain.nodeMap(OrderState("200")).action should equal (JobChainNodeAction.process)
+      jobChain.nodeMap(OrderState("300")).action should equal (JobChainNodeAction.stop)
     }
   }
 

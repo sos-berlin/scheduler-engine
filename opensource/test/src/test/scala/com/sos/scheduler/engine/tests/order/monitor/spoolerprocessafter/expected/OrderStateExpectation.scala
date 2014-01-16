@@ -6,18 +6,21 @@ import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting.
 abstract sealed class OrderStateExpectation {
   def matches(o: OrderState): Boolean
 
-  override def toString = getClass.getSimpleName
+  override def toString =
+    getClass.getSimpleName
 }
 
 case object InitialState extends OrderStateExpectation {
-  def matches(o: OrderState) = o.string startsWith Setting.initialOrderStatePrefix
+  def matches(o: OrderState) =
+    o.string startsWith Setting.initialOrderStatePrefix
 }
 
 case object SuccessState extends OrderStateExpectation {
-  def matches(o: OrderState) = o == new OrderState("SUCCESS")
+  def matches(o: OrderState) =
+    o == OrderState("SUCCESS")
 }
 
 case object ErrorState extends OrderStateExpectation {
-  def matches(o: OrderState) = o == new OrderState("ERROR")
+  def matches(o: OrderState) =
+    o == OrderState("ERROR")
 }
-

@@ -68,7 +68,7 @@ import com.sos.scheduler.engine.kernel.order.Order
     LogEvent.of(SchedulerLogLevel.ofCpp(cppLevel), message)
 
   @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousState: String): AbstractEvent =
-    new OrderStateChangedEvent(OrderKey(jobChainPath, orderId), new OrderState(previousState))
+    OrderStateChangedEvent(OrderKey(jobChainPath, orderId), OrderState(previousState))
 
   @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, orderStateTransitionCpp: Int): AbstractEvent =
     new OrderStepEndedEvent(OrderKey(jobChainPath, orderId), OrderStateTransition.ofCppCode(orderStateTransitionCpp))
