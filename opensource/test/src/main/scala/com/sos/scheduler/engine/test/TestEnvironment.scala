@@ -28,9 +28,13 @@ final class TestEnvironment(
   val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
+  private var isPrepared = false
 
   private[test] def prepare() {
-    prepareTemporaryConfigurationDirectory()
+    if (!isPrepared) {
+      prepareTemporaryConfigurationDirectory()
+      isPrepared = true
+    }
   }
 
   private def prepareTemporaryConfigurationDirectory() {
