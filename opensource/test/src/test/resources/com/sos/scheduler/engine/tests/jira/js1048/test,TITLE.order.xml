@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.6-M3/scheduler.xsd"
-   title="TITLE"
+   title="ORIGINAL-TITLE"
 >
     <run_time/>
 </order>

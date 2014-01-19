@@ -1,68 +1,61 @@
 package com.sos.scheduler.engine.tests.jira.js1048
 
 import JS1048IT._
-import com.google.common.io.Files
-import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
-import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, JobChainPath, FileBasedActivatedEvent}
-import com.sos.scheduler.engine.kernel.order.OrderSubsystem
-import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import java.io.File
+import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.scalatest.HasCloserBeforeAndAfterAll
+import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestSchedulerController}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class JS1048IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1048IT
+    extends FreeSpec
+    with HasCloserBeforeAndAfterAll
+    with ProvidesTestEnvironment {
 
-  import controller.environment.liveDirectory
+  override lazy val testConfiguration =
+    TestConfiguration(database = Some(DefaultDatabaseConfiguration()))
 
-  private lazy val orderSubsystem = instance[OrderSubsystem]
+  private def order(key: OrderKey)(implicit controller: TestSchedulerController): Order =
+    controller.instance[OrderSubsystem].order(key)
 
-  "After reestablishing the job chain (this should be equivalent with a JobScheduler restart)" - {
-    "... with an unchanged .order.xml, the previously modified title should remain" in {
-      val myOrderKey = testJobChainPath orderKey "A"
-      autoClosing(controller.newEventPipe()) { eventPipe =>
-        orderSubsystem.order(myOrderKey).getTitle shouldEqual originalTitle
-        orderSubsystem.order(myOrderKey).setTitle(commandModifiedTitle)
-        removeAndReestablishJobChain(testJobChainPath) {}
-        orderSubsystem.order(myOrderKey).getTitle shouldEqual commandModifiedTitle
-      }
+  "After JobScheduler restart with an unchanged .order.xml, a previous modification should remain" in {
+    runScheduler { implicit controller =>
+      controller.scheduler executeXml ModifyOrderCommand(suspendOrderKey, suspended = Some(true))
+      order(suspendOrderKey).isSuspended shouldBe true
+      order(titleOrderKey).title shouldEqual originalTitle
+      controller.scheduler executeXml ModifyOrderCommand(titleOrderKey, title = Some(commandModifiedTitle))
+      order(titleOrderKey).title shouldEqual commandModifiedTitle
     }
 
-//    "... with an unchanged .order.xml, the previous suspension should remain" in {
-//      val myOrderKey = testJobChainPath orderKey "A"
-//      autoClosing(controller.newEventPipe()) { eventPipe =>
-//        orderSubsystem.order(myOrderKey).setSuspended(true)
-//        orderSubsystem.order(myOrderKey).isSuspended shouldBe true
-//        removeAndReestablishJobChain(testJobChainPath) {}
-//        orderSubsystem.order(myOrderKey).isSuspended shouldBe true
-//      }
-//    }
-
-    "... with a changed .order.xml, the previous modification of the title should be lost" in {
-      val myOrderKey = testJobChainPath orderKey "B"
-      autoClosing(controller.newEventPipe()) { eventPipe =>
-        orderSubsystem.order(myOrderKey).getTitle shouldEqual originalTitle
-        orderSubsystem.order(myOrderKey).setTitle(commandModifiedTitle)
-        removeAndReestablishJobChain(testJobChainPath) {
-          myOrderKey.file(liveDirectory).xml = <order title={fileChangedTitle}><run_time/></order>
-        }
-        orderSubsystem.order(myOrderKey).getTitle shouldEqual fileChangedTitle
-      }
+    runScheduler { implicit controller =>
+      order(suspendOrderKey).isSuspended shouldBe true
+      order(titleOrderKey).title shouldEqual commandModifiedTitle
     }
   }
 
-  private def removeAndReestablishJobChain(jobChainPath: JobChainPath)(f: => Unit) {
-    autoClosing(controller.newEventPipe()) { eventPipe =>
-      val file = jobChainPath.file(liveDirectory)
-      val renamedFile = new File(s"$file~")
-      Files.move(file, renamedFile)
-      eventPipe.nextKeyed[FileBasedRemovedEvent](jobChainPath)
-      f
-      Files.move(renamedFile, file)
-      eventPipe.nextKeyed[FileBasedActivatedEvent](jobChainPath)
+  "After JobScheduler restart with a changed .order.xml, a previous modification should be lost" in {
+    runScheduler { implicit controller =>
+      controller.scheduler executeXml ModifyOrderCommand(suspendOrderKey, suspended = Some(true))
+      order(titleOrderKey).title shouldEqual originalTitle
+      controller.scheduler executeXml ModifyOrderCommand(titleOrderKey, title = Some(commandModifiedTitle))
+      order(titleOrderKey).title shouldEqual commandModifiedTitle
+    }
+
+    suspendOrderKey.file(testEnvironment.liveDirectory).xml = <order><run_time/></order>
+    titleOrderKey.file(testEnvironment.liveDirectory).xml = <order title={fileChangedTitle}><run_time/></order>
+
+    runScheduler { implicit controller =>
+      order(suspendOrderKey).isSuspended shouldBe false
+      order(titleOrderKey).title shouldEqual fileChangedTitle
     }
   }
 }
@@ -70,7 +63,9 @@ final class JS1048IT extends FreeSpec with ScalaSchedulerTest {
 
 private object JS1048IT {
   private val testJobChainPath = JobChainPath("/test")
-  private val originalTitle = "TITLE"
+  private val titleOrderKey = testJobChainPath orderKey "TITLE"
+  private val originalTitle = "ORIGINAL-TITLE"
   private val commandModifiedTitle = "COMMAND-MODIFIED"
   private val fileChangedTitle = "FILE-CHANGED"
+  private val suspendOrderKey = testJobChainPath orderKey "SUSPEND"
 }
