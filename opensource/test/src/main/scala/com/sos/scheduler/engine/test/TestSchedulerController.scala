@@ -22,6 +22,7 @@ import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.binary.TestCppBinaries
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 
@@ -37,7 +38,7 @@ with EventHandlerAnnotated {
   def environment: TestEnvironment
 
   private val testName = testClass.getName
-  protected final val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration))
+  protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, databaseDirectory))
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
   private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
@@ -51,7 +52,7 @@ with EventHandlerAnnotated {
     testConfiguration.database collect {
       case c: JdbcDatabaseConfiguration =>
         Class forName c.jdbcClassName
-        c.testJdbcUrl(testName)
+        c.testJdbcUrl(testName, databaseDirectory)
     }
 
   override def close() {
@@ -197,6 +198,9 @@ with EventHandlerAnnotated {
 
   def newJDBCConnection(): Connection =
     DriverManager.getConnection(jdbcUrlOption.get)
+
+  private def databaseDirectory =
+    environment.directory
 }
 
 
@@ -227,16 +231,16 @@ object TestSchedulerController {
     }
   }
 
-  private def cppSettings(testName: String, configuration: TestConfiguration): CppSettings =
+  private def cppSettings(testName: String, configuration: TestConfiguration, databaseDirectory: File): CppSettings =
     CppSettings(
       configuration.cppSettings
         + (CppSettingName.jobJavaClasspath -> System.getProperty("java.class.path"))
-        ++ dbNameCppSetting(testName, configuration))
+        ++ dbNameCppSetting(testName, configuration, databaseDirectory))
 
-  private def dbNameCppSetting(testName: String, configuration: TestConfiguration): Option[(CppSettingName, String)] =
+  private def dbNameCppSetting(testName: String, configuration: TestConfiguration, databaseDirectory: File): Option[(CppSettingName, String)] =
     configuration.database match {
       case Some(c: JdbcDatabaseConfiguration) =>
-        Some(CppSettingName.dbName -> Hostware.databasePath(c.jdbcClassName, c.testJdbcUrl(testName)))
+        Some(CppSettingName.dbName -> Hostware.databasePath(c.jdbcClassName, c.testJdbcUrl(testName, databaseDirectory)))
       case Some(c: HostwareDatabaseConfiguration) =>
         Some(CppSettingName.dbName -> c.hostwareString)
       case None =>
