@@ -2,14 +2,13 @@ package com.sos.scheduler.engine.test
 
 import TestSchedulerController._
 import _root_.scala.collection.JavaConversions._
-import _root_.scala.collection.mutable
+import _root_.scala.reflect.ClassTag
 import _root_.scala.sys.error
 import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.Time
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
@@ -17,49 +16,39 @@ import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
-import com.sos.scheduler.engine.kernel.util.{Hostware, ResourcePath}
+import com.sos.scheduler.engine.kernel.util.Hostware
 import com.sos.scheduler.engine.main.{SchedulerThreadController, CppBinaries, CppBinary, SchedulerState}
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.binary.TestCppBinaries
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 
 abstract class TestSchedulerController
 extends DelegatingSchedulerController
-with EventHandlerAnnotated
-with SosAutoCloseable
-with HasCloser {
+with HasCloser
+with EventHandlerAnnotated {
 
   def testClass: Class[_]
 
-  def configuration: TestConfiguration
+  def testConfiguration: TestConfiguration
 
-  def testDirectory: File
+  def environment: TestEnvironment
 
-
-  final val testName = testClass.getName
-  protected final val delegate = new SchedulerThreadController(testName, cppSettings(testName, configuration))
+  private val testName = testClass.getName
+  protected final val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration))
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
-
-  lazy val environment = new TestEnvironment(
-    resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
-    directory = testDirectory,
-    nameMap = configuration.resourceNameMap.toMap,
-    fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
-
-  private val debugMode = configuration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
-  private val logCategories = configuration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
+  private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
+  private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
 
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
   private var suppressTerminatedOnError = false
 
   private val jdbcUrlOption: Option[String] =
-    configuration.database collect {
+    testConfiguration.database collect {
       case c: JdbcDatabaseConfiguration =>
         Class forName c.jdbcClassName
         c.testJdbcUrl(testName)
@@ -94,8 +83,12 @@ with HasCloser {
   def startScheduler(args: String*) {
     prepare()
     val extraOptions = nullToEmpty(System.getProperty(classOf[TestSchedulerController].getName + ".options"))
-    val allArgs = environment.standardArgs(cppBinaries, logCategories) ++ Splitter.on(",").omitEmptyStrings.split(extraOptions) ++ args
-    delegate.startScheduler(Seq() ++ allArgs)
+    val allArgs = Seq() ++
+        environment.standardArgs(cppBinaries, logCategories) ++
+        Splitter.on(",").omitEmptyStrings.split(extraOptions) ++
+        testConfiguration.mainArguments ++
+        args
+    delegate.startScheduler(allArgs)
   }
 
   def prepare() {
@@ -120,7 +113,7 @@ with HasCloser {
     val previous = _scheduler
     _scheduler = delegate.waitUntilSchedulerState(SchedulerState.active)
     if (_scheduler == null) throw new RuntimeException("Scheduler aborted before startup")
-    if (previous == null && configuration.terminateOnError) checkForErrorLogLine()
+    if (previous == null && testConfiguration.terminateOnError) checkForErrorLogLine()
   }
 
   def waitForTermination(timeout: Time) {
@@ -156,17 +149,20 @@ with HasCloser {
 
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
-    if (configuration.terminateOnError && !suppressTerminatedOnError && !configuration.ignoreError(e.getCodeOrNull) && !configuration.errorLogEventIsExpected(e))
+    if (testConfiguration.terminateOnError && !suppressTerminatedOnError && !testConfiguration.ignoreError(e.getCodeOrNull) && !testConfiguration.errorLogEventIsExpected(e))
       terminateAfterException(error(s"Test terminated after error log line: ${e.getLine}"))
   }
 
   @EventHandler @HotEventHandler
   def handleEvent(e: EventHandlerFailedEvent) {
-    if (configuration.terminateOnError) {
+    if (testConfiguration.terminateOnError) {
       logger.debug("SchedulerTest is aborted due to 'terminateOnError' and error: " + e)
       terminateAfterException(e.getThrowable)
     }
   }
+
+  final def instance[A](implicit c: ClassTag[A]): A =
+    scheduler.injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
 
   /** Eine Exception in runnable beendet den Scheduler. */
   def newThread(runnable: Runnable) =
@@ -203,6 +199,7 @@ with HasCloser {
     DriverManager.getConnection(jdbcUrlOption.get)
 }
 
+
 object TestSchedulerController {
   final val shortTimeout = Time.of(15.0)
   private val logger = Logger(getClass)
@@ -210,25 +207,23 @@ object TestSchedulerController {
   def apply(testClass: Class[_]): TestSchedulerController =
     apply(testClass, TestConfiguration())
 
-  def apply(testClass: Class[_], configuration: TestConfiguration): TestSchedulerController = {
+  def apply(testClass: Class[_], testConfiguration: TestConfiguration): TestSchedulerController = {
     val _testClass = testClass
-    val _configuration = configuration
-
-    new TestSchedulerController with StandardTestDirectory {
-      def testClass = _testClass
-      def configuration = _configuration
+    val _testConfiguration = testConfiguration
+    new TestSchedulerController with ProvidesTestEnvironment {
+      override def testClass = _testClass
+      override lazy val testConfiguration = _testConfiguration
+      lazy val environment = testEnvironment
     }
   }
 
-  def apply(testClass: Class[_], configuration: TestConfiguration, testDirectory: File): TestSchedulerController = {
+  def apply(testClass: Class[_], testConfiguration: TestConfiguration, testEnvironment: TestEnvironment): TestSchedulerController = {
     val _testClass = testClass
-    val _configuration = configuration
-    val _testDirectory = testDirectory
-
-    new TestSchedulerController  {
-      def testClass = _testClass
-      def configuration = _configuration
-      def testDirectory = _testDirectory
+    val _configuration = testConfiguration
+    new TestSchedulerController {
+      override def testClass = _testClass
+      override lazy val testConfiguration = _configuration
+      lazy val environment = testEnvironment
     }
   }
 
