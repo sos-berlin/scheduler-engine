@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.data.xmlcommands
 
 import ModifyOrderCommand._
 import com.sos.scheduler.engine.data.order.OrderKey
+
 //import org.joda.time.DateTimeZone.UTC
 //import org.joda.time.ReadableInstant
 //import org.joda.time.format.DateTimeFormat
@@ -9,7 +10,9 @@ import com.sos.scheduler.engine.data.order.OrderKey
 final case class ModifyOrderCommand(
     orderKey: OrderKey,
     action: Option[Action.Value] = None,
-    at: Option[At] = None)
+    at: Option[At] = None,
+    title: Option[String] = None,
+    suspended: Option[Boolean] = None)
 extends XmlCommand {
 
   def xmlElem = <modify_order
@@ -17,6 +20,8 @@ extends XmlCommand {
     order={orderKey.id.string}
     action={(action map { _.toString }).orNull}
     at={(at map { _.string }).orNull}
+    title={title.orNull}
+    suspended={(suspended map { _.toString}).orNull}
     />
 }
 
