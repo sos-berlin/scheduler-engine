@@ -9,11 +9,12 @@ extends AbsolutePath {
   protected def typ: FileBasedType
 
   def file(baseDirectory: File): File =
-    new File(baseDirectory, filename(string))
+    new File(baseDirectory, relativeFilePath)
 
-  def filename(name: String): String =
-    if (typ eq FileBasedType.folder) name + "/"
-    else name + "." + typ.cppName + ".xml"
+  /** @return Relativer Pfad mit Schrägstrich beginnend. Großschreibung kann bei manchen Typen abeichen. */
+  def relativeFilePath: String =
+    if (typ eq FileBasedType.folder) string + "/"
+    else string + "." + typ.cppName + ".xml"
 
   override def toString =
     s"$typ ${super.toString}"
