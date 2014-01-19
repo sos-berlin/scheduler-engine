@@ -34,7 +34,7 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     public final void loadModule(File cppModuleFile) {
-        thread.loadModule(cppModuleFile);
+        SchedulerThread.loadModule(cppModuleFile);
     }
 
     @Override public final void startScheduler(Iterable<String> args) {

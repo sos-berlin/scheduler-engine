@@ -12,7 +12,7 @@ public enum SchedulerState {
     active,
 
     /** Das Java_subsystem des C++-Scheduler ist geschlossen. */
-    closed,
+    subsystemClosed,
 
     /** C++-Scheduler hat sich beendet. Als nächstes beendet sich der Thread. */
     terminated
