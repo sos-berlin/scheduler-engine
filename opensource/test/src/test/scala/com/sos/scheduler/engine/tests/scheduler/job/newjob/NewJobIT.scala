@@ -21,7 +21,7 @@ final class NewJobIT extends FunSuite with ScalaSchedulerTest {
   private val blockingQueue = new ArrayBlockingQueue[Boolean](1)
 
   test("job.name") {
-    assert(job.getName === "test-a")
+    assert(job.name === "test-a")
   }
 
   test("job.path") {
@@ -29,17 +29,15 @@ final class NewJobIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("job.isFileBasedReread") {
-    assert(job.isFileBasedReread === false)
+    assert(job.fileBasedIsReread === false)
   }
 
   test("jobSubsystem.visibleNames") {
-    val list = instance[JobSubsystem].getVisibleNames.toList
-    list.toSet should equal (Set("test-a"))
+    instance[JobSubsystem].visibleNames.toSet should equal (Set("test-a"))
   }
 
   test("jobSubsystem.names") {
-    val list = instance[JobSubsystem].getNames.toList
-    list.toSet should equal (Set("scheduler_file_order_sink", "scheduler_service_forwarder", "test-a"))
+    instance[JobSubsystem].names.toSet should equal (Set("scheduler_file_order_sink", "scheduler_service_forwarder", "test-a"))
   }
 
   test("start") {

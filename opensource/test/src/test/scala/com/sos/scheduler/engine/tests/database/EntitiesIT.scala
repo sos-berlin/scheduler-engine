@@ -40,36 +40,30 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   private val testStartTime = now() withMillisOfSecond 0
   private lazy val jobSubsystem = controller.scheduler.instance[JobSubsystem]
-  private lazy val orderJob = jobSubsystem.job(orderJobPath)
   private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
+
 
   override def onSchedulerActivated() {
     autoClosing(controller.newEventPipe()) { eventPipe =>
-    scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
-    eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
-    scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
-    scheduler executeXml <start_job job={simpleJobPath.string} at="2029-10-11 22:33:44"/>
-    scheduler executeXml <start_job job={simpleJobPath.string} at="2029-11-11 11:11:11"><params><param name="myJobParameter" value="myValue"/></params></start_job>
+      scheduler executeXml <order job_chain={jobChainPath.string} id={orderId.string}/>
+      eventPipe.nextWithCondition[TaskClosedEvent] { _.jobPath == orderJobPath }
+      scheduler executeXml <start_job job={simpleJobPath.string} at="period"/>
+      scheduler executeXml <start_job job={simpleJobPath.string} at="2029-10-11 22:33:44"/>
+      scheduler executeXml <start_job job={simpleJobPath.string} at="2029-11-11 11:11:11"><params><param name="myJobParameter" value="myValue"/></params></start_job>
       job(simpleJobPath).forceFileReread()
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
+      simpleJob.forceFileReread()
+      scheduler.instance[FolderSubsystem].updateFolders()
+      eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
     }
-    simpleJob.forceFileReread()
-    scheduler.instance[FolderSubsystem].updateFolders()
-    eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
-  }
   }
 
-  def entityManager =
-    instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
-
-  private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] =
-    entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
   private def simpleJob =
     scheduler.instance[JobSubsystem].job(simpleJobPath)
 
   private def entityManager =
-    controller.scheduler.instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
+    instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
 
   test("TaskHistoryEntity") {
     taskHistoryEntities should have size 2
@@ -215,14 +209,13 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](jobChainPath)
     }
-    }
     val jobChain = instance[OrderSubsystem].jobChain(jobChainPath)
     pendingUntilFixed {   // FIXME Der Scheduler stellt den Zustand aus der Datenbank wird nicht wieder her
       jobChain shouldBe 'stopped
       jobChain.node(OrderState("100")).action shouldEqual JobChainNodeAction.nextState
       jobChain.node(OrderState("200")).action shouldEqual JobChainNodeAction.process
       jobChain.node(OrderState("300")).action shouldEqual JobChainNodeAction.stop
-  }
+    }
   }
 
   test("After JobChain removal database should contain no record") {
@@ -254,7 +247,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   private def stopJobAndWait(jobPath: JobPath) {
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
-    waitForCondition(TimeoutWithSteps(standardSeconds(3), millis(10))) { job(orderJobPath).state == JobState.stopped }
+    waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { job(orderJobPath).state == JobState.stopped }
   }
 
   private def job(o: JobPath) =

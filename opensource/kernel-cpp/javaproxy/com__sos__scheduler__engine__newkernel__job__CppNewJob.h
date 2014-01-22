@@ -12,7 +12,7 @@
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct TaskId; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct TaskPersistent; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct TaskPersistentState; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Job_nodeC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct SpoolerC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Variable_setC; }}}}}}}
@@ -64,7 +64,7 @@ struct CppNewJob : ::zschimmer::javabridge::proxy_jobject< CppNewJob >, ::javapr
     ::javaproxy::java::lang::String description() const;
     void disconnectJobNode(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::Job_nodeC >& p0) const;
     ::javaproxy::org::w3c::dom::Element domElement(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::org::w3c::dom::Document >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobChain >& p1) const;
-    void enqueueTask(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistent >& p0) const;
+    void enqueueTask(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistentState >& p0) const;
     void executeStateCommand(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     bool hasTask() const;
     bool isInJobChain() const;

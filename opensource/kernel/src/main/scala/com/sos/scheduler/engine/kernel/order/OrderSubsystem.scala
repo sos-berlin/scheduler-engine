@@ -6,9 +6,10 @@ import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
+import javax.inject.{Singleton, Inject}
 import scala.collection.JavaConversions._
-import javax.inject.Inject
 
+@Singleton
 final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC) extends Subsystem {
 
 //  def jobChainMap = new Map[JobChainPath, JobChain] {

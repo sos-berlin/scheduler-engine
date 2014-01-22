@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import com.google.common.collect.ImmutableList
 import com.google.inject.{AbstractModule, Guice}
 import com.sos.scheduler.engine.common.scalautil.ModifiedBy.modifiedBy
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
@@ -12,7 +11,7 @@ import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
@@ -20,7 +19,7 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 final class JobsServiceTest extends FunSuite with BeforeAndAfterAll with MockitoSugar {
 
   private val mockedJobSubsystem = mock[JobSubsystem] modifiedBy { o =>
-    when(o.getVisibleNames) thenReturn ImmutableList.of("a", "b/c")
+    when(o.visibleNames) thenReturn List("a", "b/c")
   }
 
   private lazy val injector = Guice.createInjector(

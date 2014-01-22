@@ -5,7 +5,7 @@
 #include "com__sos__scheduler__engine__newkernel__job__CppNewJob.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "com__sos__scheduler__engine__data__job__TaskId.h"
-#include "com__sos__scheduler__engine__data__job__TaskPersistent.h"
+#include "com__sos__scheduler__engine__data__job__TaskPersistentState.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.h"
@@ -31,7 +31,7 @@ struct CppNewJob__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _description____method;
     ::zschimmer::javabridge::Method const _disconnectJobNode__Lcom_sos_scheduler_engine_kernel_cppproxy_Job_1nodeC_2__method;
     ::zschimmer::javabridge::Method const _domElement__Lorg_w3c_dom_Document_2Lcom_sos_scheduler_engine_kernel_order_jobchain_JobChain_2__method;
-    ::zschimmer::javabridge::Method const _enqueueTask__Lcom_sos_scheduler_engine_data_job_TaskPersistent_2__method;
+    ::zschimmer::javabridge::Method const _enqueueTask__Lcom_sos_scheduler_engine_data_job_TaskPersistentState_2__method;
     ::zschimmer::javabridge::Method const _executeStateCommand__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _hasTask____method;
     ::zschimmer::javabridge::Method const _isInJobChain____method;
@@ -81,7 +81,7 @@ CppNewJob__class::CppNewJob__class(const string& class_name) :
     ,_description____method(this, "description", "()Ljava/lang/String;")
     ,_disconnectJobNode__Lcom_sos_scheduler_engine_kernel_cppproxy_Job_1nodeC_2__method(this, "disconnectJobNode", "(Lcom/sos/scheduler/engine/kernel/cppproxy/Job_nodeC;)V")
     ,_domElement__Lorg_w3c_dom_Document_2Lcom_sos_scheduler_engine_kernel_order_jobchain_JobChain_2__method(this, "domElement", "(Lorg/w3c/dom/Document;Lcom/sos/scheduler/engine/kernel/order/jobchain/JobChain;)Lorg/w3c/dom/Element;")
-    ,_enqueueTask__Lcom_sos_scheduler_engine_data_job_TaskPersistent_2__method(this, "enqueueTask", "(Lcom/sos/scheduler/engine/data/job/TaskPersistent;)V")
+    ,_enqueueTask__Lcom_sos_scheduler_engine_data_job_TaskPersistentState_2__method(this, "enqueueTask", "(Lcom/sos/scheduler/engine/data/job/TaskPersistentState;)V")
     ,_executeStateCommand__Ljava_lang_String_2__method(this, "executeStateCommand", "(Ljava/lang/String;)V")
     ,_hasTask____method(this, "hasTask", "()Z")
     ,_isInJobChain____method(this, "isInJobChain", "()Z")
@@ -198,11 +198,11 @@ void CppNewJob::disconnectJobNode(const ::zschimmer::javabridge::proxy_jobject< 
     return result;
 }
 
-void CppNewJob::enqueueTask(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistent >& p0) const {
+void CppNewJob::enqueueTask(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistentState >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     CppNewJob__class* cls = _class.get();
-    cls->_enqueueTask__Lcom_sos_scheduler_engine_data_job_TaskPersistent_2__method.call(get_jobject(), parameter_list);
+    cls->_enqueueTask__Lcom_sos_scheduler_engine_data_job_TaskPersistentState_2__method.call(get_jobject(), parameter_list);
 }
 
 void CppNewJob::executeStateCommand(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const {

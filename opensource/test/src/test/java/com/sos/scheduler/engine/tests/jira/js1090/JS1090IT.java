@@ -24,7 +24,7 @@ public final class JS1090IT extends SchedulerTest {
     private CommandBuilder cmd = new CommandBuilder();
     private String logFileContent = null;
 
-    // l‰uft derzeit auf Fehler, da JS-1090 noch nicht korrigiert
+    // l√§uft derzeit auf Fehler, da JS-1090 noch nicht korrigiert
     @Ignore
     public void test() throws Exception {
         controller().prepare();

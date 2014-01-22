@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.newkernel.job
 import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.job.{TaskPersistent, TaskId}
+import com.sos.scheduler.engine.data.job.{TaskPersistentState, TaskId}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.{SpoolerC, Job_nodeC, Variable_setC}
@@ -28,7 +28,7 @@ extends Sister {
   private var configuration: JobConfiguration = null
   private var stateText = ""
 
-  private def jobPath = jobSister.getPath
+  private def jobPath = jobSister.path
   //var stateText = ""
 
   def onCppProxyInvalidated() {}
@@ -165,7 +165,7 @@ extends Sister {
     job.startTask()
   }
 
-  @ForCpp def enqueueTask(o: TaskPersistent) {
+  @ForCpp def enqueueTask(o: TaskPersistentState) {
     ???
   }
 

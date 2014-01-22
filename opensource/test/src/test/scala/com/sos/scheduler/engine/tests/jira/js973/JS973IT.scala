@@ -167,7 +167,7 @@ private object JS973IT {
   private val logger = Logger(getClass)
 
   private def newOrder(orderKey: OrderKey, remoteSchedulerOption: Option[SchedulerAddress]) =
-    <order job_chain={orderKey.jobChainPath.string} id={orderKey.id}>
+    <order job_chain={orderKey.jobChainPath.string} id={orderKey.id.string}>
       <params>{
         remoteSchedulerOption.toList map { o => <param name={remoteSchedulerParameterName} value={o.string}/>}
       }</params>

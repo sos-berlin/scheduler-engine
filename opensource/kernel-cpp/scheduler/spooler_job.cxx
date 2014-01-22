@@ -1827,6 +1827,8 @@ void Standard_job::enqueue_taskPersistentState(const TaskPersistentStateJ& taskP
     _task_queue->enqueue_task( task );
 }
 
+//-----------------------------------------------------------------------Standard_job::enqueue_task
+
 void Standard_job::enqueue_task( Task* task )
 {
     Time now = Time::now();

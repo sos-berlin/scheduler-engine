@@ -12,7 +12,7 @@ final class JobsService @Inject private(jobSubsystem: JobSubsystem) {
   @GET
   @Produces(Array(APPLICATION_JSON))
   def get() = {
-    val result = jobSubsystem.getVisibleNames
+    val result = jobSubsystem.visibleNames
     Response.ok(result).cacheControl(noCache).build()
   }
 }

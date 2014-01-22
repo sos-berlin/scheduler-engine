@@ -110,7 +110,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        start_task                  (Com_variable_set* params, Com_variable_set* environment);
     ptr<Task>                   start_task                  (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) { return start_task_(params, environment, at, force, task_name, web_service_name); }
     virtual ptr<Task>           start_task_                 (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name) = 0;
-    virtual void                enqueue_task                (const TaskPersistentJ&)                = 0;
+    virtual void                enqueue_taskPersistentState (const TaskPersistentStateJ&)           = 0;
     virtual bool                try_to_end_task             (Job* for_job)                          = 0;
     
     virtual void                remove_running_task         ( Task* )                               = 0;

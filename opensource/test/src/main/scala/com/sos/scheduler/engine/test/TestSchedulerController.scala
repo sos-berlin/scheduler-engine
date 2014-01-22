@@ -43,13 +43,8 @@ with EventHandlerAnnotated {
   private val thread = Thread.currentThread
   private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
-
-  private val debugMode = configuration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
-  private val logCategories = (configuration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "")).trim
-
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
-  private var suppressTerminatedOnError = false
   private var suppressTerminatedOnError = false
 
   private val jdbcUrlOption: Option[String] =

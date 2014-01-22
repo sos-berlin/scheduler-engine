@@ -171,7 +171,7 @@ struct Java_job : Job {
         return NULL;
     }
 
-    void enqueue_task(const TaskPersistentJ& task) {
+    void enqueue_taskPersistentState(const TaskPersistentStateJ& task) {
         _cppNewJobJ.enqueueTask(task);
     }
 
