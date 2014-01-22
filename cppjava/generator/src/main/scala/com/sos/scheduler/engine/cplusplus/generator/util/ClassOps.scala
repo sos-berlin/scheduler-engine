@@ -43,7 +43,11 @@ object ClassOps {
   def validConstructors(c: JavaClass) =
     c.getConstructors.toList filter memberIsValid
 
-  def validMethods(c: JavaClass) = withoutOverriddenVariantMethods(c.getDeclaredMethods.toList filter memberIsValid)
+  def validMethods(c: JavaClass) = {
+    val directDeclaredMethods = c.getDeclaredMethods.toList filter memberIsValid
+    val inheritedForCppMethods = Nil //Funktioniert nicht für Mixin: superclasses(c) flatMap { _.getDeclaredMethods } filter { m => memberIsAnnotated(m, classOf[ForCpp]) }
+    withoutOverriddenVariantMethods(directDeclaredMethods ++ inheritedForCppMethods)
+  }
 
   /** Wenn die Klasse mit [[com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp]] annotiert ist, werden nur ebenso annotierte Member für C++ übernommen. */
   private def memberIsValid(m: Member) =

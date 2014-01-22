@@ -4,9 +4,9 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.sos.scheduler.engine.main.SchedulerState.closed;
 import static com.sos.scheduler.engine.main.SchedulerState.started;
 import static com.sos.scheduler.engine.main.SchedulerState.starting;
+import static com.sos.scheduler.engine.main.SchedulerState.subsystemClosed;
 
 final class SchedulerStateBridge {
     private final AtomicReference<Scheduler> schedulerAtom = new AtomicReference<Scheduler>();
@@ -24,7 +24,7 @@ final class SchedulerStateBridge {
     }
 
     synchronized void setStateClosed() {
-        state = closed;
+        state = subsystemClosed;
         schedulerAtom.set(null);
         notifyAll();
     }

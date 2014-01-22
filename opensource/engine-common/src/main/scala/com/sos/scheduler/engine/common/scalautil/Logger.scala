@@ -67,11 +67,12 @@ final class Logger(val delegate: Slf4jLogger) extends AnyVal {
 
 
 object Logger {
-//  def apply[A <: AnyRef](implicit c: ClassTag[A]): Logger =
-//    apply(c.runtimeClass)
 
   def apply(c: Class[_]) =
     new Logger(LoggerFactory.getLogger(normalizeClassName(c)))
+
+  def apply(name: String) =
+    new Logger(LoggerFactory.getLogger(name))
 
   /** Entfernt das '$' der object-Klasse. */
   private def normalizeClassName(c: Class[_]) =

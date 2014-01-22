@@ -85,6 +85,7 @@ with HasInjector {
   @ForCpp private def onClose() {
     closed = true
     try {
+      schedulerThreadCallQueue.close()
       eventBus.publish(new SchedulerCloseEvent)
       eventBus.dispatchEvents()
       schedulerThreadCallQueue.close()
@@ -121,10 +122,9 @@ with HasInjector {
   @ForCpp private def javaExecuteXml(xml: String): String = {
     try commandSubsystem.executeXml(xml)
     catch {
-      case x: UnknownCommandException => {
+      case x: UnknownCommandException =>
         prefixLog.warn(x.toString)
         "UNKNOWN_COMMAND"   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
-      }
     }
   }
 
@@ -157,9 +157,8 @@ with HasInjector {
   def terminate() {
     try cppProxy.cmd_terminate()
     catch {
-      case x: CppProxyInvalidatedException => {
+      case x: CppProxyInvalidatedException =>
         logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed", x)
-      }
     }
   }
 
@@ -204,7 +203,7 @@ object Scheduler {
 
   @ForCpp def of(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
-    controllerBridge.getSettings.setSettingsInCpp(cppProxy.modifiable_settings)
+    controllerBridge.cppSettings.setSettingsInCpp(cppProxy.modifiable_settings)
 
     val injector = createInjector(Seq(
       new SchedulerModule(cppProxy, controllerBridge, schedulerThread = currentThread),

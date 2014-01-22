@@ -14,13 +14,14 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.SchedulerTestHelpers
 
 @RunWith(classOf[JUnitRunner])
-final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
+final class JS1049IT extends FreeSpec with ScalaSchedulerTest with SchedulerTestHelpers {
 
   override def onBeforeSchedulerActivation() {
-    for (o <- IncludeTypes)
-      (controller.environment.liveDirectory / o.filename).write(o.content, o.encoding)
+    for (i <- JobIncludeSettings flatMap { _.includes })
+      (controller.environment.liveDirectory / i.filename).write(i.content, i.encoding)
   }
 
   "XML configuration files" - {
@@ -29,27 +30,62 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
     }
 
     "job.xml in UTF-8" in {
-      job(JobPath("/test-a")).getDescription shouldEqual "å"
+      job(JobPath("/test-a")).description shouldEqual "å"
     }
 
-    for (t <- IncludeTypes)
-      s"Include file ${t.filename} in ${t.encoding}" in {
-        (controller.environment.liveDirectory / t.filename).contentString(t.encoding) shouldEqual t.content
-        job(t.jobPath).getDescription shouldEqual t.content
+    for (j <- JobIncludeSettings; i = j.descriptionInclude)
+      s"Include $i" in {
+        (controller.environment.liveDirectory / i.filename).contentString(i.encoding) shouldEqual i.content
+        job(j.jobPath).description shouldEqual i.content
       }
   }
 
-  "Scheduler.executeXml" in {
+  "Job description by executeXml" in {
     (scheduler executeXml <show_job job={JobPath("/test-a").string} what="description"/>).string should include ("<description>å</description>")
+  }
+
+  "Job script with include" in {
+    runJobAndWaitForEnd(textIncludeJobPath)
+  }
+
+  "XML Schema check" in {
+    controller.suppressingTerminateOnError {
+      intercept[Exception] {scheduler executeXml <show_state INVALID-ATTRIBUTE="xx"/> } .getMessage should include ("INVALID-ATTRIBUTE")
+    }
+  }
+
+  "Invalid XML" in {
+    controller.suppressingTerminateOnError {
+      intercept[Exception] { scheduler executeXml "<>" } .getMessage should include ("SAXParseException")
+    }
   }
 
   def job(o: JobPath): Job =
     instance[JobSubsystem].job(o)
 }
 
+
 private object JS1049IT {
-  private case class IncludeType(jobPath: JobPath, encoding: Charset, filename: String, content: String)
-  private val IncludeTypes = List(
-    IncludeType(JobPath("/test-text-include"), schedulerEncoding, "test-description.txt", "ö"),
-    IncludeType(JobPath("/test-xml-include"), UTF_8, "test-description.xhtml", "<p>ü</p>"))
+  private case class Include(filename: String, encoding: Charset, content: String) {
+    override def toString = s"$filename $encoding"
+  }
+
+  private case class JobIncludeSetting(
+      jobPath: JobPath,
+      descriptionInclude: Include,
+      scriptInclude: Include) {
+    def includes = List(descriptionInclude, scriptInclude)
+  }
+
+  private val textIncludeJobPath = JobPath("/test-text-include")
+  private val xmlIncludeJobPath = JobPath("/test-xml-include")
+  private val JobIncludeSettings = List(
+    JobIncludeSetting(
+      textIncludeJobPath,
+      descriptionInclude = Include("test-description.txt", schedulerEncoding, "ö"),
+      scriptInclude = Include("test-script.txt", schedulerEncoding, "exit 0")),
+    JobIncludeSetting(
+      xmlIncludeJobPath,
+      descriptionInclude = Include("test-description.xhtml", UTF_8, "<p>ü</p>"),
+      scriptInclude = Include("test-script.xml", UTF_8, "<p>ß</p>")))
 }

@@ -2,10 +2,11 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
+@javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
 final class HttpResponseCImpl
-   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
-   implements com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC
-{
+extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
+implements com.sos.scheduler.engine.kernel.cppproxy.HttpResponseC {
+
     private HttpResponseCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }

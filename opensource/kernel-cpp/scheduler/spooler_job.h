@@ -285,13 +285,17 @@ struct Standard_job : Job
     Duration                    get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks="+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
+    void                        database_record_store       ();
+    void                        database_record_remove      ();
+    void                        database_record_load        ( Read_transaction* );
+    void                        load_tasks_from_db          ( Read_transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
 
     ptr<Task>                   start_task_                 (Com_variable_set* params, Com_variable_set* environment, const Time& at, bool force, const string& task_name, const string& web_service_name);
     void                        enqueue_task                ( Task* );
-    void                        enqueue_task                (const TaskPersistentJ&);
+    void                        enqueue_taskPersistentState (const TaskPersistentStateJ&);
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     bool                        queue_filled                ()                                      { return !_task_queue->empty(); }

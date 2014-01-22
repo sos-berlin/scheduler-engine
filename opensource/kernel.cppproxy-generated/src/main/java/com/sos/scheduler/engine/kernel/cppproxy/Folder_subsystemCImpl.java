@@ -2,10 +2,11 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
+@javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
 final class Folder_subsystemCImpl
-   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
-   implements com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC
-{
+extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
+implements com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemC {
+
     private Folder_subsystemCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }

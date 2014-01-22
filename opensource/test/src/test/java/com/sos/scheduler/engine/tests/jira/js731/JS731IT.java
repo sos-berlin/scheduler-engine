@@ -21,7 +21,7 @@ public final class JS731IT extends SchedulerTest {
     }
 
     @HotEventHandler public void handleEvent(OrderFinishedEvent e, UnmodifiableOrder order) {
-        UnmodifiableVariableSet v = order.getParameters();
+        UnmodifiableVariableSet v = order.parameters();
         assertThat(v.apply("a"), equalTo("ä"));
         assertThat(v.apply("A"), equalTo("ä"));
         assertThat(v.apply("b"), equalTo("B"));

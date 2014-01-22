@@ -94,8 +94,8 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
 
   private def publishMyFinishedEvent(order: UnmodifiableOrder) {
     controller.getEventBus.publishCold(MyFinishedEvent(
-      order.getKey, order.getState,
-      Option(emptyToNull(order.getParameters(SpoolerProcessAfterNames.parameter))) map { _.toBoolean }))
+      order.key, order.state,
+      Option(emptyToNull(order.parameters(SpoolerProcessAfterNames.parameter))) map { _.toBoolean }))
   }
 
   @EventHandler def handleEvent(e: LogEvent) {

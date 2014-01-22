@@ -190,7 +190,7 @@ void Sos_ole_object::_obj_print( ostream* s ) const
 
 void Sos_ole_object::fill_excepinfo( const Xc& x, EXCEPINFO* excepinfo )
 {
-    LOG( "Errpr: " << x << '\n' );
+    LOG( "Error: " << x << '\n' );
 
     if( !excepinfo )  return;
 

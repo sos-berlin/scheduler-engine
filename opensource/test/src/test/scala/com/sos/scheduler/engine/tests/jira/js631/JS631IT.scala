@@ -38,7 +38,7 @@ final class JS631IT extends FunSuite with ScalaSchedulerTest {
     instance[OrderSubsystem].order(bOrderKey).nextInstantOption should equal (None)
     scheduler executeXml <modify_order job_chain={bOrderKey.jobChainPath.string} order={bOrderKey.id.string} action="reset"/>  // Fehler: SCHEDULER-149  There is no job in job chain "/test-nested-b" for the state "A"
     instance[OrderSubsystem].order(aOrderKey).nextInstantOption should equal (None)
-    instance[OrderSubsystem].order(aOrderKey).getState should be (a1State)
+    instance[OrderSubsystem].order(aOrderKey).state should be (a1State)
   }
 
   test("Reset in first nested job chain (initial state is in current job chain)") {

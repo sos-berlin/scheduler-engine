@@ -20,6 +20,6 @@ public final class EventHandlerFailedEvent implements Event {
     }
 
     @Override public String toString() {
-        return call + "=>" + throwable;
+        return call + " => " + throwable;
     }
 }

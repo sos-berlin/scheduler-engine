@@ -22,42 +22,42 @@ import com.sos.scheduler.engine.kernel.order.Order
   private[event] def newInstance(cppEventCode: CppEventCode, eventSource: EventSource): Event = {
     cppEventCode match {
       case `fileBasedActivatedEvent` =>
-        new FileBasedActivatedEvent(eventSource.asInstanceOf[FileBased].getTypedPath)
+        new FileBasedActivatedEvent(eventSource.asInstanceOf[FileBased].typedPath)
 
       case `fileBasedRemovedEvent` =>
-        new FileBasedRemovedEvent(eventSource.asInstanceOf[FileBased].getTypedPath)
+        new FileBasedRemovedEvent(eventSource.asInstanceOf[FileBased].typedPath)
 
       case `taskStartedEvent` =>
         val task = eventSource.asInstanceOf[Task]
-        new TaskStartedEvent(task.id, task.job.getPath)
+        new TaskStartedEvent(task.id, task.job.path)
 
       case `taskEndedEvent` =>
         val task = eventSource.asInstanceOf[Task]
-        new TaskEndedEvent(task.id, task.job.getPath)
+        new TaskEndedEvent(task.id, task.job.path)
 
       case `taskClosedEvent` =>
         val task = eventSource.asInstanceOf[Task]
-        new TaskClosedEvent(task.id, task.job.getPath)
+        new TaskClosedEvent(task.id, task.job.path)
 
       case `orderTouchedEvent` =>
-        new OrderTouchedEvent(eventSource.asInstanceOf[Order].getKey)
+        new OrderTouchedEvent(eventSource.asInstanceOf[Order].key)
 
       case `orderFinishedEvent` =>
-        new OrderFinishedEvent(eventSource.asInstanceOf[Order].getKey)
+        new OrderFinishedEvent(eventSource.asInstanceOf[Order].key)
 
       case `orderSuspendedEvent` =>
-        new OrderSuspendedEvent(eventSource.asInstanceOf[Order].getKey)
+        new OrderSuspendedEvent(eventSource.asInstanceOf[Order].key)
 
       case `orderResumedEvent` =>
-        new OrderResumedEvent(eventSource.asInstanceOf[Order].getKey)
+        new OrderResumedEvent(eventSource.asInstanceOf[Order].key)
 
       case `orderSetBackEvent` =>
         val order = eventSource.asInstanceOf[Order]
-        new OrderSetBackEvent(order.getKey, order.getState)
+        new OrderSetBackEvent(order.key, order.state)
 
       case `orderStepStartedEvent` =>
         val order: Order = eventSource.asInstanceOf[Order]
-        new OrderStepStartedEvent(order.getKey, order.getState)
+        new OrderStepStartedEvent(order.key, order.state)
 
       case o =>
         sys.error(s"Not implemented cppEventCode=$o")
@@ -68,7 +68,7 @@ import com.sos.scheduler.engine.kernel.order.Order
     LogEvent.of(SchedulerLogLevel.ofCpp(cppLevel), message)
 
   @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousState: String): AbstractEvent =
-    new OrderStateChangedEvent(OrderKey(jobChainPath, orderId), new OrderState(previousState))
+    OrderStateChangedEvent(OrderKey(jobChainPath, orderId), OrderState(previousState))
 
   @ForCpp def newOrderStepEndedEvent(jobChainPath: String, orderId: String, orderStateTransitionCpp: Int): AbstractEvent =
     new OrderStepEndedEvent(OrderKey(jobChainPath, orderId), OrderStateTransition.ofCppCode(orderStateTransitionCpp))

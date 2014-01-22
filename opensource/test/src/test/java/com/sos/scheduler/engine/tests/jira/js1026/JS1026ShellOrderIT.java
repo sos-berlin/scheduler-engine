@@ -34,7 +34,7 @@ public class JS1026ShellOrderIT extends SchedulerTest {
 
     @HotEventHandler
     public void handleOrderEnd(OrderFinishedEvent e, UnmodifiableOrder order) throws IOException, InterruptedException {
-        ImmutableMap<String,String> map = order.getParameters().toGuavaMap();
+        ImmutableMap<String,String> map = order.parameters().toGuavaMap();
         assertObject(map, "testvar1", "value1");
         assertObject(map, "testvar2", "newvalue2");
         assertObject(map, "testvar3", "value3");

@@ -2,10 +2,11 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
+@javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
 final class Order_queue_nodeCImpl
-   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.OrderQueueNode>
-   implements com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC
-{
+extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.OrderQueueNode>
+implements com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC {
+
     private Order_queue_nodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.scheduler;
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId;
 import com.sos.scheduler.engine.data.scheduler.SchedulerId;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
-import com.sos.scheduler.engine.kernel.settings.SettingName;
+import com.sos.scheduler.engine.kernel.settings.CppSettingName;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,7 +11,7 @@ import java.io.File;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.sos.scheduler.engine.kernel.settings.SettingName.htmlDir;
+import static com.sos.scheduler.engine.kernel.settings.CppSettingName.htmlDir;
 
 @Singleton
 public final class SchedulerConfiguration {
@@ -58,11 +58,11 @@ public final class SchedulerConfiguration {
         return spoolerC.tcp_port();
     }
 
-    String setting(SettingName name) {
-        return spoolerC.setting(name.getNumber());
-    }
-
     public String webDirectory() {
         return setting(htmlDir);
+    }
+
+    String setting(CppSettingName name) {
+        return spoolerC.setting(name.getNumber());
     }
 }

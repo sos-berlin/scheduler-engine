@@ -18,7 +18,7 @@ import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
 @RunWith(classOf[JUnitRunner])
 final class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with EventHandlerAnnotated {
 
-  private lazy val controller = new TestSchedulerController(
+  private lazy val controller = TestSchedulerController(
     getClass,
     TestConfiguration(
       logCategories = "scheduler java.stackTrace-",
@@ -32,8 +32,8 @@ final class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter
     val eventPipe = controller.newEventPipe()
     controller.activateScheduler()
     controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(repeatOrderKey)
-    repeatOrder.setTitle(alteredTitle)
-    repeatOrder.getTitle should equal (alteredTitle)
+    repeatOrder.title = alteredTitle
+    repeatOrder.title should equal (alteredTitle)
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
     executeShowOrder().toString should include ("<source")
@@ -57,7 +57,7 @@ final class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter
   test("After Scheduler restart, order should continue starting") {
     val eventPipe = controller.newEventPipe()
     controller.activateScheduler()
-    repeatOrder.getTitle should equal (alteredTitle)
+    repeatOrder.title should equal (alteredTitle)
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
     eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }

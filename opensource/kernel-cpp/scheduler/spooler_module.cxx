@@ -133,9 +133,9 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
             try
             {
                 xml::Element_ptr part_element = result.createElement( "source_part" );
-                string xml_bytes = include_command.read_content_bytes();
-                string xml_string = xml::Document_ptr::from_xml_bytes(xml_bytes).xml_string();
-                part_element.appendChild( result.createTextNode(xml_string));
+                bool xml_only = false;
+                string s = include_command.read_decoded_string(xml_only);
+                part_element.appendChild( result.createTextNode(s));
                 element.replace_with( part_element );
             }
             catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
@@ -147,13 +147,13 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
 
 //--------------------------------------------------------------------Text_with_includes::read_text
 
-string Text_with_includes::read_text(bool xml_expected)
+string Text_with_includes::read_text(bool xml_only)
 {
     String_list result;
 
     DOM_FOR_EACH_ELEMENT( dom_element(), element )
     {
-        result.append( read_text_element( element, xml_expected ) );
+        result.append( read_text_element( element, xml_only ) );
     }
 
     return result;
@@ -161,27 +161,15 @@ string Text_with_includes::read_text(bool xml_expected)
 
 //------------------------------------------------------------Text_with_includes::read_text_element
 
-string Text_with_includes::read_text_element( const xml::Element_ptr& element, bool xml_expected )
+string Text_with_includes::read_text_element( const xml::Element_ptr& element, bool xml_only )
 {
     if( element.nodeName_is( "source_part" ) )
         return element.text();
     else
-    if( element.nodeName_is( "include" ) )
-    {
+    if (element.nodeName_is("include")) {
         Include_command include_command ( _spooler, _file_based, element, _include_path );
-
         try {
-            string bytes = include_command.read_content_bytes();
-            if (xml_expected)
-                return xml::Document_ptr::from_xml_bytes(bytes).xml_string();
-            else {
-                try {
-                    return xml::Document_ptr::from_xml_bytes(bytes).xml_string();  // Vielleicht ist es doch ein XML? (JS-898, <script><include file=".xml">)
-        }
-                catch (exception&) {
-                    return bytes;  // Datei wird in string_encoding codiert erwartet
-                }
-            }
+            return include_command.read_decoded_string(xml_only);
         }
         catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
     }

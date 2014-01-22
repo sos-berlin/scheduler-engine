@@ -2,19 +2,19 @@ package com.sos.scheduler.engine.kernel.scheduler;
 
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.settings.CppSettings;
 import com.sos.scheduler.engine.main.SchedulerControllerBridge;
-import com.sos.scheduler.engine.kernel.settings.Settings;
 
 public class EmptySchedulerControllerBridge implements SchedulerControllerBridge {
     public static final EmptySchedulerControllerBridge singleton = new EmptySchedulerControllerBridge();
 
-    private final Settings settings = new Settings();
+    private final CppSettings cppSettings = CppSettings.empty();
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
 
     private EmptySchedulerControllerBridge() {}
 
-    @Override public final Settings getSettings() {
-        return settings;
+    @Override public final CppSettings cppSettings() {
+        return cppSettings;
     }
 
     @Override public final void onSchedulerStarted(Scheduler scheduler) {}

@@ -82,6 +82,21 @@ void Include_command::initialize()
     }
 }
 
+//-------------------------------------------------------------Include_command::read_decoded_string
+
+string Include_command::read_decoded_string(bool xml_only) {
+    string bytes = read_content_bytes();
+    if (xml_only)
+        return xml::Document_ptr::from_xml_bytes(bytes).xml_string();
+    else
+        try {
+            return xml::Document_ptr::from_xml_bytes(bytes).xml_string();  // Vielleicht ist es doch ein XML? (JS-898, <script><include file=".xml">)
+        }
+        catch (exception&) {
+            return bytes;  // Datei wird in string_encoding codiert erwartet
+        }
+}
+
 //--------------------------------------------------------------Include_command::read_content_bytes
 
 string Include_command::read_content_bytes()

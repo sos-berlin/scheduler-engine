@@ -115,19 +115,19 @@ final class OrderEventsIT extends FunSuite with ScalaSchedulerTest {
   }
 
   @HotEventHandler def handleHotEvent(e: OrderStepStartedEvent, o: UnmodifiableOrder) {
-    addEvent(hotEvents, "OrderStepStarted UnmodifiableOrder "+ o.getState -> e)
+    addEvent(hotEvents, "OrderStepStarted UnmodifiableOrder "+ o.state -> e)
   }
 
   @HotEventHandler def handleHotEvent(e: OrderStepStartedEvent, o: Order) {
-    addEvent(hotEvents, "OrderStepStarted Order "+ o.getState -> e)
+    addEvent(hotEvents, "OrderStepStarted Order "+ o.state -> e)
   }
 
   @HotEventHandler def handleHotEvent(e: OrderStepEndedEvent, o: UnmodifiableOrder) {
-    addEvent(hotEvents, "OrderStepEnded UnmodifiableOrder "+ o.getState -> e)
+    addEvent(hotEvents, "OrderStepEnded UnmodifiableOrder "+ o.state -> e)
   }
 
   @HotEventHandler def handleHotEvent(e: OrderStepEndedEvent, o: Order) {
-    addEvent(hotEvents, "OrderStepEnded Order "+ o.getState -> e)
+    addEvent(hotEvents, "OrderStepEnded Order "+ o.state -> e)
   }
 
   @EventHandler def handleEvent(e: OrderSuspendedEvent) {

@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.settings.Settings;
+import com.sos.scheduler.engine.kernel.settings.CppSettings;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 
@@ -17,12 +17,14 @@ import static com.sos.scheduler.engine.main.SchedulerState.terminated;
 final class SchedulerThreadControllerBridge implements SchedulerControllerBridge, EventHandlerAnnotated {
     private final SchedulerThreadController schedulerThreadController;
     private final SchedulerEventBus eventBus;
+    private final CppSettings cppSettings;
     private final SchedulerStateBridge stateBridge = new SchedulerStateBridge();
     private volatile boolean terminateSchedulerWhenPossible = false;
 
-    SchedulerThreadControllerBridge(SchedulerThreadController c, SchedulerEventBus eventBus) {
+    SchedulerThreadControllerBridge(SchedulerThreadController c, SchedulerEventBus eventBus, CppSettings cppSettings) {
         this.schedulerThreadController = c;
         this.eventBus = eventBus;
+        this.cppSettings = cppSettings;
     }
 
     void start() {
@@ -37,8 +39,8 @@ final class SchedulerThreadControllerBridge implements SchedulerControllerBridge
         return schedulerThreadController.getName();
     }
 
-    @Override public Settings getSettings() {
-        return schedulerThreadController.getSettings();
+    @Override public CppSettings cppSettings() {
+        return cppSettings;
     }
 
     @Override public void onSchedulerStarted(Scheduler scheduler) {

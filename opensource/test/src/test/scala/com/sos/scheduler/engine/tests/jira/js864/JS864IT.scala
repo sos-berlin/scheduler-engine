@@ -21,11 +21,11 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
 
   override def onSchedulerActivated() {
     for (i <- 0 to 5)
-      scheduler executeXml newOrderElem(new OrderId(i.toString))
+      scheduler executeXml newOrderElem(OrderId(i.toString))
   }
 
   test("0) No job chain node having action='process'") {
-    val orderKey = jobChainPath.orderKey(new OrderId("0"))
+    val orderKey = jobChainPath.orderKey(OrderId("0"))
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
     nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, aState))
@@ -36,7 +36,7 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
 
   test("1) Job chain node B has action='next_state'") {
     modifyNode(bState, nextStateAction)
-    val orderKey = jobChainPath.orderKey(new OrderId("1"))
+    val orderKey = jobChainPath.orderKey(OrderId("1"))
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
     nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, aState))
@@ -47,7 +47,7 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
   test("2) Job chain node A has action='next_state'") {
     modifyNode(bState, processAction)
     modifyNode(aState, nextStateAction)   // Alle wartenden Auftrage wechseln zu B
-    val orderKey = jobChainPath.orderKey(new OrderId("2"))
+    val orderKey = jobChainPath.orderKey(OrderId("2"))
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
     nextOrderEvent(orderKey) should be (new OrderStepStartedEvent(orderKey, bState))
@@ -57,7 +57,7 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
 
   test("3) Again, all job chain nodes having action='process'") {
     modifyNode(aState, processAction)
-    val orderKey = jobChainPath.orderKey(new OrderId("3"))
+    val orderKey = jobChainPath.orderKey(OrderId("3"))
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) should be (new OrderTouchedEvent(orderKey))
     // aState nicht, weil next_state im vorangehenden Test den Auftrag schon weitergeschoben hat.
@@ -70,14 +70,14 @@ final class JS864IT extends FunSuite with ScalaSchedulerTest {
     modifyNode(aState, nextStateAction)
     modifyNode(bState, nextStateAction)
     modifyNode(cState, nextStateAction)
-    val orderKey = jobChainPath.orderKey(new OrderId("4"))
+    val orderKey = jobChainPath.orderKey(OrderId("4"))
     resumeOrder(orderKey)
     nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))
   }
 
   test("5) Again, no job chain node having action='next_state'") {
     modifyNode(bState, "process")
-    val orderKey = jobChainPath.orderKey(new OrderId("5"))
+    val orderKey = jobChainPath.orderKey(OrderId("5"))
     resumeOrder(orderKey)
     //intercept[EventPipe.TimeoutException] { eventPipe.nextWithTimeoutAndCondition(2.s) { e: OrderTouchedEvent => e.getKey == jobChainPath.orderKey(orderId) } }
     nextOrderEvent(orderKey) should be (new OrderFinishedEvent(orderKey))

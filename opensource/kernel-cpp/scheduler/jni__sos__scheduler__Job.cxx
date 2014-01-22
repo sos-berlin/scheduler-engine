@@ -34,12 +34,12 @@ static jstring JNICALL description(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static void JNICALL enqueue_1task__Lcom_sos_scheduler_engine_data_job_TaskPersistent_2(JNIEnv* jenv, jobject, jlong cppReference, jobject p0)
+static void JNICALL enqueue_1taskPersistentState__Lcom_sos_scheduler_engine_data_job_TaskPersistentState_2(JNIEnv* jenv, jobject, jlong cppReference, jobject p0)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::enqueue_task()");
-        (o_->enqueue_task(::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistent(p0)));
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::enqueue_taskPersistentState()");
+        (o_->enqueue_taskPersistentState(::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistentState(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -235,7 +235,7 @@ static jstring JNICALL state_1name(JNIEnv* jenv, jobject, jlong cppReference)
 
 const static JNINativeMethod native_methods[] = {
     { (char*)"description__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::description },
-    { (char*)"enqueue_task__native", (char*)"(JLcom/sos/scheduler/engine/data/job/TaskPersistent;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::enqueue_1task__Lcom_sos_scheduler_engine_data_job_TaskPersistent_2 },
+    { (char*)"enqueue_taskPersistentState__native", (char*)"(JLcom/sos/scheduler/engine/data/job/TaskPersistentState;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::enqueue_1taskPersistentState__Lcom_sos_scheduler_engine_data_job_TaskPersistentState_2 },
     { (char*)"file_based_state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1state_1name },
     { (char*)"is_file_based_reread__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based_1reread },
     { (char*)"is_permanently_stopped__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1permanently_1stopped },

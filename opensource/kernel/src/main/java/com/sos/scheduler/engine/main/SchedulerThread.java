@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.main;
 
-import java.io.File;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.kernel.CppScheduler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
+
+import java.io.File;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Der Scheduler in einem eigenen Thread. */
 class SchedulerThread extends Thread {
@@ -19,8 +19,8 @@ class SchedulerThread extends Thread {
         setName("Scheduler");
     }
 
-    final void loadModule(File f) {
-        cppScheduler.loadModule(f);
+    static void loadModule(File f) {
+        CppScheduler.loadModule(f);
     }
 
     final void startThread(ImmutableList<String> args) {

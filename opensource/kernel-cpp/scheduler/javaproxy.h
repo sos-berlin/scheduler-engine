@@ -3,7 +3,7 @@
 
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "../javaproxy/com__sos__scheduler__engine__data__job__TaskId.h"
-#include "../javaproxy/com__sos__scheduler__engine__data__job__TaskPersistent.h"
+#include "../javaproxy/com__sos__scheduler__engine__data__job__TaskPersistentState.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__Scheduler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__CppEventFactory.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__JobC.h"
@@ -37,7 +37,7 @@
 namespace sos {
 namespace scheduler {
 
-typedef ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistent TaskPersistentJ;
+typedef ::javaproxy::com::sos::scheduler::engine::data::job::TaskPersistentState TaskPersistentStateJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::Scheduler SchedulerJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::event::CppEventFactory CppEventFactoryJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::http::SchedulerHttpRequest SchedulerHttpRequestJ;

@@ -12,7 +12,7 @@ final class JobLogServlet @Inject private(jobSubsystem: JobSubsystem) extends Ht
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     val operation = getOrSetAttribute(request, classOf[JobLogServlet].getName) {
       val job = jobSubsystem.job(JobPath.makeAbsolute(Option(request.getParameter("job")).get))
-      LogServletAsyncOperation(request, response, job.getLog)
+      LogServletAsyncOperation(request, response, job.log)
     }
     operation.continue()
   }

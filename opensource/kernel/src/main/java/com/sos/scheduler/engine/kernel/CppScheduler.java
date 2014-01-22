@@ -22,7 +22,7 @@ public class CppScheduler {
         System.loadLibrary("jobscheduler-engine");
     }
 
-    public final void loadModule(File moduleFile) {
+    public static void loadModule(File moduleFile) {
         try {
             logger.trace("Load "+moduleFile+", java.library.path="+System.getProperty("java.library.path"));
             System.load(moduleFile.getPath());

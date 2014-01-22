@@ -2,10 +2,11 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
+@javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
 final class JobCImpl
-   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.job.Job>
-   implements com.sos.scheduler.engine.kernel.cppproxy.JobC
-{
+extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.job.Job>
+implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
+
     private JobCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
@@ -26,10 +27,10 @@ final class JobCImpl
     private static native java.lang.String description__native(long cppReference);
 
 
-    @Override public void enqueue_task(com.sos.scheduler.engine.data.job.TaskPersistent p0) {
+    @Override public void enqueue_taskPersistentState(com.sos.scheduler.engine.data.job.TaskPersistentState p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            enqueue_task__native(cppReference(), p0);
+            enqueue_taskPersistentState__native(cppReference(), p0);
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
         finally {
@@ -37,7 +38,7 @@ final class JobCImpl
         }
     }
 
-    private static native void enqueue_task__native(long cppReference, com.sos.scheduler.engine.data.job.TaskPersistent p0);
+    private static native void enqueue_taskPersistentState__native(long cppReference, com.sos.scheduler.engine.data.job.TaskPersistentState p0);
 
 
     @Override public java.lang.String file_based_state_name() {

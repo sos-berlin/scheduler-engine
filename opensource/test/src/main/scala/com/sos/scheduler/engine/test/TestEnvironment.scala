@@ -13,8 +13,8 @@ import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.kernel.util.ResourcePath
-import com.sos.scheduler.engine.main.CppBinaries
-import com.sos.scheduler.engine.main.CppBinary
+import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
 
 /** Build the environment for the scheduler binary. */
@@ -28,9 +28,13 @@ final class TestEnvironment(
   val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
+  private var isPrepared = false
 
   private[test] def prepare() {
-    prepareTemporaryConfigurationDirectory()
+    if (!isPrepared) {
+      prepareTemporaryConfigurationDirectory()
+      isPrepared = true
+    }
   }
 
   private def prepareTemporaryConfigurationDirectory() {
@@ -77,10 +81,18 @@ final class TestEnvironment(
     new File(directory, name) sideEffect makeDirectory
 }
 
+
 object TestEnvironment {
   val schedulerId = new SchedulerId("test")
   private val jobJavaOptions = "-Xms5m -Xmx10m"
   private val configSubdir = "config"
+
+  def apply(testClass: Class[_], configuration: TestConfiguration, directory: File) =
+    new TestEnvironment(
+      resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
+      directory = directory,
+      nameMap = configuration.resourceNameMap.toMap,
+      fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
   private def libraryPathEnv(directory: File): String = {

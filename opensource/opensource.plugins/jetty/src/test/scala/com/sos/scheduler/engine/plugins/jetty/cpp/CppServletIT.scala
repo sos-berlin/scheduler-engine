@@ -4,7 +4,7 @@ import CppServletIT._
 import com.google.common.io.Files
 import com.google.inject.Injector
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
-import com.sos.scheduler.engine.kernel.settings.SettingName
+import com.sos.scheduler.engine.kernel.settings.CppSettingName
 import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
@@ -25,14 +25,12 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class CppServletIT extends FunSuite with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(JettyPluginTests.getClass.getPackage))
+  private lazy val httpDirectory = testDirectory
 
-  private val httpDirectory = controller.environment.directory
-
-  override protected def checkedBeforeAll() {
-    controller.getSettings.set(SettingName.htmlDir, httpDirectory.getPath)    // Für Bitmuster-Test
-    controller.activateScheduler()
-  }
+  override lazy val testConfiguration = TestConfiguration(
+    testPackage = Some(JettyPluginTests.getClass.getPackage),
+    cppSettings = Map(CppSettingName.htmlDir -> httpDirectory.getPath)    // Für Bitmuster-Test
+  )
 
   for (testConf <- TestConf(newAuthentifyingClient(), withGzip = false) ::
                    //TestConf(newAuthentifyingClient(filters=Iterable(new GZIPContentEncodingFilter(false))), withGzip = true) ::
@@ -90,15 +88,15 @@ final class CppServletIT extends FunSuite with ScalaSchedulerTest {
 }
 
 private object CppServletIT {
-  val orderKey = aJobChainPath.orderKey("1")
+  private val orderKey = aJobChainPath.orderKey("1")
 
-  def cppResource(injector: Injector, client: Client) =
+  private def cppResource(injector: Injector, client: Client) =
     client.resource(cppContextUri(injector))
 
-  def cppContextUri(injector: Injector) =
+  private def cppContextUri(injector: Injector) =
     new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + cppPrefixPath)
 
-  case class TestConf(client: Client, withGzip: Boolean) {
+  private case class TestConf(client: Client, withGzip: Boolean) {
     override def toString = if (withGzip) "compressed with gzip" else ""
   }
 }

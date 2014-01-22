@@ -260,7 +260,7 @@ HRESULT Com_invoke( IDispatch* idispatch, const Com_method* methods, DISPID disp
 
             if( safearray_vartype != ( p->vt & ~VT_ARRAY ) )  // Hier sind wir erstmal pingelig, obwohl p->vt vielleicht egal sein kann, wichtig ist safearray_vartype
             {
-                Z_LOG2( "com.invoke", "Picky check: safearray_vartype=" << vartype_name( safearray_vartype ) << " != p->vt=" << vartype_name( p->vt ) << "\n" );
+                Z_LOG2( "com.invoke", "Pedantic check: safearray_vartype=" << vartype_name( safearray_vartype ) << " != p->vt=" << vartype_name( p->vt ) << "\n" );
                 return DISP_E_TYPEMISMATCH;    
             }
 

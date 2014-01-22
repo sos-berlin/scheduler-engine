@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers, CommandSubsystem}
-import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
+import com.sos.scheduler.engine.kernel.cppproxy.{Order_subsystemC, Job_subsystemC, SpoolerC}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{AJobSubsystem, JobSubsystem}
@@ -22,6 +22,7 @@ import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.util.UUID.randomUUID
 import javax.inject.Singleton
+import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 
 final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
@@ -29,6 +30,8 @@ extends ScalaAbstractModule {
 
   def configure() {
     bindInstance(cppProxy)
+    provideSingleton[Job_subsystemC] { cppProxy.job_subsystem }
+    provideSingleton[Order_subsystemC] { cppProxy.order_subsystem }
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
@@ -38,17 +41,15 @@ extends ScalaAbstractModule {
     bindInstance(cppProxy.log.getSister)
     provideSingleton { new SchedulerId(cppProxy.id) }
     provideSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
+    provideSingleton { new FolderSubsystem(cppProxy.folder_subsystem) }
     provideSingleton[JobSubsystem] { new AJobSubsystem(cppProxy.job_subsystem) }
     provideSingleton { new OrderSubsystem(cppProxy.order_subsystem) }
     provideSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideSingleton[VariableSet] { cppProxy.variables.getSister }
   }
 
-  @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem) =
+  @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
     databaseSubsystem.entityManagerFactory
-
-  @Provides @Singleton def provideEntityManager(databaseSubsystem: DatabaseSubsystem) =
-    databaseSubsystem.entityManagerFactory.createEntityManager
 
   @Provides @Singleton def provideSchedulerClusterMemberKey(schedulerId: SchedulerId, clusterMemberId: ClusterMemberId) =
     new SchedulerClusterMemberKey(schedulerId, clusterMemberId)

@@ -109,7 +109,7 @@ public class SimpleTest extends SchedulerTest {
         JsonNode n = mapper.readTree(outputStream.toString());
         logger.debug("UNMARSHALL: " + n.get("TYPE").asText());
 
-		if (order.getId().asString().equals("jobchain1"))
+		if (order.id().string().equals("jobchain1"))
 			controller().terminateScheduler();
 	}
 }

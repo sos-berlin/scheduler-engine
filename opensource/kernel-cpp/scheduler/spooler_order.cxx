@@ -2315,52 +2315,45 @@ bool Job_chain::on_load()
         complete_nested_job_chains();   // Exception bei doppelter Auftragskennung in den verschachtelten Jobketten
 
 
-        if( db()  &&  
-            db()->opened()  &&
-            orders_are_recoverable()  &&  
-            !is_distributed() )
-        {
-            list<Order_queue_node*> node_list;
-            list<string>            state_sql_list;
+        if (db() &&  db()->opened()  &&  !is_distributed()) {
+            if (orders_are_recoverable()) {
+                list<Order_queue_node*> node_list;
+                list<string>            state_sql_list;
 
-            Z_FOR_EACH( Node_list, _node_list, it )
-            {
-                if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
-                {
-                    if( !node->order_queue()->_is_loaded )  
-                    {   
-                        node_list.push_back( node );
-                        state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
+                Z_FOR_EACH(Node_list, _node_list, it) {
+                    if (Order_queue_node* node = Order_queue_node::try_cast(*it)) {
+                        if (!node->order_queue()->_is_loaded) {   
+                            node_list.push_back( node );
+                            state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
+                        }
                     }
                 }
-            }
 
-
-            if( !state_sql_list.empty() )
-            {
-                for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-                {
-                    database_record_load( &ta );
-
-                    Any_file result_set = ta.open_result_set
-                        ( 
-                            S() << "select " << order_select_database_columns << ", " <<
-                                                db_text_distributed_next_time() << " as distributed_next_time"
-                            "  from " << db()->_orders_tablename <<
-                            "  where " << db_where_condition() <<
-                               " and `state` in ( " << join( ", ", state_sql_list ) << " )"
-                            "  order by `ordering`",
-                            Z_FUNCTION
-                        );
-
-                    int count = load_orders_from_result_set( &ta, &result_set );
-                    log()->debug( message_string( "SCHEDULER-935", count ) );
+                if (!state_sql_list.empty()) {
+                    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                        database_record_load(&ta);
+                        Any_file result_set = ta.open_result_set( 
+                                S() << "select " << order_select_database_columns << ", " <<
+                                                    db_text_distributed_next_time() << " as distributed_next_time"
+                                "  from " << db()->_orders_tablename <<
+                                "  where " << db_where_condition() <<
+                                   " and `state` in ( " << join( ", ", state_sql_list ) << " )"
+                                "  order by `ordering`",
+                                Z_FUNCTION);
+                        int count = load_orders_from_result_set(&ta, &result_set);
+                        log()->debug(message_string("SCHEDULER-935", count));
+                    } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
                 }
-                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_orders_tablename, x ), Z_FUNCTION ); }
+
+                Z_FOR_EACH(list<Order_queue_node*>, node_list, it)
+                    (*it)->order_queue()->_is_loaded = true;
+            } else {
+                assert(!orders_are_recoverable());
+                for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                    ta.execute(S() << "DELETE from " << db()->_orders_tablename << "  where " << db_where_condition(), "not orders_are_recoverable");
+                    ta.commit(Z_FUNCTION);
+                } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
             }
-
-
-            Z_FOR_EACH( list<Order_queue_node*>, node_list, it )  (*it)->order_queue()->_is_loaded = true;
         }
 
         set_state( s_loaded );

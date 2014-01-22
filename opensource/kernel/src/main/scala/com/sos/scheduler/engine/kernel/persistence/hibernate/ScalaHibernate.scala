@@ -1,22 +1,22 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import javax.persistence.EntityManager
-import org.slf4j.LoggerFactory
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.scheduler.engine.common.scalautil.Logger
+import javax.persistence.{EntityManagerFactory, EntityManager}
 
 object ScalaHibernate {
-  private val logger = LoggerFactory.getLogger("com.sos.scheduler.engine.kernel.job.ScalaHibernate")
 
-  def transaction[A](f: EntityManager => A)(implicit entityManager: EntityManager): A =
-    transaction(entityManager)(f)
+  private val logger = Logger("com.sos.scheduler.engine.kernel.job.ScalaHibernate")
 
-//  def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A = {
-//    val entityManager = entityManagerFactory.createEntityManager()
-//    val result = transaction(entityManager)(f)
-//    entityManager.close()
-//    result
-//  }
+  def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A =
+    transaction(entityManagerFactory)(f)
 
-  def transaction[A](entityManager: EntityManager)(f: EntityManager => A): A = {
+  def transaction[A](entityManagerFactory: EntityManagerFactory)(f: EntityManager => A): A =
+    autoClosing(entityManagerFactory.createEntityManager()) { entityManager =>
+      transaction(entityManager)(f)
+    }
+
+  private def transaction[A](entityManager: EntityManager)(f: EntityManager => A): A = {
     val ta = entityManager.getTransaction
 
     def tryRollback(t: Throwable) {

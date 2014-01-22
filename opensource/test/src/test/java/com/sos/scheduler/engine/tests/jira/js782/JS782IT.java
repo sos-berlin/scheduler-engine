@@ -34,6 +34,6 @@ public final class JS782IT extends SchedulerTest {
 
     private boolean orderIsOnBlacklist() {
         Document doc = loadXml(scheduler().executeXml("<show_job_chain job_chain='a' what='job_chain_orders blacklist'/>"));
-        return stringXPath(doc, "/spooler/answer/job_chain/blacklist/order/@order").equals(orderId.asString());
+        return stringXPath(doc, "/spooler/answer/job_chain/blacklist/order/@order").equals(orderId.string());
     }
 }
