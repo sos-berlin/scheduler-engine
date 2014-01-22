@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.data.base
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import javax.annotation.Nullable
 
-@JsonSerialize(using = classOf[IsStringSerializer])
-trait IsString {
+// Wegen "scala: error while loading IsString: @JsonSerialize(using = classOf[IsStringSerializer])
+trait IsString extends SerializableIsString {
   def string: String
 
   final def isEmpty = string.isEmpty
