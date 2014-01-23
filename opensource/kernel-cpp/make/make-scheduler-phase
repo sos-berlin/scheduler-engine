@@ -42,6 +42,7 @@ if [ -z "$MAKE_JOBS" ]; then :
 fi
 
 if [ $inWindows ]; then \
+	programPath=$(if [ "$visualStudioPlatform" == "Win32" ]; then echo "C:\\Program Files"; else echo "C:\\Program Files (x86)"; fi)
     [ -n "${WINDOWS_NET_SDK_HOME}" ] || fail 'ERROR: Missing environment variable WINDOWS_NET_SDK_HOME with installation directory of Windows SDK and msbuild.exe (for example "%windir%\Microsoft.NET\Framework\v4.0.30319")'
     msbuild=$(cygpath "${WINDOWS_NET_SDK_HOME}")/msbuild.exe
     [ -f "$msbuild" ] || fail "Missing msbuild.exe: $msbuild"
@@ -102,8 +103,8 @@ function visualStudio_compile() {
 
 function msbuild() {
     for c in $configurations; do :
-        echo $msbuild /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" /property:VCTargetsPath="C:\\Program Files (x86)\\MSBuild\\Microsoft.Cpp\\v4.0\\V120\\" $*
-        "$msbuild" /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" /property:VCTargetsPath="C:\\Program Files (x86)\\MSBuild\\Microsoft.Cpp\\v4.0\\V120\\" $*
+        echo $msbuild /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" /property:VCTargetsPath="$programPath\\MSBuild\\Microsoft.Cpp\\v4.0\\V120\\" $*
+        "$msbuild" /nologo /m:$NUMBER_OF_PROCESSORS /property:Configuration="$c" /property:Platform="$visualStudioPlatform" /property:VCTargetsPath="$programPath\\MSBuild\\Microsoft.Cpp\\v4.0\\V120\\" $*
     done
 }
 
