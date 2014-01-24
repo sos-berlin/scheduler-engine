@@ -15,6 +15,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.log.PrefixLog
+import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.kernel.util.Hostware
 import com.sos.scheduler.engine.main.{SchedulerThreadController, CppBinaries, CppBinary, SchedulerState}
@@ -30,6 +31,7 @@ import org.joda.time.Duration
 abstract class TestSchedulerController
 extends DelegatingSchedulerController
 with HasCloser
+with HasInjector
 with EventHandlerAnnotated {
 
   def testClass: Class[_]
@@ -164,7 +166,10 @@ with EventHandlerAnnotated {
   }
 
   final def instance[A](implicit c: ClassTag[A]): A =
-    scheduler.injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
+    injector.getInstance(c.runtimeClass.asInstanceOf[Class[A]])
+
+  final def injector =
+    scheduler.injector
 
   /** Eine Exception in runnable beendet den Scheduler. */
   def newThread(runnable: Runnable) =
