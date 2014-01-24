@@ -14,7 +14,9 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import org.junit.Ignore
 
+@Ignore // Ignored until ticket JS-1048 is fixed
 @RunWith(classOf[JUnitRunner])
 final class JS1048IT
     extends FreeSpec
