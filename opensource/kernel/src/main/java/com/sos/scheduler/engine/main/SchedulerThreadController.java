@@ -81,7 +81,7 @@ public class SchedulerThreadController implements SchedulerController {
         try {
             controllerBridge.terminate();
         } catch (CppProxyInvalidatedException x) {
-            logger.debug("controllerBridge.terminate()", x);
+            logger.debug("controllerBridge.terminate() Exception ignored: " + x);
         }
     }
 
