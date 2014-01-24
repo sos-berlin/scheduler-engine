@@ -54,8 +54,8 @@ abstract class MethodEventSubscription implements EventSubscription {
     @Override public final void handleEvent(Event event) {
         try {
             invokeHandler(event);
-        } catch (IllegalArgumentException x) { throw new Error("Method "+ getMethod() +" rejected argument '"+event+"'", x);
-        } catch (IllegalAccessException x) { throw new Error("Method "+ getMethod() +" is inaccessible: " +event, x);
+        } catch (IllegalArgumentException x) { throw new Error("Method "+ method +" rejected argument '"+event+"'", x);
+        } catch (IllegalAccessException x) { throw new Error("Method "+ method +" is inaccessible: " +event, x);
         } catch (InvocationTargetException x) {
             throw propagate(x.getCause() == null? x : x.getCause());
         }
@@ -63,7 +63,7 @@ abstract class MethodEventSubscription implements EventSubscription {
 
     protected abstract void invokeHandler(Event event) throws InvocationTargetException, IllegalAccessException;
 
-    @Override public final Class<? extends Event> getEventClass() {
+    @Override public final Class<? extends Event> eventClass() {
         return eventClass;
     }
 

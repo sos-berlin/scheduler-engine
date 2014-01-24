@@ -48,11 +48,15 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     public final synchronized void register(EventSubscription s) {
-        subscribers.put(s.getEventClass(), s);
+        subscribers.put(s.eventClass(), s);
     }
 
-    public final synchronized void unregister(EventSubscription s) {
-        subscribers.remove(s.getEventClass(), s);
+    public final void unregister(EventSubscription s) {
+        boolean ok;
+        synchronized(this) {
+            ok = subscribers.remove(s.eventClass(), s);
+        }
+        if (!ok) logger.debug("unregister unknown '" + s + "'");
     }
 
     protected final synchronized ImmutableCollection<Call> calls(Event e) {

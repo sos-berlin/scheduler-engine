@@ -23,6 +23,6 @@ public class SimpleMethodEventSubscription extends MethodEventSubscription {
 
     @Override public String toString() {
         return getMethod().getDeclaringClass().getSimpleName() +"."+ getMethod().getName() +
-                "("+ getEventClass().getSimpleName() +")";
+                "("+ eventClass().getSimpleName() +")";
     }
 }
