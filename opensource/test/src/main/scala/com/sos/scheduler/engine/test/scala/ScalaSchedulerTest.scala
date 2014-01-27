@@ -26,6 +26,9 @@ trait ScalaSchedulerTest
   protected lazy final val controller =
     TestSchedulerController(testClass, testConfiguration, testEnvironment).registerCloseable
 
+  protected implicit final def implicitController =   // Scala 10.3 mag implicit controller nicht, also so
+    controller
+
   override protected final def beforeAll() {
     if (testNames.isEmpty) {
       val line = s"EMPTY TEST SUITE ${getClass.getName}"
@@ -62,6 +65,9 @@ trait ScalaSchedulerTest
    * @see com.sos.scheduler.engine.test.TestSchedulerController#scheduler(). */
   protected final def scheduler =
     controller.scheduler
+
+  protected implicit val testTimeout =
+    TestTimeout(shortTimeout.toDuration)
 
   protected final def shortTimeout =
     SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
