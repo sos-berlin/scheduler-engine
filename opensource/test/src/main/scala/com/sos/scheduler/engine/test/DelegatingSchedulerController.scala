@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.time.Time
-import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.main.SchedulerController
+import org.joda.time.Duration
 
 trait DelegatingSchedulerController extends SchedulerController {
 
@@ -16,7 +15,7 @@ trait DelegatingSchedulerController extends SchedulerController {
     delegate.terminateAfterException(x)
   }
 
-  final def tryWaitForTermination(timeout: Time) =
+  final def tryWaitForTermination(timeout: Duration) =
     delegate.tryWaitForTermination(timeout)
 
   final def exitCode =

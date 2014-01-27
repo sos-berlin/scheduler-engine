@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.jobchain.max_order;
 
-import com.sos.scheduler.engine.common.time.Time;
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.joda.time.Duration;
 import org.junit.Test;
 
 import static java.lang.Math.max;
@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 public final class MaxOrderIT extends SchedulerTest {
     private static final int maxOrders = 3;         // Derselbe Wert wie <job_chain max_orders="">
     private static final int addedOrderCount = 9;   // Anzahl der <add_order>
-    public static final Time timeout = Time.of(60);
+    public static final Duration timeout = Duration.standardSeconds(60);
 
     private int runningOrderCount = 0;
     private int maxTouchedOrderCount = 0;

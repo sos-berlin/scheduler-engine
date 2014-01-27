@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.stress.parallelorder;
 
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import org.joda.time.Duration;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public final class OrderParallelIT extends SchedulerTest {
     private static final int testRuntime = Integer.parseInt(System.getProperty("ExtractResourcesTest.runtime", "5"));
     private static final String testChain = System.getProperty("ExtractResourcesTest.jobchain", "start_job");
     private static final int total = testLimit + 1;          // +1 is for the initializing order 'order_creator'
-    private static final Time timeOut = Time.of(300);
+    private static final Duration timeOut = Duration.standardSeconds(300);
 
     private int finishedOrdersCount = 0;
 

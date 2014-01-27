@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.main;
 
-import static java.util.Arrays.asList;
-
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.kernel.CppScheduler;
 import com.sos.scheduler.engine.kernel.settings.CppSettings;
+import org.joda.time.Duration;
+
+import static java.util.Arrays.asList;
 
 class Main {
     private final SchedulerController schedulerController = new SchedulerThreadController(Main.class.getName(), CppSettings.empty());
@@ -12,7 +12,7 @@ class Main {
     private int apply(String[] args) {
         CppScheduler.loadModuleFromPath();  // TODO Methode nur provisorisch. Besser den genauen Pfad übergeben, als Kommandozeilenparameter.
         schedulerController.startScheduler(asList(args));
-        schedulerController.tryWaitForTermination(Time.eternal);
+        schedulerController.tryWaitForTermination(new Duration(Long.MAX_VALUE));
         return schedulerController.exitCode();
     }
 

@@ -19,18 +19,3 @@ final class Timer(duration: Duration) {
   override def toString =
     (elapsedMs / 1000.0) + "s"
 }
-
-//object Timer {
-//    @deprecated("") def time[A](timeout: Time)(f: => A) = {
-//        val start = System.currentTimeMillis
-//        val result = f
-//        new {
-//            def whenTimedOut(f: Time => Unit) {
-//                val now = System.currentTimeMillis
-//                val elapsed = now - start
-//                if (elapsed > timeout.getMillis)  f(Time.ofMillis(elapsed))
-//                result
-//            }
-//        }
-//    }
-//}

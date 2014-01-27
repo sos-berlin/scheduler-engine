@@ -1,23 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
-import static com.google.common.collect.Iterables.transform;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.rules.TestRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.common.sync.Gate;
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.folder.JobChainPath;
 import com.sos.scheduler.engine.data.folder.JobPath;
 import com.sos.scheduler.engine.data.log.ErrorLogEvent;
@@ -27,6 +13,19 @@ import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.TestEnvironment;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;
+import org.joda.time.Duration;
+import org.junit.ClassRule;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+
+import static com.google.common.collect.Iterables.transform;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.fail;
 
 /** Der Test lässt einen Auftrag kontinuierlich durch eine Jobkette laufen.
  * Der Thread {@link FilesModifierRunnable} ändert zu zufälligen Zeitpunkten einen Job
@@ -38,7 +37,7 @@ public final class JS644IT extends SchedulerTest {
     private static final Logger logger = LoggerFactory.getLogger(JS644IT.class);
     private static final JobChainPath jobChainPath = new JobChainPath("/A");
     private static final ImmutableList<String> jobPaths = ImmutableList.of("/a", "/b", "/c");
-    private static final Time orderTimeout = Time.of(60);
+    private static final Duration orderTimeout = Duration.standardSeconds(60);
     private static final Predicate<ErrorLogEvent> expectedErrorLogEventPredicate = new Predicate<ErrorLogEvent>() {
         @Override public boolean apply(ErrorLogEvent o) { return "SCHEDULER-226".equals(o.getCodeOrNull()); }
     };

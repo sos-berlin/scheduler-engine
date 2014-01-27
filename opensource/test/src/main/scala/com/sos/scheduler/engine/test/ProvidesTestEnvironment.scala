@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.time.Time
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import org.joda.time.Duration
 
 trait ProvidesTestEnvironment extends ProvidesTestDirectory {
 
@@ -27,7 +27,7 @@ trait ProvidesTestEnvironment extends ProvidesTestDirectory {
     } finally
       if (controller.isStarted) {
         controller.terminateScheduler()
-        try controller.waitForTermination(Time.eternal)
+        try controller.waitForTermination(Duration.standardHours(3))
         finally controller.close()
       }
   }

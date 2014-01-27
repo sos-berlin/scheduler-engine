@@ -34,7 +34,7 @@ final class WebXmlIT extends FunSuite with ScalaSchedulerTest {
   }
 
 //  ignore("(for debugging only)") {
-//    controller.waitForTermination(Time.of(3600))
+//    controller.waitForTermination(1.h)
 //  }
 
   test("Web server should deliver integrated resource as without a web.xml") {

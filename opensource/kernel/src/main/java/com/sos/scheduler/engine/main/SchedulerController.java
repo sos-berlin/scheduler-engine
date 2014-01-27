@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.main;
 
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
+import org.joda.time.Duration;
 
 /** Steuerung für den C++-Scheduler in einem eigenen nebenläufigen Thread. */
 public interface SchedulerController {
@@ -18,7 +18,7 @@ public interface SchedulerController {
      * Kann aus einem anderen Thread aufgerufen werden und lässt die Warte-Methoden die Exception werfen. */
     void terminateAfterException(Throwable x);
 
-    boolean tryWaitForTermination(Time timeout);
+    boolean tryWaitForTermination(Duration timeout);
 
     int exitCode();
 

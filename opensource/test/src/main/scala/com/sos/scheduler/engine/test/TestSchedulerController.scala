@@ -8,7 +8,7 @@ import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
-import com.sos.scheduler.engine.common.time.Time
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
@@ -25,6 +25,7 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
+import org.joda.time.Duration
 
 abstract class TestSchedulerController
 extends DelegatingSchedulerController
@@ -117,7 +118,7 @@ with EventHandlerAnnotated {
     if (previous == null && testConfiguration.terminateOnError) checkForErrorLogLine()
   }
 
-  def waitForTermination(timeout: Time) {
+  def waitForTermination(timeout: Duration) {
     val ok = tryWaitForTermination(timeout)
     if (!ok) {
       val x = new SchedulerRunningAfterTimeoutException(timeout)
@@ -205,7 +206,7 @@ with EventHandlerAnnotated {
 
 
 object TestSchedulerController {
-  final val shortTimeout = Time.of(15.0)
+  final val shortTimeout = 15.s;
   private val logger = Logger(getClass)
 
   def apply(testClass: Class[_]): TestSchedulerController =
