@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js1079
 
 import com.sos.scheduler.engine.common.client.SchedulerTcpConnection
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import java.io.ByteArrayInputStream
 import java.net.{DatagramPacket, InetSocketAddress, DatagramSocket}
 import org.scalatest.Matchers._
 
-private[js1079] final class SupervisorClient(val index: Int, udpSocket: DatagramSocket, serverAddress: InetSocketAddress) extends SosAutoCloseable {
+private[js1079] final class SupervisorClient(val index: Int, udpSocket: DatagramSocket, serverAddress: InetSocketAddress)
+    extends AutoCloseable {
+
   require(udpSocket.isBound)
 
   private val schedulerId = s"SCHEDULER-$index"

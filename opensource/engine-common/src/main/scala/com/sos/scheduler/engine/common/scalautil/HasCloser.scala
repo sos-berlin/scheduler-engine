@@ -2,10 +2,9 @@ package com.sos.scheduler.engine.common.scalautil
 
 import HasCloser._
 import com.google.common.io.Closer
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import java.io.Closeable
 
-trait HasCloser extends SosAutoCloseable {
+trait HasCloser extends AutoCloseable {
 
   private val _closer: Closer = Closer.create()
 
