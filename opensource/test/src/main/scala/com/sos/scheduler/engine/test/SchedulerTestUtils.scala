@@ -1,15 +1,14 @@
 package com.sos.scheduler.engine.test
 
-import _root_.scala.concurrent.{Promise, Future}
-import _root_.scala.reflect.ClassTag
 import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
+import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, Order}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.eventbus.{EventSubscription, EventBus}
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 
 object SchedulerTestUtils {
 
@@ -21,4 +20,10 @@ object SchedulerTestUtils {
 
   def order(key: OrderKey)(implicit hasInjector: HasInjector): Order =
     hasInjector.injector.getInstance(classOf[OrderSubsystem]).order(key)
+
+  def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: TestTimeout) {
+    controller.getEventBus.awaitingEvent[TaskClosedEvent](predicate = _.jobPath == jobPath) {
+      controller.scheduler executeXml <start_job job={jobPath.string}/>
+    }
+  }
 }

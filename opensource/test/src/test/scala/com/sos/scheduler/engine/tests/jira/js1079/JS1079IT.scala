@@ -5,17 +5,15 @@ import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
 import java.net._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.test.SchedulerTestHelpers
 
 /** JS-1079: Test des Supervisors mit vielen bestehenden TCP-Verbindungen.
   * Der Scheduler läuft im selben Prozess wie Scala, weshalb die Client-Sockets mitzählen.
@@ -28,7 +26,7 @@ import com.sos.scheduler.engine.test.SchedulerTestHelpers
   * </pre>
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1079IT extends FunSuite with ScalaSchedulerTest with SchedulerTestHelpers {
+final class JS1079IT extends FunSuite with ScalaSchedulerTest {
   override protected lazy val testConfiguration = TestConfiguration(
     binariesDebugMode = Some(CppBinariesDebugMode.release))  // debug ist zu langsam
   private val nextUdpSocket = new UdpSocketGenerator

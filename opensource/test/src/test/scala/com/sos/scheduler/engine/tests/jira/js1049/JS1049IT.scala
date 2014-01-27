@@ -7,17 +7,17 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.nio.charset.Charset
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.SchedulerTestHelpers
 
 @RunWith(classOf[JUnitRunner])
-final class JS1049IT extends FreeSpec with ScalaSchedulerTest with SchedulerTestHelpers {
+final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
   override def onBeforeSchedulerActivation() {
     for (i <- JobIncludeSettings flatMap { _.includes })

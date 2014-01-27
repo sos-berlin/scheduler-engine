@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1039
 
 import JS1039TaskStdoutIT._
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -15,7 +14,6 @@ import org.scalatest.FunSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.util.matching.Regex
-import com.sos.scheduler.engine.test.SchedulerTestHelpers
 
 /** JS-1039 FIXED: API functions stdout_text and stderr_text return empty strings when used in monitor of shell-job.
   * Prüft, ob Task.stdout_text und Task.stderr_text die Ausgaben vom Shell-Prozess enthalten
@@ -24,7 +22,7 @@ import com.sos.scheduler.engine.test.SchedulerTestHelpers
   * 32 Tests: Shell oder API, mit oder ohne Monitor, lokal oder fern, stdout oder stderr:
   * Skript schreibt, spooler_task_after() schreibt, spooler_task_after() liest spooler_task.stdxxx_text. */
 @RunWith(classOf[JUnitRunner])
-final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest with SchedulerTestHelpers {
+final class JS1039TaskStdoutIT extends FunSpec with ScalaSchedulerTest {
 
   private lazy val tcpPort = FreeTcpPortFinder.findRandomFreeTcpPort()
   protected override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$tcpPort"))
