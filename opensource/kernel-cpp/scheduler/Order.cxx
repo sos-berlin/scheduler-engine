@@ -720,16 +720,13 @@ bool Order::db_try_insert( bool throw_exists_exception )
             if( payload_string != "" )  db_update_clob( &ta, "payload", payload_string );
             //_payload_modified = false;
 
-            xml::Document_ptr order_document = dom( show_for_database_only );
-            xml::Element_ptr  order_element  = order_document.documentElement();
-            if( order_element.hasAttributes()  ||  order_element.firstChild() )
-                db_update_clob( &ta, "order_xml", order_document.xml_string() );
+            string order_xml = database_xml();
+            if (!order_xml.empty())
+                db_update_clob( &ta, "order_xml", order_xml);
 
-            if( _schedule_use->is_defined() )
-            {
-                xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
-                if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml_string() );
-            }
+            string runtime_xml = database_runtime_xml();
+            if (!runtime_xml.empty())
+                db_update_clob( &ta, "run_time", runtime_xml);
 
             ta.commit( Z_FUNCTION );
 
@@ -879,21 +876,19 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 {
                     // _schedule_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
                     // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
-                    if( _schedule_use->is_defined() ) 
-                    {
-                        xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
-                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml_string() );
-                                                                                                          else  update[ "run_time" ].set_direct( "null" );
-                    }
-                    else
+                    string runtime_xml = database_runtime_xml();
+                    if (runtime_xml.empty())
                         update[ "run_time" ].set_direct( "null" );
+                    else
+                        db_update_clob( &ta, "run_time", runtime_xml);
 
                     //if( _order_xml_modified )  // Das wird nicht überall gesetzt und sowieso ändert sich das Element fast immer
                     {
-                        xml::Document_ptr order_document = dom( show_for_database_only );
-                        xml::Element_ptr  order_element  = order_document.documentElement();
-                        if( order_element.hasAttributes()  ||  order_element.firstChild() )  db_update_clob( &ta, "order_xml", order_document.xml_string() );
-                                                                                       else  update[ "order_xml" ].set_direct( "null" );
+                        string order_xml = database_xml();
+                        if (order_xml.empty()) 
+                            update[ "order_xml" ].set_direct( "null" );
+                        else
+                            db_update_clob( &ta, "order_xml", order_xml);
                     }
 
                     //if( _payload_modified )
@@ -1096,6 +1091,27 @@ void Order::db_fill_where_clause( sql::Where_clause* where )
     where->and_where_condition( "spooler_id", _spooler->id_for_db() );
     where->and_where_condition( "job_chain" , _job_chain_path.without_slash() );
     where->and_where_condition( "id"        , id().as_string()      );
+}
+
+//----------------------------------------------------------------------Order::database_runtime_xml
+
+string Order::database_runtime_xml()
+{
+    if (_schedule_use->is_defined()) {
+        xml::Document_ptr doc = _schedule_use->dom_document(show_for_database_only);
+        if (doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes())  
+            return doc.xml_string();
+    }
+    return "";
+}
+
+//------------------------------------------------------------------------------Order::database_xml
+
+string Order::database_xml()
+{
+    xml::Document_ptr order_document = dom(show_for_database_only);
+    xml::Element_ptr  order_element  = order_document.documentElement();
+    return order_element.hasAttributes() || order_element.firstChild()? order_document.xml_string() : "";
 }
 
 //---------------------------------------------------------------------------Order::db_get_ordering

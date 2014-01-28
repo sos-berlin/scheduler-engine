@@ -51,6 +51,7 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
     }
   public:
 
+    void persistState() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

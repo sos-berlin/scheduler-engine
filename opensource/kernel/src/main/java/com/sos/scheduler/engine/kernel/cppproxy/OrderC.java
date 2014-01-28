@@ -16,14 +16,21 @@ public interface OrderC extends CppProxyWithSister<Order> {
     void set_id(String id);
     String title();
     void set_title(String o);
+    String string_payload();
+    String database_runtime_xml();
+    String database_xml();
     Variable_setC params();
     //    Node job_chain_node();
+    int priority();
+    void set_priority(int o);
     String string_state();
+    String initial_state_string();
     void set_end_state(String order_state);
-    String string_end_state();
+    String end_state_string();
     Prefix_logC log();
     void java_remove();
     boolean suspended();
     void set_suspended(boolean o);
     long next_time_millis();
+    String calculate_db_distributed_next_time();
 }

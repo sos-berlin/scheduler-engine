@@ -165,16 +165,17 @@ struct Order : Com_order,
     void                    set_state                   ( const State& );
     void                    set_state1                  ( const State& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
-    State                       state                   ()                                          { return _state; }
+    const State&                state                   () const                                    { return _state; }
     string                      string_state            () const                                    { return _state.as_string(); }
     bool                        state_is_equal          ( const State& state )                      { return _state == state; }
     static void                 check_state             ( const State& );
-    State                       initial_state           ()                                          { return _initial_state; }
+    const State&                initial_state           () const                                    { return _initial_state; }
+    string                      initial_state_string    () const                                    { return _initial_state.as_string(); }
     void                        reset                   ();
 
     void                    set_end_state               ( const State& );
-    State                       end_state               ()                                          { return _end_state; }
-    string                      string_end_state        ()                                          { return _end_state.as_string(); }
+    const State&                end_state               ()                                          { return _end_state; }
+    string                      end_state_string        ()                                          { return _end_state.as_string(); }
 
     void                    set_state_text              ( const string& state_text )                { _state_text = state_text,  _state_text_modified = true; }
     string                      state_text              ()                                          { return _state_text; }
@@ -295,6 +296,8 @@ struct Order : Com_order,
     void                        db_fill_stmt            ( sql::Write_stmt* );
     void                        close_log_and_write_history();
     string                      calculate_db_distributed_next_time();
+    string                      database_runtime_xml    ();
+    string                      database_xml            ();
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
     bool                        db_update               ( Update_option u, Transaction* outer_transaction = NULL )              { return db_update2( u, false, outer_transaction ); }
