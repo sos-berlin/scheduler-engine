@@ -517,6 +517,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-722", "Preceding content truncated (field length is limited to $1 bytes)" },
     { "SCHEDULER-723", "Cluster member '$1' has been advised for processing of this order" },
     { "SCHEDULER-724", "Error ignored when trying to obtain directory change notifications for $1: $2" },
+    { "SCHEDULER-725", "Persistent Order '$1' deleted from database" },
     {}
 };
 } //namespace sos
