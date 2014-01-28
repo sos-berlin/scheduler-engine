@@ -1,15 +1,27 @@
 package com.sos.scheduler.engine.kernel.order
 
+import com.google.inject.Injector
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
+import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
-import scala.collection.JavaConversions._
 import javax.inject.Inject
+import javax.persistence.EntityManagerFactory
+import scala.collection.JavaConversions._
 
-final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC) extends Subsystem {
+final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC, injector: Injector)
+    extends Subsystem {
+
+  private[order] lazy val clusterMemberId = injector.apply[ClusterMemberId]
+  private[order] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
+  private[order] lazy val orderStore = injector.apply[HibernateOrderStore]
+  private[order] lazy val jobChainStore = injector.apply[HibernateJobChainStore]
+  private[order] lazy val jobChainNodeStore = injector.apply[HibernateJobChainNodeStore]
 
 //  def jobChainMap = new Map[JobChainPath, JobChain] {
 //    def get(key: JobChainPath) =
