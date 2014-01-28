@@ -56,7 +56,7 @@ OTHER_LIBS += -L$(JDK)/jre/lib/i386/classic
 OTHER_LIBS += -L$(JDK)/jre/lib/i386/client
 OTHER_LIBS += -L$(JDK)/jre/lib/i386/server
 #2008-01-10 Joacim Zschimmer  OTHER_LIBS += -L$(JDK)/jre/lib/i386 -ljava -ljvm -lhpi
-OTHER_LIBS += -L$(JDK)/jre/lib/i386 -ljava -lhpi
+OTHER_LIBS += -L$(JDK)/jre/lib/i386 -ljava
 
 # To run lcshell with the above, built in a Mozilla tree with a local nspr:
 # LD_LIBRARY_PATH=../../../dist/lib:/share/builds/components/jdk/1.2.2/Linux/jre/lib/i386:/share/builds/components/jdk/1.2.2/Linux/jre/lib/i386/classic:/share/builds/components/jdk/1.2.2/Linux/jre/lib/i386/native_threads CLASSPATH=./classes/Linux_All_DBG.OBJ/js15lc30.jar lcshell
