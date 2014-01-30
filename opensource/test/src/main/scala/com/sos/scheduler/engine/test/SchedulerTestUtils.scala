@@ -21,6 +21,9 @@ object SchedulerTestUtils {
   def order(key: OrderKey)(implicit hasInjector: HasInjector): Order =
     hasInjector.injector.getInstance(classOf[OrderSubsystem]).order(key)
 
+  def orderOption(key: OrderKey)(implicit hasInjector: HasInjector): Option[Order] =
+    hasInjector.injector.getInstance(classOf[OrderSubsystem]).orderOption(key)
+
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: TestTimeout) {
     controller.getEventBus.awaitingEvent[TaskClosedEvent](predicate = _.jobPath == jobPath) {
       controller.scheduler executeXml <start_job job={jobPath.string}/>
