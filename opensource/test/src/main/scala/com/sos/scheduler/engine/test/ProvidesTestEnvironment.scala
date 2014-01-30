@@ -1,7 +1,11 @@
 package com.sos.scheduler.engine.test
 
+import _root_.scala.collection.JavaConversions._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.test.configuration.TestConfiguration
+import com.sos.scheduler.engine.persistence.SchedulerDatabases.persistenceUnitName
+import com.sos.scheduler.engine.test.configuration.{JdbcDatabaseConfiguration, TestConfiguration}
+import javax.persistence.Persistence.createEntityManagerFactory
+import javax.persistence.PersistenceException
 import org.joda.time.Duration
 
 trait ProvidesTestEnvironment extends ProvidesTestDirectory {
@@ -11,6 +15,21 @@ trait ProvidesTestEnvironment extends ProvidesTestDirectory {
 
   lazy val testEnvironment =
     TestEnvironment(testClass, testConfiguration, testDirectory)
+
+  private lazy val entityManagerFactory = {
+    val properties: Map[String, String] =
+      testConfiguration.database match {
+        case c: JdbcDatabaseConfiguration => Map(
+          "javax.persistence.jdbc.driver" -> c.jdbcClassName,
+          "javax.persistence.jdbc.url" -> c.testJdbcUrl(testName, testEnvironment.databaseDirectory))
+        case c => sys.error("No JdbcDatabaseConfiguration")
+      }
+
+      try createEntityManagerFactory(persistenceUnitName, properties)
+      catch {
+        case e: PersistenceException => throw new RuntimeException(s"$e. Cause: ${e.getCause}", e)  // Hibernate liefert nur nichtssagende Meldung "Unable to build EntityManagerFactory", ohne den interessanten Cause
+      }
+  }
 
   def newTestSchedulerController() =
     TestSchedulerController(testClass, testConfiguration, testEnvironment)

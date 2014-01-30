@@ -19,7 +19,7 @@ trait ProvidesTestDirectory extends HasCloser {
         new File(workDir, testName)
     }
 
-  private def testName =
+  final def testName =
     testClass.getName
 
   protected def testClass: Class[_] =
