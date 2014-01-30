@@ -15,11 +15,7 @@ trait ProvidesTestEnvironment extends ProvidesTestDirectory {
   def newTestSchedulerController() =
     TestSchedulerController(testClass, testConfiguration, testEnvironment)
 
-  def runScheduler(f: TestSchedulerController => Unit) {
-    runScheduler()(f)
-  }
-
-  def runScheduler(activate: Boolean = true)(f: TestSchedulerController => Unit) {
+  def runScheduler[A](activate: Boolean = true)(f: TestSchedulerController => A): A = {
     val controller = newTestSchedulerController()
     try {
       if (activate)
