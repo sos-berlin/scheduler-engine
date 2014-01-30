@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.test
 import ProvidesTestDirectory._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.system.Files._
+import com.sos.scheduler.engine.test.util.TestUtils.currentTestClass
 import java.io.File
 
 trait ProvidesTestDirectory extends HasCloser {
@@ -24,7 +25,7 @@ trait ProvidesTestDirectory extends HasCloser {
     testClass.getName
 
   protected def testClass: Class[_] =
-    getClass
+    currentTestClass
 }
 
 private object ProvidesTestDirectory {
