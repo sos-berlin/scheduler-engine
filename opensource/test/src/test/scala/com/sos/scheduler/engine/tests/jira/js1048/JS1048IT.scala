@@ -6,12 +6,15 @@ import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
+import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOption}
 import com.sos.scheduler.engine.test.configuration.DefaultDatabaseConfiguration
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.{TestEnvironment, TestSchedulerController, ProvidesTestEnvironment}
 import java.nio.file.Files
+import javax.persistence.EntityManagerFactory
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -34,6 +37,7 @@ final class JS1048IT extends FreeSpec {
       envProvider.runScheduler() { implicit controller =>
         order(SuspendOrderKey) shouldBe 'suspended
         order(TitleOrderKey).title shouldEqual CommandModifiedTitle
+        requireDatabaseRecords(expectedSuspended = Some(true), expectedTitle = Some(CommandModifiedTitle))
       }
     }
   }
@@ -49,6 +53,7 @@ final class JS1048IT extends FreeSpec {
       envProvider.runScheduler() { implicit controller =>
         order(SuspendOrderKey) should not be 'suspended
         order(TitleOrderKey).title shouldEqual FileChangedTitle
+        requireDatabaseRecords(expectedSuspended = None, expectedTitle = None)
       }
     }
   }
@@ -61,6 +66,7 @@ final class JS1048IT extends FreeSpec {
       removeOrderFiles(envProvider.testEnvironment)
       envProvider.runScheduler() { implicit controller =>
         requireOrdersNotExist()
+        requireDatabaseRecords(expectedSuspended = None, expectedTitle = None)
       }
     }
   }
@@ -85,6 +91,7 @@ final class JS1048IT extends FreeSpec {
       removeOrderFiles(envProvider.testEnvironment)
       envProvider.runScheduler() { implicit controller =>
         requireOrdersNotExist()
+        requireDatabaseRecords(expectedSuspended = None, expectedTitle = None)
       }
     }
   }
@@ -106,6 +113,7 @@ final class JS1048IT extends FreeSpec {
       TitleOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order title={FileChangedTitle}><run_time/></order>
       envProvider.runScheduler() { implicit controller =>
         requireOriginalFileBasedOrders()
+        requireDatabaseRecords(expectedSuspended = None, expectedTitle = None)
       }
     }
   }
@@ -116,6 +124,7 @@ final class JS1048IT extends FreeSpec {
     order(TitleOrderKey).title shouldEqual OriginalTitle
     controller.scheduler executeXml ModifyOrderCommand(TitleOrderKey, title = Some(CommandModifiedTitle))
     order(TitleOrderKey).title shouldEqual CommandModifiedTitle
+    requireDatabaseRecords(expectedSuspended = Some(true), expectedTitle = Some(CommandModifiedTitle))
   }
 
   private def removeOrderFiles(testEnvironment: TestEnvironment) {
@@ -132,6 +141,23 @@ final class JS1048IT extends FreeSpec {
     orderOption(SuspendOrderKey) should not be 'defined
     orderOption(TitleOrderKey) should not be 'defined
   }
+
+  private def requireDatabaseRecords(expectedSuspended: Option[Boolean], expectedTitle: Option[String])(implicit controller: TestSchedulerController) {
+    transaction(entityManagerFactory) { implicit entityManager =>
+      withClue(s"Existence of database record for $SuspendOrderKey:") {
+        orderStore.tryFetch(SuspendOrderKey).isDefined shouldEqual expectedSuspended.isDefined   // Wert von Suspended steckt irgendwo im XML. Prüfen wir nicht.
+      }
+      withClue(s"Existence of database record for $TitleOrderKey:") {
+        orderStore.tryFetch(TitleOrderKey) map { _.title } shouldEqual expectedTitle
+      }
+    }
+  }
+
+  private def entityManagerFactory(implicit controller: TestSchedulerController) =
+    controller.instance[EntityManagerFactory]
+
+  private def orderStore(implicit controller: TestSchedulerController) =
+    controller.instance[HibernateOrderStore]
 }
 
 
