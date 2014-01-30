@@ -16,6 +16,7 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
+import com.sos.scheduler.engine.common.system.Files.removeDirectoryContentRecursivly
 
 /** Build the environment for the scheduler binary. */
 final class TestEnvironment(
@@ -39,6 +40,7 @@ final class TestEnvironment(
 
   private def prepareTemporaryConfigurationDirectory() {
     makeDirectories(directory)
+    removeDirectoryContentRecursivly(directory)
     makeDirectories(configDirectory)
     makeDirectories(logDirectory)
     TestEnvironmentFiles.copy(resourcePath, configDirectory, nameMap, fileTransformer)

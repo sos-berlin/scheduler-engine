@@ -16,9 +16,7 @@ trait ProvidesTestDirectory extends HasCloser {
         result
       case workDir =>
         new File(workDir).mkdir
-        val result = new File(workDir, testName)
-        makeCleanDirectory(result)
-        result
+        new File(workDir, testName)
     }
 
   private def testName =
@@ -30,9 +28,4 @@ trait ProvidesTestDirectory extends HasCloser {
 
 private object ProvidesTestDirectory {
   private val workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory"
-
-  private def makeCleanDirectory(directory: File) {
-    makeDirectory(directory)
-    removeDirectoryContentRecursivly(directory)
-  }
 }
