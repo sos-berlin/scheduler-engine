@@ -5,6 +5,7 @@ import _root_.scala.collection.immutable
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.scheduler.engine.common.system.Files.removeDirectoryContentRecursivly
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
@@ -16,7 +17,6 @@ import com.sos.scheduler.engine.kernel.util.ResourcePath
 import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import java.io.File
-import com.sos.scheduler.engine.common.system.Files.removeDirectoryContentRecursivly
 
 /** Build the environment for the scheduler binary. */
 final class TestEnvironment(
@@ -29,6 +29,7 @@ final class TestEnvironment(
   val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
+  val databaseDirectory = directory
   private var isPrepared = false
 
   private[test] def prepare() {

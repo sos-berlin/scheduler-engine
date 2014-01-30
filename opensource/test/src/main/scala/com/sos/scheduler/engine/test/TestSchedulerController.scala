@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.test
 
 import TestSchedulerController._
+import _root_.scala.Some
 import _root_.scala.collection.JavaConversions._
 import _root_.scala.reflect.ClassTag
 import _root_.scala.sys.error
@@ -19,13 +20,11 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.kernel.util.Hostware
 import com.sos.scheduler.engine.main.{SchedulerThreadController, CppBinaries, CppBinary, SchedulerState}
-import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
-import com.sos.scheduler.engine.test.binary.TestCppBinaries
+import com.sos.scheduler.engine.test.binary.{CppBinariesDebugMode, TestCppBinaries}
 import com.sos.scheduler.engine.test.configuration.{HostwareDatabaseConfiguration, JdbcDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.io.File
-import java.sql.Connection
-import java.sql.DriverManager
+import java.sql.{Connection, DriverManager}
 import org.joda.time.Duration
 
 abstract class TestSchedulerController
@@ -41,7 +40,7 @@ with EventHandlerAnnotated {
   def environment: TestEnvironment
 
   private val testName = testClass.getName
-  protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, databaseDirectory))
+  protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, environment.databaseDirectory))
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
   private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
@@ -55,7 +54,7 @@ with EventHandlerAnnotated {
     testConfiguration.database collect {
       case c: JdbcDatabaseConfiguration =>
         Class forName c.jdbcClassName
-        c.testJdbcUrl(testName, databaseDirectory)
+        c.testJdbcUrl(testName, environment.databaseDirectory)
     }
 
   override def close() {
@@ -204,9 +203,6 @@ with EventHandlerAnnotated {
 
   def newJDBCConnection(): Connection =
     DriverManager.getConnection(jdbcUrlOption.get)
-
-  private def databaseDirectory =
-    environment.directory
 }
 
 
