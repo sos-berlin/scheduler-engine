@@ -211,7 +211,7 @@ with EventHandlerAnnotated {
 
 
 object TestSchedulerController {
-  final val shortTimeout = 15.s;
+  final val shortTimeout = 15.s
   private val logger = Logger(getClass)
 
   def apply(testClass: Class[_]): TestSchedulerController =
