@@ -154,8 +154,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        send_really                 ( Scheduler_event* );
     PrefixLogJ&                 typed_java_sister           ();
     string                      obj_name                    () const;
-
-
+	string                      truncate_head(const string& str);
 
     bool                       _in_log;                     // log2() ist aktiv, Rekursion vermeiden!
 
@@ -222,6 +221,29 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 
     bool                       _remove_after_close;
     list<Event_base*>          _events;
+
+//-----------------------------------------------------------------------Prefix_log::truncate_head
+public:
+	static string truncate_head(const string& str, int max_length)
+	{
+		string result = str;
+
+		if (str.length() > max_length) {
+			string msg = zschimmer::message_string("SCHEDULER-722", max_length);
+			if (max_length <= msg.length())	{
+				result = msg;
+			}
+			else {
+				size_t start = str.length() - max_length + msg.length() - 1;
+				size_t x = str.substr(start).find_first_of("\n");
+				Z_LOG2("jdbc", msg);
+				if (x == string::npos) x = 0;
+				result = msg + str.substr(start + x);
+			}
+		}
+		return result;
+	}
+
 };
 
 //-------------------------------------------------------------------------------------------------

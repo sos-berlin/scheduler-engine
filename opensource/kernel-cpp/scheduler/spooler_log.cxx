@@ -1220,8 +1220,8 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
     {
         try
         {
-            log_element.appendChild( document.createTextNode( as_string() ) );
-        }
+			log_element.appendChild(document.createTextNode( truncate_head(as_string()) ));
+		}
         catch( exception& x ) 
         { 
             _spooler->log()->warn( x.what() ); 
@@ -1300,6 +1300,14 @@ string Prefix_log::as_string()
     result.append( _log_buffer );
 
     return result;
+}
+
+//-----------------------------------------------------------------------Prefix_log::truncate_head
+
+string Prefix_log::truncate_head(const string& str)
+{
+	int max_length = _spooler->settings()->_max_length_of_blob_entry;
+	return truncate_head(str, max_length);
 }
 
 //-------------------------------------------------------------------------------------------------

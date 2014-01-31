@@ -140,7 +140,6 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
 
   public:
     static const int            seconds_before_reopen;
-    string                      truncate_head           ( const string& str );
 };
 
 //---------------------------------------------------------------------------------Read_transaction
