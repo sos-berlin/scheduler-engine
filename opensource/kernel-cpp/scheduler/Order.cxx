@@ -318,7 +318,6 @@ void Order::occupy_for_task( Task* task, const Time& now )
     if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_are_recoverable  &&  !_is_in_database  &&  db()->opened() )
     {
         db_insert();
-        _delay_storing_until_processing = false;
     }
 
 
@@ -730,6 +729,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
             ta.commit( Z_FUNCTION );
 
             _is_in_database = true;
+            _delay_storing_until_processing = false;
         }
     }
     catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", db()->_orders_tablename, x ), Z_FUNCTION ); }
