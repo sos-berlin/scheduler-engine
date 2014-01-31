@@ -15,13 +15,11 @@ import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.{TestEnvironment, TestSchedulerController, ProvidesTestEnvironment}
 import java.nio.file.Files
 import javax.persistence.EntityManagerFactory
-import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
-@Ignore
 @RunWith(classOf[JUnitRunner])
 final class JS1048IT extends FreeSpec {
 
