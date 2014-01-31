@@ -112,7 +112,7 @@ Standing_order_subsystem::Standing_order_subsystem( Scheduler* scheduler )
 void Standing_order_subsystem::close()
 {
     set_subsystem_state( subsys_stopped );
-    file_based_subsystem<Order>::close();
+    //file_based_subsystem<Order>::close();   Persistente Aufträge nicht aus DB löschen  TODO file_based_subsystem::close() sollte immer aufgerufen werden.
 }
 
 //---------------------------------------------------Standing_order_subsystem::subsystem_initialize
