@@ -2568,7 +2568,8 @@ void Job_chain::add_order( Order* order )
     }
     else
     {
-        if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path().to_string() );
+        if( has_order_id( (Read_transaction*)NULL, order->id() ) )
+            z::throw_xc( "SCHEDULER-186", order->obj_name(), path().to_string() );
     }
     
 
@@ -2581,7 +2582,8 @@ void Job_chain::add_order( Order* order )
         order->set_state2( node->order_state() );
     }
 
-    if( ( !order->_suspended || !order->_is_on_blacklist )  &&  !node->is_type( Node::n_job ) )  z::throw_xc( "SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state) );
+    if ((!order->_suspended || !order->_is_on_blacklist) && !node->is_type(Node::n_job))
+        z::throw_xc("SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state));
 
     order->_job_chain      = this;
     order->_job_chain_path = path();

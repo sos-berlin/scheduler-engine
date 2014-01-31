@@ -1313,7 +1313,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
     if( xml::Element_ptr xml_payload_element = modify_order_element.select_node( "xml_payload" ) )
     {
-            order->set_payload_xml( xml_payload_element.first_child_element() );
+        order->set_payload_xml( xml_payload_element.first_child_element() );
     }
 
     if( priority != "" )  order->set_priority( as_int( priority ) );
@@ -1327,7 +1327,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     if( modify_order_element.hasAttribute( "end_state" ) )
         order->set_end_state( modify_order_element.getAttribute( "end_state" ) );
 
-    if( at != "" )  order->set_at( Time::of_date_time_with_now( at, _spooler->_time_zone_name ) );
+    if( at != "" )  
+        order->set_at( Time::of_date_time_with_now( at, _spooler->_time_zone_name ) );
 
     if( modify_order_element.hasAttribute( "setback" ) )
     {

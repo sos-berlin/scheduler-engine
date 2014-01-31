@@ -2413,7 +2413,12 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( _delay_storing_until_processing ) 
         {
-            if( _is_distributed )  assert(0), z::throw_xc( Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
+            if (_is_distributed)
+            {
+                assert(0);
+                // db_try_insert() muss Datenbanksatz prüfen können
+                z::throw_xc(Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible");
+            }
         }
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
