@@ -857,6 +857,7 @@ struct Job_chain : Com_job_chain,
     Order*                      blacklisted_order_or_null   ( const string& order_id );
     stdext::hash_set<string>    db_get_blacklisted_order_id_set( const File_path& directory, const Regex& );
 
+    void                        db_try_delete_non_distributed_order(Transaction* outer_transaction, const string& order_id);
     string                      db_where_condition          () const;
 
     // F�r verschachtelte Jobketten, deren Auftragskennungsr�ume verbunden sind:
@@ -893,8 +894,9 @@ struct Job_chain : Com_job_chain,
     void                        database_record_store       ();
     void                        database_record_remove      ();
     void                        database_record_load        ( Read_transaction* );
-    int                         load_orders_from_result_set ( Read_transaction*, Any_file* result_set );
-    Order*                      add_order_from_database_record( Read_transaction*, const Record& );
+    int                         load_orders_from_result_set ( Transaction*, Any_file* result_set );
+    Order*                      add_order_from_database_record( Transaction*, const Record& );
+    xml::Element_ptr            order_xml_file_based_node_or_null(Read_transaction*, const Record&) const;
 
 
     friend struct               Order;
