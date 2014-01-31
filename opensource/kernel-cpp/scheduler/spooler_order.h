@@ -1128,6 +1128,13 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     Absolute_path               make_path                   ( const Absolute_path& job_chain_path, const string& order_id ) const;
 
   //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+    
+    bool is_activating() const {
+        return _is_activating;
+    }
+
+  private:
+    bool _is_activating;
 };
 
 inline ptr<Standing_order_subsystem> new_standing_order_subsystem( Scheduler* scheduler )           { return Z_NEW( Standing_order_subsystem( scheduler ) ); }
