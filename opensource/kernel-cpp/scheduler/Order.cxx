@@ -1274,6 +1274,11 @@ bool Order::on_activate()
     {
         if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), base_file_info()._filename );
 
+        if (!_spooler->standing_order_subsystem()->is_activating())  // Nicht, wenn der Auftrag vom Standing_order_subsystem aktiviert wird. TODO: Der Zeitstempelvergleich aus add_order_from_database_record() sollte mit Typed_folder::on_base_file_changed() zusammenfallen.
+        {
+            job_chain->db_try_delete_non_distributed_order(NULL, _id.as_string());   // Den Datenbanksatz verwerfen wir. Die geänderte File_based .order.xml gilt.
+        }
+        
         place_or_replace_in_job_chain( job_chain );
 
         result = true;

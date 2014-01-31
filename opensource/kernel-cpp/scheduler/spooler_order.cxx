@@ -138,8 +138,10 @@ bool Standing_order_subsystem::subsystem_load()
 
 bool Standing_order_subsystem::subsystem_activate()
 {
+    _is_activating = true;
     set_subsystem_state( subsys_active );
     file_based_subsystem<Order>::subsystem_activate();
+    _is_activating = false;
     return true;
 }
 
