@@ -1316,7 +1316,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_xml_payload( xml_payload_element.first_child_element() );
     }
 
-    if( priority != "" )  order->set_priority( as_int( priority ) );
+    if( priority != "" )  
+        order->set_priority( as_int( priority ) );
 
     if( state != "" )  
     {
@@ -1353,16 +1354,20 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_title( modify_order_element.getAttribute( "title" ) );
     }
 
-    for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
-        if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
-            order->remove_from_job_chain( Order::jc_remove_from_job_chain_stack, &ta );
-            order->close();
-        } else {
-            order->db_update(Order::update_anyway, &ta);
+    if (job_chain && job_chain->orders_are_recoverable() && _spooler->db()->opened()) {
+        order->persist();
+    
+        for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
+            if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
+                order->remove_from_job_chain( Order::jc_remove_from_job_chain_stack, &ta );
+                order->close();
+            } else {
+                order->db_update(Order::update_anyway, &ta);
+            }
+            ta.commit(Z_FUNCTION);
         }
-        ta.commit(Z_FUNCTION);
+        catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
     }
-    catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
 
     return _answer.createElement( "ok" );
 }

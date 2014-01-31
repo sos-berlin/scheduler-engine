@@ -585,6 +585,14 @@ void Order::db_show_occupation( Log_level log_level )
     }
 }
 
+//-----------------------------------------------------------------------------------Order::persist
+
+void Order::persist() {
+    if (_job_chain && _job_chain->orders_are_recoverable() && !_is_in_database) {
+        db_try_insert();
+    }
+}
+
 //---------------------------------------------------------------------------------Order::db_insert
 
 void Order::db_insert()
@@ -2397,8 +2405,10 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
         {
-            if( db()->opened() ) {
-                is_new = db_try_insert( exists_exception );       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+            if (db()->opened()) {
+                if (!has_base_file()) {     // Nur nicht-dateibasierte Aufträge werden sofort in die Datenbank geschrieben
+                    is_new = db_try_insert(exists_exception);   // is_new==false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+                }
                 tip_next_node_for_new_distributed_order_state();
             }
         }

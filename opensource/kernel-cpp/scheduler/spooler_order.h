@@ -280,6 +280,7 @@ struct Order : Com_order,
     bool                        on_schedule_to_be_removed();
   //void                        on_schedule_removed     ();
 
+    void                        persist                 ();
     void                        db_insert               ();
     bool                        db_try_insert           ( bool throw_exists_exception = false );
     void                        db_insert_order_history_record( Transaction* );
