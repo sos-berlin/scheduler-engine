@@ -1295,11 +1295,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
     assert(order);
 
-    order->set_modified( true );
-
     if( modify_order_element.getAttribute( "action" ) == "reset" ) {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
         order->reset();
-        order->set_modified( false );
     }
 
     if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
