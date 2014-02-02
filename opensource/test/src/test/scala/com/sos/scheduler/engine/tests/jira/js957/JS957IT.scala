@@ -1,46 +1,57 @@
 package com.sos.scheduler.engine.tests.jira.js957
 
 import JS957IT._
+import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderFinishedEvent}
-import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.SchedulerTest.shortTimeout
-import com.sos.scheduler.engine.test.TestSchedulerController
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestSchedulerController}
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
 
 /** Jira-Tickets JS-956 und JS-957. */
 @RunWith(classOf[JUnitRunner])
-final class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with EventHandlerAnnotated {
+final class JS957IT extends FunSuite {
 
-  private lazy val controller = TestSchedulerController(
-    TestConfiguration(
-      testClass = getClass,
-      logCategories = "scheduler java.stackTrace-",
-      database = Some(DefaultDatabaseConfiguration(closeDelay = 60.s))))
+  private val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    logCategories = "scheduler java.stackTrace-",
+    database = Some(DefaultDatabaseConfiguration(closeDelay = 60.s)))
 
-  after {
-    controller.close()
+  test("Order should start once, and after Scheduler abort and restart, order should continue starting") {
+    autoClosing(ProvidesTestEnvironment(testConfiguration)) { envProvider =>
+      envProvider.runScheduler() { implicit controller =>
+        autoClosing(controller.newEventPipe()) { eventPipe =>
+          controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(repeatOrderKey)
+          controller.scheduler executeXml ModifyOrderCommand(repeatOrderKey, title = Some(alteredTitle))
+          repeatOrder.title shouldEqual alteredTitle
+          eventPipe.nextKeyed[OrderFinishedEvent](repeatOrderKey)
+          eventPipe.nextKeyed[OrderFinishedEvent](repeatOrderKey)
+          executeShowOrder().toString should include ("<source")
+          simulateAbort()
+        }
+      }
+      envProvider.runScheduler() { implicit controller =>
+        autoClosing(controller.newEventPipe()) { eventPipe =>
+          repeatOrder.title shouldEqual alteredTitle
+          eventPipe.nextKeyed[OrderFinishedEvent](repeatOrderKey)
+          eventPipe.nextKeyed[OrderFinishedEvent](repeatOrderKey)
+          eventPipe.nextKeyed[OrderFinishedEvent](repeatOrderKey)
+          executeShowOrder().toString should include ("<source")   // JS-956: Nach Wiederherstellung des Auftrags aus der Datenbank wird weiterhin der Text der Konfigurationsdatei geliefert
+          controller.terminateScheduler()
+        }
+      }
+    }
   }
 
-  test("Order should start once") {
-    val eventPipe = controller.newEventPipe()
-    controller.activateScheduler()
-    controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(repeatOrderKey)
-    repeatOrder.title = alteredTitle
-    repeatOrder.title should equal (alteredTitle)
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
-    executeShowOrder().toString should include ("<source")
-    simulateAbort()
-  }
-
-  private def simulateAbort() {
+  private def simulateAbort()(implicit controller: TestSchedulerController) {
     val connection = controller.newJDBCConnection()
     try {
       val statement = connection.createStatement()
@@ -54,22 +65,11 @@ final class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter
     finally connection.close()
   }
 
-  test("After Scheduler restart, order should continue starting") {
-    val eventPipe = controller.newEventPipe()
-    controller.activateScheduler()
-    repeatOrder.title should equal (alteredTitle)
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
-    eventPipe.nextWithCondition[OrderFinishedEvent] { _.orderKey == repeatOrderKey }
-    executeShowOrder().toString should include ("<source")   // JS-956: Nach Wiederherstellung des Auftrags aus der Datenbank wird weiterhin der Text der Konfigurationsdatei geliefert
-    controller.terminateScheduler()
-  }
-
-  private def executeShowOrder() =
+  private def executeShowOrder()(implicit controller: TestSchedulerController) =
     controller.scheduler executeXml
           <show_order job_chain={repeatOrderKey.jobChainPath.string} order={repeatOrderKey.id.string} what="source"/>
 
-  private def repeatOrder =
+  private def repeatOrder(implicit controller: TestSchedulerController) =
     controller.scheduler.injector.getInstance(classOf[OrderSubsystem]).order(repeatOrderKey)
 }
 
