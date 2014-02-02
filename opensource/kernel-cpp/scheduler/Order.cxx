@@ -2016,15 +2016,14 @@ void Order::set_payload( const VARIANT& payload )
 
 void Order::set_payload_xml_string( const string& xml_string )
 { 
-    //Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
-
     if( xml_string == "" )
     {
         _payload_xml_string = "";
+        _order_xml_modified = true;
     }
     else
     {
-        set_payload_xml(xml::Document_ptr::from_xml_string(_payload_xml_string).documentElement());
+        set_payload_xml(xml::Document_ptr::from_xml_string(xml_string).documentElement());
     }
 }
 
