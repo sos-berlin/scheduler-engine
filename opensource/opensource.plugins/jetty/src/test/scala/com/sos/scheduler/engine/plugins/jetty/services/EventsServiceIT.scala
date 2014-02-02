@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory
 @RunWith(classOf[JUnitRunner])
 final class EventsServiceIT extends FunSuite with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    testPackage = Some(classOf[JettyPlugin].getPackage))
   private lazy val eventsResource = javaResource(injector).path("TESTONLY/events")
 
   test("Read some events") {

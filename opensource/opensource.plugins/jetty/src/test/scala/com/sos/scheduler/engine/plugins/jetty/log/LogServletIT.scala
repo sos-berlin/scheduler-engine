@@ -20,7 +20,9 @@ import org.slf4j.LoggerFactory
 @RunWith(classOf[JUnitRunner])
 final class LogServletIT extends FunSuite with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(JettyPluginTests.getClass.getPackage))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    testPackage = Some(JettyPluginTests.getClass.getPackage))
 
   private lazy val resource = javaResource(injector)
 

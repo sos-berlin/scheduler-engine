@@ -36,7 +36,7 @@ public class JS428Test extends SchedulerTest {
     }
 
     public JS428Test() {
-        super(new TestConfigurationBuilder().terminateOnError(false).build());
+        super(new TestConfigurationBuilder(JS428Test.class).terminateOnError(false).build());
     }
 
     /**

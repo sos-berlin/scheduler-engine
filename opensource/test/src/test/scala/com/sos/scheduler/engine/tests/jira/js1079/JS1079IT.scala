@@ -27,8 +27,7 @@ import org.scalatest.junit.JUnitRunner
   */
 @RunWith(classOf[JUnitRunner])
 final class JS1079IT extends FunSuite with ScalaSchedulerTest {
-  override protected lazy val testConfiguration = TestConfiguration(
-    binariesDebugMode = Some(CppBinariesDebugMode.release))  // debug ist zu langsam
+
   private val nextUdpSocket = new UdpSocketGenerator
   private lazy val allDirectory = new File(controller.environment.configDirectory, "remote/_all")
   private lazy val serverTcpPort = findRandomFreeTcpPort()

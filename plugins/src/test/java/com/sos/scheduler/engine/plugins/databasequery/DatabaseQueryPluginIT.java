@@ -15,7 +15,7 @@ public final class DatabaseQueryPluginIT extends SchedulerTest {
     private final Duration timeout = Duration.standardSeconds(20);
 
     public DatabaseQueryPluginIT() {
-        super(new TestConfigurationBuilder()
+        super(new TestConfigurationBuilder(DatabaseQueryPluginIT.class)
                 .logCategories("java.stackTrace-")  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
                 .database(DefaultDatabaseConfiguration.forJava())
                 .build());

@@ -21,7 +21,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS806IT extends FunSuite with ScalaSchedulerTest {
 
-  override protected lazy val testConfiguration = TestConfiguration(ignoreError = Set("SCHEDULER-280"))
+  override protected lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    ignoreError = Set("SCHEDULER-280"))
 
   private lazy val liveDirectory = controller.environment.liveDirectory
   private lazy val orderSubsystem = instance[OrderSubsystem]

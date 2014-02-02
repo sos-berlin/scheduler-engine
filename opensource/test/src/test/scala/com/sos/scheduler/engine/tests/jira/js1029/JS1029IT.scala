@@ -19,7 +19,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1029IT extends FunSuite with ScalaSchedulerTest {
 
-  override protected lazy val testConfiguration = TestConfiguration(terminateOnError = false)
+  override protected lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    terminateOnError = false)
 
   if (isUnix) {  // Nur unter Unix kann eine offene Datei gelöscht werden
     test("JobScheduler should handle removed stdout file") {

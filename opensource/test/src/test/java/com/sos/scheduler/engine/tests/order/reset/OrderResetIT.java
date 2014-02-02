@@ -15,7 +15,7 @@ public class OrderResetIT extends SchedulerTest {
     private int touchedCount = 0;
 
     public OrderResetIT() {
-        super(new TestConfigurationBuilder().terminateOnError(false).build());
+        super(new TestConfigurationBuilder(OrderResetIT.class).terminateOnError(false).build());
     }
 
 	@Test

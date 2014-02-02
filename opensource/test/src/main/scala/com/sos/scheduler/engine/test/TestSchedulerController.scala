@@ -33,13 +33,11 @@ with HasCloser
 with HasInjector
 with EventHandlerAnnotated {
 
-  def testClass: Class[_]
-
   def testConfiguration: TestConfiguration
 
   def environment: TestEnvironment
 
-  private val testName = testClass.getName
+  private val testName = testConfiguration.testClass.getName
   protected final lazy val delegate = new SchedulerThreadController(testName, cppSettings(testName, testConfiguration, environment.databaseDirectory))
   private val eventBus: SchedulerEventBus = getEventBus
   private val thread = Thread.currentThread
@@ -210,24 +208,17 @@ object TestSchedulerController {
   final val shortTimeout = 15.s
   private val logger = Logger(getClass)
 
-  def apply(testClass: Class[_]): TestSchedulerController =
-    apply(testClass, TestConfiguration())
-
-  def apply(testClass: Class[_], testConfiguration: TestConfiguration): TestSchedulerController = {
-    val _testClass = testClass
+  def apply(testConfiguration: TestConfiguration): TestSchedulerController = {
     val _testConfiguration = testConfiguration
     new TestSchedulerController with ProvidesTestEnvironment {
-      override def testClass = _testClass
       override lazy val testConfiguration = _testConfiguration
       lazy val environment = testEnvironment
     }
   }
 
-  def apply(testClass: Class[_], testConfiguration: TestConfiguration, testEnvironment: TestEnvironment): TestSchedulerController = {
-    val _testClass = testClass
+  def apply(testConfiguration: TestConfiguration, testEnvironment: TestEnvironment): TestSchedulerController = {
     val _configuration = testConfiguration
     new TestSchedulerController {
-      override def testClass = _testClass
       override lazy val testConfiguration = _configuration
       lazy val environment = testEnvironment
     }

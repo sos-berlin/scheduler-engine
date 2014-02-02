@@ -22,8 +22,7 @@ trait ProvidesTestDirectory extends HasCloser {
   final def testName =
     testClass.getName
 
-  protected def testClass: Class[_] =
-    currentTestClass
+  protected def testClass: Class[_]
 }
 
 private object ProvidesTestDirectory {

@@ -16,7 +16,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS993IT extends FunSuite with ScalaSchedulerTest {
 
-  protected override lazy val testConfiguration = TestConfiguration(terminateOnError = bitness != Bits64)
+  protected override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    terminateOnError = bitness != Bits64)
 
   @volatile private var errorLogged = false
 

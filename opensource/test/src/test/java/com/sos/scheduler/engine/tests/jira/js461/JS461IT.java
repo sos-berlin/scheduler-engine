@@ -38,7 +38,7 @@ public class JS461IT extends SchedulerTest {
 	private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
 
     public JS461IT() {
-        super(new TestConfigurationBuilder().terminateOnError(false).build());
+        super(new TestConfigurationBuilder(JS461IT.class).terminateOnError(false).build());
     }
 
 	@Test

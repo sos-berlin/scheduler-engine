@@ -24,7 +24,9 @@ import org.scalatest.junit.JUnitRunner
 final class JS1048IT extends FreeSpec {
 
   private lazy val testConfiguration =
-    TestConfiguration(database = Some(DefaultDatabaseConfiguration()))
+    TestConfiguration(
+      testClass = getClass,
+      database = Some(DefaultDatabaseConfiguration()))
 
   "After JobScheduler restart with an unchanged .order.xml, a previous state should remain" in {
     autoClosing(ProvidesTestEnvironment(testConfiguration)) { envProvider =>

@@ -90,12 +90,12 @@ object TestEnvironment {
   private val jobJavaOptions = "-Xms5m -Xmx10m"
   private val configSubdir = "config"
 
-  def apply(testClass: Class[_], configuration: TestConfiguration, directory: File) =
+  def apply(testConfiguration: TestConfiguration, directory: File) =
     new TestEnvironment(
-      resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
+      resourcePath = new ResourcePath(testConfiguration.testPackage getOrElse testConfiguration.testClass.getPackage),
       directory = directory,
-      nameMap = configuration.resourceNameMap.toMap,
-      fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
+      nameMap = testConfiguration.resourceNameMap.toMap,
+      fileTransformer = testConfiguration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
   private def libraryPathEnv(directory: File): String = {

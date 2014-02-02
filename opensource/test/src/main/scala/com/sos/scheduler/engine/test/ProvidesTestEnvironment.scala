@@ -10,11 +10,13 @@ import org.joda.time.Duration
 
 trait ProvidesTestEnvironment extends ProvidesTestDirectory {
 
-  lazy val testConfiguration =
-    TestConfiguration()
+  final def testClass =
+    testConfiguration.testClass
+
+  protected def testConfiguration: TestConfiguration
 
   lazy val testEnvironment =
-    TestEnvironment(testClass, testConfiguration, testDirectory)
+    TestEnvironment(testConfiguration, testDirectory)
 
   private lazy val entityManagerFactory = {
     val properties: Map[String, String] =
@@ -32,7 +34,7 @@ trait ProvidesTestEnvironment extends ProvidesTestDirectory {
   }
 
   def newTestSchedulerController() =
-    TestSchedulerController(testClass, testConfiguration, testEnvironment)
+    TestSchedulerController(testConfiguration, testEnvironment)
 
   def runScheduler[A](activate: Boolean = true)(f: TestSchedulerController => A): A = {
     val controller = newTestSchedulerController()
@@ -50,12 +52,12 @@ trait ProvidesTestEnvironment extends ProvidesTestDirectory {
 }
 
 object ProvidesTestEnvironment {
-  def runScheduler[A](testConfiguration: TestConfiguration = TestConfiguration(), activate: Boolean = true)(f: TestSchedulerController => A): A =
-    autoClosing(ProvidesTestEnvironment(testConfiguration)) { env =>
-      env.runScheduler(activate = activate)(f)
-    }
+//  def runScheduler[A](testConfiguration: TestConfiguration, activate: Boolean = true)(f: TestSchedulerController => A): A =
+//    autoClosing(ProvidesTestEnvironment(testConfiguration)) { e =>
+//      e.runScheduler(activate = activate)(f)
+//    }
 
-  def apply(testConfiguration: TestConfiguration = TestConfiguration()) = {
+  def apply(testConfiguration: TestConfiguration) = {
     val conf = testConfiguration
     new ProvidesTestEnvironment {
       override lazy val testConfiguration = conf

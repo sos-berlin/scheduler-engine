@@ -13,13 +13,15 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JobsServiceIT extends FunSuite with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(classOf[JettyPlugin].getPackage))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    testPackage = Some(classOf[JettyPlugin].getPackage))
 
   private lazy val jobsResource = javaResource(injector).path("jobs")
 
   test("Read job list") {
     val xml = jobsResource.accept(TEXT_XML_TYPE).get(classOf[String])
-    xml should include ("<job name=\"a\"")
+    xml should include ("""<job name="a"""")
     //assertXpathEvaluatesTo(<job name='a'/>.toString(), "/scheduler/job[@name='a']", xml)
   }
 }

@@ -37,7 +37,7 @@ public final class JS804IT extends SchedulerTest {
 	private boolean result_simple = true;
 
     public JS804IT() {
-        super(new TestConfigurationBuilder().terminateOnError(false).build());
+        super(new TestConfigurationBuilder(JS804IT.class).terminateOnError(false).build());
     }
 	
 	@Test

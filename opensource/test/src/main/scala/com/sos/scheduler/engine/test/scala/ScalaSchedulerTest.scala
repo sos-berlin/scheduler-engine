@@ -17,14 +17,17 @@ trait ScalaSchedulerTest
     with EventHandlerAnnotated
     with ProvidesTestDirectory {
 
+  protected def testClass =
+    getClass
+
   protected lazy val testConfiguration =
-    TestConfiguration()
+    TestConfiguration(testClass = getClass)
 
   protected final lazy val testEnvironment =
-    TestEnvironment(testClass, testConfiguration, testDirectory)
+    TestEnvironment(testConfiguration, testDirectory)
 
   protected lazy final val controller =
-    TestSchedulerController(testClass, testConfiguration, testEnvironment).registerCloseable
+    TestSchedulerController(testConfiguration, testEnvironment).registerCloseable
 
   protected implicit final def implicitController =   // Scala 10.3 mag implicit controller nicht, also so
     controller

@@ -7,12 +7,15 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 
 @RunWith(classOf[JUnitRunner])
 final class SchemaIT
     extends FunSuite
     with HasCloserBeforeAndAfterAll
     with ProvidesTestEnvironment {
+
+  protected lazy val testConfiguration = TestConfiguration(testClass = getClass)
 
   test("XML Schema validation detects invalid scheduler.xml") {
     runScheduler(activate = false) { controller =>

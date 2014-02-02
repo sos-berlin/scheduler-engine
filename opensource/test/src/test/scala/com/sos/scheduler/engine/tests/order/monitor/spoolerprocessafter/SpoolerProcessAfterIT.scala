@@ -29,7 +29,9 @@ final class SpoolerProcessAfterIT extends FunSuite with ScalaSchedulerTest {
 
   private val messageCodes = new MyMutableMultiMap[SchedulerLogLevel, String]
 
-  protected override lazy val testConfiguration = TestConfiguration(terminateOnError = false)
+  protected override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    terminateOnError = false)
 
   private lazy val jobSubsystem = scheduler.instance[JobSubsystem]
   private lazy val orderSubsystem = scheduler.instance[OrderSubsystem]

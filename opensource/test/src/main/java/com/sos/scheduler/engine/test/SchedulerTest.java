@@ -18,11 +18,11 @@ public abstract class SchedulerTest implements EventHandlerAnnotated {
     private final TestSchedulerController controller;
 
     protected SchedulerTest() {
-        this(new TestConfigurationBuilder().build());
+        controller = TestSchedulerController.apply(new TestConfigurationBuilder(getClass()).build());
     }
 
     protected SchedulerTest(TestConfiguration c) {
-        controller = TestSchedulerController.apply(getClass(), c);
+        controller = TestSchedulerController.apply(c);
     }
 
     protected SchedulerTest(TestSchedulerController controller) {

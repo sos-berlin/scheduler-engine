@@ -15,7 +15,7 @@ public final class JS782IT extends SchedulerTest {
     private static final OrderId orderId = new OrderId("testOrder");
 
     public JS782IT() {
-        super(new TestConfigurationBuilder().terminateOnError(false).build());
+        super(new TestConfigurationBuilder(JS782IT.class).terminateOnError(false).build());
     }
 
     @Test public void suspendedOrderMovedToEndStateShouldBeOnBlacklist() {

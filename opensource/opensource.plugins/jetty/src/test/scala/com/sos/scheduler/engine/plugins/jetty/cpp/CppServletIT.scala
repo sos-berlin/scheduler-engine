@@ -28,6 +28,7 @@ final class CppServletIT extends FunSuite with ScalaSchedulerTest {
   private lazy val httpDirectory = testDirectory
 
   override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     testPackage = Some(JettyPluginTests.getClass.getPackage),
     cppSettings = Map(CppSettingName.htmlDir -> httpDirectory.getPath)    // Für Bitmuster-Test
   )

@@ -13,7 +13,9 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JS975IT extends FunSuite with ScalaSchedulerTest {
-  override lazy val testConfiguration = TestConfiguration(database = Some(DefaultDatabaseConfiguration()))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    database = Some(DefaultDatabaseConfiguration()))
 
   test("JS-975 Answer of <show_history job='...' what='log'/> should contain the log element") {
     val eventPipe = controller.newEventPipe()

@@ -14,7 +14,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class SpoolerTaskAfterIT extends FunSuite with ScalaSchedulerTest {
 
-  protected override lazy val testConfiguration = TestConfiguration(terminateOnError = false)
+  protected override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    terminateOnError = false)
 
   test("spooler_task_after should have access to last processed order") {
     scheduler executeXml <order job_chain="/test" id="1"/>
