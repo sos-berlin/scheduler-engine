@@ -635,8 +635,8 @@ string Sos_database_session::convert_texttimestamp( const char** pp, const char*
             return "str_replace(CONVERT(VARCHAR(19)," + arg + ",23),'T',' ')";
 
         case dbms_h2:
-            return "((" + arg + "))||''";   // Funktioniert unter Linux nur mit Locale en_US (LANG=en_US.UTF-8)
-            // Besser, aber funktioniert nicht: ERROR SOS-1343  Datensatz  wird mit dem Feld  zu groß - "DISTRIBUTED_NEXT_TIME String0(2147483647)"   return "FORMATDATETIME(" + arg + ",'yyyy-MM-dd''T''HH:mm:ss')||''";
+            return "((" + arg + ")||'')";   // Funktioniert mit neutralem Locale (LANG=en_US.UTF-8). Bei de_DE liefert H2 ein Dezimalkomma vor den Millisekunden, was zum Fehler führt.
+            //return "formatdatetime(" + arg + ",'yyyy-MM-dd HH:mm:ss','en');
 
         default: 
             return "((" + arg + ")&'')";

@@ -29,6 +29,7 @@
         <test.forkCount>1</test.forkCount>
         <enginedoc.version>${project.version}</enginedoc.version>
         <argLine />
+        <LC_ALL>C</LC_ALL>    <!-- Neutrales Locale für H2Database -->
     </properties>
 
     <profiles>
@@ -513,6 +514,9 @@
                 <configuration>
                     <printSummary>false</printSummary>
                     <forkCount>${test.forkCount}</forkCount>
+                    <environmentVariables>
+                        <LC_ALL>${LC_ALL}</LC_ALL>
+                    </environmentVariables>
                     <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
@@ -528,6 +532,9 @@
                 <version>2.14</version>
                 <configuration>
                     <forkCount>${test.forkCount}</forkCount>
+                    <environmentVariables>
+                        <LC_ALL>${LC_ALL}</LC_ALL>
+                    </environmentVariables>
                     <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
