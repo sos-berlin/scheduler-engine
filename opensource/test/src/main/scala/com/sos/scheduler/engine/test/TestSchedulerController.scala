@@ -46,7 +46,7 @@ with EventHandlerAnnotated {
 
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
-  private var suppressTerminatedOnError = false
+  @volatile private var suppressTerminateOnError = false
 
   private val jdbcUrlOption: Option[String] =
     testConfiguration.database collect {
@@ -142,15 +142,19 @@ with EventHandlerAnnotated {
   }
 
   def suppressingTerminateOnError[A](f: => A): A = {
-    require(!suppressTerminatedOnError)
-    suppressTerminatedOnError = true
-    try f
-    finally suppressTerminatedOnError = false
+    require(!suppressTerminateOnError)
+    suppressTerminateOnError = true
+    try {
+      val result = f
+      getEventBus.dispatchEvents()   // Damit handleEvent(ErrorLogEvent) wirklich jetzt gerufen wird, solange noch suppressTerminateOnError gilt
+      result
+    }
+    finally suppressTerminateOnError = false
   }
 
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
-    if (testConfiguration.terminateOnError && !suppressTerminatedOnError && !testConfiguration.ignoreError(e.getCodeOrNull) && !testConfiguration.errorLogEventIsExpected(e))
+    if (testConfiguration.terminateOnError && !suppressTerminateOnError && !testConfiguration.ignoreError(e.getCodeOrNull) && !testConfiguration.errorLogEventIsExpected(e))
       terminateAfterException(error(s"Test terminated after error log line: ${e.getLine}"))
   }
 
