@@ -243,4 +243,9 @@ object TestSchedulerController {
       case None =>
         None
     }
+
+  object implicits {
+    implicit def testTimeout =
+      TestTimeout (shortTimeout)
+  }
 }

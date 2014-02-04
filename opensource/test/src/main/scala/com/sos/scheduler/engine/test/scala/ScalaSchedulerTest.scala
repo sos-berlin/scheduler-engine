@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest.logger
 import com.sos.scheduler.engine.test.scala.Utils.ignoreException
 import com.sos.scheduler.engine.test.scalatest.HasCloserBeforeAndAfterAll
 import org.scalatest.Suite
+import org.joda.time.Duration
 
 trait ScalaSchedulerTest
     extends Suite
@@ -69,11 +70,11 @@ trait ScalaSchedulerTest
   protected final def scheduler =
     controller.scheduler
 
-  protected implicit val testTimeout =
-    TestTimeout(shortTimeout.toDuration)
+  protected implicit def testTimeout: TestTimeout =
+    TestSchedulerController.implicits.testTimeout
 
-  protected final def shortTimeout =
-    SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
+  protected final def shortTimeout: Duration =
+    TestSchedulerController.shortTimeout
 
   protected final def injector =
     scheduler.injector
