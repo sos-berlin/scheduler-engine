@@ -2402,7 +2402,7 @@ xml::Element_ptr Job_chain::order_xml_file_based_node_or_null(Read_transaction* 
     ptr<Order> dummy_order = _spooler->standing_order_subsystem()->new_order();
     dummy_order->load_record(path(), record);
     string order_xml = dummy_order->db_read_clob(ta, "order_xml");
-    return xml::Document_ptr::from_xml_string(order_xml).documentElement().select_node("file_based");
+    return xml::Document_ptr(order_xml).documentElement().select_node("file_based");
 }
 
 //--------------------------------------------------------------------Job_chain::db_try_delete_order
