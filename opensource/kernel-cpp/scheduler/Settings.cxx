@@ -5,7 +5,7 @@ namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
-const int  default_kbyte_of_db_lob_entry           = INT_MAX;
+const int  default_kbyte_of_db_lob_entry           = INT_MAX / 1024;
 
 //-------------------------------------------------------------------------------Settings::Settings
 
@@ -29,7 +29,7 @@ void Settings::set_defaults(Spooler* spooler) {
 
 void Settings::set_from_variables(const Com_variable_set& p) {
     _keep_order_content_on_reschedule = p.get_bool("scheduler.order.keep_order_content_on_reschedule", true);
-    _max_length_of_blob_entry = p.get_int("scheduler.max_kbyte_of_db_log_entry", default_kbyte_of_db_lob_entry) * 1024;
+    _max_length_of_blob_entry = max(p.get_int("scheduler.max_kbyte_of_db_log_entry", default_kbyte_of_db_lob_entry),0) * 1024;
     _order_distributed_balanced = p.get_bool("scheduler.order.distributed.balanced", false);
 }
 

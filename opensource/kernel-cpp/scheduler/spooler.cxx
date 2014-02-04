@@ -803,6 +803,24 @@ string Spooler::name() const
     return result;
 }
 
+//-------------------------------------------------------------------------Spooler::truncate_head
+string Spooler::truncate_head(const string& str)
+{
+	int max_length = _spooler->settings()->_max_length_of_blob_entry;
+	assert(max_length>=0);
+
+	if (str.length() <= max_length)
+		return str;
+	else {
+		string msg = message_string("SCHEDULER-722", max_length) + "\n";
+		_spooler->log()->debug(msg);
+		msg += "...";
+		size_t tail_start = str.length() - max_length + msg.length();
+		return msg + str.substr( min(tail_start,str.length()) );
+	}
+}
+
+
 //--------------------------------------------------------------------------Spooler::security_level
 
 Security::Level Spooler::security_level( const Ip_address& host )
