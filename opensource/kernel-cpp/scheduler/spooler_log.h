@@ -155,8 +155,6 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     PrefixLogJ&                 typed_java_sister           ();
     string                      obj_name                    () const;
 
-
-
     bool                       _in_log;                     // log2() ist aktiv, Rekursion vermeiden!
 
   protected:
@@ -222,6 +220,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 
     bool                       _remove_after_close;
     list<Event_base*>          _events;
+
 };
 
 //-------------------------------------------------------------------------------------------------
