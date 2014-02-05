@@ -55,7 +55,8 @@ class JS957IT extends FunSuite with OneInstancePerTest with BeforeAndAfter with 
     finally connection.close()
   }
 
-  test("After Scheduler restart, order should continue starting") {
+  // Ignoriert, weil OneInstancePerTest die Konfiguration neu einrichtet und damit orderWithRepeat.order.xml einen neueren Zeitstempel bekommt und über den Datenbanksatz gewinnt. v1.6 hat den korrigierten Test.
+  ignore("After Scheduler restart, order should continue starting") {
     val eventPipe = controller.newEventPipe()
     controller.activateScheduler()
     repeatOrder.getTitle should equal (alteredTitle)
