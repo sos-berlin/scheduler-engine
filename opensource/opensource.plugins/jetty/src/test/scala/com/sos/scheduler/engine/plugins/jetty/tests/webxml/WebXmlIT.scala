@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty.tests.webxml
 
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.{Resources, Files}
-import com.sos.scheduler.engine.common.time.Time
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
@@ -33,7 +33,7 @@ final class WebXmlIT extends FunSuite with ScalaSchedulerTest {
   }
 
   ignore("(for debugging only)") {
-    controller.waitForTermination(Time.of(3600))
+    controller.waitForTermination(1.hours)
   }
 
   test("Web server should deliver integrated resource as without a web.xml") {

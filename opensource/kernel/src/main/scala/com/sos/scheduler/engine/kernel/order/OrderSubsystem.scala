@@ -15,7 +15,7 @@ import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 
 @Singleton
-final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC) extends Subsystem {
+final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC, injector: Injector) extends Subsystem {
 
   private[order] lazy val clusterMemberId = injector.apply[ClusterMemberId]
   private[order] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]

@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.newkernel.schedule
 
 import com.sos.scheduler.engine.common.async.CallQueue
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.newkernel.utils.TimedCallHolder
 import org.joda.time.Instant._
 import org.joda.time.Interval
 
-final class IntervalSelector(schedule: Schedule, callQueue: CallQueue) extends SosAutoCloseable {
+final class IntervalSelector(schedule: Schedule, callQueue: CallQueue) extends AutoCloseable {
   private var currentRunnableInterval: Option[Interval] = None
   private var intervalStartCallHolder = new TimedCallHolder(callQueue)
 

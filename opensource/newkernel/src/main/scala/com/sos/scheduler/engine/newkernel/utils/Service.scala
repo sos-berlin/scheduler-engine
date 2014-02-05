@@ -1,8 +1,6 @@
 package com.sos.scheduler.engine.newkernel.utils
 
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
-
-trait Service extends SosAutoCloseable {
+trait Service extends AutoCloseable {
   private var _started = false
 
   final def start() {

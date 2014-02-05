@@ -4,7 +4,6 @@ import JS973IT._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.order._
@@ -175,7 +174,7 @@ private object JS973IT {
 
   private case class OrderFinishedWithResultEvent(orderKey: OrderKey, result: String) extends OrderEvent
 
-  private class Slave(val extraScheduler: ExtraScheduler, _expectedResult: String) extends SosAutoCloseable {
+  private class Slave(val extraScheduler: ExtraScheduler, _expectedResult: String) extends AutoCloseable {
     def close() {
       logger info s"close start $extraScheduler"
       extraScheduler.close()

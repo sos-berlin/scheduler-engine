@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
+import LogServletIT._
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.javaResource
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

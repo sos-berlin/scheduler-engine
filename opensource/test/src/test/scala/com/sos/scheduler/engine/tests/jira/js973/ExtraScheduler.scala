@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.jira.js973
 
 import ExtraScheduler._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants._
 import java.io.{InputStream, InputStreamReader}
 import java.nio.charset.Charset
@@ -10,7 +9,9 @@ import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.concurrent.promise
 
-final class ExtraScheduler(args: immutable.Seq[String], env: Iterable[(String, String)], tcpPort: Int) extends SosAutoCloseable {
+final class ExtraScheduler(args: immutable.Seq[String], env: Iterable[(String, String)], tcpPort: Int)
+    extends AutoCloseable {
+
   private var process: Process = null
   private val tcpIsReadyPromise = promise[Boolean]()
 

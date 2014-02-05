@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.common.async.CallQueue
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.newkernel.utils.{ThreadService, TimedCallHolder}
 import java.io.File
 import java.nio.charset.Charset
@@ -17,7 +16,7 @@ import org.joda.time.Instant
 final class ShellProcess(
     callQueue: CallQueue,
     processTerminatedHandler: ProcessTerminatedHandler)
-extends SosAutoCloseable {
+extends AutoCloseable {
 
   private var starter: Starter = null
   private var process: Process = null
