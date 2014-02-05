@@ -19,7 +19,9 @@ import scala.collection.mutable
 @RunWith(classOf[JUnitRunner])
 final class JS1052IT extends FunSuite with ScalaSchedulerTest {
   private lazy val supervisorPortNumber = findRandomFreeTcpPort(alternateTcpPortRange)
-  override lazy val testConfiguration = TestConfiguration(mainArguments = List(s"-tcp-port=$supervisorPortNumber"))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    mainArguments = List(s"-tcp-port=$supervisorPortNumber"))
 
   test("JS-1052") {
     val sockets = mutable.Buffer[Socket]()

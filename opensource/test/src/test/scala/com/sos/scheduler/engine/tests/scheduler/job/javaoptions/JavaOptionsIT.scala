@@ -18,6 +18,7 @@ import org.scalatest.junit.JUnitRunner
 final class JavaOptionsIT extends FunSuite with ScalaSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     mainArguments = List("-tcp-port="+ findAvailablePort()))
 
   private val eventPipe = controller.newEventPipe()

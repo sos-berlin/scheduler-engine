@@ -1,10 +1,12 @@
 package com.sos.scheduler.engine.common.time
 
+import java.util.concurrent.TimeUnit
 import org.joda.time.Duration.{millis, standardSeconds, standardHours, standardDays}
 import org.joda.time._
-import scala.annotation.tailrec
-import scala.math.abs
 import org.joda.time.base.AbstractInstant
+import scala.annotation.tailrec
+import scala.concurrent.duration.FiniteDuration
+import scala.math.abs
 
 object ScalaJoda {
   @volatile var extraSleepCount = 0L
@@ -77,6 +79,9 @@ object ScalaJoda {
     def compare(x: Duration, y: Duration) =
       x.getMillis compare y.getMillis
   }
+
+  implicit def jodaToConcurrentDuration(o: Duration) =
+    new FiniteDuration(o.getMillis, TimeUnit.MILLISECONDS)
 
   def sleep(d: Duration) {
     sleep(d.getMillis)

@@ -973,6 +973,12 @@ void Jdbc_file::describe_columns()
               //case jdbc_type_varbinary:
               //case jdbc_type_varchar:         field->
                 default:                        field->set_type( SOS_NEW( String0_type( min( display_size, _max_length ) ) ) );  break;
+                //default: {
+                //    int size = min(display_size, _max_length);
+                //    if (size == INT_MAX && session()->_dbms == dbms_h2)    // So bei %texttimestamp => FORMATDATETIME()
+                //        size = 1024;
+                //    field->set_type( SOS_NEW( String0_type(size) ) );  break;
+                //}
             }
 
             field->add_to( _type );

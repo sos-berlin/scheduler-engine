@@ -113,7 +113,7 @@ Standing_order_subsystem::Standing_order_subsystem( Scheduler* scheduler )
 void Standing_order_subsystem::close()
 {
     set_subsystem_state( subsys_stopped );
-    file_based_subsystem<Order>::close();
+    //file_based_subsystem<Order>::close();   Persistente Aufträge nicht aus DB löschen  TODO file_based_subsystem::close() sollte immer aufgerufen werden.
 }
 
 //---------------------------------------------------Standing_order_subsystem::subsystem_initialize
@@ -138,8 +138,10 @@ bool Standing_order_subsystem::subsystem_load()
 
 bool Standing_order_subsystem::subsystem_activate()
 {
+    _is_activating = true;
     set_subsystem_state( subsys_active );
     file_based_subsystem<Order>::subsystem_activate();
+    _is_activating = false;
     return true;
 }
 
@@ -2342,6 +2344,7 @@ bool Job_chain::on_load()
                                 Z_FUNCTION);
                         int count = load_orders_from_result_set(&ta, &result_set);
                         log()->debug(message_string("SCHEDULER-935", count));
+                        ta.commit(Z_FUNCTION); // If some obsolete orders have to be removed (db_try_delete_non_distributed_order())
                     } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
                 }
 
@@ -2365,7 +2368,7 @@ bool Job_chain::on_load()
 
 //-----------------------------------------------------------Job_chain::load_orders_from_result_set
 
-int Job_chain::load_orders_from_result_set( Read_transaction* ta, Any_file* result_set )
+int Job_chain::load_orders_from_result_set( Transaction* ta, Any_file* result_set )
 {
     int count = 0;
 
@@ -2389,34 +2392,96 @@ int Job_chain::load_orders_from_result_set( Read_transaction* ta, Any_file* resu
 
 //--------------------------------------------------------Job_chain::add_order_from_database_record
 
-Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Record& record )
+Order* Job_chain::add_order_from_database_record(Transaction* ta, const Record& record)
 {
-    string order_id = record.as_string( "id" );
+    string order_id = record.as_string("id");
+    ptr<Order> order = _spooler->standing_order_subsystem()->order_or_null(path(), order_id);
 
-    ptr<Order> order = _spooler->standing_order_subsystem()->order_or_null( path(), order_id );
-    
-    if( order )  
+    bool is_file_based = order != NULL;
+    bool was_file_based = false;
+    bool file_based_has_changed = false;
+
+    if (is_file_based)
     {
-        Z_LOG2( "scheduler", "Order from database changes " << order->path() << "\n" );
-        assert( !order->_job_chain );
-        assert( !order->_task );
+        Z_LOG2("scheduler", "Order from database changes " << order->path() << "\n");
+        assert(!order->_job_chain);
+        assert(!order->_task);
+    }
+
+    xml::Element_ptr node_file_based = order_xml_file_based_node_or_null(ta, record);
+    if (node_file_based && node_file_based.hasAttribute("last_write_time"))
+    {
+        was_file_based = true;
+
+        if (is_file_based)
+        {
+            Time database_timestamp = Time::of_utc_date_time(node_file_based.getAttribute("last_write_time"));
+            Time basefile_timestamp(order->base_file_info()._last_write_time);
+            file_based_has_changed = (database_timestamp != basefile_timestamp);
+        }
+    }
+
+    if (   was_file_based != is_file_based  // XML Datei ist gelöscht oder angelegt worden
+        || file_based_has_changed)          // XML Datei ist geändert worden
+    { 
+        db_try_delete_non_distributed_order(ta, order_id);
     }
     else
     {
-        order = _spooler->standing_order_subsystem()->new_order();
+        if (NULL == order)
+        {
+            assert(!was_file_based && !is_file_based); // War nicht und ist nicht dateibasiert
+            order = _spooler->standing_order_subsystem()->new_order();
+        }
+
+        order->load_record(path(), record);
+        order->load_blobs(ta);
+
+        if (record.as_string("distributed_next_time") != "")
+        {
+            // Wird von load_orders_from_result_set() ignoriert (sollte vielleicht nicht)
+            z::throw_xc("SCHEDULER-389", order->obj_name());
+        }
+
+        add_order(order);
     }
-
-    order->load_record( path(), record );
-    order->load_blobs( ta );
-
-    if( record.as_string( "distributed_next_time" ) != "" )
-    {
-        z::throw_xc( "SCHEDULER-389", order->obj_name() );    // Wird von load_orders_from_result_set() ignoriert (sollte vielleicht nicht)
-    }
-
-    add_order( order );
 
     return order;
+}
+
+
+/*
+    Returns (from column "order_xml" the node <file_based>) or NULL
+*/
+xml::Element_ptr Job_chain::order_xml_file_based_node_or_null(Read_transaction* ta, const Record& record) const
+{
+    ptr<Order> dummy_order = _spooler->standing_order_subsystem()->new_order();
+    dummy_order->load_record(path(), record);
+    string order_xml = dummy_order->db_read_clob(ta, "order_xml");
+    return xml::Document_ptr::from_xml_string(order_xml).documentElement().select_node("file_based");
+}
+
+//--------------------------------------------------------------------Job_chain::db_try_delete_order
+
+void Job_chain::db_try_delete_non_distributed_order(Transaction* outer_transaction, const string& order_id)
+{
+    if (db()->opened()) {
+        bool deleted = false;
+
+        for (Retry_nested_transaction ta(db(), outer_transaction); ta.enter_loop(); ta++) try {
+            deleted = ta.try_execute_single(S() << 
+                "DELETE from " << db()->_orders_tablename << 
+                " where " << db_where_condition() << 
+                " and `id`=" << sql::quoted(order_id) <<
+                " and `distributed_next_time` is null" <<
+                " and `occupying_cluster_member_id` is null", 
+                Z_FUNCTION);
+        }
+        catch (exception& x) { ta.reopen_database_after_error(x, Z_FUNCTION); }
+
+        if (deleted)
+            log()->info(message_string("SCHEDULER-725", order_id));
+    }
 }
 
 //------------------------------------------------------------Job_chain::complete_nested_job_chains
@@ -2568,7 +2633,8 @@ void Job_chain::add_order( Order* order )
     }
     else
     {
-        if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path().to_string() );
+        if( has_order_id( (Read_transaction*)NULL, order->id() ) )
+            z::throw_xc( "SCHEDULER-186", order->obj_name(), path().to_string() );
     }
     
 
@@ -2581,7 +2647,8 @@ void Job_chain::add_order( Order* order )
         order->set_state2( node->order_state() );
     }
 
-    if( ( !order->_suspended || !order->_is_on_blacklist )  &&  !node->is_type( Node::n_job ) )  z::throw_xc( "SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state) );
+    if ((!order->_suspended || !order->_is_on_blacklist) && !node->is_type(Node::n_job))
+        z::throw_xc("SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state));
 
     order->_job_chain      = this;
     order->_job_chain_path = path();

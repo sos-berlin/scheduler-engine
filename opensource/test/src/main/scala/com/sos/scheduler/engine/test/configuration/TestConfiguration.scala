@@ -6,12 +6,14 @@ import com.sos.scheduler.engine.test.ResourceToFileTransformer
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 
 final case class TestConfiguration(
+    testClass: Class[_],
+
     /** Hier werden die Ressourcen für die Scheduler-Konfiguration erwartet: scheduler.xml, factory.ini, Jobs, usw. */
     testPackage: Option[Package] = None,
 
     resourceToFileTransformer: Option[ResourceToFileTransformer] = None,
 
-    resourceNameMap: Iterable[Tuple2[String, String]] = Nil,
+    resourceNameMap: Iterable[(String, String)] = Nil,
 
     binariesDebugMode: Option[CppBinariesDebugMode] = None,
 
@@ -31,3 +33,9 @@ final case class TestConfiguration(
     ignoreError: String => Boolean = _ => false,
 
     cppSettings: Map[CppSettingName, String] = Map())
+
+
+object TestConfiguration {
+  def of(testClass: Class[_]): TestConfiguration =
+    new TestConfiguration(testClass = testClass)
+}

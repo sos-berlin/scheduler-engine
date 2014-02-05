@@ -5,7 +5,6 @@ import _root_.scala.annotation.tailrec
 import _root_.scala.reflect.ClassTag
 import _root_.scala.sys.error
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.data.event.{KeyedEvent, Event}
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.main.event.TerminatedEvent
@@ -15,7 +14,7 @@ import org.joda.time.Instant.now
 import org.joda.time.{ReadableDuration, Duration}
 
 final class EventPipe(eventBus: EventBus, defaultTimeout: Duration)
-extends EventHandlerAnnotated with SosAutoCloseable {
+extends EventHandlerAnnotated with AutoCloseable {
 
   private val queue = new LinkedBlockingQueue[Event]
 

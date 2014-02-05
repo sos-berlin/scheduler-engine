@@ -27,7 +27,7 @@ import javax.persistence._
   * CREATE UNIQUE INDEX PRIMARY_KEY_E ON SCHEDULER_ORDERS ( SPOOLER_ID, JOB_CHAIN, ID )
   * </pre> */
 @Entity
-@Table(name="SCHEDULER_ORDES")
+@Table(name="SCHEDULER_ORDERS")
 @IdClass(classOf[OrderEntityKey])
 class OrderEntity {
   @Column(name=""""SPOOLER_ID"""", nullable=false) @Id

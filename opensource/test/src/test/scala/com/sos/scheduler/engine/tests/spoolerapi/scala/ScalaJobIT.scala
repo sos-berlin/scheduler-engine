@@ -20,7 +20,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class ScalaJobIT extends FunSuite with ScalaSchedulerTest {
 
-  protected override lazy val testConfiguration = TestConfiguration(terminateOnError = false)
+  protected override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    terminateOnError = false)
   private lazy val eventPipe = controller.newEventPipe()
 
   override def onBeforeSchedulerActivation() {

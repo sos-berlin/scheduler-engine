@@ -5,6 +5,7 @@ import _root_.scala.collection.immutable
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.scheduler.engine.common.system.Files.removeDirectoryContentRecursivly
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
@@ -28,6 +29,7 @@ final class TestEnvironment(
   val liveDirectory = configDirectory
   val logDirectory = directory
   val schedulerLog = new File(logDirectory, "scheduler.log")
+  val databaseDirectory = directory
   private var isPrepared = false
 
   private[test] def prepare() {
@@ -39,6 +41,7 @@ final class TestEnvironment(
 
   private def prepareTemporaryConfigurationDirectory() {
     makeDirectories(directory)
+    removeDirectoryContentRecursivly(directory)
     makeDirectories(configDirectory)
     makeDirectories(logDirectory)
     TestEnvironmentFiles.copy(resourcePath, configDirectory, nameMap, fileTransformer)
@@ -87,12 +90,12 @@ object TestEnvironment {
   private val jobJavaOptions = "-Xms5m -Xmx10m"
   private val configSubdir = "config"
 
-  def apply(testClass: Class[_], configuration: TestConfiguration, directory: File) =
+  def apply(testConfiguration: TestConfiguration, directory: File) =
     new TestEnvironment(
-      resourcePath = new ResourcePath(configuration.testPackage getOrElse testClass.getPackage),
+      resourcePath = new ResourcePath(testConfiguration.testPackage getOrElse testConfiguration.testClass.getPackage),
       directory = directory,
-      nameMap = configuration.resourceNameMap.toMap,
-      fileTransformer = configuration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
+      nameMap = testConfiguration.resourceNameMap.toMap,
+      fileTransformer = testConfiguration.resourceToFileTransformer getOrElse StandardResourceToFileTransformer.singleton)
 
   /** Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann. */
   private def libraryPathEnv(directory: File): String = {

@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.test;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.test.configuration.TestConfiguration;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
+import org.joda.time.Duration;
 import org.junit.After;
 import org.junit.Before;
 
@@ -13,16 +13,16 @@ import java.io.File;
 import java.io.IOException;
 
 public abstract class SchedulerTest implements EventHandlerAnnotated {
-    public static final Time shortTimeout = TestSchedulerController.shortTimeout();
+    public static final Duration shortTimeout = TestSchedulerController.shortTimeout();
 
     private final TestSchedulerController controller;
 
     protected SchedulerTest() {
-        this(new TestConfigurationBuilder().build());
+        controller = TestSchedulerController.apply(new TestConfigurationBuilder(getClass()).build());
     }
 
     protected SchedulerTest(TestConfiguration c) {
-        controller = TestSchedulerController.apply(getClass(), c);
+        controller = TestSchedulerController.apply(c);
     }
 
     protected SchedulerTest(TestSchedulerController controller) {

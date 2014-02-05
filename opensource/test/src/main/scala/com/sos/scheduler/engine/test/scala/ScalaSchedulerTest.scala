@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest.logger
 import com.sos.scheduler.engine.test.scala.Utils.ignoreException
 import com.sos.scheduler.engine.test.scalatest.HasCloserBeforeAndAfterAll
 import org.scalatest.Suite
+import org.joda.time.Duration
 
 trait ScalaSchedulerTest
     extends Suite
@@ -17,14 +18,20 @@ trait ScalaSchedulerTest
     with EventHandlerAnnotated
     with ProvidesTestDirectory {
 
+  protected def testClass =
+    getClass
+
   protected lazy val testConfiguration =
-    TestConfiguration()
+    TestConfiguration(testClass = getClass)
 
   protected final lazy val testEnvironment =
-    TestEnvironment(testClass, testConfiguration, testDirectory)
+    TestEnvironment(testConfiguration, testDirectory)
 
   protected lazy final val controller =
-    TestSchedulerController(testClass, testConfiguration, testEnvironment).registerCloseable
+    TestSchedulerController(testConfiguration, testEnvironment).registerCloseable
+
+  protected implicit final def implicitController =   // Scala 10.3 mag implicit controller nicht, also so
+    controller
 
   override protected final def beforeAll() {
     if (testNames.isEmpty) {
@@ -63,8 +70,11 @@ trait ScalaSchedulerTest
   protected final def scheduler =
     controller.scheduler
 
-  protected final def shortTimeout =
-    SchedulerTest.shortTimeout   // Zur komfortableren Benutzung
+  protected implicit def testTimeout: TestTimeout =
+    TestSchedulerController.implicits.testTimeout
+
+  protected final def shortTimeout: Duration =
+    TestSchedulerController.shortTimeout
 
   protected final def injector =
     scheduler.injector

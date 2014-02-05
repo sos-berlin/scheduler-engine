@@ -34,6 +34,7 @@ import scala.xml.XML
 final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     database = Some(DefaultDatabaseConfiguration()),
     logCategories = "java.stackTrace-",  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
     cppSettings = Map(CppSettingName.useJavaPersistence -> "true"))

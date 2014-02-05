@@ -23,6 +23,7 @@ import scala.util.Try
 final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     database = Some(DefaultDatabaseConfiguration()),   // Nur damit die History-Dateien nicht die File-handles aufbrauchen.
     logCategories = "java.stackTrace-",   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
     binariesDebugMode = if (n > 0) Some(CppBinariesDebugMode.release) else None)

@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.persistence.entities.{OrderEntityConverter, Orde
 import javax.inject.Inject
 import javax.persistence.EntityManagerFactory
 
-final class HibernateOrderStore @Inject()(
+final class HibernateOrderStore @Inject private(
    protected val schedulerId: SchedulerId,
    protected val entityManagerFactory: EntityManagerFactory)
 extends AbstractHibernateStore[OrderPersistentState, OrderKey, OrderEntity]

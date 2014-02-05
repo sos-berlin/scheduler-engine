@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.plugins.jms.stress;
 
 import com.sos.scheduler.engine.common.system.OperatingSystem;
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import org.joda.time.Duration;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class StressTest extends SchedulerTest implements TaskInfoListener {
     private static final String providerUrl = "vm://localhost";
 	private static final int ESTIMATED_TASKS = 100;
 	private static final int JOB_RUNTIME_IN_SECONDS = 1;
-	private static final Time MAX_RUNTIME = Time.of(60);
+	private static final Duration MAX_RUNTIME = Duration.standardSeconds(60);
 
     private final CommandBuilder util = new CommandBuilder();
     private int taskFinished = 0;

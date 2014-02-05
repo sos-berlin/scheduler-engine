@@ -12,6 +12,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS1093IT extends FunSuite with ScalaSchedulerTest {
 
   override protected lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     mainArguments = List("-distributed-orders"),
     database = Some(DefaultDatabaseConfiguration()))
 

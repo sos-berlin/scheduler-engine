@@ -1,9 +1,13 @@
 package com.sos.scheduler.engine.eventbus;
 
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.eventbus.annotated.EventSourceMethodEventSubscription;
 import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactory;
-import com.sos.scheduler.engine.data.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +52,19 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     public final synchronized void register(EventSubscription s) {
-        subscribers.put(s.getEventClass(), s);
+        subscribers.put(s.eventClass(), s);
     }
 
-    public final synchronized void unregister(EventSubscription s) {
-        subscribers.remove(s.getEventClass(), s);
+    public final void unregister(EventSubscription s) {
+        boolean ok;
+        synchronized(this) {
+            ok = subscribers.remove(s.eventClass(), s);
+        }
+        if (!ok) logger.debug("unregister unknown '" + s + "'");
+    }
+
+    public final boolean isSubscribed() {
+        return !subscribers.isEmpty();
     }
 
     protected final synchronized ImmutableCollection<Call> calls(Event e) {

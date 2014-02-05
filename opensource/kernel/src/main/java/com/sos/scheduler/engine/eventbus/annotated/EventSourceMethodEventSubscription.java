@@ -33,6 +33,6 @@ public class EventSourceMethodEventSubscription extends MethodEventSubscription 
 
     @Override public String toString() {
         return getMethod().getDeclaringClass().getSimpleName() +"."+ getMethod().getName() +
-                "("+ getEventClass().getSimpleName() +","+ eventSourceClass.getSimpleName() +")";
+                "("+ eventClass().getSimpleName() +","+ eventSourceClass.getSimpleName() +")";
     }
 }

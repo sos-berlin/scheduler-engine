@@ -10,6 +10,7 @@ import org.scalatest.junit.JUnitRunner
 final class NewBehaviourJS856IT extends JS856IT("New behaviour: restore original order state") {
 
   override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     database = Some(DefaultDatabaseConfiguration()),
     logCategories = "java.stackTrace-",   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
     resourceNameMap = List("new-behaviour-scheduler.xml" -> "scheduler.xml"))

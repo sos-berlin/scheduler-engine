@@ -3,21 +3,23 @@ package com.sos.scheduler.engine.tests.jira.js1049
 import JS1049IT._
 import com.google.common.base.Charsets.UTF_8
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem}
+import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
+import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.kernel.variable.VariableSet
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import java.nio.charset.Charset
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.SchedulerTestHelpers
 
 @RunWith(classOf[JUnitRunner])
-final class JS1049IT extends FreeSpec with ScalaSchedulerTest with SchedulerTestHelpers {
+final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
   override def onBeforeSchedulerActivation() {
     for (i <- JobIncludeSettings flatMap { _.includes })
@@ -45,7 +47,7 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest with SchedulerTest
   }
 
   "Job script with include" in {
-    runJobAndWaitForEnd(textIncludeJobPath)
+    runJobAndWaitForEnd(TextIncludeJobPath)
   }
 
   "XML Schema check" in {
@@ -59,13 +61,16 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest with SchedulerTest
       intercept[Exception] { scheduler executeXml "<>" } .getMessage should include ("SAXParseException")
     }
   }
-
-  def job(o: JobPath): Job =
-    instance[JobSubsystem].job(o)
+  
+  "Order.xml_payload" in {
+    controller.getEventBus.awaitingKeyedEvent[OrderFinishedEvent](XmlPayloadOrderKey) {
+      controller.scheduler executeXml OrderCommand(XmlPayloadOrderKey)
+    }
+  }
 }
 
 
-private object JS1049IT {
+object JS1049IT {
   private case class Include(filename: String, encoding: Charset, content: String) {
     override def toString = s"$filename $encoding"
   }
@@ -77,15 +82,16 @@ private object JS1049IT {
     def includes = List(descriptionInclude, scriptInclude)
   }
 
-  private val textIncludeJobPath = JobPath("/test-text-include")
-  private val xmlIncludeJobPath = JobPath("/test-xml-include")
+  private val TextIncludeJobPath = JobPath("/test-text-include")
+  private val XmlIncludeJobPath = JobPath("/test-xml-include")
   private val JobIncludeSettings = List(
     JobIncludeSetting(
-      textIncludeJobPath,
+      TextIncludeJobPath,
       descriptionInclude = Include("test-description.txt", schedulerEncoding, "ö"),
       scriptInclude = Include("test-script.txt", schedulerEncoding, "exit 0")),
     JobIncludeSetting(
-      xmlIncludeJobPath,
+      XmlIncludeJobPath,
       descriptionInclude = Include("test-description.xhtml", UTF_8, "<p>ü</p>"),
       scriptInclude = Include("test-script.xml", UTF_8, "<p>ß</p>")))
+  private val XmlPayloadOrderKey = JobChainPath("/test-xml-payload") orderKey "1"
 }

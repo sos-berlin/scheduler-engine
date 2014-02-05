@@ -6,8 +6,9 @@ import scala.collection.JavaConversions._
 import scala.collection.immutable
 
 /** Für Java. */
-final class TestConfigurationBuilder {
-  private val default = TestConfiguration()
+final class TestConfigurationBuilder(testClass: Class[_]) {
+
+  private val default: TestConfiguration = TestConfiguration(testClass = testClass)
   private var _testPackage = default.testPackage
   private var _resourceToFileTransformer = default.resourceToFileTransformer
   private var _resourceNameMap = default.resourceNameMap
@@ -57,6 +58,7 @@ final class TestConfigurationBuilder {
   }
 
   def build: TestConfiguration = TestConfiguration(
+    testClass = default.testClass,
     testPackage = _testPackage,
     resourceToFileTransformer = _resourceToFileTransformer,
     resourceNameMap = _resourceNameMap,

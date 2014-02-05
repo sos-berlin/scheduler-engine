@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.test
 import ProvidesTestDirectory._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.system.Files._
+import com.sos.scheduler.engine.test.util.TestUtils.currentTestClass
 import java.io.File
 
 trait ProvidesTestDirectory extends HasCloser {
@@ -15,23 +16,15 @@ trait ProvidesTestDirectory extends HasCloser {
         result
       case workDir =>
         new File(workDir).mkdir
-        val result = new File(workDir, testName)
-        makeCleanDirectory(result)
-        result
+        new File(workDir, testName)
     }
 
-  private def testName =
+  final def testName =
     testClass.getName
 
-  protected def testClass: Class[_] =
-    getClass
+  protected def testClass: Class[_]
 }
 
 private object ProvidesTestDirectory {
   private val workDirectoryPropertyName = "com.sos.scheduler.engine.test.directory"
-
-  private def makeCleanDirectory(directory: File) {
-    makeDirectory(directory)
-    removeDirectoryContentRecursivly(directory)
-  }
 }

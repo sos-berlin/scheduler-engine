@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.kernel.supervisor
 import CppWebClient._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 import com.sos.scheduler.engine.common.xml.XmlUtils.loadXml
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.async.{SchedulerThreadCallQueue, CppCall}
@@ -15,7 +14,8 @@ import javax.ws.rs.core.MediaType._
 import scala.util.{Failure, Success}
 
 @ForCpp
-final class CppWebClient @Inject private(schedulerCallQueue: SchedulerThreadCallQueue) extends SosAutoCloseable {
+final class CppWebClient @Inject private(schedulerCallQueue: SchedulerThreadCallQueue)
+    extends AutoCloseable {
 
   private val webClient = Client.create() sideEffect { _.addFilter(new GZIPContentEncodingFilter(false)) }
 

@@ -15,7 +15,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS986IT extends FunSuite with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(database = Some(DefaultDatabaseConfiguration()))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    database = Some(DefaultDatabaseConfiguration()))
 
   test("JS-986 Fix: order.state=end should not suppress stdout in order log") {
     val eventPipe = controller.newEventPipe()

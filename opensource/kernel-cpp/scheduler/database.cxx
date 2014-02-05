@@ -1565,23 +1565,6 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
     return id;
 }
 
-//---------------------------------------------------------------------------Database::truncate_head
-
-string Database::truncate_head( const string& str )
-{
-   int max_length = _spooler->settings()->_max_length_of_blob_entry;
-   string result = str;
-   if( str.length() > max_length ) {
-      string msg = zschimmer::message_string( "SCHEDULER-722", max_length );
-      size_t start = str.length() - max_length - msg.length() - 1;
-      size_t x = str.substr(start).find_first_of("\n");
-      Z_LOG2("jdbc", msg );
-      if (x == string::npos) x = 0;
-      result = msg + str.substr(start + x);
-   }
-   return result;
-}
-
 
 //-------------------------------------------------------------------Transaction::get_variable_text
 

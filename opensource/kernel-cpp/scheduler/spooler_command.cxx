@@ -1284,18 +1284,16 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     ptr<Order> order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
                                                   : job_chain->order( id );
 
-    for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
-        if (!order  &&  job_chain->is_distributed())
+    if (!order  &&  job_chain->is_distributed()) {
+        for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
             order = _spooler->order_subsystem()->load_order_from_database(&ta, job_chain_path, id, Order_subsystem::lo_lock);  // Exception, wenn von einem Scheduler belegt
+        }
+        catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
     }
-    catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
     assert(order);
-
-    order->set_modified( true );
 
     if( modify_order_element.getAttribute( "action" ) == "reset" ) {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
         order->reset();
-        order->set_modified( false );
     }
 
     if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
@@ -1312,10 +1310,11 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
     if( xml::Element_ptr xml_payload_element = modify_order_element.select_node( "xml_payload" ) )
     {
-            order->set_payload_xml( xml_payload_element.first_child_element() );
+        order->set_payload_xml( xml_payload_element.first_child_element() );
     }
 
-    if( priority != "" )  order->set_priority( as_int( priority ) );
+    if( priority != "" )  
+        order->set_priority( as_int( priority ) );
 
     if( state != "" )  
     {
@@ -1326,7 +1325,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     if( modify_order_element.hasAttribute( "end_state" ) )
         order->set_end_state( modify_order_element.getAttribute( "end_state" ) );
 
-    if( at != "" )  order->set_at( Time::of_date_time_with_now( at, _spooler->_time_zone_name ) );
+    if( at != "" )  
+        order->set_at( Time::of_date_time_with_now( at, _spooler->_time_zone_name ) );
 
     if( modify_order_element.hasAttribute( "setback" ) )
     {
@@ -1352,16 +1352,20 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_title( modify_order_element.getAttribute( "title" ) );
     }
 
-    for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
-        if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
-            order->remove_from_job_chain( Order::jc_remove_from_job_chain_stack, &ta );
-            order->close();
-        } else {
-            order->db_update(Order::update_anyway, &ta);
+    if (job_chain && job_chain->orders_are_recoverable() && _spooler->db()->opened()) {
+        order->persist();
+    
+        for (Retry_transaction ta(_spooler->db()); ta.enter_loop(); ta++) try {
+            if (order->finished() && !order->has_base_file() && !order->is_on_blacklist()) {
+                order->remove_from_job_chain( Order::jc_remove_from_job_chain_stack, &ta );
+                order->close();
+            } else {
+                order->db_update(Order::update_anyway, &ta);
+            }
+            ta.commit(Z_FUNCTION);
         }
-        ta.commit(Z_FUNCTION);
+        catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
     }
-    catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_orders_tablename, x), Z_FUNCTION); }
 
     return _answer.createElement( "ok" );
 }

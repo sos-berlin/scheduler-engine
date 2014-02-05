@@ -62,7 +62,6 @@ Order::Order( Standing_order_subsystem* subsystem )
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
     javabridge::has_proxy<Order>(subsystem->spooler()),
     _zero_(this+1)
-    , _is_modified( false )
 {
     _com_log = new Com_log;
     _com_log->set_log( log() );
@@ -318,7 +317,6 @@ void Order::occupy_for_task( Task* task, const Time& now )
     if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_are_recoverable  &&  !_is_in_database  &&  db()->opened() )
     {
         db_insert();
-        _delay_storing_until_processing = false;
     }
 
 
@@ -413,7 +411,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
                         if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                         Any_file blob_file( "-out -binary " + blob_filename );
                         Z_LOG2("jdbc", "writing blob for field " << db()->_order_history_tablename << ".log" << " with len=" << log_text.size() << " (where `history_id`=" << as_string( _history_id ) << ")\n" );
-                        blob_file.put( db()->truncate_head(log_text) );
+                        blob_file.put( _spooler->truncate_head(log_text) );
                         blob_file.close();
                     }
                     catch( exception& x ) 
@@ -592,6 +590,14 @@ void Order::db_show_occupation( Log_level log_level )
     }
 }
 
+//-----------------------------------------------------------------------------------Order::persist
+
+void Order::persist() {
+    if (_job_chain && _job_chain->orders_are_recoverable() && !_is_in_database) {
+        db_try_insert();
+    }
+}
+
 //---------------------------------------------------------------------------------Order::db_insert
 
 void Order::db_insert()
@@ -718,20 +724,18 @@ bool Order::db_try_insert( bool throw_exists_exception )
             if( payload_string != "" )  db_update_clob( &ta, "payload", payload_string );
             //_payload_modified = false;
 
-            xml::Document_ptr order_document = dom( show_for_database_only );
-            xml::Element_ptr  order_element  = order_document.documentElement();
-            if( order_element.hasAttributes()  ||  order_element.firstChild() )
-                db_update_clob( &ta, "order_xml", order_document.xml_string() );
+            string order_xml = database_xml();
+            if (!order_xml.empty())
+                db_update_clob( &ta, "order_xml", order_xml);
 
-            if( _schedule_use->is_defined() )
-            {
-                xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
-                if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml_string() );
-            }
+            string runtime_xml = database_runtime_xml();
+            if (!runtime_xml.empty())
+                db_update_clob( &ta, "run_time", runtime_xml);
 
             ta.commit( Z_FUNCTION );
 
             _is_in_database = true;
+            _delay_storing_until_processing = false;
         }
     }
     catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", db()->_orders_tablename, x ), Z_FUNCTION ); }
@@ -877,21 +881,19 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 {
                     // _schedule_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
                     // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
-                    if( _schedule_use->is_defined() ) 
-                    {
-                        xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
-                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml_string() );
-                                                                                                          else  update[ "run_time" ].set_direct( "null" );
-                    }
-                    else
+                    string runtime_xml = database_runtime_xml();
+                    if (runtime_xml.empty())
                         update[ "run_time" ].set_direct( "null" );
+                    else
+                        db_update_clob( &ta, "run_time", runtime_xml);
 
                     //if( _order_xml_modified )  // Das wird nicht überall gesetzt und sowieso ändert sich das Element fast immer
                     {
-                        xml::Document_ptr order_document = dom( show_for_database_only );
-                        xml::Element_ptr  order_element  = order_document.documentElement();
-                        if( order_element.hasAttributes()  ||  order_element.firstChild() )  db_update_clob( &ta, "order_xml", order_document.xml_string() );
-                                                                                       else  update[ "order_xml" ].set_direct( "null" );
+                        string order_xml = database_xml();
+                        if (order_xml.empty()) 
+                            update[ "order_xml" ].set_direct( "null" );
+                        else
+                            db_update_clob( &ta, "order_xml", order_xml);
                     }
 
                     //if( _payload_modified )
@@ -1096,6 +1098,27 @@ void Order::db_fill_where_clause( sql::Where_clause* where )
     where->and_where_condition( "id"        , id().as_string()      );
 }
 
+//----------------------------------------------------------------------Order::database_runtime_xml
+
+string Order::database_runtime_xml()
+{
+    if (_schedule_use->is_defined()) {
+        xml::Document_ptr doc = _schedule_use->dom_document(show_for_database_only);
+        if (doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes())  
+            return doc.xml_string();
+    }
+    return "";
+}
+
+//------------------------------------------------------------------------------Order::database_xml
+
+string Order::database_xml()
+{
+    xml::Document_ptr order_document = dom(show_for_database_only);
+    xml::Element_ptr  order_element  = order_document.documentElement();
+    return order_element.hasAttributes() || order_element.firstChild()? order_document.xml_string() : "";
+}
+
 //---------------------------------------------------------------------------Order::db_get_ordering
 
 int Order::db_get_ordering( Transaction* ta )
@@ -1249,6 +1272,11 @@ bool Order::on_activate()
     {
         if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), base_file_info()._filename );
 
+        if (!_spooler->standing_order_subsystem()->is_activating())  // Nicht, wenn der Auftrag vom Standing_order_subsystem aktiviert wird. TODO: Der Zeitstempelvergleich aus add_order_from_database_record() sollte mit Typed_folder::on_base_file_changed() zusammenfallen.
+        {
+            job_chain->db_try_delete_non_distributed_order(NULL, _id.as_string());   // Den Datenbanksatz verwerfen wir. Die geänderte File_based .order.xml gilt.
+        }
+        
         place_or_replace_in_job_chain( job_chain );
 
         result = true;
@@ -1372,7 +1400,6 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_touched = element.bool_getAttribute( "touched" );
-    _is_modified = element.bool_getAttribute( "modified" );
 
 
     if( element.hasAttribute( "suspended" ) )
@@ -1589,7 +1616,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         Show_what log_show_what = show_what;
         if( show_what.is_set( show_for_database_only ) )  log_show_what |= show_log;
 
-        if( log  &&  show_what.is_set( show_log ) ) result.append_new_text_element( "log", db()->truncate_head(*log) );     // Protokoll aus der Datenbank
+        if( log  &&  show_what.is_set( show_log ) ) result.append_new_text_element( "log", _spooler->truncate_head(*log) );     // Protokoll aus der Datenbank
         else
         if( _log )  result.appendChild( _log->dom_element( dom_document, log_show_what ) );
     }
@@ -1639,7 +1666,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     if( _is_replacement  )  result.setAttribute( "replacement" , "yes" ),
                             result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
     if( _is_touched      )  result.setAttribute( "touched"     , "yes" );
-    if( _is_modified     )  result.setAttribute( "modified"    , "yes" );
 
     if( start_time().not_zero() )  result.setAttribute( "start_time", start_time().xml_value() );
     if( end_time().not_zero()   )  result.setAttribute( "end_time"  , end_time  ().xml_value() );
@@ -1988,15 +2014,14 @@ void Order::set_payload( const VARIANT& payload )
 
 void Order::set_payload_xml_string( const string& xml_string )
 { 
-    //Z_LOGI2( "scheduler.order", obj_name() << ".xml_payload=" << xml_string << "\n" );
-
     if( xml_string == "" )
     {
         _payload_xml_string = "";
+        _order_xml_modified = true;
     }
     else
     {
-        set_payload_xml(xml::Document_ptr::from_xml_string(_payload_xml_string).documentElement());
+        set_payload_xml(xml::Document_ptr::from_xml_string(xml_string).documentElement());
     }
 }
 
@@ -2398,13 +2423,20 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( _delay_storing_until_processing ) 
         {
-            if( _is_distributed )  assert(0), z::throw_xc( Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
+            if (_is_distributed)
+            {
+                assert(0);
+                // db_try_insert() muss Datenbanksatz prüfen können
+                z::throw_xc(Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible");
+        }
         }
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
         {
-            if( db()->opened() ) {
-                is_new = db_try_insert( exists_exception );       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+            if (db()->opened()) {
+                if (!has_base_file()) {     // Nur nicht-dateibasierte Aufträge werden sofort in die Datenbank geschrieben
+                    is_new = db_try_insert(exists_exception);   // is_new==false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+                }
                 tip_next_node_for_new_distributed_order_state();
             }
         }

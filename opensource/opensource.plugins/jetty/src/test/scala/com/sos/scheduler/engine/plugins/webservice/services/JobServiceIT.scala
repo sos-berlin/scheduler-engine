@@ -13,7 +13,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JobServiceIT extends FunSuite with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(Tests.testPackage))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    testPackage = Some(Tests.testPackage))
 
   private lazy val jobResource = javaResource(injector).path("job").queryParam("job", "a")
 

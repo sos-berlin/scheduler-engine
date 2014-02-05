@@ -29,6 +29,7 @@
         <test.forkCount>1</test.forkCount>
         <enginedoc.version>${project.version}</enginedoc.version>
         <argLine />
+        <LC_ALL>C</LC_ALL>    <!-- Neutrales Locale für H2Database -->
     </properties>
 
     <profiles>
@@ -458,8 +459,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <optimize>true</optimize>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
@@ -508,6 +509,9 @@
                 <configuration>
                     <printSummary>false</printSummary>
                     <forkCount>${test.forkCount}</forkCount>
+                    <environmentVariables>
+                        <LC_ALL>${LC_ALL}</LC_ALL>
+                    </environmentVariables>
                     <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
@@ -523,6 +527,9 @@
                 <version>2.14</version>
                 <configuration>
                     <forkCount>${test.forkCount}</forkCount>
+                    <environmentVariables>
+                        <LC_ALL>${LC_ALL}</LC_ALL>
+                    </environmentVariables>
                     <argLine>-Xms10m -Xmx50m ${argLine}</argLine>  <!-- Sparsame Heap-Zuteilung für die parallelen Prozesse -->
                     <systemPropertyVariables>
                         <java.io.tmpdir>${project.basedir}/target</java.io.tmpdir>
@@ -716,6 +723,10 @@
         <url>http://www.sos-berlin.com/jira/browse/</url>
     </issueManagement-->
 
+    <!-- 
+    	To ensure that always the local (compiled) snapshot is used, we use updatePolicy=never
+    	If you want to check for remote updates you can override the repositories in your pom or use the -U option
+    -->
     <repositories>
         <repository>
             <id>sos-os</id>
@@ -723,7 +734,7 @@
             <url>http://archiva.sos:8080/archiva/repository/sos-os-${osArch}</url>
             <snapshots>
                 <enabled>true</enabled>
-                <!-- updatePolicy>always</updatePolicy -->
+                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
         <repository>
@@ -732,7 +743,7 @@
             <url>http://archiva.sos:8080/archiva/repository/sos</url>
             <snapshots>
                 <enabled>true</enabled>
-                <!-- updatePolicy>always</updatePolicy -->
+                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
     </repositories>

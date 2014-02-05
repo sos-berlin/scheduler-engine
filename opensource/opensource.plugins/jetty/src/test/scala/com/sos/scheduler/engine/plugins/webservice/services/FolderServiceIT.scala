@@ -14,7 +14,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class FolderServiceIT extends FunSuite with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(testPackage = Some(Tests.testPackage))
+  override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
+    testPackage = Some(Tests.testPackage))
 
   private lazy val resource = javaResource(injector).path("folder")
   private val objectMapper = new ObjectMapper

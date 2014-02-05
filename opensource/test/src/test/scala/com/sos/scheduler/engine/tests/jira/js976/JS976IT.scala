@@ -21,6 +21,7 @@ final class JS976IT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration =
     TestConfiguration(
+      testClass = getClass,
       database = Some(
         if (withMySQL) HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=scheduler jdbc:mysql://127.0.0.1/scheduler")
         else DefaultDatabaseConfiguration()))

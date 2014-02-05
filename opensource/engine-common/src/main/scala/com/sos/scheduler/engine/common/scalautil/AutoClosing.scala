@@ -17,8 +17,11 @@ object AutoClosing {
       case t: Throwable =>
         try resource.close()
         catch {
-          case tt: Throwable => logger.error(s"Ignoring double exception while handling exception: $tt", tt)   // Java 7 stellt Throwable.addSuppressed() bereit
-        }
+          case suppressed: Throwable =>
+            t.addSuppressed(suppressed)
+            if (t.getSuppressed.lastOption != Some(suppressed))  // Suppression disabled?
+              logger.error(s"Ignoring double exception while handling exception: $suppressed", suppressed)
+          }
         closeFinally = false
         throw t
     }

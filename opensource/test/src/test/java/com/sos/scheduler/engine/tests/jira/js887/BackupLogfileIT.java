@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.tests.jira.js887;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
+import org.joda.time.Duration;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +20,7 @@ import static junit.framework.Assert.assertTrue;
 
 public class BackupLogfileIT extends SchedulerTest {
 
-    private static final Time timeout = Time.of(30);
+    private static final Duration timeout = Duration.standardSeconds(30);
     private static File testDirectory;
     private static File tempDirWithoutDot;
     private static File tempDirWithDot;

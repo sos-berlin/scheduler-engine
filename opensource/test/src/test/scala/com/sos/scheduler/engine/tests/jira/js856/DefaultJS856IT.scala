@@ -10,6 +10,7 @@ import org.scalatest.junit.JUnitRunner
 final class DefaultJS856IT extends JS856IT("Current default behaviour: keep order state") {
 
   override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     database = Some(DefaultDatabaseConfiguration()),
     logCategories = "java.stackTrace-")   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
 

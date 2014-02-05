@@ -16,6 +16,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS866IT extends FunSuite with ScalaSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(
+      testClass = getClass,
       mainArguments = List("-tcp-port="+ findAvailablePort()),
       terminateOnError = false)
 

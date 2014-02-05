@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.tests.stress.order;
 
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;
+
+import static org.joda.time.Duration.standardHours;
 
 public final class OrderStressIT extends SchedulerTest {
     // In Maven setzen mit -DargLine=-DOrderStressTest.limit=26 (Surefire plugin 2.6), 2010-11-28
@@ -14,7 +15,7 @@ public final class OrderStressIT extends SchedulerTest {
 
     @Test public void test() throws Exception {
         controller().activateScheduler();
-        controller().waitForTermination(Time.of(3600));
+        controller().waitForTermination(standardHours(1));
     }
     
     @EventHandler public void handleEvent(OrderTouchedEvent e) {

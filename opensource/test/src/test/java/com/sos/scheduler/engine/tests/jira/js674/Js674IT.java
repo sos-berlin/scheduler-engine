@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.tests.jira.js674;
 
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.joda.time.Duration;
 
-
-//FIXME Test wiederbeleben!
+//TODO Test wiederbeleben!
 /** Stellt sicher, dass ein Shell-Prozess einen Kind-Prozess mit kill abbrechen kann.
  *
  * @author Joacim Zschimmer
  */
 public class Js674IT extends SchedulerTest {
-    private static final Time myTimeout = Time.of(10+5);   // Länger als der Job im Fehlerfall läuft. Siehe blockedSignal.job.xml
+    private static final Duration myTimeout = Duration.standardSeconds(10 + 5);   // Länger als der Job im Fehlerfall läuft. Siehe blockedSignal.job.xml
 
 
 //    @Test public void test() throws Exception {

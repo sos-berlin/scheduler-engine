@@ -2,9 +2,8 @@ package com.sos.scheduler.engine.common.async
 
 import java.util.concurrent.Callable
 import scala.sys._
-import com.sos.scheduler.engine.common.utils.SosAutoCloseable
 
-trait CallQueue extends SosAutoCloseable {
+trait CallQueue extends AutoCloseable {
 
   def close()
 

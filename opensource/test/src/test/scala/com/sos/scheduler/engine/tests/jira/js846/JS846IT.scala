@@ -14,6 +14,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS846IT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
+    testClass = getClass,
     database = Some(DefaultDatabaseConfiguration()))
 
   for (titleLength <- Seq(201, 10000)) {

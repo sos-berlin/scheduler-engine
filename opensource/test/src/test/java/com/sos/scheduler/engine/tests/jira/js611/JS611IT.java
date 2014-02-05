@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js611;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
+import org.joda.time.Duration;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,7 +19,7 @@ import static com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFi
  * @see <a href="http://www.sos-berlin.com/jira/browse/JS-611">JS-611</a> */
 public final class JS611IT extends SchedulerTest {
 	private static final int maxOrderCount = 10;
-    private static final Time myTimeout = Time.of(maxOrderCount * 2 + 10);
+    private static final Duration myTimeout = Duration.standardSeconds(maxOrderCount * 2 + 10);
 
     private int finishedOrderCount = 0;
 

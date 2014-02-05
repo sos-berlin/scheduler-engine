@@ -139,7 +139,6 @@ struct Order : Com_order,
 
     void                        touch                   ()                                          { _is_touched = true; }
     bool                        is_touched              () const                                    { return _is_touched; }
-    void                    set_modified                ( bool b )                                  { _is_modified = b; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -164,16 +163,17 @@ struct Order : Com_order,
     void                    set_state                   ( const State& );
     void                    set_state1                  ( const State& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
-    State                       state                   ()                                          { return _state; }
+    const State&                state                   () const                                    { return _state; }
     string                      string_state            () const                                    { return _state.as_string(); }
     bool                        state_is_equal          ( const State& state )                      { return _state == state; }
     static void                 check_state             ( const State& );
-    State                       initial_state           ()                                          { return _initial_state; }
+    const State&                initial_state           () const                                    { return _initial_state; }
+    string                      initial_state_string    () const                                    { return _initial_state.as_string(); }
     void                        reset                   ();
 
     void                    set_end_state               ( const State& );
-    State                       end_state               ()                                          { return _end_state; }
-    string                      string_end_state        ()                                          { return _end_state.as_string(); }
+    const State&                end_state               ()                                          { return _end_state; }
+    string                      end_state_string        ()                                          { return _end_state.as_string(); }
 
     void                    set_state_text              ( const string& state_text )                { _state_text = state_text,  _state_text_modified = true; }
     string                      state_text              ()                                          { return _state_text; }
@@ -281,6 +281,7 @@ struct Order : Com_order,
     bool                        on_schedule_to_be_removed();
   //void                        on_schedule_removed     ();
 
+    void                        persist                 ();
     void                        db_insert               ();
     bool                        db_try_insert           ( bool throw_exists_exception = false );
     void                        db_insert_order_history_record( Transaction* );
@@ -294,6 +295,8 @@ struct Order : Com_order,
     void                        db_fill_stmt            ( sql::Write_stmt* );
     void                        close_log_and_write_history();
     string                      calculate_db_distributed_next_time();
+    string                      database_runtime_xml    ();
+    string                      database_xml            ();
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
     bool                        db_update               ( Update_option u, Transaction* outer_transaction = NULL )              { return db_update2( u, false, outer_transaction ); }
@@ -355,7 +358,6 @@ struct Order : Com_order,
     ptr<Web_service>           _web_service;
 
     bool                       _is_touched;             // Von einer Task ber�hrt
-    bool                       _is_modified;            // Wenn Scheduler beendet wird, Order in DB halten, falls Order vom user modifiziert wurde
     int                        _setback_count;
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
@@ -863,6 +865,7 @@ struct Job_chain : Com_job_chain,
 
     void                        database_read_record        (const Record&);
     void                        database_read_node_record   (job_chain::Node*, const Record&);
+    void                        db_try_delete_non_distributed_order(Transaction* outer_transaction, const string& order_id);
     string                      db_where_condition          () const;
 
     // F�r verschachtelte Jobketten, deren Auftragskennungsr�ume verbunden sind:
@@ -899,8 +902,9 @@ struct Job_chain : Com_job_chain,
     void                        database_record_store       ();
     void                        database_record_remove      ();
     void                        database_record_load        ( Read_transaction* );
-    int                         load_orders_from_result_set ( Read_transaction*, Any_file* result_set );
-    Order*                      add_order_from_database_record( Read_transaction*, const Record& );
+    int                         load_orders_from_result_set ( Transaction*, Any_file* result_set );
+    Order*                      add_order_from_database_record( Transaction*, const Record& );
+    xml::Element_ptr            order_xml_file_based_node_or_null(Read_transaction*, const Record&) const;
 
 
     friend struct               Order;
@@ -1135,6 +1139,13 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     Absolute_path               make_path                   ( const Absolute_path& job_chain_path, const string& order_id ) const;
 
   //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+    
+    bool is_activating() const {
+        return _is_activating;
+    }
+
+  private:
+    bool _is_activating;
 };
 
 inline ptr<Standing_order_subsystem> new_standing_order_subsystem( Scheduler* scheduler )           { return Z_NEW( Standing_order_subsystem( scheduler ) ); }

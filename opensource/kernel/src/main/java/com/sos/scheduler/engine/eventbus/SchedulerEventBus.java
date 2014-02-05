@@ -36,6 +36,10 @@ public final class SchedulerEventBus implements EventBus, Runnable {
         hotEventBus.unregister(s);
     }
 
+    public boolean isSubscribed() {
+        return hotEventBus.isSubscribed() || coldEventBus.isSubscribed();
+    }
+
     public void publish(Event e, EventSource source) {
         publish(new EventSourceEvent(e, source));
     }

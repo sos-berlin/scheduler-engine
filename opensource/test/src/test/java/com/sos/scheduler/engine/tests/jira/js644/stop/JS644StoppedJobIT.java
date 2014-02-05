@@ -31,7 +31,7 @@ public final class JS644StoppedJobIT extends SchedulerTest {
     private final Gate<M> threadGate = new Gate<M>();
 
     public JS644StoppedJobIT() {
-        super(new TestConfigurationBuilder().terminateOnError(false).build());     // Wegen SCHEDULER-280  Process terminated with exit code 1 (0x1)
+        super(new TestConfigurationBuilder(JS644StoppedJobIT.class).terminateOnError(false).build());     // Wegen SCHEDULER-280  Process terminated with exit code 1 (0x1)
     }
 
     @Test public void test() throws Exception {

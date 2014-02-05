@@ -14,6 +14,7 @@ struct Order__class : ::zschimmer::javabridge::Class
     Order__class(const string& class_name);
    ~Order__class();
 
+    ::zschimmer::javabridge::Method const _persistState____method;
 
     static const ::zschimmer::javabridge::class_factory< Order__class > class_factory;
 };
@@ -22,7 +23,7 @@ const ::zschimmer::javabridge::class_factory< Order__class > Order__class::class
 
 Order__class::Order__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-{}
+    ,_persistState____method(this, "persistState", "()V"){}
 
 Order__class::~Order__class() {}
 
@@ -41,6 +42,12 @@ Order::~Order() { assign_(NULL); }
 
 
 
+
+void Order::persistState() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Order__class* cls = _class.get();
+    cls->_persistState____method.call(get_jobject(), parameter_list);
+}
 
 
 ::zschimmer::javabridge::Class* Order::java_object_class_() const { return _class.get(); }

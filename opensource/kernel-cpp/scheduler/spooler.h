@@ -430,7 +430,8 @@ struct Spooler : Object,
 
     friend struct               Com_spooler;
 
-    void                        check_licence               ();
+	string                      truncate_head(const string& str);
+	void                        check_licence();
     void                        release_com_objects         ();
     void                        load_arg                    ();
     void                        read_ini_filename           ();

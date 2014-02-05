@@ -3,22 +3,23 @@ package com.sos.scheduler.engine.main;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.common.sync.ThrowableMailbox;
 import com.sos.scheduler.engine.common.time.Stopwatch;
-import com.sos.scheduler.engine.common.time.Time;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.CppSettings;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkState;
 
 /** Steuert den {@link SchedulerThread}. */
 public class SchedulerThreadController implements SchedulerController {
     private static final Logger logger = LoggerFactory.getLogger(SchedulerThreadController.class);
-    private static final Time terminationTimeout = Time.of(5);
+    private static final Duration terminationTimeout = Duration.standardSeconds(5);
 
     private final String name;
     private final SchedulerEventBus eventBus = new SchedulerEventBus();
@@ -49,7 +50,7 @@ public class SchedulerThreadController implements SchedulerController {
         terminateScheduler();
         if (!tryJoinThread(terminationTimeout)) {
             logger.warn("Still waiting for JobScheduler termination ("+terminationTimeout+") ...");
-            tryJoinThread(Time.eternal);
+            tryJoinThread(new Duration(Long.MAX_VALUE));
             logger.info("JobScheduler has been terminated after "+stopwatch);
         }
         controllerBridge.close();
@@ -80,21 +81,21 @@ public class SchedulerThreadController implements SchedulerController {
         try {
             controllerBridge.terminate();
         } catch (CppProxyInvalidatedException x) {
-            logger.debug("controllerBridge.terminate()", x);
+            logger.debug("controllerBridge.terminate() Exception ignored: " + x);
         }
     }
 
-    @Override public final boolean tryWaitForTermination(Time timeout) {
+    @Override public final boolean tryWaitForTermination(Duration timeout) {
         checkIsStarted();
         boolean result = tryJoinThread(timeout);
         throwableMailbox.throwUncheckedIfSet();
         return result;
     }
 
-    private boolean tryJoinThread(Time timeout) {
+    private boolean tryJoinThread(Duration timeout) {
         try {
-            if (timeout == Time.eternal)  thread.join();
-            else timeout.unit.timedJoin(thread, timeout.value);
+            if (timeout.getMillis() == Long.MAX_VALUE)  thread.join();
+            else TimeUnit.MILLISECONDS.timedJoin(thread, timeout.getMillis());
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
         return !thread.isAlive();
