@@ -2377,17 +2377,17 @@ Order* Job_chain::add_order_from_database_record(Transaction* ta, const Record& 
         if (NULL == order)
         {
             assert(!was_file_based && !is_file_based); // War nicht und ist nicht dateibasiert
-        order = _spooler->standing_order_subsystem()->new_order();
-    }
+            order = _spooler->standing_order_subsystem()->new_order();
+        }
 
         order->load_record(path(), record);
         order->load_blobs(ta);
 
         if (record.as_string("distributed_next_time") != "")
-    {
+        {
             // Wird von load_orders_from_result_set() ignoriert (sollte vielleicht nicht)
             z::throw_xc("SCHEDULER-389", order->obj_name());
-    }
+        }
 
         add_order(order);
     }
