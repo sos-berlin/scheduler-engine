@@ -15,6 +15,8 @@ class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends
   val cppClassClass = new CppClassClass(this)
   val cppObjectClass = if (javaClass == classOf[String]) new StringCppObjectClass(this)  else new CppObjectClass(this)
 
+  require(!(name.fullName contains '$'), s"Class $name Dollar-sign '$$' not allowed in C++ (for example gcc on AIX)")
+
   val cppConstructors = {
     val signatures = validConstructors(javaClass) filter { c => parameterTypesAreKnown(c.getParameterTypes) } map ProcedureSignature.apply
     signatures.sorted map { new CppConstructor(this, _) }

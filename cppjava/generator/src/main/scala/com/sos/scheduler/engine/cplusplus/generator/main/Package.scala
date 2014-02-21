@@ -34,10 +34,12 @@ object Package {
     c.getPackage != classOf[CppProxy].getPackage
 
   private def classIsForCpp(c: Class[_]) =
-    c.getAnnotation(classOf[ForCpp]) != null && !classIsEmptyScalaSingleton(c)
+    c.getAnnotation(classOf[ForCpp]) != null &&
+      !classIsScalaSingleton(c)  // AIX erlaubt kein '$' im Namen.  !classIsEmptyScalaSingleton(c)
 
   private def classIsEmptyScalaSingleton(c: Class[_]) =
-    classIsScalaSingleton(c) && !classHasForCppMethod(c)
+    classIsScalaSingleton(c) &&
+    !classHasForCppMethod(c)
 
   private def classIsScalaSingleton(c: Class[_]) =
     c.getName endsWith "$"
