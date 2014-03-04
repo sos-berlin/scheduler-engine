@@ -11,7 +11,7 @@ extends AbsolutePath {
   def file(baseDirectory: File): File =
     new File(baseDirectory, relativeFilePath)
 
-  /** @return Relativer Pfad mit Schrägstrich beginnend. Großschreibung kann bei manchen Typen abeichen. */
+  /** @return Relativer Pfad mit Schrägstrich beginnend. Großschreibung kann bei manchen Typen abweichen. */
   def relativeFilePath: String =
     if (typ eq FileBasedType.folder) string + "/"
     else string + "." + typ.cppName + ".xml"
