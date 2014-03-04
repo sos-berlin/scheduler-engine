@@ -9,7 +9,10 @@ class TestJob extends Job_impl {
     spooler_log.info("Step")
     spooler_task.set_delay_spooler_process(1)
     n -= 1
-    n > 0
+    if (n == 0) {
+      spooler_task.end()
+      spooler_log.info("TASK ENDS")
+    }
+    true
   }
 }
-
