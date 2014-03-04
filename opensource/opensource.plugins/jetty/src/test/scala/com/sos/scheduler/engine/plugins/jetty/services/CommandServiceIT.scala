@@ -21,7 +21,6 @@ final class CommandServiceIT extends FunSuite with ScalaSchedulerTest {
   private lazy val commandResource = javaResource(injector).path("command")
 
   test("Execute a command via POST") {
-    pending
     val result = commandResource.accept(TEXT_XML_TYPE).`type`(TEXT_XML_TYPE).post(classOf[String], "<show_state><!--äöü--></show_state>")
     checkCommandResult(result)
   }
