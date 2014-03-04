@@ -10,6 +10,7 @@
 #include "com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__SettingsC.h"
+#include "com__sos__scheduler__engine__kernel__cppproxy__Task_subsystemC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Variable_setC.h"
 #include "com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.h"
 #include "com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.h"

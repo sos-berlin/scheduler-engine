@@ -1354,6 +1354,23 @@ static void JNICALL suspend_1machine(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL task_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::task_subsystem()");
+        return Has_proxy::jobject_of(o_->task_subsystem());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jint JNICALL tcp_1port(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -1550,6 +1567,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"stop__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::stop },
     { (char*)"string_need_db__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1need_1db },
     { (char*)"suspend_machine__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::suspend_1machine },
+    { (char*)"task_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Task_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::task_1subsystem },
     { (char*)"tcp_port__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::tcp_1port },
     { (char*)"temp_dir__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::temp_1dir },
     { (char*)"udp_port__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::udp_1port },
@@ -1564,7 +1582,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Spooler >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Spooler >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 88);
+        int ret = env->RegisterNatives(*cls, native_methods, 89);
         if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.SpoolerCImpl");
     }
 

@@ -1899,10 +1899,7 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
                 try
                 {
                     ta.set_transaction_read();
-
-                    string log = file_as_string( "-binary " GZIP_AUTO + db_name() + " -table=" + _job_history_tablename + " -blob=\"LOG\"" 
-                                                " where \"ID\"=" + as_string(task_id), "" );
-                    task_element.append_new_text_element( "log", log );
+                    task_element.append_new_text_element( "log", read_task_log(task_id));
                 }
                 catch( exception& x ) { _log->warn( message_string( "SCHEDULER-268", task_id, x ) ); }  // "FEHLER BEIM LESEN DES LOGS FÜR TASK "
             }
@@ -1911,6 +1908,14 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
     catch( const _com_error& x ) { throw_com_error( x, "Database::read_task" ); }
 
     return task_element;
+}
+
+//--------------------------------------------------------------------------Database::read_task_log
+
+string Database::read_task_log(int task_id)
+{
+    return file_as_string( "-binary " GZIP_AUTO + db_name() + " -table=" + _job_history_tablename + " -blob=\"LOG\"" 
+                           " where \"ID\"=" + as_string(task_id), "" );
 }
 
 //-------------------------------------------------------------------------Job_history::Job_history
