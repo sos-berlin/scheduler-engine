@@ -460,8 +460,10 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            get_Process_class               ( spooler_com::Iprocess_class** );
     STDMETHODIMP            get_Folder_path                 ( BSTR* );
     STDMETHODIMP            get_Configuration_directory     ( BSTR* );
-    STDMETHODIMP            get_Setback_max             ( int* );
-    STDMETHODIMP            get_Script_code                 ( BSTR* );
+	/* this getter is deprecated - use Max_order_setbacks instead */
+	STDMETHODIMP            get_Setback_max(int*);
+	STDMETHODIMP            get_Script_code(BSTR*);
+	STDMETHODIMP            get_Max_order_setbacks(int*);
 
   private:
     Thread_semaphore           _lock;
