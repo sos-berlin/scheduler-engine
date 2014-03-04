@@ -18,13 +18,4 @@ object EngineJacksonConfiguration {
     o.registerModule(DefaultScalaModule)
     o.registerModule(new GuavaModule)
   }
-
-//  object MyModule extends Module {
-//    val getModuleName = getClass.getName
-//    val version = new Version(0, 0, 0, "", "", "")
-//
-//    def setupModule(context: Module.SetupContext) {
-//      context.addSerializers(new SimpleSerializers(java.util.Arrays.asList(IsStringSerializer.singleton)))
-//    }
-//  }
 }

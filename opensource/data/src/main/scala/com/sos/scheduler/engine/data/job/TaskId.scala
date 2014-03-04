@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.data.job
 
-import com.fasterxml.jackson.annotation.{JsonIgnore, JsonCreator, JsonValue}
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import scala.annotation.meta.getter
 import com.sos.scheduler.engine.data.base.GenericInt
+import scala.annotation.meta.getter
 
 @ForCpp
 final case class TaskId(@(ForCpp @getter) value: Int) extends GenericInt {
