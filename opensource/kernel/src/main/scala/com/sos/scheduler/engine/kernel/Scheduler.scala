@@ -39,6 +39,7 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
+import com.sos.scheduler.engine.kernel.util.MavenProperties
 
 @ForCpp
 @Singleton
@@ -196,7 +197,8 @@ with HasInjector {
 
 @ForCpp
 object Scheduler {
-  private final val logger = Logger(getClass)
+  private val logger = Logger(getClass)
+  private val mavenProperties = MavenProperties(getClass)
 
   @ForCpp def of(cppProxy: SpoolerC, @Nullable controllerBridgeOrNull: SchedulerControllerBridge, configurationXml: String) = {
     val controllerBridge = firstNonNull(controllerBridgeOrNull, EmptySchedulerControllerBridge.singleton)
@@ -207,4 +209,17 @@ object Scheduler {
       PluginModule(configurationXml)))
     injector.getInstance(classOf[Scheduler])
   }
+
+  @ForCpp
+  def buildVersion: String =
+    try mavenProperties.buildVersion
+    catch { case e: NoSuchElementException => "" }
+
+  @ForCpp
+  def commitNumber: String =
+    if (mavenProperties.version endsWith "-SNAPSHOT")
+      try mavenProperties.commitNumber
+      catch { case e: NoSuchElementException => "" }
+    else
+      ""
 }

@@ -877,6 +877,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "state"                , state_name() );
     state_element.setAttribute( "log_file"             , _base_log.filename() );
     state_element.setAttribute( "version"              , version_string );
+    state_element.setAttribute_optional( "commitNumber" , SchedulerJ::commitNumber() );    
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _configuration_file_path );
     state_element.setAttribute( "host"                 , _short_hostname );
@@ -2021,8 +2022,11 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
 
-  //_log->info( message_string( "SCHEDULER-900", _version + " \"" + (string)schedulerJ().getVersion() + "\"", _configuration_file_path, getpid() ) );
-    _log->info( message_string( "SCHEDULER-900", _version, _configuration_file_path, getpid() ) );
+    {
+        string b = SchedulerJ::commitNumber();
+        if (!b.empty()) b = " (commit " + b + ")";
+        _log->info( message_string( "SCHEDULER-900", _version + b, _configuration_file_path, getpid() ) );
+    }
     _spooler_start_time = Time::now();
 
 
