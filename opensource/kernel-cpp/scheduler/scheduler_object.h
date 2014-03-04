@@ -112,7 +112,7 @@ struct Scheduler_object
     void                        assert_empty_attribute      ( const xml::Element_ptr&, const string& attribute_name );
     virtual void                self_check                  ()                                      {}
 
-    Prefix_log*                 log                         ()                                      { return _log; }
+    Prefix_log*                 log                         () const                                { return _log; }
     Database*                   db                          () const;
     Job_subsystem*              job_subsystem               () const;
     Task_subsystem*             task_subsystem              () const;
