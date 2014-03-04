@@ -2008,8 +2008,8 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_PROPERTYGET, 12, "java_class_name"               , (Com_method_ptr)&Com_job::get_Java_class_name         , VT_BSTR },
     { DISPATCH_PROPERTYPUT, 13, "delay_order_after_setback"     , (Com_method_ptr)&Com_job::put_Delay_order_after_setback,VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYPUT, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::put_Max_order_setbacks      , VT_EMPTY      , { VT_I4 } },
-	{ DISPATCH_PROPERTYGET, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::get_Max_order_setbacks      , VT_INT        },
-	{ DISPATCH_METHOD     , 15, "clear_delay_after_error"       , (Com_method_ptr)&Com_job::Clear_delay_after_error     , VT_EMPTY      },
+    { DISPATCH_PROPERTYGET, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::get_Max_order_setbacks      , VT_INT        },
+    { DISPATCH_METHOD     , 15, "clear_delay_after_error"       , (Com_method_ptr)&Com_job::Clear_delay_after_error     , VT_EMPTY      },
     { DISPATCH_METHOD     , 16, "Remove"                        , (Com_method_ptr)&Com_job::Remove                      , VT_EMPTY      },
     { DISPATCH_METHOD     , 17, "Execute_command"               , (Com_method_ptr)&Com_job::Execute_command             , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 19, "Process_class"                 , (Com_method_ptr)&Com_job::get_Process_class           , VT_DISPATCH   },
@@ -2017,7 +2017,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_PROPERTYGET, 21, "Configuration_directory"       , (Com_method_ptr)&Com_job::get_Configuration_directory , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 22, "Setback_max"                   , (Com_method_ptr)&Com_job::get_Setback_max             , VT_INT        },
     { DISPATCH_PROPERTYGET, 23, "Script_code"                   , (Com_method_ptr)&Com_job::get_Script_code             , VT_BSTR       },
-	{}
+    {}
 };
 
 #endif
@@ -2453,8 +2453,16 @@ STDMETHODIMP Com_job::get_Configuration_directory( BSTR* result )
 }
 
 //-------------------------------------------------------------------------Com_job::get_Setback_max
+// deprecated
 
 STDMETHODIMP Com_job::get_Setback_max( int* result )
+{
+    return get_Max_order_setbacks(result);
+}
+
+//-------------------------------------------------------------------Com_job::get_Max_order_setbacks
+
+STDMETHODIMP Com_job::get_Max_order_setbacks(int* result)
 {
     HRESULT hr = NOERROR;
 
@@ -2487,24 +2495,6 @@ STDMETHODIMP Com_job::get_Script_code( BSTR* result )
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
-}
-
-//-------------------------------------------------------------------Com_job::get_Max_order_setbacks
-STDMETHODIMP Com_job::get_Max_order_setbacks(int* result)
-{
-	HRESULT hr = NOERROR;
-
-	THREAD_LOCK(_lock)
-		try
-	{
-		if (!_job)  return E_POINTER;
-
-		*result = _job->max_order_setbacks();
-	}
-	catch (const exception&  x)  { hr = _set_excepinfo(x, Z_FUNCTION); }
-	catch (const _com_error& x)  { hr = _set_excepinfo(x, Z_FUNCTION); }
-
-	return hr;
 }
 
 //-------------------------------------------------------------------------------Com_task::_methods

@@ -296,7 +296,9 @@ public class Job extends Idispatch implements HasBean<JobBean>
     public void         set_delay_order_after_setback( int setback_count, String hhmm_ss ) {              com_call( ">delay_order_after_setback", setback_count, hhmm_ss ); }
 
     public void         set_max_order_setbacks  ( int setback_count )               {                     com_call( ">max_order_setbacks"       , new Integer(setback_count) ); }
-    public int          max_order_setbacks      ()                                  { return ((Integer)   com_call( "<max_order_setbacks")).intValue(); }
+
+    @SchedulerGetter
+    public int              max_order_setbacks  ()                                  { return     (Integer)com_call( "<max_order_setbacks"); }
 
     /*+ Entfernt den Job.
       * Der Job wird gestoppt, d.h. laufende Tasks werden beendet, keine neuen werden gestartet.

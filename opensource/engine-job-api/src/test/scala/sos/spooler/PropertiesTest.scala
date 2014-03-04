@@ -116,7 +116,7 @@ object PropertiesTest {
   private case class NormalizedMethod(name: String, resultType: TypeName, parameterTypes: Seq[TypeName])
   extends NormalizedCall {
     override def toString =
-      s"$name(${parameterTypes mkString ", "}): $resultType"
+      s"$name(${parameterTypes mkString ", "}): $resultType (method)"
   }
 
   private case class TypeName(string: String) {
