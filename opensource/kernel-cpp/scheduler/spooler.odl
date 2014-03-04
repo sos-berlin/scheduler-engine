@@ -330,7 +330,7 @@ library Spooler
         HRESULT                 Max_order_setbacks          ( [in] int Setback_count );
 
 		[id(14),propget]
-		HRESULT                 max_order_setbacks          ( [out, retval] int* );
+		HRESULT                 Max_order_setbacks          ( [out, retval] int* );
 
         [id(15)]
         HRESULT                 Clear_delay_after_error     ();
