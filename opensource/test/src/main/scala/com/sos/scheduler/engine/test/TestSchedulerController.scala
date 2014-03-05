@@ -169,7 +169,7 @@ with EventHandlerAnnotated with SosAutoCloseable {
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
     if (configuration.terminateOnError && !configuration.ignoreError(e.getCodeOrNull) && !configuration.errorLogEventIsExpected(e))
-      terminateAfterException(error(s"Test terminated after error log line: ${e.getLine}"))
+      terminateAfterException(new RuntimeException(s"Test terminated after error log line: ${e.getLine}"))
   }
 
   @EventHandler @HotEventHandler
