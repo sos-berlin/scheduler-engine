@@ -146,7 +146,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     stopJobAndWait(orderJobPath)
     tryFetchJobEntity(orderJobPath).get match { case e =>
       e should have (
-        'schedulerId (schedulerId.asString),
+        'schedulerId (schedulerId.string),
         'clusterMemberId ("-"),
         'jobPath (orderJobPath.withoutStartingSlash),
         'stopped (true),

@@ -148,6 +148,6 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
         message.setStringProperty("eventFullName", event.getClass().getName()); // for filtering
 		message.setStringProperty("hostname", getLocalHost().getHostName());
 		message.setStringProperty("port", Integer.toString(schedulerConfiguration.tcpPort()));
-		message.setStringProperty("id", configuration.schedulerId().asString());
+		message.setStringProperty("id", configuration.schedulerId().string());
 	}
 }
