@@ -149,6 +149,20 @@
                 <cpuArchitecture>${os.arch}</cpuArchitecture>
             </properties>
         </profile>
+        <profile>
+            <id>aix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>AIX</name>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>aix</operatingSystem>
+                <osArch>aix-${os.arch}</osArch>
+                <cpuArchitecture>${os.arch}</cpuArchitecture>
+            </properties>
+        </profile>
     </profiles>
 
     <prerequisites>
