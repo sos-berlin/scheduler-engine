@@ -214,9 +214,9 @@ object Scheduler {
     catch { case e: NoSuchElementException => "" }
 
   @ForCpp
-  def commitNumber: String =
+  def versionCommitHash: String =
     if (mavenProperties.version endsWith "-SNAPSHOT")
-      try mavenProperties.commitNumber
+      try mavenProperties.versionCommitHash
       catch { case e: NoSuchElementException => "" }
     else
       ""

@@ -8,7 +8,6 @@ final class MavenProperties(classResource: ClassResource) {
     autoClosing(classResource.getInputStream) { in =>
       val p = new java.util.Properties
       p.load(in)
-      in.close()
       p
     }
 
@@ -20,21 +19,21 @@ final class MavenProperties(classResource: ClassResource) {
 
   def buildVersion: String = {
     val v = version
-    if (v endsWith "-SNAPSHOT") s"$v (git $commitNumber)"
+    if (v endsWith "-SNAPSHOT") s"$v (git $versionCommitHash)"
     else v
   }
 
   def version: String =
     apply("project.version")
 
-  def commitNumber: String =
-    apply("project.commitNumber")
+  def versionCommitHash: String =
+    apply("project.versionCommitHash")
 
   def apply(name: String): String =
     Option(properties.getProperty(name)) getOrElse { throw new NoSuchElementException(s"Unknown property '$name'") }
 
   override def toString =
-    groupId + "/" + artifactId + " (" + version + ")"
+    s"$groupId/$artifactId-$version ($versionCommitHash)"
 }
 
 

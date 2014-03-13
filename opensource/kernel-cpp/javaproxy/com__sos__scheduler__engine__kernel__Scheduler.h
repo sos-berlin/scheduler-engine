@@ -56,7 +56,6 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
 
     static ::javaproxy::java::lang::String buildVersion();
     void cancelCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
-    static ::javaproxy::java::lang::String commitNumber();
     void enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem() const;
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
@@ -69,6 +68,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     void onLoad() const;
     void threadLock() const;
     void threadUnlock() const;
+    static ::javaproxy::java::lang::String versionCommitHash();
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 
