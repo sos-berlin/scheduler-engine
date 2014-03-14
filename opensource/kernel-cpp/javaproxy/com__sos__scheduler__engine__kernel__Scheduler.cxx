@@ -21,7 +21,6 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Static_method const _buildVersion____method;
     ::zschimmer::javabridge::Method const _cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
-    ::zschimmer::javabridge::Static_method const _commitNumber____method;
     ::zschimmer::javabridge::Method const _enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _instance__Ljava_lang_Class_2__method;
@@ -35,6 +34,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _onLoad____method;
     ::zschimmer::javabridge::Method const _threadLock____method;
     ::zschimmer::javabridge::Method const _threadUnlock____method;
+    ::zschimmer::javabridge::Static_method const _versionCommitHash____method;
 
     static const ::zschimmer::javabridge::class_factory< Scheduler__class > class_factory;
 };
@@ -45,7 +45,6 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_buildVersion____method(this, "buildVersion", "()Ljava/lang/String;")
     ,_cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "cancelCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
-    ,_commitNumber____method(this, "commitNumber", "()Ljava/lang/String;")
     ,_enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "enqueueCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_instance__Ljava_lang_Class_2__method(this, "instance", "(Ljava/lang/Class;)Ljava/lang/Object;")
@@ -58,7 +57,8 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_onEnteringSleepState____method(this, "onEnteringSleepState", "()J")
     ,_onLoad____method(this, "onLoad", "()V")
     ,_threadLock____method(this, "threadLock", "()V")
-    ,_threadUnlock____method(this, "threadUnlock", "()V"){}
+    ,_threadUnlock____method(this, "threadUnlock", "()V")
+    ,_versionCommitHash____method(this, "versionCommitHash", "()Ljava/lang/String;"){}
 
 Scheduler__class::~Scheduler__class() {}
 
@@ -91,14 +91,6 @@ void Scheduler::cancelCall(const ::zschimmer::javabridge::proxy_jobject< ::javap
     parameter_list._jvalues[0].l = p0.get_jobject();
     Scheduler__class* cls = _class.get();
     cls->_cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method.call(get_jobject(), parameter_list);
-}
-
-::javaproxy::java::lang::String Scheduler::commitNumber() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Scheduler__class* cls = Scheduler__class::class_factory.clas();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_commitNumber____method.jobject_call(cls->get_jclass(), parameter_list));
-    return result;
 }
 
 void Scheduler::enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const {
@@ -194,6 +186,14 @@ void Scheduler::threadUnlock() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
     cls->_threadUnlock____method.call(get_jobject(), parameter_list);
+}
+
+::javaproxy::java::lang::String Scheduler::versionCommitHash() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = Scheduler__class::class_factory.clas();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_versionCommitHash____method.jobject_call(cls->get_jclass(), parameter_list));
+    return result;
 }
 
 
