@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>parent</artifactId>
-        <version>1.5.4077-SNAPSHOT</version>
+        <version>1.5.4070-SNAPSHOT</version>
         <relativePath>parent</relativePath>
     </parent>
 
