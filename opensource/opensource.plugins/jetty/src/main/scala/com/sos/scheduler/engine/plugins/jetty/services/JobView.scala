@@ -13,7 +13,7 @@ object JobView {
     new JobView(
       descriptionUri = newUri().segment("description").build(),
       configurationUri = newUri().segment("configuration").build(),
-      logSnapshotUri = newUri().segment("log.snapshot").build()
+      logSnapshotUri = newUri().segment("log").build()
     )
   }
 }

@@ -39,7 +39,7 @@ class JobService @Inject private(
   @Produces(Array(TEXT_PLAIN))
   def getDescription = Response.ok(job.description, textPlainVariant).tag(jobTag).build()
 
-  @GET @Path("log.snapshot")
+  @GET @Path("log")
   @Produces(Array(TEXT_PLAIN))
   def getLogSnapshot = Response.ok(job.log.getFile, schedulerTextPlainVariant).cacheControl(noCache).build()
 }

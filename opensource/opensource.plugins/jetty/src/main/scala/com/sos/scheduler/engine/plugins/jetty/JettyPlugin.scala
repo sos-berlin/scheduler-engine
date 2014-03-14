@@ -34,7 +34,6 @@ extends AbstractPlugin {
 
 // jobscheduler/engine/  Übersicht über den Zustand und weitere URIs
 // jobscheduler/engine/log  Hauptprotokoll
-// jobscheduler/engine/log.snapshot  Hauptprotokoll
 // jobscheduler/engine/configuration
 // jobscheduler/engine/folders?folder=PATH?type={folder,job,jobChain,...}&deep={false,true}
 // jobscheduler/engine/{folders,jobs,jobChains}?folder=PATH&deep={false,true}
@@ -47,7 +46,6 @@ extends AbstractPlugin {
 // jobscheduler/engine/order/configuration?jobChain=PATH&order=ORDERID
 // jobscheduler/engine/order/log?jobChain=PATH&order=ORDERID&historyId=...
 // jobscheduler/engine/order/log?jobChain=PATH&order=ORDERID
-// jobscheduler/engine/order/log.snapshot?jobChain=PATH&order=ORDERID
 // jobscheduler/engine/job_chain/configuration?jobChain=PATH
 // jobscheduler/engine/job_chain/state?jobChain=PATH
 // / -> jobscheduler/ -> jobscheduler/engine/
@@ -59,4 +57,3 @@ extends AbstractPlugin {
 // jobscheduler/engine/command  POST
 // jobscheduler/engine/job/configuration?job=PATH => Job-Konfiguration
 // jobscheduler/engine/job/description?job=PATH
-// jobscheduler/engine/job/log.snapshot?job=PATH

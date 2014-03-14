@@ -19,7 +19,7 @@ class OrderService @Inject()(
   private lazy val jobChain = orderSubsystem.jobChain(JobChainPath(jobChainPathString))
   private lazy val order = jobChain.order(orderId)
 
-  @GET @Path("log.snapshot")
+  @GET @Path("log")
   @Produces(Array(MediaType.TEXT_PLAIN))
   def getLogSnapshot = Response.ok(order.log.getFile, schedulerTextPlainVariant).cacheControl(noCache).build()
 }
