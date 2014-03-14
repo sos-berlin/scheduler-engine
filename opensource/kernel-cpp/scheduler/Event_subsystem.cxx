@@ -61,6 +61,10 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
 
 bool Event_subsystem_impl::subsystem_initialize()
 {
+    _eventSubsystemJ.assign_( _spooler->schedulerJ().getEventSubsystem() );
+    assert(_eventSubsystemJ != NULL);
+    _eventSubsystemJ.checkNumberOfEventCodes((int)end_event_code);
+
     _subsystem_state = subsys_initialized;
     return true;
 }
@@ -69,10 +73,6 @@ bool Event_subsystem_impl::subsystem_initialize()
 
 bool Event_subsystem_impl::subsystem_load()
 {
-    _eventSubsystemJ.assign_( _spooler->schedulerJ().getEventSubsystem() );
-    assert(_eventSubsystemJ != NULL);
-    _eventSubsystemJ.checkNumberOfEventCodes((int)end_event_code);
-
     _subsystem_state = subsys_loaded;
     return true;
 }
