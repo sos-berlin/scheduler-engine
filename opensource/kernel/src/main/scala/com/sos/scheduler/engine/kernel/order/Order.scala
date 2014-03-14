@@ -25,6 +25,8 @@ with HasUnmodifiableDelegate[UnmodifiableOrder]
 with OrderPersistence
 with Sister {
 
+  type Path = OrderKey
+
   lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
 
   protected val orderSubsystem = injector.apply[OrderSubsystem]

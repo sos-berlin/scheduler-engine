@@ -23,6 +23,8 @@ final class JobChain(cppProxy: Job_chainC, injector: Injector)
 extends FileBased
 with UnmodifiableJobChain {
 
+  type Path = JobChainPath
+
   def onCppProxyInvalidated() {}
 
   private implicit def entityManagerFactory =

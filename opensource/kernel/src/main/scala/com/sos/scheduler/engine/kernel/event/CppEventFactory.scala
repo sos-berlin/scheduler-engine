@@ -21,16 +21,16 @@ import com.sos.scheduler.engine.kernel.order.Order
   private[event] def newInstance(cppEventCode: CppEventCode, eventSource: EventSource): Event = {
     cppEventCode match {
       case `fileBasedActivatedEvent` =>
-        new FileBasedActivatedEvent(eventSource.asInstanceOf[FileBased].typedPath)
+        new FileBasedActivatedEvent(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedAddedEvent` =>
-        new FileBasedAddedEvent(eventSource.asInstanceOf[FileBased].typedPath)
+        new FileBasedAddedEvent(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedRemovedEvent` =>
-        new FileBasedRemovedEvent(eventSource.asInstanceOf[FileBased].typedPath)
+        new FileBasedRemovedEvent(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedReplacedEvent` =>
-        new FileBasedReplacedEvent(eventSource.asInstanceOf[FileBased].typedPath)
+        new FileBasedReplacedEvent(eventSource.asInstanceOf[FileBased].path)
 
       case `taskStartedEvent` =>
         val task = eventSource.asInstanceOf[Task]

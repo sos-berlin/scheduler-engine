@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.data.folder
 
-trait AbsolutePath
-extends Path {
+import com.sos.scheduler.engine.data.base.IsString
+
+trait AbsolutePath extends IsString {
 
   @Deprecated
   final def asString =
@@ -26,6 +27,18 @@ extends Path {
     assert(s startsWith "/")
     s.substring(1)
   }
+
+  final def assertIsEmptyOrAbsolute() {
+    if (!isEmpty)
+      assertIsAbsolute()
+  }
+
+  final def assertIsAbsolute() {
+    require(isAbsolute, s"Absolute path expected: $toString")
+  }
+
+  final def isAbsolute =
+    string startsWith "/"
 }
 
 
