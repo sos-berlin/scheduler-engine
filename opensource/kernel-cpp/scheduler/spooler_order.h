@@ -239,7 +239,6 @@ struct Order : Com_order,
     void                        handle_changed_schedule ();
     int64                       next_time_millis        ()                                          { return next_time().millis(); }
     Time                        next_time               ();
-    Time                        next_start_time         ( bool first_call = false );
     void                        set_next_start_time     ();
     bool                        is_in_initial_state     ();
     void                    set_task_error              ( const Xc& x )                             { _task_error = x; }
@@ -319,7 +318,9 @@ struct Order : Com_order,
 
 
   private:
-    void                        postprocessing2         ( Job* last_job );
+    Time                        first_start_time();
+    Time                        next_start_time();
+    void                        postprocessing2(Job* last_job);
     xml::Element_ptr            append_calendar_dom_element_for_setback(  const xml::Element_ptr& element, Show_calendar_options* options );
     void                        set_attributes_and_remove_duplicates( const xml::Element_ptr& element, xml::Simple_node_ptr node, xml::Element_ptr setback_element );
     bool                        order_is_removable_or_replaceable();
