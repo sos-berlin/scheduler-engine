@@ -305,6 +305,9 @@ library Spooler
         [id(14),propput]
         HRESULT                 Max_order_setbacks          ( [in] int Setback_count );
 
+        [id(14),propget]
+        HRESULT                 Max_order_setbacks          ( [out, retval] int* );
+
         [id(15)]
         HRESULT                 Clear_delay_after_error     ();
 
@@ -326,6 +329,7 @@ library Spooler
         [id(21),propget]        
         HRESULT                 Configuration_directory     ( [out,retval] BSTR* );
 
+        /* this getter is deprecated - use Max_order_setbacks instead */
         [id(22),propget]
         HRESULT                 Setback_max                 ( [out,retval] int* );
 

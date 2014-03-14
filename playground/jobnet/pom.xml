@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>playground</artifactId>
-        <version>1.6-SNAPSHOT</version>
+        <version>1.6.4070-SNAPSHOT</version>
     </parent>
 
     <artifactId>playground.jobnet</artifactId>

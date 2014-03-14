@@ -154,7 +154,7 @@ with EventHandlerAnnotated {
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
     if (testConfiguration.terminateOnError && !suppressTerminateOnError && !testConfiguration.ignoreError(e.getCodeOrNull) && !testConfiguration.errorLogEventIsExpected(e))
-      terminateAfterException(error(s"Test terminated after error log line: ${e.getLine}"))
+      terminateAfterException(new RuntimeException(s"Test terminated after error log line: ${e.getLine}"))
   }
 
   @EventHandler @HotEventHandler

@@ -2515,7 +2515,7 @@ void Order::set_next_start_time()
     if (is_in_initial_state()) {
         if( _schedule_use->is_defined() )
         {
-            set_setback( next_start_time( true ) );     // Braucht für <schedule start_time_function=""> das Scheduler-Skript
+            set_setback( first_start_time() );     // Braucht für <schedule start_time_function=""> das Scheduler-Skript
         }
         else
             set_setback( Time::never );
@@ -2677,8 +2677,7 @@ void Order::handle_end_state()
     }
     else
     {
-        bool  is_first_call = false; //_schedule_modified;
-        Time  next_start    = next_start_time( is_first_call );
+        Time  next_start    = next_start_time();
         State s             = _outer_job_chain_path != ""? _outer_job_chain_state : _state;
 
         report_event_code(orderFinishedEvent, java_sister());
@@ -3047,78 +3046,85 @@ Time Order::next_time()
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
-// first_call: false, wenn Order endet oder nicht gestartet wurde
-// first_call: true, bevor Order gestartet wird oder sich die Konfigurationsdatei der Order ändert
-
-Time Order::next_start_time( bool first_call )
+Time Order::first_start_time()
 {
     Time result = Time::never;
 
     if( _schedule_use->is_defined() )
     {
         Time now = Time::now();
-
         _schedule_use->log_changed_active_schedule( now );
+        _period = _schedule_use->next_period( now, schedule::wss_next_any_start );
 
-        if( first_call )
+        if( !_period.absolute_repeat().is_eternal() )
         {
-            _period = _schedule_use->next_period( now, schedule::wss_next_any_start );
+            result = _period.next_repeated( now );
 
-            if( !_period.absolute_repeat().is_eternal() )
+            if( result.is_never() )
             {
-                result = _period.next_repeated( now );
-
-                if( result.is_never() )
-                {
-                    _period = _schedule_use->next_period( _period.end(), schedule::wss_next_any_start );
-                    result = _period.begin();
-                }
-            }
-            else
-            {
+                _period = _schedule_use->next_period( _period.end(), schedule::wss_next_any_start );
                 result = _period.begin();
             }
         }
         else
         {
-            result = _period.next_repeated_allow_after_end( now );
-
-            if( result >= _period.end() )       // Periode abgelaufen?
-            {
-                bool period_not_initialized = _period.end().is_never(); // JS-957
-                Period next_period = _schedule_use->next_period( period_not_initialized? Time::now() : _period.end(), schedule::wss_next_any_start );
-                
-                if (result.is_never()) 
-                        result = next_period.begin();  // SOS1219 next_period.begin() kann never sein!??
-                else
-                if (result >= next_period.end()) { // Nächste Periode ist auch abgelaufen?
-                    next_period = _schedule_use->next_period(next_period.end(), schedule::wss_next_any_start);
-                    result = next_period.begin();
-                }
-                else
-                if( !next_period.is_seamless_repeat_of(_period))
-                    result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
-                else {
-                    // Perioden gehen nahtlos ineinander über und in result berechneter repeat-Abstand bleibt erhalten.
-                }
-
-                _period = next_period;
-            }
-
-
-            // Aber gibt es ein single_start vorher?
-
-            Period next_single_start_period = _schedule_use->next_period( now, schedule::wss_next_single_start );
-            if( next_single_start_period._single_start  )
-            {
-                if( result > next_single_start_period.begin() || result < now ) {
-                  _period = next_single_start_period;
-                  result  = next_single_start_period.begin();
-                }
-            }
+            result = _period.begin();
         }
 
         if( result < now )  result = Time(0);
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------------------------Order::next_start_time
+Time Order::next_start_time()
+{
+    Time result = Time::never;
+
+    if (_schedule_use->is_defined())
+    {
+        Time now = Time::now();
+        _schedule_use->log_changed_active_schedule(now);
+
+        if (_period.end() < now) _period = _schedule_use->next_period(Time::now(), schedule::wss_next_any_start);
+        result = _period.next_repeated_allow_after_end(now);
+
+        if (result >= _period.end())       // Periode abgelaufen?
+        {
+            bool period_not_initialized = _period.end().is_never(); // JS-957
+            Period next_period = _schedule_use->next_period(period_not_initialized ? Time::now() : _period.end(), schedule::wss_next_any_start);
+
+            if (result.is_never())
+                result = next_period.begin();  // SOS1219 next_period.begin() kann never sein!??
+            else
+            if (result >= next_period.end()) { // Nächste Periode ist auch abgelaufen?
+                next_period = _schedule_use->next_period(next_period.end(), schedule::wss_next_any_start);
+                result = next_period.begin();
+            }
+            else
+            if (!next_period.is_seamless_repeat_of(_period))
+                result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
+            else {
+                // Perioden gehen nahtlos ineinander über und in result berechneter repeat-Abstand bleibt erhalten.
+            }
+
+            _period = next_period;
+        }
+
+
+        // Aber gibt es ein single_start vorher?
+
+        Period next_single_start_period = _schedule_use->next_period(now, schedule::wss_next_single_start);
+        if (next_single_start_period._single_start)
+        {
+            if (result > next_single_start_period.begin() || result < now) {
+                _period = next_single_start_period;
+                result = next_single_start_period.begin();
+            }
+        }
+
+        if (result < now)  result = Time(0);
     }
 
     return result;

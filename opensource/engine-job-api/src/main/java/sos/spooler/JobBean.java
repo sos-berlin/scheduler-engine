@@ -88,6 +88,10 @@ public final class JobBean implements Bean<Job> {
         delegate.set_max_order_setbacks(setbackCount);
     }
 
+    public int getMax_order_setbacks() {
+        return delegate.max_order_setbacks();
+    }
+
     public void remove() {
         delegate.remove();
     }
@@ -104,6 +108,7 @@ public final class JobBean implements Bean<Job> {
         return delegate.configuration_directory();
     }
 
+    @Deprecated
     public int getSetback_max() {
         return delegate.setback_max();
     }

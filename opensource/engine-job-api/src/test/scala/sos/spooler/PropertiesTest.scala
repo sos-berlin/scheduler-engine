@@ -31,7 +31,7 @@ final class PropertiesTest extends FunSuite {
       val wrongMethods = beanMethods -- javaMethods
 
       for (m <- goodMethods) logger debug s"Good: $beanClassName $m"
-      if (missingMethods.nonEmpty) fail(s"Missing methods in $beanClassName: ${NormalizedCall.toString(missingMethods)}")
+      if (missingMethods.nonEmpty) fail(s"Missing methods in $beanClassName: ${NormalizedCall.toString(missingMethods)} - forgot @SchedulerGetter?")
       if (wrongMethods.nonEmpty) fail(s"Wrong methods in $beanClassName: ${NormalizedCall.toString(wrongMethods)}")
     }
   }
@@ -116,7 +116,7 @@ object PropertiesTest {
   private case class NormalizedMethod(name: String, resultType: TypeName, parameterTypes: Seq[TypeName])
   extends NormalizedCall {
     override def toString =
-      s"$name(${parameterTypes mkString ", "}): $resultType"
+      s"$name(${parameterTypes mkString ", "}): $resultType (method)"
   }
 
   private case class TypeName(string: String) {
