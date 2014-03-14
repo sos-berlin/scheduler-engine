@@ -576,7 +576,6 @@ struct file_based_subsystem : File_based_subsystem
     virtual ptr<FILE_BASED>     new_file_based              ()                                      = 0;
 
 
-
     void close()
     {
         vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
@@ -752,6 +751,9 @@ struct file_based_subsystem : File_based_subsystem
 
         _file_based_map[ file_based->normalized_path() ] = casted_file_based;
         increment_file_based_version();
+
+        if (jobject sister = file_based->java_sister())
+            report_event_code(fileBasedAddedEvent, sister);
     }
 
 
@@ -759,13 +761,16 @@ struct file_based_subsystem : File_based_subsystem
     {
         assert( file_based_or_null( file_based->path() ) );
 
-        FILE_BASED* casted_file_based = dynamic_cast<FILE_BASED*>( file_based );
+        ptr<FILE_BASED> casted_file_based = dynamic_cast<FILE_BASED*>( file_based );
         if( !casted_file_based )  assert(0), z::throw_xc( Z_FUNCTION );
 
         //casted_file_based->log( subsystem_state() < subsys_stopped? log_info : log_debug9, message_string( "SCHEDULER-861", object_type_name() ) );
 
         _file_based_map.erase( casted_file_based->normalized_path() );
         increment_file_based_version();
+
+        if (jobject sister = casted_file_based->java_sister())
+            report_event_code(fileBasedRemovedEvent, sister);
     }
 
 
@@ -781,6 +786,9 @@ struct file_based_subsystem : File_based_subsystem
 
         _file_based_map[ casted_old_file_based->normalized_path() ] = casted_new_file_based;
         increment_file_based_version();
+
+        if (jobject sister = new_file_based->java_sister())
+            report_event_code(fileBasedReplacedEvent, sister);
     }
 
 
@@ -825,6 +833,7 @@ struct Folder_subsystem : Object,
   //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Folder>                 new_file_based              ();
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "folders" ); }
+
 
 
     // directory_observer::Directory_observer::Directory_handler

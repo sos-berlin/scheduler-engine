@@ -6,7 +6,7 @@ import scala.Predef.String
 trait TypedPath
 extends AbsolutePath {
 
-  protected def typ: FileBasedType
+  def typ: FileBasedType
 
   def file(baseDirectory: File): File =
     new File(baseDirectory, relativeFilePath)
