@@ -7,10 +7,11 @@ import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC
 import com.sos.scheduler.engine.kernel.folder.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateTaskStore, HibernateJobStore}
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 import javax.persistence.EntityManagerFactory
 
 @ForCpp
+@Singleton
 final class JobSubsystem @Inject private(cppproxy: Job_subsystemC, injector: Injector)
 extends FileBasedSubsystem {
 
