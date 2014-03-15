@@ -1,8 +1,5 @@
 package com.sos.scheduler.engine.data.base
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-
-@JsonSerialize(using = classOf[GenericIntSerializer])
-trait GenericInt {
+trait GenericInt extends SerializableGenericInt {
   def value: Int
 }
