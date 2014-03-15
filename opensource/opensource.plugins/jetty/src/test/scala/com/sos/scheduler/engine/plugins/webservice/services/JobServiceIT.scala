@@ -29,8 +29,8 @@ final class JobServiceIT extends FunSuite with ScalaSchedulerTest {
     result should equal ("TEST-DESCRIPTION mit Ümläüten")
   }
 
-  test("Read a job snapshot log") {
-    val log = jobResource.path("log.snapshot").accept(TEXT_PLAIN_TYPE).get(classOf[String])
+  test("Read a job log") {
+    val log = jobResource.path("log").accept(TEXT_PLAIN_TYPE).get(classOf[String])
     log should include ("SCHEDULER-893")
   }
 }

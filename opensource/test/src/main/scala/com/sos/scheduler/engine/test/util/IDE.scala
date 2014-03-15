@@ -2,8 +2,10 @@ package com.sos.scheduler.engine.test.util
 
 object IDE {
   def isRunningUnderIDE: Boolean = {
-    val v = Option(System getProperty "sun.java.command") getOrElse ""
-    v.startsWith("com.intellij.") || v.startsWith("org.jetbrains.")
+    (sys.props contains "jobscheduler.ide") || {
+      val mainClassName = sys.props.getOrElse("sun.java.command", "")
+      mainClassName.startsWith("com.intellij.") || mainClassName.startsWith("org.jetbrains.")
+    }
   }
 
 //  private def isRunningUnderMaven: Boolean =

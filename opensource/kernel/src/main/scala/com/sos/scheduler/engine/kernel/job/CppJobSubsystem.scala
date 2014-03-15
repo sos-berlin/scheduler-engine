@@ -10,7 +10,7 @@ import javax.persistence.EntityManagerFactory
 
 @Singleton
 final class CppJobSubsystem @Inject private(cppproxy: Job_subsystemC, injector: Injector)
-    extends JobSubsystem {
+extends JobSubsystem {
 
   private[job] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
   private[job] lazy val jobStore = injector.apply[HibernateJobStore]

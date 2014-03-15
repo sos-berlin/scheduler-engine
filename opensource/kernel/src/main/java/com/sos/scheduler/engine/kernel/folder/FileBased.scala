@@ -11,23 +11,20 @@ import com.sos.scheduler.engine.eventbus.EventSource
 extends Sister
 with EventSource {
 
+  type Path <: TypedPath
+
   /** Jedes Exemplar hat seine eigene UUID. */
   final val uuid = java.util.UUID.randomUUID
 
   @Deprecated final def getUuid = uuid
   @Deprecated final def getFileBasedType = fileBasedType
   @Deprecated final def getPath = path
-  @Deprecated final def getTypedPath = typedPath
+  @Deprecated final def getTypedPath = path
 
   def fileBasedType: FileBasedType
 
-  def path: AbsolutePath
-
-
-  final def typedPath: TypedPath =
-    fileBasedType.typedPath(path.string)
+  def path: Path
 
   override def toString =
-    s"$fileBasedType $path"
+    path.toString
 }
-

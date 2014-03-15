@@ -244,6 +244,7 @@ struct Task : Object,
     Xc_copy                     error                       ()                                      { return _error; }
     bool                        force                       () const                                { return _force_start; }
     const Time&                 at                          () const                                { return _start_at; }
+    const string                log_string                  () const                                { return log()->as_string(); }
     const File_path             stdout_path                 () const                                { return _module_instance->stdout_path(); }
     const File_path             stderr_path                 () const                                { return _module_instance->stderr_path(); }    
 

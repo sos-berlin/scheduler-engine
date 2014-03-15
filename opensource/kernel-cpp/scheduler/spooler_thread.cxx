@@ -65,13 +65,24 @@ void Task_subsystem::build_prioritized_order_job_array()
     }
 }
 
+//-------------------------------------------------------------------------Task_subsystem::task_log
+
+string Task_subsystem::task_log(int task_id) const
+{
+    if (Task* task = get_task_or_null(task_id))
+        return task->log_string();
+    else {
+        return db()->read_task_log(task_id);
+    }
+}
+
 //-----------------------------------------------------------------Task_subsystem::get_task_or_null
 
-ptr<Task> Task_subsystem::get_task_or_null( int task_id )
+ptr<Task> Task_subsystem::get_task_or_null( int task_id ) const
 {
     ptr<Task> result = NULL;
 
-    FOR_EACH_TASK( t, task )  if( task->id() == task_id )  { result = task;  break; }
+    FOR_EACH_TASK_CONST( t, task )  if( task->id() == task_id )  { result = task;  break; }
 
     return result;
 }

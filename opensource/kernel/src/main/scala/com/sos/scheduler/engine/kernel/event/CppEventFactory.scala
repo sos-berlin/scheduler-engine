@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.kernel.event
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.event.AbstractEvent
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent
-import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent
+import com.sos.scheduler.engine.data.folder.{FileBasedReplacedEvent, FileBasedAddedEvent, FileBasedActivatedEvent, FileBasedRemovedEvent}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
@@ -22,10 +21,16 @@ import com.sos.scheduler.engine.kernel.order.Order
   private[event] def newInstance(cppEventCode: CppEventCode, eventSource: EventSource): Event = {
     cppEventCode match {
       case `fileBasedActivatedEvent` =>
-        new FileBasedActivatedEvent(eventSource.asInstanceOf[FileBased].typedPath)
+        new FileBasedActivatedEvent(eventSource.asInstanceOf[FileBased].path)
+
+      case `fileBasedAddedEvent` =>
+        new FileBasedAddedEvent(eventSource.asInstanceOf[FileBased].path)
 
       case `fileBasedRemovedEvent` =>
-        new FileBasedRemovedEvent(eventSource.asInstanceOf[FileBased].typedPath)
+        new FileBasedRemovedEvent(eventSource.asInstanceOf[FileBased].path)
+
+      case `fileBasedReplacedEvent` =>
+        new FileBasedReplacedEvent(eventSource.asInstanceOf[FileBased].path)
 
       case `taskStartedEvent` =>
         val task = eventSource.asInstanceOf[Task]

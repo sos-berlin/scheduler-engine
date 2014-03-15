@@ -21,6 +21,8 @@ with Sister
 with UnmodifiableJob
 with JobPersistence {
 
+  type Path = JobPath
+
   protected val jobSubsystem = injector.apply[JobSubsystem]
 
   private def schedulerThreadCallQueue =

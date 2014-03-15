@@ -1,12 +1,17 @@
 package com.sos.scheduler.engine.kernel.job
 
-import com.sos.scheduler.engine.data.folder.JobPath
 import com.google.inject.ImplementedBy
-import javax.persistence.EntityManagerFactory
+import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.kernel.folder.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateTaskStore, HibernateJobStore}
+import javax.persistence.EntityManagerFactory
 
 @ImplementedBy(classOf[CppJobSubsystem])
-trait JobSubsystem {
+trait JobSubsystem
+extends FileBasedSubsystem {
+
+  type Path = JobPath
+
   def job(path: JobPath): Job
 
   def names: Seq[String]

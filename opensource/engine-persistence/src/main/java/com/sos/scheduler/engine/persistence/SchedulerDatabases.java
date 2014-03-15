@@ -17,7 +17,7 @@ public final class SchedulerDatabases {
     public static final DateTimeZone databaseTimeZone = UTC;
 
     public static String schedulerIdToDatabase(SchedulerId id) {
-        return id.isEmpty()? emptyIdInDatabase : id.asString();
+        return id.isEmpty()? emptyIdInDatabase : id.string();
     }
 
     public static SchedulerId schedulerIdFromDatabase(String id) {

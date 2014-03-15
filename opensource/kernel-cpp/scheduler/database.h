@@ -70,6 +70,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     int                         get_id                  ( const string& variable_name, Transaction* = NULL );
 
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
+    string                      read_task_log           (int task_id);
 
     Transaction*                transaction             ();
     Transaction*                transaction_or_null     ()                                          { return _transaction; }

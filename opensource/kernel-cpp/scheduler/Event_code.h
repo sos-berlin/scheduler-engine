@@ -8,7 +8,9 @@ namespace scheduler {
 
 enum Event_code {
     fileBasedActivatedEvent,
+    fileBasedAddedEvent,
     fileBasedRemovedEvent,
+    fileBasedReplacedEvent,
 
     taskStartedEvent,
     taskEndedEvent,

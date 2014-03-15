@@ -261,8 +261,6 @@ void File_based::remove_now()
     on_remove_now();
     typed_folder()->remove_file_based( this );
     subsystem()->dependencies()->announce_requisite_removed( this ); 
-    if (jobject sister = java_sister())   // Noch hat nicht jede Klasse eine Java-Schwester
-        report_event_code(fileBasedRemovedEvent, sister);
 }
 
 //-------------------------------------------------------------------------------File_based::remove

@@ -8,7 +8,7 @@ namespace scheduler {
 
 //-----------------------------------------------------------------------------------Task_subsystem
 
-struct Task_subsystem: Object, Subsystem
+struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
 {
     Fill_zero                  _zero_;
 
@@ -32,7 +32,8 @@ struct Task_subsystem: Object, Subsystem
 
     void                        add_task                    ( Task* task )                          { _task_set.insert(task);  signal( task->obj_name() ); }
 
-    ptr<Task>                   get_task_or_null            ( int task_id );
+    string                      task_log                    (int task_id) const;
+    ptr<Task>                   get_task_or_null            ( int task_id ) const;
     Task*                       get_next_task               ();
 
     void                        increment_running_tasks     ();

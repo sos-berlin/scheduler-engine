@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers, CommandSubsystem}
-import com.sos.scheduler.engine.kernel.cppproxy.{Order_subsystemC, Job_subsystemC, SpoolerC}
+import com.sos.scheduler.engine.kernel.cppproxy.{Task_subsystemC, Order_subsystemC, Job_subsystemC, SpoolerC}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
@@ -31,6 +31,7 @@ extends ScalaAbstractModule {
     bindInstance(cppProxy)
     provideSingleton[Job_subsystemC] { cppProxy.job_subsystem }
     provideSingleton[Order_subsystemC] { cppProxy.order_subsystem }
+    provideSingleton[Task_subsystemC] { cppProxy.task_subsystem }
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }

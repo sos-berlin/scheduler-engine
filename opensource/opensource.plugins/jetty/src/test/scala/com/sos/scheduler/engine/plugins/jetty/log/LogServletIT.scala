@@ -26,13 +26,17 @@ final class LogServletIT extends FunSuite with ScalaSchedulerTest {
 
   private lazy val resource = javaResource(injector)
 
-  ignore("Read a task log") {
+  test("Read a task log") {
     startLogThread(resource.path("job.log").queryParam("job", "a"))
     for (i <- 1 to 3) {
       Thread.sleep(1000)
       scheduler.executeXml(<start_job job='/a'/>)
     }
     Thread.sleep(100)
+  }
+
+  test("Read a job log") {
+    logReader(resource.path("job/log").queryParam("job", "a").accept(TEXT_PLAIN_TYPE).get(classOf[Reader]))
   }
 
   // Fehler SCHEDULER-291  Error when removing protocol file: ERRNO-13  Permission denied

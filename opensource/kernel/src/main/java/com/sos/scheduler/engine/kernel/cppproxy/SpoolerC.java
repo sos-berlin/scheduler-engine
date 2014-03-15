@@ -90,6 +90,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     Job_subsystemC job_subsystem();
     Job_subsystemC job_subsystem_or_null();
     Order_subsystemC order_subsystem();
+    Task_subsystemC task_subsystem();
 //    Standing_order_subsystem*   standing_order_subsystem    () const;
 //    Schedule_subsystem_interface* schedule_subsystem        () const;
 //    Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }

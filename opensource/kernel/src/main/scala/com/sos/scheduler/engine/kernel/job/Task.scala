@@ -24,6 +24,9 @@ final class Task(cppProxy: TaskC) extends UnmodifiableTask with Sister with Even
   def parameterValue(name: String): String =
     cppProxy.params.get_string(name)
 
+  def logString =
+    cppProxy.log_string
+
   def stdoutFile =
     new File(cppProxy.stdout_path)
 

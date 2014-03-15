@@ -1834,8 +1834,8 @@ void Spooler::destroy_subsystems()
 
 void Spooler::initialize_subsystems()
 {
-    initialize_cluster();
     _event_subsystem           ->switch_subsystem_state( subsys_initialized );
+    initialize_cluster();
     _folder_subsystem          ->switch_subsystem_state( subsys_initialized );
     //_supervisor                ->switch_subsystem_state( subsys_initialized );
     _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );

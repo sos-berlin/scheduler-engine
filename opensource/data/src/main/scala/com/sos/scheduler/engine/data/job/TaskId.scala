@@ -8,6 +8,8 @@ import scala.annotation.meta.getter
 @ForCpp
 final case class TaskId(@(ForCpp @getter) value: Int) extends GenericInt {
 
+  override def toString = string
+
   def string = value.toString
 }
 
