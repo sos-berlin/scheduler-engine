@@ -1044,6 +1044,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native java.lang.String string_need_db__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC task_subsystem() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC result = task_subsystem__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Task_subsystemC task_subsystem__native(long cppReference);
+
+
     @Override public int tcp_port() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

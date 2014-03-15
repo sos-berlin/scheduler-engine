@@ -263,6 +263,7 @@
     <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistentState.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__data__job__TaskPersistentState.cxx" />
     
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Task_subsystemC.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />
