@@ -124,7 +124,7 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-scala_2.10</artifactId>
+            <artifactId>jackson-module-scala_${scala.binaryVersion}</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
