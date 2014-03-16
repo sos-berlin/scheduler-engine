@@ -24,8 +24,9 @@ class CppClass(val javaClass: Class[_], val knownClasses: Set[Class[_]]) extends
 
   val cppMethods = {
     val signatures = if (suppressMethods) Nil else
-      (validMethods(javaClass) filter { m => parameterTypesAreKnown(m.getParameterTypes) && returnTypeIsKnown(m.getReturnType) }
-        map ProcedureSignature.apply)
+      (validMethods(javaClass)
+        filter { m => parameterTypesAreKnown(m.getParameterTypes) && returnTypeIsKnown(m.getReturnType) }
+        map { m ⇒ ProcedureSignature(javaClass, m) })
     signatures.sorted map { new CppMethod(this, _) }
   }
 

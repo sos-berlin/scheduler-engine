@@ -16,7 +16,10 @@ extends JavaModule {
     val simpleName = interface.getSimpleName + suffix
 
     val sisterClass = parameterizedTypeOfRawType(interface.getGenericInterfaces, classOf[CppProxyWithSister[_]]) match {
-      case Some(t) => t.getActualTypeArguments.head.asInstanceOf[Class[_]]
+      case Some(t) => t.getActualTypeArguments.head match {
+        case o: Class[_] ⇒ o
+        case o ⇒ sys.error(s"Unknown sister class '$o' of $interface")
+      }
       case None => classOf[Sister]
     }
 
