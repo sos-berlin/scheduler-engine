@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.folder.{AbsolutePath, JobPath}
+import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.jetty.services.WebServices._
 import javax.inject.Inject
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType._
-import javax.ws.rs.core.Response.Status.NOT_FOUND
+import javax.ws.rs.core.Response.Status.BAD_REQUEST
 import javax.ws.rs.core._
 
 @Path("job")
@@ -22,7 +22,7 @@ class JobService @Inject private(
   private lazy val job =
     try jobSubsystem.job(path)
     catch {
-      case x: CppException if x.getCode == "SCHEDULER-161" => throw new WebApplicationException(x, NOT_FOUND)
+      case x: CppException if x.getCode == "SCHEDULER-161" => throw new WebApplicationException(x, BAD_REQUEST)
     }
 
   private lazy val jobTag = new EntityTag(job.uuid.toString)
