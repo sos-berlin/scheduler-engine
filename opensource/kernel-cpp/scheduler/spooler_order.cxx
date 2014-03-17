@@ -1326,7 +1326,7 @@ bool Order_queue_node::set_action(Action action)
 
 bool Order_queue_node::is_ready_for_order_processing()
 {
-    return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();
+    return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();   // act_next_state durchlassen, damit verteilter Auftrag verschoben werden kann.
 }
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
@@ -4275,7 +4275,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
-    Order* order = first_immediately_processable_order(virgin_is_allowed, now);
+    ptr<Order> order = first_immediately_processable_order(virgin_is_allowed, now);
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
@@ -4284,9 +4284,16 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
     {
         withdraw_distributed_order_request();
 
-        order = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now );
-        // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
-        if( order )  assert( order->_is_distributed );
+        if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
+            assert(o->_is_distributed);
+            if (o->_state != o->_occupied_state) {  // Bei <job_chain_node action="next_state">. Siehe Order::set_state1(), SCHEDULER-859. Order::set_dom() ändert _state, was wir hier speichern.
+                o->_task = NULL;
+                o->db_update(Order::update_and_release_occupation);
+                o->close();
+            } else {
+                order = o;
+            }
+        }
     }
 
 

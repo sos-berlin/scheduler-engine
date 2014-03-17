@@ -868,9 +868,12 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
             {
                 if( !db()->opened() )  break;
 
-                if( update_option == update_and_release_occupation  &&  _history_id  &&  _step_number )
-                    db_update_order_step_history_record( &ta );
-                db_update_order_history_state( &ta );
+                if (_history_id) {
+                    if (update_option == update_and_release_occupation  &&  _step_number) {
+                        db_update_order_step_history_record( &ta );
+                    }
+                    db_update_order_history_state( &ta );
+                }
 
                 update_ok = ta.try_execute_single( update, Z_FUNCTION );
 
@@ -2114,7 +2117,7 @@ void Order::set_state1( const State& order_state )
             if( node != _job_chain->node_from_state( order_state ) )  _log->info( message_string( "SCHEDULER-859", node->order_state().as_string(), order_state ) );
         }
 
-        move_to_node( node );
+        move_to_node( node );  // Wirkt nur für Aufträge im Speicher, also nicht für verteilte. Verteilter Auftrag wird von Order_queue::fetch_and_occupy_order() verschoben.
 
         if( previous_state != _state  &&  ( !_job_chain_node  ||  _job_chain_node->is_type( Node::n_end ) ) )
         {
