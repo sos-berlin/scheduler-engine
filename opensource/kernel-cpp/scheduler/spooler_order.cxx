@@ -541,7 +541,7 @@ void Order_subsystem_impl::reread_distributed_job_chain_from_database(Job_chain*
             S() << "select `path`, `stopped`"
             << "  from " << db()->_job_chains_table.sql_name()
             << "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db())
-            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)   // Only distrubuted job chains
+            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)   // Only distributed job chains
             << (which_job_chain ? "and `path`=" + sql::quoted(which_job_chain->path().without_slash()) : ""),
             Z_FUNCTION);
         while (!result_set.eof()) {
@@ -562,7 +562,7 @@ void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_
             S() << "select `job_chain`, `order_state`, `action`"
             << "  from " << db()->_job_chain_nodes_table.sql_name()
             << "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db())
-            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)  // Only distrubuted job chains
+            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)  // Only distributed job chains
             << (which_job_chain ? " and `job_chain`=" + sql::quoted(which_job_chain->path().without_slash()) : "")
             << (which_node ? " and `order_state`=" + sql::quoted(which_node->order_state().as_string()) : ""),
             Z_FUNCTION);
