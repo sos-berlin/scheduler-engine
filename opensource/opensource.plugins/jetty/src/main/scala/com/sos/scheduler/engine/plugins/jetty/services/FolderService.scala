@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.ws.rs._
 import javax.ws.rs.core.Response.Status.BAD_REQUEST
 import javax.ws.rs.core._
+import scala.collection.JavaConversions._
 
 @Path("folder")
 class FolderService @Inject()(folderSubsystem: FolderSubsystem) {
