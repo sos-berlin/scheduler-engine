@@ -879,27 +879,32 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 {
                     // _schedule_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
                     // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
-                    if( _schedule_use->is_defined() ) 
+                    
+                    string run_time_string = "";
+
+                    if (_schedule_use->is_defined())
                     {
-                        xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
-                        if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
-                                                                                                          else  update[ "run_time" ].set_direct( "null" );
+                        xml::Document_ptr doc = _schedule_use->dom_document(show_for_database_only);
+                        if (doc.documentElement().hasAttributes() || doc.documentElement().hasChildNodes())
+                        {
+                            run_time_string = doc.xml();
+                        }
                     }
-                    else
-                        update[ "run_time" ].set_direct( "null" );
+
+                    db_update_clob(&ta, "run_time", run_time_string);
+
 
                     //if( _order_xml_modified )  // Das wird nicht überall gesetzt und sowieso ändert sich das Element fast immer
                     {
                         xml::Document_ptr order_document = dom( show_for_database_only );
                         xml::Element_ptr  order_element  = order_document.documentElement();
-                        if( order_element.hasAttributes()  ||  order_element.firstChild() )  db_update_clob( &ta, "order_xml", order_document.xml() );
-                                                                                       else  update[ "order_xml" ].set_direct( "null" );
+                        string order_xml_string = (order_element.hasAttributes() || order_element.firstChild()) ? order_document.xml() : "";
+
+                        db_update_clob(&ta, "order_xml", order_xml_string);
                     }
 
                     //if( _payload_modified )
                     {
-                        if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
-
                         db_update_clob(&ta, "payload", payload_string);
                         //_payload_modified = false;
                     }
