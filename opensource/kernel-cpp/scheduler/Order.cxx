@@ -886,27 +886,10 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 {
                     // _schedule_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
                     // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
-                    string runtime_xml = database_runtime_xml();
-                    if (runtime_xml.empty())
-                        update[ "run_time" ].set_direct( "null" );
-                    else
-                        db_update_clob( &ta, "run_time", runtime_xml);
-
-                    //if( _order_xml_modified )  // Das wird nicht überall gesetzt und sowieso ändert sich das Element fast immer
-                    {
-                        string order_xml = database_xml();
-                        if (order_xml.empty()) 
-                            update[ "order_xml" ].set_direct( "null" );
-                        else
-                            db_update_clob( &ta, "order_xml", order_xml);
-                    }
-
-                    //if( _payload_modified )
-                    {
-                        if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
-                                              else  db_update_clob( &ta, "payload", payload_string );
-                        //_payload_modified = false;
-                    }
+                    
+                    db_update_clob(&ta, "run_time", database_runtime_xml());
+                    db_update_clob(&ta, "order_xml", database_xml());
+                    db_update_clob(&ta, "payload", payload_string);
                 }
 
                 ta.commit( Z_FUNCTION );
