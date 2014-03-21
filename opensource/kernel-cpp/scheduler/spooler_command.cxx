@@ -1391,6 +1391,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     else
     {
         assert( job_chain->is_distributed() );
+        bool ok = false;
 
         for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
         {
@@ -1400,7 +1401,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
           //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
             
             ta.execute( delete_stmt, Z_FUNCTION );
-            if( ta.record_count() == 0 )  z::throw_xc( "SCHEDULER-162", id.as_string() );
+            ok = ta.record_count() == 1;
             
             //if( ta.record_count() == 0 )
             //{
@@ -1415,6 +1416,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             ta.commit( Z_FUNCTION );
         }
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->db()->_orders_tablename, x ), Z_FUNCTION ); }
+        if (!ok) z::throw_xc( "SCHEDULER-162", id.as_string() );
     }
 
     return _answer.createElement( "ok" );

@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModul
 import javax.inject.{Named, Inject}
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.w3c.dom.Element
+import java.net.BindException
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @UseGuiceModule(classOf[JettyModule])
@@ -24,7 +25,9 @@ extends AbstractPlugin {
   }
 
   override def activate() {
-    webServer.start()
+    try webServer.start()
+    catch { case e: BindException ⇒ throw new RuntimeException(s"$e (TCP port $tcpPortNumber)", e) }
+    started = true
   }
 
   override def close() {

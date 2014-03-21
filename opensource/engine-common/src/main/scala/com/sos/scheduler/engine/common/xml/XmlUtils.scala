@@ -237,4 +237,7 @@ import scala.sys.error
       }
     "\""+ result +"\""
   }
+
+  def xmlBytesToString(bytes: Array[Byte]): String =
+    xml.XML.load(new ByteArrayInputStream(bytes)).toString()
 }
