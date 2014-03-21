@@ -1012,6 +1012,9 @@ library Spooler
     
         [id(14),propget]
         HRESULT                 Title                   ( [out,retval] BSTR* );
+
+        [id(15), propget]
+        HRESULT                 AbsolutePath            ([out, retval] BSTR*);
     }
 
     [
