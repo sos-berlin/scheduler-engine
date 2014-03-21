@@ -541,7 +541,7 @@ void Order_subsystem_impl::reread_distributed_job_chain_from_database(Job_chain*
             S() << "select `path`, `stopped`"
             << "  from " << db()->_job_chains_table.sql_name()
             << "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db())
-            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)   // Only distrubuted job chains
+            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)   // Only distributed job chains
             << (which_job_chain ? "and `path`=" + sql::quoted(which_job_chain->path().without_slash()) : ""),
             Z_FUNCTION);
         while (!result_set.eof()) {
@@ -562,7 +562,7 @@ void Order_subsystem_impl::reread_distributed_job_chain_nodes_from_database(Job_
             S() << "select `job_chain`, `order_state`, `action`"
             << "  from " << db()->_job_chain_nodes_table.sql_name()
             << "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db())
-            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)  // Only distrubuted job chains
+            << " and `cluster_member_id`=" << sql::quoted(no_cluster_member_id)  // Only distributed job chains
             << (which_job_chain ? " and `job_chain`=" + sql::quoted(which_job_chain->path().without_slash()) : "")
             << (which_node ? " and `order_state`=" + sql::quoted(which_node->order_state().as_string()) : ""),
             Z_FUNCTION);
@@ -1326,7 +1326,7 @@ bool Order_queue_node::set_action(Action action)
 
 bool Order_queue_node::is_ready_for_order_processing()
 {
-    return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();
+    return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();   // act_next_state durchlassen, damit verteilter Auftrag verschoben werden kann.
 }
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
@@ -2317,46 +2317,46 @@ bool Job_chain::on_load()
         complete_nested_job_chains();   // Exception bei doppelter Auftragskennung in den verschachtelten Jobketten
 
 
-        if (db() &&  db()->opened()  &&  !is_distributed()) {
-            if (orders_are_recoverable()) {
-                list<Order_queue_node*> node_list;
-                list<string>            state_sql_list;
+        if (db() &&  db()->opened()) {
+            for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                database_record_load(&ta);
 
-                Z_FOR_EACH(Node_list, _node_list, it) {
-                    if (Order_queue_node* node = Order_queue_node::try_cast(*it)) {
-                        if (!node->order_queue()->_is_loaded) {   
-                            node_list.push_back( node );
-                            state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
+                if (orders_are_recoverable()) {
+                    if (!_is_distributed) {
+                        list<Order_queue_node*> node_list;
+                        list<string>            state_sql_list;
+
+                        Z_FOR_EACH(Node_list, _node_list, it) {
+                            if (Order_queue_node* node = Order_queue_node::try_cast(*it)) {
+                                if (!node->order_queue()->_is_loaded) {   
+                                    node_list.push_back( node );
+                                    state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
+                                }
+                            }
                         }
+
+                        if (!state_sql_list.empty()) {
+                            Any_file result_set = ta.open_result_set( 
+                                    S() << "select " << order_select_database_columns << ", " <<
+                                                        db_text_distributed_next_time() << " as distributed_next_time"
+                                    "  from " << db()->_orders_tablename <<
+                                    "  where " << db_where_condition() <<
+                                        " and `state` in ( " << join( ", ", state_sql_list ) << " )"
+                                    "  order by `ordering`",
+                                    Z_FUNCTION);
+                            int count = load_orders_from_result_set(&ta, &result_set);  // Will remove obsolete orders as a side-effect, see db_try_delete_non_distributed_order())
+                            log()->debug(message_string("SCHEDULER-935", count));
+                        }
+
+                        Z_FOR_EACH(list<Order_queue_node*>, node_list, it)
+                            (*it)->order_queue()->_is_loaded = true;
                     }
-                }
-
-                if (!state_sql_list.empty()) {
-                    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
-                        database_record_load(&ta);
-                        Any_file result_set = ta.open_result_set( 
-                                S() << "select " << order_select_database_columns << ", " <<
-                                                    db_text_distributed_next_time() << " as distributed_next_time"
-                                "  from " << db()->_orders_tablename <<
-                                "  where " << db_where_condition() <<
-                                   " and `state` in ( " << join( ", ", state_sql_list ) << " )"
-                                "  order by `ordering`",
-                                Z_FUNCTION);
-                        int count = load_orders_from_result_set(&ta, &result_set);
-                        log()->debug(message_string("SCHEDULER-935", count));
-                        ta.commit(Z_FUNCTION); // If some obsolete orders have to be removed (db_try_delete_non_distributed_order())
-                    } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
-                }
-
-                Z_FOR_EACH(list<Order_queue_node*>, node_list, it)
-                    (*it)->order_queue()->_is_loaded = true;
-            } else {
-                assert(!orders_are_recoverable());
-                for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                } else {
+                    assert(!orders_are_recoverable());
                     ta.execute(S() << "DELETE from " << db()->_orders_tablename << "  where " << db_where_condition(), "not orders_are_recoverable");
-                    ta.commit(Z_FUNCTION);
-                } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
-            }
+                }
+                ta.commit(Z_FUNCTION);
+            } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
         }
 
         set_state( s_loaded );
@@ -3123,13 +3123,14 @@ void Job_chain::database_record_load( Read_transaction* ta )
     if (_spooler->settings()->_use_java_persistence) {
         _typed_java_sister.loadPersistentState();
     }  else {
+        string my_db_cluster_member_id = _is_distributed? no_cluster_member_id : db_cluster_member_id();
         {
             Any_file result_set = ta->open_result_set
             ( 
                 S() << "select `stopped`"
                     << "  from " << db()->_job_chains_table.sql_name()
                     << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                    <<    " and `cluster_member_id`=" << sql::quoted(db_cluster_member_id())
+                    <<    " and `cluster_member_id`=" << sql::quoted(my_db_cluster_member_id)
                     <<    " and `path`="              << sql::quoted( path().without_slash() ), 
                 Z_FUNCTION 
             );
@@ -3146,7 +3147,7 @@ void Job_chain::database_record_load( Read_transaction* ta )
                 S() << "select `order_state`, `action`"
                     << "  from " << db()->_job_chain_nodes_table.sql_name()
                     << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                    <<    " and `cluster_member_id`=" << sql::quoted(db_cluster_member_id())
+                    <<    " and `cluster_member_id`=" << sql::quoted(my_db_cluster_member_id)
                     <<    " and `job_chain`="         << sql::quoted( path().without_slash() ), 
                 Z_FUNCTION 
             );
@@ -4274,7 +4275,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
-    Order* order = first_immediately_processable_order(virgin_is_allowed, now);
+    ptr<Order> order = first_immediately_processable_order(virgin_is_allowed, now);
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
@@ -4283,9 +4284,16 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
     {
         withdraw_distributed_order_request();
 
-        order = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now );
-        // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
-        if( order )  assert( order->_is_distributed );
+        if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
+            assert(o->_is_distributed);
+            if (o->_state != o->_occupied_state) {  // Bei <job_chain_node action="next_state">. Siehe Order::set_state1(), SCHEDULER-859. Order::set_dom() ändert _state, was wir hier speichern.
+                o->_task = NULL;
+                o->db_update(Order::update_and_release_occupation);
+                o->close();
+            } else {
+                order = o;
+            }
+        }
     }
 
 
