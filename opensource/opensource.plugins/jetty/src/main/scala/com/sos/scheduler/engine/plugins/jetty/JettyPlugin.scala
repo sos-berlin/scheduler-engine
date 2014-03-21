@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import javax.inject.{Named, Inject}
 import org.eclipse.jetty.server.Server
 import org.w3c.dom.Element
+import java.net.BindException
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @UseGuiceModule(classOf[JettyModule]) final class JettyPlugin @Inject()(
@@ -19,7 +20,8 @@ extends AbstractPlugin {
   def tcpPortNumber = server.getConnectors.head.getPort
 
   override def activate() {
-    server.start()
+    try server.start()
+    catch { case e: BindException ⇒ throw new RuntimeException(s"$e (TCP port $tcpPortNumber)", e) }
     started = true
   }
 
