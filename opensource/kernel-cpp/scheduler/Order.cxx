@@ -899,7 +899,8 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     //if( _payload_modified )
                     {
                         if( payload_string == "" )  update[ "payload" ].set_direct( "null" );
-                                              else  db_update_clob( &ta, "payload", payload_string );
+
+                        db_update_clob(&ta, "payload", payload_string);
                         //_payload_modified = false;
                     }
                 }
