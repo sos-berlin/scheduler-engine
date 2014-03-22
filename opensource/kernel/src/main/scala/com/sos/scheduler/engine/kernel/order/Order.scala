@@ -17,7 +17,9 @@ import com.sos.scheduler.engine.kernel.time.CppJodaConversions.eternalCppMillisT
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import org.joda.time.Instant
 
-@ForCpp final class Order(protected val cppProxy: OrderC, injector: Injector)
+@ForCpp
+final class Order private(
+  protected val cppProxy: OrderC, injector: Injector)
 extends FileBased
 with UnmodifiableOrder
 with HasUnmodifiableDelegate[UnmodifiableOrder]

@@ -1102,6 +1102,7 @@ struct Standing_order_folder : typed_folder< Order >
 //-------------------------------------------------------------------------Standing_order_subsystem
 
 struct Standing_order_subsystem : file_based_subsystem< Order >,
+                                  javabridge::has_proxy<Standing_order_subsystem>,
                                   Object
 {
                                 Standing_order_subsystem    ( Scheduler* );
@@ -1113,6 +1114,7 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Standing_order_subsystem>::java_sister(); }
 
 
     // File_based_subsystem

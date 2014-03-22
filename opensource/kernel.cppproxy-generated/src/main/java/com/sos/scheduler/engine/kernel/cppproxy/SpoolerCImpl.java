@@ -767,6 +767,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native java.lang.String local_configuration_directory__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Lock_subsystemC lock_subsystem() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Lock_subsystemC result = lock_subsystem__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Lock_subsystemC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Lock_subsystemC lock_subsystem__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -919,6 +935,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native java.lang.String param__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC process_class_subsystem() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC result = process_class_subsystem__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC process_class_subsystem__native(long cppReference);
+
+
     @Override public void run() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -945,6 +977,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     }
 
     private static native void run_check_ctrl_c__native(long cppReference);
+
+
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Schedule_subsystemC schedule_subsystem() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Schedule_subsystemC result = schedule_subsystem__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Schedule_subsystemC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Schedule_subsystemC schedule_subsystem__native(long cppReference);
 
 
     @Override public void self_check() {
@@ -982,6 +1030,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     }
 
     private static native void signal__native(long cppReference);
+
+
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Standing_order_subsystemC standing_order_subsystem() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Standing_order_subsystemC result = standing_order_subsystem__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Standing_order_subsystemC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Standing_order_subsystemC standing_order_subsystem__native(long cppReference);
 
 
     @Override public void start() {

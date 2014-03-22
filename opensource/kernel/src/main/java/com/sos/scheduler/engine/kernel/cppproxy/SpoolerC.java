@@ -50,8 +50,6 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     void abort_now(boolean restart);
     void execute_state_cmd();
     boolean is_termination_state_cmd();
-//    ptr<Task>                   get_task                    ( int task_id );
-//    ptr<Task>                   get_task_or_null            ( int task_id );
     void load_arg();
     void load();
     void self_check();
@@ -84,20 +82,15 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     @CppThreadSafe void signal();
     DatabaseC db();
     Folder_subsystemC folder_subsystem();
-//    Process_class_subsystem*    process_class_subsystem     () const;
-//    Task_subsystem*             task_subsystem              () const;
-//    Task_subsystem*             task_subsystem_or_null      () const                            { return _task_subsystem; }
     Job_subsystemC job_subsystem();
     Job_subsystemC job_subsystem_or_null();
     Order_subsystemC order_subsystem();
     Task_subsystemC task_subsystem();
-//    Standing_order_subsystem*   standing_order_subsystem    () const;
-//    Schedule_subsystem_interface* schedule_subsystem        () const;
-//    Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
-//    lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
-//    Event_subsystem*            event_subsystem             () const                            { return _event_subsystem; }
+    Lock_subsystemC lock_subsystem();
+    Process_class_subsystemC process_class_subsystem();
+    Schedule_subsystemC schedule_subsystem();
+    Standing_order_subsystemC standing_order_subsystem();
 
-//    supervisor::Supervisor_client_interface*supervisor_client ();
     boolean has_any_task();
     @CppThreadSafe void write_to_scheduler_log(String category, String text);
     String setting(int index);

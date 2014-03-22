@@ -468,6 +468,20 @@
   
     <ClCompile Include="jni__sos__scheduler__Task_subsystem.cxx" />
     <ClCompile Include="jni__sos__scheduler__Folder.cxx" />
+    
+    
+    <ClCompile Include="jni__sos__scheduler__Process_class.cxx" />
+    
+    
+    
+    <ClCompile Include="jni__sos__scheduler__lock__Lock.cxx" />
+    <ClCompile Include="jni__sos__scheduler__lock__Lock_subsystem.cxx" />
+    
+    <ClCompile Include="jni__sos__scheduler__schedule__Schedule.cxx" />
+    
+    <ClCompile Include="jni__sos__scheduler__Process_class_subsystem.cxx" />
+    <ClCompile Include="jni__sos__scheduler__order__Standing_order_subsystem.cxx" />
+    <ClCompile Include="jni__sos__scheduler__schedule__Schedule_subsystem_interface.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event_code.h" />

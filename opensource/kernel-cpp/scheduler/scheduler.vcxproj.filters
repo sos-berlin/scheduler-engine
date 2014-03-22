@@ -309,6 +309,34 @@
     <ClCompile Include="jni__sos__scheduler__Folder.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
+    
+    
+    <ClCompile Include="jni__sos__scheduler__Process_class.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    
+    
+    
+    <ClCompile Include="jni__sos__scheduler__lock__Lock.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__lock__Lock_subsystem.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    
+    <ClCompile Include="jni__sos__scheduler__schedule__Schedule.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    
+    <ClCompile Include="jni__sos__scheduler__Process_class_subsystem.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__order__Standing_order_subsystem.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__schedule__Schedule_subsystem_interface.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
