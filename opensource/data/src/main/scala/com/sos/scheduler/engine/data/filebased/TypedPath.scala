@@ -18,3 +18,10 @@ extends AbsolutePath {
   override def toString =
     s"$fileBasedType ${super.toString}"
 }
+
+
+object TypedPath {
+  implicit def ordering[A <: TypedPath] = new Ordering[A] {
+    def compare(a: A, b: A) = a.string compare b.string
+  }
+}

@@ -100,7 +100,7 @@ with OrderPersistence {
 
   override def toString = {
     val result = getClass.getSimpleName
-    if (cppProxy.cppReferenceIsValid) s"$result $id"
+    if (cppProxy.cppReferenceIsValid) s"$result $jobChainPath:$id"
     else result
   }
 }

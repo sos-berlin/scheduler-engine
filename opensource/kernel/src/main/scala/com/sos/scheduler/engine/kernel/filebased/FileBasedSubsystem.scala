@@ -45,10 +45,10 @@ trait FileBasedSubsystem extends Subsystem {
   def visiblePaths: Seq[Path] =
     cppProxy.file_based_paths(visibleOnly = true) map companion.stringToPath
 
-  def fileBased(path: Path): MyFileBased =
+  def fileBased(path: TypedPath): MyFileBased =
     cppProxy.java_file_based(path.string).getSister
 
-  def fileBasedOption(path: Path): Option[MyFileBased] =
+  def fileBasedOption(path: TypedPath): Option[MyFileBased] =
     Option(cppProxy.java_file_based_or_null(path.string)) map { _.getSister }
 
   def fileBaseds: Seq[MyFileBased] =
