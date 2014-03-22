@@ -84,6 +84,23 @@ static jstring JNICALL file_1based_1state_1name(JNIEnv* jenv, jobject, jlong cpp
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jboolean JNICALL has_1base_1file(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::has_base_file()");
+        return (o_->has_base_file());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jboolean JNICALL is_1file_1based_1reread(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -107,6 +124,40 @@ static jboolean JNICALL is_1permanently_1stopped(JNIEnv* jenv, jobject, jlong cp
     try {
         ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::is_permanently_stopped()");
         return (o_->is_permanently_stopped());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL is_1to_1be_1removed(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::is_to_be_removed()");
+        return (o_->is_to_be_removed());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL is_1visible(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::is_visible()");
+        return (o_->is_visible());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -255,8 +306,11 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"enqueue_taskPersistentState__native", (char*)"(JLcom/sos/scheduler/engine/data/job/TaskPersistentState;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::enqueue_1taskPersistentState__Lcom_sos_scheduler_engine_data_job_TaskPersistentState_2 },
     { (char*)"file__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file },
     { (char*)"file_based_state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1state_1name },
+    { (char*)"has_base_file__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::has_1base_1file },
     { (char*)"is_file_based_reread__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1file_1based_1reread },
     { (char*)"is_permanently_stopped__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1permanently_1stopped },
+    { (char*)"is_to_be_removed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1to_1be_1removed },
+    { (char*)"is_visible__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1visible },
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },
     { (char*)"name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name },
     { (char*)"next_start_time_millis__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1start_1time_1millis },
@@ -272,7 +326,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Job >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Job >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 14);
+        int ret = env->RegisterNatives(*cls, native_methods, 17);
         if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.JobCImpl");
     }
 

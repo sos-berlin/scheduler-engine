@@ -46,7 +46,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
       }
 
       "visiblePaths" in {
-        val expected = if (subsystemCompanion eq ProcessClassSubsystem) predefinedPaths ++ testPaths else testPaths
+        val expected = testPaths ++ (if (predefinedIsVisible) predefinedPaths else Nil)
         subsystem.visiblePaths.sorted shouldEqual expected.sorted
       }
 
@@ -92,6 +92,17 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
             o.stringToPath(path.string).getClass shouldEqual path.getClass
           }
 
+          "isVisible" in {
+            o.isVisible shouldEqual (!(predefinedPaths contains path) || predefinedIsVisible)
+          }
+
+          "hasBaseFile" in {
+            path match {
+              case _: FolderPath ⇒ o.hasBaseFile shouldBe false
+              case _ ⇒ o.hasBaseFile shouldEqual !(predefinedPaths contains path)
+            }
+          }
+
           subsystemCompanion match {
             case ProcessClassSubsystem ⇒
               "stringToPath accepts empty string" in {
@@ -113,7 +124,8 @@ private object FileBasedSubsystemIT {
   private case class TestSubsystemSetting(
     subsystemCompanion: FileBasedSubsystem.AnyCompanion,
     predefinedPaths: immutable.Seq[TypedPath],
-    testPaths: immutable.Seq[TypedPath])
+    testPaths: immutable.Seq[TypedPath],
+    predefinedIsVisible: Boolean = false)
 
   private val testSettings = List(
     TestSubsystemSetting(
@@ -135,7 +147,8 @@ private object FileBasedSubsystemIT {
     TestSubsystemSetting(
       ProcessClassSubsystem,
       List(ProcessClassPath(""), ProcessClassPath("/(temporaries)")),
-      List(ProcessClassPath("/test-processClass"))),
+      List(ProcessClassPath("/test-processClass")),
+      predefinedIsVisible = true),
     TestSubsystemSetting(
       ScheduleSubsystem,
       Nil,

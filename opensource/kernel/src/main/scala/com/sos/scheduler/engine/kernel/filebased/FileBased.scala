@@ -49,10 +49,14 @@ with EventSource {
   def fileBasedIsReread =
     cppProxy.is_file_based_reread
 
-  def stringToPath(o: String): Path
+  def isVisible: Boolean = cppProxy.is_visible
+  def hasBaseFile: Boolean = cppProxy.has_base_file
+  def isToBeRemoved: Boolean = cppProxy.is_to_be_removed
 
   def log: PrefixLog =
     cppProxy.log.getSister
 
   override def toString = path.toString
+
+  def stringToPath(o: String): Path
 }

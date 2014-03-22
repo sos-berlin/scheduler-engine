@@ -11,4 +11,7 @@ trait File_basedC[S <: Sister] {
   def log: Prefix_logC
   def set_force_file_reread()
   def is_file_based_reread: Boolean
+  def is_visible: Boolean
+  def has_base_file: Boolean
+  def is_to_be_removed: Boolean
 }

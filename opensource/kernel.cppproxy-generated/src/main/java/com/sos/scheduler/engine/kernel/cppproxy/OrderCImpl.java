@@ -123,6 +123,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native java.lang.String file_path__native(long cppReference);
 
 
+    @Override public boolean has_base_file() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return has_base_file__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean has_base_file__native(long cppReference);
+
+
     @Override public java.lang.String initial_state_string() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -151,6 +165,34 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     }
 
     private static native boolean is_file_based_reread__native(long cppReference);
+
+
+    @Override public boolean is_to_be_removed() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_to_be_removed__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_to_be_removed__native(long cppReference);
+
+
+    @Override public boolean is_visible() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return is_visible__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean is_visible__native(long cppReference);
 
 
     @Override public void java_remove() {
