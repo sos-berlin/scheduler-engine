@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.newkernel.job
 import NewJobTest._
 import com.sos.scheduler.engine.common.async.{CallRunner, StandardCallQueue}
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.{TaskStartedEvent, TaskEndedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent, TaskEndedEvent}
 import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, EventHandler, SchedulerEventBus}
 import javax.xml.stream.XMLInputFactory
 import org.joda.time.DateTimeZone

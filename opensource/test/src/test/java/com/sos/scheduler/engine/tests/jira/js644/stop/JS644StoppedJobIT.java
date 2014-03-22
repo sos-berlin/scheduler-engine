@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.sos.scheduler.engine.common.sync.Gate;
-import com.sos.scheduler.engine.data.folder.JobPath;
+import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandler;

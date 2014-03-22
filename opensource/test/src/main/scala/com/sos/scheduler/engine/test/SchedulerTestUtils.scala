@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
-import com.sos.scheduler.engine.data.job.{TaskId, TaskClosedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskClosedEvent}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain

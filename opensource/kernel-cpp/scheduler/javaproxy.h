@@ -17,7 +17,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__folder__FileBased.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__job__Job.h"

@@ -2,12 +2,12 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
+#include "com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace filebased { 
 
 struct FileBased__class : ::zschimmer::javabridge::Class
 {
@@ -18,7 +18,7 @@ struct FileBased__class : ::zschimmer::javabridge::Class
     static const ::zschimmer::javabridge::class_factory< FileBased__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< FileBased__class > FileBased__class::class_factory ("com.sos.scheduler.engine.kernel.folder.FileBased");
+const ::zschimmer::javabridge::class_factory< FileBased__class > FileBased__class::class_factory ("com.sos.scheduler.engine.kernel.filebased.FileBased");
 
 FileBased__class::FileBased__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)

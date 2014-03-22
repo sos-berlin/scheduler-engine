@@ -11,10 +11,12 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.command.{CommandHandler, HasCommandHandlers, CommandSubsystem}
-import com.sos.scheduler.engine.kernel.cppproxy.{Task_subsystemC, Order_subsystemC, Job_subsystemC, SpoolerC}
+import com.sos.scheduler.engine.kernel.cppproxy._
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
+import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
+import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.variable.VariableSet
@@ -32,6 +34,7 @@ extends ScalaAbstractModule {
     provideSingleton[Job_subsystemC] { cppProxy.job_subsystem }
     provideSingleton[Order_subsystemC] { cppProxy.order_subsystem }
     provideSingleton[Task_subsystemC] { cppProxy.task_subsystem }
+    provideSingleton[Folder_subsystemC] { cppProxy.folder_subsystem }
     bindInstance(controllerBridge)
     bind(classOf[EventBus]) to classOf[SchedulerEventBus] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, cppProxy, schedulerThread) }
@@ -43,6 +46,7 @@ extends ScalaAbstractModule {
     provideSingleton { new ClusterMemberId(cppProxy.cluster_member_id) }
     provideSingleton { new DatabaseSubsystem(cppProxy.db) }
     provideSingleton[VariableSet] { cppProxy.variables.getSister }
+    provideSingleton[FileBasedSubsystem.Register] { new FileBasedSubsystem.Register(List(FolderSubsystem, JobSubsystem, OrderSubsystem)) }
   }
 
   @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
@@ -53,9 +57,6 @@ extends ScalaAbstractModule {
 
   @Provides @Singleton def provideCommandSubsystem(pluginSubsystem: PluginSubsystem) =
     new CommandSubsystem(asJavaIterable(commandHandlers(List(pluginSubsystem))))
-
-  @Provides @Singleton def provideFolderSubsystem(queue: SchedulerThreadCallQueue) =
-    new FolderSubsystem(cppProxy.folder_subsystem, queue)
 }
 
 object SchedulerModule {

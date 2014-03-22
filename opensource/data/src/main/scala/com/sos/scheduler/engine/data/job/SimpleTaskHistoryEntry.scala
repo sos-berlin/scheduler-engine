@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.data.job
 
-import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
 import org.joda.time.DateTime
 

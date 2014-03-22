@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.order.ordersubsystemofjob;
 
-import com.sos.scheduler.engine.data.folder.JobChainPath;
-import com.sos.scheduler.engine.data.folder.JobPath;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
+import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;

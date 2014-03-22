@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.data.order.jobchain;
+package com.sos.scheduler.engine.data.jobchain;
 
 public enum JobChainNodeAction {
     process("process"),

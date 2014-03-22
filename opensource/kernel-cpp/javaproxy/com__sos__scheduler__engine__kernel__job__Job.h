@@ -8,11 +8,11 @@
 #include "../zschimmer/Has_proxy.h"
 #include "../zschimmer/javaproxy.h"
 #include "../zschimmer/lazy.h"
-#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
+#include "com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace job { struct JobPersistentState; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace filebased { struct FileBased; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace scala { struct Option; }}
 
@@ -22,7 +22,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct Job__class;
 
-struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased {
+struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::sos::scheduler::engine::kernel::filebased::FileBased {
   private:
     static Job new_instance();  // Not implemented
   public:
@@ -48,7 +48,7 @@ struct Job : ::zschimmer::javabridge::proxy_jobject< Job >, ::javaproxy::com::so
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< Job >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::kernel::filebased::FileBased::set_jobject(jo);
     }
   public:
 

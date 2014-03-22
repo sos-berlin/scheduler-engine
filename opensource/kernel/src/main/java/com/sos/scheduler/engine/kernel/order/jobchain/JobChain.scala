@@ -2,12 +2,11 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.folder.FileBasedType
-import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.order.jobchain.JobChainPersistentState
+import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainPersistentState}
 import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
-import com.sos.scheduler.engine.kernel.folder.FileBased
+import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
@@ -78,7 +77,7 @@ with UnmodifiableJobChain {
     case o => new File(o)
   }
 
-  /** Markiert, dass das [[com.sos.scheduler.engine.kernel.folder.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
+  /** Markiert, dass das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
   def forceFileReread() {
     cppProxy.set_force_file_reread()
   }

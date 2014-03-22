@@ -1,6 +1,7 @@
-package com.sos.scheduler.engine.data.folder
+package com.sos.scheduler.engine.data.jobchain
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType, TypedPath}
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.order.OrderKey
 
@@ -9,14 +10,11 @@ extends TypedPath {
 
   assertIsAbsolute()
 
-  def typ =
-    FileBasedType.jobChain
+  def fileBasedType = FileBasedType.jobChain
 
-  def orderKey(o: String): OrderKey =
-    orderKey(OrderId(o))
+  def orderKey(o: String): OrderKey = orderKey(OrderId(o))
 
-  def orderKey(o: OrderId): OrderKey =
-    new OrderKey(this, o)
+  def orderKey(o: OrderId): OrderKey = new OrderKey(this, o)
 }
 
 

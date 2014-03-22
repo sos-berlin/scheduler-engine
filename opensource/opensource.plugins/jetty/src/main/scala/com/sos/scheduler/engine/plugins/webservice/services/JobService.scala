@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.{textPlainVariant, schedulerTextPlainVariant, noCache}

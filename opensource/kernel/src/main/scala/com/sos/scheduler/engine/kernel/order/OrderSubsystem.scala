@@ -2,20 +2,28 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC
+import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
-import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import javax.inject.{Singleton, Inject}
 import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 
 @Singleton
-final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC, injector: Injector) extends Subsystem {
+final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC, injector: Injector)
+extends FileBasedSubsystem {
+
+  type MyFileBased = JobChain
+
+  val companion = OrderSubsystem
+
+  override def fileBased(o: JobChainPath) = jobChain(o)
 
   private[order] lazy val clusterMemberId = injector.apply[ClusterMemberId]
   private[order] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
@@ -64,3 +72,6 @@ final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC, injector:
   def jobChainOption(o: JobChainPath): Option[JobChain] =
     Option(cppProxy.java_file_based_or_null(o.string))
 }
+
+
+object OrderSubsystem extends FileBasedSubsystem.Companion[OrderSubsystem, JobChainPath, JobChain](FileBasedType.jobChain)

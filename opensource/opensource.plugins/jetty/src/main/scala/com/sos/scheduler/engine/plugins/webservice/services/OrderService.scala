@@ -1,13 +1,10 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.{noCache, schedulerTextPlainVariant}
-import javax.inject.Inject
-import javax.ws.rs._
-import javax.ws.rs.core.{MediaType, Response}
 import javax.inject.Inject
 import javax.ws.rs._
 import javax.ws.rs.core.{MediaType, Response}

@@ -5,12 +5,12 @@ import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.folder.FileBasedType
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
-import com.sos.scheduler.engine.kernel.folder.FileBased
+import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}

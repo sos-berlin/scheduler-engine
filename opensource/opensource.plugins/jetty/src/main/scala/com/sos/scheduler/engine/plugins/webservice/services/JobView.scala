@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import java.net.URI
 import javax.ws.rs.core.UriBuilder
 

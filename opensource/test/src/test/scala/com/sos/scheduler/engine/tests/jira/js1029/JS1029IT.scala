@@ -4,8 +4,7 @@ import JS1029IT._
 import com.sos.scheduler.engine.common.system.Files.removeFile
 import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.{TaskId, TaskEndedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskEndedEvent, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.HotEventHandler
 import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

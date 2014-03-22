@@ -4,7 +4,7 @@
 
 #include "com__sos__scheduler__engine__kernel__job__Job.h"
 #include "com__sos__scheduler__engine__data__job__JobPersistentState.h"
-#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
+#include "com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "java__lang__String.h"
 #include "scala__Option.h"
 

@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import TasksServiceIT._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.{TaskClosedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent, TaskStartedEvent}
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
 import com.sos.scheduler.engine.plugins.webservice.tests.Tests
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._

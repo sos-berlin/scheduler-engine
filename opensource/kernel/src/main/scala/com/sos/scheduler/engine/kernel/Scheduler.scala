@@ -2,10 +2,13 @@ package com.sos.scheduler.engine.kernel
 
 import Scheduler._
 import com.google.common.base.Objects.firstNonNull
+import com.google.common.io.Closer
 import com.google.inject.Guice.createInjector
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.async.CallRunner
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
+import com.sos.scheduler.engine.common.scalautil.HasCloser.implicits.RichCloser
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.xml.NamedChildElements
 import com.sos.scheduler.engine.common.xml.XmlUtils.childElements
@@ -15,9 +18,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, FileBasedType}
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent
-import com.sos.scheduler.engine.eventbus.SchedulerEventBus
+import com.sos.scheduler.engine.eventbus.{EventSubscription, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.async.{SchedulerThreadCallQueue, CppCall}
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem
@@ -26,21 +30,23 @@ import com.sos.scheduler.engine.kernel.configuration.SchedulerModule
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem
 import com.sos.scheduler.engine.kernel.event.EventSubsystem
+import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.log.CppLogger
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.plugin.{PluginModule, PluginSubsystem}
 import com.sos.scheduler.engine.kernel.scheduler._
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.kernel.time.TimeZones
+import com.sos.scheduler.engine.kernel.util.MavenProperties
 import com.sos.scheduler.engine.main.SchedulerControllerBridge
 import java.lang.Thread.currentThread
 import javax.annotation.Nullable
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTimeZone.UTC
 import scala.collection.JavaConversions._
+import scala.collection.breakOut
 import scala.sys.error
 import scala.util.control.NonFatal
-import com.sos.scheduler.engine.kernel.util.MavenProperties
 
 @ForCpp
 @Singleton
@@ -61,8 +67,14 @@ with SchedulerXmlCommandExecutor
 with HasInjector {
 
   private var closed = false
-  private var onCloseFunction: Option[() => Unit] = None
+  private val closer = Closer.create()
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
+  private val eventSubscriptions = {
+    val subsystemCompanions = injector.apply[FileBasedSubsystem.Register].companions
+    val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemCompanions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) } (breakOut)
+    List(
+      EventSubscription[FileBasedEvent] { e => for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) })
+  }
 
   enableJavaUtilLoggingOverSLF4J()
   TimeZones.initialize()
@@ -74,7 +86,12 @@ with HasInjector {
 
   if (isStartedByCpp) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
     threadLock()
-    onCloseFunction = Some(threadUnlock _)  //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
+    closer { threadUnlock() }  //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
+  }
+
+  for (s <- eventSubscriptions) {
+    eventBus.registerHot(s)
+    closer { eventBus.unregisterHot(s) }
   }
 
   private def isStartedByCpp =
@@ -93,9 +110,9 @@ with HasInjector {
       try databaseSubsystem.close() catch { case NonFatal(x) => prefixLog.error(s"databaseSubsystem.close(): $x") }
       try pluginSubsystem.close() catch { case NonFatal(x)=> prefixLog.error(s"pluginSubsystem.close(): $x") }
     }
-    finally for (o <- onCloseFunction) o()
     eventBus.dispatchEvents()
     disposableCppProxyRegister.tryDisposeAll()
+    closer.close()
   }
 
   @ForCpp private def onLoad() {

@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.wake_when_not_in_period
 
 import WakeWhenInPeriodIT._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskStartedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._

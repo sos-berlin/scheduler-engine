@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import javax.inject.Inject

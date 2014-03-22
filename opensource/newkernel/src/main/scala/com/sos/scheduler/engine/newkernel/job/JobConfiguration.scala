@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.newkernel.job
 
+import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.newkernel.schedule.Schedule
-import com.sos.scheduler.engine.data.folder.AbsolutePath
-import scala.sys.error
 
 case class JobConfiguration(
     script: JobScript,
@@ -24,7 +23,7 @@ object JobConfiguration {
     var schedule: Option[Schedule] = None
 
     def build() = new JobConfiguration(
-      script getOrElse error("Missing 'script'"),
+      script getOrElse sys.error("Missing 'script'"),
       schedule getOrElse Schedule.Default,
       title)
   }

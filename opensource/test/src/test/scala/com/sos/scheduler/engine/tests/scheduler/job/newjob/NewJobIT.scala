@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.newjob
 
 import NewJobIT._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -25,7 +24,7 @@ final class NewJobIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("job.path") {
-    assert(job.getPath.asString === "/test-a")
+    assert(job.path.string === "/test-a")
   }
 
   test("job.isFileBasedReread") {

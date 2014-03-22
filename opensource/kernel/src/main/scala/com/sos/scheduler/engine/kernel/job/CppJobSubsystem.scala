@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.job
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateTaskStore, HibernateJobStore}
 import javax.inject.{Singleton, Inject}
@@ -15,6 +15,9 @@ extends JobSubsystem {
   private[job] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
   private[job] lazy val jobStore = injector.apply[HibernateJobStore]
   private[job] lazy val taskStore = injector.apply[HibernateTaskStore]
+
+  def fileBased(path: JobPath) =
+    job(path)
 
   def job(path: JobPath): Job =
     cppproxy.job_by_string(path.string).getSister

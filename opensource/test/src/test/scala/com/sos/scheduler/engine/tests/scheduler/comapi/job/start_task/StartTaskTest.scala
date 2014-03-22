@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.comapi.job.start_task
 
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest

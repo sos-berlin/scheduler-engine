@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.noCache
 import javax.inject.Inject

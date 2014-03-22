@@ -205,7 +205,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__CppEventFactory.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpResponse.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx" />
@@ -264,6 +264,7 @@
     <ClCompile Include="com__sos__scheduler__engine__data__job__TaskPersistentState.cxx" />
     
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Task_subsystemC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__filebased__FileBased.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

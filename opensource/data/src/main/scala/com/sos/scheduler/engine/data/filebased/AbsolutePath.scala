@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.data.folder
+package com.sos.scheduler.engine.data.filebased
 
 import com.sos.scheduler.engine.data.base.IsString
 

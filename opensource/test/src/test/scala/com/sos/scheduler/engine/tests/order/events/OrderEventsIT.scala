@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.order.events
 
 import OrderEventsIT._
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.kernel.order._

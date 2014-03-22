@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js1049
 import JS1049IT._
 import com.google.common.base.Charsets.UTF_8
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
-import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
+import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding

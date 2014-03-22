@@ -93,9 +93,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__http__SchedulerHttpRequest.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -270,6 +268,9 @@
     </ClCompile>
     
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Task_subsystemC.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__filebased__FileBased.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     </ItemGroup>

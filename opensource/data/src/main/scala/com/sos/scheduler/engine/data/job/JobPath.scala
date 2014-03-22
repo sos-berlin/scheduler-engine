@@ -1,14 +1,14 @@
-package com.sos.scheduler.engine.data.folder
+package com.sos.scheduler.engine.data.job
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType, TypedPath}
 
 final case class JobPath(string: String)
 extends TypedPath {
 
   assertIsAbsolute()
 
-  def typ =
-    FileBasedType.job
+  def fileBasedType = FileBasedType.job
 }
 
 
