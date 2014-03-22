@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.data.jobchain.JobChainPath
 final case class OrderKey(jobChainPath: JobChainPath, id: OrderId)
 extends SerializableOrderKey
 with TypedPath {
+  requireIsAbsolute()
 
   def fileBasedType = FileBasedType.order
 

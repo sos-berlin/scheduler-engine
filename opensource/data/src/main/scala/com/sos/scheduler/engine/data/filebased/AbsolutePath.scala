@@ -28,12 +28,12 @@ trait AbsolutePath extends IsString {
     s.substring(1)
   }
 
-  final def assertIsEmptyOrAbsolute() {
+  final def requireIsEmptyOrAbsolute() {
     if (!isEmpty)
-      assertIsAbsolute()
+      requireIsAbsolute()
   }
 
-  final def assertIsAbsolute() {
+  final def requireIsAbsolute() {
     require(isAbsolute, s"Absolute path expected: $toString")
   }
 
