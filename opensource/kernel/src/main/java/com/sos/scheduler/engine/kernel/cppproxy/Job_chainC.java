@@ -11,17 +11,13 @@ import com.sos.scheduler.engine.kernel.order.jobchain.Node;
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector;
 
 @CppClass(clas="sos::scheduler::order::Job_chain", directory="scheduler", include="spooler.h")
-public interface Job_chainC extends CppProxyWithSister<JobChain> {
+public interface Job_chainC extends CppProxyWithSister<JobChain>, File_basedC<JobChain> {
     SisterType<JobChain, Job_chainC> sisterType = new SisterType<JobChain, Job_chainC>() {
         public JobChain sister(Job_chainC proxy, Sister context) {
             return new JobChain(proxy, ((HasInjector)context).injector());
         }
     };
 
-    String name();
-    String path();
-    void set_force_file_reread();
-    String file();
     List<Node> java_nodes();
     OrderC order(String orderId);
     OrderC order_or_null(String orderID);

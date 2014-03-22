@@ -6,24 +6,27 @@ import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
-import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import javax.inject.{Singleton, Inject}
 import javax.persistence.EntityManagerFactory
-import scala.collection.JavaConversions._
 
 @Singleton
-final class OrderSubsystem @Inject private(cppProxy: Order_subsystemC, injector: Injector)
+final class OrderSubsystem @Inject private(
+  protected[this] val cppProxy: Order_subsystemC, injector: Injector,
+  implicit private val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
+  type MySubsystem = OrderSubsystem
   type MyFileBased = JobChain
+  type MyFile_basedC = Job_chainC
 
   val companion = OrderSubsystem
-
-  override def fileBased(o: JobChainPath) = jobChain(o)
 
   private[order] lazy val clusterMemberId = injector.apply[ClusterMemberId]
   private[order] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
@@ -46,8 +49,10 @@ extends FileBasedSubsystem {
 //  }
 
   def tryRemoveOrder(k: OrderKey) {
-    for (o <- orderOption(k))
-      o.remove()
+    inSchedulerThread {
+      for (o <- orderOption(k))
+        o.remove()
+    }
   }
 
   def order(orderKey: OrderKey): Order =
@@ -61,17 +66,19 @@ extends FileBasedSubsystem {
   }
 
   def jobChainsOfJob(job: Job): Iterable[JobChain] =
-    jobChains filter { _ refersToJob job }
+    inSchedulerThread {
+      jobChains filter { _ refersToJob job }
+    }
 
   def jobChains: Seq[JobChain] =
-    cppProxy.java_file_baseds
+    fileBaseds
 
   def jobChain(o: JobChainPath): JobChain =
-    jobChainOption(o) getOrElse sys.error(s"Unknown $o")
+    fileBased(o)
 
   def jobChainOption(o: JobChainPath): Option[JobChain] =
-    Option(cppProxy.java_file_based_or_null(o.string))
+    fileBasedOption(o)
 }
 
 
-object OrderSubsystem extends FileBasedSubsystem.Companion[OrderSubsystem, JobChainPath, JobChain](FileBasedType.jobChain)
+object OrderSubsystem extends FileBasedSubsystem.Companion[OrderSubsystem, JobChainPath, JobChain](FileBasedType.jobChain, JobChainPath.apply)

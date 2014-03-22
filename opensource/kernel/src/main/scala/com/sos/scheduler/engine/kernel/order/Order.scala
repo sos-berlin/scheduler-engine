@@ -11,7 +11,6 @@ import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
-import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions.eternalCppMillisToNoneInstant
@@ -22,8 +21,7 @@ import org.joda.time.Instant
 extends FileBased
 with UnmodifiableOrder
 with HasUnmodifiableDelegate[UnmodifiableOrder]
-with OrderPersistence
-with Sister {
+with OrderPersistence {
 
   type Path = OrderKey
 
@@ -37,11 +35,9 @@ with Sister {
     cppProxy.java_remove()
   }
 
-  def fileBasedType: FileBasedType =
-    FileBasedType.order
+  def stringToPath(o: String) = OrderKey(o)
 
-  def path: OrderKey =
-    OrderKey(cppProxy.path)
+  def fileBasedType = FileBasedType.order
 
   def key: OrderKey =
     jobChainPath orderKey id
@@ -94,9 +90,6 @@ with Sister {
 
   def parameters: VariableSet =
     cppProxy.params.getSister
-
-  def log: PrefixLog =
-    cppProxy.log.getSister
 
   def nextInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_time_millis)

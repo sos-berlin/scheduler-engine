@@ -467,6 +467,7 @@
     <ClCompile Include="jni__sos__scheduler__Timed_call.cxx" />
   
     <ClCompile Include="jni__sos__scheduler__Task_subsystem.cxx" />
+    <ClCompile Include="jni__sos__scheduler__Folder.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event_code.h" />

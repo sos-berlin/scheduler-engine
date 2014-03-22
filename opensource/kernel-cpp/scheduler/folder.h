@@ -406,6 +406,7 @@ struct typed_folder : Typed_folder
 // Bislang gibt es nur einen Ordner im Scheduler.
 
 struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >, 
+                javabridge::has_proxy<Folder>,
                 Object
 {
     static int                  position_of_extension_point ( const string& filename );
@@ -421,6 +422,8 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Object::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Folder>::java_sister(); }
 
     void                        close                       ();
     bool                        on_initialize               ();
@@ -661,12 +664,12 @@ struct file_based_subsystem : File_based_subsystem
         return result;
     }
 
-    virtual vector<string> file_based_names(bool visibleOnly) const {
+    virtual vector<string> file_based_paths(bool visibleOnly) const {
         vector<string> result;
         result.reserve(_file_based_map.size());
         Z_FOR_EACH_CONST(typename File_based_map, _file_based_map, i) {
             const File_based* f = i->second;
-            if (!visibleOnly || f->is_visible()) result.push_back(f->name());
+            if (!visibleOnly || f->is_visible()) result.push_back(f->path());
         }
         return result;
     }
@@ -715,6 +718,17 @@ struct file_based_subsystem : File_based_subsystem
         return result;
     }
 
+    FILE_BASED* java_file_based(const string& path) const {
+        return file_based(Absolute_path(path));
+    }
+
+    FILE_BASED* java_file_based_or_null(const string& path) const {
+        return file_based_or_null(Absolute_path(path));
+    }
+
+    FILE_BASED* java_active_file_based(const string& path) const {
+        return active_file_based(Absolute_path(path));
+    }
 
     javaproxy::java::util::ArrayList java_file_baseds() 
     {
@@ -723,12 +737,6 @@ struct file_based_subsystem : File_based_subsystem
             if (FILE_BASED* file_based = it->second)
                 result.add(file_based->java_sister());
         return result;
-    }
-
-
-    javaproxy::com::sos::scheduler::engine::kernel::filebased::FileBased java_file_based_or_null(const string& absolute_path) {
-        FILE_BASED* f = file_based_or_null(Absolute_path(absolute_path));
-        return f? f->java_sister() : NULL;
     }
 
 

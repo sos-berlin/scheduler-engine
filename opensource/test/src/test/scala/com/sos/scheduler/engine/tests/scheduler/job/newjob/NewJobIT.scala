@@ -11,7 +11,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
 final class NewJobIT extends FunSuite with ScalaSchedulerTest {
@@ -31,12 +30,12 @@ final class NewJobIT extends FunSuite with ScalaSchedulerTest {
     assert(job.fileBasedIsReread === false)
   }
 
-  test("jobSubsystem.visibleNames") {
-    instance[JobSubsystem].visibleNames.toSet should equal (Set("test-a"))
+  test("jobSubsystem.visiblePaths") {
+    instance[JobSubsystem].visiblePaths.toSet shouldEqual Set(JobPath("/test-a"))
   }
 
   test("jobSubsystem.names") {
-    instance[JobSubsystem].names.toSet should equal (Set("scheduler_file_order_sink", "scheduler_service_forwarder", "test-a"))
+    instance[JobSubsystem].paths.toSet shouldEqual Set(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder"), JobPath("/test-a"))
   }
 
   test("start") {

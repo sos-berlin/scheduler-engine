@@ -3,10 +3,8 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.h"
-#include "com__sos__scheduler__engine__kernel__order__jobchain__JobChain.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
-#include "java__util__ArrayList.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 

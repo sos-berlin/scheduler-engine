@@ -1,22 +1,24 @@
 package com.sos.scheduler.engine.kernel.filebased
 
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import com.sos.scheduler.engine.cplusplus.runtime.HasSister
 import com.sos.scheduler.engine.data.filebased._
+import com.sos.scheduler.engine.kernel.cppproxy.{File_basedC, SubsystemC}
 import com.sos.scheduler.engine.kernel.scheduler.Subsystem
+import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
 
 trait FileBasedSubsystem extends Subsystem {
 
+  type MySubsystem <: FileBasedSubsystem
   type MyFileBased <: FileBased
-
+  type MyFile_basedC <: File_basedC[MyFileBased] with HasSister[MyFileBased]
   type Path = MyFileBased#Path
 
-  def fileBasedType = companion.fileBasedType
-
-  val companion: FileBasedSubsystem.AnyCompanion
-
   //implicit protected def schedulerThreadCallQueue: SchedulerThreadCallQueue
+
+  val companion: FileBasedSubsystem.Companion[MySubsystem, Path, MyFileBased]
 
   private val mutablePathSet = new mutable.HashSet[Path] with mutable.SynchronizedSet[Path]
 
@@ -37,17 +39,31 @@ trait FileBasedSubsystem extends Subsystem {
   def count =
     paths.size
 
-  def paths: immutable.Seq[Path] =
+  def paths: Seq[Path] =
     mutablePathSet.toImmutableSeq
 
-  def fileBased(o: Path): MyFileBased
+  def visiblePaths: Seq[Path] =
+    cppProxy.file_based_paths(visibleOnly = true) map companion.stringToPath
+
+  def fileBased(path: Path): MyFileBased =
+    cppProxy.java_file_based(path.string).getSister
+
+  def fileBasedOption(path: Path): Option[MyFileBased] =
+    Option(cppProxy.java_file_based_or_null(path.string)) map { _.getSister }
+
+  def fileBaseds: Seq[MyFileBased] =
+    cppProxy.java_file_baseds
+
+  def fileBasedType = companion.fileBasedType
+
+  protected[this] def cppProxy: SubsystemC[MyFileBased, MyFile_basedC]
 }
 
 
 object FileBasedSubsystem {
   type AnyCompanion = Companion[_ <: FileBasedSubsystem, _ <: TypedPath, _ <: FileBased]
 
-  abstract class Companion[S <: FileBasedSubsystem : ClassTag, P <: TypedPath : ClassTag, F <: FileBased](val fileBasedType: FileBasedType) {
+  abstract class Companion[S <: FileBasedSubsystem : ClassTag, P <: TypedPath : ClassTag, F <: FileBased](val fileBasedType: FileBasedType, val stringToPath: String ⇒ P) {
     type MyFileBased = F
     type Path = P
     val subsystemClass: Class[S] = implicitClass[S]

@@ -27,11 +27,11 @@ class JobIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("jobSubsystem.visibleNames") {
-    instance[JobSubsystem].visibleNames.toSet shouldEqual Set("a", "b")
+    instance[JobSubsystem].visiblePaths.toSet shouldEqual Set(JobPath("/a"), JobPath("/b"))
   }
 
   test("jobSubsystem.names") {
-    instance[JobSubsystem].names.toSet shouldEqual Set("scheduler_file_order_sink", "scheduler_service_forwarder", "a", "b")
+    instance[JobSubsystem].paths.toSet shouldEqual Set(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder"), JobPath("/a"), JobPath("/b"))
   }
 }
 

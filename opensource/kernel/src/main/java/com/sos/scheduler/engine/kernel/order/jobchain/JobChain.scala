@@ -11,18 +11,23 @@ import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
-import java.io.File
 import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 
 @ForCpp
-final class JobChain(cppProxy: Job_chainC, injector: Injector)
+final class JobChain(protected[this] val cppProxy: Job_chainC, injector: Injector)
 extends FileBased
 with UnmodifiableJobChain {
 
   type Path = JobChainPath
+
+  def stringToPath(o: String) =
+    JobChainPath(o)
+
+  def fileBasedType =
+    FileBasedType.jobChain
 
   def onCppProxyInvalidated() {}
 
@@ -62,25 +67,6 @@ with UnmodifiableJobChain {
 
   private def nodeStore =
     injector.getInstance(classOf[HibernateJobChainNodeStore])
-
-  def fileBasedType =
-    FileBasedType.jobChain
-
-  def name =
-    cppProxy.name
-
-  def path =
-    JobChainPath(cppProxy.path)
-
-  def file = cppProxy.file match {
-    case "" => sys.error(s"$toString has no source file")
-    case o => new File(o)
-  }
-
-  /** Markiert, dass das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
-  def forceFileReread() {
-    cppProxy.set_force_file_reread()
-  }
 
   def refersToJob(job: Job): Boolean = nodes exists {
     case n: JobNode => n.getJob eq job

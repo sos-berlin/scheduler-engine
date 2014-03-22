@@ -9,21 +9,14 @@ import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector;
 
 @CppClass(clas="sos::scheduler::Job", directory="scheduler", include="spooler.h")
-public interface JobC extends CppProxyWithSister<Job> {
+public interface JobC extends CppProxyWithSister<Job>, File_basedC<Job> {
     SisterType<Job, JobC> sisterType = new SisterType<Job, JobC>() {
         public Job sister(JobC proxy, Sister context) {
             return new Job(proxy, ((HasInjector)context).injector());
         }
     };
 
-    String file_based_state_name();
-    void set_force_file_reread();
-    boolean is_file_based_reread();
-    String name();
-    String path();
-    byte[] source_xml_bytes();
     String description();
-    Prefix_logC log();
     String state_name();
     void set_state_cmd(String cmd);
     boolean is_permanently_stopped();

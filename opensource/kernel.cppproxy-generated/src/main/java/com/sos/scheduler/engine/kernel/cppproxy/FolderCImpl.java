@@ -3,43 +3,13 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 @javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
-final class JobCImpl
-extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.job.Job>
-implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
+final class FolderCImpl
+extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.folder.Folder>
+implements com.sos.scheduler.engine.kernel.cppproxy.FolderC {
 
-    private JobCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
+    private FolderCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
-
-    @Override public java.lang.String description() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            java.lang.String result = description__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native java.lang.String description__native(long cppReference);
-
-
-    @Override public void enqueue_taskPersistentState(com.sos.scheduler.engine.data.job.TaskPersistentState p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            enqueue_taskPersistentState__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void enqueue_taskPersistentState__native(long cppReference, com.sos.scheduler.engine.data.job.TaskPersistentState p0);
-
 
     @Override public java.lang.String file() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
@@ -87,20 +57,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean is_file_based_reread__native(long cppReference);
 
 
-    @Override public boolean is_permanently_stopped() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return is_permanently_stopped__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native boolean is_permanently_stopped__native(long cppReference);
-
-
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -133,20 +89,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native java.lang.String name__native(long cppReference);
 
 
-    @Override public long next_start_time_millis() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return next_start_time_millis__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native long next_start_time_millis__native(long cppReference);
-
-
     @Override public java.lang.String path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -177,20 +119,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native void set_force_file_reread__native(long cppReference);
 
 
-    @Override public void set_state_cmd(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            set_state_cmd__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native void set_state_cmd__native(long cppReference, java.lang.String p0);
-
-
     @Override public byte[] source_xml_bytes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -205,22 +133,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native byte[] source_xml_bytes__native(long cppReference);
-
-
-    @Override public java.lang.String state_name() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            java.lang.String result = state_name__native(cppReference());
-            checkIsNotReleased(java.lang.String.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native java.lang.String state_name__native(long cppReference);
 
 
 }

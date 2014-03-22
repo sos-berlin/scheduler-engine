@@ -21,4 +21,9 @@ object ScalaUtils {
     def toKeyedMap[K](toKey: A ⇒ K): Map[K, A] =
       (delegate map { o ⇒ toKey(o) -> o }).toMap
   }
+
+  implicit class RichArray[A](val delegate: Array[A]) extends AnyVal {
+    def toImmutableSeq: immutable.Seq[A] =
+      Vector() ++ delegate
+  }
 }

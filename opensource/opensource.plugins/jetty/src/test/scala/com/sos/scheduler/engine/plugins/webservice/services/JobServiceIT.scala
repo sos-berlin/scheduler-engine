@@ -17,7 +17,7 @@ final class JobServiceIT extends FunSuite with ScalaSchedulerTest {
     testClass = getClass,
     testPackage = Some(Tests.testPackage))
 
-  private lazy val jobResource = javaResource(injector).path("job").queryParam("job", "a")
+  private lazy val jobResource = javaResource(injector).path("job").queryParam("job", "/a")
 
   test("Read a job configuration") {
     val result = jobResource.path("configuration").accept(TEXT_XML_TYPE).get(classOf[String])

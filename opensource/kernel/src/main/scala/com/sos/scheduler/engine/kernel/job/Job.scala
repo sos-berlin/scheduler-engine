@@ -10,11 +10,11 @@ import com.sos.scheduler.engine.data.job.TaskPersistentState
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
-import com.sos.scheduler.engine.kernel.filebased.{FileBased, FileBasedState}
+import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
 import org.joda.time.Instant
 
-@ForCpp final class Job(protected val cppProxy: JobC, protected val injector: Injector)
+@ForCpp final class Job(protected[this] val cppProxy: JobC, protected val injector: Injector)
 extends FileBased
 with Sister
 with UnmodifiableJob
@@ -29,38 +29,13 @@ with JobPersistence {
 
   def onCppProxyInvalidated() {}
 
-  def fileBasedType =
-    FileBasedType.job
+  def fileBasedType = FileBasedType.job
 
-  def path =
-    JobPath(cppProxy.path)
+  def stringToPath(o: String) = JobPath(o)
 
-  def name =
-    cppProxy.name
+  def description: String = cppProxy.description
 
-  def fileBasedState =
-    FileBasedState.ofCppName(cppProxy.file_based_state_name)
-
-  /** @return true, wenn das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] nach einer Änderung erneut geladen worden ist. */
-  def fileBasedIsReread =
-    cppProxy.is_file_based_reread
-
-  def log =
-    cppProxy.log.getSister
-
-  /** Markiert, dass das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
-  def forceFileReread() {
-    cppProxy.set_force_file_reread()
-  }
-
-  def configurationXmlBytes =
-    cppProxy.source_xml_bytes
-
-  def description =
-    cppProxy.description
-
-  def state =
-    JobState.valueOf(cppProxy.state_name)
+  def state = JobState.valueOf(cppProxy.state_name)
 
   protected def nextStartInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_start_time_millis)
