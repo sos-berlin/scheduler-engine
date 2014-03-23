@@ -443,6 +443,7 @@ struct Spooler : Object,
     void                        set_check_memory_leak       (bool);
     void                        load                        ();
     void                        open_pid_file               ();
+    int                         pid                         () const { return _pid; }
     void                        fetch_hostname              ();
     void                        read_xml_configuration      ();
     void                        initialize_java_subsystem     ();

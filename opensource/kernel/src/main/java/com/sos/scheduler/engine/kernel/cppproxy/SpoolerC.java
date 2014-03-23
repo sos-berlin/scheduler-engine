@@ -23,6 +23,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     String include_path();
     String temp_dir();
     String state_name();
+    int pid();
     String log_directory();
     boolean is_service();
     String configuration_file_path();

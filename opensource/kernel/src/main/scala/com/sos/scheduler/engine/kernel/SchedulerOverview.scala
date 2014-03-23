@@ -5,10 +5,11 @@ import org.joda.time.Instant
 
 final case class SchedulerOverview(
   version: String,
-  commitNumber: String,
+  versionCommitHash: String,
   startInstant: Instant,
   instant: Instant,
   schedulerId: SchedulerId,
   tcpPort: Option[Int],
   udpPort: Option[Int],
+  processId: Int,
   state: String)

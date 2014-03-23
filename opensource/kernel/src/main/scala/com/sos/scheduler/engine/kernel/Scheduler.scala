@@ -213,12 +213,13 @@ with HasInjector {
     inSchedulerThread {
       new SchedulerOverview(
         version = mavenProperties.version,
-        commitNumber = mavenProperties.buildVersion,
+        versionCommitHash = mavenProperties.versionCommitHash,
         startInstant = startInstant,
         instant = now(),
         schedulerId = schedulerConfiguration.schedulerId,
         tcpPort = schedulerConfiguration.tcpPort match { case 0 ⇒ None case n ⇒ Some(n) },
         udpPort = schedulerConfiguration.udpPort,
+        processId = cppProxy.pid,
         state = cppProxy.state_name)
     }
 

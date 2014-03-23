@@ -935,6 +935,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native java.lang.String param__native(long cppReference);
 
 
+    @Override public int pid() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return pid__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native int pid__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC process_class_subsystem() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
