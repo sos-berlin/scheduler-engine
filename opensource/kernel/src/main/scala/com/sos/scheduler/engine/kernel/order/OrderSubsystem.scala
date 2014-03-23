@@ -19,7 +19,7 @@ import javax.persistence.EntityManagerFactory
 @Singleton
 final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC, injector: Injector,
-  implicit private val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit protected[this] val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
   type MySubsystem = OrderSubsystem

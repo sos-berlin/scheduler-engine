@@ -12,7 +12,7 @@ import scala.collection.immutable
 @Singleton
 final class FolderSubsystem @Inject private(
   protected[this] val cppProxy: Folder_subsystemC,
-    implicit private val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit protected[this] val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
   type MySubsystem = FolderSubsystem

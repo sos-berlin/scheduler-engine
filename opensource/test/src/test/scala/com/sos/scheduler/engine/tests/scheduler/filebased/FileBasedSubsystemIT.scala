@@ -14,9 +14,9 @@ import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.filebased.{FileBasedState, FileBasedSubsystem}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
-import com.sos.scheduler.engine.kernel.job.JobSubsystem
+import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
-import com.sos.scheduler.engine.kernel.order.{Order, StandingOrderSubsystem, OrderSubsystem}
+import com.sos.scheduler.engine.kernel.order.{StandingOrderSubsystem, OrderSubsystem, Order}
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -30,16 +30,18 @@ import scala.collection.immutable
 final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
   "FileBasedSubsystem.Register" in {
-    injector.apply[FileBasedSubsystem.Register].companions shouldEqual (testSettings map { _.subsystemCompanion })
+    injector.apply[FileBasedSubsystem.Register].companions.toSet shouldEqual (testSettings map { _.subsystemCompanion }).toSet
   }
 
-  testSettings foreach testSubsystem
-
-  private def testSubsystem(setting: TestSubsystemSetting) {
+  for (setting <- testSettings) {
     import setting._
 
     lazy val subsystem = injector.getInstance(subsystemCompanion.subsystemClass)
     subsystemCompanion.subsystemClass.getSimpleName - {
+
+      "count" in {
+        subsystem.count shouldEqual size
+      }
 
       "paths" in {
         subsystem.paths.sorted shouldEqual (predefinedPaths ++ testPaths).sorted
@@ -50,12 +52,24 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
         subsystem.visiblePaths.sorted shouldEqual expected.sorted
       }
 
-      for (path <- testPaths) {
+      "overview" in {
+        subsystem.overview should have (
+          'fileBasedType (subsystemCompanion.fileBasedType),
+          'count (size),
+          'fileBasedStateCounts (Map(FileBasedState.active -> (predefinedPaths.size + testPaths.size)))
+        )
+      }
+
+      for (path <- testPaths map { _.asInstanceOf[subsystem.Path] }) {
         s"fileBased $path" - {
           lazy val o = subsystem.fileBased(path)
 
           "path" in {
-            for (path <- testPaths) subsystem.fileBased(path).path shouldEqual path
+            o.path shouldEqual path
+          }
+
+          "name" in {
+            o.name shouldEqual path.name
           }
 
           "configurationXmlBytes" in {
@@ -76,17 +90,6 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
             o.fileBasedState shouldEqual FileBasedState.active
           }
 
-          "name" in {
-            o.name shouldEqual path.name
-          }
-
-          "toString" in {
-            (o, path) match {
-              case (o: Order, path: OrderKey) ⇒ o.toString should (include (path.jobChainPath.string) and include (path.id.string))
-              case _ ⇒ o.toString should include (path.string)
-            }
-          }
-
           "stringToPath" in {
             o.stringToPath(path.string) shouldEqual path
             o.stringToPath(path.string).getClass shouldEqual path.getClass
@@ -100,6 +103,13 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
             path match {
               case _: FolderPath ⇒ o.hasBaseFile shouldBe false
               case _ ⇒ o.hasBaseFile shouldEqual !(predefinedPaths contains path)
+            }
+          }
+
+          "toString" in {
+            (o, path) match {
+              case (o: Order, path: OrderKey) ⇒ o.toString should (include (path.jobChainPath.string) and include (path.id.string))
+              case _ ⇒ o.toString should include (path.string)
             }
           }
 
@@ -117,6 +127,12 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
       }
     }
   }
+
+  "JobSubsystemOverview" in {
+    injector.getInstance(classOf[JobSubsystem]).overview should have (
+      'jobStateCounts (Map(JobState.pending -> jobSubsystemSetting.size))
+    )
+  }
 }
 
 
@@ -125,17 +141,22 @@ private object FileBasedSubsystemIT {
     subsystemCompanion: FileBasedSubsystem.AnyCompanion,
     predefinedPaths: immutable.Seq[TypedPath],
     testPaths: immutable.Seq[TypedPath],
-    predefinedIsVisible: Boolean = false)
+    predefinedIsVisible: Boolean = false) {
+
+    def size = predefinedPaths.size + testPaths.size
+  }
+
+  private val jobSubsystemSetting = TestSubsystemSetting(
+      JobSubsystem,
+      List(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder")),
+      List(JobPath("/test-job-a"), JobPath("/test-job-b")))
 
   private val testSettings = List(
     TestSubsystemSetting(
       FolderSubsystem,
       Nil,
       List(FolderPath("/"))),
-    TestSubsystemSetting(
-      JobSubsystem,
-      List(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder")),
-      List(JobPath("/test-job-a"), JobPath("/test-job-b"))),
+    jobSubsystemSetting,
     TestSubsystemSetting(
       LockSubsystem,
       Nil,

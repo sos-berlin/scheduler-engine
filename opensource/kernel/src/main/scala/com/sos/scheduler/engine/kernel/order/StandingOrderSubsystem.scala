@@ -2,13 +2,15 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.{OrderC, Standing_order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 final class StandingOrderSubsystem @Inject private(
-  protected[this] val cppProxy: Standing_order_subsystemC)
+  protected[this] val cppProxy: Standing_order_subsystemC,
+  implicit protected[this] val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
   type MySubsystem = StandingOrderSubsystem

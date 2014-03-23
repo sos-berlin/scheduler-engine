@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.configuration
 
 import SchedulerModule._
-import com.google.inject.Provides
 import com.google.inject.Scopes.SINGLETON
+import com.google.inject.{Injector, Provides}
 import com.sos.scheduler.engine.common.async.StandardCallQueue
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
+import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.{StandingOrderSubsystem, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
@@ -28,7 +29,6 @@ import java.util.UUID.randomUUID
 import javax.inject.Singleton
 import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.kernel.log.PrefixLog
 
 final class SchedulerModule(cppProxy: SpoolerC, controllerBridge: SchedulerControllerBridge, schedulerThread: Thread)
 extends ScalaAbstractModule {
@@ -58,15 +58,17 @@ extends ScalaAbstractModule {
     provideSingleton[Schedule_subsystemC] { cppProxy.schedule_subsystem }
     provideSingleton[Task_subsystemC] { cppProxy.task_subsystem }
     provideSingleton[Standing_order_subsystemC] { cppProxy.standing_order_subsystem }
-    provideSingleton[FileBasedSubsystem.Register] { new FileBasedSubsystem.Register(List(
+  }
+
+  @Provides @Singleton def provideFileBasedSubsystemRegister(injector: Injector): FileBasedSubsystem.Register =
+    FileBasedSubsystem.Register(injector, List(
       FolderSubsystem,
       JobSubsystem,
       LockSubsystem,
       OrderSubsystem,
       ProcessClassSubsystem,
       ScheduleSubsystem,
-      StandingOrderSubsystem)) }
-  }
+      StandingOrderSubsystem))
 
   @Provides @Singleton def provideEntityManagerFactory(databaseSubsystem: DatabaseSubsystem): EntityManagerFactory =
     databaseSubsystem.entityManagerFactory
