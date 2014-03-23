@@ -10,7 +10,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 final class ProcessClassSubsystem @Inject private(
   protected[this] val cppProxy: Process_class_subsystemC,
-  implicit protected[this] val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem{
   type MySubsystem = ProcessClassSubsystem
   type MyFileBased = ProcessClass

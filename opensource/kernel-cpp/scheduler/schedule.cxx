@@ -616,7 +616,8 @@ Schedule::Schedule( Schedule_subsystem_interface* schedule_subsystem_interface, 
     Idispatch_implementation( &class_descriptor ),
     My_file_based( schedule_subsystem_interface, static_cast<spooler_com::Ischedule*>( this ), type_schedule ),
     _scheduler_holidays_usage(scheduler_holidays_usage),
-    _zero_(this+1)
+    _zero_(this+1),
+    javabridge::has_proxy<Schedule>(spooler())
 {
     _inlay = Z_NEW( Inlay( this ) );
 }

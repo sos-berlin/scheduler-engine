@@ -1029,6 +1029,7 @@ STDMETHODIMP Process_class_configuration::Remove()
 Process_class::Process_class( Scheduler* scheduler, const string& name )
 :
     Process_class_configuration( scheduler, name ),
+    javabridge::has_proxy<Process_class>(spooler()),
     _zero_(this+1)
 {
 }

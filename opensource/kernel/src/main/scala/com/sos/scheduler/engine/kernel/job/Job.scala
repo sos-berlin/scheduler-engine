@@ -1,31 +1,25 @@
 package com.sos.scheduler.engine.kernel.job
 
-import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.job.TaskPersistentState
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.data.job.{JobPath, TaskPersistentState}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
+import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions._
 import org.joda.time.Instant
 
-@ForCpp final class Job(protected[this] val cppProxy: JobC, protected val injector: Injector)
+@ForCpp
+final class Job(protected[this] val cppProxy: JobC, protected val subsystem: JobSubsystem)
 extends FileBased
 with Sister
 with UnmodifiableJob
 with JobPersistence {
 
   type Path = JobPath
-
-  protected val jobSubsystem = injector.apply[JobSubsystem]
-
-  private def schedulerThreadCallQueue =
-    injector.apply[SchedulerThreadCallQueue]
 
   def onCppProxyInvalidated() {}
 
@@ -55,5 +49,15 @@ with JobPersistence {
 
   private[job] def enqueueTaskPersistentState(t: TaskPersistentState) {
     cppProxy.enqueue_taskPersistentState(t)
+  }
+}
+
+
+object Job {
+  final class Type extends SisterType[Job, JobC] {
+    def sister(proxy: JobC, context: Sister) = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new Job(proxy, injector.apply[JobSubsystem])
+    }
   }
 }

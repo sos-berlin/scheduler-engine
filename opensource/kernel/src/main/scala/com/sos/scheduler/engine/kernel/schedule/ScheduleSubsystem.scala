@@ -10,7 +10,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 final class ScheduleSubsystem @Inject private(
   protected[this] val cppProxy: Schedule_subsystemC,
-  implicit protected[this] val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
   type MySubsystem = ScheduleSubsystem

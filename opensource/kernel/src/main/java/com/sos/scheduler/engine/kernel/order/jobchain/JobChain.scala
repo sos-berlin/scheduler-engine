@@ -1,23 +1,29 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainPersistentState}
-import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.Order
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
+import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 
 @ForCpp
-final class JobChain(protected[this] val cppProxy: Job_chainC, injector: Injector)
+final class JobChain(
+  protected[this] val cppProxy: Job_chainC,
+  protected val subsystem: OrderSubsystem,
+  injector: Injector)
 extends FileBased
 with UnmodifiableJobChain {
 
@@ -103,5 +109,15 @@ with UnmodifiableJobChain {
 
   private[order] def remove() {
     cppProxy.remove()
+  }
+}
+
+
+object JobChain {
+  final class Type extends SisterType[JobChain, Job_chainC] {
+    def sister(proxy: Job_chainC, context: Sister) = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new JobChain(proxy, injector.apply[OrderSubsystem], injector)
+    }
   }
 }

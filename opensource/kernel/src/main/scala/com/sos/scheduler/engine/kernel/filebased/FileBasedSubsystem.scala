@@ -22,7 +22,7 @@ trait FileBasedSubsystem extends Subsystem {
 
   val companion: FileBasedSubsystem.Companion[MySubsystem, Path, MyFileBased]
 
-  implicit protected[this] def schedulerThreadCallQueue: SchedulerThreadCallQueue
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue
 
   private val mutablePathSet = new mutable.HashSet[Path] with mutable.SynchronizedSet[Path]
 

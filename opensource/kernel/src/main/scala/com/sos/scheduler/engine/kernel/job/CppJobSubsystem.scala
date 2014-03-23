@@ -15,7 +15,7 @@ import javax.persistence.EntityManagerFactory
 @Singleton
 final class CppJobSubsystem @Inject private(
   protected[this] val cppProxy: Job_subsystemC,
-  implicit protected[this] val schedulerThreadCallQueue: SchedulerThreadCallQueue,
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   injector: Injector)
 extends JobSubsystem {
 

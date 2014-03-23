@@ -1,10 +1,8 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.cplusplus.runtime.Sister
-import com.sos.scheduler.engine.cplusplus.runtime.SisterType
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
@@ -19,7 +17,8 @@ import org.joda.time.Instant
 
 @ForCpp
 final class Order private(
-  protected val cppProxy: OrderC, injector: Injector)
+  protected val cppProxy: OrderC,
+  protected val subsystem: StandingOrderSubsystem)
 extends FileBased
 with UnmodifiableOrder
 with HasUnmodifiableDelegate[UnmodifiableOrder]
@@ -28,8 +27,6 @@ with OrderPersistence {
   type Path = OrderKey
 
   lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
-
-  protected val orderSubsystem = injector.apply[OrderSubsystem]
 
   def onCppProxyInvalidated() {}
 
@@ -106,10 +103,11 @@ with OrderPersistence {
 }
 
 
-@ForCpp object Order {
-
+object Order {
   final class Type extends SisterType[Order, OrderC] {
-    def sister(proxy: OrderC, context: Sister): Order =
-      new Order(proxy, context.asInstanceOf[HasInjector].injector)
+    def sister(proxy: OrderC, context: Sister): Order = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new Order(proxy, injector.apply[StandingOrderSubsystem])
+    }
   }
 }

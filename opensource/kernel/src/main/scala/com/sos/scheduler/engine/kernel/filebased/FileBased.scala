@@ -5,13 +5,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.{FileBasedType, TypedPath}
 import com.sos.scheduler.engine.eventbus.EventSource
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.File_basedC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import java.io.File
 import org.joda.time.Instant
 import scala.util.control.NonFatal
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 
 @ForCpp
 abstract class FileBased
@@ -21,7 +20,9 @@ with EventSource {
 
   type Path <: TypedPath
 
-  //protected implicit def schedulerThreadCallQueue: SchedulerThreadCallQueue
+  protected def subsystem: FileBasedSubsystem
+
+  protected implicit def schedulerThreadCallQueue = subsystem.schedulerThreadCallQueue
 
   /** Jedes Exemplar hat seine eigene UUID. */
   final val uuid = java.util.UUID.randomUUID
@@ -29,14 +30,14 @@ with EventSource {
   protected[this] def cppProxy: File_basedC[_]
 
   def overview: FileBasedOverview =
-    //inSchedulerThread {
+    inSchedulerThread {
       SimpleFileBasedOverview(
         path = self.path,
         fileBasedState = self.fileBasedState)
-    //}
+    }
 
-  def details: FileBasedDetails = {
-    //inSchedulerThread {
+  def details: FileBasedDetails =
+    inSchedulerThread {
       val overview = self.overview
       SimpleFileBasedDetails(
         path = overview.path,

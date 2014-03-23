@@ -19,7 +19,7 @@ import javax.persistence.EntityManagerFactory
 @Singleton
 final class OrderSubsystem @Inject private(
   protected[this] val cppProxy: Order_subsystemC, injector: Injector,
-  implicit protected[this] val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
   type MySubsystem = OrderSubsystem
@@ -30,7 +30,6 @@ extends FileBasedSubsystem {
 
   private[order] lazy val clusterMemberId = injector.apply[ClusterMemberId]
   private[order] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
-  private[order] lazy val orderStore = injector.apply[HibernateOrderStore]
   private[order] lazy val jobChainStore = injector.apply[HibernateJobChainStore]
   private[order] lazy val jobChainNodeStore = injector.apply[HibernateJobChainNodeStore]
 
