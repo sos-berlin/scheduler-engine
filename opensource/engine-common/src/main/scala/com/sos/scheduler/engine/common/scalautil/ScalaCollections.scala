@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.common.scalautil
 
+import scala.collection.TraversableLike
 import scala.sys.error
 
 object ScalaCollections {
@@ -19,5 +20,11 @@ object ScalaCollections {
   }
 
   def emptyToNone(o: String): Option[String] =
+    if (o.isEmpty) None else Some(o)
+
+  def emptyToNone[A <: TraversableLike[_, _]](o: A): Option[A] =
+    if (o.isEmpty) None else Some(o)
+
+  def emptyToNone[A](o: Array[A]): Option[Array[A]] =
     if (o.isEmpty) None else Some(o)
 }
