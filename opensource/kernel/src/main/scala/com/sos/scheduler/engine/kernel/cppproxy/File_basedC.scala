@@ -7,6 +7,7 @@ trait File_basedC[S <: Sister] {
   def name: String
   def file_based_state_name: String
   def file: String
+  def file_modification_time_t: Long
   def source_xml_bytes: Array[Byte]
   def log: Prefix_logC
   def set_force_file_reread()

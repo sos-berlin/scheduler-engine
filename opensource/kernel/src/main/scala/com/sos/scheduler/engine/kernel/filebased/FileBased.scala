@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
+import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.{FileBasedType, TypedPath}
@@ -7,11 +8,14 @@ import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.cppproxy.File_basedC
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import java.io.File
+import org.joda.time.Instant
+import scala.util.control.NonFatal
 
 @ForCpp
 abstract class FileBased
 extends Sister
 with EventSource {
+  self ⇒
 
   type Path <: TypedPath
 
@@ -19,6 +23,19 @@ with EventSource {
   final val uuid = java.util.UUID.randomUUID
 
   protected[this] def cppProxy: File_basedC[_]
+
+  def details: FileBasedDetails =
+    SimpleFileBasedDetails(
+      path = self.path,
+      fileBasedState = self.fileBasedState,
+      file = self.fileOption,
+      fileModificationInstant = fileModificationInstantOption,
+      sourceXml = sourceXmlBytes match {
+        case Array() ⇒ ""
+        case bytes ⇒
+          try xmlBytesToString(bytes)
+          catch { case NonFatal(t) ⇒ <ERROR>{t.toString}</ERROR>.toString() }
+      })
 
   def fileBasedType: FileBasedType
 
@@ -31,13 +48,25 @@ with EventSource {
   def name =
     cppProxy.name
 
+  def fileModificationInstantOption: Option[Instant] =
+    cppProxy.file_modification_time_t match {
+      case 0 ⇒ None
+      case n ⇒ Some(new Instant(n * 1000))
+    }
+
+  def sourceXmlBytes: Array[Byte] =
+    cppProxy.source_xml_bytes
+
   def configurationXmlBytes =
     cppProxy.source_xml_bytes
 
   def file: File =
+    fileOption getOrElse sys.error(s"$toString has no source file")
+
+  def fileOption: Option[File] =
     cppProxy.file match {
-      case "" => sys.error(s"$toString has no source file")
-      case o => new File(o)
+      case "" => None
+      case o => Some(new File(o))
     }
 
   /** Markiert, dass das [[com.sos.scheduler.engine.kernel.filebased.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
