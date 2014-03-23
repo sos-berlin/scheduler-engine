@@ -5,6 +5,7 @@
 #include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__kernel__filebased__FileBased.h"
 #include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
+#include "java__lang__Object.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 

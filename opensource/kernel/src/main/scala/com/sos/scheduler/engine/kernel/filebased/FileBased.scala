@@ -13,7 +13,7 @@ import org.joda.time.Instant
 import scala.util.control.NonFatal
 
 @ForCpp
-abstract class FileBased
+trait FileBased
 extends Sister
 with EventSource {
   self ⇒
