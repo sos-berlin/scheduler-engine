@@ -265,4 +265,18 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native java.lang.String state_name__native(long cppReference);
 
 
+    @Override public boolean waiting_for_process() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return waiting_for_process__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean waiting_for_process__native(long cppReference);
+
+
 }

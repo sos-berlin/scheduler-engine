@@ -22,4 +22,5 @@ public interface JobC extends CppProxyWithSister<Job>, File_basedC<Job> {
     boolean is_permanently_stopped();
     long next_start_time_millis();
     void enqueue_taskPersistentState(TaskPersistentState o);
+    boolean waiting_for_process();
 }
