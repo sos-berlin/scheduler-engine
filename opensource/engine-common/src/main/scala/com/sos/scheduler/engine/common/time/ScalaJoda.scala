@@ -80,6 +80,10 @@ object ScalaJoda {
       x.getMillis compare y.getMillis
   }
 
+  implicit object InstantOrdering extends Ordering[Instant]{
+    override def compare(a: Instant, b: Instant) = a.getMillis compare b.getMillis
+  }
+
   implicit def jodaToConcurrentDuration(o: Duration) =
     new FiniteDuration(o.getMillis, TimeUnit.MILLISECONDS)
 
