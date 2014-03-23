@@ -9,5 +9,5 @@ final case class SimpleFileBasedDetails(
   fileBasedState: FileBasedState,
   file: Option[File],
   fileModificationInstant: Option[Instant],
-  sourceXml: String)
+  sourceXml: Option[String])
 extends FileBasedDetails

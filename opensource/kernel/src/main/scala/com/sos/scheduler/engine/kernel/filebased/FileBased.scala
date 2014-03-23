@@ -10,6 +10,8 @@ import com.sos.scheduler.engine.kernel.log.PrefixLog
 import java.io.File
 import org.joda.time.Instant
 import scala.util.control.NonFatal
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 
 @ForCpp
 abstract class FileBased
@@ -19,23 +21,35 @@ with EventSource {
 
   type Path <: TypedPath
 
+  //protected implicit def schedulerThreadCallQueue: SchedulerThreadCallQueue
+
   /** Jedes Exemplar hat seine eigene UUID. */
   final val uuid = java.util.UUID.randomUUID
 
   protected[this] def cppProxy: File_basedC[_]
 
-  def details: FileBasedDetails =
-    SimpleFileBasedDetails(
-      path = self.path,
-      fileBasedState = self.fileBasedState,
-      file = self.fileOption,
-      fileModificationInstant = fileModificationInstantOption,
-      sourceXml = sourceXmlBytes match {
-        case Array() ⇒ ""
-        case bytes ⇒
-          try xmlBytesToString(bytes)
-          catch { case NonFatal(t) ⇒ <ERROR>{t.toString}</ERROR>.toString() }
-      })
+  def overview: FileBasedOverview =
+    //inSchedulerThread {
+      SimpleFileBasedOverview(
+        path = self.path,
+        fileBasedState = self.fileBasedState)
+    //}
+
+  def details: FileBasedDetails = {
+    //inSchedulerThread {
+      val overview = self.overview
+      SimpleFileBasedDetails(
+        path = overview.path,
+        fileBasedState = overview.fileBasedState,
+        file = self.fileOption,
+        fileModificationInstant = fileModificationInstantOption,
+        sourceXml = sourceXmlBytes match {
+          case o if o.isEmpty ⇒ None
+          case o ⇒
+            try Some(xmlBytesToString(o))
+            catch { case NonFatal(t) ⇒ Some(<ERROR>{t.toString}</ERROR>.toString()) }
+        })
+    }
 
   def fileBasedType: FileBasedType
 

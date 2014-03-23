@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.tests.scheduler.filebased
 
 import FileBasedSubsystemIT._
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.scalautil.ScalaCollections.emptyToNone
+import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
 import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.filebased.TypedPath.ordering
@@ -16,15 +18,17 @@ import com.sos.scheduler.engine.kernel.filebased.{FileBasedState, FileBasedSubsy
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
-import com.sos.scheduler.engine.kernel.order.{StandingOrderSubsystem, OrderSubsystem, Order}
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
+import org.joda.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.immutable
+import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
@@ -104,6 +108,24 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
               case _: FolderPath ⇒ o.hasBaseFile shouldBe false
               case _ ⇒ o.hasBaseFile shouldEqual !(predefinedPaths contains path)
             }
+          }
+
+          "overview" in {
+            o.overview should have (
+              'path (path),
+              'fileBasedState (FileBasedState.active))
+          }
+
+          "details" in {
+            o.details should have (
+              'path (path),
+              'fileBasedState (FileBasedState.active),
+              'file (Try(o.file).toOption),
+              'sourceXml (emptyToNone(o.sourceXmlBytes) map xmlBytesToString))
+            if (o.hasBaseFile)
+              o.details.fileModificationInstant.get should (be >= (now() - 30.s) and be <= now())
+            else
+              o.details.fileModificationInstant shouldBe None
           }
 
           "toString" in {
