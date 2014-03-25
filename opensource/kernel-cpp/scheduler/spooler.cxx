@@ -1712,6 +1712,7 @@ void Spooler::load()
     tzset();
     _security.clear();             
     load_arg();
+    _java_subsystem->initialize_java_sister();
     open_pid_file();
     _log->open_dont_cache();
     fetch_hostname();
@@ -1724,7 +1725,7 @@ void Spooler::load()
     _db = Z_NEW(Database(this));
 
     new_subsystems();
-    _java_subsystem->initialize_java_sister();
+    _java_subsystem->switch_subsystem_state( subsys_initialized );
     modifiable_settings()->set_defaults(this);
 
     initialize_subsystems();
@@ -1781,14 +1782,6 @@ void Spooler::read_xml_configuration()
        else
          z::throw_xc( "SCHEDULER-479", this->id() );
 
-}
-
-//---------------------------------------------------------------Spooler::initialize_java_subsystem
-
-void Spooler::initialize_java_subsystem()
-{
-    _java_subsystem = new_java_subsystem(this);
-    _java_subsystem->switch_subsystem_state( subsys_initialized );
 }
 
 //--------------------------------------------------------------------------Spooler::new_subsystems
@@ -1886,7 +1879,7 @@ void Spooler::load_subsystems()
 
 void Spooler::activate_subsystems()
 {
-    _java_subsystem            ->switch_subsystem_state( subsys_active );
+    _java_subsystem          ->switch_subsystem_state( subsys_active );
 
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
     _scheduler_script_subsystem->switch_subsystem_state( subsys_active );       // ruft spooler_init()
@@ -3287,7 +3280,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     _argv = argv;
     _parameter_line = parameter_line;
 
-    initialize_java_subsystem();
+    _java_subsystem = new_java_subsystem(this);
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 

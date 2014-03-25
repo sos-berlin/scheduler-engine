@@ -51,9 +51,6 @@ final class Scheduler @Inject private(
     schedulerConfiguration: SchedulerConfiguration,
     prefixLog: PrefixLog,
     disposableCppProxyRegister: DisposableCppProxyRegister,
-    pluginSubsystem: PluginSubsystem,
-    commandSubsystem: CommandSubsystem,
-    databaseSubsystem: DatabaseSubsystem,
     implicit private val schedulerThreadCallQueue: SchedulerThreadCallQueue,
     eventBus: SchedulerEventBus,
     val injector: Injector)
@@ -65,13 +62,11 @@ with HasInjector {
   private var closed = false
   private val closer = Closer.create()
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
+  private lazy val pluginSubsystem = injector.apply[PluginSubsystem]
+  private lazy val commandSubsystem = injector.apply[CommandSubsystem]
+  private lazy val databaseSubsystem = injector.apply[DatabaseSubsystem]
+
   val startInstant = now()
-  private val eventSubscriptions = {
-    val subsystemCompanions = injector.apply[FileBasedSubsystem.Register].companions
-    val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemCompanions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) } (breakOut)
-    List(
-      EventSubscription[FileBasedEvent] { e => for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) })
-  }
 
   enableJavaUtilLoggingOverSLF4J()
   TimeZones.initialize()
@@ -81,18 +76,21 @@ with HasInjector {
 
   cppProxy.setSister(this)
 
-  if (isStartedByCpp) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
+  if (controllerBridge eq EmptySchedulerControllerBridge.singleton) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
     threadLock()
-    closer { threadUnlock() }  //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
+    closer {threadUnlock()} //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
   }
 
-  for (s <- eventSubscriptions) {
-    eventBus.registerHot(s)
-    closer { eventBus.unregisterHot(s) }
+  @ForCpp
+  private def initialize() {
+    val eventSubscription = {
+      val subsystemCompanions = injector.apply[FileBasedSubsystem.Register].companions
+      val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemCompanions.map {o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass)}(breakOut)
+      EventSubscription[FileBasedEvent] {e => for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e)}
+    }
+    eventBus.registerHot(eventSubscription)
+    closer {eventBus.unregisterHot(eventSubscription)}
   }
-
-  private def isStartedByCpp =
-    controllerBridge eq EmptySchedulerControllerBridge.singleton
 
   def onCppProxyInvalidated() {}
 
@@ -223,8 +221,7 @@ with HasInjector {
         state = cppProxy.state_name)
     }
 
-  def isClosed =
-    closed
+  def isClosed = closed
 }
 
 @ForCpp
