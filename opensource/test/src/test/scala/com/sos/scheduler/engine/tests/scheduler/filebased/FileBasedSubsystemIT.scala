@@ -9,9 +9,6 @@ import com.sos.scheduler.engine.data.filebased.TypedPath.ordering
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, TypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.jobchain.EndNodeOverview
-import com.sos.scheduler.engine.data.jobchain.JobChainDetails
-import com.sos.scheduler.engine.data.jobchain.JobNodeOverview
 import com.sos.scheduler.engine.data.jobchain._
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderState}
