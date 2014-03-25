@@ -50,7 +50,6 @@ struct Node : ::zschimmer::javabridge::proxy_jobject< Node >, ::javaproxy::java:
     }
   public:
 
-    void persistState() const;
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

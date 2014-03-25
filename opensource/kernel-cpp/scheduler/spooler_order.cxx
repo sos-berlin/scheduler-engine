@@ -440,6 +440,8 @@ ptr<Order_subsystem> new_order_subsystem( Scheduler* scheduler )
 Order_subsystem::Order_subsystem( Scheduler* scheduler ) 
 : 
     file_based_subsystem<Job_chain>( scheduler, this, Scheduler_object::type_order_subsystem )
+    //javabridge::has_proxy<Order_subsystem>(scheduler)
+    //_typed_java_sister(java_sister())
 {
 }
 
@@ -990,9 +992,7 @@ namespace job_chain {
 Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )         
 : 
     Scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
-    javabridge::has_proxy<Node>(job_chain->spooler()),
     _zero_(this+1), 
-    _typed_java_sister(java_sister()),
     _job_chain(job_chain),
     _type(type),
     _order_state(order_state)
@@ -1265,6 +1265,14 @@ Absolute_path Node::job_chain_path() const
     return _job_chain->path(); 
 }
 
+//-------------------------------------------------------------------------------End_node::End_node
+
+End_node::End_node(Job_chain* job_chain, const Order::State& state) 
+: 
+    Node(job_chain, state, n_end), 
+    javabridge::has_proxy<End_node>(job_chain->spooler()) 
+{}
+
 //----------------------------------------------------------------Order_queue_node::why_dom_element
 
 xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc, const Time& now) const {
@@ -1280,8 +1288,7 @@ xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc,
 
 Order_queue_node::Order_queue_node( Job_chain* job_chain, const Order::State& state, Node::Type type ) 
 : 
-    Node( job_chain, state, type ),
-    javabridge::has_proxy<Order_queue_node>(job_chain->spooler())
+    Node( job_chain, state, type )
 {
     _order_queue = new Order_queue( this );
 }
@@ -1559,6 +1566,7 @@ Job* Job_node::job_or_null() const
 Nested_job_chain_node::Nested_job_chain_node( Job_chain* job_chain, const Order::State& state, const Absolute_path& job_chain_path ) 
 : 
     Node( job_chain, state, n_job_chain ),
+    javabridge::has_proxy<Nested_job_chain_node>(spooler()),
     _nested_job_chain_path( job_chain_path ),
     _nested_job_chain(this)
 {

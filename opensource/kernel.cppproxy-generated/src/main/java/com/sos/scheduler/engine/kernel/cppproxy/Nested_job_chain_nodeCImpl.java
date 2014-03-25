@@ -3,29 +3,13 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 @javax.annotation.Generated("C++/Java-Generator - SOS GmbH Berlin")
-final class NodeCImpl
-extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.Node>
-implements com.sos.scheduler.engine.kernel.cppproxy.NodeC {
+final class Nested_job_chain_nodeCImpl
+extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.NestedJobChainNode>
+implements com.sos.scheduler.engine.kernel.cppproxy.Nested_job_chain_nodeC {
 
-    private NodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
+    private Nested_job_chain_nodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
-
-    @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            com.sos.scheduler.engine.kernel.cppproxy.NodeC result = error_node__native(cppReference());
-            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.NodeC.class, result);
-            return result;
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node__native(long cppReference);
-
 
     @Override public java.lang.String job_chain_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
@@ -43,11 +27,11 @@ implements com.sos.scheduler.engine.kernel.cppproxy.NodeC {
     private static native java.lang.String job_chain_path__native(long cppReference);
 
 
-    @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node() {
+    @Override public java.lang.String nested_job_chain_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            com.sos.scheduler.engine.kernel.cppproxy.NodeC result = next_node__native(cppReference());
-            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.NodeC.class, result);
+            java.lang.String result = nested_job_chain_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
@@ -56,7 +40,7 @@ implements com.sos.scheduler.engine.kernel.cppproxy.NodeC {
         }
     }
 
-    private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node__native(long cppReference);
+    private static native java.lang.String nested_job_chain_path__native(long cppReference);
 
 
     @Override public void set_action_string(java.lang.String p0) {

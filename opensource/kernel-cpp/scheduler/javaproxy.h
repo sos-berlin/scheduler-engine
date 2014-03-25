@@ -9,10 +9,8 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__JobC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__NodeC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__OrderC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
@@ -46,7 +44,6 @@ typedef ::javaproxy::com::sos::scheduler::engine::kernel::log::PrefixLog PrefixL
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::job::Job JobJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderSubsystem OrderSubsystemJ;
 typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::JobChain JobChainJ;
-typedef ::javaproxy::com::sos::scheduler::engine::kernel::order::jobchain::Node NodeJ;
 typedef ::javaproxy::java::lang::Object ObjectJ;
 typedef ::javaproxy::java::lang::String StringJ;
 

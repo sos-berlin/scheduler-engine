@@ -6,30 +6,20 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction, JobChainNodePersistentState}
 import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
-import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateJobChainNodeStore
-import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
-import javax.persistence.EntityManagerFactory
 
-/** @author Zschimmer.sos */
+/** @author Joacim Zschimmer */
 @ForCpp
-class Node(cppProxy: NodeCI, injector: Injector) extends Sister {
+abstract class Node extends Sister {
+
+  protected val cppProxy: NodeCI
+  protected def injector: Injector
 
   def onCppProxyInvalidated() {}
 
-  private implicit def entityManagerFactory =
-    injector.getInstance(classOf[EntityManagerFactory])
-
-  @ForCpp private def persistState() {
-    transaction { implicit entityManager =>
-      persistentStateStore.store(persistentState)
-    }
-  }
-
-  protected def persistentStateStore =
-    injector.getInstance(classOf[HibernateJobChainNodeStore])
-
   final def persistentState =
     new JobChainNodePersistentState(jobChainPath, orderState, action)
+
+  def overview: NodeOverview
 
   final def jobChainPath =
     JobChainPath(cppProxy.job_chain_path)

@@ -25,8 +25,9 @@ jni_cppproxy_objects=\
  jni__sos__scheduler__order__Order_queue.o\
  jni__sos__scheduler__order__Order_subsystem.o\
  jni__sos__scheduler__order__Standing_order_subsystem.o\
+ jni__sos__scheduler__order__job_chain__End_node.o\
  jni__sos__scheduler__order__job_chain__Job_node.o\
- jni__sos__scheduler__order__job_chain__Node.o\
- jni__sos__scheduler__order__job_chain__Order_queue_node.o\
+ jni__sos__scheduler__order__job_chain__Nested_job_chain_node.o\
+ jni__sos__scheduler__order__job_chain__Sink_node.o\
  jni__sos__scheduler__schedule__Schedule.o\
  jni__sos__scheduler__schedule__Schedule_subsystem_interface.o

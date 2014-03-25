@@ -304,10 +304,24 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx">
+    
+    
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__End_nodeC.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx">
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Nested_job_chain_nodeC.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Sink_nodeC.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__EndNode.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__NestedJobChainNode.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__SinkNode.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
     </ItemGroup>

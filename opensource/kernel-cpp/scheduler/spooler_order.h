@@ -462,8 +462,7 @@ namespace job_chain {
 //----------------------------------------------------------------------------------job_chain::Node
 
 struct Node : Com_job_chain_node,
-              Scheduler_object,
-              javabridge::has_proxy<Node>
+              Scheduler_object
 {
     //---------------------------------------------------------------------------------------------
 
@@ -532,11 +531,14 @@ struct Node : Com_job_chain_node,
 
                                 Node                        ( Job_chain*, const Order::State& state, Type );
 
+    virtual jobject             java_sister                 () = 0;
+
     virtual void                close                       ();
     string                      obj_name                    () const;
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     State                       state                       () const                                { return _state; }
     string                      state_name                  () const                                { return string_from_state( _state ); }
+
 
     virtual bool                initialize                  ();
     virtual void                activate                    ();
@@ -587,7 +589,6 @@ struct Node : Com_job_chain_node,
 
     void                        database_record_store       ();
 
-    const NodeJ                _typed_java_sister;
     Order::State               _order_state;                // Bezeichnung des Zustands
     Order::State               _next_state;                 // Bezeichnung des Folgezustands
     Order::State               _error_state;                // Bezeichnung des Fehlerzustands
@@ -609,26 +610,27 @@ struct Node : Com_job_chain_node,
 
 //------------------------------------------------------------------------------job_chain::End_node
 
-struct End_node : Node
+struct End_node : Node, javabridge::has_proxy<End_node>
 {
     typedef Node                Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( End_node, n_end )
 
-                                End_node                    ( Job_chain* job_chain, const Order::State& state ) : Node( job_chain, state, n_end ) {}
+                                End_node                    ( Job_chain* job_chain, const Order::State& state );
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<End_node>::java_sister(); }
+
+
 };
 
 //----------------------------------------------------------------------job_chain::Order_queue_node
 
-struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
+struct Order_queue_node : Node
 {
     typedef Node                Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Order_queue_node, n_order_queue )
 
 
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
-
-    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Order_queue_node>::java_sister(); }
-
     void                        close                       ();
   //void                        replace                     ( Node* old_node );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -695,7 +697,7 @@ struct Job_node : Order_queue_node,
 
 //-----------------------------------------------------------------job_chain::Nested_job_chain_node
 
-struct Nested_job_chain_node : Node
+struct Nested_job_chain_node : Node, javabridge::has_proxy<Nested_job_chain_node>
 {
     typedef Node                Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Nested_job_chain_node, n_job_chain )
@@ -703,6 +705,8 @@ struct Nested_job_chain_node : Node
 
                                 Nested_job_chain_node       ( Job_chain*, const Order::State&, const Absolute_path& job_chain_path );
                                ~Nested_job_chain_node       ();
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Nested_job_chain_node>::java_sister(); }
 
     void                        close                       ();
     bool                        initialize                  ();
@@ -724,7 +728,7 @@ struct Nested_job_chain_node : Node
 
 //-----------------------------------------------------------------------------job_chain::Sink_node
 
-struct Sink_node : Job_node
+struct Sink_node : Job_node, javabridge::has_proxy<Sink_node>
 {
     typedef Job_node            Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Sink_node, n_file_order_sink )

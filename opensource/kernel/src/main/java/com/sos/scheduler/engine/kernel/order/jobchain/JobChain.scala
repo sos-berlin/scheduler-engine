@@ -74,6 +74,18 @@ with UnmodifiableJobChain {
   private def nodeStore =
     injector.getInstance(classOf[HibernateJobChainNodeStore])
 
+  override def details = {
+    val d = super.details
+    JobChainDetails(
+      d.path.asInstanceOf[JobChainPath],
+      d.fileBasedState,
+      d.file,
+      d.fileModificationInstant,
+      d.sourceXml,
+      nodes = nodes map { _.overview }
+    )
+  }
+
   def refersToJob(job: Job): Boolean = nodes exists {
     case n: JobNode => n.getJob eq job
     case _ => false

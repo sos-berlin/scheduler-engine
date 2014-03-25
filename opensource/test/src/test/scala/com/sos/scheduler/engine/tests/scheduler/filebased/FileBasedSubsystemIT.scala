@@ -11,16 +11,18 @@ import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.lock.LockPath
-import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.order.{OrderKey, OrderState}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.filebased.{FileBasedState, FileBasedSubsystem}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.lock.LockSubsystem
+import com.sos.scheduler.engine.kernel.order.jobchain.{EndNodeOverview, JobChainDetails, JobNodeOverview, NestedJobChainNodeOverview}
 import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem, StandingOrderSubsystem}
 import com.sos.scheduler.engine.kernel.processclass.ProcessClassSubsystem
 import com.sos.scheduler.engine.kernel.schedule.ScheduleSubsystem
+import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import org.joda.time.Instant.now
 import org.junit.runner.RunWith
@@ -33,8 +35,11 @@ import scala.util.Try
 @RunWith(classOf[JUnitRunner])
 final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
+  private lazy val jobSubsystem = injector.apply[JobSubsystem]
+  private lazy val fileBasedSubsystemRegister = injector.apply[FileBasedSubsystem.Register]
+
   "FileBasedSubsystem.Register" in {
-    injector.apply[FileBasedSubsystem.Register].companions.toSet shouldEqual (testSettings map { _.subsystemCompanion }).toSet
+    fileBasedSubsystemRegister.companions.toSet shouldEqual (testSettings map { _.subsystemCompanion }).toSet
   }
 
   for (setting <- testSettings) {
@@ -44,27 +49,29 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
     subsystemCompanion.subsystemClass.getSimpleName - {
 
       "count" in {
-        subsystem.count shouldEqual size
+        subsystem.count shouldEqual paths.size
       }
 
       "paths" in {
-        subsystem.paths.sorted shouldEqual (predefinedPaths ++ testPaths).sorted
+        subsystem.paths.sorted shouldEqual paths.sorted
       }
 
       "visiblePaths" in {
-        val expected = testPaths ++ (if (predefinedIsVisible) predefinedPaths else Nil)
-        subsystem.visiblePaths.sorted shouldEqual expected.sorted
+        subsystem.visiblePaths.sorted shouldEqual visiblePaths.sorted
       }
 
       "overview" in {
+        val expectedFileBasedStates = Map(
+          FileBasedState.notInitialized -> (paths count pathIsNotInitialized),
+          FileBasedState.active -> (paths count { o ⇒ !pathIsNotInitialized(o) }))
         subsystem.overview should have (
           'fileBasedType (subsystemCompanion.fileBasedType),
-          'count (size),
-          'fileBasedStateCounts (Map(FileBasedState.active -> (predefinedPaths.size + testPaths.size)))
-        )
+          'count (paths.size),
+          'fileBasedStateCounts (expectedFileBasedStates filter { _._2 != 0 } ))
       }
 
       for (path <- testPaths map { _.asInstanceOf[subsystem.Path] }) {
+        def expectedFileBasedState = if (pathIsNotInitialized(path)) FileBasedState.notInitialized else FileBasedState.active
         s"fileBased $path" - {
           lazy val o = subsystem.fileBased(path)
 
@@ -77,21 +84,21 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
           }
 
           "configurationXmlBytes" in {
-            if ((subsystemCompanion eq FolderSubsystem) || (subsystemCompanion eq ProcessClassSubsystem) && (predefinedPaths contains path))
+            if (pathDontHasXml(path))
               o.configurationXmlBytes.toSeq shouldBe 'empty
             else
               xmlBytesToString(o.configurationXmlBytes) should include ("<" + subsystem.companion.fileBasedType.cppName + " ")
           }
 
           "file" in {
-            if ((subsystemCompanion eq FolderSubsystem) || (subsystemCompanion eq ProcessClassSubsystem) && (predefinedPaths contains path))
+            if (pathDontHasXml(path))
               intercept[RuntimeException] { o.file }
             else
               o.file shouldEqual testEnvironment.fileFromPath(path)
           }
 
           "fileBasedState" in {
-            o.fileBasedState shouldEqual FileBasedState.active
+            o.fileBasedState shouldEqual expectedFileBasedState
           }
 
           "stringToPath" in {
@@ -104,22 +111,23 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
           }
 
           "hasBaseFile" in {
-            path match {
-              case _: FolderPath ⇒ o.hasBaseFile shouldBe false
-              case _ ⇒ o.hasBaseFile shouldEqual !(predefinedPaths contains path)
-            }
+            o.hasBaseFile shouldEqual !pathDontHasXml(path)
+//            path match {
+//              case _: FolderPath ⇒ o.hasBaseFile shouldBe false
+//              case _ ⇒ o.hasBaseFile shouldEqual !(predefinedPaths contains path)
+//            }
           }
 
           "overview" in {
             o.overview should have (
               'path (path),
-              'fileBasedState (FileBasedState.active))
+              'fileBasedState (expectedFileBasedState))
           }
 
           "details" in {
             o.details should have (
               'path (path),
-              'fileBasedState (FileBasedState.active),
+              'fileBasedState (expectedFileBasedState),
               'file (Try(o.file).toOption),
               'sourceXml (emptyToNone(o.sourceXmlBytes) map xmlBytesToString))
             if (o.hasBaseFile)
@@ -151,9 +159,38 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "JobSubsystemOverview" in {
-    injector.getInstance(classOf[JobSubsystem]).overview should have (
-      'jobStateCounts (Map(JobState.pending -> jobSubsystemSetting.size))
+    jobSubsystem.overview should have (
+      'jobStateCounts (Map(JobState.pending -> jobSubsystemSetting.paths.size))
     )
+  }
+
+  "JobChainDetails" - {
+    "normal job chain" in {
+      val details: JobChainDetails = jobChain(JobChainPath("/test-jobChain")).details
+      details.nodes(0).asInstanceOf[JobNodeOverview] should have (
+        'orderState (OrderState("A")),
+        'nextState (OrderState("SINK")),
+        'errorState (OrderState("ERROR")),
+        'jobPath (JobPath("/test-job-a")))
+      details.nodes(1).asInstanceOf[JobNodeOverview] should have (
+        'orderState (OrderState("SINK")),
+        'nextState (OrderState("")),
+        'errorState (OrderState("")),
+        'jobPath (schedulerFileOrderSinkJobPath))
+      details.nodes(2).asInstanceOf[EndNodeOverview] should have (
+        'orderState (OrderState("ERROR")))
+    }
+
+    "nested job chain" in {
+      val details: JobChainDetails = jobChain(JobChainPath("/test-jobChain-nested")).details
+      details.nodes(0).asInstanceOf[NestedJobChainNodeOverview] should have (
+        'orderState (OrderState("NESTED")),
+        'nextState (OrderState("END")),
+        'errorState (OrderState("")),   // Warum nicht automatisch gleich nextState?
+        'nestedJobChainPath (JobChainPath("/NESTED")))
+      details.nodes(1).asInstanceOf[EndNodeOverview] should have (
+        'orderState (OrderState("END")))
+    }
   }
 }
 
@@ -165,19 +202,41 @@ private object FileBasedSubsystemIT {
     testPaths: immutable.Seq[TypedPath],
     predefinedIsVisible: Boolean = false) {
 
-    def size = predefinedPaths.size + testPaths.size
+    val paths = predefinedPaths ++ testPaths
+    val visiblePaths = paths filterNot pathIsInvisible
   }
+
+  private val schedulerFileOrderSinkJobPath = JobPath("/scheduler_file_order_sink")
+  private val schedulerServiceForwardingJobChainPath = JobChainPath("/scheduler_service_forwarding")
+  private val schedulerServiceForwarderJobPath = JobPath("/scheduler_service_forwarder")
+  private val emptyProcessClassPath = ProcessClassPath("")
+  private val temporaryProcessClassPath = ProcessClassPath("/(temporaries)")
+  private val rootFolderPath = FolderPath("/")
+  //private val testNestedJobChainPath =
+
+  private val pathDontHasXml = Set[TypedPath](
+    schedulerFileOrderSinkJobPath,
+    schedulerServiceForwarderJobPath,
+    emptyProcessClassPath,
+    temporaryProcessClassPath,
+    rootFolderPath)
+  
+  private val pathIsInvisible = Set[TypedPath](
+    schedulerServiceForwardingJobChainPath,
+    schedulerServiceForwarderJobPath)
+
+  private val pathIsNotInitialized = Set[TypedPath](JobChainPath("/test-jobChain-nested"))   // Die referenzierte Jobkette fehlt
 
   private val jobSubsystemSetting = TestSubsystemSetting(
       JobSubsystem,
-      List(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder")),
-      List(JobPath("/test-job-a"), JobPath("/test-job-b")))
+      List(schedulerServiceForwarderJobPath),
+      List(schedulerFileOrderSinkJobPath, JobPath("/test-job-a"), JobPath("/test-job-b")))
 
   private val testSettings = List(
     TestSubsystemSetting(
       FolderSubsystem,
       Nil,
-      List(FolderPath("/"))),
+      List(rootFolderPath)),
     jobSubsystemSetting,
     TestSubsystemSetting(
       LockSubsystem,
@@ -186,10 +245,10 @@ private object FileBasedSubsystemIT {
     TestSubsystemSetting(
       OrderSubsystem,
       List(JobChainPath("/scheduler_service_forwarding")),
-      List(JobChainPath("/test-jobChain"))),
+      List(JobChainPath("/test-jobChain"), JobChainPath("/test-jobChain-nested"))),
     TestSubsystemSetting(
       ProcessClassSubsystem,
-      List(ProcessClassPath(""), ProcessClassPath("/(temporaries)")),
+      List(emptyProcessClassPath, temporaryProcessClassPath),
       List(ProcessClassPath("/test-processClass")),
       predefinedIsVisible = true),
     TestSubsystemSetting(

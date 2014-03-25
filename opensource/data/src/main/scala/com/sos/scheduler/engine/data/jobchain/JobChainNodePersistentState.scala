@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.data.jobchain
 
 import com.sos.scheduler.engine.data.base.HasKey
 import com.sos.scheduler.engine.data.order.OrderState
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
 
 final case class JobChainNodePersistentState(
     jobChainPath: JobChainPath,

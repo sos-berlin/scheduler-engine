@@ -14,7 +14,6 @@ struct Node__class : ::zschimmer::javabridge::Class
     Node__class(const string& class_name);
    ~Node__class();
 
-    ::zschimmer::javabridge::Method const _persistState____method;
 
     static const ::zschimmer::javabridge::class_factory< Node__class > class_factory;
 };
@@ -23,7 +22,7 @@ const ::zschimmer::javabridge::class_factory< Node__class > Node__class::class_f
 
 Node__class::Node__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_persistState____method(this, "persistState", "()V"){}
+{}
 
 Node__class::~Node__class() {}
 
@@ -42,12 +41,6 @@ Node::~Node() { assign_(NULL); }
 
 
 
-
-void Node::persistState() const {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    Node__class* cls = _class.get();
-    cls->_persistState____method.call(get_jobject(), parameter_list);
-}
 
 
 ::zschimmer::javabridge::Class* Node::java_object_class_() const { return _class.get(); }
