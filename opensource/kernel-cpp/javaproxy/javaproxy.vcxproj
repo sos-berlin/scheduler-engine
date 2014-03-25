@@ -192,11 +192,11 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_nodeC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx" />
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx" />
+    
+    
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SettingsC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx" />
@@ -246,7 +246,7 @@
     <ClCompile Include="org__joda__time__base__AbstractDuration.cxx" />
     <ClCompile Include="org__joda__time__base__BaseDuration.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__JobChain.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__Node.cxx" />
+    
     <ClCompile Include="org__joda__time__ReadableInstant.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Timed_callC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__async__CppCall.cxx" />
@@ -273,6 +273,17 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__ScheduleC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Standing_order_subsystemC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Schedule_subsystemC.cxx" />
+    
+    
+    
+    
+    
+    
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__jobchain__Node.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderSubsystem.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx" />
+    <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h" />

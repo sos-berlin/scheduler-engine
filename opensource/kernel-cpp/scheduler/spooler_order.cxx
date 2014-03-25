@@ -2,6 +2,7 @@
 
 #include "spooler.h"
 #include "Order_subsystem_impl.h"
+#include "../javaproxy/java__lang__Class.h"
 
 using stdext::hash_set;
 using stdext::hash_map;
@@ -469,6 +470,15 @@ void Order_subsystem_impl::close()
 
 
     file_based_subsystem<Job_chain>::close();
+}
+
+//----------------------------------------------------------Order_subsystem_impl::typed_java_sister
+
+OrderSubsystemJ& Order_subsystem_impl::typed_java_sister() {
+    // OrderSubsystem is a @Singleton in Dependency Injector and constructed by the injector configuration module. So we don't construct OrderSubsystem via CppProxy
+    if (!_typed_java_sister) 
+        _typed_java_sister = spooler()->schedulerJ().instance(OrderSubsystemJ::java_class_()->get_jobject());
+    return _typed_java_sister;
 }
 
 //-------------------------------------------------------Order_subsystem_impl::subsystem_initialize
@@ -1179,7 +1189,7 @@ void Node::database_record_store()
     if (_state == s_active) {
         if(_db_action != _action) {
             if (_spooler->settings()->_use_java_persistence)
-                _typed_java_sister.persistState();
+                _spooler->order_subsystem()->typed_java_sister().persistNodeState(java_sister());
             else
             if(db()->opened() && _db_action != _action) {
                 for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try

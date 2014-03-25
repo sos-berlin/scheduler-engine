@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.order
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
@@ -11,15 +12,18 @@ import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerT
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, Order_subsystemC}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
+import com.sos.scheduler.engine.kernel.order.jobchain.{Node, JobChain}
+import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import javax.inject.{Singleton, Inject}
 import javax.persistence.EntityManagerFactory
 
+@ForCpp
 @Singleton
 final class OrderSubsystem @Inject private(
-  protected[this] val cppProxy: Order_subsystemC, injector: Injector,
-  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
+  protected[this] val cppProxy: Order_subsystemC,
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
+  injector: Injector)
 extends FileBasedSubsystem {
 
   type MySubsystem = OrderSubsystem
@@ -28,10 +32,8 @@ extends FileBasedSubsystem {
 
   val companion = OrderSubsystem
 
-  private[order] lazy val clusterMemberId = injector.apply[ClusterMemberId]
-  private[order] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
-  private[order] lazy val jobChainStore = injector.apply[HibernateJobChainStore]
-  private[order] lazy val jobChainNodeStore = injector.apply[HibernateJobChainNodeStore]
+  private implicit lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
+  private lazy val persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
 
 //  def jobChainMap = new Map[JobChainPath, JobChain] {
 //    def get(key: JobChainPath) =
@@ -46,6 +48,13 @@ extends FileBasedSubsystem {
 //    def +[B1 >: JobChain](kv: (JobChainPath, B1)) =
 //      throw new NotImplementedError
 //  }
+
+  @ForCpp
+  def persistNodeState(node: Node) {
+    transaction { implicit entityManager =>
+      persistentStateStore.store(node.persistentState)
+    }
+  }
 
   def tryRemoveOrder(k: OrderKey) {
     inSchedulerThread {

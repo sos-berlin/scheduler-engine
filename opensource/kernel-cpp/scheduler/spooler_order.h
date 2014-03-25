@@ -1052,6 +1052,7 @@ struct Order_subsystem: Object,
 
                                 Order_subsystem             ( Scheduler* );
 
+    virtual OrderSubsystemJ&    typed_java_sister           ()                                      = 0;
 
     virtual ptr<Job_chain_folder_interface> new_job_chain_folder( Folder* )                         = 0;
     virtual void                check_exception             ()                                      = 0;
