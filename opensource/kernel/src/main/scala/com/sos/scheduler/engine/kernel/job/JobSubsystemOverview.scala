@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystemOverview
+import spray.json.DefaultJsonProtocol._
 
 final case class JobSubsystemOverview(
   fileBasedType: FileBasedType,
@@ -10,3 +11,11 @@ final case class JobSubsystemOverview(
   jobStateCounts: Map[JobState, Int],
   needProcessCount: Int)
 extends FileBasedSubsystemOverview
+
+
+object JobSubsystemOverview {
+  private implicit val fileBasedTypeJsonFormat = FileBasedType.MyJsonFormat
+  private implicit val fileBasedStateJsonFormat = FileBasedState.MyJsonFormat
+  private implicit val jobStateJsonFormat = JobState.MyJsonFormat
+  implicit val MyJsonFormat = jsonFormat5(apply)
+}

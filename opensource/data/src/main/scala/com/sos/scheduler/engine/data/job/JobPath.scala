@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.job
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.sos.scheduler.engine.data.base.IsString
 import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType, TypedPath}
 
 final case class JobPath(string: String)
@@ -13,6 +14,8 @@ extends TypedPath {
 
 
 object JobPath {
+  implicit val MyJsonFormat = new IsString.MyJsonFormat(apply)
+
   @JsonCreator def of(absolutePath: String): JobPath =
     new JobPath(absolutePath)
 

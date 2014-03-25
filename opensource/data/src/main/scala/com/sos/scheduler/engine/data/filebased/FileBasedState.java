@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.data.filebased;
 
+import com.sos.scheduler.engine.data.base.JavaEnumJsonFormat;
+import spray.json.JsonFormat;
+
 public enum FileBasedState {
     /** Fehler in XML-Definition */
     undefined("undefined"),
@@ -34,4 +37,6 @@ public enum FileBasedState {
             if (s.cppName.equals(name)) return s;
         throw new IllegalArgumentException(name);
     }
+
+    public static final JsonFormat<FileBasedState> MyJsonFormat = new JavaEnumJsonFormat<>(FileBasedState.class);
 }

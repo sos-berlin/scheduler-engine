@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.data.filebased
 
+import com.sos.scheduler.engine.data.base.IsString
 import java.io.File
 
 trait TypedPath
@@ -24,4 +25,6 @@ object TypedPath {
   implicit def ordering[A <: TypedPath] = new Ordering[A] {
     def compare(a: A, b: A) = a.string compare b.string
   }
+
+  implicit val MyJsonFormat = new IsString.MyJsonFormat[TypedPath](IsString.UnsupportedJsonDeserialization)
 }

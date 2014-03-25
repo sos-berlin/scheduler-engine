@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.data.filebased;
 
+import com.sos.scheduler.engine.data.base.JavaEnumJsonFormat;
+import spray.json.JsonFormat;
+
 public enum FileBasedType {
     folder("folder", "Folder"),
     job("job", "Job"),
@@ -32,4 +35,6 @@ public enum FileBasedType {
                 return o;
         throw new RuntimeException("Unknown file based type '"+name+"'");
     }
+
+    public static final JsonFormat<FileBasedType> MyJsonFormat = new JavaEnumJsonFormat<>(FileBasedType.class);
 }

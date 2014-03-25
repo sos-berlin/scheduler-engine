@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.jobchain
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.sos.scheduler.engine.data.base.IsString
 import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType, TypedPath}
 import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.order.OrderKey
@@ -18,7 +19,7 @@ extends TypedPath {
 }
 
 
-object JobChainPath {
+object JobChainPath extends IsString.HasJsonFormat[JobChainPath] {
   @JsonCreator def of(absolutePath: String): JobChainPath =
     new JobChainPath(absolutePath)
 

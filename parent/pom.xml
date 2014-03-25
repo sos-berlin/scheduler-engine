@@ -463,6 +463,11 @@
                 <artifactId>reflections</artifactId>
                 <version>0.9.9-RC1</version>
             </dependency>
+            <dependency>
+                <groupId>io.spray</groupId>
+                <artifactId>spray-json_${scala.binaryVersion}</artifactId>
+                <version>1.2.5</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

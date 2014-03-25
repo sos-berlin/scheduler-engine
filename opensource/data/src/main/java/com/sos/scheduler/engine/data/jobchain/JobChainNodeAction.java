@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.data.jobchain;
 
+import com.sos.scheduler.engine.data.base.JavaEnumJsonFormat;
+import spray.json.JsonFormat;
+
 public enum JobChainNodeAction {
     process("process"),
     stop("stop"),
@@ -22,4 +25,6 @@ public enum JobChainNodeAction {
         }
         throw new RuntimeException("Invalid JobChainNodeAction: "+cppName);
     }
+
+    public static final JsonFormat<JobChainNodeAction> MyJsonFormat = new JavaEnumJsonFormat<>(JobChainNodeAction.class);
 }
