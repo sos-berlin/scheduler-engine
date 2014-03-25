@@ -113,7 +113,10 @@ with EventHandlerAnnotated {
   def waitUntilSchedulerIsActive() {
     val previous = _scheduler
     _scheduler = delegate.waitUntilSchedulerState(SchedulerState.active)
-    if (_scheduler == null) throw new RuntimeException("Scheduler aborted before startup")
+    if (_scheduler == null) {
+      waitForTermination(shortTimeout)   // Should throw the exception causing the activation failure
+      throw new RuntimeException("Scheduler aborted before startup")
+    }
     if (previous == null && testConfiguration.terminateOnError) checkForErrorLogLine()
   }
 
