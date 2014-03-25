@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.job
 
-import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.kernel.filebased.{FileBasedState, FileBasedSubsystemOverview}
+import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
+import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystemOverview
 
 final case class JobSubsystemOverview(
   fileBasedType: FileBasedType,

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
-import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedType}
 
 final case class SimpleSubsystemOverview(
   fileBasedType: FileBasedType,

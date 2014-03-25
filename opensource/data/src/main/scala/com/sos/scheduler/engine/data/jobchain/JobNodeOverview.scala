@@ -1,7 +1,6 @@
-package com.sos.scheduler.engine.kernel.order.jobchain
+package com.sos.scheduler.engine.data.jobchain
 
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.jobchain.JobChainNodeAction
 import com.sos.scheduler.engine.data.order.OrderState
 
 final case class JobNodeOverview(

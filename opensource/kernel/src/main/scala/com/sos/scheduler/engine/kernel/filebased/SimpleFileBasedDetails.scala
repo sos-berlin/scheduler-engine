@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.filebased
 
-import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.scheduler.engine.data.filebased.{FileBasedState, FileBasedDetails, TypedPath}
 import java.io.File
 import org.joda.time.Instant
 

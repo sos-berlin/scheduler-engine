@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.{NestedJobChainNodeOverview, JobChainPath}
 import com.sos.scheduler.engine.kernel.cppproxy.Nested_job_chain_nodeC
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 
 @ForCpp
 final class NestedJobChainNode(

@@ -4,6 +4,7 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType
 import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.jobchain.JobNodeOverview
 import com.sos.scheduler.engine.kernel.cppproxy.Job_nodeC
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector

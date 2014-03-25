@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernel.filebased;
+package com.sos.scheduler.engine.data.filebased;
 
 public enum FileBasedState {
     /** Fehler in XML-Definition */

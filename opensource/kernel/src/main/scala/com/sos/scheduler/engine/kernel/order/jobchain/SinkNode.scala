@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
+import com.sos.scheduler.engine.data.jobchain.SinkNodeOverview
 import com.sos.scheduler.engine.kernel.cppproxy.Sink_nodeC
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 

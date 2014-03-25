@@ -1,8 +1,11 @@
-package com.sos.scheduler.engine.kernel.filebased
+package com.sos.scheduler.engine.data.filebased
 
 import java.io.File
 import org.joda.time.Instant
 
+/**
+ * @author Joacim Zschimmer
+ */
 trait FileBasedDetails extends FileBasedOverview {
   def file: Option[File]
   def fileModificationInstant: Option[Instant]

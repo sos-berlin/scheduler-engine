@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.order.jobchain
 import com.google.inject.Injector
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction, JobChainNodePersistentState}
+import com.sos.scheduler.engine.data.jobchain.{NodeOverview, JobChainPath, JobChainNodeAction, JobChainNodePersistentState}
 import com.sos.scheduler.engine.data.order.OrderState
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI
 
