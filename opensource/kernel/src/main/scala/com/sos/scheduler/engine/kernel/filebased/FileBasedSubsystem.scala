@@ -42,7 +42,7 @@ trait FileBasedSubsystem extends Subsystem {
 
   def overview: FileBasedSubsystemOverview =
     inSchedulerThread {
-      SimpleSubsystemOverview(
+      SimpleFileBasedSubsystemOverview(
         fileBasedType = self.fileBasedType,
         count = self.count,
         fileBasedStateCounts = (fileBaseds map { _.fileBasedState }).countEquals)
