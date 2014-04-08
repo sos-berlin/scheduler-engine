@@ -1944,7 +1944,7 @@ void Standard_job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
     Time t = next_order_time();
     if (t <= Time::now())
-    process_order();
+        process_order();
     else
     if (!t.is_never())
         _call_register.call_at<Order_timed_call>(t);
@@ -2541,7 +2541,7 @@ Time Standard_job::next_start_time() const
 {
     if( _state == s_pending  ||  _state == s_running ) {
         Time t = min( _next_start_time, _next_single_start );
-        return !is_in_job_chain() || t.is_zero()? t : min(t, max(_combined_job_nodes->next_time(), _period.begin()));
+        return !is_in_job_chain() || t.is_zero()? t : min(t, max(next_order_time(), _period.begin()));
     } else 
         return Time::never;
 }
@@ -2584,7 +2584,7 @@ void Standard_job::calculate_next_time( const Time& now )
 
                 if (next_time > now && is_in_job_chain() && in_period) {
                     bool has_order = request_order( now, Z_FUNCTION );
-                    next_time = has_order? Time(0) : min(next_time, _combined_job_nodes->next_time() );
+                    next_time = has_order? Time(0) : min(next_time, next_order_time() );
                 }
             }
         }

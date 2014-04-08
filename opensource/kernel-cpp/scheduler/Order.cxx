@@ -2863,7 +2863,8 @@ void Order::postprocessing2( Job* last_job )
 {
     _moved = false;
 
-    if (job()) job()->signal_earlier_order(this);
+    if (Job* j = job()) 
+        j->signal_earlier_order(this);
 
     if( finished() )
     {
