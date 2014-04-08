@@ -182,7 +182,7 @@ public class Job_chain extends Idispatch implements HasBean<Job_chainBean>
     public String           title               ()                                  { return (String)           com_call( "<title" ); }
 
     @SchedulerGetter
-    public String           absolutePath        ()                                  { return (String)           com_call( "<absolutePath" ); }
+    public String           path                ()                                  { return (String)           com_call( "<livePath" ); }
 
     public final Job_chainBean toBean() {
         return new Job_chainBean(this);
