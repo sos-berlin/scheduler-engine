@@ -43,7 +43,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Standard_job, Calculated_next_time_do_something_call)
     DEFINE_SIMPLE_CALL(Standard_job, Start_when_directory_changed_call)
     DEFINE_SIMPLE_CALL(Standard_job, Order_timed_call)
-    DEFINE_SIMPLE_CALL(Standard_job, Order_available_call)
+    DEFINE_SIMPLE_CALL(Standard_job, Order_possibly_available_call)
     DEFINE_SIMPLE_CALL(Standard_job, Process_available_call)
     DEFINE_SIMPLE_CALL(Standard_job, Below_min_tasks_call)
     DEFINE_SIMPLE_CALL(Standard_job, Below_max_tasks_call)
@@ -1945,9 +1945,9 @@ void Standard_job::on_call(const Order_timed_call&) {
     process_order();
 }
 
-//-------------------------------------------------------Standard_job::on_call Order_available_call
+//----------------------------------------------Standard_job::on_call Order_possibly_available_call
 
-void Standard_job::on_call(const Order_available_call&) {
+void Standard_job::on_call(const Order_possibly_available_call&) {
     process_order();
 }
 
@@ -2616,7 +2616,7 @@ bool Standard_job::connect_job_node( Job_node* job_node )
 
     if( _state >= s_initialized ) {
         _combined_job_nodes->connect_job_node( job_node );
-        on_order_available();  // Ruft request_order()
+        on_order_possibly_available();  // Ruft request_order()
         result = true;
     }
 
@@ -2711,11 +2711,11 @@ void Standard_job::on_locks_available()
     _call_register.call<Locks_available_call>();
 }
 
-//-----------------------------------------------------------------Standard_job::on_order_available
+//--------------------------------------------------------Standard_job::on_order_possibly_available
 
-void Standard_job::on_order_available()
+void Standard_job::on_order_possibly_available()
 {
-    _call_register.call<Order_available_call>();
+    _call_register.call<Order_possibly_available_call>();
 }
 
 //----------------------------------------------------------------------Standard_job::task_to_start

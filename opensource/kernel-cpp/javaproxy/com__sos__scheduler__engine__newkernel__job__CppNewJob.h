@@ -74,7 +74,7 @@ struct CppNewJob : ::zschimmer::javabridge::proxy_jobject< CppNewJob >, ::javapr
     bool onActivate() const;
     bool onInitialize() const;
     bool onLoad() const;
-    void onOrderAvailable() const;
+    void onOrderPossiblyAvailable() const;
     void onPrepareToRemove() const;
     void onProcessIsIdle() const;
     void onReferencedScheduleLoaded() const;

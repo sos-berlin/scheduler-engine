@@ -148,7 +148,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     int                         job_chain_priority          () const                                { return _job_chain_priority; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->job_chain_priority() > b->job_chain_priority(); }
-    virtual void                on_order_available          ()                                      = 0;
+    virtual void                on_order_possibly_available ()                                      = 0;
 
 
   private:
@@ -167,7 +167,7 @@ namespace job {
     struct Calculated_next_time_do_something_call;
     struct Start_when_directory_changed_call;
     struct Order_timed_call;
-    struct Order_available_call;
+    struct Order_possibly_available_call;
     struct Process_available_call;
     struct Below_min_tasks_call;
     struct Below_max_tasks_call;
@@ -311,7 +311,7 @@ struct Standard_job : Job
     void                        on_call                     (const job::Task_closed_call&);
     void                        on_call                     (const job::Start_when_directory_changed_call&);
     void                        on_call                     (const job::Order_timed_call&);
-    void                        on_call                     (const job::Order_available_call&);
+    void                        on_call                     (const job::Order_possibly_available_call&);
     void                        on_call                     (const job::Process_available_call&);
     void                        on_call                     (const job::Below_min_tasks_call&);
     void                        on_call                     (const job::Below_max_tasks_call&);
@@ -348,7 +348,7 @@ struct Standard_job : Job
     void                    set_order_controlled            ();
 
     void                    set_idle_timeout                ( const Duration& );
-    void                        on_order_available          ();
+    void                        on_order_possibly_available ();
 
     Module*                     module                      ()                                      { return _module; }
 

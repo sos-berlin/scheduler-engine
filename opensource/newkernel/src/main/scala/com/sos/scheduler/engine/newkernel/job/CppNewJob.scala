@@ -210,7 +210,7 @@ extends Sister {
     ???
   }
 
-  @ForCpp def onOrderAvailable() {
+  @ForCpp def onOrderPossiblyAvailable() {
     ???
   }
 
