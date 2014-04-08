@@ -154,10 +154,12 @@ with HasInjector {
   }
 
   def terminate() {
-    try cppProxy.cmd_terminate()
-    catch {
-      case x: CppProxyInvalidatedException =>
-        logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed", x)
+    if (!isClosed) {
+      try cppProxy.cmd_terminate()
+      catch {
+        case x: CppProxyInvalidatedException =>
+          logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed")
+      }
     }
   }
 
