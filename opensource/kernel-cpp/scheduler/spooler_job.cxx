@@ -1942,7 +1942,12 @@ void Standard_job::on_call(const Calculated_next_time_do_something_call&) {
 
 void Standard_job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
+    Time t = next_order_time();
+    if (t <= Time::now())
     process_order();
+    else
+    if (!t.is_never())
+        _call_register.call_at<Order_timed_call>(t);
 }
 
 //----------------------------------------------Standard_job::on_call Order_possibly_available_call
