@@ -1014,7 +1014,7 @@ library Spooler
         HRESULT                 Title                   ( [out,retval] BSTR* );
 
         [id(15), propget]
-        HRESULT                 LivePath                ([out, retval] BSTR*);
+        HRESULT                 path                    ([out, retval] BSTR*);
     }
 
     [
