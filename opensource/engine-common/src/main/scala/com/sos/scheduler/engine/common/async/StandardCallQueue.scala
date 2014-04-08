@@ -4,7 +4,6 @@ import StandardCallQueue._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import org.joda.time.DateTimeUtils.currentTimeMillis
 import scala.collection.mutable
-import scala.sys.error
 
 final class StandardCallQueue extends PoppableCallQueue {
   private val queue = mutable.Buffer[TimedCall[_]]()
@@ -12,9 +11,9 @@ final class StandardCallQueue extends PoppableCallQueue {
   private var closed = false
 
   def add(o: TimedCall[_]) {
-    logger debug s"Enqueue $o"
+    logger debug s"Enqueue at ${o.atString} $o"
     synchronized {
-      if (closed)  error(s"CallQueue is closed. '$o' is rejected")
+      if (closed)  sys.error(s"CallQueue is closed. '$o' is rejected")
       val i = positionAfter(o.epochMillis)
       if (i < queue.size) queue.insert(i, o)
       else queue.append(o)  // Scala 2.10.0: queue.insert(queue.size, x) geht in eine Schleife
