@@ -1381,7 +1381,8 @@ bool Task::do_something()
                             _begin_called = true;
                             if( !_operation ) {
                                 _operation = begin__start();
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_starting_completed_call>());
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_starting_completed_call>());
                             } else {
                                 ok = operation__end();
 
@@ -1414,7 +1415,8 @@ bool Task::do_something()
                                     lock_requestor->dequeue_lock_requests();
                                 }
                                 _operation = do_call__start( spooler_open_name );
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_opening_completed_call>());
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_opening_completed_call>());
                             } else {
                                 bool ok = operation__end();
                                 if( _delay_until_locks_available ) {
@@ -1463,7 +1465,8 @@ bool Task::do_something()
 
                             if( !_operation ) {
                                 _operation = do_step__start();
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_step_completed_call>());
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_step_completed_call>());
                                 wake_when_longer_than();
                             } else {
                                 _call_register.cancel<Warn_longer_than_call>();
@@ -1497,7 +1500,8 @@ bool Task::do_something()
                                         lock_requestor->dequeue_lock_requests();
                                     }
                                     _operation = do_step__start();
-                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_step_completed_call>());
+                                    if (!_operation->async_finished())
+                                        _operation->on_async_finished_call(_call_register.new_async_call<Task_step_completed_call>());
                                     wake_when_longer_than();
                                     something_done = true;
                                 }
@@ -1578,7 +1582,8 @@ bool Task::do_something()
                                     _history.start();
                                 if( _begin_called ) {
                                     _operation = do_end__start();
-                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_end_completed_call>());
+                                    if (!_operation->async_finished())
+                                        _operation->on_async_finished_call(_call_register.new_async_call<Task_end_completed_call>());
                                 } else {
                                     set_state_direct( s_exit );
                                     loop = true;
@@ -1598,7 +1603,8 @@ bool Task::do_something()
                                 if( shall_wait_for_registered_pid() ) {
                                     if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) ) {
                                         _operation = m->_remote_instance->call__start( "Wait_for_subprocesses" );
-                                        _operation->on_async_finished_call(_call_register.new_async_call<Task_wait_for_subprocesses_completed_call>());
+                                        if (!_operation->async_finished())
+                                            _operation->on_async_finished_call(_call_register.new_async_call<Task_wait_for_subprocesses_completed_call>());
                                     } else {
                                         try {
                                             _subprocess_register.wait();
@@ -1622,7 +1628,8 @@ bool Task::do_something()
                         case s_on_success: {
                             if( !_operation ) {
                                 _operation = do_call__start( spooler_on_success_name );
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_on_success_completed_call>());
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_on_success_completed_call>());
                             } else {
                                 operation__end();
                                 set_state_direct( s_exit );
@@ -1636,7 +1643,8 @@ bool Task::do_something()
                         case s_on_error: {
                             if( !_operation ) {
                                 _operation = do_call__start( spooler_on_error_name );
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_on_error_completed_call>());
+                               if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_on_error_completed_call>());
                             }
                             else  
                                 operation__end(), set_state_direct( s_exit ), loop = true;
@@ -1647,7 +1655,8 @@ bool Task::do_something()
                         case s_exit: {
                             if( !_operation ) {
                                 _operation = do_call__start( spooler_exit_name );
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_exit_completed_call>());
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_exit_completed_call>());
                             } else {
                                 operation__end();
                                 set_state_direct( s_release );
@@ -1660,7 +1669,8 @@ bool Task::do_something()
                         case s_release: {
                             if( !_operation ) {
                                 _operation = do_release__start();
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_release_completed_call>());
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_release_completed_call>());
                             } else  {
                                 operation__end();
                                 set_state_direct( s_killing );
@@ -1683,7 +1693,8 @@ bool Task::do_something()
                         case s_ended: {
                             if( !_operation ) {
                                 _operation = do_close__start();
-                                _operation->on_async_finished_call(_call_register.new_async_call<Task_ended_completed_call>());
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_ended_completed_call>());
                             } else {
                                 operation__end();
                                 if( _module_instance  && _module_instance->_module->kind() == Module::kind_process ) {
