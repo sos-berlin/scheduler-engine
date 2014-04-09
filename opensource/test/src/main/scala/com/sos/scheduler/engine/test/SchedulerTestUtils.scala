@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.test
 
+import _root_.scala.concurrent.{Await, Future}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskClosedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
@@ -9,6 +10,10 @@ import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, Order}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 
 object SchedulerTestUtils {
 
@@ -25,9 +30,23 @@ object SchedulerTestUtils {
     hasInjector.injector.getInstance(classOf[OrderSubsystem]).orderOption(key)
 
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: TestTimeout): TaskId = {
-    val event = controller.getEventBus.awaitingEvent[TaskClosedEvent](predicate = _.jobPath == jobPath) {
-      controller.scheduler executeXml <start_job job={jobPath.string}/>
+    val (taskId, future) = runJobFuture(jobPath)
+    Await.result(future, timeout.duration)
+    taskId
+  }
+
+  def runJobFuture(jobPath: JobPath)(implicit controller: TestSchedulerController): (TaskId, Future[TaskClosedEvent]) = {
+    implicit val callQueue = controller.injector.apply[SchedulerThreadCallQueue]
+    inSchedulerThread {
+      val taskId = startJob(jobPath)
+      // Im selben Thread, damit wir sicher das Event abonnieren, bevor es eintrifft. Sonst ginge es verloren.
+      val future = controller.getEventBus.keyedEventFuture[TaskClosedEvent](taskId)
+      Tuple2(taskId, future)
     }
-    event.taskId
+  }
+
+  def startJob(jobPath: JobPath)(implicit controller: TestSchedulerController): TaskId = {
+    val response = controller.scheduler executeXml <start_job job={jobPath.string}/>
+    TaskId((response.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
   }
 }
