@@ -2807,6 +2807,12 @@ void Output_message::write_safearray( const SAFEARRAY* const_safearray )
         case VT_UI1    : { Locked_any_safearray a ( safearray ); write_bytes( a->pvData, a.count() * 1 ); break; }
       //case VT_UI4    : { Locked_any_safearray a ( safearray ); write_bytes( a->pvData, a.count() * 4 ); break; }
 
+        case VT_BSTR: {
+            Locked_safearray<BSTR> a ( safearray ); 
+            for( int i = 0; i < a.count(); i++ )  write_bstr( a[ i ] ); 
+            break;
+        }
+
         case VT_VARIANT: 
         { 
             Locked_safearray<VARIANT> a ( safearray ); 
@@ -3322,6 +3328,12 @@ SAFEARRAY* Input_message::read_safearray()
         {
             case VT_UI1    : { Locked_any_safearray a ( safearray ); read_bytes( a->pvData, b.cElements * 1 ); break; }
           //case VT_UI4    : { Locked_any_safearray a ( safearray ); read_bytes( a->pvData, b.cElements * 4 ); break; }
+
+            case VT_BSTR: {
+                Locked_safearray<BSTR> a ( safearray ); 
+                for( int i = 0; (uint)i < b.cElements; i++ )  read_bstr( &a[ i ] ); 
+                break;
+            }
 
             case VT_VARIANT: 
             { 

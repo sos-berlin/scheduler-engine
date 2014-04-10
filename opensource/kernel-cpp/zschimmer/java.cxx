@@ -45,7 +45,7 @@ static Message_code_text error_codes[] =
     { "Z-JAVA-105", "Java exception $1, method=$2" },
     { "Z-JAVA-106", "Java reference is NULL (\"NullPointerException\")" },
     { "Z-JAVA-107", "Type '$1' expected, not '$2'" },
-    { "Z-JAVA-109", "set_jvm: A Java Virtual Machine has alreade been started" },
+    { "Z-JAVA-109", "set_jvm: A Java Virtual Machine has already been started" },
     { "Z-JAVA-110", "Java Virtual Machine is older then version 1.2" },
     { "Z-JAVA-111", "Reference to C++ object is not longer valid" },
     { "Z-JAVA-112", "The $1. parameter is of unknown type" },

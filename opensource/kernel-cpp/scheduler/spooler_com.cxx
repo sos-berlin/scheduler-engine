@@ -4674,6 +4674,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_METHOD     , 13, "Remove"                    , (Com_method_ptr)&Com_job_chain::Remove             , VT_EMPTY      },
     { DISPATCH_PROPERTYPUT, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 15, "States"                    , (Com_method_ptr)&Com_job_chain::get_States         , (VARENUM)(VT_BSTR|VT_ARRAY) },
     {}
 };
 
@@ -5094,6 +5095,31 @@ STDMETHODIMP Com_job_chain::get_Title( BSTR* result )
 
     return hr;
 }
+
+
+STDMETHODIMP Com_job_chain::get_States(SAFEARRAY** result)
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if (!_job_chain)  return E_POINTER;
+
+        Locked_safearray<BSTR> safearray (_job_chain->_node_list.size());
+        int i = 0;
+        Z_FOR_EACH(Job_chain::Node_list, _job_chain->_node_list, it)
+        {
+            safearray[i++] = bstr_from_string((*it)->string_order_state());
+        }
+
+        *result = safearray.take_safearray();
+    }
+    catch (const exception&  x)  { hr = Set_excepinfo(x, Z_FUNCTION); }
+    catch (const _com_error& x)  { hr = Set_excepinfo(x, Z_FUNCTION); }
+
+    return hr;
+}
+
 
 //---------------------------------------------------------------------Com_job_chain_node::_methods
 #ifdef Z_COM

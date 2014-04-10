@@ -1346,7 +1346,7 @@ HRESULT SafeArrayGetVartype( SAFEARRAY* safearray, VARTYPE* result )
 
     if( FAILED( hr ) ) 
     {
-        Z_LOG( "SafeArrayGetVartype() => " << string_from_hresult(hr) << "  fFeatures=" << hex << safearray->fFeatures << " vt=" << vt << dec << "\n" );
+        Z_LOG( "SafeArrayGetVartype() => " << string_from_hresult(hr) << "  fFeatures=0x" << hex << safearray->fFeatures << " vartype=" << vartype_name(vt) << "\n" );
     }
 
     return hr;

@@ -181,6 +181,10 @@ public class Job_chain extends Idispatch implements HasBean<Job_chainBean>
     @SchedulerGetter
     public String           title               ()                                  { return (String)           com_call( "<title" ); }
 
+    @SchedulerGetter
+    public String[]         states              ()                                  { return (String[])         com_call( "<states" ); }
+
+
     public final Job_chainBean toBean() {
         return new Job_chainBean(this);
     }

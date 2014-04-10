@@ -1019,6 +1019,9 @@ library Spooler
     
         [id(14),propget]
         HRESULT                 Title                   ( [out,retval] BSTR* );
+
+        [id(15), propget]
+        HRESULT                 States                  ( [out, retval] SAFEARRAY(BSTR)* );
     }
 
     [
