@@ -4245,7 +4245,12 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
     {
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
         {
-            if( !order->_history_id )  order->db_insert_order_history_record( &ta );
+            if (!order->_history_id)
+            {
+                order->_history_id = db()->get_order_history_id(&ta);
+                order->db_insert_order_history_record(&ta);
+            }
+
             order->db_insert_order_step_history_record( &ta );
             ta.commit( Z_FUNCTION );
         }
