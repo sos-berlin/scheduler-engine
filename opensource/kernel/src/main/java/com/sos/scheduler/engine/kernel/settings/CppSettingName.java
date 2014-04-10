@@ -20,7 +20,11 @@ public enum CppSettingName {
 
     supervisorConfigurationPollingInterval(8),
 
-    clusterRestartAfterEmergencyAbort(9);
+    clusterRestartAfterEmergencyAbort(9),
+
+    useOldMicroschedulingForJobs(10),
+
+    useOldMicroschedulingForTasks(11);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

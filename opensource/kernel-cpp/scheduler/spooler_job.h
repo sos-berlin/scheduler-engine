@@ -371,6 +371,7 @@ struct Standard_job : Job
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
     bool                        above_min_tasks             () const;
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
+    void                        try_start_task              ();
 
   private:
     void                        set_log                     ();
@@ -397,7 +398,6 @@ struct Standard_job : Job
     Time                        next_start_time             () const;
     void                        calculate_next_time         ( const Time& now );
     void                        process_order               ();
-    void                        try_start_task              ();
     ptr<Task>                   task_to_start               ();
     void                        set_state                   ( State );
     bool                        execute_state_cmd           (State_cmd);
@@ -541,6 +541,7 @@ struct Job_subsystem: Object,
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
     virtual Schedule*           default_schedule            ()                                      = 0;
+    virtual void                do_something                ()                                      = 0;
 
     Job*                        job                         ( const Absolute_path& job_path )       { return file_based( job_path ); } 
     Job*                        job_or_null                 ( const Absolute_path& job_path )       { return file_based_or_null( job_path ); }

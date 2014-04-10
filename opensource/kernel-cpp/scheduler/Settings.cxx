@@ -36,6 +36,8 @@ void Settings::set_from_variables(const Com_variable_set& p) {
         _supervisor_configuration_polling_interval = p.get_int("scheduler.configuration.client.polling_interval", _supervisor_configuration_polling_interval);
         _cluster_restart_after_emergency_abort = p.get_bool("scheduler.cluster.restart_after_emergency_abort", _cluster_restart_after_emergency_abort);
     }
+    _use_old_microscheduling_for_jobs = p.get_bool("scheduler.old_microscheduling.enable_for_jobs", _use_old_microscheduling_for_jobs);
+    _use_old_microscheduling_for_tasks = p.get_bool("scheduler.old_microscheduling.enable_for_tasks", _use_old_microscheduling_for_tasks);
 }
 
 //------------------------------------------------------------------------------------Settings::set
@@ -68,6 +70,13 @@ void Settings::set(int number, const string& value) {
             break;
         case 9:
             _cluster_restart_after_emergency_abort = as_bool(value);
+            break;
+        case 10:
+            _use_old_microscheduling_for_jobs = as_bool(value);
+            break;
+        case 11:
+            _use_old_microscheduling_for_tasks = as_bool(value);
+            break;
         default:
             z::throw_xc("UNKNOWN_SETTING", number);
     }

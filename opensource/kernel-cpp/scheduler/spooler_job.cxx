@@ -75,6 +75,7 @@ struct Job_subsystem_impl : Job_subsystem
     bool                        is_any_task_queued          ();
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     Schedule*                   default_schedule            ()                                      { return _default_schedule; }
+    void                        do_something                ();
 
 
     // File_based_subsystem:
@@ -269,6 +270,16 @@ void Job_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr& e
         if( options->_count >= options->_limit )  break;
 
         job->append_calendar_dom_elements( element, options );
+    }
+}
+
+//-----------------------------------------------------------------Job_subsystem_impl::do_something
+
+void Job_subsystem_impl::do_something() 
+{
+    FOR_EACH_JOB(job) {
+        if (Standard_job* j = dynamic_cast<Standard_job*>(job))
+            j->try_start_task();
     }
 }
 

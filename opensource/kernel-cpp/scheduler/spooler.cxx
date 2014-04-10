@@ -2679,6 +2679,13 @@ bool Spooler::run_continue( const Time& now )
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();
 
+    if (_settings->_use_old_microscheduling_for_jobs && _job_subsystem) {
+        _job_subsystem->do_something();
+    }
+    if (_settings->_use_old_microscheduling_for_tasks && _task_subsystem) {  
+        something_done |= _task_subsystem->do_something();
+    }
+
     return something_done;
 }
 
