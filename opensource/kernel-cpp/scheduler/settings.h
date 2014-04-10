@@ -18,7 +18,16 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     void                        set                         (int number, const string& value);
     string                      get                         (int number) const;
 
+    void freeze() { 
+        _freezed = true; 
+    }
+
+    bool is_freezed() const {
+        return _freezed; 
+    }
+
     Fill_zero                  _zero_;
+    bool                       _freezed;       // Some, not all, settings can be changed at runtime
     string                     _db_name;
     string                     _job_java_options;
     string                     _job_java_classpath;
