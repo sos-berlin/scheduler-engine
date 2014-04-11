@@ -33,9 +33,15 @@ class ClassOpsTest {
     trait T1
     trait T2[T]
     class C extends T1 with T2[Int]
+    val c = parameterizedTypes(classOf[C].getGenericInterfaces)
+    assertEquals(1, c.size)
+    assertEquals(classOf[T2[_]], c.head.getRawType)
 
-    val a = parameterizedTypes(classOf[C].getGenericInterfaces)
-    assertEquals(1, a.size)
-    assertEquals(classOf[T2[Int]], a.head.getRawType)
+    trait T3[T]
+    class D extends T2[Int] with T3[String]
+    val d = parameterizedTypes(classOf[D].getGenericInterfaces)
+    assertEquals(2, d.size)
+    assertEquals(classOf[T2[_]], d(0).getRawType)
+    assertEquals(classOf[T3[_]], d(1).getRawType)
   }
 }

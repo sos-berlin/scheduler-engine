@@ -704,6 +704,9 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     STDMETHODIMP            put_Title                   ( BSTR );
     STDMETHODIMP            get_Title                   ( BSTR* );
 
+    STDMETHODIMP            get_States                  ( SAFEARRAY** result );
+    
+
   private:
     Job_chain*       _job_chain;
 };

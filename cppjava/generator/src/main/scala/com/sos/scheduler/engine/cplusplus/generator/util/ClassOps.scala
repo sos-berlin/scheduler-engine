@@ -121,7 +121,7 @@ object ClassOps {
     (parameterizedTypes(types) filter { _.getRawType == rawType } ensuring { _.size <= 1 }).headOption
 
   def parameterizedTypes(types: Seq[Type]): List[ParameterizedType] =
-    types.toList filter { _.isInstanceOf[ParameterizedType] } map { _.asInstanceOf[ParameterizedType]}
+    types.toList collect { case o: ParameterizedType ⇒ o }
 
   def isVoid(t: Class[_]) =
     t == classOf[Void]  ||  t.getName == "void"

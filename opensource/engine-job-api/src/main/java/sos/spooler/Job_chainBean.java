@@ -66,6 +66,10 @@ public final class Job_chainBean implements Bean<Job_chain>{
         return delegate.title();
     }
 
+    public String[] getStates() {
+        return delegate.states();
+    }
+
     @Override public Job_chain getDelegate() {
         return delegate;
     }

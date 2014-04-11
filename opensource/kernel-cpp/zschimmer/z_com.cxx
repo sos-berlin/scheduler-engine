@@ -1325,19 +1325,31 @@ string debug_string_from_variant( const VARIANT& v )
                     }
                     else
                     {
-
                         result << ":{";
-
-                        Locked_safearray<Variant> array ( V_ARRAY( &v ) );
-
-                        for( int i = 0; i < array.count(); i++ )
-                        {
-                            if( i > 5 )  { result << ",..."; break; }
-                            if( i > 0 )  result << ',';
-                          //result += string_from_variant( array[i] );       // Bei einem Fehler hier lassen wir abbrechen.
-                            result << debug_string_from_variant( array[i] ).substr( 0, 30 );
+                        VARTYPE element_type = 0;
+                        SafeArrayGetVartype(V_ARRAY(&v), &element_type);
+                        switch (element_type) {
+                            case VT_BSTR: {
+                                Locked_safearray<BSTR> array ( V_ARRAY( &v ) );
+                                for( int i = 0; i < array.count(); i++ ) {
+                                    if( i > 5 )  { result << ",..."; break; }
+                                    if( i > 0 )  result << ',';
+                                    result << string_from_bstr(array[i]).substr( 0, 30 );
+                                }
+                                break;
+                            }
+                            case VT_VARIANT: {
+                                Locked_safearray<Variant> array ( V_ARRAY( &v ) );
+                                for( int i = 0; i < array.count(); i++ ) {
+                                    if( i > 5 )  { result << ",..."; break; }
+                                    if( i > 0 )  result << ',';
+                                    result << debug_string_from_variant( array[i] ).substr( 0, 30 );
+                                }
+                                break;
+                            }
+                            default:
+                                result << "vartype=" << element_type;
                         }
-
                         result << '}';
                     }
                     return result;

@@ -333,8 +333,7 @@ Absolute_path Absolute_path::build( const File_based* source_file_based, const s
 
 Absolute_path::Absolute_path( const Path& path )
 {
-    assert( path.empty()  ||  path.is_absolute() );
-    if( !path.empty()  &&  !path.is_absolute() )  assert(0), z::throw_xc( Z_FUNCTION, path );
+    if( !path.empty()  &&  !path.is_absolute() )  z::throw_xc( Z_FUNCTION, path );
 
     set_path( path );
 }
