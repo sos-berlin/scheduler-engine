@@ -36,16 +36,18 @@ trait TimedCall[A] extends Callable[A] {
   protected def onComplete(o: Try[A]) {
     o match {
       case Success(p) =>
-      case Failure(e: CancelledException) => logger.debug(s"TimedCall '$toString' cancelled")
+      case Failure(e: CancelledException) => logger.debug(s"$toString cancelled")
       case Failure(t) => logger.error(s"Error in TimedCall ignored: $t ($toString)", t)
     }
   }
 
-  override def toString =
-    Seq(
+  override def toString = {
+    val s = Seq(
       Some(Try(toStringPrefix) getOrElse "toString error"),
-      Some(s"at=$atString") filter { _ => epochMillis != shortTermMillis })
-    .flatten mkString " "
+        Some(s"at=$atString") filter { _ => epochMillis != shortTermMillis })
+        .flatten mkString " "
+    s"TimedCall '$s'"
+  }
 
   final def atString =
     if (epochMillis == shortTermMillis) "short-term"

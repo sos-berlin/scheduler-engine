@@ -4,7 +4,7 @@
 #include "mutex.h"
 #include "threads_base.h"
 #include "log.h"
-
+#include "java.h"
 
 namespace zschimmer {
 
@@ -36,7 +36,13 @@ void Event_base::set_signaled_then_callback(const string& name) {
 void Thread_base::thread_call_main()
 { 
     thread_init();
+    if (javabridge::Vm* vm = javabridge::Vm::get_vm(false))
+        vm->attach_thread("C++ " + _thread_name);
+
     int exit_code = call_thread_main();  
+
+    if (javabridge::Vm* vm = javabridge::Vm::get_vm(false))
+        vm->detach_thread();
     thread_exit( exit_code ); 
 }
 

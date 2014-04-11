@@ -26,12 +26,14 @@ import scala.sys.error
 
   private val logger = Logger(getClass)
   private val documentBuilder = threadLocal {
-    val factory = DocumentBuilderFactory.newInstance() sideEffect { _ setNamespaceAware true }
-    factory.newDocumentBuilder() sideEffect { _ setErrorHandler new ErrorHandler {
-      def warning(exception: SAXParseException) = logger.debug(exception.toString, exception)
-      def error(exception: SAXParseException) = throw exception
-      def fatalError(exception: SAXParseException) = throw exception
-    } }
+    val factory = DocumentBuilderFactory.newInstance() sideEffect { _.setNamespaceAware(true) }
+    factory.newDocumentBuilder() sideEffect {
+      _.setErrorHandler(new ErrorHandler {
+        def warning(exception: SAXParseException) = logger.debug(exception.toString, exception)
+        def error(exception: SAXParseException) = throw exception
+        def fatalError(exception: SAXParseException) = throw exception
+      })
+    }
   }
   private val transformerFactory = threadLocal { TransformerFactory.newInstance() }
 
@@ -216,13 +218,14 @@ import scala.sys.error
       static_xPathNullPointerLogged = true
     }
     try {
-      @SuppressWarnings(Array("unchecked"))
-      val result = Class.forName(workAroundClassName).asInstanceOf[Class[XPathFactory]].newInstance
+      val result = Class.forName(workAroundClassName).asInstanceOf[Class[XPathFactory]].newInstance()
+      logger.warn(s"Using $workAroundClassName as a workaround after $e", e)
       result
     }
     catch {
       case ee: Throwable =>
-        logger.debug("Workaround failed", ee)
+        logger.error("Workaround failed", ee)
+        e.addSuppressed(ee)
         throw e
       }
     }

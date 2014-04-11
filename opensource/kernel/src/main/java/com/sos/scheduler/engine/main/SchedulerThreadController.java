@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.main;
 import com.google.common.collect.ImmutableList;
 import com.sos.scheduler.engine.common.sync.ThrowableMailbox;
 import com.sos.scheduler.engine.common.time.Stopwatch;
-import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.settings.CppSettings;
@@ -78,11 +77,7 @@ public class SchedulerThreadController implements SchedulerController {
     }
 
     @Override public final void terminateScheduler() {
-        try {
-            controllerBridge.terminate();
-        } catch (CppProxyInvalidatedException x) {
-            logger.debug("controllerBridge.terminate() Exception ignored: " + x);
-        }
+        controllerBridge.terminate();
     }
 
     @Override public final boolean tryWaitForTermination(Duration timeout) {

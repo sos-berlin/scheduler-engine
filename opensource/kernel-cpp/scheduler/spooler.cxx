@@ -679,7 +679,7 @@ Spooler::Spooler(jobject java_main_context)
     _communication(this), 
     _base_log(this),
     _wait_handles(this),
-    _modifiable_settings(Z_NEW(Settings)),
+    _settings(Z_NEW(Settings)),
     _log_level( log_info ),
     _log_to_stderr_level( log_unknown ),
     _log_file_cache(log::cache::Request_cache::new_instance()),
@@ -731,17 +731,17 @@ Spooler::~Spooler()
     }
 }
 
-//-----------------------------------------------------------------------Spooler::writable_settings
+//---------------------------------------------------------------------Spooler::modifiable_settings
 
 Settings* Spooler::modifiable_settings() const {
-    if (_settings)  z::throw_xc("modifiable_settings");
-    return _modifiable_settings;
+    if (_settings->is_freezed())  z::throw_xc("modifiable_settings");
+    return _settings;
 }
 
 //--------------------------------------------------------------------------------Spooler::settings
 
 const Settings* Spooler::settings() const {
-    if (!_settings)  z::throw_xc("settings is missing");   // Sollte nicht passieren
+    if (!_settings->is_freezed())  z::throw_xc("SETTINGS-NOT-FREEZED");
     return _settings;
 }
 
@@ -1730,7 +1730,7 @@ void Spooler::load()
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
     modifiable_settings()->set_from_variables(*_variables);
-    _settings = _modifiable_settings;   // Von Scheduler.java befüllt
+    _settings->freeze(); // Von Scheduler.java befüllt
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
