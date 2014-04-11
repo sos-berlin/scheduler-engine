@@ -867,7 +867,7 @@ JNIEnv* Vm::jni_env()
     void* jenv = NULL;
 
     if( _vm->GetEnv( &jenv, JNI_VERSION_1_2 ) == JNI_OK )  return static_cast<JNIEnv*>( jenv );
-                                                     else  return attach_thread( "" );
+                                                     else  return attach_thread( "C++" );
 }
 
 //-----------------------------------------------------------------------------------------Env::Env
