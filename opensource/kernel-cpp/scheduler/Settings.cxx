@@ -11,7 +11,8 @@ Settings::Settings()
     _keep_order_content_on_reschedule(true),
     _max_length_of_blob_entry(INT_MAX),
     _supervisor_configuration_polling_interval(15 * 60),
-    _cluster_restart_after_emergency_abort(true)
+    _cluster_restart_after_emergency_abort(true),
+    _use_old_microscheduling_for_tasks(true)  // JS-1140 Fehlerbehandlung in Task mit Async_operation-Kindern funktioniert nicht (weil Task async_finished() pollt)
 {}
 
 //------------------------------------------------------------------------------Settings::~Settings
