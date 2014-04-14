@@ -14,6 +14,7 @@ import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, Order}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
+import org.joda.time.Duration
 
 object SchedulerTestUtils {
 
@@ -30,10 +31,14 @@ object SchedulerTestUtils {
     hasInjector.injector.getInstance(classOf[OrderSubsystem]).orderOption(key)
 
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: TestTimeout): TaskId = {
+    runJobAndWaitForEnd(jobPath, timeout.duration)
+  }
+
+  def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskId = {
     val (taskId, future) = runJobFuture(jobPath)
-    Await.result(future, timeout.duration)
+    Await.result(future, timeout)
     taskId
-    }
+  }
 
   def runJobFuture(jobPath: JobPath)(implicit controller: TestSchedulerController): (TaskId, Future[TaskClosedEvent]) = {
     implicit val callQueue = controller.injector.apply[SchedulerThreadCallQueue]
@@ -42,7 +47,7 @@ object SchedulerTestUtils {
       // Im selben Thread, damit wir sicher das Event abonnieren, bevor es eintrifft. Sonst ginge es verloren.
       val future = controller.getEventBus.keyedEventFuture[TaskClosedEvent](taskId)
       Tuple2(taskId, future)
-  }
+    }
   }
 
   def startJob(jobPath: JobPath)(implicit controller: TestSchedulerController): TaskId = {
