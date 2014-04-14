@@ -1,19 +1,21 @@
 package com.sos.scheduler.engine.test
 
 import _root_.scala.concurrent.{Await, Future}
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskClosedEvent}
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{TaskId, TaskClosedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, Order}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
-import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
-import com.sos.scheduler.engine.common.inject.GuiceImplicits._
+import org.joda.time.Duration
 
 object SchedulerTestUtils {
 
@@ -30,8 +32,12 @@ object SchedulerTestUtils {
     hasInjector.injector.getInstance(classOf[OrderSubsystem]).orderOption(key)
 
   def runJobAndWaitForEnd(jobPath: JobPath)(implicit controller: TestSchedulerController, timeout: TestTimeout): TaskId = {
+    runJobAndWaitForEnd(jobPath, timeout.duration)
+  }
+
+  def runJobAndWaitForEnd(jobPath: JobPath, timeout: Duration)(implicit controller: TestSchedulerController): TaskId = {
     val (taskId, future) = runJobFuture(jobPath)
-    Await.result(future, timeout.duration)
+    Await.result(future, timeout)
     taskId
   }
 
