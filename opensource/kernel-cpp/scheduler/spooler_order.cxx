@@ -4245,21 +4245,14 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
     {
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
         {
-            bool new_in_order_history = false;
-
-            if (!order->_history_id)
-            {
+            bool new_in_order_history = !order->_history_id;
+            if (new_in_order_history) {
                 order->_history_id = db()->get_order_history_id(&ta);
-                new_in_order_history = true;
             }
-
             order->db_insert_order_step_history_record( &ta );
-
-            if (new_in_order_history)
-            {
+            if (new_in_order_history) {
                 order->db_insert_order_history_record(&ta);
             }
-
             ta.commit( Z_FUNCTION );
         }
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_order_history_tablename + " or " + db()->_order_step_history_tablename, x ), Z_FUNCTION ); }
