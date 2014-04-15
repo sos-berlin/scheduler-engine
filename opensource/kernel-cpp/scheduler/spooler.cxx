@@ -3988,8 +3988,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             }
         }
 
-        java_options += " "+ subst_env(read_profile_string(factory_ini, "java", "options"));
-        java_classpath = java_classpath + Z_PATH_SEPARATOR + subst_env(read_profile_string(factory_ini, "java", "class_path"));
+        java_options = subst_env(read_profile_string(factory_ini, "java", "options")) + " " + java_options;
+        java_classpath = subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath;
         
         if( send_cmd != "" )  is_service = false;
 
