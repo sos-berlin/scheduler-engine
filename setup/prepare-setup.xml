@@ -96,6 +96,8 @@ to run without maven integration.
             <include name="slf4j*.jar"/>
             <include name="xercesImpl*.jar"/>
             <include name="xml-apis*.jar"/>
+            <include name="spray-json*.jar"/>
+            <include name="parboiled*.jar"/>
             
             <!-- additional jars for jetty integration -->
             <include name="aopalliance-*.jar"/>
@@ -103,6 +105,7 @@ to run without maven integration.
             <include name="jetty-*.jar"/>
             <include name="jul-to-slf4j-*.jar"/>
             <include name="servlet-api-*.jar"/>
+            
             <!-- this is always a part of the fat jar (see fileset spooler.lib) -->
             <exclude name="jetty-${version.number}*.jar"/>
 
