@@ -4,10 +4,8 @@ import JS1079IT._
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
-import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import java.io.File
 import java.net._

@@ -6,7 +6,7 @@ public final class X {
     private final I i;
     private final BI b;
 
-    @Inject public X(I i, BI b) {
+    @Inject private X(I i, BI b) {
         this.i = i;
         this.b = b;
     }

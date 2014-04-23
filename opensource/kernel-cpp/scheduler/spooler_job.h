@@ -148,7 +148,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     int                         job_chain_priority          () const                                { return _job_chain_priority; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->job_chain_priority() > b->job_chain_priority(); }
-    virtual void                on_order_available          ()                                      = 0;
+    virtual void                on_order_possibly_available ()                                      = 0;
 
 
   private:
@@ -167,7 +167,7 @@ namespace job {
     struct Calculated_next_time_do_something_call;
     struct Start_when_directory_changed_call;
     struct Order_timed_call;
-    struct Order_available_call;
+    struct Order_possibly_available_call;
     struct Process_available_call;
     struct Below_min_tasks_call;
     struct Below_max_tasks_call;
@@ -311,7 +311,7 @@ struct Standard_job : Job
     void                        on_call                     (const job::Task_closed_call&);
     void                        on_call                     (const job::Start_when_directory_changed_call&);
     void                        on_call                     (const job::Order_timed_call&);
-    void                        on_call                     (const job::Order_available_call&);
+    void                        on_call                     (const job::Order_possibly_available_call&);
     void                        on_call                     (const job::Process_available_call&);
     void                        on_call                     (const job::Below_min_tasks_call&);
     void                        on_call                     (const job::Below_max_tasks_call&);
@@ -348,7 +348,7 @@ struct Standard_job : Job
     void                    set_order_controlled            ();
 
     void                    set_idle_timeout                ( const Duration& );
-    void                        on_order_available          ();
+    void                        on_order_possibly_available ();
 
     Module*                     module                      ()                                      { return _module; }
 
@@ -371,6 +371,7 @@ struct Standard_job : Job
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
     bool                        above_min_tasks             () const;
     void                        on_task_finished            ( Task* );                              // Task::finished() ruft das
+    void                        try_start_task              ();
 
   private:
     void                        set_log                     ();
@@ -397,7 +398,6 @@ struct Standard_job : Job
     Time                        next_start_time             () const;
     void                        calculate_next_time         ( const Time& now );
     void                        process_order               ();
-    void                        try_start_task              ();
     ptr<Task>                   task_to_start               ();
     void                        set_state                   ( State );
     bool                        execute_state_cmd           (State_cmd);
@@ -541,6 +541,7 @@ struct Job_subsystem: Object,
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
     virtual Schedule*           default_schedule            ()                                      = 0;
+    virtual void                do_something                ()                                      = 0;
 
     Job*                        job                         ( const Absolute_path& job_path )       { return file_based( job_path ); } 
     Job*                        job_or_null                 ( const Absolute_path& job_path )       { return file_based_or_null( job_path ); }

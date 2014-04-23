@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.{TaskPersistentState, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskPersistentState, TaskId}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.persistence.entities.TaskEntityConverter.toDBString
 import com.sos.scheduler.engine.persistence.entities.{TaskEntityConverter, TaskEntity}

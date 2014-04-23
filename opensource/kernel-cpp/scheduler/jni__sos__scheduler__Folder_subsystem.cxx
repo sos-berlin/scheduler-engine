@@ -17,6 +17,108 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL file_1based_1paths__Z(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::file_based_paths()");
+        return java_array_from_c(o_->file_based_paths(p0 != 0));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jboolean JNICALL is_1empty(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::is_empty()");
+        return (o_->is_empty());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL java_1active_1file_1based__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::java_active_file_based()");
+        return Has_proxy::jobject_of(o_->java_active_file_based(env.string_from_jstring(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL java_1file_1based__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::java_file_based()");
+        return Has_proxy::jobject_of(o_->java_file_based(env.string_from_jstring(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL java_1file_1based_1or_1null__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::java_file_based_or_null()");
+        return Has_proxy::jobject_of(o_->java_file_based_or_null(env.string_from_jstring(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL java_1file_1baseds(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Folder_subsystem* o_ = has_proxy< ::sos::scheduler::Folder_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Folder_subsystem::java_file_baseds()");
+        return (o_->java_file_baseds()).local_ref();
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL java_1names__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1)
 {
     Env env = jenv;
@@ -50,6 +152,12 @@ static jboolean JNICALL update_1folders_1now(JNIEnv* jenv, jobject, jlong cppRef
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"file_based_paths__native", (char*)"(JZ)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::file_1based_1paths__Z },
+    { (char*)"is_empty__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::is_1empty },
+    { (char*)"java_active_file_based__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/FolderC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1active_1file_1based__Ljava_lang_String_2 },
+    { (char*)"java_file_based__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/FolderC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based__Ljava_lang_String_2 },
+    { (char*)"java_file_based_or_null__native", (char*)"(JLjava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/FolderC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1based_1or_1null__Ljava_lang_String_2 },
+    { (char*)"java_file_baseds__native", (char*)"(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1file_1baseds },
     { (char*)"java_names__native", (char*)"(JLjava/lang/String;Ljava/lang/String;)[Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1names__Ljava_lang_String_2Ljava_lang_String_2 },
     { (char*)"update_folders_now__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::update_1folders_1now }
 };
@@ -59,7 +167,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Folder_subsystem >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Folder_subsystem >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 2);
+        int ret = env->RegisterNatives(*cls, native_methods, 8);
         if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.Folder_subsystemCImpl");
     }
 

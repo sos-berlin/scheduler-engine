@@ -23,6 +23,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
+    ::zschimmer::javabridge::Method const _initialize____method;
     ::zschimmer::javabridge::Method const _instance__Ljava_lang_Class_2__method;
     ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _log__Ljava_lang_String_2ILjava_lang_String_2__method;
@@ -47,6 +48,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_cancelCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "cancelCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_enqueueCall__Lcom_sos_scheduler_engine_kernel_async_CppCall_2__method(this, "enqueueCall", "(Lcom/sos/scheduler/engine/kernel/async/CppCall;)V")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
+    ,_initialize____method(this, "initialize", "()V")
     ,_instance__Ljava_lang_Class_2__method(this, "instance", "(Ljava/lang/Class;)Ljava/lang/Object;")
     ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
     ,_log__Ljava_lang_String_2ILjava_lang_String_2__method(this, "log", "(Ljava/lang/String;ILjava/lang/String;)V")
@@ -106,6 +108,12 @@ void Scheduler::enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::java
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem result;
     result.steal_local_ref(cls->_getEventSubsystem____method.jobject_call(get_jobject(), parameter_list));
     return result;
+}
+
+void Scheduler::initialize() const {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    cls->_initialize____method.call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::java::lang::Object Scheduler::instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Class >& p0) const {

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sos.scheduler.engine.data.configuration.EngineJacksonConfiguration;
 import com.sos.scheduler.engine.data.event.Event;
-import com.sos.scheduler.engine.data.folder.JobPath;
+import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.job.TaskEndedEvent;
 import com.sos.scheduler.engine.data.job.TaskStartedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;

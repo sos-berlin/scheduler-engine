@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.plugins.jetty.tests.commons
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.folder.{JobPath, JobChainPath}
+import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.plugins.jetty.WebServer
 import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
 import com.sos.scheduler.engine.plugins.jetty.configuration.ObjectMapperJacksonJsonProvider

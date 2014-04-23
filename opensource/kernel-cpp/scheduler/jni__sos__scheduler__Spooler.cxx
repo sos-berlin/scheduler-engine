@@ -860,6 +860,23 @@ static jstring JNICALL local_1configuration_1directory(JNIEnv* jenv, jobject, jl
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jobject JNICALL lock_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::lock_subsystem()");
+        return Has_proxy::jobject_of(o_->lock_subsystem());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL log(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -1028,6 +1045,40 @@ static jstring JNICALL param(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jint JNICALL pid(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::pid()");
+        return (o_->pid());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jint();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL process_1class_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::process_class_subsystem()");
+        return Has_proxy::jobject_of(o_->process_class_subsystem());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static void JNICALL run(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -1053,6 +1104,23 @@ static void JNICALL run_1check_1ctrl_1c(JNIEnv* jenv, jobject, jlong cppReferenc
     }
     catch(const exception& x) {
         env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL schedule_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::schedule_subsystem()");
+        return Has_proxy::jobject_of(o_->schedule_subsystem());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
     }
 }
 
@@ -1102,6 +1170,23 @@ static void JNICALL signal(JNIEnv* jenv, jobject, jlong cppReference)
     }
     catch(const exception& x) {
         env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
+static jobject JNICALL standing_1order_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::standing_order_subsystem()");
+        return Has_proxy::jobject_of(o_->standing_order_subsystem());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jobject();
     }
 }
 
@@ -1359,6 +1444,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"load__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::load },
     { (char*)"load_arg__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::load_1arg },
     { (char*)"local_configuration_directory__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::local_1configuration_1directory },
+    { (char*)"lock_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Lock_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::lock_1subsystem },
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },
     { (char*)"log_directory__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log_1directory },
     { (char*)"log_show_state__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log_1show_1state },
@@ -1369,11 +1455,15 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"order_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Order_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order_1subsystem },
     { (char*)"orders_are_distributed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::orders_1are_1distributed },
     { (char*)"param__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::param },
+    { (char*)"pid__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::pid },
+    { (char*)"process_class_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Process_class_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::process_1class_1subsystem },
     { (char*)"run__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::run },
     { (char*)"run_check_ctrl_c__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::run_1check_1ctrl_1c },
+    { (char*)"schedule_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Schedule_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::schedule_1subsystem },
     { (char*)"self_check__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::self_1check },
     { (char*)"setting__native", (char*)"(JI)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::setting__I },
     { (char*)"signal__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::signal },
+    { (char*)"standing_order_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Standing_order_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::standing_1order_1subsystem },
     { (char*)"start__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::start },
     { (char*)"state_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::state_1name },
     { (char*)"stop__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::stop },
@@ -1393,7 +1483,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Spooler >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Spooler >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 78);
+        int ret = env->RegisterNatives(*cls, native_methods, 83);
         if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.SpoolerCImpl");
     }
 

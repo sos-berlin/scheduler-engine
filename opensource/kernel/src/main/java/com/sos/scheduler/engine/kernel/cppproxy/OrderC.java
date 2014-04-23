@@ -5,10 +5,9 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 
 @CppClass(clas="sos::scheduler::order::Order", directory="scheduler", include="spooler.h")
-public interface OrderC extends CppProxyWithSister<Order> {
+public interface OrderC extends CppProxyWithSister<Order>, File_basedC<Order> {
     Order.Type sisterType = new Order.Type();
 
-    String path();
     String file_path();
     String job_chain_path_string();
     Job_chainC job_chain();
@@ -27,7 +26,6 @@ public interface OrderC extends CppProxyWithSister<Order> {
     String initial_state_string();
     void set_end_state(String order_state);
     String end_state_string();
-    Prefix_logC log();
     void java_remove();
     boolean suspended();
     void set_suspended(boolean o);

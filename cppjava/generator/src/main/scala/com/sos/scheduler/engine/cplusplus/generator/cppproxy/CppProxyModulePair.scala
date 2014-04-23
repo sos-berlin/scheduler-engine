@@ -10,7 +10,7 @@ class CppProxyModulePair(val interface: Class[_]) {
     require(interface.isInterface, "Not an interface: " + interface)
 
     private val config = CppClassConfiguration(interface)
-    private val procedureSignatures = (interface.getMethods.toList filter isCppMethod map ProcedureSignature.apply).sorted
+    private val procedureSignatures = (interface.getMethods.toList filter isCppMethod map { m ⇒ ProcedureSignature(interface, m) }).sorted
     val javaModule = new JavaClassModule(config, procedureSignatures)
     val jniModule = new JniModule(config, procedureSignatures, javaModule.name)
 }

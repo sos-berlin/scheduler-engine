@@ -407,7 +407,8 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
 
 struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>, 
                   spooler_com::Ihas_java_class_name,
-                  file_based< Schedule, Schedule_folder, Schedule_subsystem_interface >
+                  file_based< Schedule, Schedule_folder, Schedule_subsystem_interface >,
+                  javabridge::has_proxy<Schedule>
 {
     static Class_descriptor     class_descriptor;
     static const Com_method    _methods[];
@@ -467,6 +468,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
                                 Schedule                    ( Schedule_subsystem_interface*, Scheduler_holidays_usage = with_scheduler_holidays );
                                ~Schedule                    ();
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Schedule>::java_sister(); }
 
     // Scheduler_object
 
@@ -591,10 +593,12 @@ struct Schedule_folder : typed_folder< Schedule >
 //---------------------------------------------------------------------Schedule_subsystem_interface
 
 struct Schedule_subsystem_interface : Object,
-                                      file_based_subsystem< Schedule >
+                                      file_based_subsystem< Schedule >,
+                                      javabridge::has_proxy<Schedule_subsystem_interface>
 {
                                 Schedule_subsystem_interface( Scheduler*, Type_code );
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Schedule_subsystem_interface>::java_sister(); }
 
     virtual ptr<Schedule_folder> new_schedule_folder        ( Folder* )                             = 0;
     Schedule*                   schedule                    ( const Absolute_path& path ) const     { return file_based( path ); }

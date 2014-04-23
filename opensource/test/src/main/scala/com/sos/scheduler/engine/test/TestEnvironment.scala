@@ -9,7 +9,8 @@ import com.sos.scheduler.engine.common.system.Files.removeDirectoryContentRecurs
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory}
 import com.sos.scheduler.engine.common.system.OperatingSystem
 import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
-import com.sos.scheduler.engine.data.folder.{JobPath, TypedPath}
+import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding

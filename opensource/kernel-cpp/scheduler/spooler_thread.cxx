@@ -42,6 +42,17 @@ void Task_subsystem::close()
     _event = NULL;
 }
 
+//---------------------------------------------------------------------Task_subsystem::do_something
+
+bool Task_subsystem::do_something() 
+{
+    bool something_done = false;
+    FOR_EACH_TASK(it, task) {
+        something_done |= task->do_something();
+    }
+    return something_done;
+}
+
 //------------------------------------------------Task_subsystem::build_prioritized_order_job_array
 
 void Task_subsystem::build_prioritized_order_job_array()

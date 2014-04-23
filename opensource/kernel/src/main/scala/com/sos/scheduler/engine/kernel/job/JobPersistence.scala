@@ -10,9 +10,9 @@ import org.joda.time.{Duration, Instant}
 private[job] trait JobPersistence {
   this: Job =>
 
-  protected val jobSubsystem: JobSubsystem
+  protected val subsystem: JobSubsystem
 
-  import jobSubsystem.{entityManagerFactory, jobStore, taskStore}
+  import subsystem.{entityManagerFactory, jobStore, taskStore}
 
   @ForCpp @Nullable private[job] final def tryFetchPersistentState(): JobPersistentState =
     transaction(entityManagerFactory) { implicit entityManager =>

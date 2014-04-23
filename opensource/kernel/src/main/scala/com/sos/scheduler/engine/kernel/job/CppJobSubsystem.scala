@@ -2,29 +2,37 @@ package com.sos.scheduler.engine.kernel.job
 
 import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.common.scalautil.ScalaUtils._
+import com.sos.scheduler.engine.data.filebased.FileBasedState
+import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
+import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateTaskStore, HibernateJobStore}
 import javax.inject.{Singleton, Inject}
 import javax.persistence.EntityManagerFactory
 
 @Singleton
-final class CppJobSubsystem @Inject private(cppproxy: Job_subsystemC, injector: Injector)
+final class CppJobSubsystem @Inject private(
+  protected[this] val cppProxy: Job_subsystemC,
+  implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue,
+  injector: Injector)
 extends JobSubsystem {
 
   private[job] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
   private[job] lazy val jobStore = injector.apply[HibernateJobStore]
   private[job] lazy val taskStore = injector.apply[HibernateTaskStore]
 
-  def job(path: JobPath): Job =
-    cppproxy.job_by_string(path.string).getSister
-
-  def names: Seq[String] =
-    fetchNames(visibleOnly = false)
-
-  def visibleNames: Seq[String] =
-    fetchNames(visibleOnly = true)
-
-  private def fetchNames(visibleOnly: Boolean): Seq[String] =
-    cppproxy.file_based_names(visibleOnly)
+  override def overview: JobSubsystemOverview = {
+    case class JobInfo(fileBasedState: FileBasedState, jobState: JobState, needsProcess: Boolean)
+    def jobInfo(path: JobPath) = job(path) match { case j ⇒ JobInfo(j.fileBasedState, j.state, j.needsProcess) }
+    val (superOverview, jobInfos) = inSchedulerThread { (super.overview, paths map jobInfo) }
+    JobSubsystemOverview(
+      fileBasedType = superOverview.fileBasedType,
+      count = superOverview.count,
+      fileBasedStateCounts = superOverview.fileBasedStateCounts,
+      jobStateCounts = (jobInfos map { _.jobState }).countEquals,
+      needProcessCount = jobInfos count { _.needsProcess }
+    )
+  }
 }

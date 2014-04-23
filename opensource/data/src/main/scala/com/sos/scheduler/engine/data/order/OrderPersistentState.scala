@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.order
 
 import com.sos.scheduler.engine.data.base.HasKey
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import org.joda.time.ReadableInstant
 

@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.order.jobchain.{JobChainNodePersistentStateKey, JobChainNodePersistentState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodePersistentStateKey, JobChainNodePersistentState}
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.persistence.entities.{JobChainNodeEntityConverter, JobChainNodeEntity}
 import javax.inject.{Inject, Singleton}

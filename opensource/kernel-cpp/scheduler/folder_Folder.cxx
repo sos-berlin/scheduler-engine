@@ -11,6 +11,7 @@ using namespace directory_observer;
 Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
 :
     file_based< Folder, Subfolder_folder, Folder_subsystem >( folder_subsystem, this, type_folder ),
+    javabridge::has_proxy<Folder>(spooler()),
     _parent(parent),
     _zero_(this+1)
 {

@@ -77,6 +77,8 @@ void Com_env::jstring_to_bstr( const jstring& jstr, BSTR* bstr )
 
 //--------------------------------------------------------------------Com_env::jobject_from_variant
 
+// Soll nur von Java aufgerufen werden oder von etwas was einen Lokal frame benutzt
+// Im Fehlerfall müssen Loale Referenzen freigeben weden z.B. mit Local_frame
 jobject Com_env::jobject_from_variant( const VARIANT& v, Java_idispatch_container* java_idispatch_container )
 {
     Env     env = jni_env();
@@ -258,6 +260,18 @@ jobject Com_env::jobject_from_variant( const VARIANT& v, Java_idispatch_containe
                 break;
             }
 
+            //case VT_ARRAY | VT_VARIANT:
+            //{
+            //    result = jobjectArray_from_safearray_of_variants( V_ARRAY(&v) );
+            //    break;
+            //}
+
+            case VT_ARRAY | VT_BSTR:
+            {
+                result = jobjectArray_from_bstr_safearray( V_ARRAY(&v) );
+                break;
+            }
+
           //case VT_VARIANT:
           //case VT_UNKNOWN:
           //case VT_DECIMAL:
@@ -279,6 +293,91 @@ jobject Com_env::jobject_from_variant( const VARIANT& v, Java_idispatch_containe
             default:  
                 throw_xc( "Z-JAVA-104", variant_type_name(v) );
         }
+    }
+
+    return result;
+}
+
+
+// Wird momentan nicht verwendet
+jobjectArray Com_env::jobjectArray_from_safearray_of_variants(const SAFEARRAY* arr)
+{
+    Env          env = jni_env();
+    jobjectArray result = NULL;
+
+    Locked_safearray<Variant> safearray(const_cast<SAFEARRAY*>(arr));
+    
+    if (safearray.count() == 0)
+    {
+        jclass objectClass = env.find_class("java/lang/Object");
+        result = env->NewObjectArray(0, objectClass, 0);
+    }
+    else
+    {
+        VARTYPE vartype = 0x0;
+
+        // Collect vartypes of all elements
+        for (int i = 0; i < safearray.count(); i++)
+        {
+            vartype = vartype | safearray[i].vt;
+        }
+
+        switch (vartype)
+        {
+            case VT_BSTR:
+            {
+                jclass stringClass = env.find_class("java/lang/String");
+                result = env->NewObjectArray(safearray.count(), stringClass, 0);
+
+                if ( result != NULL )
+                {
+                    for (int i = 0; i < safearray.count(); i++)
+                    {
+                        VARIANT& var = safearray[i];
+                        jstring jstr = jstring_from_bstr(V_BSTR(&var));
+                        env->SetObjectArrayElement(result, i, jstr);
+                        env->DeleteLocalRef(jstr);
+
+                        if (env->ExceptionCheck())
+                            env.throw_java(Z_FUNCTION);
+                    }
+                }
+
+                break;
+            }
+            default:
+            {
+                // throw_xc: Z-JAVA-xxx, Unsupported COM variant type $1 in SAFEARRAY
+            }
+        }
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------Com_env::jobjectArray_from_bstr_safearray
+
+jobjectArray Com_env::jobjectArray_from_bstr_safearray(const SAFEARRAY* arr)
+{
+    Env  env = jni_env();
+    Locked_safearray<BSTR> safearray(const_cast<SAFEARRAY*>(arr));
+    jclass stringClass = Vm::static_vm->standard_classes()->_java_lang_string_class;
+    
+    jobjectArray result = env->NewObjectArray(safearray.count(), stringClass, NULL);
+    env.check_result(result, "NewObjectArray");
+    try {
+        for (int i = 0; i < safearray.count(); i++)
+        {
+            jstring jstr = jstring_from_bstr(safearray[i]);
+            env->SetObjectArrayElement(result, i, jstr);
+            env->DeleteLocalRef(jstr);
+
+            if (env->ExceptionCheck())
+                env.throw_java(Z_FUNCTION);
+        }
+    } catch (exception&) {
+        env->DeleteGlobalRef(result);
+        throw;
     }
 
     return result;

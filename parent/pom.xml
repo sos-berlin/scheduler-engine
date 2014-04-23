@@ -15,7 +15,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> <!-- für maven-failsafe-plugin -->
-        <scala.version>2.10.3</scala.version>
+        <scala.version>2.10.4</scala.version>
         <scala.binaryVersion>2.10</scala.binaryVersion>
         <scala.plugin.version>2.15.2</scala.plugin.version>
         <scalatest.scala.version>2.10</scalatest.scala.version>
@@ -462,6 +462,11 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>0.9.9-RC1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.spray</groupId>
+                <artifactId>spray-json_${scala.binaryVersion}</artifactId>
+                <version>1.2.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

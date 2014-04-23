@@ -1,15 +1,14 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.plugins.webservice.utils.WebServices.noCache
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import javax.ws.rs._
-import javax.ws.rs.core.Response.Status.NOT_FOUND
+import javax.ws.rs.core.Response.Status.BAD_REQUEST
 import javax.ws.rs.core._
-import scala.collection.JavaConversions._
 
 @Path("folder")
 class FolderService @Inject()(folderSubsystem: FolderSubsystem) {
@@ -26,7 +25,7 @@ class FolderService @Inject()(folderSubsystem: FolderSubsystem) {
   private def view(folderPath: AbsolutePath, typeName: String, u: UriInfo) = {
     try FolderView(folderSubsystem.names(folderPath, typeName), folderPath, typeName, u.getBaseUri)
     catch {
-      case x: CppException if x.getCode == "SCHEDULER-161" => throw new WebApplicationException(x, NOT_FOUND)
+      case x: CppException if x.getCode == "SCHEDULER-161" => throw new WebApplicationException(x, BAD_REQUEST)
     }
   }
 }

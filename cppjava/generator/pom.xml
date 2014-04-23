@@ -97,5 +97,10 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.binaryVersion}</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

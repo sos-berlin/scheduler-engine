@@ -19,6 +19,7 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
 
     virtual void                close                       ();
 
+    bool                        do_something                ();
     string                      name                        () const                                { return "task"; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     

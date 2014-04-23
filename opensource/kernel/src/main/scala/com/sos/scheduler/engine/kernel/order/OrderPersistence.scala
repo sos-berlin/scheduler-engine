@@ -15,9 +15,9 @@ trait OrderPersistence {
   this: Order =>
 
   protected val cppProxy: OrderC
-  protected val orderSubsystem: OrderSubsystem
+  protected val subsystem: StandingOrderSubsystem
 
-  import orderSubsystem.{entityManagerFactory, orderStore}
+  import subsystem.{entityManagerFactory, orderStore}
 
   @ForCpp private[order] def persistState() {
     transaction(entityManagerFactory) { implicit entityManager =>
@@ -47,7 +47,6 @@ trait OrderPersistence {
 
 
 private object OrderPersistence {
-  private val logger = Logger(getClass)
   private val titleColumnSize = 200
   private val dateTimeFormatter = DateTimeFormat forPattern "yyyy-MM-dd HH:mm:ss" withZone DateTimeZone.UTC
 

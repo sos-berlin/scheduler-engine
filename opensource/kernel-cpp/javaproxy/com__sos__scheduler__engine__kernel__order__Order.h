@@ -8,11 +8,11 @@
 #include "../zschimmer/Has_proxy.h"
 #include "../zschimmer/javaproxy.h"
 #include "../zschimmer/lazy.h"
-#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace filebased { struct FileBased; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
+namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -21,7 +21,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct Order__class;
 
-struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased {
+struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::java::lang::Object {
   private:
     static Order new_instance();  // Not implemented
   public:
@@ -47,7 +47,7 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< Order >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased::set_jobject(jo);
+        ::javaproxy::java::lang::Object::set_jobject(jo);
     }
   public:
 

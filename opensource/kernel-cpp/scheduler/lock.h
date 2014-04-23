@@ -16,6 +16,7 @@ struct Use;
 
 struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>, 
               file_based< Lock, Lock_folder, Lock_subsystem >, 
+              javabridge::has_proxy<Lock>,
               Non_cloneable
 {
     enum Lock_mode
@@ -34,6 +35,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     void                        close                       ();
   //string                      obj_name                    () const;
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Lock>::java_sister(); }
 
     // file_based<>
 
@@ -265,7 +267,8 @@ struct Holder : Object, Scheduler_object, Non_cloneable
 //-----------------------------------------------------------------------------------Lock_subsystem
 
 struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::Ilocks>, 
-                        file_based_subsystem< Lock >
+                        file_based_subsystem< Lock >,
+                        javabridge::has_proxy<Lock_subsystem>
 {
                                 Lock_subsystem              ( Scheduler* );
 
@@ -276,6 +279,7 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Lock_subsystem>::java_sister(); }
 
 
     // File_based_subsystem

@@ -21,6 +21,6 @@ final class JobsServiceIT extends FunSuite with ScalaSchedulerTest {
   private lazy val jobsResource = javaResource(injector).path("jobs")
 
   test("Read job list") {
-    jobsResource.accept(APPLICATION_JSON_TYPE).get(new GenericType[Set[String]]() {})  should equal (Set("a"))
+    jobsResource.accept(APPLICATION_JSON_TYPE).get(new GenericType[Set[String]]() {})  should equal (Set("/a"))
   }
 }

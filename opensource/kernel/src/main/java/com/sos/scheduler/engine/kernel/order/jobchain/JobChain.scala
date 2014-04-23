@@ -1,29 +1,39 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
+import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.folder.FileBasedType
-import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.order.jobchain.JobChainPersistentState
-import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
+import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.jobchain.{JobChainDetails, JobChainPath, JobChainPersistentState}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderState}
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC
-import com.sos.scheduler.engine.kernel.folder.FileBased
+import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.Order
+import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
-import java.io.File
+import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import javax.annotation.Nullable
 import javax.persistence.EntityManagerFactory
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 
 @ForCpp
-final class JobChain(cppProxy: Job_chainC, injector: Injector)
+final class JobChain(
+  protected[this] val cppProxy: Job_chainC,
+  protected val subsystem: OrderSubsystem,
+  injector: Injector)
 extends FileBased
 with UnmodifiableJobChain {
 
   type Path = JobChainPath
+
+  def stringToPath(o: String) =
+    JobChainPath(o)
+
+  def fileBasedType =
+    FileBasedType.jobChain
 
   def onCppProxyInvalidated() {}
 
@@ -64,23 +74,16 @@ with UnmodifiableJobChain {
   private def nodeStore =
     injector.getInstance(classOf[HibernateJobChainNodeStore])
 
-  def fileBasedType =
-    FileBasedType.jobChain
-
-  def name =
-    cppProxy.name
-
-  def path =
-    JobChainPath(cppProxy.path)
-
-  def file = cppProxy.file match {
-    case "" => sys.error(s"$toString has no source file")
-    case o => new File(o)
-  }
-
-  /** Markiert, dass das [[com.sos.scheduler.engine.kernel.folder.FileBased]] beim nächsten Verzeichnisabgleich neu geladen werden soll. */
-  def forceFileReread() {
-    cppProxy.set_force_file_reread()
+  override def details = {
+    val d = super.details
+    JobChainDetails(
+      d.path.asInstanceOf[JobChainPath],
+      d.fileBasedState,
+      d.file,
+      d.fileModificationInstant,
+      d.sourceXml,
+      nodes = nodes map { _.overview }
+    )
   }
 
   def refersToJob(job: Job): Boolean = nodes exists {
@@ -118,5 +121,15 @@ with UnmodifiableJobChain {
 
   private[order] def remove() {
     cppProxy.remove()
+  }
+}
+
+
+object JobChain {
+  final class Type extends SisterType[JobChain, Job_chainC] {
+    def sister(proxy: Job_chainC, context: Sister) = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new JobChain(proxy, injector.apply[OrderSubsystem], injector)
+    }
   }
 }

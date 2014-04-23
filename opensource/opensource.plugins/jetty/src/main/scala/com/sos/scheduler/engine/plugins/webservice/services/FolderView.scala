@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.sos.scheduler.engine.data.folder.AbsolutePath
+import com.sos.scheduler.engine.data.filebased.AbsolutePath
 import java.net.URI
 import javax.ws.rs.core.UriBuilder
 

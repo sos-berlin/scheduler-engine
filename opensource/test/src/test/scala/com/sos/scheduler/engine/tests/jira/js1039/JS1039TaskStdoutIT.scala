@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1039
 
 import JS1039TaskStdoutIT._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

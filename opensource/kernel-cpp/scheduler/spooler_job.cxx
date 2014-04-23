@@ -43,7 +43,7 @@ namespace job {
     DEFINE_SIMPLE_CALL(Standard_job, Calculated_next_time_do_something_call)
     DEFINE_SIMPLE_CALL(Standard_job, Start_when_directory_changed_call)
     DEFINE_SIMPLE_CALL(Standard_job, Order_timed_call)
-    DEFINE_SIMPLE_CALL(Standard_job, Order_available_call)
+    DEFINE_SIMPLE_CALL(Standard_job, Order_possibly_available_call)
     DEFINE_SIMPLE_CALL(Standard_job, Process_available_call)
     DEFINE_SIMPLE_CALL(Standard_job, Below_min_tasks_call)
     DEFINE_SIMPLE_CALL(Standard_job, Below_max_tasks_call)
@@ -75,6 +75,7 @@ struct Job_subsystem_impl : Job_subsystem
     bool                        is_any_task_queued          ();
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     Schedule*                   default_schedule            ()                                      { return _default_schedule; }
+    void                        do_something                ();
 
 
     // File_based_subsystem:
@@ -269,6 +270,16 @@ void Job_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr& e
         if( options->_count >= options->_limit )  break;
 
         job->append_calendar_dom_elements( element, options );
+    }
+}
+
+//-----------------------------------------------------------------Job_subsystem_impl::do_something
+
+void Job_subsystem_impl::do_something() 
+{
+    FOR_EACH_JOB(job) {
+        if (Standard_job* j = dynamic_cast<Standard_job*>(job))
+            j->try_start_task();
     }
 }
 
@@ -1942,12 +1953,17 @@ void Standard_job::on_call(const Calculated_next_time_do_something_call&) {
 
 void Standard_job::on_call(const Order_timed_call&) {
     _call_register.cancel<Order_timed_call>();
-    process_order();
+    Time t = next_order_time();
+    if (t <= Time::now())
+        process_order();
+    else
+    if (!t.is_never())
+        _call_register.call_at<Order_timed_call>(t);
 }
 
-//-------------------------------------------------------Standard_job::on_call Order_available_call
+//----------------------------------------------Standard_job::on_call Order_possibly_available_call
 
-void Standard_job::on_call(const Order_available_call&) {
+void Standard_job::on_call(const Order_possibly_available_call&) {
     process_order();
 }
 
@@ -2536,7 +2552,7 @@ Time Standard_job::next_start_time() const
 {
     if( _state == s_pending  ||  _state == s_running ) {
         Time t = min( _next_start_time, _next_single_start );
-        return !is_in_job_chain() || t.is_zero()? t : min(t, max(_combined_job_nodes->next_time(), _period.begin()));
+        return !is_in_job_chain() || t.is_zero()? t : min(t, max(next_order_time(), _period.begin()));
     } else 
         return Time::never;
 }
@@ -2579,7 +2595,7 @@ void Standard_job::calculate_next_time( const Time& now )
 
                 if (next_time > now && is_in_job_chain() && in_period) {
                     bool has_order = request_order( now, Z_FUNCTION );
-                    next_time = has_order? Time(0) : min(next_time, _combined_job_nodes->next_time() );
+                    next_time = has_order? Time(0) : min(next_time, next_order_time() );
                 }
             }
         }
@@ -2616,7 +2632,7 @@ bool Standard_job::connect_job_node( Job_node* job_node )
 
     if( _state >= s_initialized ) {
         _combined_job_nodes->connect_job_node( job_node );
-        on_order_available();  // Ruft request_order()
+        on_order_possibly_available();  // Ruft request_order()
         result = true;
     }
 
@@ -2711,11 +2727,11 @@ void Standard_job::on_locks_available()
     _call_register.call<Locks_available_call>();
 }
 
-//-----------------------------------------------------------------Standard_job::on_order_available
+//--------------------------------------------------------Standard_job::on_order_possibly_available
 
-void Standard_job::on_order_available()
+void Standard_job::on_order_possibly_available()
 {
-    _call_register.call<Order_available_call>();
+    _call_register.call<Order_possibly_available_call>();
 }
 
 //----------------------------------------------------------------------Standard_job::task_to_start

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job order="no">
+    <script language="java" java_class="com.sos.scheduler.engine.tests.jira.js1104.Job1" />
+    <run_time once="yes"/>
+</job>
+

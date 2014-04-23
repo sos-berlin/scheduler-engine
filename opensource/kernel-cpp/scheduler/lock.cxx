@@ -214,6 +214,7 @@ Lock::Lock( Lock_subsystem* lock_subsystem, const string& name )
     Idispatch_implementation( &class_descriptor ),
     file_based<Lock,Lock_folder,Lock_subsystem>( lock_subsystem, static_cast<spooler_com::Ilock*>( this ), type_lock ),
     _zero_(this+1),
+    javabridge::has_proxy<Lock>(spooler()),
     _waiting_queues(2)                  // [lk_exclusive] und [lk_non_ecklusive]
 {
     _config._max_non_exclusive = INT_MAX;

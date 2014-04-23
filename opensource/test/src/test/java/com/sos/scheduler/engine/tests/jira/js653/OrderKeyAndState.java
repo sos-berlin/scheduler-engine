@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js653;
 
 import com.google.common.base.Objects;
-import com.sos.scheduler.engine.data.folder.JobChainPath;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.data.order.OrderKey;
 import com.sos.scheduler.engine.data.order.OrderState;

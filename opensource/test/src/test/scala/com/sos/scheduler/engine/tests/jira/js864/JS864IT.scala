@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.tests.jira.js864
 
 import JS864IT._
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JS864IT extends FunSuite with ScalaSchedulerTest {

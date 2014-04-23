@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.js644;
 
 import com.sos.scheduler.engine.common.sync.Gate;
-import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
-import com.sos.scheduler.engine.data.folder.JobChainPath;
-import com.sos.scheduler.engine.data.folder.JobPath;
+import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
+import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;

@@ -11,10 +11,13 @@ using namespace ::zschimmer::javabridge;
 
 void register_native_classes(){ 
     has_proxy< ::sos::scheduler::Database >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::Folder >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Folder_subsystem >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Job >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Job_subsystem >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Prefix_log >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::Process_class >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::Process_class_subsystem >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Settings >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Spooler >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Task >::register_cpp_proxy_class_in_java();
@@ -23,11 +26,17 @@ void register_native_classes(){
     has_proxy< ::sos::scheduler::com_objects::Com_variable_set >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::http::Chunk_reader >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::http::Java_response >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::lock::Lock >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::lock::Lock_subsystem >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Job_chain >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Order >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Order_queue >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::Order_subsystem >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::order::Standing_order_subsystem >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::order::job_chain::End_node >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::order::job_chain::Job_node >::register_cpp_proxy_class_in_java();
-    has_proxy< ::sos::scheduler::order::job_chain::Node >::register_cpp_proxy_class_in_java();
-    has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::order::job_chain::Nested_job_chain_node >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::order::job_chain::Sink_node >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::schedule::Schedule >::register_cpp_proxy_class_in_java();
+    has_proxy< ::sos::scheduler::schedule::Schedule_subsystem_interface >::register_cpp_proxy_class_in_java();
 }

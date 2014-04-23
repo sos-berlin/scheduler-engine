@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js995
 
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import org.junit.Ignore
 import org.junit.runner.RunWith

@@ -34,6 +34,8 @@ struct Com_env : Env
 
     jstring                     jstring_from_bstr           ( const BSTR bstr )                     { return jni_env()->NewString( (const jchar*)bstr, SysStringLen(bstr) );}
     jstring                     jstring_from_variant        ( const VARIANT& );
+    jobjectArray                jobjectArray_from_safearray_of_variants ( const SAFEARRAY* arr );
+    jobjectArray                jobjectArray_from_bstr_safearray ( const SAFEARRAY* arr );
 };
 
 //-----------------------------------------------------------------------------------Java_idispatch

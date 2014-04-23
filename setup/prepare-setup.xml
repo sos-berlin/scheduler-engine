@@ -94,6 +94,7 @@ to run without maven integration.
             <include name="scala-library-*.jar"/>
             <include name="scala-reflect-*.jar"/>
             <include name="slf4j*.jar"/>
+            <include name="spray-json_*.jar"/>
             <include name="xercesImpl*.jar"/>
             <include name="xml-apis*.jar"/>
             <include name="spray-json*.jar"/>

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
 import com.sos.scheduler.engine.kernel.order._

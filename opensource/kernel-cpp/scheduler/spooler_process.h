@@ -240,11 +240,14 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
 //------------------------------------------------------------------------------------Process_class
 // <process_class>
 
-struct Process_class : Process_class_configuration
+struct Process_class : Process_class_configuration,
+                       javabridge::has_proxy<Process_class>
 {
                                 Process_class               ( Scheduler*, const string& name = "" );
     Z_GNU_ONLY(                 Process_class               (); )
                                ~Process_class               ();
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Process_class>::java_sister(); }
 
 
     // file_based<Process_class>
@@ -318,7 +321,8 @@ struct Process_class_folder : typed_folder<Process_class>
 //--------------------------------------------------------------------------Process_class_subsystem
 
 struct Process_class_subsystem : idispatch_implementation< Process_class_subsystem, spooler_com::Iprocess_classes>, 
-                                 file_based_subsystem< Process_class >
+                                 file_based_subsystem< Process_class >,
+                                 javabridge::has_proxy<Process_class_subsystem>
 {
                                 Process_class_subsystem     ( Scheduler* );
 
@@ -327,6 +331,8 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Process_class_subsystem>::java_sister(); }
 
     // file_based_subsystem< Process_class >
     string                      object_type_name            () const                                { return "Process_class"; }

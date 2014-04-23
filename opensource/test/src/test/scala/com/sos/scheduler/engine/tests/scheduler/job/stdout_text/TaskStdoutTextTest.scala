@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout_text
 
 import TaskStdoutTextTest._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskClosedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._

@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.newjob
 
 import NewJobIT._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -12,7 +11,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
 final class NewJobIT extends FunSuite with ScalaSchedulerTest {
@@ -25,19 +23,19 @@ final class NewJobIT extends FunSuite with ScalaSchedulerTest {
   }
 
   test("job.path") {
-    assert(job.getPath.asString === "/test-a")
+    assert(job.path.string === "/test-a")
   }
 
   test("job.isFileBasedReread") {
     assert(job.fileBasedIsReread === false)
   }
 
-  test("jobSubsystem.visibleNames") {
-    instance[JobSubsystem].visibleNames.toSet should equal (Set("test-a"))
+  test("jobSubsystem.visiblePaths") {
+    instance[JobSubsystem].visiblePaths.toSet shouldEqual Set(JobPath("/test-a"))
   }
 
   test("jobSubsystem.names") {
-    instance[JobSubsystem].names.toSet should equal (Set("scheduler_file_order_sink", "scheduler_service_forwarder", "test-a"))
+    instance[JobSubsystem].paths.toSet shouldEqual Set(JobPath("/scheduler_file_order_sink"), JobPath("/scheduler_service_forwarder"), JobPath("/test-a"))
   }
 
   test("start") {

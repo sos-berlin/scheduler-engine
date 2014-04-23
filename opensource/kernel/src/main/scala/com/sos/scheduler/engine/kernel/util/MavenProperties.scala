@@ -24,7 +24,10 @@ final class MavenProperties(classResource: ClassResource) {
   }
 
   def version: String =
-    apply("project.version")
+    apply("project.version") match {
+      case "${project.version}" ⇒ "(IDE development)"
+      case o ⇒ o
+    }
 
   def versionCommitHash: String =
     apply("project.versionCommitHash")

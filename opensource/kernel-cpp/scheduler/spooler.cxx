@@ -679,7 +679,7 @@ Spooler::Spooler(jobject java_main_context)
     _communication(this), 
     _base_log(this),
     _wait_handles(this),
-    _modifiable_settings(Z_NEW(Settings)),
+    _settings(Z_NEW(Settings)),
     _log_level( log_info ),
     _log_to_stderr_level( log_unknown ),
     _log_file_cache(log::cache::Request_cache::new_instance()),
@@ -731,17 +731,17 @@ Spooler::~Spooler()
     }
 }
 
-//-----------------------------------------------------------------------Spooler::writable_settings
+//---------------------------------------------------------------------Spooler::modifiable_settings
 
 Settings* Spooler::modifiable_settings() const {
-    if (_settings)  z::throw_xc("modifiable_settings");
-    return _modifiable_settings;
+    if (_settings->is_freezed())  z::throw_xc("modifiable_settings");
+    return _settings;
 }
 
 //--------------------------------------------------------------------------------Spooler::settings
 
 const Settings* Spooler::settings() const {
-    if (!_settings)  z::throw_xc("settings is missing");   // Sollte nicht passieren
+    if (!_settings->is_freezed())  z::throw_xc("SETTINGS-NOT-FREEZED");
     return _settings;
 }
 
@@ -1712,6 +1712,7 @@ void Spooler::load()
     tzset();
     _security.clear();             
     load_arg();
+    _java_subsystem->initialize_java_sister();
     open_pid_file();
     _log->open_dont_cache();
     fetch_hostname();
@@ -1724,13 +1725,13 @@ void Spooler::load()
     _db = Z_NEW(Database(this));
 
     new_subsystems();
-    _java_subsystem->initialize_java_sister();
+    _java_subsystem->switch_subsystem_state( subsys_initialized );
     modifiable_settings()->set_defaults(this);
 
     initialize_subsystems();
     load_config( _config_element_to_load, _config_source_filename );
     modifiable_settings()->set_from_variables(*_variables);
-    _settings = _modifiable_settings;   // Von Scheduler.java befüllt
+    _settings->freeze(); // Von Scheduler.java befüllt
     initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
@@ -1781,14 +1782,6 @@ void Spooler::read_xml_configuration()
        else
          z::throw_xc( "SCHEDULER-479", this->id() );
 
-}
-
-//---------------------------------------------------------------Spooler::initialize_java_subsystem
-
-void Spooler::initialize_java_subsystem()
-{
-    _java_subsystem = new_java_subsystem(this);
-    _java_subsystem->switch_subsystem_state( subsys_initialized );
 }
 
 //--------------------------------------------------------------------------Spooler::new_subsystems
@@ -1886,7 +1879,7 @@ void Spooler::load_subsystems()
 
 void Spooler::activate_subsystems()
 {
-    _java_subsystem            ->switch_subsystem_state( subsys_active );
+    _java_subsystem          ->switch_subsystem_state( subsys_active );
 
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
     _scheduler_script_subsystem->switch_subsystem_state( subsys_active );       // ruft spooler_init()
@@ -2686,6 +2679,13 @@ bool Spooler::run_continue( const Time& now )
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();
 
+    if (_settings->_use_old_microscheduling_for_jobs && _job_subsystem) {
+        _job_subsystem->do_something();
+    }
+    if (_settings->_use_old_microscheduling_for_tasks && _task_subsystem) {  
+        something_done |= _task_subsystem->do_something();
+    }
+
     return something_done;
 }
 
@@ -3287,7 +3287,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line)
     _argv = argv;
     _parameter_line = parameter_line;
 
-    initialize_java_subsystem();
+    _java_subsystem = new_java_subsystem(this);
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 

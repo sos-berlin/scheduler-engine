@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.runtime.timezone
 
 import TimeZoneIT._
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._

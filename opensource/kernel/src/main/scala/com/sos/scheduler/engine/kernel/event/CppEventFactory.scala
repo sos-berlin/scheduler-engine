@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.event
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.event.AbstractEvent
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.folder.{FileBasedReplacedEvent, FileBasedAddedEvent, FileBasedActivatedEvent, FileBasedRemovedEvent}
+import com.sos.scheduler.engine.data.filebased.{FileBasedReplacedEvent, FileBasedRemovedEvent, FileBasedAddedEvent, FileBasedActivatedEvent}
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.job.TaskEndedEvent
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
@@ -12,7 +12,7 @@ import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.event.CppEventCode._
-import com.sos.scheduler.engine.kernel.folder.FileBased
+import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.kernel.order.Order
 

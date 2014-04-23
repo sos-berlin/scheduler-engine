@@ -87,9 +87,9 @@ void Typed_call_register::enqueue_id(int id, Timed_call* o) {
 void Typed_call_register::cancel_id(int id) {
     Z_FAST_MUTEX(_mutex) {
         Map::iterator i = _map.find(id);
-        if (i != _map.end())
+        if (i != _map.end()) 
             cancel_entry(&i->second);
-        }
+    }
 }
 
 
@@ -108,7 +108,8 @@ Time Typed_call_register::next_time() const {
     Z_FAST_MUTEX(_mutex) {
         Z_FOR_EACH_CONST(Map, _map, i) {
             if (const Timed_call* t = i->second)
-                if (result < t->at()) result = t->at();
+                if (result < t->at()) 
+                    result = t->at();
         }
     }
     return result;

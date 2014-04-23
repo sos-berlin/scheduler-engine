@@ -2,21 +2,20 @@ package com.sos.scheduler.engine.data.order
 
 import OrderKey._
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonCreator}
-import com.sos.scheduler.engine.data.folder.{FileBasedType, TypedPath, JobChainPath}
+import com.sos.scheduler.engine.data.filebased.{FileBasedType, TypedPath}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 
 // Wegen "scala: error while loading IsString, class file OrderKey.class":  @JsonSerialize(using = classOf[OrderKeySerializer])
 final case class OrderKey(jobChainPath: JobChainPath, id: OrderId)
 extends SerializableOrderKey
 with TypedPath {
+  requireIsAbsolute()
 
-  def typ =
-    FileBasedType.order
+  def fileBasedType = FileBasedType.order
 
-  def string =
-    jobChainPath.string + separator + id
+  def string = jobChainPath.string + separator + id
 
-  override def toString =
-    s"${jobChainPath.string}:$id"
+  override def toString = s"${jobChainPath.string}:$id"
 }
 
 

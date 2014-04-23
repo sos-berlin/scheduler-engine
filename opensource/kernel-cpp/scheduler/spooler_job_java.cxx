@@ -219,8 +219,8 @@ struct Java_job : Job {
         return _cppNewJobJ.signalEarlierOrder(next_time.millis(), order_name, function);
     }
 
-    void on_order_available() {
-        return _cppNewJobJ.onOrderAvailable();
+    void on_order_possibly_available() {
+        return _cppNewJobJ.onOrderPossiblyAvailable();
     }
 
     int max_order_setbacks() const {

@@ -4,7 +4,7 @@ import static scala.collection.JavaConversions.asJavaIterable;
 
 import javax.inject.Inject;
 
-import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue;

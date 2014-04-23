@@ -83,7 +83,7 @@ object JettyServerBuilder {
 
   def newFilterHolder[F <: Filter](c: Class[F], initParameters: Iterable[(String, String)]) = {
     val result = new FilterHolder(Holder.Source.EMBEDDED)
-    result.setHeldClass(classOf[GzipFilter])
+    result.setHeldClass(c)
     for (p <- initParameters) result.setInitParameter(p._1, p._2)
     result
   }

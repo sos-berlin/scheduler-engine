@@ -360,6 +360,7 @@ struct Spooler : Object,
     const Settings*             settings                    () const;
     string                      setting                     (int i) const                       { return settings()->get(i); }
     Settings*                   modifiable_settings         () const;
+    void                        modify_settings             (const Com_variable_set& v)         { _settings->set_from_variables(v); }
     void                    set_id                          ( const string& );
     const string&               id                          () const                            { return _spooler_id; }
     string                      id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
@@ -442,6 +443,7 @@ struct Spooler : Object,
     void                        set_check_memory_leak       (bool);
     void                        load                        ();
     void                        open_pid_file               ();
+    int                         pid                         () const { return _pid; }
     void                        fetch_hostname              ();
     void                        read_xml_configuration      ();
     void                        initialize_java_subsystem     ();
@@ -573,8 +575,7 @@ struct Spooler : Object,
     char**                     _argv;
     string                     _parameter_line;
     string                     _xml_schema_url;
-    ptr<Settings> const        _modifiable_settings;
-    Settings*                  _settings;
+    ptr<Settings>              _settings;
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, f�r Zugriff auf _db.

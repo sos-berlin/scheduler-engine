@@ -41,7 +41,7 @@ struct CppNewJob__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _onActivate____method;
     ::zschimmer::javabridge::Method const _onInitialize____method;
     ::zschimmer::javabridge::Method const _onLoad____method;
-    ::zschimmer::javabridge::Method const _onOrderAvailable____method;
+    ::zschimmer::javabridge::Method const _onOrderPossiblyAvailable____method;
     ::zschimmer::javabridge::Method const _onPrepareToRemove____method;
     ::zschimmer::javabridge::Method const _onProcessIsIdle____method;
     ::zschimmer::javabridge::Method const _onReferencedScheduleLoaded____method;
@@ -91,7 +91,7 @@ CppNewJob__class::CppNewJob__class(const string& class_name) :
     ,_onActivate____method(this, "onActivate", "()Z")
     ,_onInitialize____method(this, "onInitialize", "()Z")
     ,_onLoad____method(this, "onLoad", "()Z")
-    ,_onOrderAvailable____method(this, "onOrderAvailable", "()V")
+    ,_onOrderPossiblyAvailable____method(this, "onOrderPossiblyAvailable", "()V")
     ,_onPrepareToRemove____method(this, "onPrepareToRemove", "()V")
     ,_onProcessIsIdle____method(this, "onProcessIsIdle", "()V")
     ,_onReferencedScheduleLoaded____method(this, "onReferencedScheduleLoaded", "()V")
@@ -262,10 +262,10 @@ bool CppNewJob::onLoad() const {
     return 0 != cls->_onLoad____method.bool_call(get_jobject(), parameter_list);
 }
 
-void CppNewJob::onOrderAvailable() const {
+void CppNewJob::onOrderPossiblyAvailable() const {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     CppNewJob__class* cls = _class.get();
-    cls->_onOrderAvailable____method.call(get_jobject(), parameter_list);
+    cls->_onOrderPossiblyAvailable____method.call(get_jobject(), parameter_list);
 }
 
 void CppNewJob::onPrepareToRemove() const {

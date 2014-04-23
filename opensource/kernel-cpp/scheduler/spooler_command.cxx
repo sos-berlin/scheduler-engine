@@ -814,6 +814,18 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
     return _answer.createElement( "ok" );
 }
 
+//----------------------------------------------------------Command_processor::execute_settings_set
+
+xml::Element_ptr Command_processor::execute_settings_set(const xml::Element_ptr& element)
+{
+    string name = element.getAttribute("name");
+    string value = element.getAttribute("value");
+    ptr<Com_variable_set> v = new Com_variable_set();
+    v->set_var(name, value);
+    _spooler->modify_settings(*v);
+    return _answer.createElement( "ok" );
+}
+
 //-------------------------------------------------------------Command_processor::execute_terminate
 
 xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& element )
@@ -1391,6 +1403,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     else
     {
         assert( job_chain->is_distributed() );
+        bool ok = false;
 
         for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
         {
@@ -1400,7 +1413,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
           //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
             
             ta.execute( delete_stmt, Z_FUNCTION );
-            if( ta.record_count() == 0 )  z::throw_xc( "SCHEDULER-162", id.as_string() );
+            ok = ta.record_count() == 1;
             
             //if( ta.record_count() == 0 )
             //{
@@ -1415,6 +1428,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             ta.commit( Z_FUNCTION );
         }
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->db()->_orders_tablename, x ), Z_FUNCTION ); }
+        if (!ok) z::throw_xc( "SCHEDULER-162", id.as_string() );
     }
 
     return _answer.createElement( "ok" );
@@ -1660,7 +1674,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "remove_job_chain" ) )  result = execute_remove_job_chain( element );
     else
-    if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
+    if( element.nodeName_is( "service_request"  ) )  result = execute_settings_set( element );
+    else
+    if( element.nodeName_is( "settings.set"  ) )  result = execute_service_request( element );
     else
     if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );   // Nicht offiziell, nur Test
     else

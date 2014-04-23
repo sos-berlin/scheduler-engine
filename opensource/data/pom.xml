@@ -114,5 +114,9 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.spray</groupId>
+            <artifactId>spray-json_${scala.binaryVersion}</artifactId>
+        </dependency>
     </dependencies>
 </project>

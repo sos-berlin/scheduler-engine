@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js993
 
 import com.sos.scheduler.engine.common.system.Bitness._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskStartedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

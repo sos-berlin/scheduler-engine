@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.sos.scheduler.engine.data.folder.FileBasedType
+import com.sos.scheduler.engine.data.filebased.FileBasedType
 import java.net.URI
 import javax.ws.rs.core.UriBuilder
 

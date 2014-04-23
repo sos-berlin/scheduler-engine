@@ -2,13 +2,13 @@ package com.sos.scheduler.engine.tests.jira.js655;
 
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.common.system.Files;
-import com.sos.scheduler.engine.data.folder.FileBasedActivatedEvent;
-import com.sos.scheduler.engine.data.folder.FileBasedRemovedEvent;
-import com.sos.scheduler.engine.data.folder.JobChainPath;
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
+import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent;
+import com.sos.scheduler.engine.data.filebased.FileBasedRemovedEvent;
+import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sun.jersey.api.client.Client;
