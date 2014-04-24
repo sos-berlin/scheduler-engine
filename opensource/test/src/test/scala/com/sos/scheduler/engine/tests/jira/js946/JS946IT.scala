@@ -4,6 +4,7 @@ import JS946IT._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
 import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -24,8 +25,8 @@ final class JS946IT extends FreeSpec with ScalaSchedulerTest {
     testClass = getClass,
     mainArguments = List(s"-tcp-port=$tcpPort"),
     ignoreError = Set(
-      "SCHEDULER-280",  // "Process terminated with exit code 1"
-      "Z-REMOTE-118"))  // "Separate process pid=0: No response from new process within 60s"
+      MessageCode("SCHEDULER-280"),  // "Process terminated with exit code 1"
+      MessageCode("Z-REMOTE-118")))  // "Separate process pid=0: No response from new process within 60s"
 
   "With invalid remote_scheduler address or inaccessible remote scheduler, task does not start within a minute" in {
     scheduler executeXml <process_class name="inaccessible-remote" remote_scheduler={s"127.0.0.1:$tcpPort"}/>
