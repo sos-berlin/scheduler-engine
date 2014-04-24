@@ -4,7 +4,7 @@ import JS631IT._
 import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStateChangedEvent, OrderState}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
-import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.configuration.DefaultDatabaseConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
@@ -14,9 +14,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JS631IT extends FunSuite with ScalaSchedulerTest {
-  override protected lazy val testConfiguration = TestConfiguration(
-    testClass = getClass,
-    database = Some(DefaultDatabaseConfiguration()))
 
   test("Without reset") {
     val eventPipe = controller.newEventPipe()

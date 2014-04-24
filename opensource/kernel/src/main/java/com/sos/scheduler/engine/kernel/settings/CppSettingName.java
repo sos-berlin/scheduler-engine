@@ -22,9 +22,7 @@ public enum CppSettingName {
 
     clusterRestartAfterEmergencyAbort(9),
 
-    alwaysCreateDatabaseTables(12),
-
-    roles(13);
+    alwaysCreateDatabaseTables(12);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

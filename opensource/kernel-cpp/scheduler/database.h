@@ -84,6 +84,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     void                        check_database          ();
     void                        create_tables_when_needed();
     bool                        create_table_when_needed( Transaction*, const string& table_name, const string& fields );
+    void                        create_table            (Transaction* ta, const string& tablename, const string& fields);
     void                        rename_column           ( Transaction*, const string& table_name, const string& column_name, const string& new_column_name, const string& type );
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }

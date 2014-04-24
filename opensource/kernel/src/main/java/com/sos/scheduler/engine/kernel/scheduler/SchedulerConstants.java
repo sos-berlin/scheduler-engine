@@ -13,6 +13,7 @@ public final class SchedulerConstants {
     public static final Charset schedulerEncoding = ISO_8859_1;
     public static final Charset logFileEncoding = schedulerEncoding;
     public static final DateTimeZone schedulerTimeZone = UTC;
+    public static final int taskIdOffset = 3;   // 1 wird nicht benutzt; 2 ist für Schedulerstartsatz; 3 ist die erste TaskId
 
     private SchedulerConstants() {}
 }

@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.data.order.OrderFinishedEvent
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
 import com.sos.scheduler.engine.test.SchedulerTest.shortTimeout
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
@@ -23,6 +24,7 @@ final class JS957IT extends FunSuite {
   private val testConfiguration = TestConfiguration(
     testClass = getClass,
     logCategories = "scheduler java.stackTrace-",
+    cppSettings = CppSettings.testMap + (CppSettingName.alwaysCreateDatabaseTables -> false.toString),
     database = Some(DefaultDatabaseConfiguration(closeDelay = 60.s)))
 
   test("Order should start once, and after Scheduler abort and restart, order should continue starting") {
