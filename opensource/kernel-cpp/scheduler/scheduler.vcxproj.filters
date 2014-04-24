@@ -472,7 +472,7 @@
     <ClInclude Include="log_cache_Request_cache.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="Settings.h">
+    <ClInclude Include="settings.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="Event_code.h">
