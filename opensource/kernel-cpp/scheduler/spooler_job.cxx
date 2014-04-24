@@ -1527,23 +1527,18 @@ void Job::Task_queue::remove_task_from_db( int task_id )
     else
     while(1)
     {
-        try
-        {
-            if( _spooler->db()->opened() )
-            {
+        if (_spooler->db()->opened()) {
+            try {
                 Transaction ta ( _spooler->db() );
-
                 ta.execute( "DELETE from " + _spooler->db()->_tasks_tablename +
                             "  where \"TASK_ID\"=" + as_string( task_id ),
                             Z_FUNCTION );
                 ta.commit( Z_FUNCTION);
+                break;
             }
-
-            break;
-        }
-        catch( exception& x )
-        {
-            _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
+            catch (exception& x) {
+                _spooler->db()->try_reopen_after_error( x, Z_FUNCTION );
+            }
         }
     }
 }
