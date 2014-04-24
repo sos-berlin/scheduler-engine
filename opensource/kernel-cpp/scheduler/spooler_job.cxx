@@ -713,9 +713,9 @@ bool Job::on_load() // Transaction* ta )
                 _history.open(NULL);
             } else {
                 for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try {
-                    if( db()->opened() )  database_record_load( &ta );
+                    database_record_load( &ta );
                     _history.open( &ta );
-                    if( db()->opened() )  load_tasks_from_db( &ta );
+                    load_tasks_from_db( &ta );
                 }
                 catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
             }
@@ -1044,25 +1044,22 @@ Duration Job::db_average_step_duration( const Duration& deflt )
 {
     Duration result = deflt;
 
-    if( _spooler->db()->opened() )
+    Record record;
+    S select_sql;
+    select_sql << "select round (sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` ),2 )" // JS-448
+                    "  from " << db()->_job_history_tablename
+                << "  where `steps` > 0 "
+                    " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
+                <<  " and `job_name`=" << sql::quoted( path().without_slash() );
+
+    for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
     {
-        Record record;
-        S select_sql;
-        select_sql << "select round (sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` ),2 )" // JS-448
-                      "  from " << db()->_job_history_tablename
-                   << "  where `steps` > 0 "
-                       " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
-                   <<  " and `job_name`=" << sql::quoted( path().without_slash() );
+        record = ta.read_single_record( select_sql, Z_FUNCTION );
+    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_history_tablename, x ), Z_FUNCTION ); }
 
-        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
-        {
-            record = ta.read_single_record( select_sql, Z_FUNCTION );
-        }
-        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_history_tablename, x ), Z_FUNCTION ); }
-
-        if( !record.null(0) && record.as_string(0) != "" ) {
-            result = Duration(floor( record.as_double( 0 ) ));
-        }
+    if( !record.null(0) && record.as_string(0) != "" ) {
+        result = Duration(floor( record.as_double( 0 ) ));
     }
 
     return result;
@@ -1464,8 +1461,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
             _job->typed_java_sister().persistEnqueuedTask(task->_id, task->_enqueue_time.millis(), task->_start_at.millis(), 
                 task->has_parameters()? xml_as_string(task->parameters_as_dom()) : "", 
                 has_xml? xml_as_string(task_document) : "");
-        else
-        if (_spooler->db()->opened() ) {
+        else {
             while(1) try {
                 Transaction ta ( _spooler->db() );
 
@@ -2155,8 +2151,7 @@ void Job::database_record_store()
             if (_spooler->settings()->_use_java_persistence) {
                 typed_java_sister().persistState();
             }
-            else
-            if (db()->opened()) {
+            else {
                 for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
                 {
                     sql::Update_stmt update ( &db()->_jobs_table );
@@ -2186,9 +2181,7 @@ void Job::database_record_remove()
     if (_spooler->settings()->_use_java_persistence) {
         typed_java_sister().deletePersistentState();
     }
-    else
-    if( db()->opened() )
-    {
+    else {
         for( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
         {
             sql::Delete_stmt delete_statement ( &db()->_jobs_table );

@@ -855,15 +855,6 @@ string Spooler::http_url() const
     return result;
 }
 
-//--------------------------------------------------------------------------Spooler::string_need_db
-
-string Spooler::string_need_db() const
-{
-    return _need_db? _wait_endless_for_db_open? "yes" 
-                                              : "strict" 
-                   : "no";
-}
-
 //-----------------------------------------------------------------------Spooler::state_dom_element
 
 xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const Show_what& show_what )
@@ -881,9 +872,6 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _configuration_file_path );
     state_element.setAttribute( "host"                 , _short_hostname );
-
-    if( _need_db )
-    state_element.setAttribute( "need_db"              , string_need_db() );
 
     if( _tcp_port )
     state_element.setAttribute( "tcp_port"             , _tcp_port );
@@ -1442,21 +1430,6 @@ void Spooler::read_ini_file()
     _db_log_level               = make_log_level(read_profile_string( _factory_ini ,"spooler", "db_log_level"       , as_string( _db_log_level ) ) );
     modifiable_settings()->_html_dir = subst_env(read_profile_string( _factory_ini, "spooler", "html_dir" ) );
 
-    // need_db=yes|no|strict
-    string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
-    if( stricmp( need_db_str.c_str(), "strict" ) == 0 )
-    {
-        _need_db = true; 
-        _wait_endless_for_db_open = false;
-    }
-    else
-    {
-        try{ _wait_endless_for_db_open = _need_db = as_bool( need_db_str ); }
-        catch( const exception& x ) { z::throw_xc( "SCHEDULER-206", need_db_str, x.what() ); }
-    }
-
-    _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"         , 5 );
-
     _mail_on_warning = read_profile_bool           ( _factory_ini, "spooler", "mail_on_warning", _mail_on_warning );
     _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error   );
     _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
@@ -1562,8 +1535,6 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set(),  _ignore_process_classes_set = true;
             else
-            //if( opt.flag      ( "no-database"            ) )  if( opt.set() )  _need_db = XXX;
-            //else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else
             if( opt.flag      ( "exclusive"              ) )  _cluster_configuration._demand_exclusiveness   = opt.set();
@@ -1607,6 +1578,8 @@ void Spooler::read_command_line_arguments()
             if (opt.with_value("job-java-classpath")) { modifiable_settings()->_job_java_classpath = opt.value(); }
             else
             if (opt.with_value("time-zone")) { _time_zone_name = opt.value(); }
+            else
+            if (opt.with_value("roles")) { _settings->set(setting_roles, opt.value()); }
             else
                 throw_sos_option_error( opt );
         }
@@ -2033,14 +2006,12 @@ void Spooler::start()
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
     _web_services->switch_subsystem_state( subsys_loaded );
 
-    if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
-    {
-        if( settings()->_db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
+    if (_cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness) {
+        if (!settings()->has_role_scheduler())  z::throw_xc("SCHEDULER-357"); 
     }
 
-    if( _need_db  && settings()->_db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
-
-    _db->open(settings()->_db_name);
+    if (_spooler->settings()->has_role_scheduler())
+        _db->open();
     
     assert( !_cluster || _cluster->my_member_id() != "" );
     _db->spooler_start();

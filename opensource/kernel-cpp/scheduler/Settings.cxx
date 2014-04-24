@@ -1,4 +1,5 @@
 #include "spooler.h"
+#include "../kram/licence.h"
 
 namespace sos {
 namespace scheduler {
@@ -12,7 +13,12 @@ Settings::Settings()
     _max_length_of_blob_entry(INT_MAX),
     _supervisor_configuration_polling_interval(15 * 60),
     _cluster_restart_after_emergency_abort(true)
-{}
+{
+    if (SOS_LICENCE(licence_scheduler)) 
+        _roles.insert(role_scheduler);
+    if (SOS_LICENCE(licence_scheduler_agent))
+        _roles.insert(role_agent);
+}
 
 //------------------------------------------------------------------------------Settings::~Settings
 
@@ -72,6 +78,23 @@ void Settings::set(int number, const string& value) {
         case 12:
             _always_create_database_tables = as_bool(value);
             break;
+        case 13: {
+            _roles.clear();
+            vector<string> role_strings = vector_split(" *, *", value);
+            Z_FOR_EACH(vector<string>, role_strings, i) {
+                string role_string = *i;
+                if (role_string == "scheduler") {
+                    if (!SOS_LICENCE(licence_scheduler)) sos::throw_xc("SOS-1000", "Scheduler");
+                    _roles.insert(role_scheduler);
+                } else
+                if (role_string == "agent") {
+                    if (!SOS_LICENCE(licence_scheduler_agent)) sos::throw_xc("SOS-1000", "Agent");
+                    _roles.insert(role_agent);
+                } else
+                    z::throw_xc("SCHEDULER-391", "roles", role_string, "scheduler, agent");
+            }
+            break;
+        }
         default:
             z::throw_xc("UNKNOWN_SETTING", number);
     }

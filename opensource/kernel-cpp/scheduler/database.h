@@ -52,7 +52,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
                                 Database                ( Spooler* );
 
     void                        close                   ();
-    void                        open                    ( const string& db_name );
+    void                        open                    ();
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
     void                    set_db_name                 (const string& o)                           { _db_name = o; }
@@ -80,7 +80,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
     ptr<Com_variable_set>       properties              ();                                         // Mit "password"
     Database_lock_syntax        lock_syntax             ();
-    void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
+    void                        try_reopen_after_error  ( const exception&, const string& function);
     void                        check_database          ();
     void                        create_tables_when_needed();
     bool                        create_table_when_needed( Transaction*, const string& table_name, const string& fields );
@@ -128,7 +128,6 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     Any_file                   _db;
     ptr<Com_variable_set>      _properties;
     string                     _error;
-    map<string,long32>         _id_counters;
     Any_file                   _history_table;
     vector<Dyn_obj>            _history_update_params;
     int                        _id;
@@ -323,7 +322,7 @@ struct Job_history
     bool                       _history_yes;
     int                        _on_process;             // Beim soundsovieltem _on_process Historiensatz schreiben
     With_log_switch            _with_log;
-    bool                       _use_db;
+    bool                       _history_enabled;
     bool                       _error;
     bool                       _start_called;
 

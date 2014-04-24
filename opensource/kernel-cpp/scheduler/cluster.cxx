@@ -1430,8 +1430,7 @@ bool Cluster::subsystem_activate()
     assert( !_is_backup_member || _demand_exclusiveness );
 
 
-    if( !_spooler->_need_db )  z::throw_xc( "SCHEDULER-358", _spooler->string_need_db() ); 
-    if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
+    if (!_spooler->settings()->has_role_scheduler())  z::throw_xc("SCHEDULER-357"); 
 
     if( db()->lock_syntax() == db_lock_none )  z::throw_xc( "SCHEDULER-359", db()->dbms_name() );
 

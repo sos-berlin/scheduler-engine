@@ -4,19 +4,23 @@ import _root_.scala.concurrent.{Await, Future}
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
-import com.sos.scheduler.engine.data.job.{TaskClosedEvent, TaskId}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.job.{TaskId, TaskClosedEvent}
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.job.{Job, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
-import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
-import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
+import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, Order}
+import com.sos.scheduler.engine.kernel.scheduler.{SchedulerException, HasInjector}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.joda.time.Duration
+import com.sos.scheduler.engine.data.message.MessageCode
 import org.scalatest.Matchers._
+import com.sos.scheduler.engine.test.TestTimeout
+import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.job.TaskClosedEvent
+import com.sos.scheduler.engine.cplusplus.runtime.CppException
 
 object SchedulerTestUtils {
 

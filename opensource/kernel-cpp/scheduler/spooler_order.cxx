@@ -1181,7 +1181,7 @@ void Node::database_record_store()
             if (_spooler->settings()->_use_java_persistence)
                 _typed_java_sister.persistState();
             else
-            if(db()->opened() && _db_action != _action) {
+            if (_db_action != _action) {
                 for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
                 {
                     sql::Update_stmt update ( &db()->_job_chain_nodes_table );
@@ -2316,48 +2316,45 @@ bool Job_chain::on_load()
     {
         complete_nested_job_chains();   // Exception bei doppelter Auftragskennung in den verschachtelten Jobketten
 
+        for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+            database_record_load(&ta);
 
-        if (db() &&  db()->opened()) {
-            for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
-                database_record_load(&ta);
+            if (orders_are_recoverable()) {
+                if (!_is_distributed) {
+                    list<Order_queue_node*> node_list;
+                    list<string>            state_sql_list;
 
-                if (orders_are_recoverable()) {
-                    if (!_is_distributed) {
-                        list<Order_queue_node*> node_list;
-                        list<string>            state_sql_list;
-
-                        Z_FOR_EACH(Node_list, _node_list, it) {
-                            if (Order_queue_node* node = Order_queue_node::try_cast(*it)) {
-                                if (!node->order_queue()->_is_loaded) {   
-                                    node_list.push_back( node );
-                                    state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
-                                }
+                    Z_FOR_EACH(Node_list, _node_list, it) {
+                        if (Order_queue_node* node = Order_queue_node::try_cast(*it)) {
+                            if (!node->order_queue()->_is_loaded) {   
+                                node_list.push_back( node );
+                                state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
                             }
                         }
-
-                        if (!state_sql_list.empty()) {
-                            Any_file result_set = ta.open_result_set( 
-                                    S() << "select " << order_select_database_columns << ", " <<
-                                                        db_text_distributed_next_time() << " as distributed_next_time"
-                                    "  from " << db()->_orders_tablename <<
-                                    "  where " << db_where_condition() <<
-                                        " and `state` in ( " << join( ", ", state_sql_list ) << " )"
-                                    "  order by `ordering`",
-                                    Z_FUNCTION);
-                            int count = load_orders_from_result_set(&ta, &result_set);  // Will remove obsolete orders as a side-effect, see db_try_delete_non_distributed_order())
-                            log()->debug(message_string("SCHEDULER-935", count));
-                        }
-
-                        Z_FOR_EACH(list<Order_queue_node*>, node_list, it)
-                            (*it)->order_queue()->_is_loaded = true;
                     }
-                } else {
-                    assert(!orders_are_recoverable());
-                    ta.execute(S() << "DELETE from " << db()->_orders_tablename << "  where " << db_where_condition(), "not orders_are_recoverable");
+
+                    if (!state_sql_list.empty()) {
+                        Any_file result_set = ta.open_result_set( 
+                                S() << "select " << order_select_database_columns << ", " <<
+                                                    db_text_distributed_next_time() << " as distributed_next_time"
+                                "  from " << db()->_orders_tablename <<
+                                "  where " << db_where_condition() <<
+                                    " and `state` in ( " << join( ", ", state_sql_list ) << " )"
+                                "  order by `ordering`",
+                                Z_FUNCTION);
+                        int count = load_orders_from_result_set(&ta, &result_set);  // Will remove obsolete orders as a side-effect, see db_try_delete_non_distributed_order())
+                        log()->debug(message_string("SCHEDULER-935", count));
+                    }
+
+                    Z_FOR_EACH(list<Order_queue_node*>, node_list, it)
+                        (*it)->order_queue()->_is_loaded = true;
                 }
-                ta.commit(Z_FUNCTION);
-            } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
-        }
+            } else {
+                assert(!orders_are_recoverable());
+                ta.execute(S() << "DELETE from " << db()->_orders_tablename << "  where " << db_where_condition(), "not orders_are_recoverable");
+            }
+            ta.commit(Z_FUNCTION);
+        } catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_orders_tablename, x), Z_FUNCTION); }
 
         set_state( s_loaded );
         result = true;
@@ -2465,23 +2462,21 @@ xml::Element_ptr Job_chain::order_xml_file_based_node_or_null(Read_transaction* 
 
 void Job_chain::db_try_delete_non_distributed_order(Transaction* outer_transaction, const string& order_id)
 {
-    if (db()->opened()) {
-        bool deleted = false;
+    bool deleted = false;
 
-        for (Retry_nested_transaction ta(db(), outer_transaction); ta.enter_loop(); ta++) try {
-            deleted = ta.try_execute_single(S() << 
-                "DELETE from " << db()->_orders_tablename << 
-                " where " << db_where_condition() << 
-                " and `id`=" << sql::quoted(order_id) <<
-                " and `distributed_next_time` is null" <<
-                " and `occupying_cluster_member_id` is null", 
-                Z_FUNCTION);
-        }
-        catch (exception& x) { ta.reopen_database_after_error(x, Z_FUNCTION); }
-
-        if (deleted)
-            log()->info(message_string("SCHEDULER-725", order_id));
+    for (Retry_nested_transaction ta(db(), outer_transaction); ta.enter_loop(); ta++) try {
+        deleted = ta.try_execute_single(S() << 
+            "DELETE from " << db()->_orders_tablename << 
+            " where " << db_where_condition() << 
+            " and `id`=" << sql::quoted(order_id) <<
+            " and `distributed_next_time` is null" <<
+            " and `occupying_cluster_member_id` is null", 
+            Z_FUNCTION);
     }
+    catch (exception& x) { ta.reopen_database_after_error(x, Z_FUNCTION); }
+
+    if (deleted)
+        log()->info(message_string("SCHEDULER-725", order_id));
 }
 
 //------------------------------------------------------------Job_chain::complete_nested_job_chains
@@ -3056,8 +3051,7 @@ void Job_chain::database_record_store()
         if (_db_stopped != _is_stopped) {
             if (_spooler->settings()->_use_java_persistence)
                 _typed_java_sister.persistState();
-            else
-            if (db()->opened()) {
+            else {
                 for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
                 {
                     sql::Update_stmt update ( &db()->_job_chains_table );
@@ -3083,9 +3077,7 @@ void Job_chain::database_record_remove()
 {
     if (_spooler->settings()->_use_java_persistence)
         _typed_java_sister.deletePersistentState();
-    else
-    if( db()->opened() )
-    {
+    else {
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
         {
             {
@@ -3860,7 +3852,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
         }
 
         if( remaining > 0  &&  _job_chain->is_distributed()
-         &&  db()  &&  db()->opened()  &&  !db()->is_in_transaction() )
+         &&  db()  &&  !db()->is_in_transaction() )
         {
             Read_transaction ta ( db() );
 

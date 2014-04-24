@@ -326,7 +326,7 @@ void Transaction::commit( const string& debug_text )
 void Transaction::intermediate_commit( const string& debug_text )
 { 
     assert( _db );
-    if( db()->opened() )  execute( "COMMIT", debug_text, ex_force );
+    execute( "COMMIT", debug_text, ex_force );
 }
 
 //----------------------------------------------------------------------------Transaction::rollback
@@ -411,8 +411,7 @@ void Database_retry::reopen_database_after_error( const exception& x, const stri
     assert( !_db->is_in_transaction() );
 
     _db->try_reopen_after_error( x, function ); 
-
-    if( _db->opened() )  repeat_loop(); 
+    repeat_loop(); 
 }
 
 //-------------------------------------------------------------------------------Database::Database
@@ -473,27 +472,23 @@ ptr<Com_variable_set> Database::properties() {
 
 //-----------------------------------------------------------------------------------Database::open
 
-void Database::open( const string& db_name )
+void Database::open()
 {
-    try
-    {
-        string my_db_name = db_name.substr(0,5) == "jdbc "? db_name.substr(0, 5) +"-id=spooler "+ db_name.substr(5)
+    string db_name = _spooler->settings()->_db_name;
+    if (db_name.empty()) z::throw_xc("SCHEDULER-205");
+
+    try {
+        string my_db_name = db_name.substr(0,5) == "jdbc "? db_name.substr(0, 5) + "-id=spooler "+ db_name.substr(5)
             : db_name;
         set_db_name(my_db_name);
         open2();
     }
-    catch( exception& x )
-    {
-        if( !_spooler->_wait_endless_for_db_open )  throw;
-        
-        try_reopen_after_error( x, Z_FUNCTION, true );
+    catch (exception& x) {
+        try_reopen_after_error( x, Z_FUNCTION);
     }
 
-    if( opened() ) 
-    {
-        create_tables_when_needed();
-        check_database();
-    }
+    create_tables_when_needed();
+    check_database();
 }
 
 //----------------------------------------------------------------------------------Database::open2
@@ -502,37 +497,33 @@ void Database::open2()
 {
     Z_MUTEX( _lock )
     {
-        if (_db_name != "") {
-            _log->info( message_string( "SCHEDULER-907", _db_name ) );     // Datenbank wird geöffnet
+        _log->info( message_string( "SCHEDULER-907", _db_name ) );     // Datenbank wird geöffnet
 
-            try
+        try
+        {
+            _db.open( "-in -out " + _db_name );
+
+            switch( _db.dbms_kind() )
             {
-                _db.open( "-in -out " + _db_name );
+                case dbms_sybase: 
+                    _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
+                    break;
 
-                switch( _db.dbms_kind() )
-                {
-                    case dbms_sybase: 
-                        _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
-                        break;
+                case dbms_h2: 
+                    _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
+                    break;
 
-                    case dbms_h2: 
-                        _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
-                        break;
-
-                    default: ;
-                }
-
-                _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geöffnet
-                _email_sent_after_db_error = false;
+                default: ;
             }
-            catch( exception& x )  
-            { 
-                close();
 
-                if( _spooler->_need_db )  throw;
-            
-                _log->warn( message_string( "SCHEDULER-309", x ) );         // "FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: "
-            }
+            _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geöffnet
+            _email_sent_after_db_error = false;
+        }
+        catch( exception& x )  
+        { 
+            close();
+            _error_count++;
+            z::throw_xc("SCHEDULER-309", x);    // "FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: "
         }
     }
 }
@@ -1264,6 +1255,7 @@ void Database::close()
         _history_table.close();
         _history_table.destroy();
 
+        if (_db.opened()) log()->info( message_string( "SCHEDULER-957" ) );   // "Datenbank wird geschlossen"
         try
         {
             _db.close();  // odbc.cxx und jdbc.cxx unterdrücken selbst Fehler.
@@ -1293,16 +1285,15 @@ void Database::open_history_table( Read_transaction* ta )
 
 //-----------------------------------------------------------------Database::try_reopen_after_error
 
-void Database::try_reopen_after_error( const exception& callers_exception, const string& function, bool wait_endless )
+void Database::try_reopen_after_error(const exception& callers_exception, const string& function)
 {
-    bool    too_much_errors = false;
-    string  warn_msg;
-
+    if (_waiting) z::throw_xc("SCHEDULER-184");
     if (_db_name == "") throw;
     if( _is_reopening_database_after_error ) throw;
 
     In_recursion in_recursion = &_waiting; 
     if (in_recursion)  throw_xc( callers_exception );   
+    close();
     
     try {
         _is_reopening_database_after_error = true;
@@ -1310,139 +1301,43 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
 
         _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception, function ) );
 
-        if( _db.opened() )  _spooler->log()->info( message_string( "SCHEDULER-957" ) );   // "Datenbank wird geschlossen"
-        try
-        {
-            close();
-        }
-        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }       // Fehler beim Schließen der Datenbank
-
-
-        while( !_db.opened()  &&  !too_much_errors )
-        {
-            if( !_spooler->_executing_command )
-            {
-                warn_msg = "After max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problems with the database it is no longer used";
-
-                if( !wait_endless || _error_count == 0 )  ++_error_count;
+        while (!_db.opened()) {
+            try {
+                open2();
+                //open_history_table();
+                THREAD_LOCK( _error_lock )  _error = "";
                 
-                if( !wait_endless  &&  _error_count >= _spooler->_max_db_errors )
-                {
-                    too_much_errors = true;
-                    break;
-                }
-
-
-                if( !_email_sent_after_db_error )
-                {
+                _reopen_time = ::time(NULL);
+                break;
+            }
+            catch (exception& x) {
+                THREAD_LOCK( _error_lock )  _error = x.what();
+                if( _spooler->_executing_command )  throw;   // Wenn wir ein (TCP-)Kommando ausführen, warten (und blockieren) wir nicht. Der Scheduler-Zustand kann dann vom Datenbank-Zustand abweichen!
+                if (!_email_sent_after_db_error) {
                     string body = "This is the " + as_string(_error_count) + ". problem with the database.";
-                    if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
                     body += "\ndb=" + remove_password(_db_name) + "\r\n\r\n" + callers_exception.what() + "\r\n\r\nThe Scheduler is trying to open the database again.";
-                    //if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
-
                     Scheduler_event scheduler_event ( evt_database_error, log_warn, this );
                     scheduler_event.set_error( callers_exception );
-                    scheduler_event.set_count( _error_count );
-
                     Mail_defaults mail_defaults ( _spooler );
                     mail_defaults.set( "subject", S() << "ERROR ON DATABASE ACCESS: " << callers_exception.what() );
                     mail_defaults.set( "body"   , body );
-
                     scheduler_event.send_mail( mail_defaults );
-
                     _email_sent_after_db_error = true;
                 }
-            }
 
-            while(1)
-            {
-                try
-                {
-                    open2();
-                    //open_history_table();
-                    THREAD_LOCK( _error_lock )  _error = "";
- 
-                    _reopen_time = ::time(NULL);
-                    break;
-                }
-                catch( exception& x )
-                {
-                    THREAD_LOCK( _error_lock )  _error = x.what();
-
-                    if( _spooler->_executing_command )  throw;   // Wenn wir ein (TCP-)Kommando ausführen, warten (und blockieren) wir nicht. Der Scheduler-Zustand kann dann vom Datenbank-Zustand abweichen!
-
-                    _spooler->log()->warn( x.what() );
-
-                    if( !_spooler->_need_db )  break;
-                    
-                    if( !_spooler->_wait_endless_for_db_open )  // need_db=strict?
-                    {
-                        too_much_errors = true;
-                        warn_msg = message_string( "SCHEDULER-314", _spooler->string_need_db() );   // "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
-                        break;
-                    }
-
-                    _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
-                    if (_spooler->_connection_manager)
-                        _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
-                }
+                _spooler->log()->warn( x.what() );
+                _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
+                if (!_spooler->_connection_manager) throw;
+                _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
             }
         }
 
-
-        if( _db.opened() )
-        {
-            if( _email_sent_after_db_error )    // Zurzeit immer true
-            {
-                Scheduler_event scheduler_event ( evt_database_continue, log_info, this );
-
-                Mail_defaults mail_defaults ( _spooler );
-
-                mail_defaults.set( "subject", "Scheduler is connected again with the database" );
-                mail_defaults.set( "body"   , "Scheduler continues processing.\n\ndb=" + remove_password(_db_name) );
-
-                scheduler_event.send_mail( mail_defaults );
-            }
-        }
-        else
-        {
-            if( too_much_errors )
-            {
-                _spooler->log()->warn( warn_msg );
-                
-                if( _spooler->_need_db ) 
-                {
-                    string msg = message_string( "SCHEDULER-265", callers_exception );     // "SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK"
-                    _log->error( msg );
-
-                    Scheduler_event scheduler_event ( evt_database_error_abort, log_error, this );
-                    scheduler_event.set_error( callers_exception );
-                    scheduler_event.set_scheduler_terminates( true );
-
-                    Mail_defaults mail_defaults ( _spooler );
-
-                    mail_defaults.set( "subject", msg );
-                    mail_defaults.set( "body"   , S() << "db=" << remove_password( _db_name ) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
-
-                    scheduler_event.send_mail( mail_defaults );
-                    
-
-                    _spooler->abort_immediately();
-                }
-            }
-
-            _spooler->log()->info( message_string( "SCHEDULER-959" ) );   // "Historie wird von Datenbank auf Dateien umgeschaltet" );
-
-            Scheduler_event scheduler_event ( evt_database_error_switch_to_file, log_warn, this );
-            scheduler_event.set_error( callers_exception );
-
-            Mail_defaults mail_defaults( _spooler );
-            mail_defaults.set( "subject", string("SCHEDULER CONTINUES WITHOUT DATABASE AFTER ERRORS: ") + callers_exception.what() );
-            mail_defaults.set( "body"   , S() << "Because of need_db=no\n" "db=" << remove_password(_db_name) << "\r\n\r\n" << callers_exception.what() << "\r\n\r\n" << warn_msg );
-            
+        if (_email_sent_after_db_error) {    // Zurzeit immer true
+            Scheduler_event scheduler_event ( evt_database_continue, log_info, this );
+            Mail_defaults mail_defaults ( _spooler );
+            mail_defaults.set( "subject", "Scheduler is connected again with the database" );
+            mail_defaults.set( "body"   , "Scheduler continues processing.\n\ndb=" + remove_password(_db_name) );
             scheduler_event.send_mail( mail_defaults );
-
-            set_db_name("");     // Umschalten auf dateibasierte Historie
         }
 
         if( !_transaction ||  !_transaction->_suppress_heart_beat_timeout_check )  _spooler->assert_is_still_active( Z_FUNCTION );
@@ -1474,109 +1369,63 @@ Database_lock_syntax Database::lock_syntax()
 
 int Database::get_id( const string& variable_name, Transaction* outer_transaction )
 {
-    int  id;
-
-    try
-    {
-        while(1)
-        {
-            try
-            {
-                id = get_id_( variable_name, outer_transaction );
-                break;
-            }
-            catch( exception& x )
-            {
-                if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
-                try_reopen_after_error( x, Z_FUNCTION );
-            }
-        }
+    try {
+        return get_id_( variable_name, outer_transaction );
     }
-    catch( exception& x ) 
-    { 
+    catch (exception& x) { 
         _spooler->log()->error( message_string( "SCHEDULER-304", x, variable_name ) );   // "FEHLER BEIM LESEN DER NÄCHSTEN ID: "
-        throw;
+        z::throw_xc("SCHEDULER-304", x.what(), variable_name );   // "FEHLER BEIM LESEN DER NÄCHSTEN ID: "
     }
-
-    return id;
 }
 
 //--------------------------------------------------------------------------------Database::get_id_
 
 int Database::get_id_( const string& variable_name, Transaction* outer_transaction )
 {
-    int id;
-
-
-    if( _db.opened() )
-    {
-        Transaction ta ( this, outer_transaction );
-
+    int id = -1;
+    for (Retry_nested_transaction ta (db(), outer_transaction); ta.enter_loop(); ta++) 
+    try {
         if( dbms_kind() == dbms_access ||
             dbms_kind() == dbms_sybase)
         {
             ta.execute( S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), Z_FUNCTION );
-
             Any_file sel = ta.open_result_set( S() << "select `wert`  from " << _variables_tablename << "  where `name`=" << sql::quoted( variable_name ),
                                                Z_FUNCTION );
-            if( sel.eof() )
-            {
+            if (sel.eof()) {
                 id = 1;
                 ta.execute( S() << "INSERT into " << _variables_tablename << " (`name`,`wert`) " 
                             "values (" << sql::quoted( variable_name ) << "," << id << ")",
                             Z_FUNCTION);
-            }
-            else
-            {
+            } else {
                 id = sel.get_record().as_int(0);
             }
-        }
-        else
-        {
-            for( int tries = 2; tries > 0; tries-- )
-            {
-                Any_file sel = ta.open_commitable_result_set( S() << "select `wert`  from " << _variables_tablename << " %update_lock  where `name`=" << sql::quoted( variable_name ), 
+        } else {
+            for (int tries = 2; tries > 0; tries--) {
+                Any_file sel = ta.open_commitable_result_set(S() << "select `wert`  from " << _variables_tablename << " %update_lock  where `name`=" << sql::quoted(variable_name), 
                                                               Z_FUNCTION );
-                if( !sel.eof() )
-                {
+                if (!sel.eof()) {
                     id = sel.get_record().as_int(0) + 1;
-                    ta.execute( S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), Z_FUNCTION );
+                    ta.execute(S() << "UPDATE " << _variables_tablename << "  set `wert`=`wert`+1  where `name`=" << sql::quoted( variable_name ), Z_FUNCTION);
                     tries = 0;
-                }
-                else
-                {
-                    try
-                    {
+                } else {
+                    try {
                         id = 1;
                         ta.execute( S() << "INSERT into " << _variables_tablename << " (`name`,`wert`) " 
-                                    "values (" << sql::quoted( variable_name ) << "," << id << ")",
+                                    "values (" << sql::quoted(variable_name) << "," << id << ")",
                                     Z_FUNCTION);
                     }
-                    catch( exception& x )
-                    {
-                        if( tries <= 1 )  throw;
-                        _log->warn( x.what() );     // Möglicherweise hat gerade ein anderer den Satz eingefügt
+                    catch (exception& x) {
+                        if (tries <= 1) throw;
+                        _log->warn(x.what());     // Möglicherweise hat gerade ein anderer den Satz eingefügt
                     }
                 }
             }
         }
-
         Z_LOG2( "scheduler", "Database::get_id(\"" + variable_name + "\") = " << id << '\n' );
-
-        _id_counters[ variable_name ] = id + 1;
-
         ta.commit( Z_FUNCTION );
     }
-    else
-    if( _waiting )
-    {
-        z::throw_xc( "SCHEDULER-184" );
-    }
-    else
-    {
-        id = InterlockedIncrement( &_id_counters[ variable_name ] );
-    }
-
+    catch (exception& x) { ta.reopen_database_after_error(z::Xc("SCHEDULER-306", _variables_tablename, x  ), Z_FUNCTION); }
+    if (id == -1)  z::throw_xc(Z_FUNCTION);
     return id;
 }
 
@@ -1741,26 +1590,23 @@ void Database::spooler_start()
     {
         _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
 
-        if( _db.opened() )   // get_id() kann die DB schließen (nach Fehler)
+        Transaction ta ( this );
         {
-            Transaction ta ( this );
-            {
-                sql::Insert_stmt insert ( ta.database_descriptor(), _job_history_tablename );
+            sql::Insert_stmt insert ( ta.database_descriptor(), _job_history_tablename );
         
-                insert[ "id"                ] = _id;
-                insert[ "spooler_id"        ] = _spooler->id_for_db();
+            insert[ "id"                ] = _id;
+            insert[ "spooler_id"        ] = _spooler->id_for_db();
 
-                if( _spooler->is_cluster() )
-                insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
+            if( _spooler->is_cluster() )
+            insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
 
-                insert[ "job_name"          ] = "(Spooler)";
-                insert[ "start_time"        ].set_datetime( Time::now().db_string(time::without_ms) );
-                insert[ "pid"               ] = getpid();
+            insert[ "job_name"          ] = "(Spooler)";
+            insert[ "start_time"        ].set_datetime( Time::now().db_string(time::without_ms) );
+            insert[ "pid"               ] = getpid();
 
-                ta.execute( insert, Z_FUNCTION );
+            ta.execute( insert, Z_FUNCTION );
 
-                ta.commit( Z_FUNCTION );
-            }
+            ta.commit( Z_FUNCTION );
         }
     }
 }
@@ -1971,39 +1817,35 @@ void Job_history::open( Transaction* outer_transaction )
 
     _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 
-
     try
     {
         if( !_history_yes )  return;
 
-        if( _spooler->_db->opened())
+        Transaction ta ( +_spooler->_db, outer_transaction );
         {
-            Transaction ta ( +_spooler->_db, outer_transaction );
+
+            set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
+
+            _spooler->_db->open_history_table( &ta );
+
+            if( const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr() ) 
             {
+                _extra_type = SOS_NEW( Record_type );
 
-                set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
-
-                _spooler->_db->open_history_table( &ta );
-
-                if( const Record_type* type = _spooler->_db->_history_table.spec().field_type_ptr() ) 
+                for( int i = 0; i < type->field_count(); i++ )
                 {
-                    _extra_type = SOS_NEW( Record_type );
-
-                    for( int i = 0; i < type->field_count(); i++ )
+                    string name = type->field_descr_ptr(i)->name();
+                    if( my_columns.find( lcase(name) ) == my_columns.end() )  
                     {
-                        string name = type->field_descr_ptr(i)->name();
-                        if( my_columns.find( lcase(name) ) == my_columns.end() )  
-                        {
-                            _extra_names.push_back( name );
-                            type->field_descr_ptr(i)->add_to( _extra_type );
-                        }
+                        _extra_names.push_back( name );
+                        type->field_descr_ptr(i)->add_to( _extra_type );
                     }
                 }
             }
-            ta.commit( Z_FUNCTION );
-
-            _use_db = true;
         }
+        ta.commit( Z_FUNCTION );
+
+        _history_enabled = true;
     }
     catch( exception& x )  
     { 
@@ -2016,7 +1858,7 @@ void Job_history::open( Transaction* outer_transaction )
 
 void Job_history::close()
 {
-    _use_db = false;
+    _history_enabled = false;
 }
 
 //---------------------------------------------------------------------------Job_history::read_tail
@@ -2032,7 +1874,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
         history_element = doc.createElement( "history" );
         dom_append_nl( history_element );
 
-        with_log &= _use_db;
+        with_log &= _history_enabled;
 
         try
         {
@@ -2040,9 +1882,9 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
             {
                 if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
 
-                if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+                if( _history_enabled  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
-                if (!_use_db) z::throw_xc("SCHEDULER-136");
+                if (!_history_enabled) z::throw_xc("SCHEDULER-136");
                 if (_spooler->_db->_db_name == "") z::throw_xc("SCHEDULER-361", Z_FUNCTION);
 
                 for ( Retry_transaction ta ( _spooler->db() ); ta.enter_loop(); ta++ ) try
@@ -2227,7 +2069,7 @@ void Task_history::write( bool start )
     {
         try
         {
-            if( _job_history->_use_db )
+            if( _job_history->_history_enabled )
             {
                 if( !_spooler->_db->opened() )       // Datenbank ist (wegen eines Fehlers) geschlossen worden?
                 {
@@ -2242,7 +2084,7 @@ void Task_history::write( bool start )
                 }
             }
 
-            if( _job_history->_use_db )
+            if( _job_history->_history_enabled )
             {
                 Transaction ta ( +_spooler->_db );
                 {
@@ -2396,4 +2238,3 @@ void Task_history::set_extra_field( const string& name, const Variant& value )
 } //namespace database
 } //namespace scheduler
 } //namespace sos
-
