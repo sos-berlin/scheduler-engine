@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.xml.XmlUtils.{loadXml, prettyXml}
 import com.sos.scheduler.engine.data.log.ErrorLogEvent
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.log.PrefixLog
@@ -45,7 +46,7 @@ with EventHandlerAnnotated {
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
-  @volatile private var suppressTerminateOnError = false
+  @volatile private var errorLogEventIsTolerated: ErrorLogEvent ⇒ Boolean = Set()
 
   private val jdbcUrlOption: Option[String] =
     testConfiguration.database collect {
@@ -143,21 +144,27 @@ with EventHandlerAnnotated {
     if (!lastErrorLine.isEmpty) error("Test terminated after error log line: " + lastErrorLine)
   }
 
-  def suppressingTerminateOnError[A](f: => A): A = {
-    require(!suppressTerminateOnError)
-    suppressTerminateOnError = true
+  def suppressingTerminateOnError[A](f: ⇒ A): A =
+    toleratingErrorLogEvent(_ ⇒ true)(f)
+
+  def toleratingErrorLogEvent[A](errorCode: MessageCode)(f: ⇒ A): A =
+    toleratingErrorLogEvent(_.codeOption == Some(errorCode))(f)
+
+  def toleratingErrorLogEvent[A](predicate: ErrorLogEvent ⇒ Boolean)(f: ⇒ A): A = {
+    require(errorLogEventIsTolerated == Set())
+    errorLogEventIsTolerated = predicate
     try {
       val result = f
-      getEventBus.dispatchEvents()   // Damit handleEvent(ErrorLogEvent) wirklich jetzt gerufen wird, solange noch suppressTerminateOnError gilt
+      getEventBus.dispatchEvents()   // Damit handleEvent(ErrorLogEvent) wirklich jetzt gerufen wird, solange noch errorLogEventIsTolerated gesetzt ist
       result
     }
-    finally suppressTerminateOnError = false
+    finally errorLogEventIsTolerated = Set()
   }
 
   @EventHandler
   def handleEvent(e: ErrorLogEvent) {
-    if (testConfiguration.terminateOnError && !suppressTerminateOnError && !testConfiguration.ignoreError(e.getCodeOrNull) && !testConfiguration.errorLogEventIsExpected(e))
-      terminateAfterException(new RuntimeException(s"Test terminated after error log line: ${e.getLine}"))
+    if (testConfiguration.terminateOnError && !(e.codeOption exists testConfiguration.ignoreError) && !errorLogEventIsTolerated(e) && !testConfiguration.errorLogEventIsTolerated(e))
+      terminateAfterException(new RuntimeException(s"Test terminated after error log message: ${e.message}"))
   }
 
   @EventHandler @HotEventHandler

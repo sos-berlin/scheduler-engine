@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.jira.js975
 
 import JS975IT._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
-import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith
@@ -12,9 +11,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 final class JS975IT extends FunSuite with ScalaSchedulerTest {
-  override lazy val testConfiguration = TestConfiguration(
-    testClass = getClass,
-    database = Some(DefaultDatabaseConfiguration()))
 
   test("JS-975 Answer of <show_history job='...' what='log'/> should contain the log element") {
     val eventPipe = controller.newEventPipe()

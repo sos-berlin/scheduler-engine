@@ -902,43 +902,42 @@ void Database::create_tables_when_needed()
 
 bool Database::create_table_when_needed( Transaction* ta, const string& tablename, const string& fields )
 {
-    bool result = false;
-
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
 
-    try
-    {
-        //Transaction ta ( this );        // Select und Create table nicht in derselben Transaktion. Für Access und PostgresQL
-
-        Any_file select = ta->open_result_set( "select count(*)  from " + tablename + "  where 1=0", Z_FUNCTION );
-        select.get_record();
-        select.close();
-        // ok
-    }
-    catch( exception& x )
-    {
-        _log->warn( x.what() );
-        _log->info( message_string( "SCHEDULER-909", tablename ) );
-
-        try
-        {
-            ta->intermediate_commit( Z_FUNCTION ); 
-
-            S create_table;
-            create_table << "CREATE TABLE " << tablename << " (" << fields << ")";
-            if( dbms_kind() == dbms_mysql )  create_table << " ENGINE=InnoDB";    // JS-670: since Version 5.0: ENGINE=innodb, since 5.5. Type=InnoDB does not work anymore
-
-            ta->execute( create_table, Z_FUNCTION );
-
-            result = true;
+    if (_spooler->settings()->_always_create_database_tables) {
+        create_table(ta, tablename, fields);
+        return true;
+    } else {
+        try {
+            Any_file select = ta->open_result_set( "select count(*)  from " + tablename + "  where 1=0", Z_FUNCTION );
+            select.get_record();
+            select.close();
+            return false;
         }
-        catch( exception& x )
-        {
-            z::throw_xc( "SCHEDULER-363", tablename, x );
+        catch (exception& x) {
+            create_table(ta, tablename, fields);
+            return true;
         }
     }
+}
 
-    return result;
+//---------------------------------------------------------------------------Database::create_table
+
+void Database::create_table(Transaction* ta, const string& tablename, const string& fields)
+{
+    if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
+    _log->info( message_string( "SCHEDULER-909", tablename ) );
+
+    try {
+        ta->intermediate_commit( Z_FUNCTION );    // Select und Create table nicht in derselben Transaktion. Für Access und PostgresQL
+        S create_table;
+        create_table << "CREATE TABLE " << tablename << " (" << fields << ")";
+        if( dbms_kind() == dbms_mysql )  create_table << " ENGINE=InnoDB";    // JS-670: since Version 5.0: ENGINE=innodb, since 5.5. Type=InnoDB does not work anymore
+        ta->execute( create_table, Z_FUNCTION );
+    }
+    catch( exception& x ) {
+        z::throw_xc( "SCHEDULER-363", tablename, x );
+    }
 }
 
 //-----------------------------------------------------------------------------Database::add_column

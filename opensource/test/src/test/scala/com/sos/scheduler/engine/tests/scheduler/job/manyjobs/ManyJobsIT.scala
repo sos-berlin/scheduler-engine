@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStartedEvent}
 import com.sos.scheduler.engine.eventbus.EventHandler
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
-import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
@@ -24,8 +24,6 @@ final class ManyJobsIT extends FunSuite with ScalaSchedulerTest {
 
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
-    database = Some(DefaultDatabaseConfiguration()),   // Nur damit die History-Dateien nicht die File-handles aufbrauchen.
-    logCategories = "java.stackTrace-",   // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
     binariesDebugMode = if (n > 0) Some(CppBinariesDebugMode.release) else None)
 
   private var activatedJobCount = 0

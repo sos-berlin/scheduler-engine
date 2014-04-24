@@ -16,9 +16,6 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS1040IT extends FreeSpec with ScalaSchedulerTest {
 
-  override lazy val testConfiguration = TestConfiguration(
-    testClass = getClass,
-    database = Some(DefaultDatabaseConfiguration()))
   private lazy val orderSubsystem = instance[OrderSubsystem]
 
   "job_chain orders_recoverable=no should delete all orders in database when job chain is deleted and reread" - {

@@ -4,6 +4,7 @@ import StandardCallQueue._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import org.joda.time.DateTimeUtils.currentTimeMillis
 import scala.collection.mutable
+import scala.util.control.NonFatal
 
 final class StandardCallQueue extends PoppableCallQueue {
   private val queue = mutable.Buffer[TimedCall[_]]()
@@ -21,23 +22,27 @@ final class StandardCallQueue extends PoppableCallQueue {
   }
 
   def close() {
-    synchronized {
+    val copy = synchronized {
       closed = true
-      queue dropWhile { o => o.onCancel(); true }
+      val result = queue.toVector
+      queue.clear()
+      result
+    }
+    for (o <- copy) {
+      try o.onCancel()
+      catch { case NonFatal(e) ⇒ logger.warn(s"$o.onCancel(): $e", e) }
     }
   }
 
   def tryCancel(o: TimedCall[_]): Boolean = {
-    synchronized {
+    val cancelled = synchronized {
       indexOf(o) match {
-        case -1 =>
-          false
-        case i =>
-          o.onCancel()
-          queue.remove(i)
-          true
+        case -1 ⇒ None
+        case i ⇒ Some(queue.remove(i))
       }
     }
+    for (o <- cancelled) o.onCancel()
+    cancelled.isDefined
   }
 
   def isEmpty =

@@ -24,7 +24,9 @@ public enum CppSettingName {
 
     useOldMicroschedulingForJobs(10),
 
-    useOldMicroschedulingForTasks(11);
+    useOldMicroschedulingForTasks(11),
+
+    alwaysCreateDatabaseTables(12);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

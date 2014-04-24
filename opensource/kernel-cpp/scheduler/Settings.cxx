@@ -78,6 +78,9 @@ void Settings::set(int number, const string& value) {
         case 11:
             _use_old_microscheduling_for_tasks = as_bool(value);
             break;
+        case 12:
+            _always_create_database_tables = as_bool(value);
+            break;
         default:
             z::throw_xc("UNKNOWN_SETTING", number);
     }

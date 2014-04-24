@@ -4,15 +4,14 @@ import JS1048IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
-import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
+import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
+import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{order, orderOption}
-import com.sos.scheduler.engine.test.configuration.DefaultDatabaseConfiguration
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
-import com.sos.scheduler.engine.test.{TestEnvironment, TestSchedulerController, ProvidesTestEnvironment}
+import com.sos.scheduler.engine.test.{ProvidesTestEnvironment, TestEnvironment, TestSchedulerController}
 import java.nio.file.Files
 import javax.persistence.EntityManagerFactory
 import org.junit.runner.RunWith
@@ -26,7 +25,7 @@ final class JS1048IT extends FreeSpec {
   private lazy val testConfiguration =
     TestConfiguration(
       testClass = getClass,
-      database = Some(DefaultDatabaseConfiguration()))
+      cppSettings = CppSettings.testMap + (CppSettingName.alwaysCreateDatabaseTables -> false.toString))
 
   "After JobScheduler restart with an unchanged .order.xml, a previous state should remain" in {
     autoClosing(ProvidesTestEnvironment(testConfiguration)) { envProvider =>

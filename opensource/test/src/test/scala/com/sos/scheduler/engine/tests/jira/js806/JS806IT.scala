@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.LogEvent
+import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
@@ -24,7 +25,7 @@ final class JS806IT extends FunSuite with ScalaSchedulerTest {
 
   override protected lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
-    ignoreError = Set("SCHEDULER-280"))
+    ignoreError = Set(MessageCode("SCHEDULER-280")))
 
   private lazy val liveDirectory = controller.environment.liveDirectory
   private lazy val orderSubsystem = instance[OrderSubsystem]

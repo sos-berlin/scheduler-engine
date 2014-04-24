@@ -4,7 +4,7 @@ import CppServletIT._
 import com.google.common.io.Files
 import com.google.inject.Injector
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
-import com.sos.scheduler.engine.kernel.settings.CppSettingName
+import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
 import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
 import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
@@ -30,8 +30,7 @@ final class CppServletIT extends FunSuite with ScalaSchedulerTest {
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     testPackage = Some(JettyPluginTests.getClass.getPackage),
-    cppSettings = Map(CppSettingName.htmlDir -> httpDirectory.getPath)    // Für Bitmuster-Test
-  )
+    cppSettings = CppSettings.testMap + (CppSettingName.htmlDir -> httpDirectory.getPath))    // Für Bitmuster-Test
 
   for (testConf <- TestConf(newAuthentifyingClient(), withGzip = false) ::
                    //TestConf(newAuthentifyingClient(filters=Iterable(new GZIPContentEncodingFilter(false))), withGzip = true) ::

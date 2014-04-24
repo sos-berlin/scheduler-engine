@@ -499,7 +499,7 @@
     <ClInclude Include="log_cache_Request_cache.h" />
     <ClInclude Include="spooler_job_java.h" />
     <ClInclude Include="Timed_call.h" />
-    <ClInclude Include="Settings.h" />
+    <ClInclude Include="settings.h" />
     <ClInclude Include="spooler_xslt_stylesheet.h" />
     <ClInclude Include="cluster.h" />
     <ClInclude Include="database.h" />

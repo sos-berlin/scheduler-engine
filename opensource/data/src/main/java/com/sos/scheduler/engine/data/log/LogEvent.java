@@ -1,13 +1,15 @@
 package com.sos.scheduler.engine.data.log;
 
 import com.sos.scheduler.engine.data.event.AbstractEvent;
+import com.sos.scheduler.engine.data.message.MessageCode;
+import scala.Option;
 
-import javax.annotation.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 public class LogEvent extends AbstractEvent {
-    private static final Pattern codePattern = Pattern.compile("([A-Z]+(-[0-9A-Z]+)+)( .*)?");
+    private static final Pattern codePattern = Pattern.compile("([A-Z]+(-[0-9A-Z]+)+)( .*)?", Pattern.DOTALL);
 
     private final SchedulerLogLevel level;
     private final String line;
@@ -17,12 +19,21 @@ public class LogEvent extends AbstractEvent {
         this.line = message;
     }
 
+    public final Option<MessageCode> codeOption() {
+        String code = getCodeOrNull();
+        return code == null? Option.<MessageCode>apply(null) : Option.apply(new MessageCode(code));
+    }
+
     @Nullable public final String getCodeOrNull() {
         return messageCodeFromLineOrNull(line);
     }
 
     public final SchedulerLogLevel level() {
         return level;
+    }
+
+    public final String message() {
+        return line;
     }
 
     public final String getLine() {
