@@ -38,6 +38,7 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     bool                       _order_distributed_balanced;
     int                        _supervisor_configuration_polling_interval;
     bool                       _cluster_restart_after_emergency_abort;
+    bool                       _always_create_database_tables;  // For tests only to suppress java error messages
 };
 
 }} //namespace sos::scheduler

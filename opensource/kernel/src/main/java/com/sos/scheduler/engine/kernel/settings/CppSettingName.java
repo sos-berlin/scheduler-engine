@@ -20,7 +20,11 @@ public enum CppSettingName {
 
     supervisorConfigurationPollingInterval(8),
 
-    clusterRestartAfterEmergencyAbort(9);
+    clusterRestartAfterEmergencyAbort(9),
+
+    alwaysCreateDatabaseTables(12),
+
+    roles(13);
 
     /** Die Zahl muss mit der Zahl im C++-Code Settings.cxx übereinstimmen. */
     private final int number;

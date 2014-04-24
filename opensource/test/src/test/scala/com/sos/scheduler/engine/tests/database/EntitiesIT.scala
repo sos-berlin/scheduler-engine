@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerTimeZone
-import com.sos.scheduler.engine.kernel.settings.CppSettingName
+import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
 import com.sos.scheduler.engine.persistence.entities._
 import com.sos.scheduler.engine.test.TestEnvironment.schedulerId
 import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
@@ -36,8 +36,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
   override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
     database = Some(DefaultDatabaseConfiguration()),
-    logCategories = "java.stackTrace-",  // Exceptions wegen fehlender Datenbanktabellen wollen wir nicht sehen.
-    cppSettings = Map(CppSettingName.useJavaPersistence -> "true"))
+    cppSettings = CppSettings.testMap + (CppSettingName.useJavaPersistence -> true.toString))
 
   private val testStartTime = now() withMillisOfSecond 0
 

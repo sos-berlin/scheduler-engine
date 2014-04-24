@@ -68,6 +68,10 @@ void Settings::set(int number, const string& value) {
             break;
         case 9:
             _cluster_restart_after_emergency_abort = as_bool(value);
+            break;
+        case 12:
+            _always_create_database_tables = as_bool(value);
+            break;
         default:
             z::throw_xc("UNKNOWN_SETTING", number);
     }
