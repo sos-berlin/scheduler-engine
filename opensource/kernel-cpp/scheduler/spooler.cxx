@@ -3337,7 +3337,9 @@ Timed_call* Spooler::enqueue_call(Timed_call* call) {
 //-----------------------------------------------------------------------------Spooler::cancel_call
 
 void Spooler::cancel_call(Timed_call* call) {
-    if (call) schedulerJ().cancelCall(call->java_sister());
+    if (call) 
+        if (SchedulerJ& o = schedulerJ()) 
+            o.cancelCall(call->java_sister());
 }
 
 //----------------------------------------------------------------------------------Spooler::launch
