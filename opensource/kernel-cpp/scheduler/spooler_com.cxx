@@ -5097,6 +5097,7 @@ STDMETHODIMP Com_job_chain::get_Title( BSTR* result )
     return hr;
 }
 
+//--------------------------------------------------------------------------Com_job_chain::get_Path
 
 STDMETHODIMP Com_job_chain::get_Path(BSTR* result)
 {
@@ -5114,7 +5115,7 @@ STDMETHODIMP Com_job_chain::get_Path(BSTR* result)
     return hr;
 }
 
-
+//------------------------------------------------------------------------Com_job_chain::get_States
 
 STDMETHODIMP Com_job_chain::get_States(SAFEARRAY** result)
 {
