@@ -80,7 +80,8 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
     ptr<Com_variable_set>       properties              ();                                         // Mit "password"
     Database_lock_syntax        lock_syntax             ();
-    void                        try_reopen_after_error  ( const exception&, const string& function);
+    void                        open_or_wait_until_opened();
+    bool                        try_reopen_after_error  ( const exception&, const string& function);
     void                        check_database          ();
     void                        create_tables_when_needed();
     bool                        create_table_when_needed( Transaction*, const string& table_name, const string& fields );
@@ -255,7 +256,7 @@ struct Transaction : Read_transaction
 
 struct Database_retry
 {
-                                Database_retry          ( Database* db )                        : _db(db), _enter_loop(1) {}
+                                Database_retry          ( Database* db )                            : _db(db), _enter_loop(1), _immediately_reopened_count(0) {}
 
                                 operator bool           ()                                          { return enter_loop(); }
     bool                        enter_loop              ()                                          { return _enter_loop > 0; }
@@ -263,8 +264,9 @@ struct Database_retry
     void                        reopen_database_after_error( const exception&, const string& function );
     void                        operator ++             (int)                                       { _enter_loop--; }
 
-    Database*                _db;
+    Database*                  _db;
     int                        _enter_loop;
+    int                        _immediately_reopened_count;
 };
 
 //-------------------------------------------------------------------------Retry_nested_transaction
@@ -277,7 +279,7 @@ struct Database_retry
 
 struct Retry_nested_transaction : Transaction
 {
-                                Retry_nested_transaction( Database* db, Transaction* outer )        : Transaction(db,outer), _database_retry( db ) {}
+                                Retry_nested_transaction(Database*, Transaction*);
   
 
     bool                        enter_loop              ()                                          { return _database_retry.enter_loop(); }

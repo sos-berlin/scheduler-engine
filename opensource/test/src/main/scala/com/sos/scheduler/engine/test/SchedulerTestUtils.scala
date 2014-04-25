@@ -58,15 +58,15 @@ object SchedulerTestUtils {
     TaskId((response.elem \ "answer" \ "ok" \ "task" \ "@id").toString().toInt)
   }
 
-  /** Fängt eine Exception ab, die auch vom JobScheduler als Fehlermeldung ins Hauptprotokoll geschrieben wird.
-    * Eine Fehlermeldung im Hauptprotokoll führt gewöhnlich zum Abbruch des Tests.
-    * @param errorCode Code der im Hauptprokoll zu tolerierenden Fehlermeldung.
-    * @param testException: Test-Code, der bei einer falschen CppException eine Exception wirft, zum Bespiel mit ScalaTest. */
-  def interceptLoggedSchedulerError(errorCode: MessageCode, testException: SchedulerException ⇒ Unit = _ ⇒ ())(body: ⇒ Unit)(implicit controller: TestSchedulerController) {
-    controller.toleratingErrorLogEvent(errorCode) {
-      val e = intercept[SchedulerException](body)
-      s"${e.getMessage} " should startWith (s"$errorCode ")
-      testException(e)
-    }
-  }
+//  /** Fängt eine Exception ab, die auch vom JobScheduler als Fehlermeldung ins Hauptprotokoll geschrieben wird.
+//    * Eine Fehlermeldung im Hauptprotokoll führt gewöhnlich zum Abbruch des Tests.
+//    * @param errorCode Code der im Hauptprokoll zu tolerierenden Fehlermeldung.
+//    * @param testException: Test-Code, der bei einer falschen CppException eine Exception wirft, zum Bespiel mit ScalaTest. */
+//  def interceptLoggedSchedulerError(errorCode: MessageCode, testException: SchedulerException ⇒ Unit = _ ⇒ ())(body: ⇒ Unit)(implicit controller: TestSchedulerController) {
+//    controller.toleratingErrorLogEvent(errorCode) {
+//      val e = intercept[SchedulerException](body)
+//      s"${e.getMessage} " should startWith (s"$errorCode ")
+//      testException(e)
+//    }
+//  }
 }

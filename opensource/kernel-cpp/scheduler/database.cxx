@@ -42,6 +42,7 @@ const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im 
 const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
 const int max_column_length = 249;      // Für MySQL 249 statt 250. jz 7.1.04
 const int order_title_column_size = 200;
+const int immediately_reopened_max = 10;    // Maximale Anzahl Fehler in der Retry_transaction, ohne dass die Datenbank nicht erreichbar war. Verhindert Endlosschleife.
 
 
 //-------------------------------------------------------------------------------------------------
@@ -365,6 +366,18 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
     }
 }
 
+//-----------------------------------------------Retry_nested_transaction::Retry_nested_transaction
+
+Retry_nested_transaction::Retry_nested_transaction(Database* db, Transaction* outer)        
+: 
+    Transaction(db,outer), 
+    _database_retry( db ) 
+{
+    if (!outer) {
+        db->open_or_wait_until_opened();
+    }
+}
+
 //--------------------------------------------Retry_nested_transaction::reopen_database_after_error
 
 void Retry_nested_transaction::reopen_database_after_error( const exception& x, const string& function )
@@ -411,7 +424,12 @@ void Database_retry::reopen_database_after_error( const exception& x, const stri
     assert( _db );
     assert( !_db->is_in_transaction() );
 
-    _db->try_reopen_after_error( x, function ); 
+    if (_immediately_reopened_count >= immediately_reopened_max)
+        throw;
+
+    bool immediately_reopened = _db->try_reopen_after_error( x, function ); 
+    if (immediately_reopened)
+        _immediately_reopened_count++;
     repeat_loop(); 
 }
 
@@ -1284,10 +1302,25 @@ void Database::open_history_table( Read_transaction* ta )
     }
 }
 
+//--------------------------------------------------------------Database::open_or_wait_until_opened
+
+void Database::open_or_wait_until_opened()        
+{
+    if (!_db.opened()) {
+        try {
+            open2();
+        } 
+        catch (exception& x) {
+            try_reopen_after_error(x, Z_FUNCTION);
+        }
+    }
+}
+
 //-----------------------------------------------------------------Database::try_reopen_after_error
 
-void Database::try_reopen_after_error(const exception& callers_exception, const string& function)
+bool Database::try_reopen_after_error(const exception& callers_exception, const string& function)
 {
+    bool immediately_reopened = true;
     if (_waiting) z::throw_xc("SCHEDULER-184");
     if (_db_name == "") throw;
     if( _is_reopening_database_after_error ) throw;
@@ -1334,6 +1367,7 @@ void Database::try_reopen_after_error(const exception& callers_exception, const 
                     Java_thread_unlocker unlocker ( _spooler );   // Damit das JettyPlugin durchkommt. Das ist gefährlich. Wir blockieren irgendwo mitten in der Code-Ausführung und erlauben rekursive Operationen.
                     _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
                 }
+                immediately_reopened = false;
             }
         }
 
@@ -1353,6 +1387,8 @@ void Database::try_reopen_after_error(const exception& callers_exception, const 
     }
 
     _is_reopening_database_after_error = false;
+    assert(_db.opened());
+    return immediately_reopened;
 }
 
 //----------------------------------------------------------------------------Database::lock_syntax

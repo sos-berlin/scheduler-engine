@@ -7,8 +7,9 @@ import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.taskIdOffset
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{interceptLoggedSchedulerError, runJobAndWaitForEnd}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.runJobAndWaitForEnd
 import com.sos.scheduler.engine.test.TestSchedulerController
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import javax.persistence.EntityManagerFactory
@@ -16,7 +17,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.cplusplus.runtime.CppException
 
 @RunWith(classOf[JUnitRunner])
 final class JS1082IT extends FreeSpec with ScalaSchedulerTest {
@@ -51,16 +51,12 @@ final class JS1082IT extends FreeSpec with ScalaSchedulerTest {
   }
 
   private def interceptDatabaseError(body: ⇒ Unit) {
-    interceptLoggedSchedulerError(MessageCode("SCHEDULER-304"), _.toString should include (variablesTableName))(body)
+    controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-303"), MessageCode("SCHEDULER-304"))) {
+      val e = intercept[SchedulerException](body)
+      s"${e.getMessage} " should startWith ("SCHEDULER-304 ")
+      e.getMessage should include (variablesTableName)
+    }
   }
-//  private def interceptDatabaseError(body: ⇒ Unit) {
-//    val errorCode = MessageCode("SCHEDULER-304")
-//    controller.toleratingErrorLogEvent(errorCode) {
-//      val e = intercept[CppException](body)
-//      e.getCode shouldEqual errorCode.string
-//      e.toString should include (variablesTableName)
-//    }
-//  }
 }
 
 private object JS1082IT {

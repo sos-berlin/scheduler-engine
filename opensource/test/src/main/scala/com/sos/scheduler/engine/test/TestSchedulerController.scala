@@ -148,8 +148,8 @@ with EventHandlerAnnotated {
   def suppressingTerminateOnError[A](f: ⇒ A): A =
     toleratingErrorLogEvent(_ ⇒ true)(f)
 
-  def toleratingErrorLogEvent[A](errorCode: MessageCode)(f: ⇒ A): A =
-    toleratingErrorLogEvent(_.codeOption == Some(errorCode))(f)
+  def toleratingErrorCodes[A](tolerateErrorCodes: MessageCode ⇒ Boolean)(f: ⇒ A): A =
+    toleratingErrorLogEvent(_.codeOption exists tolerateErrorCodes)(f)
 
   def toleratingErrorLogEvent[A](predicate: ErrorLogEvent ⇒ Boolean)(f: ⇒ A): A = {
     require(errorLogEventIsTolerated == Set())
