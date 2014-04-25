@@ -8,7 +8,7 @@ call prepare-setup.sh <version> to use this pom
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.6.4070-SNAPSHOT</version>
+        <version>1.6.4115</version>
     </parent>
 
     <properties>
