@@ -348,7 +348,7 @@ void Order::db_insert_order_history_record( Transaction* ta )
 {
     if( _spooler->_order_history_yes  &&  db()->opened() )
     {
-        _history_id = db()->get_order_history_id( ta );
+        assert(_history_id);
 
         sql::Insert_stmt insert ( ta->database_descriptor() );
 
