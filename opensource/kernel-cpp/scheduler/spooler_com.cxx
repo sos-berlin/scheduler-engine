@@ -4645,6 +4645,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_METHOD     , 13, "Remove"                    , (Com_method_ptr)&Com_job_chain::Remove             , VT_EMPTY      },
     { DISPATCH_PROPERTYPUT, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 15, "Path"                      , (Com_method_ptr)&Com_job_chain::get_Path           , VT_BSTR },
     {}
 };
 
@@ -5065,6 +5066,24 @@ STDMETHODIMP Com_job_chain::get_Title( BSTR* result )
 
     return hr;
 }
+
+
+STDMETHODIMP Com_job_chain::get_Path(BSTR* result)
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if (!_job_chain)  return E_POINTER;
+
+        hr = String_to_bstr(_job_chain->path().to_string(), result);
+    }
+    catch (const exception&  x)  { hr = Set_excepinfo(x, Z_FUNCTION); }
+    catch (const _com_error& x)  { hr = Set_excepinfo(x, Z_FUNCTION); }
+
+    return hr;
+}
+
 
 //---------------------------------------------------------------------Com_job_chain_node::_methods
 #ifdef Z_COM

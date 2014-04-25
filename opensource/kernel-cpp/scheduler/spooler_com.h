@@ -793,6 +793,8 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     STDMETHODIMP            put_Title                   ( BSTR );
     STDMETHODIMP            get_Title                   ( BSTR* );
 
+    STDMETHODIMP            get_Path                    (BSTR*);
+
   private:
     Thread_semaphore           _lock;
     Job_chain*       _job_chain;
