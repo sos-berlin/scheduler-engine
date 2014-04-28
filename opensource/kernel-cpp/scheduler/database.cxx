@@ -1802,7 +1802,6 @@ string Database::read_task_log(int task_id)
 
 void Database::require_database() const {
     _spooler->settings()->require_role(Settings::role_scheduler);
-    //if (_db_name.empty()) z::throw_xc("SCHEDULER-488");   // Not role_scheduler?
 }
 
 //-------------------------------------------------------------------------Job_history::Job_history
