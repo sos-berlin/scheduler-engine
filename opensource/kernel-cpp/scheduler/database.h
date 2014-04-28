@@ -89,6 +89,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     void                        rename_column           ( Transaction*, const string& table_name, const string& column_name, const string& new_column_name, const string& type );
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }
+    void                        require_database        () const;
 
 
     Fill_zero                  _zero_;

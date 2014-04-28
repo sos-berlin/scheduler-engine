@@ -628,7 +628,6 @@ struct Spooler : Object,
 
     ptr<Database>              _db;
     bool                       _db_check_integrity;
-    bool                       _jobs_allowed_for_licence;   // e.g. jobs are not allowed if scheduler runs as agent
     bool                       _remote_commands_allowed_for_licence;   // executing of remote commands are not allowed for "normal" scheduler
 
     int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)

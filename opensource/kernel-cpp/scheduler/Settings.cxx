@@ -4,6 +4,16 @@
 namespace sos {
 namespace scheduler {
 
+//-----------------------------------------------------------------------------------role_to_string
+
+static string role_to_string(Settings::Role role) {
+    switch (role) {
+        case Settings::role_scheduler: return "scheduler";
+        case Settings::role_agent: return "agent";
+        default: return "ROLE-" + as_string((int)role);
+    }
+}
+
 //-------------------------------------------------------------------------------Settings::Settings
 
 Settings::Settings()
@@ -80,7 +90,7 @@ void Settings::set(int number, const string& value) {
             break;
         case 13: {
             _roles.clear();
-            vector<string> role_strings = vector_split(" *, *", value);
+            vector<string> role_strings = vector_split("( +)|( *, *)", value);
             Z_FOR_EACH(vector<string>, role_strings, i) {
                 string role_string = *i;
                 if (role_string == "scheduler") {
@@ -112,6 +122,18 @@ string Settings::get(int number) const {
         default:
             z::throw_xc("UNKNOWN_SETTING", number);
     }
+}
+
+//---------------------------------------------------------------------------Settings::require_role
+
+void Settings::require_role(Role role) const {
+    if (_roles.find(role) == _roles.end())
+        z::throw_xc("SCHEDULER-487", role_to_string(role));
+}
+
+void Settings::require_role(Role role, const string& info) const {
+    if (_roles.find(role) == _roles.end())
+        z::throw_xc("SCHEDULER-487", role_to_string(role), info);
 }
 
 }} //namespace sos::scheduler

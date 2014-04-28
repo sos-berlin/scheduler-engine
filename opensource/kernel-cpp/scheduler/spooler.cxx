@@ -747,9 +747,7 @@ void Spooler::check_licence()
 {
     /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
-    _jobs_allowed_for_licence = SOS_LICENCE(licence_scheduler) != NULL;
     _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
-    if (!_jobs_allowed_for_licence) Z_LOG2( "scheduler", "jobs are not allowed.\n"  );
     if (!_remote_commands_allowed_for_licence) Z_LOG2( "scheduler", "executing of remote commands are not allowed (licence key for agent is required. sales@sos-berlin.com).\n" );
     if ( Log_ptr::is_demo_version() )  
        Z_LOG2( "scheduler", "JobScheduler is running with open source licence.\n" );

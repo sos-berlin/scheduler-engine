@@ -11,7 +11,7 @@ namespace com_objects {
 }
 
 enum Setting_name {
-    setting_null,
+    setting_0,
 
     /** Wie -db= */
     setting_db_name,
@@ -27,6 +27,8 @@ enum Setting_name {
 
     /** Datenbank über neue Java-Schnittstelle statt über die alte Hostware. */
     setting_use_java_persistence,
+
+    settings_6,
 
     setting_order_distributed_balanced,
 
@@ -59,6 +61,9 @@ struct Settings : z::Object, z::javabridge::has_proxy<Settings> {
     bool has_role_scheduler() const {
         return _roles.find(role_scheduler) != _roles.end();
     }
+
+    void require_role(Role) const;
+    void require_role(Role, const string& info) const;
 
     void freeze() { 
         _freezed = true; 

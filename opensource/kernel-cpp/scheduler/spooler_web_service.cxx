@@ -226,7 +226,7 @@ bool Web_services::subsystem_initialize()
     */
 
     /** \change 2.1.2 - JS-559: new licence type scheduler-agent */
-    if (_spooler->_jobs_allowed_for_licence) {
+    if (_spooler->modifiable_settings()->has_role_scheduler()) {
         Command_processor command_processor ( _spooler, Security::seclev_all );
 
         command_processor.execute_xml_string( job_xml       );

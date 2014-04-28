@@ -80,8 +80,7 @@ Read_transaction::Read_transaction( Database* db )
     _log(db->_log)
 {
     assert( db );
-    //Das müssen wir später prüfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
-
+    db->require_database();
     begin_transaction( db );
 }
 
@@ -508,6 +507,7 @@ void Database::open()
 
 void Database::open2()
 {
+    require_database();
     Z_MUTEX( _lock )
     {
         _log->info( message_string( "SCHEDULER-907", _db_name ) );     // Datenbank wird geöffnet
@@ -1798,6 +1798,13 @@ string Database::read_task_log(int task_id)
                            " where \"ID\"=" + as_string(task_id), "" );
 }
 
+//-----------------------------------------------------------------------Database::require_database
+
+void Database::require_database() const {
+    _spooler->settings()->require_role(Settings::role_scheduler);
+    //if (_db_name.empty()) z::throw_xc("SCHEDULER-488");   // Not role_scheduler?
+}
+
 //-------------------------------------------------------------------------Job_history::Job_history
 
 Job_history::Job_history( Job* job )
@@ -1900,6 +1907,7 @@ void Job_history::close()
 
 xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, const Show_what& show, bool use_task_schema )
 {
+    _spooler->db()->require_database();
     bool with_log = show.is_set( show_log );
 
     xml::Element_ptr history_element;

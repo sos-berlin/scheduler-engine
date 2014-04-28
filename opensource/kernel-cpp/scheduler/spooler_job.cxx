@@ -644,7 +644,7 @@ bool Job::on_initialize()
     {
         Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
-        if( !_spooler->_jobs_allowed_for_licence && !dynamic_cast<Internal_job*>(this) ) z::throw_xc( "SCHEDULER-716" );        /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
+        _spooler->settings()->require_role(Settings::role_scheduler, obj_name());
         if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
 
         add_requisite( Requisite_path( spooler()->process_class_subsystem(), _module->_process_class_path ) );
@@ -682,6 +682,7 @@ bool Job::on_initialize()
 
 bool Job::on_load() // Transaction* ta )
 {
+    _spooler->settings()->require_role(Settings::role_scheduler, obj_name());
     // Nach Fehler nicht wiederholbar.
 
     bool result = false;
