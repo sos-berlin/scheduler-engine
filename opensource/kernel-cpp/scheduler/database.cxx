@@ -496,16 +496,10 @@ void Database::open()
     string db_name = _spooler->settings()->_db_name;
     if (db_name.empty()) z::throw_xc("SCHEDULER-205");
 
-    try {
-        string my_db_name = db_name.substr(0,5) == "jdbc "? db_name.substr(0, 5) + "-id=spooler "+ db_name.substr(5)
-            : db_name;
-        set_db_name(my_db_name);
-        open2();
-    }
-    catch (exception& x) {
-        try_reopen_after_error( x, Z_FUNCTION);
-    }
-
+    string my_db_name = db_name.substr(0,5) == "jdbc "? db_name.substr(0, 5) + "-id=spooler "+ db_name.substr(5)
+        : db_name;
+    set_db_name(my_db_name);
+    open2();
     create_tables_when_needed();
     check_database();
 }
