@@ -991,6 +991,9 @@ library Spooler
         HRESULT                 Title                   ( [out,retval] BSTR* );
 
         [id(15), propget]
+        HRESULT                 Path                    ([out, retval] BSTR*);
+
+        [id(16), propget]
         HRESULT                 States                  ( [out, retval] SAFEARRAY(BSTR)* );
     }
 
@@ -1300,7 +1303,7 @@ library Spooler
         HRESULT                 Start_new_file          ();
 
         [id(29)]
-        HRESULT                 Log_file                ( [in] BSTR path );
+        HRESULT                 Log_file                ( [in] BSTR Path );
 
         [id(30),propput]
         HRESULT                 New_filename            ( [in] BSTR Filename );

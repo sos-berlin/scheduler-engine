@@ -586,6 +586,8 @@ struct Ijob_chain : IDispatch
 
     virtual HRESULT     put_Title                   ( BSTR )                                        = 0;
     virtual HRESULT     get_Title                   ( BSTR* )                                       = 0;
+
+    virtual HRESULT     get_Path                    ( BSTR* )                                       = 0;
 };
 
 //----------------------------------------------------------------------------------Order_queue
