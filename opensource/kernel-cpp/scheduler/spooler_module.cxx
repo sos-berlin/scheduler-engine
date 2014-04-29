@@ -1077,7 +1077,6 @@ Async_operation* Module_instance::call__start( const string& method )
 {
     _call_method = method;
     _sync_operation = Z_NEW(Sync_operation);
-    _sync_operation = Z_NEW(Sync_operation);
     return _sync_operation;
 }
 
