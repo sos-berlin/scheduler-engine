@@ -26,7 +26,10 @@ extends AbstractPlugin {
 
   override def activate() {
     try webServer.start()
-    catch { case e: BindException if myJettyConfiguration.portOption.isDefined ⇒ throw new RuntimeException(s"$e (TCP port ${myJettyConfiguration.portOption.get}?})", e) }
+    catch {
+      case e: BindException if myJettyConfiguration.portOption.isDefined ⇒
+        throw new RuntimeException(s"$e (TCP port ${myJettyConfiguration.portOption.get.value}?})", e)
+    }
   }
 
   override def close() {
