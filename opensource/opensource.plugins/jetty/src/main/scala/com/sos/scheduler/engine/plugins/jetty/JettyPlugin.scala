@@ -1,14 +1,16 @@
 package com.sos.scheduler.engine.plugins.jetty
 
 import JettyPlugin._
-import com.sos.scheduler.engine.kernel.plugin.{Plugin, UseGuiceModule, AbstractPlugin}
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.kernel.plugin.Plugin
+import com.sos.scheduler.engine.kernel.plugin.{UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
+import java.net.BindException
 import javax.inject.{Named, Inject}
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.w3c.dom.Element
-import java.net.BindException
 
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @UseGuiceModule(classOf[JettyModule])
@@ -25,10 +27,14 @@ extends AbstractPlugin {
   }
 
   override def activate() {
-    try webServer.start()
+    val portNumbersString = webServer.portNumbers mkString " "
+    if (portNumbersString.nonEmpty) logger.info(s"HTTP port $portNumbersString")
+    try {
+      webServer.start()
+    }
     catch {
-      case e: BindException if myJettyConfiguration.portOption.isDefined ⇒
-        throw new RuntimeException(s"$e (TCP port ${myJettyConfiguration.portOption.get.value}?})", e)
+      case e: BindException if portNumbersString.nonEmpty ⇒
+        throw new RuntimeException(s"$e (TCP port $portNumbersString?})", e)
     }
   }
 
@@ -38,6 +44,8 @@ extends AbstractPlugin {
 }
 
 object JettyPlugin {
+  private val logger = Logger(getClass)
+
   private def newRootContextHandler() = {
     val result = new ServletContextHandler(ServletContextHandler.SESSIONS)
     result.setContextPath("/")
