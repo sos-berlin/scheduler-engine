@@ -546,15 +546,8 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
             break;
         }
 
-        case kind_internal:
-        {
-            ptr<Internal_module_instance> p = Z_NEW( Internal_module_instance( this ) );
-            result = +p;
-            break;
-        }
-
         default:                     
-            z::throw_xc( "SCHEDULER-173" );
+            z::throw_xc( "SCHEDULER-173", as_int(kind));
     }
 
     result->_kind = kind;

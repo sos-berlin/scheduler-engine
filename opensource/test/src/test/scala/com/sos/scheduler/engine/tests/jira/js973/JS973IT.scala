@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
 import JS973IT._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
@@ -12,15 +13,17 @@ import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
 import com.sos.scheduler.engine.kernel.order.{OrderSubsystem, UnmodifiableOrder}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.remoteSchedulerParameterName
 import com.sos.scheduler.engine.main.CppBinary
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import com.sos.scheduler.engine.tests.jira.js973.JS973IT.OrderFinishedWithResultEvent
 import java.io.File
-import org.scalatest.FunSuite
+import java.nio.file.Files
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import scala.concurrent.Await
 
-final class JS973IT extends FunSuite with ScalaSchedulerTest {
+final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 
   private lazy val aSlave = newSlave()
   private lazy val bSlave = newSlave()
@@ -39,27 +42,27 @@ final class JS973IT extends FunSuite with ScalaSchedulerTest {
     slaves foreach { _.close() }
   }
 
-  test(s"Without parameter $remoteSchedulerParameterName runs job in our scheduler") {
+  s"Without parameter $remoteSchedulerParameterName runs job in our scheduler" in {
     testOrderWithRemoteScheduler(shellJobChainPath, None, "**")
   }
 
-  test(s"Empty parameter $remoteSchedulerParameterName runs job in our scheduler") {
+  s"Empty parameter $remoteSchedulerParameterName runs job in our scheduler" in {
     testOrderWithRemoteScheduler(shellJobChainPath, Some(SchedulerAddress("")), "**")
   }
 
-  test(s"Order parameter $remoteSchedulerParameterName selects a remote scheduler") {
+  s"Order parameter $remoteSchedulerParameterName selects a remote scheduler" in {
     testOrderWithRemoteScheduler(shellJobChainPath, aSlave)
   }
 
-  test(s"Task runs on remote_scheduler of process_class") {
+  s"Task runs on remote_scheduler of process_class" in {
     testOrderWithRemoteScheduler(processClassJobChainPath, None, processClassSlave.expectedResult)
   }
 
-  test(s"Order parameter $remoteSchedulerParameterName overrides remote scheduler of process class") {
+  s"Order parameter $remoteSchedulerParameterName overrides remote scheduler of process class" in {
     testOrderWithRemoteScheduler(processClassJobChainPath, aSlave)
   }
 
-  test("Shell with monitor") {
+  "Shell with monitor" in {
     testOrderWithRemoteScheduler(shellWithMonitorJobChainPath, aSlave)
   }
 
@@ -77,12 +80,29 @@ final class JS973IT extends FunSuite with ScalaSchedulerTest {
 //    eventPipe.close()
 //  }
 
-  test(s"Invalid syntax of $remoteSchedulerParameterName keeps order at same job node and stops job") {
+  s"Invalid syntax of $remoteSchedulerParameterName keeps order at same job node and stops job" in {
     testInvalidJobChain(shellJobChainPath, SchedulerAddress(":INVALID-ADDRESS"), expectedErrorCode = "Z-4003")
   }
 
-  test("Not for API jobs") {
+  "Not for API jobs" in {
     testInvalidJobChain(apiJobChainPath, aSlave.extraScheduler.address, expectedErrorCode = "SCHEDULER-484")
+  }
+
+  "File_order_sink_module::create_instance_impl" in {
+    val fileOrdersDir = Files.createTempDirectory("test")
+    val orderFile = fileOrdersDir.toFile / "test.txt"
+    orderFile.write("test")
+    val jobChainPath = JobChainPath("/test-file-order")
+    val orderKey = jobChainPath.orderKey(orderFile.getAbsolutePath)
+    controller.getEventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+      scheduler executeXml
+        <job_chain name={jobChainPath.name}>
+          <file_order_source directory={fileOrdersDir.toString} regex="^test\.txt$"/>
+          <job_chain_node state="100" job="test-a"/>
+          <file_order_sink state="end" remove="yes"/>
+        </job_chain>
+    }
+    Files.delete(fileOrdersDir)
   }
 
   //test("Not in a cluster") {}

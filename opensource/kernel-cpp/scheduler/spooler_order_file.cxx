@@ -204,7 +204,7 @@ struct File_order_sink_module : Internal_module
     }
 
 
-    ptr<Module_instance> create_instance_impl()
+    ptr<Module_instance> create_instance_impl(const Host_and_port& remote_scheduler)
     { 
         ptr<File_order_sink_module_instance> result = Z_NEW( File_order_sink_module_instance( this ) );  
         return +result;

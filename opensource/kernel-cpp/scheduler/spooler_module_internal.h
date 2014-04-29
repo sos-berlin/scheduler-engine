@@ -11,7 +11,7 @@ namespace scheduler {
 struct Internal_module : Module
 {
                                 Internal_module             ( Spooler*, Prefix_log* = NULL );
-    virtual ptr<Module_instance> create_instance_impl       () = 0;
+    virtual ptr<Module_instance> create_instance_impl       (const Host_and_port& remote_scheduler) = 0;
 };
 
 //-------------------------------------------------------------------------Internal_module_instance
@@ -31,7 +31,7 @@ struct Internal_module_instance : Module_instance
     bool                        loaded                      ()                                      { return _loaded; }
     bool                        callable                    ()                                      { return true; }
 
-    virtual bool                spooler_process             ()                                      { return false; }
+    virtual bool                spooler_process             () = 0;
 
     Fill_zero                  _zero_;
     Task*                      _task;
