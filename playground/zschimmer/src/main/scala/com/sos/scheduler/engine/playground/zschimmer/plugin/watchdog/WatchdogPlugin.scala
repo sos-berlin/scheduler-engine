@@ -28,7 +28,7 @@ extends AbstractPlugin {
   private val configuration = Configuration(elem)
   private val thread1 = new Thread1
 
-  override def activate() {
+  override def onActivate() {
     thread1.start()
   }
 

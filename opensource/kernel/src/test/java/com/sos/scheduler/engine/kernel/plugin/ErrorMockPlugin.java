@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.kernel.plugin;
 
 
 public class ErrorMockPlugin extends AbstractPlugin {
-    @Override public void prepare() {
+    @Override public void onPrepare() {
         throw new RuntimeException("prepare");
     }
 
-    @Override public void activate() {
+    @Override public void onActivate() {
         throw new RuntimeException("activate");
     }
 

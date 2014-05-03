@@ -46,6 +46,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
     try {
       if (pluginInstance.isPrepared) throw new IllegalStateException(s"$this is already prepared")
       _pluginInstance.prepare()
+      if (!_pluginInstance.isPrepared) throw new IllegalStateException(s"$this: prepare() did not result in isPrepared")
     }
     catch {
       case x: Exception ⇒ throw new RuntimeException(s"$this cannot be prepared: $x", x)
@@ -64,6 +65,7 @@ class PluginAdapter(configuration: PluginConfiguration) {
     try {
       if (pluginInstance.isActive) throw new IllegalStateException(s"$this is already active")
       pluginInstance.activate()
+      if (!_pluginInstance.isActive) throw new IllegalStateException(s"$this: prepare() did not result in isPrepared")
     }
     catch {
       case x: Exception => throw new RuntimeException(s"$this cannot be activated: $x", x)

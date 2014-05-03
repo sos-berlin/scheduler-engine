@@ -25,7 +25,7 @@ extends AbstractPlugin {
     c.copy(handlers = newRootContextHandler() +: c.handlers)
   }
 
-  override def activate() {
+  override def onActivate() {
     val portNumbersString = webServer.portNumbers mkString " "
     if (portNumbersString.nonEmpty) logger.info(s"HTTP port $portNumbersString")
     try {

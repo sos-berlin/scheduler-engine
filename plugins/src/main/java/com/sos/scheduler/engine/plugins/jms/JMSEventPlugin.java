@@ -76,8 +76,7 @@ public class JMSEventPlugin extends AbstractPlugin implements EventHandlerAnnota
     }
 
 	@Override
-	public void activate() {
-		super.activate();
+	public void onActivate() {
 		connector.start();
 	}
 

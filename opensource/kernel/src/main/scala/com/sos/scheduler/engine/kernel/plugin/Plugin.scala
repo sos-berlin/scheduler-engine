@@ -8,14 +8,20 @@ trait Plugin {
   private var _isPrepared = false
   private var _isActive = false
 
-  def prepare() {
+  final def prepare() {
+    onPrepare()
     _isPrepared = true
   }
 
-  def activate() {
+  def onPrepare() {}
+
+  final def activate() {
     if (!_isPrepared)  throw new IllegalStateException
+    onActivate()
     _isActive = true
   }
+
+  def onActivate() {}
 
   def close() {
     _isActive = false

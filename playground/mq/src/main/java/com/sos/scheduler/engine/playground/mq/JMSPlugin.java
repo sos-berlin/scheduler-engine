@@ -24,7 +24,7 @@ public class JMSPlugin extends AbstractPlugin implements EventHandlerAnnotated {
         log.info(JMSPlugin.class.getName() + ": providerUrl=" + providerUrl);
     }
 
-    @Override public final void activate() {
+    @Override public final void onActivate() {
         connector.start();
     }
 
