@@ -2,8 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty
 
 import JettyPlugin._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.kernel.plugin.Plugin
-import com.sos.scheduler.engine.kernel.plugin.{UseGuiceModule, AbstractPlugin}
+import com.sos.scheduler.engine.kernel.plugin.{Plugins, UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
@@ -15,7 +14,7 @@ import org.w3c.dom.Element
 /** JS-795: Einbau von Jetty in den JobScheduler. */
 @UseGuiceModule(classOf[JettyModule])
 final class JettyPlugin @Inject private(
-    @Named(Plugin.configurationXMLName) pluginElement: Element,
+    @Named(Plugins.configurationXMLName) pluginElement: Element,
     schedulerConfiguration: SchedulerConfiguration)
 extends AbstractPlugin {
 
