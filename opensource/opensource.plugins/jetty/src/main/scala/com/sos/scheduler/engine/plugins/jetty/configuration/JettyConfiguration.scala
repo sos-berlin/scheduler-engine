@@ -7,6 +7,7 @@ import java.io.File
 import java.net.URL
 import org.eclipse.jetty.security.LoginService
 import org.eclipse.jetty.server.Handler
+import org.eclipse.jetty.servlet.ServletContextHandler
 import scala.collection.immutable
 
 final case class JettyConfiguration(
@@ -16,7 +17,9 @@ final case class JettyConfiguration(
   jettyXMLURLOption: Option[URL] = None,
   accessLogFileOption: Option[File] = None,
   loginServiceOption: Option[LoginService] = None,
-  handlers: immutable.Seq[Handler] = Nil
+  handlers: immutable.Seq[Handler] = Nil,
+  servletContextHandlerModifiers: immutable.Seq[ServletContextHandler ⇒ Unit] = Nil,
+  gzip: Boolean = false   // GzipFilter funktioniert nicht mit Spray (wegen async?)
 )
 
 object JettyConfiguration {

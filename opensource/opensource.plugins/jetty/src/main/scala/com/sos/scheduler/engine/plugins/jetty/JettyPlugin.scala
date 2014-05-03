@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.jetty
 
 import JettyPlugin._
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.kernel.plugin.{Plugins, UseGuiceModule, AbstractPlugin}
+import com.sos.scheduler.engine.kernel.plugin.{ExtensionRegister, Plugins, UseGuiceModule, AbstractPlugin}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.plugins.jetty.configuration.SchedulerConfigurationAdapter
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JettyModule
@@ -16,16 +16,13 @@ import org.w3c.dom.Element
 final class JettyPlugin @Inject private(
     @Named(Plugins.configurationXMLName) pluginElement: Element,
     schedulerConfiguration: SchedulerConfiguration)
-extends AbstractPlugin {
+extends AbstractPlugin
+with ExtensionRegister[JettyPluginExtension] {
 
-  private val webServer = new WebServer(myJettyConfiguration)
-
-  private def myJettyConfiguration = {
-    val c = SchedulerConfigurationAdapter.jettyConfiguration(pluginElement, schedulerConfiguration)
-    c.copy(handlers = newRootContextHandler() +: c.handlers)
-  }
+  private var webServer: WebServer = null
 
   override def onActivate() {
+    webServer = new WebServer(myJettyConfiguration)
     val portNumbersString = webServer.portNumbers mkString " "
     if (portNumbersString.nonEmpty) logger.info(s"HTTP port $portNumbersString")
     try {
@@ -37,8 +34,16 @@ extends AbstractPlugin {
     }
   }
 
+  private def myJettyConfiguration = {
+    val conf = SchedulerConfigurationAdapter.jettyConfiguration(pluginElement, schedulerConfiguration)
+    conf.copy(
+      handlers = newRootContextHandler() +: conf.handlers,
+      servletContextHandlerModifiers = extensions map { _.modifyServletContextHandler })
+  }
+
   override def close() {
-    webServer.close()
+    if (webServer != null)
+      webServer.close()
   }
 }
 
