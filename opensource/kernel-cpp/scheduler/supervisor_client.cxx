@@ -87,8 +87,11 @@ struct Abstract_connector : Async_operation, Scheduler_object
         xml_writer->set_attribute("scheduler_id", _spooler->_spooler_id);
         xml_writer->set_attribute_optional("cluster_member_id", _spooler->cluster_member_id());
 
-        if (_spooler->_udp_port)
+        if (_spooler->_udp_port) {
             xml_writer->set_attribute("udp_port", _spooler->_udp_port);
+            if (!_spooler->_ip_address.is_empty())
+                xml_writer->set_attribute("ip", _spooler->_ip_address.ip_string());
+        }
 
         xml_writer->set_attribute("version", _spooler->_version);
         xml_writer->set_attribute("interval", _polling_interval.seconds());
