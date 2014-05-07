@@ -40,7 +40,6 @@ import org.joda.time.DateTimeZone.UTC
 import org.joda.time.Instant.now
 import scala.collection.JavaConversions._
 import scala.collection.breakOut
-import scala.sys.error
 import scala.util.control.NonFatal
 
 @ForCpp
@@ -78,18 +77,18 @@ with HasInjector {
 
   if (controllerBridge eq EmptySchedulerControllerBridge.singleton) { // Wenn wir ein controllerBridge haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
     threadLock()
-    closer {threadUnlock()} //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
+    closer { threadUnlock() } //TODO Sperre wird in onClose() zu früh freigegeben, der Scheduler läuft ja noch. Lösung: Start über Java mit CppScheduler.run()
   }
 
   @ForCpp
   private def initialize() {
     val eventSubscription = {
       val subsystemCompanions = injector.apply[FileBasedSubsystem.Register].companions
-      val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemCompanions.map {o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass)}(breakOut)
-      EventSubscription[FileBasedEvent] {e => for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e)}
+      val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemCompanions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
+      EventSubscription[FileBasedEvent] { e ⇒ for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) }
     }
     eventBus.registerHot(eventSubscription)
-    closer {eventBus.unregisterHot(eventSubscription)}
+    closer { eventBus.unregisterHot(eventSubscription) }
   }
 
   def onCppProxyInvalidated() {}
@@ -101,8 +100,8 @@ with HasInjector {
       eventBus.publish(new SchedulerCloseEvent)
       eventBus.dispatchEvents()
       schedulerThreadCallQueue.close()
-      try databaseSubsystem.close() catch { case NonFatal(x) => prefixLog.error(s"databaseSubsystem.close(): $x") }
-      try pluginSubsystem.close() catch { case NonFatal(x)=> prefixLog.error(s"pluginSubsystem.close(): $x") }
+      try databaseSubsystem.close() catch { case NonFatal(x) ⇒ prefixLog.error(s"databaseSubsystem.close(): $x") }
+      try pluginSubsystem.close() catch { case NonFatal(x) ⇒ prefixLog.error(s"pluginSubsystem.close(): $x") }
     }
     eventBus.dispatchEvents()
     disposableCppProxyRegister.tryDisposeAll()
@@ -134,7 +133,7 @@ with HasInjector {
   @ForCpp private def javaExecuteXml(xml: String): String = {
     try commandSubsystem.executeXml(xml)
     catch {
-      case x: UnknownCommandException =>
+      case x: UnknownCommandException ⇒
         prefixLog.warn(x.toString)
         "UNKNOWN_COMMAND"   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
     }
@@ -170,7 +169,7 @@ with HasInjector {
     if (!isClosed) {
       try cppProxy.cmd_terminate()
       catch {
-        case x: CppProxyInvalidatedException =>
+        case x: CppProxyInvalidatedException ⇒
           logger.debug("Scheduler.terminate() ignored because C++ object has already been destroyed")
       }
     }
@@ -189,7 +188,7 @@ with HasInjector {
 
   /** execute_xml_string() der C++-Klasse Spooler */
   def uncheckedExecuteXml(xml: String): String = {
-    if (closed) error("Scheduler is closed")
+    if (closed) sys.error("Scheduler is closed")
     inSchedulerThread { cppProxy.execute_xml_string(xml) }
     .stripSuffix("\0")  // Von C++ angehängtes '\0' an, siehe Command_response::end_standard_response()
   }
@@ -242,13 +241,13 @@ object Scheduler {
   @ForCpp
   def buildVersion: String =
     try mavenProperties.buildVersion
-    catch { case e: NoSuchElementException => "" }
+    catch { case e: NoSuchElementException ⇒ "" }
 
   @ForCpp
   def versionCommitHash: String =
     if (mavenProperties.version endsWith "-SNAPSHOT")
       try mavenProperties.versionCommitHash
-      catch { case e: NoSuchElementException => "" }
+      catch { case e: NoSuchElementException ⇒ "" }
     else
       ""
 }
