@@ -31,7 +31,7 @@ static const char               std_service_name[]          = "sos_scheduler";  
 static const char               std_service_display_name[]  = "SOS Scheduler";    // Gezeigter Name
 static const int                terminate_timeout           = 30;
 static const int                stop_timeout                = terminate_timeout + 5;        // Zeit lassen, um Datenbank zu schlieﬂen, dann abort_now() per Thread
-static const int                pending_timeout             = 60;
+static const int                pending_timeout             = 15;
 
 static Spooler* static_service_spooler = NULL;
 
