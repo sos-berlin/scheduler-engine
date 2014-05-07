@@ -307,13 +307,16 @@ ptr<Command_response> Supervisor::execute_configuration_fetch(const xml::Element
     string scheduler_id = element.getAttribute("scheduler_id");
     string cluster_member_id = element.getAttribute("cluster_member_id");
     int udp_port = element.int_getAttribute("udp_port", 0);
-    string id = S() << (!cluster_member_id.empty() ? cluster_member_id : scheduler_id) << "," << client_host.name_or_ip() << ":" << udp_port;
+    Host host = client_host;
+    if (element.hasAttribute("ip")) 
+        host = element.getAttribute("ip");
+    string id = S() << (!cluster_member_id.empty() ? cluster_member_id : scheduler_id) << "," << host.ip_string() << ":" << udp_port;
     ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null(id);
     if (!remote_scheduler) {
         remote_scheduler = Z_NEW(Remote_scheduler(this, id));
         _remote_scheduler_register.add(remote_scheduler);
     }
-    remote_scheduler->set_host_and_udp(client_host, udp_port);
+    remote_scheduler->set_host_and_udp(host, udp_port);
     remote_scheduler->set_async_manager(_spooler->_connection_manager);
     remote_scheduler->update(element);
     remote_scheduler->set_alarm_clock();
@@ -332,7 +335,6 @@ void Remote_scheduler::update(const xml::Element_ptr& element) {
     _active_since = ::time(NULL);
     _connected_at = _connected_at;
     _error = NULL;
-    _udp_port = element.int_getAttribute("udp_port", 0);
     _deactivate_at = _active_since + element.int_getAttribute("interval", default_deactivation_timeout) * 2;   // Wenn nach doppelter Polling-Zeit der Client sich nicht wieder gemeldet hat, deaktivieren wir ihn.
 }
 
