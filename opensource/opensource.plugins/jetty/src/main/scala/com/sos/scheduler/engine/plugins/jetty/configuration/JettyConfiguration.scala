@@ -12,7 +12,7 @@ import scala.collection.immutable
 
 final case class JettyConfiguration(
   portOption: Option[TcpPortNumber] = None,
-  contextPath: String = "",
+  contextPath: String = Config.contextPath,
   webAppContextConfigurationOption: Option[WebAppContextConfiguration] = None,
   jettyXMLURLOption: Option[URL] = None,
   accessLogFileOption: Option[File] = None,

@@ -12,7 +12,6 @@ object SchedulerConfigurationAdapter {
       Some(new File(schedulerConfiguration.mainConfigurationDirectory, filename)) filter { _.exists }
 
     JettyConfiguration(
-      contextPath = Config.contextPath,
       portOption = pluginElement.getAttribute("port") match {
         case "TEST" => Some(TcpPortNumber.random())
         case _ => xmlAttributeIntOption(pluginElement, "port") map TcpPortNumber.apply
