@@ -1,25 +1,24 @@
 package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.google.inject.{AbstractModule, Guice}
-import com.sos.scheduler.engine.common.scalautil.ModifiedBy.modifiedBy
+import com.sos.scheduler.engine.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystem
-import com.sos.scheduler.engine.plugins.jetty.configuration.Config
 import com.sos.scheduler.engine.plugins.jetty.configuration.injection.JerseyModule
-import com.sos.scheduler.engine.plugins.jetty.tests.commons.WebServiceTester
-import com.sun.jersey.api.client.GenericType
+import com.sos.scheduler.engine.plugins.jetty.test.WebServiceTester
 import javax.ws.rs.core.MediaType._
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.scalatest.{FreeSpec, BeforeAndAfterAll}
+import spray.json._
 
 @RunWith(classOf[JUnitRunner])
-final class JobsServiceTest extends FunSuite with BeforeAndAfterAll with MockitoSugar {
+final class JobsServiceTest extends FreeSpec with BeforeAndAfterAll with MockitoSugar {
 
-  private val mockedJobSubsystem = mock[JobSubsystem] modifiedBy { o =>
+  private val mockedJobSubsystem = mock[JobSubsystem] sideEffect { o ⇒
     when(o.visiblePaths) thenReturn List(JobPath("/a"), JobPath("/b/c"))
   }
 
@@ -32,7 +31,6 @@ final class JobsServiceTest extends FunSuite with BeforeAndAfterAll with Mockito
       }
     })
   private lazy val tester = new WebServiceTester(injector)
-  private lazy val jobsResource = tester.webResource.path(Config.enginePrefixPath).path("jobs")
 
   override def beforeAll() {
     tester.start()
@@ -42,7 +40,8 @@ final class JobsServiceTest extends FunSuite with BeforeAndAfterAll with Mockito
     tester.close()
   }
 
-  test("Read job list") {
-    jobsResource.accept(APPLICATION_JSON_TYPE).get(new GenericType[Set[String]]() {}) shouldEqual Set("/a", "/b/c")
+  "Read job list" in {
+    tester.webResource.path("/jobscheduler/engine/jobs").accept(APPLICATION_JSON_TYPE).get(classOf[String]).parseJson shouldEqual
+      """[ "/a", "/b/c" ]""".parseJson
   }
 }

@@ -91,7 +91,6 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -142,9 +141,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <groupId>io.spray</groupId>
+            <artifactId>spray-json_${scala.binaryVersion}</artifactId>
         </dependency>
     </dependencies>
 </project>

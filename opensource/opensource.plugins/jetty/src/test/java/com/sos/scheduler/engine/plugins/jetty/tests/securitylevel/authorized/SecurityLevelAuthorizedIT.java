@@ -17,8 +17,7 @@ import java.net.URL;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
-import static com.sos.scheduler.engine.plugins.jetty.configuration.Config.cppPrefixPath;
-import static com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.contextUri;
+import static com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests.contextUri;
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,7 +48,7 @@ public class SecurityLevelAuthorizedIT extends SchedulerTest {
     public void testUser(String userName, ClientResponse.Status expectedStatus, String expectedResult) throws Exception {
         Client webClient = Client.create();
         webClient.addFilter(new HTTPBasicAuthFilter(userName, generalPassword));
-        WebResource webResource = webClient.resource(new URI(contextUri(scheduler().injector()) + cppPrefixPath() +"/command"));
+        WebResource webResource = webClient.resource(new URI(contextUri(scheduler().injector()) + "/jobscheduler/engine-cpp/command"));
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
         assertThat(response.getClientResponseStatus(), equalTo(expectedStatus));
         assertThat(response.getEntity(String.class), containsString(expectedResult));

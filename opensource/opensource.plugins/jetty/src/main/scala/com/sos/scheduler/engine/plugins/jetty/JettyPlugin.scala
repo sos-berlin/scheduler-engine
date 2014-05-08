@@ -45,6 +45,11 @@ with ExtensionRegister[JettyPluginExtension] {
     if (webServer != null)
       webServer.close()
   }
+
+  def portNumber: Int = {
+    if (webServer == null) throw new IllegalStateException()
+    webServer.portNumbers.headOption getOrElse sys.error("JettyPlugin has no TCP port configured")
+  }
 }
 
 object JettyPlugin {

@@ -9,8 +9,7 @@ import org.junit.Test;
 
 import java.net.URI;
 
-import static com.sos.scheduler.engine.plugins.jetty.configuration.Config.cppPrefixPath;
-import static com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests.contextUri;
+import static com.sos.scheduler.engine.plugins.jetty.test.JettyPluginTests.contextUri;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -27,7 +26,7 @@ public final class SecurityLevelAnonymousIT extends SchedulerTest {
 
     private void testUser(ClientResponse.Status expectedStatus, String expectedResult) throws Exception {
         Client webClient = Client.create();
-        WebResource webResource = webClient.resource(new URI(contextUri(scheduler().injector()) + cppPrefixPath() +"/command"));
+        WebResource webResource = webClient.resource(new URI(contextUri(scheduler().injector()) + "/jobscheduler/engine-cpp/command"));
         ClientResponse response = webResource.post(ClientResponse.class, xmlCommand);
         assertThat(response.getClientResponseStatus(), equalTo(expectedStatus));
         assertThat(response.getEntity(String.class), containsString(expectedResult));

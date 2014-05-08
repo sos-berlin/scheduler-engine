@@ -1,47 +1,46 @@
-package com.sos.scheduler.engine.plugins.jetty.tests.commons
+package com.sos.scheduler.engine.plugins.jetty.test
 
-import com.google.inject.Injector
+import com.google.inject.{ConfigurationException, Injector}
 import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.plugins.jetty.WebServer
-import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
+import com.sos.scheduler.engine.kernel.plugin.PluginSubsystem
+import com.sos.scheduler.engine.plugins.jetty.JettyPlugin
 import com.sos.scheduler.engine.plugins.jetty.configuration.ObjectMapperJacksonJsonProvider
+import com.sun.jersey.api.client.Client
 import com.sun.jersey.api.client.config.DefaultClientConfig
 import com.sun.jersey.api.client.filter.{ClientFilter, HTTPBasicAuthFilter}
-import com.sun.jersey.api.client.{Client, WebResource}
 import java.net.URI
 import org.joda.time.Duration
+import scala.math.min
+import scala.util.control.NonFatal
 
 object JettyPluginTests {
 
   private val defaultTimeout = 60.s
   val aJobChainPath = JobChainPath("/a")
+  val aJobPath = JobPath("/a")
   val orderJobPath = JobPath("/order")
 
-  def javaResource(injector: Injector) =
-    newAuthentifyingClient().resource(javaContextUri(injector))
-
-  private def javaContextUri(injector: Injector) =
-    new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath + enginePrefixPath)
-
   def contextUri(injector: Injector) =
-    new URI("http://localhost:"+ jettyPortNumber(injector) + contextPath)
+    new URI("http://127.0.0.1:"+ jettyPortNumber(injector))
 
   def jettyPortNumber(injector: Injector) =
-    WebServer.tcpPortNumber
-    //Macht abhängig vom Scheduler: injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin]).tcpPortNumber
+    jettyPlugin(injector).portNumber
 
-  def newAuthResource(uri: URI): WebResource = {
-    val client = newAuthentifyingClient(defaultTimeout)
-    client.resource(uri)
-  }
+  private def jettyPlugin(injector: Injector): JettyPlugin =
+    try injector.getInstance(classOf[JettyPlugin])   // Scheitert, wenn über Scheduler und PluginSubsystem gestartet, weil JettyPlugin in einem Child Injector steckt.
+    catch {
+      case e: ConfigurationException ⇒
+        try injector.getInstance(classOf[PluginSubsystem]).pluginByClass(classOf[JettyPlugin])  // Nur, wenn Test mit Scheduler gestartet ist
+        catch { case NonFatal(ee) ⇒ e.addSuppressed(ee); throw e }
+    }
 
   def newAuthentifyingClient(timeout: Duration = defaultTimeout, filters: Iterable[ClientFilter] = Iterable()) = {
     val config = new DefaultClientConfig sideEffect { _.getSingletons.add(ObjectMapperJacksonJsonProvider) }
-    Client.create(config) sideEffect { client =>
-      client.setReadTimeout(timeout.getMillis.toInt)
+    Client.create(config) sideEffect { client ⇒
+      client.setReadTimeout(min(timeout.getMillis.toInt, Int.MaxValue))
       client.addFilter(new HTTPBasicAuthFilter("testName", "testPassword"))
       for (f <- filters) client.addFilter(f)
     }

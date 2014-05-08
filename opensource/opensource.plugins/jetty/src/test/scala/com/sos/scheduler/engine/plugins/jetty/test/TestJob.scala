@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.tests.commons
+package com.sos.scheduler.engine.plugins.jetty.test
 
 import sos.spooler.Job_impl
 
