@@ -44,6 +44,7 @@ object JettyServerBuilder {
 
     def newWebAppContext(c: WebAppContextConfiguration) = {
       val webAppContext = new WebAppContext
+      webAppContext.setThrowUnavailableOnStartupException(true)
       webAppContext.setResourceBase(c.resourceBaseURL.toExternalForm)
       for (f <- c.webXMLFileOption) webAppContext.setDescriptor(f.getPath)
       new WebXmlConfiguration().configure(webAppContext)
