@@ -41,7 +41,7 @@ extends Sister {
     val inputFactory = XMLInputFactory.newInstance()
     val reader = inputFactory.createXMLEventReader(new ByteArrayInputStream(bytes))
     reader.nextEvent().asInstanceOf[StartDocument]
-    configuration = new JobConfigurationXMLParser(timeZone, reader).parse()
+    configuration = JobConfigurationXMLParser.parseWithReader(timeZone)(reader)
   }
 
   @ForCpp def onInitialize(): Boolean = {
