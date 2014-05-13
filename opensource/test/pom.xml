@@ -47,13 +47,13 @@
                     <quiet />
                 </configuration>
                 <executions>
-                    <execution>
+                    <!--execution>
                         <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
                             <goal>test-jar</goal>
                         </goals>
-                    </execution>
+                    </execution-->
                 </executions>
             </plugin>
             <!-- es ist nicht klar, wie dieses plugin genutzt werden kann
