@@ -23,8 +23,6 @@ final case class JettyConfiguration(
 )
 
 object JettyConfiguration {
-  private val testPortRange = 40000 until 50000
-
   final case class WebAppContextConfiguration(
     resourceBaseURL: URL,
     webXMLFileOption: Option[File] = None)
@@ -40,7 +38,7 @@ object JettyConfiguration {
     }
 
     def random() = new TcpPortNumber {
-      lazy val value = findRandomFreeTcpPort(testPortRange)
+      lazy val value = findRandomFreeTcpPort()
     }
   }
 }
