@@ -1,12 +1,13 @@
-package com.sos.scheduler.engine.plugins.jetty.services
+package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 import javax.ws.rs._
 import javax.ws.rs.core._
 
 @Path("")
-class RootService @Inject()(schedulerInstanceId: SchedulerInstanceId) {
+@Singleton
+final class RootService @Inject private(schedulerInstanceId: SchedulerInstanceId) {
   private lazy val tag = new EntityTag(schedulerInstanceId.asString)
 
   @GET

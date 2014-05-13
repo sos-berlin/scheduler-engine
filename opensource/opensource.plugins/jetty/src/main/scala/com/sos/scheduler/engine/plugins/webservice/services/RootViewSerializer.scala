@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jetty.services
+package com.sos.scheduler.engine.plugins.webservice.services
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.{SerializerProvider, JsonSerializer}
