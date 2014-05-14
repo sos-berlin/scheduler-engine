@@ -5,12 +5,15 @@ import com.google.common.io.ByteStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.io.Closeables.closeQuietly;
 import static com.google.common.io.Files.createParentDirs;
 import static com.google.common.io.Files.createTempDir;
 import static com.sos.scheduler.engine.common.system.Files.DirectoryHandling.dontRemoveDirectory;
@@ -88,14 +91,14 @@ public final class Files {
     }
 
     private static final Function<File,Void> removeFileFunction = new Function<File,Void>() {
-        @Override @Nullable public Void apply(@Nullable File f) {
+        @Override @Nullable public Void apply(File f) {
             removeFile(f);
             return null;
         }
     };
 
     private static final Function<File,Void> tryRemoveFileFunction = new Function<File,Void>() {
-        @Override @Nullable public Void apply(@Nullable File f) {
+        @Override @Nullable public Void apply(File f) {
             try {
                 removeFile(f);
             } catch (Exception x) {
@@ -124,15 +127,10 @@ public final class Files {
     }
 
     public static void copyURLToFile(URL source, File destination) {
-        try {
-            InputStream in = source.openStream();
-            OutputStream out = new FileOutputStream(destination);
-            try {
+        try (InputStream in = source.openStream()) {
+            try (OutputStream out = new FileOutputStream(destination)) {
                 ByteStreams.copy(in, out);
                 out.close();
-            } finally {
-                closeQuietly(out);
-                closeQuietly(in);
             }
         } catch (IOException x) {
             throw new RuntimeException("copyURLToFile(): "+x+", from="+source+" to="+destination, x);
