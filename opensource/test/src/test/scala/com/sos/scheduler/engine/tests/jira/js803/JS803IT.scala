@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
+import JS803IT._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.eventbus.{HotEventHandler, EventHandler}
@@ -22,8 +23,6 @@ import scala.xml.Utility.trim
  * @see com.sos.scheduler.engine.tests.jira.js653.JS653IT */
 final class JS803IT extends SchedulerTest {
 
-  import JS803IT._
-
   private val expectedOrders = new mutable.HashSet[OrderId]
   private val terminatedOrders = new mutable.HashSet[OrderId]
   private var startTime: DateTime = null
@@ -31,9 +30,9 @@ final class JS803IT extends SchedulerTest {
   @Test def test() {
     controller.activateScheduler()
     startTime = secondNow() plusSeconds orderDelay
-    addOrder(OrderKey(jobChainPath, OrderId("dailyOrder")), addDailyOrderElem)
-    addOrder(OrderKey(jobChainPath, OrderId("singleOrder")), addSingleOrderElem)
-    addOrder(OrderKey(jobChainPath, OrderId("singleRuntimeOrder")), addSingleRuntimeOrderElem)
+    addOrder(jobChainPath orderKey "dailyOrder", addDailyOrderElem)
+    addOrder(jobChainPath orderKey "singleOrder", addSingleOrderElem)
+    addOrder(jobChainPath orderKey "singleRuntimeOrder", addSingleRuntimeOrderElem)
     try controller.waitForTermination(shortTimeout)
     finally (expectedOrders diff terminatedOrders).toList match {
       case List() =>

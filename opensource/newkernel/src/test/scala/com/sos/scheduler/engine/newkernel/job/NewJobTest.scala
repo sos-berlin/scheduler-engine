@@ -53,5 +53,5 @@ class NewJobTest extends FunSuite with EventHandlerAnnotated {
 
 private object NewJobTest {
   private val logger = Logger(getClass)
-  private val jobPath = JobPath.of("/a")
+  private val jobPath = JobPath("/a")
 }

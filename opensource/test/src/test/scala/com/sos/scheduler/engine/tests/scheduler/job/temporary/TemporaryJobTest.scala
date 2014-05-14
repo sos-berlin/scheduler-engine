@@ -16,7 +16,7 @@ import scala.util.Try
 final class TemporaryJobTest extends FunSuite with ScalaSchedulerTest {
   test("Temporary job") {
     val eventPipe = controller.newEventPipe()
-    val jobPath = JobPath.of("/TEMP")
+    val jobPath = JobPath("/TEMP")
     scheduler executeXml <job name={jobPath.name} temporary="yes"><script language="shell">exit 0</script><run_time once="yes"/></job>
     eventPipe.nextWithCondition[TaskEndedEvent]( _.jobPath == jobPath )
     eventPipe.nextKeyed[FileBasedRemovedEvent](jobPath)

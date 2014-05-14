@@ -51,5 +51,5 @@ final class NewJobIT extends FunSuite with ScalaSchedulerTest {
 }
 
 object NewJobIT {
-  private val jobPath = JobPath.of("/test-a")
+  private val jobPath = JobPath("/test-a")
 }

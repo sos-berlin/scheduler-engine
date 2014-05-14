@@ -19,5 +19,5 @@ final class TaskStdoutTextTest extends FunSuite with ScalaSchedulerTest {
 }
 
 private object TaskStdoutTextTest {
-  private val jobPath = JobPath.of("/test")
+  private val jobPath = JobPath("/test")
 }

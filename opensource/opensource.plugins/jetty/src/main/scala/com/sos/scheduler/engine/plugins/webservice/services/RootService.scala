@@ -8,7 +8,7 @@ import javax.ws.rs.core._
 @Path("")
 @Singleton
 final class RootService @Inject private(schedulerInstanceId: SchedulerInstanceId) {
-  private lazy val tag = new EntityTag(schedulerInstanceId.asString)
+  private lazy val tag = new EntityTag(schedulerInstanceId.string)
 
   @GET
   @Produces(Array(MediaType.APPLICATION_JSON))

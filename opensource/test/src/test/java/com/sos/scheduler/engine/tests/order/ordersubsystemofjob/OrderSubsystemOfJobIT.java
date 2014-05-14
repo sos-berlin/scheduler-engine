@@ -24,10 +24,10 @@ public final class OrderSubsystemOfJobIT extends SchedulerTest {
         JobSubsystem jobSubsystem = instance(JobSubsystem.class);
         OrderSubsystem orderSubsystem = instance(OrderSubsystem.class);
 
-        Job aJob = jobSubsystem.job(JobPath.of("/A"));
-        Job bJob = jobSubsystem.job(JobPath.of("/B"));
-        JobChain aJobchain = orderSubsystem.jobChain(JobChainPath.of("/a"));
-        JobChain abJobchain = orderSubsystem.jobChain(JobChainPath.of("/ab"));
+        Job aJob = jobSubsystem.job(new JobPath("/A"));
+        Job bJob = jobSubsystem.job(new JobPath("/B"));
+        JobChain aJobchain = orderSubsystem.jobChain(new JobChainPath("/a"));
+        JobChain abJobchain = orderSubsystem.jobChain(new JobChainPath("/ab"));
 
         Iterable<JobChain> a = asJavaIterable(orderSubsystem.jobChainsOfJob(aJob));
         Iterable<JobChain> ab = asJavaIterable(orderSubsystem.jobChainsOfJob(bJob));

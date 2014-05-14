@@ -26,9 +26,9 @@ import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
 
 public class SimpleTest extends SchedulerTest {
-    private static final JobPath jobPath = JobPath.of("/job1");
+    private static final JobPath jobPath = new JobPath("/job1");
 	private static final Logger logger = LoggerFactory.getLogger(SimpleTest.class);
-    private static final OrderKey orderKey = OrderKey.of("/jobchain1", "jobchain1");
+    private static final OrderKey orderKey = OrderKey.apply("/jobchain1", "jobchain1");
 	
 	private final CommandBuilder util = new CommandBuilder();
 

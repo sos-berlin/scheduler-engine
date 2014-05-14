@@ -166,7 +166,7 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 
   @HotEventHandler
   def handle(e: OrderFinishedEvent, o: UnmodifiableOrder) {
-    controller.getEventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.getParameters(resultVariableName)))
+    controller.getEventBus.publishCold(OrderFinishedWithResultEvent(e.orderKey, o.parameters(resultVariableName)))
   }
 
   private val orderIdGenerator = (1 to Int.MaxValue).iterator map { i => new OrderId(i.toString) }
@@ -176,10 +176,10 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 }
 
 private object JS973IT {
-  private val shellJobChainPath = JobChainPath.of("/test-shell")
-  private val shellWithMonitorJobChainPath = JobChainPath.of("/test-shell-with-monitor")
-  private val apiJobChainPath = JobChainPath.of("/test-api")
-  private val processClassJobChainPath = JobChainPath.of("/test-processClass")
+  private val shellJobChainPath = JobChainPath("/test-shell")
+  private val shellWithMonitorJobChainPath = JobChainPath("/test-shell-with-monitor")
+  private val apiJobChainPath = JobChainPath("/test-api")
+  private val processClassJobChainPath = JobChainPath("/test-processClass")
   private val testVariableName = "TEST_WHICH_SCHEDULER"
   private val resultVariableName = "result"
   private val extraSchedulerTimeout = 60.s

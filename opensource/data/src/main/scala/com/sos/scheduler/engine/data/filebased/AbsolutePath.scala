@@ -4,14 +4,6 @@ import com.sos.scheduler.engine.data.base.IsString
 
 trait AbsolutePath extends IsString {
 
-  @Deprecated
-  final def asString =
-    string
-
-  @Deprecated
-  final def getName =
-    name
-
   final def name: String = {
     val s = string
     s.substring(s.lastIndexOf('/') + 1)

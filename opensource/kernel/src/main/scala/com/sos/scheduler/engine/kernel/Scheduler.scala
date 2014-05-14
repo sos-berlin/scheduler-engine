@@ -199,7 +199,7 @@ with HasInjector {
 
   //    /** @param text Sollte auf \n enden */
   //    public void writeToSchedulerLog(LogCategory category, String text) {
-  //        cppProxy.write_to_scheduler_log(category.asString(), text);
+  //        cppProxy.write_to_scheduler_log(category.string(), text);
   //    }
 
   def callCppAndDoNothing() {

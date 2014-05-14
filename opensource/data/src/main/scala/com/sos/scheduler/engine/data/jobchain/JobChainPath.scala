@@ -20,8 +20,7 @@ extends TypedPath {
 
 
 object JobChainPath extends IsString.HasJsonFormat[JobChainPath] {
-  @JsonCreator def of(absolutePath: String): JobChainPath =
-    new JobChainPath(absolutePath)
+  @JsonCreator def valueOf(absolutePath: String) = new JobChainPath(absolutePath)
 
   def makeAbsolute(path: String) =
     new JobChainPath(AbsolutePath.makeAbsolute(path))
