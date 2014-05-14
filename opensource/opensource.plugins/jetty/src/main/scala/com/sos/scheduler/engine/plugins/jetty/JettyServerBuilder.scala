@@ -13,6 +13,7 @@ import org.eclipse.jetty.servlets.GzipFilter
 import org.eclipse.jetty.util.security.Constraint
 import org.eclipse.jetty.webapp.{WebXmlConfiguration, WebAppContext}
 import org.eclipse.jetty.xml.XmlConfiguration
+import scala.language.reflectiveCalls
 
 object JettyServerBuilder {
   def newJettyServer(config: JettyConfiguration) = {

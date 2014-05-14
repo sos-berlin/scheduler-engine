@@ -10,13 +10,13 @@ final class SchedulerThreadCallQueue(val delegate: PoppableCallQueue, spoolerC: 
     delegate.close()
   }
 
-  def add(o: TimedCall[_]) = {
+  def add[A](o: TimedCall[A]) = {
     delegate.add(o)
     try spoolerC.signal()
     catch { case e: CppProxyInvalidatedException => }   // Das passiert, wenn der TimedCall den Scheduler beendet und er beim signal() schon beendet ist.
   }
 
-  def tryCancel(o: TimedCall[_]) =
+  def tryCancel[A](o: TimedCall[A]) =
     delegate.tryCancel(o)
 
   def nextTime =

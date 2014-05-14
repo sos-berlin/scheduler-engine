@@ -115,7 +115,7 @@ object VcxprojFile {
     val projectFilename = dir.getName + ".vcxproj"   // "scheduler/scheduler.vcxproj"
     val projectFile = new File(dir, projectFilename)
     if (projectFile.exists)
-      new VcxprojFile(projectFile, modules map { _.sourceCodeFile.path } toList).store()
+      new VcxprojFile(projectFile, (modules map { _.sourceCodeFile.path }).toList).store()
   }
 
   private def includeAttributeString(e: Element) = Option(e getAttributeValue "Include") getOrElse { throw new RuntimeException("<ClCompile> without attribute Include=") }

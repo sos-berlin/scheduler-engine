@@ -48,6 +48,7 @@ private object JobPeriodIT {
   }
 
   private trait JobConfig {
+    val path: JobPath
     val interval: Duration
     val xmlElem: xml.Elem
   }

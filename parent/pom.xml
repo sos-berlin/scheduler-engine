@@ -659,6 +659,7 @@
                         </jvmArgs>
                         <args>
                             <arg>-deprecation</arg>
+                            <arg>-feature</arg>
                         </args>
                     </configuration>
                 </plugin>
@@ -774,17 +775,4 @@
             <url>scp://www.yourcompany.com/www/docs/project/</url>
         </site-->
     </distributionManagement>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>${scala.plugin.version}</version>
-                <configuration>
-                    <scalaVersion>${scala.version}</scalaVersion>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
 </project>

@@ -7,9 +7,9 @@ trait CallQueue extends AutoCloseable {
 
   def close()
 
-  def add(o: TimedCall[_])
+  def add[A](o: TimedCall[A])
 
-  def tryCancel(o: TimedCall[_]): Boolean
+  def tryCancel[A](o: TimedCall[A]): Boolean
 
   def nextTime: Long
 

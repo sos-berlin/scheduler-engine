@@ -61,7 +61,7 @@ object Jni {
   def simpleMethodName(m: Method): String = simpleMethodName(m.getName, m.getParameterTypes)
 
   def simpleMethodName(name: String, parameterTypes: Seq[Class[_]]) =
-      mangled(name) + whenFilled("__", parameterTypes map mangled mkString)
+      mangled(name) + whenFilled("__", (parameterTypes map mangled).mkString)
 
   private def whenFilled(prefix: String, string: String) = if (string.isEmpty) ""  else prefix + string
 

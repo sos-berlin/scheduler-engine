@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.common.scalautil
 
+import scala.language.reflectiveCalls  // Für close()
+
 /** Wie java try(AutoClosable), aber für alle Klassen mit close().
   * @author Joacim Zschimmer */
 object AutoClosing {

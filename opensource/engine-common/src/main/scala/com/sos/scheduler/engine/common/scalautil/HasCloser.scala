@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.common.scalautil
 import HasCloser._
 import com.google.common.io.Closer
 import java.io.Closeable
+import scala.language.reflectiveCalls
 
 trait HasCloser extends AutoCloseable {
 
