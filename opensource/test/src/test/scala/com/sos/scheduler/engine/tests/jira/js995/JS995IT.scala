@@ -17,7 +17,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class JS995IT extends FreeSpec with ScalaSchedulerTest {
 
-  "Job soll erst aktiv werden, wenn benötigter Schedule da ist" in {
+  "Job soll erst aktiv werden, wenn benoetigter Schedule da ist" in {
     val job = instance[JobSubsystem].job(testJobPath)
     job.state shouldEqual JobState.loaded
     controller.getEventBus.awaitingKeyedEvent[FileBasedActivatedEvent](testJobPath) {
