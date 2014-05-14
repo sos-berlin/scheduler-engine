@@ -57,7 +57,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-172", "This kind of script (scripting engine, Perl, COM or Java) is not possible here" },
     { "SCHEDULER-173", "Missing script" },
     { "SCHEDULER-174", "Method \"$1\" is missing in class \"$2\"" },
-    { "SCHEDULER-177", "Java is not available (see error message when JobScheduler started)" },
     { "SCHEDULER-179", "<process> task did not terminate. pid=$1" },
     { "SCHEDULER-182", "Unexpected XML element <$1>" },
     { "SCHEDULER-183", "Scheduler cannot start because spooler_init() in '$1' returned false" },

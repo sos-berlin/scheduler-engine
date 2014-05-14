@@ -483,8 +483,6 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
     {
         case kind_java:              
         {
-            if( _spooler )  if( !_spooler->java_subsystem()->java_vm()  ||  !_spooler->java_subsystem()->java_vm()->running() )  z::throw_xc( "SCHEDULER-177" );
-
             _java_vm = get_java_vm( false );
             _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
 
@@ -501,8 +499,6 @@ ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_sc
         // JS-498: neue Instanz für java-script via Java-Interface 
         case kind_scripting_engine_java:
         {
-            if( _spooler )  if( !_spooler->java_subsystem()->java_vm()  ||  !_spooler->java_subsystem()->java_vm()->running() )  z::throw_xc( "SCHEDULER-177" );
-
             _java_vm = get_java_vm( false );
             _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
 
