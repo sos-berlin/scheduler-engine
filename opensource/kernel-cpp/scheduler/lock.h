@@ -81,6 +81,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     void                        unregister_lock_use         ( Use* lock_use )                       { _use_set.erase( lock_use ); }
     bool                        require_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use schon hält
     bool                        release_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use weiterhin hält
+    void                        notify_waiting_requestor    ();
   //bool                        is_held_by                  ( Holder*, Lock_mode );
     bool                        is_held_by                  ( Holder*, Use* );
     int                         enqueue_lock_use            ( Use* );
