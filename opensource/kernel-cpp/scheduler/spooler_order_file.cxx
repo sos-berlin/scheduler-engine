@@ -573,20 +573,20 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
             }
             else
             {
-				if ( _alert_when_directory_missing )
-				{
-					log()->warn( x.what() ); 
+                if ( _alert_when_directory_missing )
+                {
+                    log()->warn( x.what() ); 
 
-					if( _spooler->_mail_on_error )
-					{
-						_send_recovered_mail = true; 
-						send_mail( evt_file_order_source_error, &x );
-					}
-				}
-				else
-				{
-					log()->info( x.what() );
-				}
+                    if( _spooler->_mail_on_error )
+                    {
+                        _send_recovered_mail = true; 
+                        send_mail( evt_file_order_source_error, &x );
+                    }
+                }
+                else
+                {
+                    log()->info( x.what() );
+                }
             }
 
             _directory_error = x;

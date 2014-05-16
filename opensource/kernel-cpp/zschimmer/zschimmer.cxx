@@ -775,7 +775,7 @@ uint64 as_uint64( const char* str )
     return n;
 
   OVERFLW:
-  	throw_overflow( "Z-4002", "uint64", str );
+    throw_overflow( "Z-4002", "uint64", str );
     return 0;
 }
 
@@ -1597,7 +1597,7 @@ string complete_computer_name()
             if( err )  throw_errno( errno, "getdomainname" );
 
             if( buffer[0]  &&  strcmp( buffer, "(none)" ) != 0 )  result << "." << buffer;
-#	endif
+#       endif
 
         return result;
 

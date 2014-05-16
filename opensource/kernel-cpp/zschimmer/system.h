@@ -103,7 +103,7 @@
 #   define __GNUC_VERSION__             ( __GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__ )       // 3.2.1 => 30201
 
 #   define Z_UNIX
-#   if defined __LP64__	
+#   if defined __LP64__
 #       define Z_64
 #   endif
 #   define Z_GNU_ONLY( statement )      statement

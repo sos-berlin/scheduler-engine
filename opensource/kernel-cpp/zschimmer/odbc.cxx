@@ -4,10 +4,6 @@
 #include "zschimmer.h"
 #include "regex_class.h"
 
-#ifdef Z_BORLAND
-#	pragma package(smart_init)
-#endif
-
 #include <stdio.h>
 
 #ifdef Z_WINDOWS

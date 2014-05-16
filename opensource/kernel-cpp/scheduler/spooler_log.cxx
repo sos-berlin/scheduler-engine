@@ -1198,8 +1198,8 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
     {
         try
         {
-			log_element.appendChild(document.createTextNode( _spooler->truncate_head(as_string()) ));
-		}
+            log_element.appendChild(document.createTextNode( _spooler->truncate_head(as_string()) ));
+        }
         catch( exception& x ) 
         { 
             _spooler->log()->warn( x.what() ); 

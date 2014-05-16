@@ -19,7 +19,7 @@ namespace xml {
 #if !defined Z_WINDOWS
     const int NODE_ELEMENT = 1;
     const int NODE_ATTRIBUTE = 2;
-    const int NODE_TEXT	= 3;
+    const int NODE_TEXT = 3;
     const int NODE_CDATA_SECTION = 4;
     const int NODE_ENTITY_REFERENCE = 5;
     const int NODE_ENTITY = 6;
@@ -29,7 +29,7 @@ namespace xml {
     const int NODE_DOCUMENT_TYPE = 10;
     const int NODE_DOCUMENT_FRAGMENT = 11;
     const int NODE_NOTATION = 12;
-#endif	
+#endif
 
 //--------------------------------------------------------------------------------name_of_node_type
 
