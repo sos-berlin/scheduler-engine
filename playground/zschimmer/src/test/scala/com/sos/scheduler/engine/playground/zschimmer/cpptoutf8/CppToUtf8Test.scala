@@ -3,49 +3,48 @@ package com.sos.scheduler.engine.playground.zschimmer.cpptoutf8
 import CppToUtf8._
 import com.google.common.base.Charsets.{ISO_8859_1, UTF_8}
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
-import com.sos.scheduler.engine.common.scalautil.Logger
 import java.io.{StringWriter, File}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-final class CppToUtf8Test extends FunSuite {
+final class CppToUtf8Test extends FreeSpec {
 
-  test("convertLine empty") {
+  "convertLine empty" in {
     check("" -> "")
   }
 
-  test("convertLine ASCII") {
+  "convertLine ASCII" in {
     check("x" -> "x")
     check("x // y" -> "x // y")
     check("// y" -> "// y")
   }
 
-  test("Non-ASCII only in comment") {
+  "Non-ASCII is accepted in comment only" in {
     intercept[IllegalArgumentException] {
       convertToString(Seq(0xE4.toByte))
     }
   }
 
-  test("convertLine ISO-8859-1") {
+  "convertLine ISO-8859-1" in {
     check("//xxä-ö-ü" -> "//xxä-ö-ü")
     check("//xxäöü" -> "//xxäöü")
   }
 
-  test("convertLine mixed ISO-8859-1 and UTF-8") {
+  "convertLine mixed ISO-8859-1 and UTF-8" in {
     check("//HÃ¶he Höhe" -> "//Höhe Höhe")
   }
 
-  test("Multi-line comment") {
+  "Multi-line comment" in {
     check("xx\n/*HÃ¶he Höhe\n*/yy" -> "xx\n/*Höhe Höhe\n*/yy")
     intercept[IllegalArgumentException] {
       convertToString(toBytes("xx\n/*yy\n*/yyHöhe"))
     }
   }
 
-  test("file") {
+  "file" in {
     val file = File.createTempFile("test", ".tmp")
     file.deleteOnExit()
     file.contentBytes = toBytes("//xxä-ö-ü\n" + "//HÃ¶he Höhe\n")
@@ -65,8 +64,4 @@ final class CppToUtf8Test extends FunSuite {
     convertBytes(o, w)
     w.toString
   }
-}
-
-private object CppToUtf8Test {
-  private val logger = Logger(getClass)
 }
