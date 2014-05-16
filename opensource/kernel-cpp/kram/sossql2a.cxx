@@ -1,7 +1,7 @@
 #include "precomp.h"
 
 //#define MODULE_NAME "sossql2"
-//#define COPYRIGHT   "©1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 /*
@@ -35,7 +35,7 @@ Sos_ptr<Sql_table> Sql_parser::parse_table_name()
     Sos_ptr<Sql_table> t;
 
     t = SOS_NEW( Sql_table );
-// /*  Ein vollständiger Dateiname kann nur mit "|" angegeben werden (nur einer)
+// /*  Ein vollstÃ¤ndiger Dateiname kann nur mit "|" angegeben werden (nur einer)
     if( next_token_is( k_string ) )
     {
         Sos_string filename = parse_string();
@@ -112,7 +112,7 @@ void Sql_parser::parse_let( Sql_select* select )
 void Sql_parser::parse_select( Sql_select* select )
 {
 /*
-    Für jedes im Select angegebenes Ergebnisfeld die Rechenvorschrift speichern und den
+    FÃ¼r jedes im Select angegebenes Ergebnisfeld die Rechenvorschrift speichern und den
     Feldtyp ermitteln.
 */
     parse( k_select );
@@ -147,7 +147,7 @@ void Sql_parser::parse_select( Sql_select* select )
                 {
                     ((Sql_field_expr*)+expr)->_resolve_star = true;
                     select->_resolve_star = true;
-                    // tabelle.* wird von sossqlfl.cxx dem Aufrufer gegenüber in die einzelnen Felder aufgelöst.
+                    // tabelle.* wird von sossqlfl.cxx dem Aufrufer gegenÃ¼ber in die einzelnen Felder aufgelÃ¶st.
                 }
 
                 select->_result_name_array.add( empty_string );
@@ -175,7 +175,7 @@ void Sql_parser::parse_select( Sql_select* select )
 
     if( next_token_is( k_loop ) ) {
         select->_loop_before_where = true;
-        select->_loop = parse_loop_clause();  // LOOP vor WHERE, äußere Schleife
+        select->_loop = parse_loop_clause();  // LOOP vor WHERE, Ã¤uÃŸere Schleife
     }
 
     if( next_token_is( k_where ) ) {

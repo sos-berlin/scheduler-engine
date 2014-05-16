@@ -42,7 +42,7 @@ struct Com_env : Env
 
 struct Java_idispatch : Object
 {
-    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
+    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // FÃ¼r gcc 3.2. Nicht implementiert.
                                 Java_idispatch              ( IDispatch*, bool is_owner, const char* subclass );
                                ~Java_idispatch              ();
 
@@ -53,7 +53,7 @@ struct Java_idispatch : Object
   //string                     _class_name;
     jobject                    _jobject;
     Global_jobject             _global_jobject;
-    bool                       _is_owner;                   // Java-Idispatch wird mit Aufruf von ~Java_idispatch() ungültig
+    bool                       _is_owner;                   // Java-Idispatch wird mit Aufruf von ~Java_idispatch() ungÃ¼ltig
 };
 
 //-------------------------------------------------------------------------Java_idispatch_container
@@ -68,7 +68,7 @@ struct Java_idispatch_container
 
     Fill_zero                  _zero_;
 
-    std::list< ptr<Java_idispatch> > _java_idispatch_list;        // Hält alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
+    std::list< ptr<Java_idispatch> > _java_idispatch_list;        // HÃ¤lt alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
 };
 
 //--------------------------------------------------------------------------------Jobject_idispatch

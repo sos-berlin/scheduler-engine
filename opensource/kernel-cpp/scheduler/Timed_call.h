@@ -59,7 +59,7 @@ struct Object_call : Timed_call {
 };
 
 //-------------------------------------------------------------------------------------Type_int_map
-// Bildet Typnamen auf natürliche Zahlen ab
+// Bildet Typnamen auf natÃ¼rliche Zahlen ab
 
 struct Type_int_map {
     static Type_int_map static_singleton;
@@ -105,7 +105,7 @@ struct object_call : Object_call {
 };
 
 //-------------------------------------------------------------------------------DEFINE_SIMPLE_CALL
-// Definiert einen Klasse für den parameterlosen Aufruf
+// Definiert einen Klasse fÃ¼r den parameterlosen Aufruf
 
 #define DEFINE_SIMPLE_CALL(OBJECT_TYPE, CALL) \
     struct CALL : object_call<OBJECT_TYPE, CALL> { \

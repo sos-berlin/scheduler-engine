@@ -71,7 +71,7 @@ void Xslt_parameters::set_string(int i, const string& name, const string& value)
 
     if( value.find( '"' ) != string::npos )
     {
-        if( value.find( '\'' ) != string::npos )  throw_xc( "JAVAXSLT-005", name, value );    // Anscheinend kennt libxslt keine Ersatzdarstellung für Anführungszeichen
+        if( value.find( '\'' ) != string::npos )  throw_xc( "JAVAXSLT-005", name, value );    // Anscheinend kennt libxslt keine Ersatzdarstellung fÃ¼r AnfÃ¼hrungszeichen
         string_value = "'" + value + "'";
     }
     else

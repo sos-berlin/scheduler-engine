@@ -16,7 +16,7 @@ const extern int                default_heart_beat_timeout;
 const extern int                default_heart_beat_own_timeout;
 const extern int                default_heart_beat_warn_timeout;
 
-// Für set_continue_exclusive_operation
+// FÃ¼r set_continue_exclusive_operation
 const extern string             continue_exclusive_non_backup;      // Nur Non-backup-Scheduler darf exklusiv werden
 const extern string             continue_exclusive_this;            // Nur Scheduler mit unserem Url darf exklusiv werden
 const extern string             continue_exclusive_any;             // Jeder darf exklusiv werden
@@ -37,8 +37,8 @@ struct Configuration
     bool                       _demand_exclusiveness;
     bool                       _orders_are_distributed;
     bool                       _suppress_watchdog_thread;
-    int                        _heart_beat_timeout;         // Großzügigere Frist für den Herzschlag, nach der der Scheduler für tot erklärt wird
-    int                        _heart_beat_own_timeout;     // < _heart_beat_timeout      Zur eigenen Prüfung, etwas kürzer als _heart_beat_timeout
+    int                        _heart_beat_timeout;         // GroÃŸzÃ¼gigere Frist fÃ¼r den Herzschlag, nach der der Scheduler fÃ¼r tot erklÃ¤rt wird
+    int                        _heart_beat_own_timeout;     // < _heart_beat_timeout      Zur eigenen PrÃ¼fung, etwas kÃ¼rzer als _heart_beat_timeout
     int                        _heart_beat_warn_timeout;    // < _heart_beat_own_timeout  Nach dieser Zeit ohne Herzschlag gibt's eine Warnung
 };
 

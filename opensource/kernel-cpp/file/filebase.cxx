@@ -1,5 +1,5 @@
 //#define MODULE_NAME "filebase"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "precomp.h"

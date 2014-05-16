@@ -41,8 +41,8 @@ struct Read_transaction;
 enum Database_lock_syntax
 { 
     db_lock_none,
-    db_lock_for_update,         // Sätze mit "select for update" sperren
-    db_lock_with_updlock,       // SQL-Server: Sätze mit "select with(updlock)" sperren, für SQL Server
+    db_lock_for_update,         // SÃ¤tze mit "select for update" sperren
+    db_lock_with_updlock,       // SQL-Server: SÃ¤tze mit "select with(updlock)" sperren, fÃ¼r SQL Server
 };
 
 //-----------------------------------------------------------------------------------------Database
@@ -315,7 +315,7 @@ struct Job_history
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Job*                       _job;
-    Task*                      _last_task;              // Wem gehört der zuletzt geschriebene Satz?
+    Task*                      _last_task;              // Wem gehÃ¶rt der zuletzt geschriebene Satz?
     Absolute_path              _job_path;
     bool                       _history_yes;
     int                        _on_process;             // Beim soundsovieltem _on_process Historiensatz schreiben
@@ -353,7 +353,7 @@ struct Task_history
     Task*                      _task;
     bool                       _start_called;
 
-    int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
+    int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende Ã¼berschrieben oder gelÃ¶scht wird.
     string                     _tabbed_record;
     Record                     _extra_record;
     int                        _task_id;

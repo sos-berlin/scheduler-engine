@@ -3,7 +3,7 @@
 #include "precomp.h"
 
 //#define MODULE_NAME "sossql2"
-//#define COPYRIGHT   "©1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 /*
@@ -197,7 +197,7 @@ Sos_ptr<Sql_expr> Sql_parser::parse_value_expr()
                 if( punkt && next_token_is( k_star ) ) {
                     token[ n++ ] = _token;
                     parse_token();
-                    token[ n-1 ]._name = "*";       // Für get_field_descr() und parse_select()
+                    token[ n-1 ]._name = "*";       // FÃ¼r get_field_descr() und parse_select()
                 }
 
                 e->_pos        = token[ n-1 ]._pos;
@@ -362,7 +362,7 @@ AGGREGATE:
 
         default:
             //throw_syntax_error( "SOS-SQL-12", _token._pos );
-            check_token( k_identifier );  // Löst Exception aus
+            check_token( k_identifier );  // LÃ¶st Exception aus
             return NULL;
     }
 
@@ -744,13 +744,13 @@ Sos_ptr<Sql_expr> Sql_parser::parse_cond_expr()
 
     while( next_token_is( k_colon ) ) {
         parse_token();
-        e->_operand_array.add( parse_or_expr() );    // else-expr oder nächste cond-expr
+        e->_operand_array.add( parse_or_expr() );    // else-expr oder nÃ¤chste cond-expr
         if( !next_token_is( k_question_mark ) )  goto COND_OK;
         parse_token();
         e->_operand_array.add( parse_or_expr() );    // then-expr
     }
 
-    _need_error_log = true;   // Else-Fall ist ein Fehler fürs Fehlerprotokoll
+    _need_error_log = true;   // Else-Fall ist ein Fehler fÃ¼rs Fehlerprotokoll
 
   COND_OK:
     return +e;

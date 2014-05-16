@@ -1,6 +1,6 @@
-// $Id: zschimmer.h 14145 2010-12-02 12:11:47Z jz $        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: zschimmer.h 14145 2010-12-02 12:11:47Z jz $        Â© 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
-// §1719
+// Â§1719
 
 
 #ifndef __ZSCHIMMER_H
@@ -25,7 +25,7 @@
 #endif
 
 #ifdef INTERFACE
-#   undef INTERFACE     // Für Windows
+#   undef INTERFACE     // FÃ¼r Windows
 #endif
 
 //----------------------------------------------------------------------------------------warnings
@@ -54,7 +54,7 @@ inline std::ostream& operator << ( std::ostream& s, const std::exception& x )
 //-------------------------------------------------------------------------------------------static
 
 #ifndef Z_WINDOWS
-    extern int                  main_pid;               // Für pthreads (im Spooler). Bei Hostjava etc. kann das die pid des aktuellen Threads sein.
+    extern int                  main_pid;               // FÃ¼r pthreads (im Spooler). Bei Hostjava etc. kann das die pid des aktuellen Threads sein.
 #endif
 
 //---------------------------------------------------------------------------------z_malloc, z_free
@@ -97,7 +97,7 @@ template< class IUNKNOWN_INTERFACE >
 struct simple_iunknown_implementation : IUNKNOWN_INTERFACE
 {
     void*                       operator new            ( size_t size, Z_new_type, const char* name, int lineno )   { return z_malloc( size, name, lineno ); }
-    void                        operator delete         ( void* p, Z_new_type, const char*, int )                   { z_free(p); }  // Für VC++ 6: Sonst warning C4291
+    void                        operator delete         ( void* p, Z_new_type, const char*, int )                   { z_free(p); }  // FÃ¼r VC++ 6: Sonst warning C4291
     void                        operator delete         ( void* p )                                                 { z_free(p); }
 
 
@@ -153,7 +153,7 @@ struct simple_iunknown_implementation : IUNKNOWN_INTERFACE
 
 struct Object : simple_iunknown_implementation<IUnknown>
 /*
-    Objekte dieses Typs können static oder automatic sein oder mit Z_NEW() angelegt werden.
+    Objekte dieses Typs kÃ¶nnen static oder automatic sein oder mit Z_NEW() angelegt werden.
     operator new() kann nicht verwendet werden.
 */
 {
@@ -180,7 +180,7 @@ struct _No_AddRef_Release : T
 template< class TYPE >
 struct ptr
 {
-    // Ohne virtuelle Methode, damit _ptr möglichst am Anfang (offset 0) steht.
+    // Ohne virtuelle Methode, damit _ptr mÃ¶glichst am Anfang (offset 0) steht.
 
 
     enum                        New                     { new_object };                 // zur Polymorphie der Konstrukturen
@@ -283,7 +283,7 @@ inline ptr<TYPE> z_new( TYPE* p )
 }
 
 //--------------------------------------------------------------------------------------------Z_NEW
-// Nur für ptr<TYPE> var = Z_NEW( TYPE )
+// Nur fÃ¼r ptr<TYPE> var = Z_NEW( TYPE )
 
 #ifdef __GNUC__
 
@@ -298,7 +298,7 @@ inline ptr<TYPE> z_new( TYPE* p )
 #endif
 
 //-----------------------------------------------------------------------------------------qi_ptr<>
-// ptr<> mit Typprüfung mit QueryInterface()
+// ptr<> mit TypprÃ¼fung mit QueryInterface()
 
 template< class TYPE >
 struct qi_ptr : ptr<TYPE>

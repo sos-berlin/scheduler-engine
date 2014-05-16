@@ -1,4 +1,4 @@
-// sosclien.h                               ©1996 SOS GmbH Berlin
+// sosclien.h                               Â©1996 SOS GmbH Berlin
 
 #ifndef __SOSCLIEN_H
 #define __SOSCLIEN_H
@@ -21,7 +21,7 @@ namespace sos
 struct Sos_database_session;
 
 void init_std_client();
-// Trägt Standard-Client in Sos_static ein.
+// TrÃ¤gt Standard-Client in Sos_static ein.
 
 //------------------------------------------------------------------------------------Sos_client
 

@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "itoa"
-// itoa.cxx                                 (c) Jörg Schwiemann
+// itoa.cxx                                 (c) JÃ¶rg Schwiemann
 
 #include "sysdep.h"
 

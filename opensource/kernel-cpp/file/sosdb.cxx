@@ -85,7 +85,7 @@ const Dbms_word dbms_words[] =
   //{ dbms_sql_server   , "DATETIME"     , "DATE"            },
     { dbms_sql_server   , "%NOW"         , "GetDate()"       },
     { dbms_sql_server   , "%ALTER_COLUMN", "ALTER COLUMN"    },
-    { dbms_sql_server   , "%UPDATE_LOCK" , "WITH(UPDLOCK)"   },     // Für jede Tabelle in der From-Klausel angebbar, siehe http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_fa-fz_4ox9.asp
+    { dbms_sql_server   , "%UPDATE_LOCK" , "WITH(UPDLOCK)"   },     // FÃ¼r jede Tabelle in der From-Klausel angebbar, siehe http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_fa-fz_4ox9.asp
 
     { dbms_mysql        , "BOOLEAN"      , "BOOL"            },
     { dbms_mysql        , "BLOB"         , "LONGBLOB"        },
@@ -420,11 +420,11 @@ void Sos_database_session::execute_direct( const Const_area& stmt )
 
     char  quote       = '\0';
 
-    while( p < p_end )     // für jede Anweisung
+    while( p < p_end )     // fÃ¼r jede Anweisung
     {
         const char* p0 = p;
 
-        while( p < p_end )   // für jedes Zeichen
+        while( p < p_end )   // fÃ¼r jedes Zeichen
         {
             if( *p == ';'  )  break;
             else
@@ -534,7 +534,7 @@ void Sos_database_session::execute_direct_single( const Const_area& stmt_par )
                 _execute_direct( stmt );
             }
             catch( const Xc& ) {
-                if( _row_count == 0     // -1: undefiniert, > 0: einige Sätze geändert bevor ein Fehler auftreten ist (etwa Lock_error)
+                if( _row_count == 0     // -1: undefiniert, > 0: einige SÃ¤tze geÃ¤ndert bevor ein Fehler auftreten ist (etwa Lock_error)
                  && _cmd != "CALL" )    // Wird bei CALL _row_count korrekt geliefert?
                 {
                     transaction_ends(); // Transaktion ist wegen des Fehlers und _row_count == 0 doch nicht begonnen worden.
@@ -635,7 +635,7 @@ string Sos_database_session::convert_texttimestamp( const char** pp, const char*
             return "str_replace(CONVERT(VARCHAR(19)," + arg + ",23),'T',' ')";
 
         case dbms_h2:
-            return "((" + arg + ")||'')";   // Funktioniert mit neutralem Locale (LANG=en_US.UTF-8). Bei de_DE liefert H2 ein Dezimalkomma vor den Millisekunden, was zum Fehler führt.
+            return "((" + arg + ")||'')";   // Funktioniert mit neutralem Locale (LANG=en_US.UTF-8). Bei de_DE liefert H2 ein Dezimalkomma vor den Millisekunden, was zum Fehler fÃ¼hrt.
             //return "formatdatetime(" + arg + ",'yyyy-MM-dd HH:mm:ss','en');
 
         default: 
@@ -814,8 +814,8 @@ string Sos_database_session::translate_limit( const string& stmt, int limit )
 //    {
 //        case dbms_sql_server:
 //        {
-//            // Der Algorithmus fügt "WITH(UPDLOCK)" vor dem ersten WHERE ein.
-//            // Bei mehreren Tabellen in der FROM-Klausel sollte der Text aber nach jeder Tabelle eingefügt werden.
+//            // Der Algorithmus fÃ¼gt "WITH(UPDLOCK)" vor dem ersten WHERE ein.
+//            // Bei mehreren Tabellen in der FROM-Klausel sollte der Text aber nach jeder Tabelle eingefÃ¼gt werden.
 //            // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tsqlref/ts_fa-fz_4ox9.asp
 //
 //            const char* p0 = stmt.c_str();
@@ -867,8 +867,8 @@ string Sos_database_session::translate_sql( const string& sql_statement )
 
 void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_area )
 {
-    // Nur das erste Zeichen von _identifier_quote_begin wird berücksichtigt.
-    // '"' oder _identifier_quote_begin[ 0 ] im Namen werden nicht berücksichtigt!!! IST VERBOTEN!
+    // Nur das erste Zeichen von _identifier_quote_begin wird berÃ¼cksichtigt.
+    // '"' oder _identifier_quote_begin[ 0 ] im Namen werden nicht berÃ¼cksichtigt!!! IST VERBOTEN!
 
     const char* p           = stmt.char_ptr();
     const char* p_end       = stmt.char_ptr() + stmt.length();
@@ -933,14 +933,14 @@ void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_ar
                 result += *p++;
         }
         else
-        if( *p == '"' || *p == '`' ) {   // ` für " für "select `A`, `B`"  statt "select \"A\", \"B\""
+        if( *p == '"' || *p == '`' ) {   // ` fÃ¼r " fÃ¼r "select `A`, `B`"  statt "select \"A\", \"B\""
             result += in_identifier? quote_end : quote_begin; 
             in_identifier = !in_identifier; 
             p++;
         }
         else
         if( in_identifier ) {
-            result += sos_toupper( *p++ );        // Für Oracle 7
+            result += sos_toupper( *p++ );        // FÃ¼r Oracle 7
         }
         else
         if( p[0] == '|'  &&  p[1] == '|' ) {
@@ -967,7 +967,7 @@ void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_ar
 
             string new_word = translate( word );
 
-            if( new_word == "%NOW" )    // %NOW() nicht übersetzt?
+            if( new_word == "%NOW" )    // %NOW() nicht Ã¼bersetzt?
             {
                 string s = "%timestamp('" + Sos_optional_date_time::now().as_string() + "')";       // Lokale Uhr
                 const char* sp = s.c_str();
@@ -986,7 +986,7 @@ void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_ar
                 result += convert_secondsdiff( &p, p_end );
             }
             else
-            if( new_word == "%LIMIT" )  // %LIMIT nicht übersetzt? Das ist wohl immer so.
+            if( new_word == "%LIMIT" )  // %LIMIT nicht Ã¼bersetzt? Das ist wohl immer so.
             {
                 limit = -1;
                 
@@ -1008,12 +1008,12 @@ void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_ar
                 append_for_update = true;
             }
             else
-            if( new_word != word )      // translate() hat übersetzt?
+            if( new_word != word )      // translate() hat Ã¼bersetzt?
             {
                 result += new_word;
                 result += ' ';
             }
-            else                        // translate() hat nicht übersetzt?
+            else                        // translate() hat nicht Ã¼bersetzt?
             {
                 p = saved_p;
 
@@ -1062,10 +1062,10 @@ void Sos_database_session::convert_stmt( const Const_area& stmt, Area* result_ar
             const char* p2 = p;
             while( p2 < p_end  &&  ( isalnum( (unsigned char)*p2) || *p2 == '_' ) )  p2++;
 
-            // Wenigstens in PostgresQL gilt limit für die gesamte Abfrage, nicht für ein einzelnes select
+            // Wenigstens in PostgresQL gilt limit fÃ¼r die gesamte Abfrage, nicht fÃ¼r ein einzelnes select
             if( limit >= 0  &&  !klammern  &&  ( p2 - p == 5  &&  strnicmp( p, "union"    , p2 - p ) == 0
                                               || p2 - p == 9  &&  strnicmp( p, "intersect", p2 - p ) == 0
-                                              || p2 - p == 6  &&  strnicmp( p, "except"   , p2 - p ) == 0 ) )    // Die Wörter werden im Subselect nicht erkannt
+                                              || p2 - p == 6  &&  strnicmp( p, "except"   , p2 - p ) == 0 ) )    // Die WÃ¶rter werden im Subselect nicht erkannt
             {
                 result_area->append( translate_limit( result, limit ) );
                 result_area->append( ' ' );
@@ -1119,7 +1119,7 @@ void Sos_database_session::transaction_begun()
 //-------------------------------------------------------Sos_database_session::transaction_ends
 
 // Wird bei Commit und Rollback gerufen.
-// Wird auch zum Rücksetzen einer wegen eines Fehlers falsch vorhergesagten Transaktion gerufen.
+// Wird auch zum RÃ¼cksetzen einer wegen eines Fehlers falsch vorhergesagten Transaktion gerufen.
 
 void Sos_database_session::transaction_ends()
 {

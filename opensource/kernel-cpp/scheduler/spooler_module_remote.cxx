@@ -174,7 +174,7 @@ bool Remote_module_instance_proxy::name_exists( const string& name )
 
 Variant Remote_module_instance_proxy::call( const string& name )
 {
-    return _remote_instance->call( "call", "?" + name );     // "?": Methode ist optional. Wenn es sie nicht gibt, kommt VT_EMPTY zurück
+    return _remote_instance->call( "call", "?" + name );     // "?": Methode ist optional. Wenn es sie nicht gibt, kommt VT_EMPTY zurÃ¼ck
 }
 
 //-------------------------------------------------------Remote_module_instance_proxy::begin__start
@@ -192,12 +192,12 @@ Async_operation* Remote_module_instance_proxy::begin__start()
 
 bool Remote_module_instance_proxy::begin__end()
 {
-    //_operation->async_check_error();   Nicht hier rufen!  call__end() prüft den Fehler und ruft vorher pop_operation().
+    //_operation->async_check_error();   Nicht hier rufen!  call__end() prÃ¼ft den Fehler und ruft vorher pop_operation().
 
     ptr<Async_operation> operation = _operation;
     _operation = NULL;
 
-    // *** Sonderfall, weil es keine _connection für pop_operation gibt ***
+    // *** Sonderfall, weil es keine _connection fÃ¼r pop_operation gibt ***
     Operation* op = dynamic_cast<Operation*>( +operation );
     if( op  &&  op->_call_state == c_connect )  op->async_check_error();   
     // ***
@@ -217,10 +217,10 @@ bool Remote_module_instance_proxy::begin__end()
 
 
     // _remote_instance->call__end() ist nicht gut, wenn _remote_instance->call__start() einen Fehler gemeldet hat. Das sollte anders codiert werden.
-    // Ein Fehler in _remote_instance->call__start() wird durch den Fehler "pop_operation() bei leerem Stack" überdeckt.
-    // Das hier sollte überarbeitet werden. Im Fehlerfall ist mal eine Operation offen, die beendet werden muss, und mal nicht.
+    // Ein Fehler in _remote_instance->call__start() wird durch den Fehler "pop_operation() bei leerem Stack" Ã¼berdeckt.
+    // Das hier sollte Ã¼berarbeitet werden. Im Fehlerfall ist mal eine Operation offen, die beendet werden muss, und mal nicht.
     if( !operation->async_child() )  operation->async_check_error();
-    if( _remote_instance )  result = check_result( _remote_instance->call__end() );   // call__end() vor der Fehlerprüfung rufen, sonst werden untere Operationen nicht beendet. 12.11.03
+    if( _remote_instance )  result = check_result( _remote_instance->call__end() );   // call__end() vor der FehlerprÃ¼fung rufen, sonst werden untere Operationen nicht beendet. 12.11.03
     operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
 
     return result;
@@ -442,7 +442,7 @@ AGAIN:
             _session->connect_server__end();
         }
         
-        // Nächste Operation
+        // NÃ¤chste Operation
 
         {
             operation->_multi_qi.allocate( 1 );
@@ -466,10 +466,10 @@ AGAIN:
             operation->_multi_qi.clear();
         }
 
-        // Nächste Operation
+        // NÃ¤chste Operation
 
         {
-            Variant params ( Variant::vt_array, int_cast((16+2) + 8 * _module->_monitors->_monitor_map.size()) );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, int_cast((16+2) + 8 * _module->_monitors->_monitor_map.size()) );   // Wichtig: GrÃ¶ÃŸe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -517,16 +517,16 @@ AGAIN:
                     /**
                     * \change 2.0.224 - JS-444: include with attribute live_file does not work
                     * \detail
-                    * Auch für Monitore werden includes in der laufenden scheduler-Instanz aufgelöst und an den monitor-Prozess übergeben.
+                    * Auch fÃ¼r Monitore werden includes in der laufenden scheduler-Instanz aufgelÃ¶st und an den monitor-Prozess Ã¼bergeben.
                     *
-                    * Diese Lösung führt dazu, dass sowohl das Attribute \i file als auch das Attribute \i live_file Dateien benennen, die 
-                    * lokal in der Instanz des scheduler servers zur Verfügung stehen müssen. Remote-Includes sind damit nicht möglich.
+                    * Diese LÃ¶sung fÃ¼hrt dazu, dass sowohl das Attribute \i file als auch das Attribute \i live_file Dateien benennen, die 
+                    * lokal in der Instanz des scheduler servers zur VerfÃ¼gung stehen mÃ¼ssen. Remote-Includes sind damit nicht mÃ¶glich.
                     * 
-                    * Diese Änderung wurde in Abstimmung mit UR und AL gemacht.
+                    * Diese Ã„nderung wurde in Abstimmung mit UR und AL gemacht.
                     *
                     * \todo
                     * Anpassen der Dokumentation - Dort steht:
-                    * Bei Ausführung auf einem entfernten Rechner mit <process_class remote_scheduler="…"> wird die Datei auf dem entfernten Rechner gelesen.
+                    * Bei AusfÃ¼hrung auf einem entfernten Rechner mit <process_class remote_scheduler="Â…"> wird die Datei auf dem entfernten Rechner gelesen.
                     * (Seite 35 der techn. Beschreibung).
                     *
                     * ... sollte ersatzlos gestrichen werden.
@@ -565,7 +565,7 @@ AGAIN:
             _module->_compiled = true;
         }
             
-        // Nächste Operation
+        // NÃ¤chste Operation
 
         {
             Variant objects ( Variant::vt_array, int_cast(_object_list.size()) );
@@ -636,10 +636,10 @@ bool Remote_module_instance_proxy::Operation::async_finished_() const
     if( _call_state == c_begin  &&  !_proxy->_process ) 
     {
         // Ein Sonderfall: async_continue() wird hier (statt oben im Hauptprogramm) gerufen,
-        // weil die Operation nicht über Connection::current_super_operation() erreichbar ist.
+        // weil die Operation nicht Ã¼ber Connection::current_super_operation() erreichbar ist.
         // Denn diese Operation hat ja noch keine Connection.
-        // Ein zentrales Register aller offenen Operationen wäre gut.
-        // Dann müsste das Hauptprogramm auch nicht die Verbindungen kennen und für jede
+        // Ein zentrales Register aller offenen Operationen wÃ¤re gut.
+        // Dann mÃ¼sste das Hauptprogramm auch nicht die Verbindungen kennen und fÃ¼r jede
         // async_continue() aufrufen.
 
         // S.a. begin__end(): async_check_error() bei _state == c_connect
@@ -680,7 +680,7 @@ string Remote_module_instance_proxy::Operation::state_name() const
         case c_release        : return "release";
 
         case c_finished       : return "finished";
-        default               : return as_string(_call_state);      // Für Microsoft
+        default               : return as_string(_call_state);      // FÃ¼r Microsoft
     }
 }
 

@@ -77,7 +77,7 @@ const char* std_date_time_format_array [ 16 ] =
 };
 
 
-//                                     Jan Feb M‰r Apr Mai Jun Jul Aug Sep Okt Nov Dez
+//                                     Jan Feb M√§r Apr Mai Jun Jul Aug Sep Okt Nov Dez
 const uint1 monatstage [ 1+12 ] = { 0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 const char monthnames3  [ 12 ][4] = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
@@ -627,7 +627,7 @@ void Sos_optional_date_time_type::write_text( const Byte* p, Area* buffer, const
                 int n = date.year();
                 *b++ = Byte( n % 100 / 10 + '0' );
                 *b++ = Byte( n % 10 + '0' );
-                if( sos_isdigit( f[0] )  &&  sos_isdigit( f[1] ) )  f += 2;     // Schwelle f¸r 1900/2000 wird beim Schreiben ignoriert
+                if( sos_isdigit( f[0] )  &&  sos_isdigit( f[1] ) )  f += 2;     // Schwelle f√ºr 1900/2000 wird beim Schreiben ignoriert
             }
         }
         else
@@ -1239,7 +1239,7 @@ void As_date_time_type::_get_param( Type_param* param ) const
 Bool As_date_time_type::null( const Byte* p ) const
 {
     return Field_subtype::null( p );
-  //return _base_type->empty( p );  // schlieﬂt null() ein
+  //return _base_type->empty( p );  // schlie√üt null() ein
 }
 
 //--------------------------------------------------------------As_date_time_type::write_text

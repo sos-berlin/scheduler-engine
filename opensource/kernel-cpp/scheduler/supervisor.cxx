@@ -31,7 +31,7 @@ const double                    udp_timeout_warn_period     = 5*60;
 const double                    udp_warn_timeout            = 60;
 const double                    max_hostname_age            = 15*60;                                // Nach dieser Zeit gethostbyname() erneut rufen
 const string                    directory_name_for_all_schedulers = "_all";
-const double                    allowed_directory_age       = 0.0;                                  // Verzeichnis nur lesen, wenn letztes Lesen länger her ist
+const double                    allowed_directory_age       = 0.0;                                  // Verzeichnis nur lesen, wenn letztes Lesen lÃ¤nger her ist
 const int                       default_deactivation_timeout = 3600;    // Wird bisher nicht verwendet, weil Client stets die Angabe liefert
 
 //------------------------------------------------------------------------------------Xml_file_info
@@ -66,7 +66,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
 
     ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
 
-    // Für Clients vor v1.6
+    // FÃ¼r Clients vor v1.6
     ptr<Command_response>       execute_configuration_fetch_updated_files(const xml::Element_ptr&, Command_processor*);
     void                        register_me                 (const xml::Element_ptr&, Communication::Operation*);
     void                        connection_lost_event       (const exception*);
@@ -284,7 +284,7 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
     }
     else
     if (string_begins_with(element.nodeName(), "supervisor.remote_scheduler.")) {
-        // Für Clients vor v1.6
+        // FÃ¼r Clients vor v1.6
         Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
         if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
 
@@ -339,7 +339,7 @@ void Remote_scheduler::update(const xml::Element_ptr& element) {
 }
 
 //----------------------------------------------------Supervisor::execute_register_remote_scheduler
-// Für Clients vor v1.6
+// FÃ¼r Clients vor v1.6
 
 void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
 {
@@ -356,7 +356,7 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
 
 //--------------------------------------------------------------------Remote_scheduler::register_me
 
-// Für Clients vor v1.6
+// FÃ¼r Clients vor v1.6
 void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation) 
 {
     Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( communication_operation );
@@ -384,7 +384,7 @@ void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_sche
     _connection_operation = connection_operation; /*! \change JS-481 Connection merken */
     set_dom( register_remote_scheduler_element );
 
-    connection_operation->_remote_scheduler = this;        // Remote_scheduler mit TCP-Verbindung verknüpfen
+    connection_operation->_remote_scheduler = this;        // Remote_scheduler mit TCP-Verbindung verknÃ¼pfen
 }
 
 //--------------------------------------------------------------------------Supervisor::dom_element
@@ -480,7 +480,7 @@ Directory* Remote_scheduler::configuration_directory_or_null()
 
 //------------------------------------------------------------------------Remote_scheduler::set_dom
 
-// Für Clients vor v1.6
+// FÃ¼r Clients vor v1.6
 void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_element )
 {
     if( !register_scheduler_element )  return;
@@ -522,7 +522,7 @@ ptr<Command_response> Remote_scheduler::execute_xml( const xml::Element_ptr& ele
 
 //--------------------------------------Remote_scheduler::execute_configuration_fetch_updated_files
 
-// Für Clients vor v1.6
+// FÃ¼r Clients vor v1.6
 ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_files(const xml::Element_ptr& element, Command_processor* command_processor)
 {
     assert(element.nodeName_is("supervisor.remote_scheduler.configuration.fetch_updated_files"));
@@ -540,7 +540,7 @@ void Remote_scheduler::set_alarm_clock()
         if (_configuration_changed)
             set_async_delay(udp_timeout);
         else
-        if (_deactivate_at)  // 0 bei alten Verfahren mit ständiger Verbindung
+        if (_deactivate_at)  // 0 bei alten Verfahren mit stÃ¤ndiger Verbindung
             set_async_next_gmtime(_deactivate_at);
     }
 }
@@ -583,9 +583,9 @@ ptr<Command_response> Remote_scheduler::fetch_updated_files(const xml::Element_p
         assert( directory );
     }
 
-    if( !_repeated_reading )    // Beim ersten Mal müssen die Dateien sofort geliefert werden. Also nicht altern lassen! 
+    if( !_repeated_reading )    // Beim ersten Mal mÃ¼ssen die Dateien sofort geliefert werden. Also nicht altern lassen! 
     {
-        directory = directory->clone();     // Nur in der Kopie die Alterung zurücknehmen
+        directory = directory->clone();     // Nur in der Kopie die Alterung zurÃ¼cknehmen
         directory->withdraw_aging_deep();     
         _repeated_reading = true;
     }
@@ -611,7 +611,7 @@ ptr<Command_response> Remote_scheduler::fetch_updated_files(const xml::Element_p
     _configuration_changed       = false;
     _configuration_transfered_at = ::time(NULL);
 
-    if( is_active )  _remote_configurations->set_alarm();    // Für alternde Dateieinträge: Nach kurzer Zeit Verzeichnis nochmal prüfen 
+    if( is_active )  _remote_configurations->set_alarm();    // FÃ¼r alternde DateieintrÃ¤ge: Nach kurzer Zeit Verzeichnis nochmal prÃ¼fen 
     return +response;
 }
 
@@ -662,7 +662,7 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
 
 
 
-        /// Dateien hinzugefügt?
+        /// Dateien hinzugefÃ¼gt?
 
         while( e != directory->_ordered_list.end()  &&
                ( xfi == xml_ordered_file_infos.end()  ||  e->_file_info->path().name() < (*xfi)->_filename ) )
@@ -677,7 +677,7 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
         
 
 
-        /// Dateien gelöscht?
+        /// Dateien gelÃ¶scht?
 
         while( xfi != xml_ordered_file_infos.end()  &&
                ( e == directory->_ordered_list.end()  ||  e->_file_info->path().name() > (*xfi)->_filename ) )  // Datei entfernt?
@@ -740,7 +740,7 @@ void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, const Director
 
 bool Remote_scheduler::check_remote_configuration()
 {
-    // Konfigurationsverzeichnis ist möglicherweise geändert worden.
+    // Konfigurationsverzeichnis ist mÃ¶glicherweise geÃ¤ndert worden.
     
     bool changed = false;
 
@@ -877,7 +877,7 @@ string Remote_scheduler::obj_name() const
 
 //----------------------------------------------------------Remote_scheduler::connection_lost_event
 
-// Für Clients vor v1.6
+// FÃ¼r Clients vor v1.6
 void Remote_scheduler::connection_lost_event( const exception* x )
 {
     // x kann NULL sein
@@ -887,7 +887,7 @@ void Remote_scheduler::connection_lost_event( const exception* x )
     _disconnected_at = ::time(NULL);
     _active_since = 0;
     _is_connected = false;
-    _connection_operation = NULL;  /*! \change JS-481 Zugefügtes Objektreferenz wieder auflösen */
+    _connection_operation = NULL;  /*! \change JS-481 ZugefÃ¼gtes Objektreferenz wieder auflÃ¶sen */
 
     Z_LOG2("scheduler",Z_FUNCTION << ": " << *this << "\n" );
     if( _is_active )  _error = x;
@@ -1011,7 +1011,7 @@ void Remote_configurations::resolve_configuration_directory_names()
                                 new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
                             }
                         }
-                        catch( exception& x ) { log()->warn( S() << x.what() << ", " << e->_file_info->path() ); }    // Ungültiger Verzeichnisname
+                        catch( exception& x ) { log()->warn( S() << x.what() << ", " << e->_file_info->path() ); }    // UngÃ¼ltiger Verzeichnisname
                     }
                 }
             }
@@ -1057,7 +1057,7 @@ Ip_address Hostname_cache::try_resolve_name( const string& hostname )
 
         try
         {
-            e._ip_address = Host( hostname );           // gethostbyname(), kann Exception auslösen
+            e._ip_address = Host( hostname );           // gethostbyname(), kann Exception auslÃ¶sen
         }
         catch( exception& x )
         {

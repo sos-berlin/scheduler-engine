@@ -8,7 +8,7 @@ namespace zschimmer {
 namespace posix {
 
 //-------------------------------------------------------------------Simple_directory_reader::close
-/* Nicht geprüft
+/* Nicht geprÃ¼ft
     
 void Simple_directory_reader::close() 
 { 

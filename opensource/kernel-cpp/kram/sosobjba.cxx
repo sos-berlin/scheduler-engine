@@ -1,7 +1,7 @@
 // $Id: sosobjba.cxx 13964 2010-08-18 11:12:52Z jz $
 
 #include "precomp.h"
-//#define COPYRIGHT   "© 1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© 1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #if defined _DEBUG  &&  defined WIN32
@@ -151,7 +151,7 @@ void Sos_self_deleting::obj_del()
 
 void throw_sos_1126()
 {
-    Xc x ( "SOS-1126" );       // Zeiger auf bereits zerstörtes Objekt verwendet
+    Xc x ( "SOS-1126" );       // Zeiger auf bereits zerstÃ¶rtes Objekt verwendet
     SHOW_ERR( x );
 
 #   if defined _DEBUG  &&  defined SYSTEM_WIN32
@@ -184,13 +184,13 @@ Sos_pointer::Sos_pointer( const Sos_pointer& src )
 }
 
 //------------------------------------------------------------------------Sos_pointer::__assign
-// ohne Stackprüfung
+// ohne StackprÃ¼fung
 
 void Sos_pointer::__assign( Sos_self_deleting* src )
 {
     //checked_pointer( src );
 
-    Sos_self_deleting* p = copy( src );     // falls Sos_pointer = Sos_self_deleting*, damit ref_count nicht vorübergehend 0 wird
+    Sos_self_deleting* p = copy( src );     // falls Sos_pointer = Sos_self_deleting*, damit ref_count nicht vorÃ¼bergehend 0 wird
     //if( _ptr ) _ptr->obj_remove_ref();
     inline_del();
     _ptr = p;

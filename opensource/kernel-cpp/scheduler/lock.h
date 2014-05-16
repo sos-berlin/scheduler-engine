@@ -21,7 +21,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
 {
     enum Lock_mode
     { 
-        lk_exclusive     = 0,   // Index für _waiting_queues
+        lk_exclusive     = 0,   // Index fÃ¼r _waiting_queues
         lk_non_exclusive = 1 
     };
 
@@ -79,8 +79,8 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     void                    set_max_non_exclusive           ( int );
     void                        register_lock_use           ( Use* lock_use )                       { _use_set.insert( lock_use ); }
     void                        unregister_lock_use         ( Use* lock_use )                       { _use_set.erase( lock_use ); }
-    bool                        require_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use schon hält
-    bool                        release_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use weiterhin hält
+    bool                        require_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use schon hÃ¤lt
+    bool                        release_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use weiterhin hÃ¤lt
   //bool                        is_held_by                  ( Holder*, Lock_mode );
     bool                        is_held_by                  ( Holder*, Use* );
     int                         enqueue_lock_use            ( Use* );
@@ -104,7 +104,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     Configuration              _config;
 
 
-    Lock_mode                  _lock_mode;                  // Nur gültig, wenn !_holder_set.empty()
+    Lock_mode                  _lock_mode;                  // Nur gÃ¼ltig, wenn !_holder_set.empty()
     State                      _state;
 
     typedef stdext::hash_set<Use*>             Use_set;
@@ -112,7 +112,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     Holder_map                 _holder_map;                 // Derselbe Holder kann dieselbe Sperre mehrmals halten, je mit einem Use
 
     typedef list<Use*>          Use_list;
-    vector<Use_list>           _waiting_queues;             // Index: Lock_mode, eine Liste für lk_non_exclusive und eine für lk_exclusive
+    vector<Use_list>           _waiting_queues;             // Index: Lock_mode, eine Liste fÃ¼r lk_non_exclusive und eine fÃ¼r lk_exclusive
 
     Use_set                    _use_set;
 
@@ -192,7 +192,7 @@ struct Requestor : Object,
 
     void                        close                       ();
 
-    void                    set_dom                         ( const xml::Element_ptr& );            // Für <lock.use>, Use
+    void                    set_dom                         ( const xml::Element_ptr& );            // FÃ¼r <lock.use>, Use
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     void                    set_folder_path                 ( const Absolute_path& p )              { _folder_path = p; }
@@ -257,7 +257,7 @@ struct Holder : Object, Scheduler_object, Non_cloneable
   private:
     Fill_zero                  _zero_;
   //bool                       _is_holding;
-    set<const Requestor*>      _requestor_set;              // 1) <lock.use>  2) Per API für die Task  3) Per API für spooler_process()
+    set<const Requestor*>      _requestor_set;              // 1) <lock.use>  2) Per API fÃ¼r die Task  3) Per API fÃ¼r spooler_process()
   //set<const Requestor*>      _holding_requestor_set;      // Die Requestor, deren Sperren gehalten werden (belegt sind)
 
   protected:

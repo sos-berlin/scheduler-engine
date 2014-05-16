@@ -441,7 +441,7 @@ void Dynamic_area::free()
 
         if( collectable_area_ptr()->_ref_count == 0 )  {//return;//throw Xc( "SOS-1119" );
           //delete collectable_area_ptr();
-            Const_area_handle( *this );  // Referenz legen und wieder entfernen, löscht den Puffer und protokolliert das
+            Const_area_handle( *this );  // Referenz legen und wieder entfernen, lÃ¶scht den Puffer und protokolliert das
         }
 
         _ptr    = 0;
@@ -473,7 +473,7 @@ void exchange_dynamic_area( Dynamic_area* a, Dynamic_area* b )
 //-------------------------------------------------------------------------Dynamic_area::assign
 /* Auskommentiert, weil noch nicht getestet. Lohnt sich noch nicht.
 
-void Dynamic_area::assign( Const_area_handle handle )   // nicht als Referenz übergeben!
+void Dynamic_area::assign( Const_area_handle handle )   // nicht als Referenz Ã¼bergeben!
 {
     if( handle.ref_count() == 1 ) {     // der letzte Mohikaner?
         free();
@@ -491,7 +491,7 @@ void Dynamic_area::assign( Const_area_handle handle )   // nicht als Referenz üb
 
 //-------------------------------------------------------------------------Dynamic_area::append
 
-void Dynamic_area::append( Const_area_handle handle )   // nicht als Referenz übergeben!
+void Dynamic_area::append( Const_area_handle handle )   // nicht als Referenz Ã¼bergeben!
 {
     if( length() == 0 )
     {
@@ -557,7 +557,7 @@ void Dynamic_string::allocate_min( unsigned int size )
 */
 //-----------------------------------------------------------------------------------------incr
 
-void incr( Area* a )            // Als vorzeichenlose Binärzahl um eins erhöhen
+void incr( Area* a )            // Als vorzeichenlose BinÃ¤rzahl um eins erhÃ¶hen
 {
     Byte* p     = a->byte_ptr() + a->length();
     int   carry = 1;
@@ -573,7 +573,7 @@ void incr( Area* a )            // Als vorzeichenlose Binärzahl um eins erhöhen
 
 //-----------------------------------------------------------------------------------------decr
 
-void decr( Area* a )            // Als vorzeichenlose Binärzahl um eins erniedrigen
+void decr( Area* a )            // Als vorzeichenlose BinÃ¤rzahl um eins erniedrigen
 {
     Byte* p      = a->byte_ptr() + a->length();
     int   borrow = 1;
@@ -601,7 +601,7 @@ struct Area_ostrstream : ostrstream
    ~Area_ostrstream()
     {
         _area_ptr->length(pcount());
-        //jz das knallt: _area_ptr->char_ptr()[_area_ptr->length()]='\0'; // null-Byte implizit, gehört aber nicht zum Satz
+        //jz das knallt: _area_ptr->char_ptr()[_area_ptr->length()]='\0'; // null-Byte implizit, gehÃ¶rt aber nicht zum Satz
     }
 
   private:
@@ -740,7 +740,7 @@ void write_string( const char* p, int len, Area* output, char quote, char quote_
     if( (int4)len < 0 )  throw_no_memory_error( len );
     if( memchr( p, '\0', len ) )  throw_xc_hex( "SOS-1111", p, len );
 
-    output->allocate_min( 2 + len );    // + 1 für jedes Anführungszeichen im Text
+    output->allocate_min( 2 + len );    // + 1 fÃ¼r jedes AnfÃ¼hrungszeichen im Text
     output->length( 0 );
     *output += quote;
 
@@ -809,8 +809,8 @@ void format( Area* buffer, double a, const char* form, char decimal_symbol )
 
 /*
     char  buff [ 50+1 ];    // Zwischenformatierung von sprintf()
-    char  buff2 [ 50+1 ];   // Ergebnis, rechtbündig
-    int   dig   = 0;        // Zähler für Ziffern (von rechts)
+    char  buff2 [ 50+1 ];   // Ergebnis, rechtbÃ¼ndig
+    int   dig   = 0;        // ZÃ¤hler fÃ¼r Ziffern (von rechts)
     int   scale = 0;        // Anzahl Nachkommastellen
 
     const char* fe = form + strlen( form );
@@ -880,8 +880,8 @@ void format( Area* buffer, const Const_area& zahl, const char* form, char decima
     const char  taus    = decimal_symbol == '.'? ',' : '.';
     char        buff  [ 100+1 ];  // Ziffern der Zahl, ohne Vorzeichen oder Dezimalpunkt
     char*       b;
-    char        buff2 [ 100+1 ];  // Ergebnis, rechtbündig
-    int         dig     = 0;      // Zähler für Ziffern (von rechts)
+    char        buff2 [ 100+1 ];  // Ergebnis, rechtbÃ¼ndig
+    int         dig     = 0;      // ZÃ¤hler fÃ¼r Ziffern (von rechts)
     int         scale   = 0;      // Anzahl Nachkommastellen
     const char* fe      = form + strlen( form );
     const char* f;
@@ -903,7 +903,7 @@ void format( Area* buffer, const Const_area& zahl, const char* form, char decima
 
 
     b = buff;
-    *b++ = '0';      // Platz für Überlauf beim Aufrunden
+    *b++ = '0';      // Platz fÃ¼r Ãœberlauf beim Aufrunden
     z = zahl.char_ptr();
 
     while( z < zahl.char_ptr() + zahl.length()  &&  *z == ' ' )  z++;
@@ -991,7 +991,7 @@ void format( Area* buffer, const Const_area& zahl, const char* form, char decima
             else
             {
                 //if( b == b0  &&  f[-1] == taus ) {
-                    // Format-Zeichen unterdrücken
+                    // Format-Zeichen unterdrÃ¼cken
                 //} else {
                     *--p = *--f;
                 //}

@@ -158,7 +158,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     virtual void                close                       ();
     virtual void                begin                       ();
     void                    set_host                        ( Host* );
-    void                        execute_stylesheets         ();                                     // Führt _web_service->_request_xslt_stylesheet usw. aus
+    void                        execute_stylesheets         ();                                     // FÃ¼hrt _web_service->_request_xslt_stylesheet usw. aus
 
     int                         id                          () const                                { return _id; }
 

@@ -98,7 +98,7 @@ XS( XS_Zschimmer_destroy )
     catch( const exception&  x ) { error = true;  error_text = x.what(); }
     catch( const _com_error& x ) { error = true;  error_text = string_from_bstr( x.Description() ); }
 
-    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zurück!
+    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zurÃ¼ck!
 
     XSRETURN(1);
 }
@@ -141,7 +141,7 @@ XS( XS_Zschimmer_resolve_name )
     catch( const exception&  x ) { error = true;  error_text = x.what(); }
     catch( const _com_error& x ) { error = true;  error_text = string_from_bstr( x.Description() ); }
 
-    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zurück!
+    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zurÃ¼ck!
 
     XSRETURN(1);
 }
@@ -173,7 +173,7 @@ static bool sv_to_variant( SV* sv, Variant* variant )
         case SVt_PVAV:  // Array?
         {
             AV* av = (AV*)sv;
-            int n  = av_len( av ) + 1;  // av_len() liefert nicht die Länge, sondern den höchsten Index
+            int n  = av_len( av ) + 1;  // av_len() liefert nicht die LÃ¤nge, sondern den hÃ¶chsten Index
             //int              n         = max( 0, length );
 
             variant->vt = VT_ARRAY|VT_VARIANT;
@@ -251,7 +251,7 @@ XS( XS_Zschimmer_call )
     bool        error           = false;
 
 
-    // *** Bei einem Fehler wird croak() gerufen. Diese Routine kehrt nicht zurück. Die Variablen string_result und error_text werden dann nicht freigeben. *** //
+    // *** Bei einem Fehler wird croak() gerufen. Diese Routine kehrt nicht zurÃ¼ck. Die Variablen string_result und error_text werden dann nicht freigeben. *** //
 
     try
     {
@@ -363,7 +363,7 @@ XS( XS_Zschimmer_call )
             case VT_EMPTY:      break;  
             case VT_NULL:       break;  // NULL ist auch undefined?
 
-            case VT_ERROR:      if( result.scode != DISP_E_PARAMNOTFOUND )    // Das liefert PerlScript, wenn Funktion keine Rückgabe hat.
+            case VT_ERROR:      if( result.scode != DISP_E_PARAMNOTFOUND )    // Das liefert PerlScript, wenn Funktion keine RÃ¼ckgabe hat.
                                     throw_com( result.scode, "IDispatch::Invoke (result)", method_name.c_str() );
                                 break;
 

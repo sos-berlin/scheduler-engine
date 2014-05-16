@@ -1,4 +1,4 @@
-// sosfld2.h                                    ©1996, SOS GmbH Berlin
+// sosfld2.h                                    Â©1996, SOS GmbH Berlin
 
 #ifndef __SOSFLD2_H
 #define __SOSFLD2_H

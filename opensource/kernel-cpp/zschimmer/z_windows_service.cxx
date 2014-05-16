@@ -1,7 +1,7 @@
 // $Id: z_windows_service.cxx 13786 2009-04-28 08:03:45Z jz $
 
 /*
-    ! pid jeder vmware-vmx.exe merken. Machine läuft nicht, wenn der Prozess beendet ist.
+    ! pid jeder vmware-vmx.exe merken. Machine lÃ¤uft nicht, wenn der Prozess beendet ist.
 */
 
 #include "zschimmer.h"
@@ -192,7 +192,7 @@ void Service::set_service_status( int state, int checkpoint_value, int wait_hint
                                                   //service_status.dwCurrentState == SERVICE_STOP_PENDING ? (int)( _stop_duration_hint*1000 ) 
                                                   //                                                      : 0;
 
-    // Nicht zu lange im Zustand xx_PENDING bleiben, weil die Knöpfe in der Diensteverwaltung gesperrt sind:
+    // Nicht zu lange im Zustand xx_PENDING bleiben, weil die KnÃ¶pfe in der Diensteverwaltung gesperrt sind:
     /*
     if( service_status.dwCurrentState == SERVICE_START_PENDING )
     {
@@ -227,7 +227,7 @@ void Service::set_service_status( int state, int checkpoint_value, int wait_hint
 
     if( service_status.dwCurrentState == SERVICE_STOPPED )
     {
-        _service_status_handle = NULL;  // Sonst beim nächsten Mal: Fehler MSWIN-00000006  Das Handle ist ungültig. [SetServiceStatus] [SERVICE_STOPPED]
+        _service_status_handle = NULL;  // Sonst beim nÃ¤chsten Mal: Fehler MSWIN-00000006  Das Handle ist ungÃ¼ltig. [SetServiceStatus] [SERVICE_STOPPED]
         //start_self_destruction();
     }
 }
@@ -387,7 +387,7 @@ uint Service::service_thread()
     {
         if( _self_destruction_timeout )  start_self_destruction();
 
-        set_service_status( SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei
+        set_service_status( SERVICE_PAUSED );     // Das schaltet die DiensteknÃ¶pfe frei
         event_log( _name, x.what() );
         ret = 99;
     }
@@ -446,7 +446,7 @@ void Service::service_main( DWORD argc, char** argv )
             TerminateProcess( GetCurrentProcess(), 1 ); 
         }   
 
-        TerminateThread( _thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
+        TerminateThread( _thread_handle, 999 );   // Sollte nicht nÃ¶tig sein. NÃ¼tzt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch lÃ¤uft.
 */
         service_thread();
 

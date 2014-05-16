@@ -1,6 +1,6 @@
 //#define MODULE_NAME "comfile"
 //#define AUTHOR      "Joacim Zschimmer"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 
 #include "precomp.h"
 #include "../kram/sysdep.h"
@@ -36,7 +36,7 @@ struct Com_main : Sos_self_deleting
     Bool                           _opened;
     int                            _key_pos;
     int                            _key_len;
-    int                            _index;              // Für Comfile_static::_com_main_array[]
+    int                            _index;              // FÃ¼r Comfile_static::_com_main_array[]
     Bool                           _single_use;         // com ist unwirksam, nur ein Benutzer
 };
 
@@ -198,7 +198,7 @@ void Com_file::prepare_open( const char* param, Open_mode open_mode, const File_
         m->_filename = filename;
         m->_last_user = this;
 
-        // Bei _single_use ist rewind() auf keylose Datei möglich
+        // Bei _single_use ist rewind() auf keylose Datei mÃ¶glich
         m->_single_use = ( ( open_mode & inout ) == in )  &&  m->_key_pos < 0;
 
 /*
@@ -230,7 +230,7 @@ void Com_file::open( const char*, Open_mode, const File_spec& )
 {
     if( !_com_main->_opened ) {
         _com_main->_file.open();
-        // key_position() ist erst jetzt gültig:
+        // key_position() ist erst jetzt gÃ¼ltig:
         //_com_main->_key_pos = _com_main->_file.key_position();
         //_com_main->_key_len = _com_main->_file.key_length();
         _com_main->_opened = true;
@@ -399,7 +399,7 @@ void Com_file::update( const Const_area& record )
         if( l < _com_main->_key_len
          || memcmp( record.byte_ptr() + _com_main->_key_pos, _key.ptr(), _com_main->_key_len ) != 0 )
         {
-            //LOG( "Com_file::update current_key=" << hex << _key <<", geändert="
+            //LOG( "Com_file::update current_key=" << hex << _key <<", geÃ¤ndert="
             //     << Const_area( record.byte_ptr() + _com_main->_key_pos, max( 0, l ) ) << dec << '\n' );
             throw_xc( "SOS-1229" );
         }

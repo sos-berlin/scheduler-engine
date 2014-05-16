@@ -205,7 +205,7 @@ void Script_site::parse( const string& source_text, const string& source_name, i
                                          0, 
                                          0,          // line number
                                          flags,      // SCRIPTTEXT_ISVISIBLE, 
-                                         result,     // Nur für SCRIPTTEXT_ISEXPRESSION
+                                         result,     // Nur fÃ¼r SCRIPTTEXT_ISEXPRESSION
                                          &excepinfo
                                        );
 
@@ -307,7 +307,7 @@ int main( int argc, char** argv )
                     script_parts.push_back( File_path( option_value ) );
                 }
                 else
-                if( option_name == "-sos.ini=" )        // Für new ActiveXObject( "hostware.File" )
+                if( option_name == "-sos.ini=" )        // FÃ¼r new ActiveXObject( "hostware.File" )
                 {
                     set_environment_variable( "SOS_INI", option_value );
                 }

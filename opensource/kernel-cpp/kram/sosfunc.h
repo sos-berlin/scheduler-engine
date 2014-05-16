@@ -1,4 +1,4 @@
-// sosfunc.h                                        ©1996 SOS GmbH Berlin
+// sosfunc.h                                        Â©1996 SOS GmbH Berlin
 //                                                  Joacim Zschimmer
 
 #ifndef __SOSFUNC_H

@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosmain"
-//#define COPYRIGHT   "©1997 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1997 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 /* Applikation, die main() ruft.

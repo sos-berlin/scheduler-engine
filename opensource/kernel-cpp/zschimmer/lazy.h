@@ -31,14 +31,14 @@ struct abstract_lazy {
 template<class T> 
 struct lazy : abstract_lazy<T> {
   protected:
-    void initialize() const;    // Für jedes T eine Spezialisierung implementieren!
+    void initialize() const;    // FÃ¼r jedes T eine Spezialisierung implementieren!
 };
 
 //-------------------------------------------------------------------------------------------------
 
 }
 
-// Für jedes Spezialisierung des Templates lazy<> muss die Methode initialize() implementiert werden 
+// FÃ¼r jedes Spezialisierung des Templates lazy<> muss die Methode initialize() implementiert werden 
 // (dabei T durch den konkrete Klassennamen ersetzen):
 // namespace zschimmer {
 //      void lazy<T>::initialize() {

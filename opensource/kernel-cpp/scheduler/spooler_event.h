@@ -71,7 +71,7 @@ struct Scheduler_event
     Log_level                  _severity;
     bool                       _scheduler_terminates;
     Scheduler_object*          _object;
-    ptr<IUnknown>              _object_iunknown;            // Hält das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
+    ptr<IUnknown>              _object_iunknown;            // HÃ¤lt das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
     string                     _log_path;
     Xc_copy                    _error;
     string                     _message;

@@ -4,7 +4,7 @@
     Subprocess
 
     Objekte im Task-Prozess.
-    Registriert Pid (mit ein paar Angaben für <show_state>) im Scheduler (im Objekt Task).
+    Registriert Pid (mit ein paar Angaben fÃ¼r <show_state>) im Scheduler (im Objekt Task).
 
 
     Scheduler beendet Task erst, wenn alle Subprozesse beendet sind.
@@ -13,11 +13,11 @@
 
     <kill_task> bricht alle Subprozesse ab (wie add_pid).
 
-    stdout und stderr ins Task-Protokoll übernehmen.
+    stdout und stderr ins Task-Protokoll Ã¼bernehmen.
 
     Fehler im Subprozess (signal oder Exit code) -> Task-Fehler
 
-    Subprozesse, für die ein wait() erfolgreich ausgeführt worden ist, 
+    Subprozesse, fÃ¼r die ein wait() erfolgreich ausgefÃ¼hrt worden ist, 
     werden nicht mehr vom Scheduler beobachtet.
 */
 
@@ -154,7 +154,7 @@ STDMETHODIMP Subprocess::put_Environment( BSTR name_bstr, BSTR value_bstr )
 
 STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 {
-    // stderr und stdout in temporäre Datei
+    // stderr und stdout in temporÃ¤re Datei
 
     HRESULT hr = S_OK;
 
@@ -366,7 +366,7 @@ HRESULT Subprocess::Update_register_entry()
             if( !_process.terminated() )
             {
                 vector<Variant> variant_array;
-                // Rückwärts!
+                // RÃ¼ckwÃ¤rts!
                 variant_array.push_back( _process.command_line() );
                 variant_array.push_back( _process.own_process_group() );
                 variant_array.push_back( ignore_signal() );
@@ -380,7 +380,7 @@ HRESULT Subprocess::Update_register_entry()
             {
                 vector<Variant> variant_array;
 
-                // Rückwärts!
+                // RÃ¼ckwÃ¤rts!
                 variant_array.push_back( _process.pid() );
 
                 com_invoke( DISPATCH_METHOD, _task, "Remove_pid", &variant_array );

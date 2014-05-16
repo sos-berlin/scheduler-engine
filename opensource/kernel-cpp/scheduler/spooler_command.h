@@ -30,7 +30,7 @@ enum Show_what_enum
     show_description        = 0x10,
     show_log                = 0x20,
     show_task_history       = 0x40,
-    show_no_subfolders_flag = 0x80,             // JS-506: internees Flag für das weitere Auflössen von Unterordnern
+    show_no_subfolders_flag = 0x80,             // JS-506: internees Flag fÃ¼r das weitere AuflÃ¶ssen von Unterordnern
     show_remote_schedulers  = 0x100,
     show_schedule           = 0x200,
     show_job_chains         = 0x400,
@@ -55,7 +55,7 @@ enum Show_what_enum
 
     show_all_               = 0x40000000,
     show_all                = 0x7FFFFFFF,   // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
-    show_for_database_only  = 0x80000000,   // XML-Element nur für Datenbank
+    show_for_database_only  = 0x80000000,   // XML-Element nur fÃ¼r Datenbank
 };
 
 inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); } 
@@ -123,7 +123,7 @@ struct Command_response : Xml_response
 {
                               //Command_response            ();
 
-    virtual string              complete_text               ()                                      { z::throw_xc( "SCHEDULER-353" ); }  // Nur für Synchronous_command_response
+    virtual string              complete_text               ()                                      { z::throw_xc( "SCHEDULER-353" ); }  // Nur fÃ¼r Synchronous_command_response
     void                        begin_standard_response     ();
     void                        end_standard_response       ();
 };
@@ -339,7 +339,7 @@ struct Command_processor
     Xc_copy                    _error;
     bool                       _validate;
     Security::Level            _security_level;
-    string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet
+    string                     _source_filename;            // Das Verzeichnis wird fÃ¼r <base file=".."> verwendet
     Has_log*                   _log;
     Variable_set_map           _variable_set_map;
     ptr<Command_response>      _response;

@@ -210,7 +210,7 @@ int z_socketpair( int domain, int type, int protocol, SOCKET sockets[2] )
             if( accepted_address.sin_port             != a_address.sin_port             )  throw EACCES;
 
 
-            // Rückgabe
+            // RÃ¼ckgabe
 
             sockets[ 0 ] = a;
             sockets[ 1 ] = b;
@@ -245,8 +245,8 @@ void Ip_address::operator = ( const string& name )
         else
         {
             // Besser auslagern in Host::resolve_name(), weil gethostbyname() einige Sekunden blockieren kann
-            // Host kann ip_adresse oder Name zugewiesen werden, ohne dass gethostbyname() oder gethostbyaddr() gerufen würde.
-            // Ip_address kann dann kein Name zugewiesen werden, nur explizit über resolve_name( name );
+            // Host kann ip_adresse oder Name zugewiesen werden, ohne dass gethostbyname() oder gethostbyaddr() gerufen wÃ¼rde.
+            // Ip_address kann dann kein Name zugewiesen werden, nur explizit Ã¼ber resolve_name( name );
 
             hostent* h = z_gethostbyname( name.c_str() );
             uint32*  p = *(uint32**)h->h_addr_list;

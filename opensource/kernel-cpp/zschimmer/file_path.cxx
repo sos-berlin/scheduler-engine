@@ -87,11 +87,11 @@ bool is_directory_separator( char c )
 //            
 //            if( *it == ".." )    
 //            {
-//                it++, it++;                 // ../.. ist nicht kürzbar
+//                it++, it++;                 // ../.. ist nicht kÃ¼rzbar
 //            }
 //            else
 //            {
-//                it = result.erase( it );    // Vorgänger
+//                it = result.erase( it );    // VorgÃ¤nger
 //                it = result.erase( it );    // ".."
 //            }
 //        }
@@ -192,12 +192,12 @@ bool File_path::is_relative_path() const
     
     if( length() >= 0 )
     {
-        if( is_relative )  is_relative = (*this)[0] != '/'  &&                  // Fängt nicht mit '/' an
+        if( is_relative )  is_relative = (*this)[0] != '/'  &&                  // FÃ¤ngt nicht mit '/' an
                                          (*this)[0] != Z_DIR_SEPARATOR[0];
 
         #if defined Z_WINDOWS
 
-            if( is_relative )  is_relative = find( ':' ) == string::npos;       // Enthält kein ':'
+            if( is_relative )  is_relative = find( ':' ) == string::npos;       // EnthÃ¤lt kein ':'
 
         #endif
     }
@@ -230,7 +230,7 @@ void File_path::prepend_directory( const string& directory_path )
 
     //if( path != ""  &&  ( *path.rbegin() == Z_DIR_SEPARATOR[0]  ||  *path.rbegin() == '/' ) )   // directory_path ohne '/' am Ende?
     //{
-    //    path += directory_separator( directory_path, *this );                                   // '/' anfügen
+    //    path += directory_separator( directory_path, *this );                                   // '/' anfÃ¼gen
     //}
 
     //if( *this != ""  &&  ( *rbegin() == Z_DIR_SEPARATOR[0]  ||  *rbegin() == '/' ) )            // Name mit '/' am Anfang?
@@ -359,8 +359,8 @@ string File_path::normalized() const
 {
 #   ifdef Z_WINDOWS
 
-        // Werden alle Großbuchstaben erkannt?
-        // Beim Umstellung auf UTF-8 lcase() prüfen!
+        // Werden alle GroÃŸbuchstaben erkannt?
+        // Beim Umstellung auf UTF-8 lcase() prÃ¼fen!
 
         string result = lcase( *this );
 
@@ -481,7 +481,7 @@ void File_path::remove_complete_directory() const
 bool File_path::exists() const
 {
     // Unter Windows nicht folgenden Aufruf verwenden, denn der sieht in einem Cache nach. 
-    // Die Datei kann schon gelöscht sein (wenigstens bem Zugriff übers Netzwerk)
+    // Die Datei kann schon gelÃ¶scht sein (wenigstens bem Zugriff Ã¼bers Netzwerk)
     // GetFileAttributes( path.c_str() ) != -1;
 
     struct stat s;
@@ -785,8 +785,8 @@ void File_info::read_stat( const struct stat& stat_buf )
 
 bool File_info::quick_last_write_less( const File_info* a, const File_info* b )
 { 
-    time_t at = a->_last_write_time;     // Muss gefüllt sein!
-    time_t bt = b->_last_write_time;     // Muss gefüllt sein!
+    time_t at = a->_last_write_time;     // Muss gefÃ¼llt sein!
+    time_t bt = b->_last_write_time;     // Muss gefÃ¼llt sein!
 
     if( at < bt )  return true;
     if( at > bt )  return false;
@@ -800,8 +800,8 @@ bool File_info::quick_last_write_less( const File_info* a, const File_info* b )
 
 int File_info::quick_last_write_compare( const File_info* a, const File_info* b )
 { 
-    time_t at = a->_last_write_time;     // Muss gefüllt sein!
-    time_t bt = b->_last_write_time;     // Muss gefüllt sein!
+    time_t at = a->_last_write_time;     // Muss gefÃ¼llt sein!
+    time_t bt = b->_last_write_time;     // Muss gefÃ¼llt sein!
 
     if( at < bt )  return -1;
     if( at > bt )  return +1;

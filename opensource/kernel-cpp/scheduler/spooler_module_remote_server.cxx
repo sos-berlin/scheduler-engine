@@ -69,7 +69,7 @@ void Remote_module_instance_server::close__end()   // synchron
         _file_logger->close();
     }
 
-    try_delete_files();     // Kann verzögern um delete_temporary_files_delay Sekunden
+    try_delete_files();     // Kann verzÃ¶gern um delete_temporary_files_delay Sekunden
 
     _module_instance = NULL;
 
@@ -101,7 +101,7 @@ void Remote_module_instance_server::try_delete_files()
 
             if( deleted )  
             {
-                _log.debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
+                _log.debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht lÃ¶schbar gewesen ist
             }
             else 
             {
@@ -167,8 +167,8 @@ void Com_remote_module_instance_server::Class_data::read_xml_bytes( const string
         if( !_task_process_element  ||  !_task_process_element.nodeName_is( "task_process" ) )  z::throw_xc( Z_FUNCTION, "<task_process> expected" );
     }
 
-    //::close( STDIN_FILENO );  // 2007-07-09 Brauchen wir nicht mehr, also schließen, bevor ein Enkelprozess den Handle erbt und dann die Datei nicht löschbar ist.
-    //STDIN_FILENO neu belegen (mit dup()?), damit nicht irgend ein open() STDIN_FILENO zurückliefert. Windows: "nul:", Unix: "/dev/null".
+    //::close( STDIN_FILENO );  // 2007-07-09 Brauchen wir nicht mehr, also schlieÃŸen, bevor ein Enkelprozess den Handle erbt und dann die Datei nicht lÃ¶schbar ist.
+    //STDIN_FILENO neu belegen (mit dup()?), damit nicht irgend ein open() STDIN_FILENO zurÃ¼ckliefert. Windows: "nul:", Unix: "/dev/null".
 }
 
 //------------Com_remote_module_instance_server::Stdout_stderr_handler::on_thread_has_received_data
@@ -326,7 +326,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "recompile"        )  _server->_module->_recompile       = value[0] == '1';
                 else
-                if( key_word == "script"           )  _server->_module->set_xml_string_text_with_includes( value );    // 2008-02-25 JS-215: <include> sind schon vom Client aufgelöst worden
+                if( key_word == "script"           )  _server->_module->set_xml_string_text_with_includes( value );    // 2008-02-25 JS-215: <include> sind schon vom Client aufgelÃ¶st worden
                 else
                 if( key_word == "job"              )  job_name                          = value;
                 else
@@ -353,7 +353,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "process.shell_variable_prefix"  )  _server->_module->_process_shell_variable_prefix = value;
                 else
-                if( key_word == "monitor.language" ) // Muss der erste Parameter für den Module_monitor sein!
+                if( key_word == "monitor.language" ) // Muss der erste Parameter fÃ¼r den Module_monitor sein!
                 {
                     monitor = Z_NEW( Module_monitor );
                     monitor->_module = Z_NEW( Module( (Scheduler*)NULL, (File_based*)NULL, include_path, NULL ) );  
@@ -416,7 +416,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
 void Com_remote_module_instance_server::set_vm_class_path(javabridge::Vm* java_vm , const string& task_class_path) const // JS-540
 {
-    // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
+    // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (Ã¼ber Javascript) Java benutzt.
     //java_vm->set_log( &_log );
     if( !task_class_path.empty() )
         java_vm->set_class_path( task_class_path );
@@ -532,7 +532,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         string stderr_path = _class_data->_task_process_element.getAttribute("stderr_path");
         if (!stdout_path.empty())
             if (Process_module_instance *o = dynamic_cast<Process_module_instance*>(+_server->_module_instance)) 
-                o->set_stdout_path(stdout_path);  // Für Process_module_instance::get_first_line_as_state_text() und verhindert das Öffnen eigener stdout/stderr-Dateien (s. Process_module_instance::begin__start())
+                o->set_stdout_path(stdout_path);  // FÃ¼r Process_module_instance::get_first_line_as_state_text() und verhindert das Ã–ffnen eigener stdout/stderr-Dateien (s. Process_module_instance::begin__start())
         
         Async_operation* operation = _server->_module_instance->begin__start();
 
@@ -557,7 +557,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             if (_server->_file_logger->has_files()) 
                 _server->_file_logger->start_thread();
 
-            // Bei einer Exception in dieser Methode Begin() bekommt Task::do_something() ok=false zurück und
+            // Bei einer Exception in dieser Methode Begin() bekommt Task::do_something() ok=false zurÃ¼ck und
             // gibt dann selbst stdout und stderr aus (soweit nicht remote)
         }
 

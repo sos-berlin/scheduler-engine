@@ -24,7 +24,7 @@ using namespace zschimmer;
 
 //-------------------------------------------------------------------------------------------static
 
-static posix::Undestroyable_mutex interlocked_increment_mutex ( "InterlockedIncrement", Mutex::kind_nonrecursive );    // Für InterlockedIncrement() und InterlockedDecrement()
+static posix::Undestroyable_mutex interlocked_increment_mutex ( "InterlockedIncrement", Mutex::kind_nonrecursive );    // FÃ¼r InterlockedIncrement() und InterlockedDecrement()
 
 //-----------------------------------------------------------------------------InterlockedIncrement
 

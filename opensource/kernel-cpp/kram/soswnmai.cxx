@@ -2,7 +2,7 @@
 
 #include "precomp.h"
 //#define MODULE_NAME "soswnmai"
-//#define COPYRIGHT   "© 1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© 1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 /* Applikation, die main() ruft.

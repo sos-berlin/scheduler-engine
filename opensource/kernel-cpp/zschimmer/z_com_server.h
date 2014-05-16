@@ -3,7 +3,7 @@
 /*
     ZU TUN:
 
-    Templates für IDispatch auf IUnknown zurückführen. Die sind fast gleich implementiert.
+    Templates fÃ¼r IDispatch auf IUnknown zurÃ¼ckfÃ¼hren. Die sind fast gleich implementiert.
 */
 
 #ifndef __Z_COM_SERVER_H
@@ -36,7 +36,7 @@ HRESULT                         Set_excepinfo               ( const _com_error&,
 HRESULT                         Set_excepinfo               ( const char* descr, const string& source );
 
 //---------------------------------------------------------------------------------------Com_method
-// Com_method brauchen wir eigentlich nur für Unix.
+// Com_method brauchen wir eigentlich nur fÃ¼r Unix.
 
 #if !defined _MSC_VER  //||  _MSC_VER >= 1400      // Visual Studio .Net 2003 (7.1) kennt __VA_ARGS__ nicht. Visual Studio 2005 kann mit leerem __VA_ARGS__ nicht umgehen
 
@@ -74,7 +74,7 @@ struct Com_method
 */
 
     int                        _flags;              // Z.B. DISPATCH_METHOD oder DISPATCH_PROPERTYGET
-    DISPID                     _dispid;             // irgendwas > 0 (im Allgemeinen),  für jeden Methodennamen eindeutig
+    DISPID                     _dispid;             // irgendwas > 0 (im Allgemeinen),  fÃ¼r jeden Methodennamen eindeutig
     const char*                _name;               // Name der Methode
     Com_method_ptr             _method;             // Methode
     Variant_type               _result_type;
@@ -110,7 +110,7 @@ struct Typelib_ref
     GUID                       _typelib_id;
     string                     _version_string;
     HINSTANCE                  _hinstance;
-    Com_class_descriptor*      _class_descriptor_list;     // Liste aller Klassenbeschreibungen (über _next verkettet), statisch initialisieren!
+    Com_class_descriptor*      _class_descriptor_list;     // Liste aller Klassenbeschreibungen (Ã¼ber _next verkettet), statisch initialisieren!
     ptr<ITypeLib>              _typelib;
 
 #   ifndef Z_COM
@@ -119,9 +119,9 @@ struct Typelib_ref
 };
 
 //-----------------------------------------------------------------------------Com_class_descriptor
-// Nur für static Objekte!
+// Nur fÃ¼r static Objekte!
 
-typedef HRESULT              (* Com_class_factory_creator )( const CLSID&, const IID&, IUnknown** );    // Für perl_scripting_engine.cxx
+typedef HRESULT              (* Com_class_factory_creator )( const CLSID&, const IID&, IUnknown** );    // FÃ¼r perl_scripting_engine.cxx
 
 
 struct Com_class_descriptor : Non_cloneable
@@ -129,7 +129,7 @@ struct Com_class_descriptor : Non_cloneable
     enum Creatable { non_creatable, creatable };
 
                                 Com_class_descriptor        ( Typelib_ref*, const CLSID&, const IID&, const char* name, Creatable = non_creatable, const Com_method* = NULL );
-                              //Com_class_descriptor        ( Com_class_factory_creator, const CLSID&, const IID& );         // Für perl_scripting_engine.cxx
+                              //Com_class_descriptor        ( Com_class_factory_creator, const CLSID&, const IID& );         // FÃ¼r perl_scripting_engine.cxx
     virtual                    ~Com_class_descriptor        ()                                      {}
 
     void                        Register_class              ();
@@ -168,7 +168,7 @@ struct Com_class_descriptor : Non_cloneable
     string                     _title;
     bool                       _creatable;
     ptr<ITypeInfo>             _typeinfo;
-  //Com_class_factory_creator  _creator;                    // Für perl_scripting_engine.cxx
+  //Com_class_factory_creator  _creator;                    // FÃ¼r perl_scripting_engine.cxx
 };
 
 //-----------------------------------------------------------------creatable_com_class_descriptor<>

@@ -1,4 +1,4 @@
-// sosdumcl.h                               © 1995 SOS GmbH Berlin
+// sosdumcl.h                               Â© 1995 SOS GmbH Berlin
 
 #ifndef __SOSDUMCL_H
 #define __SOSDUMCL_H
@@ -28,7 +28,7 @@ struct Sos_dummy_client : Sos_object
     Const_area_handle           send_and_await_data     ( Request_msg*, Const_area_handle* key = 0 );
     void                        send_and_await_ack      ( Request_msg* );
     Sos_object_ptr              send_and_await_object_ref( Request_msg* );
-    Const_area_handle           send_and_await_data_request( Data_msg* );  // für den Fileserver
+    Const_area_handle           send_and_await_data_request( Data_msg* );  // fÃ¼r den Fileserver
     Sos_object_ptr              create                  ( const Sos_string& name, Sos_object* owner );
     void                        await_ack               ();
 
@@ -41,11 +41,11 @@ struct Sos_dummy_client : Sos_object
   private:
     friend struct               Sos_dummy_client_mailbox;
 
-    void                       _obj_data_msg            ( Data_msg* );          // für wait_data()
-    void                       _obj_other_msg           ( Sos_msg* );           // für send_and_await_xxx()
-    void                       _obj_data_reply_msg      ( Data_reply_msg* );    // für send_and_await_data()
-    void                       _obj_error_msg           ( Error_msg* );         // für send_and_await_xxx()
-    void                       _obj_object_ref_msg      ( Object_ref_msg* );    // für send_and_await_object_ref()
+    void                       _obj_data_msg            ( Data_msg* );          // fÃ¼r wait_data()
+    void                       _obj_other_msg           ( Sos_msg* );           // fÃ¼r send_and_await_xxx()
+    void                       _obj_data_reply_msg      ( Data_reply_msg* );    // fÃ¼r send_and_await_data()
+    void                       _obj_error_msg           ( Error_msg* );         // fÃ¼r send_and_await_xxx()
+    void                       _obj_object_ref_msg      ( Object_ref_msg* );    // fÃ¼r send_and_await_object_ref()
 
     SOS_DECLARE_MSG_DISPATCHER
 

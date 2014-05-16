@@ -43,7 +43,7 @@ struct Process : zschimmer::Object, Scheduler_object
         State                      _state;
         ptr<Process>               _process;
         Async_operation*           _close_session_operation;
-        ptr<Close_operation>       _hold_self;              // Objekt hält sich selbst, wenn es selbstständig, ohne Antwort, den Process schließen soll
+        ptr<Close_operation>       _hold_self;              // Objekt hÃ¤lt sich selbst, wenn es selbststÃ¤ndig, ohne Antwort, den Process schlieÃŸen soll
     };
 
 
@@ -134,7 +134,7 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_log_stdout_and_stderr       ( bool b )                              { _log_stdout_and_stderr = b; }
     void                    set_login                       (Login* o)                              { _login = o; }
     Process_id                  process_id                  () const                                { return _process_id; }
-    int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
+    int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, Ã¼ber Connection_to_own_server_thread
     Process_id                  remote_process_id           () const                                { return _remote_process_id; }
     bool                     is_terminated                  ();
     void                        end_task                    ();
@@ -169,7 +169,7 @@ struct Process : zschimmer::Object, Scheduler_object
     int                        _exit_code;
     int                        _termination_signal;
     Time                       _running_since;
-    bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
+    bool                       _temporary;                  // LÃ¶schen, wenn kein Module_instance mehr lÃ¤uft
     long32                     _module_instance_count;
     Module_instance*           _module_instance;
     ptr<Login>                 _login;
@@ -186,7 +186,7 @@ struct Process : zschimmer::Object, Scheduler_object
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;
     const Process_id           _process_id;
-    bool                       _log_stdout_and_stderr;      // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
+    bool                       _log_stdout_and_stderr;      // Prozess oder Thread soll stdout und stderr selbst Ã¼ber COM/TCP protokollieren
 };
 
 //----------------------------------------------------------------------Process_class_configuration
@@ -230,7 +230,7 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
 
     int                        _max_processes;
     Host_and_port              _remote_scheduler;
-    // Neue Einstellungen in Process_class::set_configuration() berücksichtigen!
+    // Neue Einstellungen in Process_class::set_configuration() berÃ¼cksichtigen!
 
 
     static Class_descriptor     class_descriptor;

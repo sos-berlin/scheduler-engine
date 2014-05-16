@@ -12,7 +12,7 @@ using namespace zschimmer::file;
 //-------------------------------------------------------------------------------------------------
 
 const int                       file_timestamp_delay        = 2+1;      // FAT-Zeitstempel sind 2 Sekunden genau
-const int                       remove_delay                = 2;        // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
+const int                       remove_delay                = 2;        // Nur Dateien, die solange weg sind, gelten als gelÃ¶scht. Sonst wird removed/added zu modified
 
 #ifdef Z_WINDOWS
     const int                   directory_watch_interval_min = 60;
@@ -270,7 +270,7 @@ bool Directory::read( Read_flags read_what, double minimum_age )
 
 
 
-            /// Dateien hinzugefügt?
+            /// Dateien hinzugefÃ¼gt?
 
             while( fi != ordered_file_infos.end()  &&
                    ( e == _ordered_list.end()  ||  (*fi)->path().name() < e->_file_info->path().name() ) )
@@ -301,14 +301,14 @@ bool Directory::read( Read_flags read_what, double minimum_age )
             
 
 
-            /// Dateien gelöscht?
+            /// Dateien gelÃ¶scht?
 
             while( e != _ordered_list.end()  &&
                    ( fi == ordered_file_infos.end()  ||  (*fi)->path().name() > e->_file_info->path().name() ) )  // Datei entfernt?
             {
                 if( e->_subdirectory )
                 {
-                    e = _ordered_list.erase( e );       // Verzeichniseinträge nicht altern lassen, sofort löschen
+                    e = _ordered_list.erase( e );       // VerzeichniseintrÃ¤ge nicht altern lassen, sofort lÃ¶schen
                     _directory_tree->set_last_change_at( now );
                     directory_has_changed = true;
                 }
@@ -411,7 +411,7 @@ void Directory::merge_new_entries( const Directory* other )
 
 void Directory::assert_ordered_list()
 {
-#   ifndef NDEBUG   // Ordnung prüfen
+#   ifndef NDEBUG   // Ordnung prÃ¼fen
     {
         Entry_list::const_iterator a = _ordered_list.begin();
         if( a != _ordered_list.end() )  
@@ -633,13 +633,13 @@ bool Folder_directory_lister::open( const File_path& root, const Absolute_path& 
     {
         if( path.is_root()  &&  !complete_path.exists() )  z::throw_xc( "SCHEDULER-882", complete_path, x );    // Jemand hat das Konfigurationsverzeichnis entfernt
 
-        if( x.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )  // ERRNO-2  Verzeichnis gelöscht
+        if( x.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )  // ERRNO-2  Verzeichnis gelÃ¶scht
         {
             _is_removed = true; 
             _log->debug3( x.what() );
         }
         else
-        if( x.code() == ( S() << "ERRNO-" << EINVAL ).to_string() )  // ERRNO-22 "invalid argument"? Die Bedeutung ist nicht bekannt. Für Püschel. Möglicherweise eine Datei statt einem Verzeichnis
+        if( x.code() == ( S() << "ERRNO-" << EINVAL ).to_string() )  // ERRNO-22 "invalid argument"? Die Bedeutung ist nicht bekannt. FÃ¼r PÃ¼schel. MÃ¶glicherweise eine Datei statt einem Verzeichnis
         {
             _log->info( x.what() ); 
         }

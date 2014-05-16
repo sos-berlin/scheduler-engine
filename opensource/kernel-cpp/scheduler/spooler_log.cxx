@@ -117,7 +117,7 @@ struct Log_set_console_colors_base
 
             if( attributes & BACKGROUND_INTENSITY
              && attributes & BACKGROUND_RED 
-             && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiß oder gelb
+             && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiÃŸ oder gelb
             {
                 attributes &= ~( FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE );
 
@@ -304,7 +304,7 @@ Log::~Log()
 }
 
 //-------------------------------------------------------------------------------Log::set_directory
-// Für allgemeines Spooler-Protokoll
+// FÃ¼r allgemeines Spooler-Protokoll
 
 void Log::set_directory( const string& directory )         
 {
@@ -316,7 +316,7 @@ void Log::set_directory( const string& directory )
 }
 
 //------------------------------------------------------------------------------------Log::open_new
-// Für allgemeines Spooler-Protokoll
+// FÃ¼r allgemeines Spooler-Protokoll
 
 void Log::open_new()
 {
@@ -415,7 +415,7 @@ void Log::write( Log_level level, Prefix_log* extra_log, Prefix_log* order_log, 
         }
         else
         {
-            _log_buffer.append( text, len );  // Das ist derselbe Mechanismus wie in Prefix_log. Das könnte man zusammenfassen.
+            _log_buffer.append( text, len );  // Das ist derselbe Mechanismus wie in Prefix_log. Das kÃ¶nnte man zusammenfassen.
         }
 
         if( extra_log )  extra_log->write( text, len );
@@ -522,7 +522,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             if( extra_log )  extra_log->signal_events();
             if( order_log )  order_log->signal_events();
 
-            if( this == &_spooler->_base_log )  _spooler->log()->signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
+            if( this == &_spooler->_base_log )  _spooler->log()->signal_events();   // Nicht schÃ¶n, aber es gibt sowieso nur ein Log.
         }
     }
 }
@@ -872,7 +872,7 @@ void Prefix_log::write( const char* text, int len )
 
     if( _file == -1 )
     {
-        if( this == _spooler->_log  ||  _spooler->log_directory() != "*stderr" )        // Datei wird noch geöffnet?
+        if( this == _spooler->_log  ||  _spooler->log_directory() != "*stderr" )        // Datei wird noch geÃ¶ffnet?
         {
             if (!_log_buffer_is_full) {
                 if (_log_buffer.length() + len > log_buffer_max) {
@@ -983,7 +983,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
 
 
         // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
-        // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
+        // mail_on_error==false oder mail_on_process==false nicht wie gewÃ¼nscht,
         // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
         // Datei kann offen bleiben   //finish_log();

@@ -61,7 +61,7 @@ struct Licence_key_file : Abs_file
     Fill_zero                  _zero_;
     Sos_licence                _licence;
     
-    bool                       _installed_keys;         // Installierte Lizenzschlüssel liefern
+    bool                       _installed_keys;         // Installierte LizenzschlÃ¼ssel liefern
     std::list<string>::iterator _installed_keys_it;
 
     Sos_licence                _products_of_licence;
@@ -100,7 +100,7 @@ Sos_string Sos_licence::key() const
     Sos_seriennr*           s   = &_seriennr[ 1 ];
     Sos_limited_text<100>   key = s->_ausstellerkuerzel;
 
-    Sos_date( s->_date.year(), s->_date.month(), s->_date.day() );  // Datum prüfen
+    Sos_date( s->_date.year(), s->_date.month(), s->_date.day() );  // Datum prÃ¼fen
 
     key += '-';
     key += s->_kundenkuerzel;
@@ -166,9 +166,9 @@ void Licence_key_file::get_master_licence( Sos_licence* result, const string& au
 
 void Licence_key_file::check_rights()
 {
-    // Nur Codes sind erlaubt, die in installierten Schlüsseln mit Code 10 (Lizenzgenerator) vorkommen.
-    // Und diese Schlüssel müssen als Kunden den zu generierenden Aussteller führen,
-    // und diese Schlüssel müssen als Austeller SOS führen.
+    // Nur Codes sind erlaubt, die in installierten SchlÃ¼sseln mit Code 10 (Lizenzgenerator) vorkommen.
+    // Und diese SchlÃ¼ssel mÃ¼ssen als Kunden den zu generierenden Aussteller fÃ¼hren,
+    // und diese SchlÃ¼ssel mÃ¼ssen als Austeller SOS fÃ¼hren.
 
     Sos_seriennr* s = &_licence._seriennr[ 1 ];
 

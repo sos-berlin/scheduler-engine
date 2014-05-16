@@ -141,7 +141,7 @@ struct Abstract_connector : Async_operation, Scheduler_object
         if (xml::Element_ptr directory_element = response_document.select_node("/spooler/answer/configuration.directory")) {
             _supervisor_client->set_using_central_configuration();
             update_directory_structure(root_path, directory_element);
-            _spooler->folder_subsystem()->handle_folders();     // cache-Verzeichnis würde reichen
+            _spooler->folder_subsystem()->handle_folders();     // cache-Verzeichnis wÃ¼rde reichen
         } 
     }
 
@@ -193,9 +193,9 @@ struct Abstract_connector : Async_operation, Scheduler_object
                     log()->info(message_string("SCHEDULER-701", path, last_write_time.as_string(_spooler->_time_zone_name)));
 
                     File_path temporary_path = file_path + "~";
-                    //if( temporary_path.exists() )  temporary_path.unlink();     // Löschen, damit Dateirechte gesetzt werden können (Datei sollte nicht vorhanden sein)
+                    //if( temporary_path.exists() )  temporary_path.unlink();     // LÃ¶schen, damit Dateirechte gesetzt werden kÃ¶nnen (Datei sollte nicht vorhanden sein)
 
-                    File file(temporary_path, "wb"); //, 0400 );                   // Nur lesbar, damit keiner versehentlich die Datei ändert
+                    File file(temporary_path, "wb"); //, 0400 );                   // Nur lesbar, damit keiner versehentlich die Datei Ã¤ndert
                     file.print(content);
                     file.close();
 

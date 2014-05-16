@@ -1,5 +1,5 @@
 // $Id: system_command.cxx 13164 2007-11-14 18:00:23Z jz $
-// © 2004 Joacim Zschimmer
+// Â© 2004 Joacim Zschimmer
 
 #include "zschimmer.h"
 #include "log.h"
@@ -28,7 +28,7 @@ namespace zschimmer {
 
 //--------------------------------------------------------------------------System_command::execute
 
-/* Neuer Code für Windows, der das Kommando direkt (nicht über cmd.exe) ruft und deshalb die Anführungszeichen korrekt übergibt: 
+/* Neuer Code fÃ¼r Windows, der das Kommando direkt (nicht Ã¼ber cmd.exe) ruft und deshalb die AnfÃ¼hrungszeichen korrekt Ã¼bergibt: 
    2007-11-14
 
 void System_command::execute( const string& cmd )
@@ -56,7 +56,7 @@ void System_command::execute( const string& cmd )
 
 #   ifdef Z_WINDOWS
 
-        // Wir nehmen nicht system(), weil das in Anführungszeichen gesetzte Parameter nicht korrekt übergibt.
+        // Wir nehmen nicht system(), weil das in AnfÃ¼hrungszeichen gesetzte Parameter nicht korrekt Ã¼bergibt.
 
         Process process;
         process.set_stdout_path( stdout_file.path() );
@@ -71,7 +71,7 @@ void System_command::execute( const string& cmd )
         my_cmd.append( " >"  + stdout_file.path() );
 
         Z_LOG( "signal(SIGCHLD,SIG_DFL)\n" );
-        ::signal( SIGCHLD, SIG_DFL );                 // 2006-03-04 Für Suse 9.2  (Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.)
+        ::signal( SIGCHLD, SIG_DFL );                 // 2006-03-04 FÃ¼r Suse 9.2  (Java verÃ¤ndert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.)
 
         Z_LOG( "system " << my_cmd << "\n" );
 
@@ -143,7 +143,7 @@ void System_command::execute( const string& cmd )
 
 #   ifdef Z_UNIX
         Z_LOG( "signal(SIGCHLD,SIG_DFL)\n" );
-        ::signal( SIGCHLD, SIG_DFL );                 // 2006-03-04 Für Suse 9.2  (Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.)
+        ::signal( SIGCHLD, SIG_DFL );                 // 2006-03-04 FÃ¼r Suse 9.2  (Java verÃ¤ndert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.)
 #   endif
 
 

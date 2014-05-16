@@ -83,7 +83,7 @@ Java_message::Java_message( zschimmer::javabridge::Vm* vm )
 
 Java_message::~Java_message()
 {
-    // Das ist etwas krumm programmiert: _java_vm müssen wir _nach_ der Oberklasse Global_jobject freigeben.
+    // Das ist etwas krumm programmiert: _java_vm mÃ¼ssen wir _nach_ der Oberklasse Global_jobject freigeben.
 
     {
         Env env = jni_env();
@@ -204,7 +204,7 @@ void Java_message::set_content_type( const string& content_type )
 void Java_message::set_encoding( const string& encoding )
 {
     //throw_xc( "Java_message::set_encoding" );
-    //LOG( "Java_message::set_encoding(\"" << encoding << "\") wird für JavaMail ignoriert\n" );
+    //LOG( "Java_message::set_encoding(\"" << encoding << "\") wird fÃ¼r JavaMail ignoriert\n" );
     set( "encoding", encoding );
 }
 

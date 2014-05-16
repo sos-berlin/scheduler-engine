@@ -19,7 +19,7 @@ Include_command::Include_command( Scheduler* scheduler, const File_based* source
     _source_file_based(source_file_based),
     _include_path(include_path)
 {
-    // Hier keine Exception auslˆsen
+    // Hier keine Exception ausl√∂sen
     // Anwendung:  
     //      Include_command include_command ( ... );
     //      try { include_command.xxx(); } catch( x ) { throw ... include_command.obj_name() ...; }
@@ -74,7 +74,7 @@ void Include_command::initialize()
             }
             else
             {
-                z::throw_xc( "SCHEDULER-462" );     // _attribute_live_file="..." hier nicht mˆglich
+                z::throw_xc( "SCHEDULER-462" );     // _attribute_live_file="..." hier nicht m√∂glich
             }
         }
 
@@ -127,7 +127,7 @@ string Include_command::register_include_and_read_content_bytes( File_based* sou
 
     if( source_file_based  &&  denotes_configuration_file() )
     {
-        source_file_based->register_include( path(), _file_info );       // Auch wenn Datei sich nicht ˆffnen l‰sst
+        source_file_based->register_include( path(), _file_info );       // Auch wenn Datei sich nicht √∂ffnen l√§sst
     }
 
     file.check_error( "open" );
@@ -174,7 +174,7 @@ string Include_command::obj_name() const
 //                _file_info = file_info;
 //            }
 //        }
-//        catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }      // F¸r andere Fehler als ENOENT
+//        catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }      // F√ºr andere Fehler als ENOENT
 //    }
 //
 //    return _file_info;
@@ -264,12 +264,12 @@ file::File_info* Has_includes::changed_included_file_info()
                     else
                     if( directory_entry->_file_info->last_write_time() != file_info->last_write_time() )  
                     {
-                        result = directory_entry->_file_info;  // Datei ge‰ndert
+                        result = directory_entry->_file_info;  // Datei ge√§ndert
                     }
                 }
             }
             else
-            if( file_info )  result = file_info;      // Datei ist gelˆscht (oder sollte das ignoriert werden, sodass der Job weiterl‰uft?)
+            if( file_info )  result = file_info;      // Datei ist gel√∂scht (oder sollte das ignoriert werden, sodass der Job weiterl√§uft?)
 
             if( result )  break;
         }
@@ -357,7 +357,7 @@ xml::Element_ptr Has_includes::dom_element( const xml::Document_ptr& document, c
 //        else
 //        {
 //            Z_LOG2( "zschimmer", Z_FUNCTION << " <include _attribute_live_file='" << path << "'>: Datei fehlt\n" );
-//            // Wenn die inkludierte Datei gelˆscht ist, lassen wir den Job in Ruhe
+//            // Wenn die inkludierte Datei gel√∂scht ist, lassen wir den Job in Ruhe
 //        }
 //    }
 //}

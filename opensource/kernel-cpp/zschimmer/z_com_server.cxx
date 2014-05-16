@@ -424,7 +424,7 @@ HRESULT Com_class_descriptor::Create_instance( IUnknown* outer, const IID& iid, 
     else
     {
         //return E_NOINTERFACE;
-        // Vielleicht liefert QueryInterface() das gewünschte Interface. Sonst wird das Objekt umsonst angelegt und wieder verworfen.
+        // Vielleicht liefert QueryInterface() das gewÃ¼nschte Interface. Sonst wird das Objekt umsonst angelegt und wieder verworfen.
 
         ptr<IUnknown> iunknown;
         void*         void_ptr = NULL;

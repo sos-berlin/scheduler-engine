@@ -13,10 +13,10 @@ struct SOS_CLASS Area;
 struct SOS_CLASS Sos_object_base;
 
 const int sos_max_error_code_length = 24;     // ohne 0-Byte
-const int max_msg_insertions        = 4;      // Anzahl Einfügungen in Xc
+const int max_msg_insertions        = 4;      // Anzahl EinfÃ¼gungen in Xc
 
 //#if defined SYSTEM_SOLARIS
-const int max_msg_insertion_length  = 1000;   // jz 10.9.97: Erhöht von 100 auf 100, sossv2.cxx show_msg fügt ggfs. Blanks ein.
+const int max_msg_insertion_length  = 1000;   // jz 10.9.97: ErhÃ¶ht von 100 auf 100, sossv2.cxx show_msg fÃ¼gt ggfs. Blanks ein.
 //#endif
 
 struct Const_area;
@@ -68,11 +68,11 @@ extern const Source_pos std_source_pos;
 struct Xc_base;
 
 
-struct Msg_insertions //: Sos_self_deleting  für bei Solaris C++ 4.0.1 zum Fehler
+struct Msg_insertions //: Sos_self_deleting  fÃ¼r bei Solaris C++ 4.0.1 zum Fehler
 {
-    /* Einfügungen für den Meldungstext.
-       Die Einfügungen werden in dynamisch angefordertem Speicher gehalten.
-       Wenn kein Speicher verfügbar ist, werden Einfügungen ignoriert.
+    /* EinfÃ¼gungen fÃ¼r den Meldungstext.
+       Die EinfÃ¼gungen werden in dynamisch angefordertem Speicher gehalten.
+       Wenn kein Speicher verfÃ¼gbar ist, werden EinfÃ¼gungen ignoriert.
     */
                                 Msg_insertions          () THROW_NONE;
                                 Msg_insertions          ( const char* ) THROW_NONE;
@@ -204,7 +204,7 @@ struct Xc : Xc_base
     //DEFINE_OBJ_COPY( Xc )
 };
 
-// Solaris nennt folgendes obsolet, weil temporäres Objekt bei throw erzeugt wird (warum?)
+// Solaris nennt folgendes obsolet, weil temporÃ¤res Objekt bei throw erzeugt wird (warum?)
 /*
 Xc& operator^ ( Xc& x, const char* s            )  { return x.insert( s ); }
 inline Xc& operator^ ( Xc& x, const Sos_string& s      )  { return x.insert( s ); }
@@ -213,7 +213,7 @@ inline Xc& operator^ ( Xc& x, int4 s )                    { return x.insert( s )
 */
 
 //--------------------------------------------------------------------------------------Xc_copy
-// Xc_ptr ohne Referenzzählung, also nur ein Xc_ptr für eine Xc.
+// Xc_ptr ohne ReferenzzÃ¤hlung, also nur ein Xc_ptr fÃ¼r eine Xc.
 
 struct Xc_copy
 {
@@ -387,7 +387,7 @@ Z_NORETURN inline void throw_xc( const char* error_code, const string& a, int b 
 
 Z_NORETURN void throw_xc_hex                ( const char* e, const void* p, uint len );
 
-Z_NORETURN void throw_errno                 ( int, const char* function );        // Löst die passende Exception aus
+Z_NORETURN void throw_errno                 ( int, const char* function );        // LÃ¶st die passende Exception aus
 Z_NORETURN void throw_errno                 ( int e, const Msg_insertions& );
 Z_NORETURN void throw_errno                 ( int, const char* function, const Sos_object_base* );
 Z_NORETURN void throw_errno                 ( int, const char* function, const char* );
@@ -484,25 +484,25 @@ inline void raise_to_THROW_NONE
 }
 
 
-// raise löst eine Exception aus (auáerhalb eines Exception-Handlers)
+// raise lÃ¶st eine Exception aus (auÃ¡erhalb eines Exception-Handlers)
 #define raise(name,error_code) {                                              \
         _XC.raise_exception (name, error_code);                               \
         goto exception_handler;                                               \
 }
 
-// raise löst eine Exception aus (auáerhalb eines Exception-Handlers)
+// raise lÃ¶st eine Exception aus (auÃ¡erhalb eines Exception-Handlers)
 #define raise_errno(_errno) {                                                 \
         _XC.raise_exception (_errno);                                         \
         goto exception_handler;                                               \
 }
 
-// x_raise löst eine Exception in einem Exception-Handler aus
+// x_raise lÃ¶st eine Exception in einem Exception-Handler aus
 #define x_raise(name,error_code) {                                            \
         _XC.raise_exception (name, error_code);                               \
         return;                                                               \
 }
 
-// Löst dieselbe Exception in einem Exception Handler nochmal aus
+// LÃ¶st dieselbe Exception in einem Exception Handler nochmal aus
 #define raise_again {                                                         \
         _XC._raise_again();                                                   \
         /*goto exception_handler; */                                          \

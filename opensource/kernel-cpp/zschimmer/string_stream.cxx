@@ -25,7 +25,7 @@ String_stream::~String_stream()
 size_t String_stream::length()
 { 
     size_t result = tellp(); 
-    return (int)result == -1? 0 : result;     // Am ¡nfang liefert tellp() BADOFF
+    return (int)result == -1? 0 : result;     // Am √Ånfang liefert tellp() BADOFF
 } 
 
 //--------------------------------------------------------------------------String_stream::truncate

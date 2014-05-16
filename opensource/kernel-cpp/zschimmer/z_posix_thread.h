@@ -33,7 +33,7 @@ struct Thread : zschimmer::Thread_base, Non_cloneable
 
     bool                        thread_is_running           ()                                      { return _thread_is_running; }
     Id                          thread_id                   ()                                      { return _thread_id; }
-  //void                    set_thread_id                   ( Id id )                               { _thread_id = id; }            // Nur sinnvoll, wenn das Objekt mal nicht als Thread l‰uft (z.B. Task_subsystem)
+  //void                    set_thread_id                   ( Id id )                               { _thread_id = id; }            // Nur sinnvoll, wenn das Objekt mal nicht als Thread l√§uft (z.B. Task_subsystem)
     pthread_t                   thread_handle               ()                                      { return _pthread_handle; }
 
   //bool                        try_set_thread_priority     ( int pri )                             { return SetThreadPriority( _thread_handle._handle, pri ) != 0; }
@@ -50,7 +50,7 @@ struct Thread : zschimmer::Thread_base, Non_cloneable
     Fill_zero                  _zero_;
   //pthread_attr_t             _pthread_attr;
     pthread_t                  _pthread_handle;
-    Id                         _thread_id;                  // Kopie von _pthread_handle oder von auﬂen gesetzt (dann _pthread_handle == NULL, f¸r Spooler-Threads)
+    Id                         _thread_id;                  // Kopie von _pthread_handle oder von au√üen gesetzt (dann _pthread_handle == NULL, f√ºr Spooler-Threads)
   //Event                      _thread_event;
     bool                       _thread_is_running;
     int                        _thread_pid;

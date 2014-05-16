@@ -23,12 +23,12 @@ const int                       max_weekdays_per_month      = 5;
 
 enum With_single_start      // Welche <period> soll gesucht werden?
 {
-    wss_next_period                 = 0x01,                 // Nächste <period> mit end vor einem Zeitpunkt, begin ist egal
+    wss_next_period                 = 0x01,                 // NÃ¤chste <period> mit end vor einem Zeitpunkt, begin ist egal
     wss_next_single_start           = 0x02,
     wss_next_period_or_single_start = 0x03,
-    wss_next_begin                  = 0x04,                 // Nächste <period> mit begin ab einem Zeitpunkt
+    wss_next_begin                  = 0x04,                 // NÃ¤chste <period> mit begin ab einem Zeitpunkt
     wss_next_begin_or_single_start  = 0x06,
-    wss_next_any_start              = 0x08,                 // Nächster Start: single_start, start_once, repeat (nur erster Start in der Periode)
+    wss_next_any_start              = 0x08,                 // NÃ¤chster Start: single_start, start_once, repeat (nur erster Start in der Periode)
     wss_when_holiday_ignore_holiday       = 0x10,           // <period when_holiday="ignore_holiday">
     wss_when_holiday_next_non_holiday     = 0x20,           // <period when_holiday="next_non_holiday">
     wss_when_holiday_previous_non_holiday = 0x40            // <period when_holiday="next_previous_holiday">
@@ -74,8 +74,8 @@ struct Period
     enum With_or_without_date { without_date, with_date };
     void                        set_dom                     ( const xml::Element_ptr&, With_or_without_date = without_date, const Period* deflt = NULL );
 
-    bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
-    bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //für set<>
+    bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //fÃ¼r set<>
+    bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //fÃ¼r set<>
     bool                        operator ==                 ( const Period& o ) const;
     bool                        operator !=                 ( const Period& o ) const               { return !( *this == o ); }
     bool                        is_in_time                  ( const Time& t ) const                 { return t >= _begin && t < _end; }
@@ -104,13 +104,13 @@ struct Period
 //private:
     Fill_zero                  _zero_;
     Time                       _begin;                      // Sekunden seit Mitternacht, manchmal auch mit Datum
-    Time                       _absolute_repeat_begin;      // _begin kann verschoben sein. Das ist die Basis für _absolute_repeat
+    Time                       _absolute_repeat_begin;      // _begin kann verschoben sein. Das ist die Basis fÃ¼r _absolute_repeat
     Time                       _end;                        // Sekunden seit Mitternacht, manchmal auch mit Datum
     Duration                   _repeat;
     Duration                   _absolute_repeat;
     bool                       _single_start;
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
-    bool                       _start_once;                 // Für Joacim Zschimmer
+    bool                       _start_once;                 // FÃ¼r Joacim Zschimmer
     When_holiday               _when_holiday;
     Absolute_path              _schedule_path;
 };
@@ -313,7 +313,7 @@ struct At_set
 enum Scheduler_holidays_usage                               // eMail von Andreas Liebert 2008-04-21
 { 
     with_scheduler_holidays,                                // Standard
-    without_scheduler_holidays                              // Order.run_time soll nicht <config><holidays> übernehmen
+    without_scheduler_holidays                              // Order.run_time soll nicht <config><holidays> Ã¼bernehmen
 };          
 
 
@@ -383,7 +383,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
 
     Time                        next_single_start           ( const Time& );
     Time                        next_any_start              ( const Time& );
-    Time                        next_allowed_start          ( const Time& t );                      // Liefert t oder den Beginn der nächsten Periode
+    Time                        next_allowed_start          ( const Time& t );                      // Liefert t oder den Beginn der nÃ¤chsten Periode
 
     virtual void                on_schedule_loaded          ()                                      = 0;
     virtual void                on_schedule_modified        ()                                      = 0;
@@ -395,7 +395,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
   private:
     Fill_zero                  _zero_;
     Absolute_path              _schedule_path;
-    ptr<Schedule>              _schedule;                   // Bennantes <schedule> oder unbenanntes, eigenes (heißt dann <run_time>)
+    ptr<Schedule>              _schedule;                   // Bennantes <schedule> oder unbenanntes, eigenes (heiÃŸt dann <run_time>)
     ptr<Schedule>              _default_schedule;           // Das Schedule, wenn sonst keins definiert ist oder benanntes Schedule nicht bekannt ist.
     File_based*                _using_object;
     Scheduler_holidays_usage   _scheduler_holidays_usage;
@@ -416,8 +416,8 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
     struct Inlay : Object
     {
-        // Schedule::put_Xml() soll den Schedule inhaltlich vollständig ersetzen.
-        // Die SOS bevorzugt dies vor der üblichen (und eleganten) Lösung, das Objekt zu verwerfen und ein neues anzulegen (mit Spooler.create_schedule()).
+        // Schedule::put_Xml() soll den Schedule inhaltlich vollstÃ¤ndig ersetzen.
+        // Die SOS bevorzugt dies vor der Ã¼blichen (und eleganten) LÃ¶sung, das Objekt zu verwerfen und ein neues anzulegen (mit Spooler.create_schedule()).
         // Deshalb unterscheiden wir hier zwischen Schedule und Inlay, damit
         // letzteres von put_Xml() entfernt und durch ein neues Inlay ersetzt werden kann, unter Beibehaltung des Schedule.
         // Siehe eMail von Andreas Liebert 2008-04-21.
@@ -539,7 +539,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     Inlay*                      inlay                       ()                                      { return _inlay; }
     bool                     is_covering                    ();
     bool                     is_covering_at                 ( const Time& );
-    Schedule*                   covering_schedule_at        ( const Time& );                        // NULL, wenn kein Schedule überdeckt
+    Schedule*                   covering_schedule_at        ( const Time& );                        // NULL, wenn kein Schedule Ã¼berdeckt
     Schedule*                   active_schedule_at          ( const Time& );
     Absolute_path               active_schedule_path_at     ( const Time& );
     bool                        once                        ()                                      { return _inlay->_once; }
@@ -571,7 +571,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     Covering_schedules            _covering_schedules;      // <schedule substitute="...">, die auf dieses Schedule verweisen
 
     ptr<Inlay>                    _inlay;
-    Schedule*                     _covered_schedule;        // <schedule substitute="...">, das zu überdeckende Schedule
+    Schedule*                     _covered_schedule;        // <schedule substitute="...">, das zu Ã¼berdeckende Schedule
 };
 
 //----------------------------------------------------------------------------------Schedule_folder

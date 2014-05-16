@@ -37,7 +37,7 @@ struct Include_command
 };
 
 //-------------------------------------------------------------------------------------Has_includes
-// Geänderte inkludierte Dateien führt zum Erneuten Lesen des File_based
+// GeÃ¤nderte inkludierte Dateien fÃ¼hrt zum Erneuten Lesen des File_based
 
 struct Has_includes             // <include live_file="..."> 
 {

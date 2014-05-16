@@ -1,6 +1,6 @@
-// tabucase.h                   J. Zschimmer,  ©1995 SOS GmbH Berlin
+// tabucase.h                   J. Zschimmer,  Â©1995 SOS GmbH Berlin
 
-// Für Modul sosctype.cxx
+// FÃ¼r Modul sosctype.cxx
 
 #ifndef __TABUCASE_H
 #define __TABUCASE_H

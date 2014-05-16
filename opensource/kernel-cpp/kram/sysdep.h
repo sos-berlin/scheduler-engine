@@ -2,7 +2,7 @@
 #define __SYSDEP_H
 
 // sysdep.h
-// Systemabhängige Definitionen
+// SystemabhÃ¤ngige Definitionen
 //                                                      (c) 1995 SOS GmbH Berlin
 //                                                      Joacim Zschimmer
 
@@ -46,7 +46,7 @@ using zschimmer::make_string;
 #    endif
 
 #    if !defined __FLAT__
-#       define SYSTEM_I286    // Damit der Emulator von Windows NT auf RM (MIPS) unterstützt wird
+#       define SYSTEM_I286    // Damit der Emulator von Windows NT auf RM (MIPS) unterstÃ¼tzt wird
 #    endif
 
 #    if defined _WIN32
@@ -67,7 +67,7 @@ using zschimmer::make_string;
 #    endif
 
 #    if defined(__DLL__)
-#        define SYSTEM_WINDLL           // Wird auch von außen gesetzt
+#        define SYSTEM_WINDLL           // Wird auch von auÃŸen gesetzt
 #        if defined SYSTEM_WIN16
 #            define SYSTEM_WIN16DLL
 #        endif
@@ -112,7 +112,7 @@ using zschimmer::make_string;
 #   pragma warning( disable:4097 )   // warning C4097: typedef-name 'Base_class' used as synonym for class-name 'Field_descr::Sos_self_deleting'
 //# pragma warning( disable:4099 )   // warning C4099: 'Sos_factory_agent' : type name first seen using 'class' now seen using 'struct'
 #   pragma warning( error  :4150 )   // warning C4150: deletion of pointer to incomplete type 'Soscopy_dialog'; no destructor called
-#   pragma warning( error  :4190 )   // warning C4190: 'sos_new_ptr' has C-linkage specified, but returns UDT 'Sos_ptr<struct Hostapi>' which is incompatible with C.  SOS_NEW() liefert gelöschtes Objekt!
+#   pragma warning( error  :4190 )   // warning C4190: 'sos_new_ptr' has C-linkage specified, but returns UDT 'Sos_ptr<struct Hostapi>' which is incompatible with C.  SOS_NEW() liefert gelÃ¶schtes Objekt!
 #   pragma warning( disable:4237 )   // warning C4237: nonstandard extension used : 'false' keyword is reserved for future use
 #   pragma warning( disable:4355 )   // warning C4355: 'this' : used in base member initializer list
 #   pragma warning( error  :4307 )   // warning C4307: '*' : integral constant overflow
@@ -189,7 +189,7 @@ using zschimmer::make_string;
     const Bool true  = 1;
 #endif
 
-typedef Bool Sos_bool;  // Für Herrn Püschel
+typedef Bool Sos_bool;  // FÃ¼r Herrn PÃ¼schel
 
 //-----------------------------------------------------------------------------------SYSTEM_MFC
 #if defined _MSC_VER
@@ -228,7 +228,7 @@ typedef Bool Sos_bool;  // Für Herrn Püschel
 #endif
 //------------------------------------------------------------------------------------SOS_CLASS
 #if defined SYSTEM_WIN && defined SYSTEM_STARVIEW
-//Nur für sosole: (führt zu großen export-Listen in der .exe)
+//Nur fÃ¼r sosole: (fÃ¼hrt zu groÃŸen export-Listen in der .exe)
 //#    define SOS_CLASS _export         // um gemeinsam mit StarView vererbbar zu sein
 #   define SOS_CLASS
 # else
@@ -322,7 +322,7 @@ typedef Bool Sos_bool;  // Für Herrn Püschel
         const int   _lineno;
     };
 
-    //extern const char* __try_source_filename;   // try-Blöcke müßten gestapelt werden
+    //extern const char* __try_source_filename;   // try-BlÃ¶cke mÃ¼ÃŸten gestapelt werden
     //extern const char* __try_lineno;
 
     } //namespace sos
@@ -571,7 +571,7 @@ inline Byte* significant_byte_ptr (uint4 *i, unsigned int byte_no) {
 #endif
 
 
-//----------------------------------------------------------Vorwärtsdeklarationen iostream etc.
+//----------------------------------------------------------VorwÃ¤rtsdeklarationen iostream etc.
 
 #include <string>
 
@@ -588,7 +588,7 @@ inline Byte* significant_byte_ptr (uint4 *i, unsigned int byte_no) {
 
 namespace sos
 {
-    //using namespace std;  // Das ist (bei Microsoft VSC++ 6) nicht auf namespace sos beschränkt.
+    //using namespace std;  // Das ist (bei Microsoft VSC++ 6) nicht auf namespace sos beschrÃ¤nkt.
     using ::std::string;
     using ::std::iostream;
     using ::std::istream;

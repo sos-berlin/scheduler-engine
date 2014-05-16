@@ -23,7 +23,7 @@ struct Sos_regex : Regex
     void match( const Sos_string& to_match );
 
  private:
-    Sos_string _regex_string; // Für Fehlerausgaben
+    Sos_string _regex_string; // FÃ¼r Fehlerausgaben
 };
 
 // Implementierung

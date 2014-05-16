@@ -1304,7 +1304,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     }
     assert(order);
 
-    if( modify_order_element.getAttribute( "action" ) == "reset" ) {   // Außerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen öffnet.
+    if( modify_order_element.getAttribute( "action" ) == "reset" ) {   // AuÃŸerhalb der Transaktion, weil move_to_other_nested_job_chain() wegen remove_from_job_chain() eigene Transaktionen Ã¶ffnet.
         order->reset();
     }
 
@@ -1724,7 +1724,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
     try
     {
-        if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine Prüfung mehr
+        if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine PrÃ¼fung mehr
 
         if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
 //        if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );    // JS-748: timestamps in the command use the colon
@@ -1887,12 +1887,12 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
             {
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
-                    if( !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende führt zum erneuten GET mit demselben Pfad
+                    if( !string_ends_with( path, "/" )  &&  isalnum( (uchar)*path.rbegin() ) )  // '?' am Ende fÃ¼hrt zum erneuten GET mit demselben Pfad
                     {
-                        // (Man könnte hier noch prüfen, ob's wirklich ein Verzeichnis ist.)
-                        // Der Browser soll dem Verzeichnisnamen einen Schräger anhängen und das als Basisadresse für weitere Anfragen verwenden.
+                        // (Man kÃ¶nnte hier noch prÃ¼fen, ob's wirklich ein Verzeichnis ist.)
+                        // Der Browser soll dem Verzeichnisnamen einen SchrÃ¤ger anhÃ¤ngen und das als Basisadresse fÃ¼r weitere Anfragen verwenden.
                         // http://localhost:6310/jz ==> http://localhost:6310/jz/, http://localhost:6310/jz/details.html
-                        // Ohne diesen Mechanismus würde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
+                        // Ohne diesen Mechanismus wÃ¼rde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
 
                         path += "/";
                         http_response->set_status( http::status_301_moved_permanently );
@@ -2001,7 +2001,7 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
     ptr<Command_response> result = _response;
     if( !result )
     {
-        //_spooler->signal("execute_xml");    // Sonst schläft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
+        //_spooler->signal("execute_xml");    // Sonst schlÃ¤ft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
         ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( _answer.xml_bytes(string_encoding, indent_string != "") ) );
         result = +r;
     }
@@ -2078,7 +2078,7 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text, bool 
         if (is_bytes) command_doc.load_xml_bytes( xml_text );
                  else command_doc.load_xml_string(xml_text);
     } catch (exception& x) {
-        _spooler->log()->error(x.what());       // Log ist möglicherweise noch nicht geöffnet
+        _spooler->log()->error(x.what());       // Log ist mÃ¶glicherweise noch nicht geÃ¶ffnet
         throw;
     }
 
@@ -2107,7 +2107,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
-    // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
+    // Eigentlich nur fÃ¼r einige mÃ¶glicherweise langlaufende <show_xxx>-Kommandos nÃ¶tig, z.B. <show_state>, <show_history> (mit Datenbank)
     if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml_string());
 }
 
@@ -2333,7 +2333,7 @@ string File_buffered_command_response::get_part()
         {
             if( _buffer == "" ) 
             {
-                // Leeren String zurückgeben bedeutet, dass noch keine neuen Daten da sind
+                // Leeren String zurÃ¼ckgeben bedeutet, dass noch keine neuen Daten da sind
             }
             else
             {

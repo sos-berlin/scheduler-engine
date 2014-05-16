@@ -26,7 +26,7 @@ const OLECHAR* wmemchr( const OLECHAR* s, OLECHAR c, int len )
     if( s == NULL )
     {
         if( len <= 0 )  return NULL;                    // wmemchr(NULL,c,-1) tolerieren wir.
-        fprintf( stderr, "wmemchr(NULL,%d)!\n", len );  // Führt zum Absturz
+        fprintf( stderr, "wmemchr(NULL,%d)!\n", len );  // FÃ¼hrt zum Absturz
     }
 
     const OLECHAR* p = s;

@@ -20,16 +20,16 @@ namespace sos
 
 Botschaften-Protokoll:
 
-BOTSCHAFTEN F‹R ANFORDERUNGEN:
+BOTSCHAFTEN F√úR ANFORDERUNGEN:
 
 
 Exceptions:
-Lˆst eine Bearbeitungsroutine f¸r eine Anforderungsbotschaft eine Exception Xc aus, wird diese
+L√∂st eine Bearbeitungsroutine f√ºr eine Anforderungsbotschaft eine Exception Xc aus, wird diese
 von send() in eine Error_msg( Xc ) konvertiert. Andere Exceptions werden mit Verlust der
 Fehlerinformation ebenfalls in Error_msg konvertiert. Die Error_msg wird an den Absender
-zur¸ckgeschickt.
+zur√ºckgeschickt.
 
-Die Bearbeitungsroutine darf eine Exception nur auslˆsen, wenn sie auf die Anforderung noch nicht
+Die Bearbeitungsroutine darf eine Exception nur ausl√∂sen, wenn sie auf die Anforderung noch nicht
 selbst geantwortet hat. Die Anforderung soll dann auch keine Seiteneffekte haben.
 
 
@@ -52,7 +52,7 @@ Data_msg( Const_area ):
     sendet Daten. Wird je nach Zielobjekt als Datensatz oder als Ausschnitt eines Streams
     interpretiert.
 
-    Vielleicht wird noch optional die Satzposition mit ¸bertragen werden.
+    Vielleicht wird noch optional die Satzposition mit √ºbertragen werden.
 
 Antwort:
     Ack_msg oder Error_msg.
@@ -75,21 +75,21 @@ Antwort:
 
 
 
-BOTSCHAFTEN F‹R ANTWORTEN:
+BOTSCHAFTEN F√úR ANTWORTEN:
 
 Ack_msg:
-    Best‰tigung.
+    Best√§tigung.
 
 
 Data_reply_msg( Const_area ):
     Wird je nach Zielobjekt als Datensatz oder als Ausschnitt eines Streams interpretiert.
 
-    Vielleicht wird noch optional die Satzposition mit ¸bertragen werden.
+    Vielleicht wird noch optional die Satzposition mit √ºbertragen werden.
 
 
 Object_ref_msg( Sos_object* ):
-    Liefert den Zeiger auf ein neu angelegtes Objekt. Das Objekt wird Eigentum des Empf‰ngers,
-    welcher es am Ende schlieﬂen muﬂ.
+    Liefert den Zeiger auf ein neu angelegtes Objekt. Das Objekt wird Eigentum des Empf√§ngers,
+    welcher es am Ende schlie√üen mu√ü.
 
 
 Error_msg( Xc ):
@@ -99,7 +99,7 @@ Error_msg( Xc ):
 //AUSSERDEM:
 
 //Async_error_msg( Xc ):
-//    Fehlermeldung, die ein Server-Objekt unabh‰ngig von einer Anforderung verschicken kann,
+//    Fehlermeldung, die ein Server-Objekt unabh√§ngig von einer Anforderung verschicken kann,
 //    z.B. Verbindungsverlust.
 */
 
@@ -119,18 +119,18 @@ enum Request_msg_type
 {
     msg_create            = 0x01, // An eine Objekt-Fabrik, Antwort ist msg_object_ref
     msg_open              = 0x01,
-    msg_destroy           = 0x02, // Objekt schlieﬂen (destruieren) == msg_end/msg_finish?
+    msg_destroy           = 0x02, // Objekt schlie√üen (destruieren) == msg_end/msg_finish?
     msg_run               = 0x03, // Objekt starten, Objekt soll aktiv Daten von sich geben. Evtl. mit einer Art Dateiname.
-    msg_end               = 0x04, // (Vorl‰ufig?) letzte Meldung von der Quelle (EOF) (Close?),
+    msg_end               = 0x04, // (Vorl√§ufig?) letzte Meldung von der Quelle (EOF) (Close?),
     msg_data              = 0x05, // Datensatz (put, get)
     msg_spec              = 0x06, // Objekt-spezifische Botschaft
 
-    msg_prepare_to_commit = 0x07, // Anschlieﬂend msg_commit oder msg_roll_back
-    msg_commit            = 0x08, // Transaktion abschlieﬂen, wird mit msg_ack best‰tigt
-    msg_roll_back         = 0x09, // Transaktion zur¸ckrollen, wird mit msg_ack best‰tigt (vielleicht nicht nˆtig?)
+    msg_prepare_to_commit = 0x07, // Anschlie√üend msg_commit oder msg_roll_back
+    msg_commit            = 0x08, // Transaktion abschlie√üen, wird mit msg_ack best√§tigt
+    msg_roll_back         = 0x09, // Transaktion zur√ºckrollen, wird mit msg_ack best√§tigt (vielleicht nicht n√∂tig?)
 
     msg_seek              = 0x0A,
-    msg_cancel            = 0x0B, // Alle Anforderungen abbrechen, alle Anforderungen auﬂer cancel beantworten
+    msg_cancel            = 0x0B, // Alle Anforderungen abbrechen, alle Anforderungen au√üer cancel beantworten
 
     // Dateioperationen:
     msg_get               = 0x0101, // sequentiell lesen, Antwort ist Data_reply_msg
@@ -144,7 +144,7 @@ inline Bool is_request( Sos_msg_type t ) { return ( (int)t & 0x8000 ) == 0; }
 
 enum Reply_msg_type
 {
-    msg_ack           = 0x8001,  // Empfangsquittung, bereit f¸r n‰chsten Datensatz
+    msg_ack           = 0x8001,  // Empfangsquittung, bereit f√ºr n√§chsten Datensatz
     msg_error         = 0x8002,  // Fehler, anstelle einer anderen Antwort
     msg_object_ref    = 0x8003,  // Objekt-Referenz
     msg_data_reply    = 0x8004

@@ -7,7 +7,7 @@
 #include "precomp.h"
 
 //#define MODULE_NAME "sosstrg0"
-//#define COPYRIGHT   "© 1885 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© 1885 SOS GmbH Berlin"
 #define AUTHOR      "Joacim Zschimmer"
 
 #include <stdlib.h>
@@ -383,8 +383,8 @@ unsigned int position( const Sos_string& str, const Sos_string& to_find, unsigne
 
 uint length_without_trailing_char( const char* text, uint len, char c )
 {
-    // Der String wird Wortweise (int32) geprüft.
-    // Dabei werden bis drei Bytes vor dem String gelesen, die müssen aber zugreifbar sein, weil sie im selben Speicherwort liegen.
+    // Der String wird Wortweise (int32) geprÃ¼ft.
+    // Dabei werden bis drei Bytes vor dem String gelesen, die mÃ¼ssen aber zugreifbar sein, weil sie im selben Speicherwort liegen.
 
     check_pointer( text, len, "length_without_trailing_char" );
 
@@ -404,7 +404,7 @@ uint length_without_trailing_char( const char* text, uint len, char c )
         {
             // p ist ausgerichtet, p >= text
             const char* text0 = (const char*)( (long)text & (long)~3 );  // Auf int32-Grenze abrunden
-            if( *(int32*)text0 == cccc )       // (p0 < text) muss geprüft werden?
+            if( *(int32*)text0 == cccc )       // (p0 < text) muss geprÃ¼ft werden?
             {
                 p -= 4;
                 while( p > text  &&  *(int32*)p == cccc )  p -= 4;

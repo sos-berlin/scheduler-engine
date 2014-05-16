@@ -68,7 +68,7 @@ int priority_class_from_string( const string& priority )
         else
         if( p == "13"  ||  p == "high"         )  result = HIGH_PRIORITY_CLASS;           // 0x00000080   11..15 idle: 1  time critical: 15
         else
-      // Realtime verdr‰ngt Maus- und Tastaturroutinen.
+      // Realtime verdr√§ngt Maus- und Tastaturroutinen.
       //if( p == "24"  ||  p == "realtime"     )  result = REALTIME_PRIORITY_CLASS;       // 0x00000100   2..31  idle: 16 time critical: 31
       //else
         {

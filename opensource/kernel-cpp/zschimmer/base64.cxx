@@ -101,7 +101,7 @@ string base64_decoded( const io::Char_sequence& base64_encoded )
             Byte d = pr2six[ p[3] ];
             
             if( a & 0x80                ||
-                b & 0x80  &&  b != 199  ||   // '=' ist Füllzeichen und erlaubt
+                b & 0x80  &&  b != 199  ||   // '=' ist FÃ¼llzeichen und erlaubt
                 c & 0x80  &&  c != 199  || 
                 d & 0x80  &&  d != 199     )  throw_xc( "Z-BASE64-001", p - (const Byte*)base64_encoded.ptr() );
 
@@ -153,7 +153,7 @@ string base64_encoded( const io::Byte_sequence& seq )
         result.replace( r, 4, base64_encoded( io::Byte_sequence( remainder, sizeof remainder ) ) );
 
         r += 4;
-        p += 3;     assert( p > p_end );    // *p ist ungültig
+        p += 3;     assert( p > p_end );    // *p ist ungÃ¼ltig
         result[ r-1 ] = '=';
         if( p > p_end + 1 )  result[ r-2 ] = '=';
     }

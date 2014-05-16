@@ -79,7 +79,7 @@ void Java_subsystem::close()
 
     if( _java_vm )  _java_vm->set_log( NULL );
 
-    //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
+    //_java_vm.close();  Erneutes _java.init() stÃ¼rzt ab, deshalb lassen wir Java stehen und schlieÃŸen es erst am Schluss
     _subsystem_state = subsys_stopped;
 }
 

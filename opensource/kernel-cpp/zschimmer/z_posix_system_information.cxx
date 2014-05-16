@@ -5,7 +5,7 @@
 #include "z_com_server.h"
 
 #ifdef Z_HPUX
-#   define _LARGEFILE64_SOURCE         // Für statvfs64
+#   define _LARGEFILE64_SOURCE         // FÃ¼r statvfs64
 #   include <sys/param.h>
 #   include <sys/pstat.h>
 #endif
@@ -141,7 +141,7 @@ STDMETHODIMP get_System_information( BSTR what_bstr, VARIANT* parameter_vt, VARI
         {
             set_result( result, (int64)call_pstat_getvminfo().psv_cfree * sysconf( _SC_PAGE_SIZE ) );
 
-            // Größe des Arbeitsspeichers:
+            // GrÃ¶ÃŸe des Arbeitsspeichers:
             //pst_static s = call_pstat_getstatic();
             //set_result( result, (int64)s.physical_memory * s.page_size );
         }

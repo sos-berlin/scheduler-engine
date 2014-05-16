@@ -297,7 +297,7 @@ void Sql_aggregate::process_record()
 
     _select->fetch_table_records();
 
-    // Gruppenschl¸ssel bilden
+    // Gruppenschl√ºssel bilden
     _select->assign_expr_array( *_groupby_type, &_groupby_record, _groupby_expr_array );
 
 
@@ -353,7 +353,7 @@ void Sql_aggregate::finish_aggregates( Byte* aggregate_record )
 
 void Sql_aggregate::fetch_result()
 {
-    while(1)    // Solange HAVING-Klausel nicht erf¸llt oder fehlerhaft ist oder LOOP vor WHERE l‰uft
+    while(1)    // Solange HAVING-Klausel nicht erf√ºllt oder fehlerhaft ist oder LOOP vor WHERE l√§uft
     {
         if( _result_iterator == _result_map.end() )  throw_eof_error();
 
@@ -364,7 +364,7 @@ void Sql_aggregate::fetch_result()
         _result_iterator++;
 
         if( !_having )  break;
-        if( _select->eval_expr_as_bool( _having, false ) )  break;    // HAVING-Klausel erf¸llt?
+        if( _select->eval_expr_as_bool( _having, false ) )  break;    // HAVING-Klausel erf√ºllt?
     }
 }
 

@@ -157,7 +157,7 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
 
     xml::Document_ptr    mail_dom;
 
-    // STYLESHEET AUSFÜHREN
+    // STYLESHEET AUSFÃœHREN
     ptr<Xslt_stylesheet> stylesheet;
 
     if( _mail )
@@ -431,9 +431,9 @@ void Scheduler_event_manager::report_event( Scheduler_event* event )
 
         if( _event_file.opened() )
         {
-            //TODO Was tun wir bei einen Fehler, z.B. wenn die Platte erschöpft ist? *********************************************************
+            //TODO Was tun wir bei einen Fehler, z.B. wenn die Platte erschÃ¶pft ist? *********************************************************
             _event_file.print( event->xml_bytes() );
-            _event_file.print( "\n" );        // Platz für '\0' schaffen
+            _event_file.print( "\n" );        // Platz fÃ¼r '\0' schaffen
         }
 
         Z_FOR_EACH( Get_events_command_response_list, _get_events_command_response_list, it )

@@ -58,7 +58,7 @@ struct Node_list;
 
 enum NodeType
 {
-                                            // Werte müssen mit libxml/tree.h übereinstimmen (das sind dieselben wie in http://www.w3.org/TR/REC-DOM-Level-1/)
+                                            // Werte mÃ¼ssen mit libxml/tree.h Ã¼bereinstimmen (das sind dieselben wie in http://www.w3.org/TR/REC-DOM-Level-1/)
     ELEMENT_NODE                    = 1,    //XML_ELEMENT_NODE,
     ATTRIBUTE_NODE                  = 2,    //XML_ATTRIBUTE_NODE,
     TEXT_NODE                       = 3,    //XML_TEXT_NODE,
@@ -85,7 +85,7 @@ struct Simple_node_ptr
                                 Simple_node_ptr             (const NodeJ& o)                        : _nodeJ(o) {}
                                 Simple_node_ptr             (const Simple_node_ptr& o)              : _nodeJ(o._nodeJ) {}
 
-    virtual                    ~Simple_node_ptr             ()                                      {}              // Für gcc 3.2
+    virtual                    ~Simple_node_ptr             ()                                      {}              // FÃ¼r gcc 3.2
 
 
     virtual void                assign                      (const NodeJ& o)                        { _nodeJ = o; }
@@ -263,9 +263,9 @@ struct Element_ptr : Node_ptr
     void                        setAttribute                ( const string& name, const char*   value ) const;
     void                        setAttribute                ( const string& name, bool value ) const;
     void                        setAttribute                ( const string& name, int64 value ) const;
-    void                        setAttribute                ( const string& name, int value ) const           { setAttribute( name, (int64)value ); }  // Für gcc 3.3
-    void                        setAttribute                ( const string& name, long value ) const          { setAttribute( name, (int64)value ); }  // Für gcc 3.3
-    void                        setAttribute                ( const string& name, size_t value ) const        { setAttribute( name, (int64)value ); }  // Für gcc 3.3
+    void                        setAttribute                ( const string& name, int value ) const           { setAttribute( name, (int64)value ); }  // FÃ¼r gcc 3.3
+    void                        setAttribute                ( const string& name, long value ) const          { setAttribute( name, (int64)value ); }  // FÃ¼r gcc 3.3
+    void                        setAttribute                ( const string& name, size_t value ) const        { setAttribute( name, (int64)value ); }  // FÃ¼r gcc 3.3
     bool                        hasAttributes               () const;
     void                        removeAttribute             ( const string& name ) const;
     bool                        hasAttribute                ( const string& name ) const;

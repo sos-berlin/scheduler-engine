@@ -106,7 +106,7 @@ void Event::signal( const string& name )
 }
 
 //------------------------------------------------------------------------------Event::async_signal
-// Keinen System-Aufruf machen! (Auﬂer SetEvent)
+// Keinen System-Aufruf machen! (Au√üer SetEvent)
 
 void Event::async_signal( const char* )
 {

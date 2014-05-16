@@ -221,7 +221,7 @@ static void create_mini_dump(EXCEPTION_POINTERS* exeption_pointers)
             xcep_info_ptr = &xcep_info;
         }
         (*miniDumpWriteDumpFunction)(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, xcep_info_ptr, NULL, NULL);
-        Z_LOG("Mini dump written\n");  // Gefährlich im Interrupt. Aber jetzt ist sowieso Schluss.
+        Z_LOG("Mini dump written\n");  // GefÃ¤hrlich im Interrupt. Aber jetzt ist sowieso Schluss.
     }
 }
 
@@ -236,7 +236,7 @@ static LONG WINAPI create_mini_dump_exception_filter(struct _EXCEPTION_POINTERS 
 
 void create_mini_dump_on_unhandled_exception() 
 {
-    /* Wir laden die DLL vorab, um im unklaren Zustand einer Windows-Exception so wenige Windows-Funktionen wie möglich aufzurufen.
+    /* Wir laden die DLL vorab, um im unklaren Zustand einer Windows-Exception so wenige Windows-Funktionen wie mÃ¶glich aufzurufen.
         http://msdn.microsoft.com/en-us/library/windows/desktop/ms680360%28v=vs.85%29.aspx:
         MiniDumpWriteDump should be called from a separate process if at all possible, rather than 
         from within the target process being dumped. This is especially true when the target process is 

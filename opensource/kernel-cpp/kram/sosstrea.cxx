@@ -21,8 +21,8 @@ namespace sos {
 void write_iso_string( Sos_binary_ostream* s, const char* string, uint field_size )
 /*
     Schreibt den String im Code ISO 8859-1 (ASCII).
-    Der String wird im lolalen Code übergeben.
-    Der String wird auf die Länge field_size abgeschnitten oder mit Blanks aufgefüllt.
+    Der String wird im lolalen Code Ã¼bergeben.
+    Der String wird auf die LÃ¤nge field_size abgeschnitten oder mit Blanks aufgefÃ¼llt.
     Beim Abschneiden kann eine Exception auftreten.
 */
 {
@@ -36,9 +36,9 @@ void write_iso_string( Sos_binary_ostream* s, const char* string, uint field_siz
 
 void read_iso_string( Sos_binary_istream* s, char* string_buffer, uint field_size )
 /*
-    Konvertiert einen ISO 8859-1-String fester Länge in einen 0-terminierten String im
+    Konvertiert einen ISO 8859-1-String fester LÃ¤nge in einen 0-terminierten String im
     lokalen Code, bei dem die Blanks abgeschnitten worden sind.
-    Der Puffer für den String muß ein Byte größer sein als field_size.
+    Der Puffer fÃ¼r den String muÃŸ ein Byte grÃ¶ÃŸer sein als field_size.
 */
 {
     const Byte* p0 = (const Byte*) s->read_bytes( 0 );
@@ -59,9 +59,9 @@ void read_iso_string( Sos_binary_istream* s, char* string_buffer, uint field_siz
 
 void read_ebcdic_string( Sos_binary_istream* s, char* string_buffer, uint field_size )
 /*
-    Konvertiert einen EBCDIC-String fester Länge in einen 0-terminierten String im
+    Konvertiert einen EBCDIC-String fester LÃ¤nge in einen 0-terminierten String im
     lokalen Code, bei dem die Blanks abgeschnitten worden sind.
-    Der Puffer für den String muß ein Byte größer sein als field_size.
+    Der Puffer fÃ¼r den String muÃŸ ein Byte grÃ¶ÃŸer sein als field_size.
 */
 {
     const Byte* p0 = (const Byte*) s->read_bytes( 0 );
@@ -82,9 +82,9 @@ void read_ebcdic_string( Sos_binary_istream* s, char* string_buffer, uint field_
 
 void read_ebcdic_string( Sos_binary_istream* s, Area* buffer_ptr, uint field_size )
 /*
-    Konvertiert einen EBCDIC-String fester Länge in einen 0-terminierten String im
+    Konvertiert einen EBCDIC-String fester LÃ¤nge in einen 0-terminierten String im
     lokalen Code, bei dem die Blanks abgeschnitten worden sind.
-    Der Puffer für den String muß ein Byte größer sein als field_size.
+    Der Puffer fÃ¼r den String muÃŸ ein Byte grÃ¶ÃŸer sein als field_size.
 */
 {
     buffer_ptr->allocate_min( field_size + 1 );

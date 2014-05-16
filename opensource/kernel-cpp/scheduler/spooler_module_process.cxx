@@ -10,7 +10,7 @@ namespace scheduler {
 //--------------------------------------------------------------------------------------------const
 
 const string                    order_params_environment_name   = "SCHEDULER_RETURN_VALUES";
-const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
+const int                       max_stdout_state_text_length    = 100;                              // FÃ¼r Job.state_text und Order.state_text
 
 //--------------------------------------------------------------------------------------Kill_thread
 #ifdef Z_UNIX
@@ -159,7 +159,7 @@ bool Process_module_instance::load()
             int ret = fchmod( _shell_file, 0700 );
             if( ret )  throw_errno( errno, "fchmod", _shell_file.path().c_str() );
 
-            script = trim( script );    // Damit Unix-"#!" am Anfang steht. Das ändert die Zeilennummerierung.
+            script = trim( script );    // Damit Unix-"#!" am Anfang steht. Das Ã¤ndert die Zeilennummerierung.
 #       endif
 
         _shell_file.print( script );
@@ -175,7 +175,7 @@ void Process_module_instance::start()
 {
     Module_instance::start();
 
-    //2008-06-15: _task_paramters an Remote Scheduler übergeben
+    //2008-06-15: _task_paramters an Remote Scheduler Ã¼bergeben
     //ptr<Variable_set> vs = _process_environment->clone();
     //vs->merge( _task_parameters );
     //_process_param = subst_env( _module->_process_param_raw, vs );
@@ -239,11 +239,11 @@ void Process_module_instance::close_process()
 
 Async_operation* Process_module_instance::begin__start()
 {
-    // Für Com_remote_module_instance_server::Begin (File_logger) stdout- und stderr-Dateien schon hier anlegen
+    // FÃ¼r Com_remote_module_instance_server::Begin (File_logger) stdout- und stderr-Dateien schon hier anlegen
     // Wegen open_inheritable sollte vor begin__end() kein anderer Prozess gestartet werden.
     // (Sowieso wird begin__end() gleich danach gerufen)
 
-    if (_stdout_path.empty()) {  // JS-1039 - set_stdout_path() ist nicht aufgerufen worden, also öffenen wir selbst die stdout/stderr-Dateien. Siehe Com_remote_module_instance_server::Begin()
+    if (_stdout_path.empty()) {  // JS-1039 - set_stdout_path() ist nicht aufgerufen worden, also Ã¶ffenen wir selbst die stdout/stderr-Dateien. Siehe Com_remote_module_instance_server::Begin()
         _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
         _stdout_path = _stdout_file.path();
         _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
@@ -346,7 +346,7 @@ bool Process_module_instance::begin__end()
         _spooler->register_process_handle( _process_handle );
     }
 
-    _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindert (ERRNO-13 Permission denied)
+    _stdout_file.close();       // SchlieÃŸen, damit nicht ein anderer Prozess die Handles erbt und damit das LÃ¶schen verhindert (ERRNO-13 Permission denied)
     _stderr_file.close();
 
     return true;
@@ -385,7 +385,7 @@ bool Process_module_instance::process_has_signaled()
 Variant Process_module_instance::step__end()
 {
     Z_LOG2( "scheduler", Z_FUNCTION << "\n" );
-    assert( !_spooler );    // Soll nur über Com_remote_module_instance_server gerufen werden
+    assert( !_spooler );    // Soll nur Ã¼ber Com_remote_module_instance_server gerufen werden
 
     _process_handle.wait();
     assert( process_has_signaled() );
@@ -393,7 +393,7 @@ Variant Process_module_instance::step__end()
     close_process();
 
     if( _order_params_file.path() != "" )
-        transfer_back_order_params();       // Vor spooler_process_after(), damit da die geänderten Auftragsparameter verfügbar sind.
+        transfer_back_order_params();       // Vor spooler_process_after(), damit da die geÃ¤nderten Auftragsparameter verfÃ¼gbar sind.
 
     if( _spooler_process_before_called )
         _spooler_process_result = check_result( _monitor_instances.spooler_process_after( _spooler_process_result ) );
@@ -458,7 +458,7 @@ string Process_module_instance::get_first_line_as_state_text()
 
 void Process_module_instance::Process_event::close()
 {
-    // waitpid() rufen, falls noch nicht geschehen (um Zombie zu schließen)
+    // waitpid() rufen, falls noch nicht geschehen (um Zombie zu schlieÃŸen)
 
     if( _pid )
     {
@@ -532,7 +532,7 @@ bool Process_module_instance::Process_event::wait( double seconds )
             }
         }
 
-      //Z_LOG2( "scheduler", "Prozess läuft noch\n" );
+      //Z_LOG2( "scheduler", "Prozess lÃ¤uft noch\n" );
 
         if( seconds < 0.0001 )  break;
 
@@ -579,7 +579,7 @@ bool Process_module_instance::begin__end()
     _log.info( m );
 
     Z_LOG2( "scheduler", "signal(SIGCHLD,SIG_DFL)\n" );
-    ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
+    ::signal( SIGCHLD, SIG_DFL );                 // Java verÃ¤ndert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
 
     Z_LOG2( "scheduler", "fork(), execvp(\"" << program_path() << "\")\n" );
     int pid = fork();
@@ -591,7 +591,7 @@ bool Process_module_instance::begin__end()
 
         case 0:
         {
-            zschimmer::Log_ptr::disable_logging(); // fork() kann gesperrte Mutex übernehmen, was zum Deadlock führt (stimmt das?)
+            zschimmer::Log_ptr::disable_logging(); // fork() kann gesperrte Mutex Ã¼bernehmen, was zum Deadlock fÃ¼hrt (stimmt das?)
             // Z_LOG() ist jetzt wirkunglos. Kann cerr auch gesperrt sein? Wenigstens ist es unwahrscheinlich, weil cerr kaum benutzt wird.
 
             // Alle Prozesse einer Task in einer Prozessgruppe starten, ausser der Prozess wird vom Hauptscheduler gestartet (vgl. JS-930)
@@ -607,7 +607,7 @@ bool Process_module_instance::begin__end()
                 catch( exception& x ) { cerr << "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n"; }
             }
 
-            ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kümmert sich der Haupt-Prozess)
+            ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kÃ¼mmert sich der Haupt-Prozess)
 
             if (_stdout_file.opened()) dup2( _stdout_file.file_no(), STDOUT_FILENO );
             if (_stderr_file.opened()) dup2( _stderr_file.file_no(), STDERR_FILENO );

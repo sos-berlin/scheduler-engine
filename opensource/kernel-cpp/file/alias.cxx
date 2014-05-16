@@ -1,6 +1,6 @@
 //#define MODULE_NAME "alias"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
-//#define AUTHOR      "Jörg Schwiemann"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
+//#define AUTHOR      "JÃ¶rg Schwiemann"
 
 #include "precomp.h"
 
@@ -151,7 +151,7 @@ void Alias_file::prepare_open( const char* parameter, Open_mode open_mode, const
         if( opt.param( 1 ) ) {          // Der Dateiname steht im Abschnitt [alias]
             filename = read_profile_string( c_str( ini_file ), c_str( section ), c_str( opt.value() ) );
             if( empty( filename ) )  {
-                if( opt.value() == "soserror.txt" ) {       // Besonderer Name für xception.cxx
+                if( opt.value() == "soserror.txt" ) {       // Besonderer Name fÃ¼r xception.cxx
                     filename = directory_of_path( module_filename() );
                     if( length( filename ) )  filename += "/";
                     filename += "soserror.txt";
@@ -172,7 +172,7 @@ void Alias_file::prepare_open( const char* parameter, Open_mode open_mode, const
         filename = "";
 
         // Der Erkennung der Variablen kann gerne verbessert werden.
-        // Z.B. könnte das Verfahren von sh, bash oder perl übernommen werden.
+        // Z.B. kÃ¶nnte das Verfahren von sh, bash oder perl Ã¼bernommen werden.
 
         const char* p = c_str( orig );
         while( *p ) {

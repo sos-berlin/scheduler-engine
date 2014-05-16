@@ -70,7 +70,7 @@ struct Com_thread_data
     Fill_zero                  _zero_;
     ptr<IErrorInfo>            _current_errorinfo;
     long32                     _coinitialize_count;
-    int                        _last_error;           // Für SetLastError() und GetLastError()
+    int                        _last_error;           // FÃ¼r SetLastError() und GetLastError()
 };
 
 //-------------------------------------------------------------------------------------------static
@@ -501,7 +501,7 @@ HRESULT CoGetClassObject( const CLSID& clsid, DWORD dwClsContext, COSERVERINFO*,
             if( !m->_module_filename  ||  !m->_module_filename[0] )  return CO_E_DLLNOTFOUND;
 
             string module_filename = m->_module_filename;
-            // Auf HP-UX wirkt LD_LIBRARY_PATH nicht. Deshalb kann der Moduldateiname über eine Umgebungsvariable eingestellt werden:
+            // Auf HP-UX wirkt LD_LIBRARY_PATH nicht. Deshalb kann der Moduldateiname Ã¼ber eine Umgebungsvariable eingestellt werden:
             if( const char* e = getenv( replace_regex( module_filename, "\\.", "_" ).c_str() ) )  module_filename = e;
 
             Z_LOG( "dlopen(\"" << module_filename << "\",RTLD_LAZY|RTLD_GLOBAL)\n" );
@@ -1018,7 +1018,7 @@ HRESULT VariantChangeTypeEx( VARIANT* dest, const VARIANT* src, LCID lcid, unsig
                 }
 
               //case VT_ERROR:
-                case VT_BOOL:       V_BOOL(&result) = as_bool  ( str.empty()? "0" : str.c_str() );  break;      // Leerer String für Perl. Das Original scheint das auch so zu machen
+                case VT_BOOL:       V_BOOL(&result) = as_bool  ( str.empty()? "0" : str.c_str() );  break;      // Leerer String fÃ¼r Perl. Das Original scheint das auch so zu machen
               //case VT_I1:         V_I1  (&result) = as_int8  ( str.c_str() );  break;
               //case VT_UI1:        V_UI1 (&result) = as_uint8 ( str.c_str() );  break;
                 case VT_UI2:        V_UI1 (&result) = as_uint16( str.c_str() );  break;

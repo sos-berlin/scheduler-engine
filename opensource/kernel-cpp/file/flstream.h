@@ -1,4 +1,4 @@
-// flstream.h                   ©1996 SOS GmbH Berlin
+// flstream.h                   Â©1996 SOS GmbH Berlin
 
 #ifndef __FLSTREAM_H
 #define __FLSTREAM_H

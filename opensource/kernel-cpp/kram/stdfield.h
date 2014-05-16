@@ -1,4 +1,4 @@
-// stdfield.h                                            © 1995 SOS GmbH Berlin
+// stdfield.h                                            Â© 1995 SOS GmbH Berlin
 
 #ifndef __STDFIELD_H
 #define __STDFIELD_H
@@ -76,7 +76,7 @@ struct Int_type : Field_type
   //void                       _get_param               ( Type_param* ) const;
 };
 
-typedef Int_type C_int_field;   // zur Kompatibilität, jz 10.3.96
+typedef Int_type C_int_field;   // zur KompatibilitÃ¤t, jz 10.3.96
 
 extern Int_type int_type;
 
@@ -406,9 +406,9 @@ extern Double_type double_type;
 DEFINE_ADD_FIELD( double, double_type );
 
 //----------------------------------------------------------------------------------Text_type
-// Feld mit Blanks aufgefüllt, beim Lesen werden die Blanks abgeschnitten;
+// Feld mit Blanks aufgefÃ¼llt, beim Lesen werden die Blanks abgeschnitten;
 // Nicht 0-terminiert.
-// Mit 0x00 aufgefüllt: NULL
+// Mit 0x00 aufgefÃ¼llt: NULL
 
 struct Text_type : Field_type
 {

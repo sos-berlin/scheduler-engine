@@ -59,7 +59,7 @@ inline void convert_from_string( const Sos_string& str, Area* object_ptr )
 
 //=================================================================================================
 
-// Abstrakte Name_file Klasse für Sos_list_control_as
+// Abstrakte Name_file Klasse fÃ¼r Sos_list_control_as
 
 struct Abs_name_file : Abs_file
 {
@@ -150,7 +150,7 @@ struct Auto_storable_as : virtual Auto_storable,
     T*                         _real_object_ptr;
 };
 
-/* Nicht gemeinsam mit dem nächsten template verwendbar. Leider, leider.
+/* Nicht gemeinsam mit dem nÃ¤chsten template verwendbar. Leider, leider.
 template< class T >
 inline void object_check( const Sos_string& str, T* )
 {
@@ -158,8 +158,8 @@ inline void object_check( const Sos_string& str, T* )
 }
 */
 // IMPLEMENT_OBJECT_CHECK( non Storable_as<T> ):
-// Nur für Typen, die nicht Storable_as<Sos_string> sind,
-// dieses object_check() kann keine Unterklassen von T berücksichtigen!
+// Nur fÃ¼r Typen, die nicht Storable_as<Sos_string> sind,
+// dieses object_check() kann keine Unterklassen von T berÃ¼cksichtigen!
 
 #define IMPLEMENT_OBJECT_CHECK( T )                                                             \
     inline void object_check( const Sos_string& str, T* )                                       \

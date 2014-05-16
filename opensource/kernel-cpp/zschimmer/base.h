@@ -1,15 +1,15 @@
-// $Id: base.h 13880 2010-06-10 15:47:25Z jz $        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: base.h 13880 2010-06-10 15:47:25Z jz $        Â© 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __ZSCHIMMER_BASE_H
 #define __ZSCHIMMER_BASE_H
 
 //------------------------------------------------------------------------------------------------
 
-#define Z_SOS                               // Für die SOS GmbH
+#define Z_SOS                               // FÃ¼r die SOS GmbH
 
 #ifdef Z_SOS
 //#   define Z_ERROR_PREFIX "SOS"             // Fehlercode beginnen mit SOS- (statt Z-) 
-#   define Z_TEMP_FILE_ID "sos"             // Namensbestandteil von temporären Dateinamen
+#   define Z_TEMP_FILE_ID "sos"             // Namensbestandteil von temporÃ¤ren Dateinamen
 #else
 #   define Z_TEMP_FILE_ID "zsc"
 #endif
@@ -23,7 +23,7 @@
 #   endif
 
 #   ifndef _WIN32_DCOM
-#       define _WIN32_DCOM              // Für CoCreateInstanceEx()
+#       define _WIN32_DCOM              // FÃ¼r CoCreateInstanceEx()
 #   endif
 #endif
 
@@ -36,7 +36,7 @@ class _com_error;
 
     namespace stdext        
     {
-        using namespace __gnu_cxx;  // gcc 3.3.2 kennt stdext nicht (hierin sollte hash_map sein), dafür __gnu_cxx
+        using namespace __gnu_cxx;  // gcc 3.3.2 kennt stdext nicht (hierin sollte hash_map sein), dafÃ¼r __gnu_cxx
     }
 
 #endif
@@ -142,12 +142,12 @@ class _com_error;
 #endif
 //------------------------------------------------------------------------------------DYNAMIC_CAST
 
-#ifdef __GNUC__                               // gcc 2.3.2 bis 3.3.1: dynamic_cast<> stürzt ab. 
+#ifdef __GNUC__                               // gcc 2.3.2 bis 3.3.1: dynamic_cast<> stÃ¼rzt ab. 
 #   define DYNAMIC_CAST_CRASHES
 #endif
 
 #ifdef DYNAMIC_CAST_CRASHES
-#   define DYNAMIC_CAST( TYPE, POINTER )   ( static_cast< TYPE >( POINTER ) )      // Nur verwenden, wenn sich der Zeiger wirklich casten lässt!
+#   define DYNAMIC_CAST( TYPE, POINTER )   ( static_cast< TYPE >( POINTER ) )      // Nur verwenden, wenn sich der Zeiger wirklich casten lÃ¤sst!
 # else
 #   define DYNAMIC_CAST( TYPE, POINTER )   ( dynamic_cast< TYPE >( POINTER ) )
 #endif
@@ -418,7 +418,7 @@ int                         z_snprintf                  ( char* buffer, uint buf
 string                      z_strerror                  ( int errn );
 inline string               hex_from_int                ( int i )                                   { return printf_string( "%08x", i ); }
 inline string               hex_from_int16              ( int16 i )                                 { return printf_string( "%04x", i ); }
-inline char                 char_from_wchar             ( wchar_t c )                               { return (char)( c & 0xFF ); }  // Hier könnte eine Prüfung einfügt werden.
+inline char                 char_from_wchar             ( wchar_t c )                               { return (char)( c & 0xFF ); }  // Hier kÃ¶nnte eine PrÃ¼fung einfÃ¼gt werden.
 //inline char                 char_from_wchar             ( int c )                                   { return char_from_wchar( (wchar_t)c ); }
 string                      z_function                  ( const char* pretty_function );
 
@@ -800,7 +800,7 @@ struct Rotating_bar
 
 struct Log_context  // Dieser struct wird zwischen DLLs ausgetausch. Also kein C++ oder sowas verwenden!
 {
-    // DIESE TYPEN NIEMALS NIE ÄNDERN, SIE WERDEN ZWISCHEN DLLS AUSGETAUSCHT (hostole.dll, spidermonkey.dll)
+    // DIESE TYPEN NIEMALS NIE Ã„NDERN, SIE WERDEN ZWISCHEN DLLS AUSGETAUSCHT (hostole.dll, spidermonkey.dll)
     // Und keine C++-Klassen verwenden, nur einfaches altes C.
 
 #   ifdef Z_UNIX
@@ -831,7 +831,7 @@ struct Message_code_text
 {
     const char*            _code;
     const char*            _text;
-    Message_code_text*     _next;                       // Nur der erste in einem Array Message_code_text[] ist gefüllt
+    Message_code_text*     _next;                       // Nur der erste in einem Array Message_code_text[] ist gefÃ¼llt
 };
 
 //-----------------------------------------------------------------------------------javabridge::Vm
@@ -847,7 +847,7 @@ void                        zschimmer_init              ();
 void                        zschimmer_terminate         ();
 string                      subst_env                   ( const string&, const Get_string_by_name_interface* = NULL );   // Ersetzt $NAME
 
-const static double         double_time_max             = INT_MAX;      // Könnte LONG_MAX sein, wenn time_t 64 Bits hat (wie in Microsoft C++ 2005)
+const static double         double_time_max             = INT_MAX;      // KÃ¶nnte LONG_MAX sein, wenn time_t 64 Bits hat (wie in Microsoft C++ 2005)
 const static time_t         time_max                    = INT_MAX;      
 
 double                      double_from_localtime       ();
@@ -896,7 +896,7 @@ extern bool                 unloading_module;
 } //namespace zschimmer
 
 //--------------------------------------------------------------------------------------namespace z
-// Abkürzung für namespace zschimmer
+// AbkÃ¼rzung fÃ¼r namespace zschimmer
 
 namespace z 
 { 

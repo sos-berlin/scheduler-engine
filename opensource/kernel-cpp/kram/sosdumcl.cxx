@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosdumcl"
-//#define COPYRIGHT   "© SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 
@@ -18,7 +18,7 @@ namespace sos {
 
 //---------------------------------------------------------------------Sos_dummy_client_mailbox
 
-struct Sos_dummy_client_mailbox     // Kommunikationsbereich für Sos_dummy_client
+struct Sos_dummy_client_mailbox     // Kommunikationsbereich fÃ¼r Sos_dummy_client
 {
                                 Sos_dummy_client_mailbox ( Sos_dummy_client* p );
                                ~Sos_dummy_client_mailbox ();

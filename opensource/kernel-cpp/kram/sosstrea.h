@@ -127,7 +127,7 @@ Bool        read_ebcdic_jn     ( Sos_binary_istream* );
 inline void read_ebcdic_jn     ( Sos_binary_istream*, Bool* );
 void        write_ebcdic_jn    ( Sos_binary_ostream*, Bool );
 
-// Zur Kompatibilit‰t:
+// Zur Kompatibilit√§t:
 
 inline void read_string_iso ( Sos_binary_istream* s, char* string_buffer, uint field_length )
 {

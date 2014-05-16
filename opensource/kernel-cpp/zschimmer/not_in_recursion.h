@@ -1,4 +1,4 @@
-// zschimmer.h                                      ©2000 Joacim Zschimmer
+// zschimmer.h                                      Â©2000 Joacim Zschimmer
 // $Id: not_in_recursion.h 13691 2008-09-30 20:42:20Z jz $
 
 #ifndef __ZSCHIMMER_NOT_IN_RECURSION_H

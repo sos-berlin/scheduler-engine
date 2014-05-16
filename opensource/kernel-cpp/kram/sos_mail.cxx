@@ -38,7 +38,7 @@ using namespace std;
 
 //--------------------------------------------------------------------------------------------const
 
-const int max_subject_length = 200;     // Möglicherweise gehen bis 1024-length("Subject: ") Zeichen?
+const int max_subject_length = 200;     // MÃ¶glicherweise gehen bis 1024-length("Subject: ") Zeichen?
 
 //-------------------------------------------------------------------------------------------static
 
@@ -145,7 +145,7 @@ void Message::set_subject( const string& subject )
     for( const char* p = subject.c_str(); s.length() < max_subject_length; )
     {
         if( (Byte)p[0] < ' ' )  break;                  // Vor allem \0, \r und \n
-        if( p[0] == ' ' )  while( p[1] == ' ' )  p++;   // Plumpe Spam-Filter mögen keine aufeinanderfolgenden Blanks
+        if( p[0] == ' ' )  while( p[1] == ' ' )  p++;   // Plumpe Spam-Filter mÃ¶gen keine aufeinanderfolgenden Blanks
 
         s += p[0];
         p++;
@@ -323,7 +323,7 @@ int Message::dequeue()
             //LOGI( "open " << email_filename << "\n" );
 
 #           ifdef Z_WINDOWS
-                file = sopen( email_filename.c_str(), O_RDONLY | _O_BINARY | _O_SEQUENTIAL | O_NOINHERIT, _SH_DENYRW );   // Exklusiv Öffnen, denn mehrere Threads und Prozesse (auch Spooler & hostole) können dasselbe Verzeichnis lesen
+                file = sopen( email_filename.c_str(), O_RDONLY | _O_BINARY | _O_SEQUENTIAL | O_NOINHERIT, _SH_DENYRW );   // Exklusiv Ã–ffnen, denn mehrere Threads und Prozesse (auch Spooler & hostole) kÃ¶nnen dasselbe Verzeichnis lesen
 #           else
                 file = open( email_filename.c_str(), O_RDONLY | O_NOINHERIT );
 #           endif

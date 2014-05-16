@@ -271,7 +271,7 @@ HRESULT Sos_ole_object::_set_excepinfo( const Xc& x, const string& method )
 
     hr = _set_excepinfo( source.c_str(), what.c_str(), method );
 
-    //Als hr sollte DISP_E_EXCEPTION zurückgegeben werden, denn sonst verschwindet der Fehlertext (mit Einfügungen) oder manchmal sogar der ganze Fehler (in JScript) jz 24.6.01
+    //Als hr sollte DISP_E_EXCEPTION zurÃ¼ckgegeben werden, denn sonst verschwindet der Fehlertext (mit EinfÃ¼gungen) oder manchmal sogar der ganze Fehler (in JScript) jz 24.6.01
     //if( strncmp( x.code(), "MSWIN-", 6 ) == 0 )  try{  hr = hex_as_int32( x.code() + 6 );  }catch(const Xc&){}
     //if( strcmp( x.name(), "OLE" ) == 0  &&  FAILED( ((Ole_error*)&x)->_hresult ) )  hr = ((Ole_error*)&x)->_hresult;
 
@@ -699,7 +699,7 @@ void Ole_server::exit()
         CoUninitialize();
     }
 
-    _appl.exit();       // Sos_static schließen
+    _appl.exit();       // Sos_static schlieÃŸen
 }
 
 //---------------------------------------------------------------------------------Ole_server::init
@@ -830,7 +830,7 @@ void Typelib_descr::load_typelib()
             //hr = LoadRegTypeLib( LIBID_hostware_type_library, 1, 0, LANG_NEUTRAL, &type_lib );
             //if( FAILED( hr ) )  return hr;
 
-            CoInitialize(NULL);     // Gegenstück in ~Typelib_descr(), damit OLE bis Erfüllung von atexit() gehalten wird. 
+            CoInitialize(NULL);     // GegenstÃ¼ck in ~Typelib_descr(), damit OLE bis ErfÃ¼llung von atexit() gehalten wird. 
 
             //Sos_string typelib_filename = module_filename();
             BSTR typelib_filename_bstr = SysAllocString_string( _typelib_filename );

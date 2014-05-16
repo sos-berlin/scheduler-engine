@@ -8,20 +8,20 @@
 
     ??? Scheduler und com_remote: 2 x GetIDsOfNames und Invoke zusammenfassen?
 
-    Wie in Java die Objekte nur für einen Aufruf gültig machen und danach entfernen?
+    Wie in Java die Objekte nur fÃ¼r einen Aufruf gÃ¼ltig machen und danach entfernen?
 
     Nicht thread-sicher!
-        Spidermonkey mit JS_THREADSAFE übersetzen (dazu fehlen Header-Dateien)
+        Spidermonkey mit JS_THREADSAFE Ã¼bersetzen (dazu fehlen Header-Dateien)
         Jsobject_idispatch sollte in anderen Threads benutzbar sein
-        -> Problem, wenn Spidermonkey beendet wird während ein anderer Thread Jsobject_idispatch aufruft -> Locks
+        -> Problem, wenn Spidermonkey beendet wird wÃ¤hrend ein anderer Thread Jsobject_idispatch aufruft -> Locks
 
-    Spidermonkey mit STRICT übersetzen!
+    Spidermonkey mit STRICT Ã¼bersetzen!
 
     Fehlermeldungen testen: Syntax, throw, Spooler- und Hostware-Fehler, Java-Fehler, catch von spooler-Fehler
 
     Einige Z_LOGs rausnehmen?
 
-    *** msvcr71.dll wird benötigt!
+    *** msvcr71.dll wird benÃ¶tigt!
 
     Garbage Collector beachten: http://www.mozilla.org/js/spidermonkey/gctips.html
 
@@ -29,16 +29,16 @@
     jvm.dll wird automatisch ermittelt aus Registrierung
 
     
-    Fehlermeldungen mit Methodennamen versehen: COM-Fehler bei spooler_log.info() sollte info erwähnen.
+    Fehlermeldungen mit Methodennamen versehen: COM-Fehler bei spooler_log.info() sollte info erwÃ¤hnen.
 */
 
 /*
     SPIDERMONKEY
         Visual C++ 2003: Nur die Debug-Version funktioniert!
-        Sie kann mit /O2 usw. übersetzt werden, aber es muss die Debug-Variante sein.
+        Sie kann mit /O2 usw. Ã¼bersetzt werden, aber es muss die Debug-Variante sein.
 
         Die Release-Variante erkennt Funktions-Parameter nicht.
-        Mit #ifdef DEBUG führt ein assert() zum Abbruch.
+        Mit #ifdef DEBUG fÃ¼hrt ein assert() zum Abbruch.
 */
 
 /*
@@ -48,37 +48,37 @@
 
     Jsobject_idispatch : IDispatch
         Ein JavaScript-Objekt (auch das globale) als IDispatch.
-        Eigentümer ist Javascript.
-        ~Jsobject_idispatch() gibt JS_Object frei (außer dem globalen Objekt)
+        EigentÃ¼mer ist Javascript.
+        ~Jsobject_idispatch() gibt JS_Object frei (auÃŸer dem globalen Objekt)
 
     Idispatch_jsobject
-        Nur für das globale Objekt in Javascript!
+        Nur fÃ¼r das globale Objekt in Javascript!
         Wenn andere Javascript-Objekte als IDispatch ansprechbar sein sollen:
-            Referenzzählung beachten
+            ReferenzzÃ¤hlung beachten
             finalizer -> Release(), _jsobject_to_idispatch.erase( jsobject )
 
         Ein IDispatch als JS_Object
-        Eigentümer ist die COM-Anwendung
+        EigentÃ¼mer ist die COM-Anwendung
         finalizer -> IDispatch()::Release()
 
 
     Java_liveconnect_interface
-        Callbacks für LiveConnect
+        Callbacks fÃ¼r LiveConnect
 
 
 
     OBJEKTE
         
-        IDispatch an Javascript übergeben (z.B. spooler_log)
+        IDispatch an Javascript Ã¼bergeben (z.B. spooler_log)
 
             
-        JSObject an COM übergeben (erstmal nur das globale Objekt)
+        JSObject an COM Ã¼bergeben (erstmal nur das globale Objekt)
             Jsobject_idispatch( jsobject )
 
 
 
 
-    ÄNDERUNGEN IN SPIDERMONKEY 1.7
+    Ã„NDERUNGEN IN SPIDERMONKEY 1.7
 
     jsscan.c, Zeile 113-116:
 
@@ -93,7 +93,7 @@
         DllMain auskommentiert.
 
 
-    liveconnect/jsj_JavaPackage.c, Zeilen 552-555 angehängt:
+    liveconnect/jsj_JavaPackage.c, Zeilen 552-555 angehÃ¤ngt:
 
         JSBool JSJ_pre_define_java_packages(JSContext *cx, JSObject *global_obj, JavaPackageDef *predefined_packages)   //2008-01-10 Joacim Zschimmer
         {                                                                                                               //2008-01-10 Joacim Zschimmer
@@ -103,18 +103,18 @@
 
 
     Veraltet:
-    ÄNDERUNGEN IN SPIDERMONKEY 1.5
+    Ã„NDERUNGEN IN SPIDERMONKEY 1.5
 
     jsapi.c, Zeile 4196-4199:
         DllMain auskommentiert.
 
 
-    jscntxt.h, Zeile 327 eingefügt:
+    jscntxt.h, Zeile 327 eingefÃ¼gt:
         jsbytecode*         exception_pc;           //jz 27.9.04
         char*               exception_script;       //jz 27.9.04
 
 
-    jscntxt.c, Zeile 613 eingefügt:
+    jscntxt.c, Zeile 613 eingefÃ¼gt:
         if( cx->exception_script )                                                              //jz 27.9.04
         {                                                                                       //jz 27.9.04
             report.filename = cx->exception_script->filename;                                   //jz 27.9.04
@@ -136,7 +136,7 @@
         Alle JS_EXPORT_API gegen JS_PUBLIC_API ausgetauscht
 
 
-    liveconnect/jsj_JavaPackage.c, Zeilen 530-503 eingefügt:
+    liveconnect/jsj_JavaPackage.c, Zeilen 530-503 eingefÃ¼gt:
 
         JSJ_pre_define_java_packages(JSContext *cx, JSObject *global_obj, JavaPackageDef *predefined_packages)  //jz 17.10.04
         {                                                                                                       //jz 17.10.04
@@ -185,14 +185,14 @@
 #endif
 
 #define JS_FILE
-//#define JS_THREADSAFE  // JavaScript mit JS_THREADSAFE übersetzen!   Geht nicht und brauchen wir auch nicht.
+//#define JS_THREADSAFE  // JavaScript mit JS_THREADSAFE Ã¼bersetzen!   Geht nicht und brauchen wir auch nicht.
 #define EXPORT_JS_API   // Wir binden Spidermonkey als .lib ein
 
 #include "../js/src/jsapi.h"
 #include "../js/src/jsdate.h"
 #include "../js/src/liveconnect/jsjava.h"
-#include "../js/src/jscntxt.h"                  // Für *cx->down->fp->pc == JSOP_SETCALL 
-#include "../js/src/jsopcode.h"                 // Für *cx->down->fp->pc == JSOP_SETCALL 
+#include "../js/src/jscntxt.h"                  // FÃ¼r *cx->down->fp->pc == JSOP_SETCALL 
+#include "../js/src/jsopcode.h"                 // FÃ¼r *cx->down->fp->pc == JSOP_SETCALL 
 
 
 extern "C" JSBool JSJ_pre_define_java_packages( JSContext*, JSObject*, JavaPackageDef* );  //jz
@@ -704,7 +704,7 @@ const char                      spidermonkey_module_filename[]  = "spidermonkey.
 const char                      liveconnect_module_filename[]   = "liveconnect.dll";
 const int                       size_before_garbage_collection  = 50*1024*1024;
 const int                       context_stack_size              = 100*1024;
-const int                       initial_jsobject_method_count   = 20;                       // Soviele Methoden und Eigenschaften hat ein übliches JSObjekt 
+const int                       initial_jsobject_method_count   = 20;                       // Soviele Methoden und Eigenschaften hat ein Ã¼bliches JSObjekt 
 const char                      no_such_method_name[]           = "__noSuchMethod__";
 
 const char* javascript_standard_object_names[] = 
@@ -715,7 +715,7 @@ const char* javascript_standard_object_names[] =
     NULL
 };
 
-const char* javascript_standard_global_object_names[] =         // javascript_standard_object_names wird hinzugefügt
+const char* javascript_standard_global_object_names[] =         // javascript_standard_object_names wird hinzugefÃ¼gt
 {
     "Array",
     "Boolean",
@@ -819,7 +819,7 @@ Spidermonkey::Class_descriptor  Spidermonkey::class_descriptor  ( &typelib, "Spi
 //Loaded_module                   Spidermonkey::liveconnect_module;
 
 
-// Pakete, die Java zugeordnet sind und in new benutzt werden können:
+// Pakete, die Java zugeordnet sind und in new benutzt werden kÃ¶nnen:
 
 static JavaPackageDef my_java_packages[] =
 {
@@ -1352,7 +1352,7 @@ void Spidermonkey::throw_spidermonkey( const char* function )
 }
 
 //-----------------------------------------------------------------------Spidermonkey::com_finalize
-// Wird möglicherweise von einem eigenen Thread gerufen 
+// Wird mÃ¶glicherweise von einem eigenen Thread gerufen 
 // (in Version 1.5rc6 nocht nicht)
 
 JS_DLL_CALLBACK void Spidermonkey::com_finalize( JSObject* jsobject )
@@ -1465,7 +1465,7 @@ JSBool Spidermonkey::com_property_resolve( JSObject* jsobject, jsval id )
 {
     JSBool ok = false;
 
-    if( JSVAL_IS_VOID( id )  &&  jsobject == _global_jsobject )     // Für new XML("...")
+    if( JSVAL_IS_VOID( id )  &&  jsobject == _global_jsobject )     // FÃ¼r new XML("...")
     {
         ok = true;
     }
@@ -1504,7 +1504,7 @@ JSBool Spidermonkey::com_property_resolve( JSObject* jsobject, jsval id )
 
             if( idispatch_member )
             {
-                // Bei jsobject == _global_jsobject muss die Eigenschaft definiert werden (z.B. für embed() )
+                // Bei jsobject == _global_jsobject muss die Eigenschaft definiert werden (z.B. fÃ¼r embed() )
                 // bei jsobject != _global_jsobject kann das unterbleiben. Dann ruft spidermonkey immer wieder resolve auf.
 
                 ok = JS_DefineUCProperty( _jscontext, jsobject, name_bstr.uint16_ptr(), name_bstr.length(), 
@@ -1528,7 +1528,7 @@ JSBool Spidermonkey::com_property_resolve( JSObject* jsobject, jsval id )
 void Spidermonkey::get_intermediate_object_parameters( JSObject* intermediate_jsobject, Dispparams* dispparams, int arg_offset )
 {
     // Zwischenobjekt von com_call(): 
-    // Die Eigenschaft __arguments__ enthält ein Array mit den Parametern für den Aufruf von DISPID_VALUE
+    // Die Eigenschaft __arguments__ enthÃ¤lt ein Array mit den Parametern fÃ¼r den Aufruf von DISPID_VALUE
 
     HRESULT hr;
     JSBool  ok;
@@ -1564,7 +1564,7 @@ JSBool Spidermonkey::com_property_get( JSObject* jsobject, jsval id, jsval* resu
 {
     JSBool ok = false;
 
-    if( JSVAL_IS_VOID( id )  &&  jsobject == _global_jsobject )     // Für new XML("...")
+    if( JSVAL_IS_VOID( id )  &&  jsobject == _global_jsobject )     // FÃ¼r new XML("...")
     {
         *result = JSVAL_VOID;
         ok = true;
@@ -1603,7 +1603,7 @@ JSBool Spidermonkey::com_property_get( JSObject* jsobject, jsval id, jsval* resu
                     throw_com_excepinfo( hr, &excepinfo, "IDispatch::Invoke", string_from_bstr( name_bstr ).c_str() );
                 }
 
-                //  Wir ändern result nicht, dann ruft Spidermonkey com_no_such_method_call() auf.
+                //  Wir Ã¤ndern result nicht, dann ruft Spidermonkey com_no_such_method_call() auf.
             }
             else
             {
@@ -1675,7 +1675,7 @@ JSBool Spidermonkey::com_property_add( JSObject* jsobject, jsval id, jsval* )
 {
     JSBool ok = false;
 
-    if( JSVAL_IS_VOID( id )  &&  jsobject == _global_jsobject )     // Für new XML("...")
+    if( JSVAL_IS_VOID( id )  &&  jsobject == _global_jsobject )     // FÃ¼r new XML("...")
     {
         ok = true;
     }
@@ -1730,7 +1730,7 @@ JSBool Spidermonkey::com_property_delete( JSObject* jsobject, jsval id, jsval* r
 
 JSObject* Spidermonkey::create_intermediate_object( IDispatch* idispatch, JSObject* arguments_jsobject )
 {
-    // Zwischenobjekt anlegen, das als Funktionsergebnis (lvalue) zurückgegeben wird.
+    // Zwischenobjekt anlegen, das als Funktionsergebnis (lvalue) zurÃ¼ckgegeben wird.
 
     JSObject* intermediate_jsobject = NULL;
 
@@ -1784,16 +1784,16 @@ JSBool Spidermonkey::com_call( JSObject*, uintN argc, jsval* argv, jsval* jsresu
         // set v = spooler.create_variable_set()
         // v.set_var( "variable", "wert" )
         // a = v("variable") <-- Hier sind wir
-        //    global_jsobject ist das globale Objekt: v("variable") ist ungefähr das gleiche wie global.v("variable")
+        //    global_jsobject ist das globale Objekt: v("variable") ist ungefÃ¤hr das gleiche wie global.v("variable")
         //    Unser Objekt v ist in argv[-2], s. js_Call() in jsobj.c.
-        // Vorher hat com_convert true für JSTYPE_FUNCTION geliefert.
+        // Vorher hat com_convert true fÃ¼r JSTYPE_FUNCTION geliefert.
 
         JSObject* arguments_jsobject = JS_NewArrayObject( _jscontext, argc, argv );
         if( !arguments_jsobject )  throw_xc( "SPIDERMONKEY", "JS_NewArrayObject" );
 
         *jsresult = jsval_from_jsobject( create_intermediate_object( (IDispatch*)JS_GetPrivate( _jscontext, jsobject_from_jsval( argv[ -2 ] ) ), arguments_jsobject ) );
 
-        JS_SetCallReturnValue2( _jscontext, JS_GetEmptyStringValue( _jscontext ) );  // Name der Eigenschaft "" zurückgeben
+        JS_SetCallReturnValue2( _jscontext, JS_GetEmptyStringValue( _jscontext ) );  // Name der Eigenschaft "" zurÃ¼ckgeben
     }
     catch( const exception&  x ) { set_js_exception( x );  ok = false; }
     catch( const _com_error& x ) { set_js_exception( x );  ok = false; }
@@ -1835,7 +1835,7 @@ JSBool Spidermonkey::com_no_such_method_call( JSContext* cx, JSObject* jsobject,
 
             *jsresult = jsval_from_jsobject( create_intermediate_object( (IDispatch*)JS_GetPrivate( _jscontext, jsobject ), args ) );
 
-            JS_SetCallReturnValue2( _jscontext, jsval_from_bstr( name_bstr ) );  // Name der Eigenschaft zurückgeben
+            JS_SetCallReturnValue2( _jscontext, jsval_from_bstr( name_bstr ) );  // Name der Eigenschaft zurÃ¼ckgeben
         }
         else
         {
@@ -1853,12 +1853,12 @@ JSBool Spidermonkey::com_no_such_method_call( JSContext* cx, JSObject* jsobject,
                 /*
                 if( JSVAL_IS_OBJECT( value ) )
                 {
-                    // Nicht in Jsval_to_variant() konvertieren, damit wir SetNamedRoot() nicht rufen müssen.
+                    // Nicht in Jsval_to_variant() konvertieren, damit wir SetNamedRoot() nicht rufen mÃ¼ssen.
 
                     ptr<Jsobject_idispatch> jsobject_idispatch = Z_NEW( Jsobject_idispatch( this, value ) );                
                     dispparams[i] = +jsobject_idispatch;
 
-                    Invoke "toString" soll zu Invoke(DISPID_VALUE) führen
+                    Invoke "toString" soll zu Invoke(DISPID_VALUE) fÃ¼hren
                 }
                 else
                 */
@@ -1973,7 +1973,7 @@ HRESULT Spidermonkey::Jsval_to_variant( jsval js_value, VARIANT* result )
                 int64  msec = (int64)js_DateGetMsecSinceEpoch( _jscontext, date_jsobject );     // GMT
 
 
-                // Zeitzone berücksichtigen (VT_DATE ist lokale Zeit)
+                // Zeitzone berÃ¼cksichtigen (VT_DATE ist lokale Zeit)
 
                 jsval jsresult;
                 int ok = JS_CallFunctionName( _jscontext, date_jsobject, "toString", 0, NULL, &jsresult );
@@ -2449,7 +2449,7 @@ void Spidermonkey::initialize()
     if( !_activexobject_jsfunction )  throw_spidermonkey( "JS_DefineFunction" );
 
 
-    // Funktion, die eine Java-Klasse lädt, sodass sie in Javascript bekannt ist
+    // Funktion, die eine Java-Klasse lÃ¤dt, sodass sie in Javascript bekannt ist
     _declare_java_package_jsfunction = JS_DefineFunction( _jscontext, _global_jsobject, "declare_java_package", declare_java_package_jsfunction, 1, 0 );
     if( !_declare_java_package_jsfunction )  throw_spidermonkey( "JS_DefineFunction" );
 
@@ -2524,7 +2524,7 @@ HRESULT Spidermonkey::Close()
         if( _jscontext )
         {
             JS_GC( _jscontext );        // Garbage Collector, damit auch wirklich alle finalizer aufgerufen werden.
-                                        // Wichtig für JSJ_DisconnectFromJavaVM()!
+                                        // Wichtig fÃ¼r JSJ_DisconnectFromJavaVM()!
 
             release_js_scripts();
 

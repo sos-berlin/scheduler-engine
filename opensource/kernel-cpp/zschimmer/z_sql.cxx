@@ -56,7 +56,7 @@ string without_comments_regardless_quotes( const string& sql )
         
         const char* q = p0;
         while( isspace( (unsigned char)*q ) )  q++;   
-        if( q < p )                                   // Nur ausgeben, wenn nicht nur weißer Zwischenraum
+        if( q < p )                                   // Nur ausgeben, wenn nicht nur weiÃŸer Zwischenraum
             result.append( p0, p - p0 );       
 
         p += 2;

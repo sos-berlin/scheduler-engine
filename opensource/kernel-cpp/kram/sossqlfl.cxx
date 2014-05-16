@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sossqlfl"
-//#define COPYRIGHT   "©1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "../kram/sos.h"
@@ -56,7 +56,7 @@ void Sossql_session::_open( Sos_database_file* database_file )
     {
         if( empty( _db_name ) ) {
             _catalog_name = "com | sossql_profile_catalog alias"; // oder 'sossql tables' ?
-            // Nicht öffnen! sossql_profile_catalog nutzt sossql-select, das gibt eine Schleife
+            // Nicht Ã¶ffnen! sossql_profile_catalog nutzt sossql-select, das gibt eine Schleife
         } else {
             _catalog_name = "com | " + read_existing_profile_string( "", "sossql catalogs", c_str( _db_name ) );
             // Katalog offenhalten:
@@ -220,7 +220,7 @@ void Sossql_file::prepare_open( const char* param, File_base::Open_mode open_mod
     if( !empty( _db_name )  &&  !empty( _catalog_name ) ) {
         // jz 3.9.01: throw_xc wieder eingebaut. js 14.7.98: 
         throw_xc( "SOS-1385", c_str( _db_name ), c_str( _catalog_name ) );
-        // _catalog_name hat Vorrang. Geht überhaupt beides? js
+        // _catalog_name hat Vorrang. Geht Ã¼berhaupt beides? js
         //jz LOG( "Sossql_file::prepare_open: Fehler? catalog='" << c_str( _catalog_name ) << "' vs. db=" << c_str( _db_name ) << '\n' );
         //jz _db_name = "";
     }
@@ -249,7 +249,7 @@ void Sossql_file::prepare_open( const char* param, File_base::Open_mode open_mod
 
         {
             Dynamic_area stmt;
-            ((Sossql_session*)+_session)->_limit = _limit;  // Kann von convert_stmt() über translate_limit() ersetzt werden. Für %limit().
+            ((Sossql_session*)+_session)->_limit = _limit;  // Kann von convert_stmt() Ã¼ber translate_limit() ersetzt werden. FÃ¼r %limit().
             _session->convert_stmt( Const_area( c_str( statement ), length( statement ) ), &stmt );
             statement = string( stmt.char_ptr(), length( stmt ) );
             _limit = ((Sossql_session*)+_session)->_limit;
@@ -276,9 +276,9 @@ void Sossql_file::prepare_open( const char* param, File_base::Open_mode open_mod
 
             if( _select_stmt->_resolve_star )      // select ...,tabelle.*,... ?
             {     
-                // tabelle.* in die einzelnen Felder auflösen: Dazu bauen wir eine neue Satzbeschreibung:
+                // tabelle.* in die einzelnen Felder auflÃ¶sen: Dazu bauen wir eine neue Satzbeschreibung:
                 Sos_ptr<Record_type> type = Record_type::create();
-                type->name( _select_stmt->_result_record_type->name() );  // Namen übernehmen
+                type->name( _select_stmt->_result_record_type->name() );  // Namen Ã¼bernehmen
 
                 for( int i = 0; i < _select_stmt->_result_record_type->field_count(); i++ ) 
                 {
@@ -307,7 +307,7 @@ void Sossql_file::prepare_open( const char* param, File_base::Open_mode open_mod
             }
 
             //if( _select_stmt->_result_key_descr ) {
-            //    // Nur, wenn die Schlüsselfelder aller Tabellen selektiert sind!
+            //    // Nur, wenn die SchlÃ¼sselfelder aller Tabellen selektiert sind!
             //    _any_file_ptr->_spec._key_specs._key_spec._field_descr_ptr = +_select_stmt->_result_key_descr;
             //    _key_len = _select_stmt->_result_key_descr->type().field_size();
             //    _key_pos = _select_stmt->_result_key_descr->offset();
@@ -349,7 +349,7 @@ void Sossql_file::open( const char*, File_base::Open_mode, const File_spec& )
         _stmt->execute();
         _any_file_ptr->_record_count = _stmt->_row_count;
     } else {
-        // Anweisungen (insert, delete etc.) werden mit put_record übergeben
+        // Anweisungen (insert, delete etc.) werden mit put_record Ã¼bergeben
     }
 }
 

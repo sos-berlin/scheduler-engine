@@ -7,13 +7,13 @@ namespace scheduler {
 namespace schedule {
 
 //
-//  Schedule_use könnte die Schedule-Logik von Job und Order übernehmen.
+//  Schedule_use kÃ¶nnte die Schedule-Logik von Job und Order Ã¼bernehmen.
 //
-//  Schedule_use::_current_period: aktuelle oder, wenn es keine gibt, die nächste Periode
-//  Schedule_use::_next_single_start: Nächster single_start
+//  Schedule_use::_current_period: aktuelle oder, wenn es keine gibt, die nÃ¤chste Periode
+//  Schedule_use::_next_single_start: NÃ¤chster single_start
 //  Zu beiden Angaben, aus welchem Schedule sie stammen
 //  
-//  Nächster Start wegen repeat oder absolute_repeat
+//  NÃ¤chster Start wegen repeat oder absolute_repeat
 //  
 
 //-------------------------------------------------------------------------------Schedule_subsystem
@@ -51,7 +51,7 @@ Schedule    ::Class_descriptor  Schedule    ::class_descriptor  ( &typelib, "sos
 Schedule_use::Class_descriptor  Schedule_use::class_descriptor  ( &typelib, "sos.spooler.Run_time", Schedule_use::_methods );
 
 const int                       max_include_nesting         = 10;
-const int                       foresee_years               = 20;       // Längstens soviele Jahre voraussehen
+const int                       foresee_years               = 20;       // LÃ¤ngstens soviele Jahre voraussehen
 
 const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "do"        , "fr"     , "sa"      ,
                                 "sonntag", "montag", "dienstag", "mittwoch" , "donnerstag", "freitag", "samstag" ,
@@ -201,7 +201,7 @@ bool Schedule_subsystem::subsystem_activate()
 
 void Schedule_subsystem::assert_xml_element_name( const xml::Element_ptr& element ) const
 {
-    if( !element.nodeName_is( "run_time" ) )  File_based_subsystem::assert_xml_element_name( element );    // <run_time> und <schedule> sind ungefähr gleich
+    if( !element.nodeName_is( "run_time" ) )  File_based_subsystem::assert_xml_element_name( element );    // <run_time> und <schedule> sind ungefÃ¤hr gleich
 }
 
 //-----------------------------------------------------Schedule_subsystem<Schedule>::new_file_based
@@ -451,7 +451,7 @@ bool Schedule_use::on_requisite_loaded( File_based* file_based )
 bool Schedule_use::on_requisite_to_be_removed( File_based* )
 {
     bool ok = on_schedule_to_be_removed();
-    assert( ok );   // false nicht geprüft
+    assert( ok );   // false nicht geprÃ¼ft
 
     if( ok )                    // Stets true!
     {
@@ -873,15 +873,15 @@ bool Schedule::try_connect_covered_schedule()
 
         if( covered_schedule ) // &&  covered_schedule->file_based_state() >= s_loaded )
         {
-            // Bei Überlappung gibt es eine Exception und der überdeckende Schedule wird nicht im überdeckten eingetragen.
+            // Bei Ãœberlappung gibt es eine Exception und der Ã¼berdeckende Schedule wird nicht im Ã¼berdeckten eingetragen.
             // Besser: Keine Exception, sondern return false, 
-            //         überdeckender Scheduler wird im überdeckten unwirksam eingetragen,
-            //         damit bei Änderung eines anderen überdeckenden Schedules erneut alle auf Überlappung geprüft werden können.
+            //         Ã¼berdeckender Scheduler wird im Ã¼berdeckten unwirksam eingetragen,
+            //         damit bei Ã„nderung eines anderen Ã¼berdeckenden Schedules erneut alle auf Ãœberlappung geprÃ¼ft werden kÃ¶nnen.
             //         Zustand is_overlapping.
             // Die SOS fordert nur "There can be more than one replacement schedule for a schedule, but the replacement schedules may not overlap."
-            // Der Überlappende Schedule muss jetzt geändert (neu gespeichert) werden, damit er wirken kann.
+            // Der Ãœberlappende Schedule muss jetzt geÃ¤ndert (neu gespeichert) werden, damit er wirken kann.
 
-            covered_schedule->cover_with_schedule( this );  // Löst Exception aus bei nicht eindeutiger Überdeckung
+            covered_schedule->cover_with_schedule( this );  // LÃ¶st Exception aus bei nicht eindeutiger Ãœberdeckung
             _covered_schedule = covered_schedule;
         }
         else
@@ -915,7 +915,7 @@ void Schedule::disconnect_covered_schedule()
 
 void Schedule::disconnect_covering_schedules()
 {
-    assert( _covering_schedules.empty() );   // Schedule::on_requisite_to_be_removed() sollte bereits die Verbindungen gelöst haben
+    assert( _covering_schedules.empty() );   // Schedule::on_requisite_to_be_removed() sollte bereits die Verbindungen gelÃ¶st haben
 
     Covering_schedules covering_schedules = _covering_schedules;
 
@@ -932,17 +932,17 @@ void Schedule::disconnect_covering_schedules()
 Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
 { 
     Period result;
-    Time   interval_begin = Time(0);      // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
-    Time   interval_end   = Time::never;  // Standard-Schedule endet. Gilt, falls kein überdeckendes Schedule >= t
+    Time   interval_begin = Time(0);      // Standard-Schedule beginnt. Gilt, falls kein Ã¼berdeckendes Schedule < t 
+    Time   interval_end   = Time::never;  // Standard-Schedule endet. Gilt, falls kein Ã¼berdeckendes Schedule >= t
     Time   t              = tim;
 
-    // Überdeckende Schedule prüfen, <schedule substitute="...">
+    // Ãœberdeckende Schedule prÃ¼fen, <schedule substitute="...">
 
     for( Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound(t.millis());; next_schedule++ )   // Liefert das erste Schedule nach t
     {
         assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
-        if( next_schedule == _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
+        if( next_schedule == _covering_schedules.begin() )   // Kein Ã¼berdeckendes Schedule mit _covered_schedule_begin < t?
         { 
             interval_begin = Time(0);
         }
@@ -966,21 +966,21 @@ Period Schedule::next_local_period( Schedule_use* use, const Time& tim, With_sin
                 {
                     result = period;
                     result._schedule_path = covering_schedule->path();
-                    break;     // Periode beginnt im überdeckenden Schedule? Gut!
+                    break;     // Periode beginnt im Ã¼berdeckenden Schedule? Gut!
                 }
 
-                t = interval_end;   // Das überdeckende Schedule hat keine Periode. Also weiter in unserem Standard-Schedule!
+                t = interval_end;   // Das Ã¼berdeckende Schedule hat keine Periode. Also weiter in unserem Standard-Schedule!
             }
 
-            interval_begin = covering_schedule->_inlay->_covered_schedule_end;      // Beginn der Lücke nach dem letzten überdeckenden Schedule
+            interval_begin = covering_schedule->_inlay->_covered_schedule_end;      // Beginn der LÃ¼cke nach dem letzten Ã¼berdeckenden Schedule
         }
 
-        interval_end = next_schedule != _covering_schedules.end()? next_schedule->second->_inlay->_covered_schedule_begin     // Ende der Lücke
+        interval_end = next_schedule != _covering_schedules.end()? next_schedule->second->_inlay->_covered_schedule_begin     // Ende der LÃ¼cke
                                                                  : Time::never;
 
         assert( t >= interval_begin  &&  t <= interval_end );
 
-        if( interval_begin < interval_end )     // Die Lücke nach dem überdeckenden Schedule ist länger als 0?
+        if( interval_begin < interval_end )     // Die LÃ¼cke nach dem Ã¼berdeckenden Schedule ist lÃ¤nger als 0?
         {
             assert( !covering_schedule_at( t ) );
             Period period = _inlay->next_local_period( use, t, single_start, before );       // Unser Standard-Schedule
@@ -1037,7 +1037,7 @@ Schedule* Schedule::covering_schedule_at( const Time& t )
     Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t.millis() );   // Liefert das erste Schedule nach t
     assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
-    if( next_schedule != _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
+    if( next_schedule != _covering_schedules.begin() )   // Kein Ã¼berdeckendes Schedule mit _covered_schedule_begin < t?
     {
         Covering_schedules::iterator schedule_before = next_schedule;  
         schedule_before--;
@@ -1106,7 +1106,7 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
                 Time now = Time::now();
                 Schedule* covering_schedule = covering_schedule_at( now );
                 result.setAttribute( "active", ( is_covering()? is_covering_at( now )
-                                                              : !covering_schedule    )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
+                                                              : !covering_schedule    )? "yes": "no" );  // Wird nicht Ã¼berdeckt oder kann jetzt selbst Ã¼berdecken?
                 if( covering_schedule )  result.setAttribute( "now_covered_by_schedule", covering_schedule->path() );
             }
 
@@ -1195,7 +1195,7 @@ Schedule::Inlay::Inlay( Schedule* schedule )
     _months(12)
 {
     _dom.create();
-    _dom.appendChild( _dom.createElement( "run_time" ) );       // <run_time/>, zur Kompatibilität für nicht gesetztes <run_time> in einem Job.
+    _dom.appendChild( _dom.createElement( "run_time" ) );       // <run_time/>, zur KompatibilitÃ¤t fÃ¼r nicht gesetztes <run_time> in einem Job.
                                                                 // Bei file_based_state() == s_undefined wird dann ein <run_time/> statt <schedule/> geliefert
 
     if( _schedule->_scheduler_holidays_usage == with_scheduler_holidays )      // Default. Nur bei Order nicht (siehe eMail von Andreas Liebert 2008-04-21).
@@ -1367,10 +1367,10 @@ bool Schedule::Inlay::is_filled() const
 
 Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
 {
-    // Wenn mehrere Jahre vorausgesehen werden sollen (s. foresee_years), könnte der Algorithmus vielleicht beschleunigt werden.
-    // single_start könnte geprüft werden: <run_time> ohne single_start usw. muss dann nicht durchsucht werden.
-    // Oder nur <at> wird weit vorhergesehen, dann könnte man direkt zum Tag springen, dann rückwärts zum vorangehenden Nicht-Feiertag.
-    // Ebenso, wenn nur <months> angegeben ist: Direkt zum nächsten angegebenen Monat springen.
+    // Wenn mehrere Jahre vorausgesehen werden sollen (s. foresee_years), kÃ¶nnte der Algorithmus vielleicht beschleunigt werden.
+    // single_start kÃ¶nnte geprÃ¼ft werden: <run_time> ohne single_start usw. muss dann nicht durchsucht werden.
+    // Oder nur <at> wird weit vorhergesehen, dann kÃ¶nnte man direkt zum Tag springen, dann rÃ¼ckwÃ¤rts zum vorangehenden Nicht-Feiertag.
+    // Ebenso, wenn nur <months> angegeben ist: Direkt zum nÃ¤chsten angegebenen Monat springen.
     // Ebenso <weekdays> usw.
 
 
@@ -1384,7 +1384,7 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
         
         last_function_result.set_single_start(Time(0));
 
-        Time limited_before = min( before, beginning_time + Duration(foresee_years*366*24*60*60));     // Längstens soviele Jahre ab beginning_time voraussehen
+        Time limited_before = min( before, beginning_time + Duration(foresee_years*366*24*60*60));     // LÃ¤ngstens soviele Jahre ab beginning_time voraussehen
 
 
         for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + Duration::day)     
@@ -1441,7 +1441,7 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
                      after += Duration::day)
                 {
                     Period p = next_period_of_same_day(t + after, single_start | wss_when_holiday_previous_non_holiday);
-                    if( !p.empty() )  result = min(result, p - after);    // Zukünftige Periode auf heute verschieben
+                    if( !p.empty() )  result = min(result, p - after);    // ZukÃ¼nftige Periode auf heute verschieben
                 }
             }
         }
@@ -1661,7 +1661,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
         _end = Time(dt);
     }
 
-    _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
+    _start_once = element.bool_getAttribute( "start_once", _start_once );   // FÃ¼r Joacim Zschimmer
     //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( Z_FUNCTION, "Attribute start_once is not supported" );
 
     if( element.hasAttribute( "when_holiday" ) )  _when_holiday = when_holiday_from_string( element.getAttribute( "when_holiday" ) );
@@ -1698,13 +1698,13 @@ bool Period::is_coming( const Time& time_of_day, With_single_start single_start 
                                                                          // ^-- Falls time_of_day == previous_period.end(), sonst Schleife!
     else
     if( single_start & wss_next_begin  &&  !_single_start  &&  time_of_day <= _begin )  result = true;
-                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nÃ¤chsten Tags)
     else
     if( single_start & wss_next_single_start  &&  _single_start  &&  time_of_day <= _begin )  result = true;
-                                                                              // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+                                                                              // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nÃ¤chsten Tags)
     else
   //if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
-                                                                                                       // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+                                                                                                       // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nÃ¤chsten Tags)
     if( single_start & wss_next_any_start  &&  ( _single_start         && time_of_day <= _begin ||
                                                   has_repeat_or_once() && time_of_day <  _end      ) )  result = true;
     else
@@ -1752,7 +1752,7 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
     if( !_absolute_repeat.is_eternal() )
     {
         result = next_absolute_repeated(t); 
-        // result ist never, wenn Ende der Periode erreicht ist. "allow_after_end" gilt nur für repeat, nicht für absolute_repeat.
+        // result ist never, wenn Ende der Periode erreicht ist. "allow_after_end" gilt nur fÃ¼r repeat, nicht fÃ¼r absolute_repeat.
     }
 
     return result;  
@@ -2001,7 +2001,7 @@ void Monthday_set::set_dom( const xml::Element_ptr& monthdays_element, const Day
                 list<int> weekdays       = get_weekday_numbers( element.getAttribute( "day" ) );
                 int       which          = element.int_getAttribute( "which" );
 
-                if( which == 0  ||  abs( which ) > max_weekdays_per_month )  z::throw_xc( Z_FUNCTION, S() << "Invalid value for which=" << which );    // XML-Schema hat schon geprüft
+                if( which == 0  ||  abs( which ) > max_weekdays_per_month )  z::throw_xc( Z_FUNCTION, S() << "Invalid value for which=" << which );    // XML-Schema hat schon geprÃ¼ft
 
                 Month_weekdays* m   = which > 0? &_month_weekdays : &_reverse_month_weekdays;
                 ptr<Day>        day = Z_NEW( Day( element, &my_default_day, default_period ) );

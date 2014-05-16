@@ -10,12 +10,12 @@ namespace sql {
 
 /*
     struct Transaction;   Im Thread Local Storage ablegen (Thread_data)
-    Für jede Datenbankverbindung eine eigene Transaktion: map<Db*, ptr<Transaction> >
-    Alle Datenbankzugriffe über die Transaktion, so dass sie weiß, ob ein Rollback oder Commit nötig ist.
-    Verschachtelte Transaktionen (die inneren ignorieren Commit, Rollback ist nicht möglich, außer am Anfang)
-    Unabhängig von der Hostware (ist über allgemeines Interface ankoppelbar)
+    FÃ¼r jede Datenbankverbindung eine eigene Transaktion: map<Db*, ptr<Transaction> >
+    Alle Datenbankzugriffe Ã¼ber die Transaktion, so dass sie weiÃŸ, ob ein Rollback oder Commit nÃ¶tig ist.
+    Verschachtelte Transaktionen (die inneren ignorieren Commit, Rollback ist nicht mÃ¶glich, auÃŸer am Anfang)
+    UnabhÃ¤ngig von der Hostware (ist Ã¼ber allgemeines Interface ankoppelbar)
 
-    Ohne TLS: DB-Objekt wird mit Transaction verbunden. Operation ohne eröffnete Transaction ist unzulässig.
+    Ohne TLS: DB-Objekt wird mit Transaction verbunden. Operation ohne erÃ¶ffnete Transaction ist unzulÃ¤ssig.
 */
 
 //-------------------------------------------------------------------------------------------------

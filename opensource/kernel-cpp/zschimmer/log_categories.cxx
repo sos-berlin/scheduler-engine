@@ -10,11 +10,11 @@ using namespace std;
 namespace zschimmer {
 
 //-----------------------------------------------------------------------------------Log_categories
-// Dieser Code ist ganz unverständlich, weil er direkt auf der Hash-Map arbeitet.
-// Ein besserer Algorithmus wäre ein Baum, aus dem nach jeder Änderung die Hash-Map generiert wird.
+// Dieser Code ist ganz unverstÃ¤ndlich, weil er direkt auf der Hash-Map arbeitet.
+// Ein besserer Algorithmus wÃ¤re ein Baum, aus dem nach jeder Ã„nderung die Hash-Map generiert wird.
 // Der Baum dient zum Verwalten der durch Punkte getrennten Pfade.
 // Die Hash-Map ist daraus gebildet und dient zum schnellen Lesen mit is_set().
-// Dann brauchen wir die "derived"-Einträge nicht mehr, der Algorithmus wäre klarer.
+// Dann brauchen wir die "derived"-EintrÃ¤ge nicht mehr, der Algorithmus wÃ¤re klarer.
 
 
 /*
@@ -26,7 +26,7 @@ namespace zschimmer {
         log_what = misc.profile misc.java.exceptions objectserver.* objectserver.recv-
     
 
-    Das führt zu den Aufrufen:
+    Das fÃ¼hrt zu den Aufrufen:
 
         set( "misc.profile"         , true );
         set( "misc.java.exception"  , true );
@@ -257,7 +257,7 @@ bool Log_categories::is_set( const string& name, bool is_derived )
 {
     bool result = false;
 
-    if( _really_all )  return true;     // Für set_all(), kann von Signal-Handler (z.B. SIGUSR1) gesetzt werden.
+    if( _really_all )  return true;     // FÃ¼r set_all(), kann von Signal-Handler (z.B. SIGUSR1) gesetzt werden.
     if( name == ""  )  return true;
     if( !_valid     )  return true;
 
@@ -298,7 +298,7 @@ bool Log_categories::is_set2( const string& name, bool is_derived )
                 }
             }
 
-            // Eintrag merken, damit's beim nächsten Mal gleich gefunden wird.
+            // Eintrag merken, damit's beim nÃ¤chsten Mal gleich gefunden wird.
 
             e = _map.insert( Map::value_type( name,  Entry( Entry::e_derived, value ) ) )
                 .first;    
@@ -379,7 +379,7 @@ void Log_categories::modify_children( const string& parent, bool value, bool chi
 {
     //Z_DEBUG_ONLY( Z_LOGI( Z_FUNCTION << "(\"" << name << "\"," << value << ")\n" ) );
 
-    // Für Kinder übernehmen
+    // FÃ¼r Kinder Ã¼bernehmen
 
     string prefix = parent == ""? "" : parent +".";
 

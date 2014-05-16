@@ -47,7 +47,7 @@ const DWORD             DLL_PROCESS_DETACH = 2;
 const DWORD             DLL_THREAD_ATTACH  = 3;
 const DWORD             DLL_THREAD_DETACH  = 4;
 
-const DWORD             Z_DLL_COM_ATTACH = 101;         // Eigene Erweiterung, um Com_context zu übergeben (für SetError() etc.)
+const DWORD             Z_DLL_COM_ATTACH = 101;         // Eigene Erweiterung, um Com_context zu Ã¼bergeben (fÃ¼r SetError() etc.)
 const DWORD             Z_DLL_COM_DETACH = 102;         // Eigene Erweiterung 
 
 #define LOCALE_SYSTEM_DEFAULT  0u
@@ -96,7 +96,7 @@ typedef OLECHAR* BSTR;
 
 BSTR        SysAllocStringLen       ( const OLECHAR*, UINT len );
 BSTR        SysAllocString          ( const OLECHAR* );
-BSTR        SysAllocString          ( const wchar_t* );                     // Für SysAllocString( L"..." )  (Unix)
+BSTR        SysAllocString          ( const wchar_t* );                     // FÃ¼r SysAllocString( L"..." )  (Unix)
 
 void        SysFreeString           ( BSTR );
 int         SysReAllocStringLen     ( BSTR*, const OLECHAR*, UINT len );
@@ -574,7 +574,7 @@ struct MULTI_QI
 
 //---------------------------------------------------------------------------------------_com_error
 
-struct _com_error               // Zur Verträglichkeit mit Microsofts COM. Wird nicht in Unix nicht benutzt.
+struct _com_error               // Zur VertrÃ¤glichkeit mit Microsofts COM. Wird nicht in Unix nicht benutzt.
 {
   //zschimmer::com::Bstr        Description                 () const    { return ""; }
     BSTR                        Description                 () const    { return NULL; }
@@ -583,7 +583,7 @@ struct _com_error               // Zur Verträglichkeit mit Microsofts COM. Wird 
 
 //-------------------------------------------------------------------------------------------COINIT
 
-enum COINIT     // Für CoInitializeEx()
+enum COINIT     // FÃ¼r CoInitializeEx()
 {
     COINIT_MULTITHREADED     = 0x0,
     COINIT_APARTMENTTHREADED = 0x2,

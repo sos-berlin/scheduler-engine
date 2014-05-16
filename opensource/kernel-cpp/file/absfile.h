@@ -1,6 +1,6 @@
 // absfile.h                                             (c) 1992-1995 SOS GmbH Berlin
 //
-// Abstrakte Klassen für in Sätzen organisierte Dateien
+// Abstrakte Klassen fÃ¼r in SÃ¤tzen organisierte Dateien
 
 #ifndef __ABSFILE_H
 #define __ABSFILE_H
@@ -112,7 +112,7 @@ typedef Abs_file Abs_connection;     // ???????
 //--------------------------------------------------------------------------------Abs_file_type
 
 struct Abs_file_type
-/* Pro Dateityp ein Exemplar für alle (Windows-)Tasks
+/* Pro Dateityp ein Exemplar fÃ¼r alle (Windows-)Tasks
 */
 {
                                 Abs_file_type           ()              { _next = _head; _head = this; }

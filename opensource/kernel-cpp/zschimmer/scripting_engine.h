@@ -10,7 +10,7 @@
 #ifdef Z_WINDOWS
 
 #   include <objbase.h>                     // COM
-//#   include "../factory/msscript.h"         // GUID für Scripting Engine
+//#   include "../factory/msscript.h"         // GUID fÃ¼r Scripting Engine
 #    include <activscp.h>
 
 

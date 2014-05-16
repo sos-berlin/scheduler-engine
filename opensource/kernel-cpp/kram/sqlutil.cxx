@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sqlutil"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "../kram/sosstrng.h"
@@ -18,7 +18,7 @@ Dyn_obj get_single_row( const Sos_string& stmt, const Dyn_obj& param )
 {
     Dyn_obj             o;
     Sos_ptr<Field_type> type;
-    Record_type         param_record_type;    // muss close() gültig sein!
+    Record_type         param_record_type;    // muss close() gÃ¼ltig sein!
     Any_file            f;
     Dynamic_area        buffer;
 

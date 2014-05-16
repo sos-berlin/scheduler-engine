@@ -34,18 +34,18 @@ const char history_column_names[] =    "id"           ":numeric,"
                                        "exit_code,"
                                        "pid";
 
-const char history_column_names_db[] = "log";    // Spalten zus‰tzlich in der Daten..bank
+const char history_column_names_db[] = "log";    // Spalten zus√§tzlich in der Daten..bank
 
-const int max_field_length = 1024;      // Das ist die Feldgrˆﬂe von Any_file -type=(...) f¸r tabulierte Datei.
-const int blob_field_size  = 1900;      // Bis zu dieser Grˆﬂe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
-const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu erˆffnen und Operation wiederholen.
-const int max_column_length = 249;      // F¸r MySQL 249 statt 250. jz 7.1.04
+const int max_field_length = 1024;      // Das ist die Feldgr√∂√üe von Any_file -type=(...) f√ºr tabulierte Datei.
+const int blob_field_size  = 1900;      // Bis zu dieser Gr√∂√üe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
+const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu er√∂ffnen und Operation wiederholen.
+const int max_column_length = 249;      // F√ºr MySQL 249 statt 250. jz 7.1.04
 const int order_title_column_size = 200;
 
 
 //-------------------------------------------------------------------------------------------------
 
-const int Database::seconds_before_reopen   = Z_NDEBUG_DEBUG( 60, 20 );     // Solange warten, bis Datenbank nach Fehler erneut geˆffnet wird. 
+const int Database::seconds_before_reopen   = Z_NDEBUG_DEBUG( 60, 20 );     // Solange warten, bis Datenbank nach Fehler erneut ge√∂ffnet wird. 
 
 //---------------------------------------------------------------------------------------sql_quoted
 
@@ -77,7 +77,7 @@ Read_transaction::Read_transaction( Database* db )
     _log(db->_log)
 {
     assert( db );
-    //Das m¸ssen wir sp‰ter pr¸fen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
+    //Das m√ºssen wir sp√§ter pr√ºfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
 
     begin_transaction( db );
 }
@@ -163,7 +163,7 @@ Any_file Read_transaction::open_file_2( const string& db_prefix, const string& e
     }
     catch( exception& x )
     {
-        if( _log_sql )  // Vielleicht f¸r alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
+        if( _log_sql )  // Vielleicht f√ºr alle Anweisungen, aber dann haben wir einen Fehler im Protokoll, das ist nicht 100%ig kompatibel
         {
             _db->_log->warn( logging_sql + debug_extra );
             _db->_log->error( x.what() );
@@ -232,7 +232,7 @@ Transaction::Transaction( Database* db )
     _outer_transaction(NULL)
 {
     assert( db );
-    //Das m¸ssen wir sp‰ter pr¸fen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
+    //Das m√ºssen wir sp√§ter pr√ºfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
 
     begin_transaction( db );
 }
@@ -246,7 +246,7 @@ Transaction::Transaction( Database* db, Transaction* outer_transaction )
     _outer_transaction(outer_transaction)
 {
     assert( db );
-    //Das m¸ssen wir sp‰ter pr¸fen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
+    //Das m√ºssen wir sp√§ter pr√ºfen  if( !_db->opened() )  z::throw_xc( "SCHEDULER-361" );
 
     if( _outer_transaction )
     {
@@ -301,9 +301,9 @@ void Transaction::commit( const string& debug_text )
         {
             if( !_suppress_heart_beat_timeout_check  &&  !_spooler->assert_is_still_active( Z_FUNCTION, debug_text, this ) )
             {
-                _spooler->abort_immediately_after_distribution_error( Z_FUNCTION );     // Wir wollen das versp‰tete Commit verhindern
-                //_spooler->throw_distribution_error( "commit" );       // Das f¸hrt nach Datenbank-Reopen doch noch zu einem Commit (weil assert_is_still_active wieder true liefert?) 
-                                                                        // Auﬂerdem geht dann kein Commit mehr, auch nicht Order::db_release_occupation().
+                _spooler->abort_immediately_after_distribution_error( Z_FUNCTION );     // Wir wollen das versp√§tete Commit verhindern
+                //_spooler->throw_distribution_error( "commit" );       // Das f√ºhrt nach Datenbank-Reopen doch noch zu einem Commit (weil assert_is_still_active wieder true liefert?) 
+                                                                        // Au√üerdem geht dann kein Commit mehr, auch nicht Order::db_release_occupation().
             }
 
             execute( "COMMIT", debug_text );
@@ -333,7 +333,7 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
         if( _outer_transaction )  
         {
             Z_DEBUG_ONLY( Z_WINDOWS_ONLY( DebugBreak() ) );
-            Z_LOG( "Rollback in inner transaction." << debug_text );        // Keine Exception, weil wir schon in einer Exception sein kˆnnen.
+            Z_LOG( "Rollback in inner transaction." << debug_text );        // Keine Exception, weil wir schon in einer Exception sein k√∂nnen.
         }
 
         if( db()->opened() )  
@@ -353,7 +353,7 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
         _db->_transaction = _outer_transaction;
         _db = NULL; 
 
-        //Wir sind vielleicht in einer Exception, also keine weitere Exception auslˆsen:  if( !db->_transaction )  _spooler->assert_is_still_active( Z_FUNCTION, debug_text );
+        //Wir sind vielleicht in einer Exception, also keine weitere Exception ausl√∂sen:  if( !db->_transaction )  _spooler->assert_is_still_active( Z_FUNCTION, debug_text );
     }
 }
 
@@ -361,7 +361,7 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
 
 void Retry_nested_transaction::reopen_database_after_error( const exception& x, const string& function )
 { 
-    if( _outer_transaction )  throw;    // Wenn's eine ‰uﬂere Transaktion gibt, dann die Schleife dort wiederholen
+    if( _outer_transaction )  throw;    // Wenn's eine √§u√üere Transaktion gibt, dann die Schleife dort wiederholen
 
     assert( _db );
 
@@ -425,7 +425,7 @@ Database::Database( Spooler* spooler )
     _job_chains_table     .set_name( read_profile_string( ini_file, "spooler", "db_job_chains_table"     , _job_chains_table     .name() ) );
     _job_chain_nodes_table.set_name( read_profile_string( ini_file, "spooler", "db_job_chain_nodes_table", _job_chain_nodes_table.name() ) );
 
-    // Kˆnnte auch auf Table_descriptor umgestellt werden:
+    // K√∂nnte auch auf Table_descriptor umgestellt werden:
     _job_history_tablename        = ucase(read_profile_string( ini_file, "spooler", "db_history_table"           , "SCHEDULER_HISTORY" ));
     _tasks_tablename              = ucase(read_profile_string( ini_file, "spooler", "db_tasks_table"             , "SCHEDULER_TASKS" ));
     _order_history_tablename      = ucase(read_profile_string( ini_file, "spooler", "db_order_history_table"     , "SCHEDULER_ORDER_HISTORY" ));
@@ -460,7 +460,7 @@ ptr<Com_variable_set> Database::properties() {
         }
         _properties = result;
     }
-    return _properties;     // F¸r Java verankern, damit C++-Proxy nicht sofort stirbt
+    return _properties;     // F√ºr Java verankern, damit C++-Proxy nicht sofort stirbt
 }
 
 //-----------------------------------------------------------------------------------Database::open
@@ -493,7 +493,7 @@ void Database::open( const string& db_name )
 void Database::open2()
 {
     if (_db_name != "") {
-        _log->info( message_string( "SCHEDULER-907", _db_name ) );     // Datenbank wird geˆffnet
+        _log->info( message_string( "SCHEDULER-907", _db_name ) );     // Datenbank wird ge√∂ffnet
 
         try
         {
@@ -512,7 +512,7 @@ void Database::open2()
                 default: ;
             }
 
-            _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geˆffnet
+            _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist ge√∂ffnet
             _email_sent_after_db_error = false;
         }
         catch( exception& x )  
@@ -521,7 +521,7 @@ void Database::open2()
 
             if( _spooler->_need_db )  throw;
             
-            _log->warn( message_string( "SCHEDULER-309", x ) );         // "FEHLER BEIM ÷FFNEN DER HISTORIENDATENBANK: "
+            _log->warn( message_string( "SCHEDULER-309", x ) );         // "FEHLER BEIM √ñFFNEN DER HISTORIENDATENBANK: "
         }
     }
 }
@@ -538,7 +538,7 @@ void Database::check_database()
         check_value.reserve( 300 );
         check_value = "\t\r\n";                                  
         for( int c = ' ' ; c <= 0x7E; c++ )  check_value += (char)c;     // Alle ASCII-Zeichen
-        //2007-11-26 Andreas P¸schel will das nicht:  for( int c = 0xA0; c <= 0xFF; c++ )  check_value += (char)c;     // Alle Latin1-Zeichen
+        //2007-11-26 Andreas P√ºschel will das nicht:  for( int c = 0xA0; c <= 0xFF; c++ )  check_value += (char)c;     // Alle Latin1-Zeichen
         check_value += '\\';    // Letztes Zeichen, um einen Syntaxfehler hervorzurufen, wenn die Datenbank \ im String interpretiert
 
         {
@@ -647,7 +647,7 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _tasks_tablename, 
-                         S() << "`task_id`"          " integer"      " not null,"          // Prim‰rschl¸ssel
+                         S() << "`task_id`"          " integer"      " not null,"          // Prim√§rschl√ºssel
                                 "`spooler_id`"       " varchar(100)" " not null,"
                                 "`cluster_member_id`"" varchar(100)"    << null << ","
                                 "`job_name`"         " varchar(255)" " not null,"
@@ -734,10 +734,10 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _orders_tablename, S() <<
-                                "`job_chain`"                   " varchar(250)" << chararacter_set << " not null,"                                    // Prim‰rschl¸ssel
-                                "`id`"                          " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Prim‰rschl¸ssel
-                                "`spooler_id`"                  " varchar(100)" << chararacter_set << " not null,"                                    // Prim‰rschl¸ssel
-                                "`distributed_next_time`"       " datetime"        << null << ","     // Auftrag ist verteilt ausf¸hrbar
+                                "`job_chain`"                   " varchar(250)" << chararacter_set << " not null,"                                    // Prim√§rschl√ºssel
+                                "`id`"                          " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Prim√§rschl√ºssel
+                                "`spooler_id`"                  " varchar(100)" << chararacter_set << " not null,"                                    // Prim√§rschl√ºssel
+                                "`distributed_next_time`"       " datetime"        << null << ","     // Auftrag ist verteilt ausf√ºhrbar
                                 "`occupying_cluster_member_id`" " varchar(100)"    << null << ","     // Index
                                 "`priority`"                    " integer"      " not null,"
                                 // "`suspended`"                   " boolean"         << null << ","     // JS-333
@@ -786,7 +786,7 @@ void Database::create_tables_when_needed()
         bool   created;
         string primary_key        = "`history_id`";
         string column_definitions = S() <<
-            "`history_id`"  " integer"      " not null,"             // Prim‰rschl¸ssel
+            "`history_id`"  " integer"      " not null,"             // Prim√§rschl√ºssel
             "`job_chain`"   " varchar(250)" " not null,"
             "`order_id`"    " varchar(" << const_order_id_length_max << ")" " not null,"
             "`spooler_id`"  " varchar(100)" " not null,"
@@ -811,7 +811,7 @@ void Database::create_tables_when_needed()
         {
             try
             {
-                Transaction ta ( this );                                                    // JS-150, Spalte end_time soll null aufnehmen kˆnnen
+                Transaction ta ( this );                                                    // JS-150, Spalte end_time soll null aufnehmen k√∂nnen
 
                 sql::Insert_stmt insert ( ta.database_descriptor() );
 
@@ -826,10 +826,10 @@ void Database::create_tables_when_needed()
 
                 ta.execute( insert, Z_FUNCTION );
 
-                // Wir pr¸fen bei allen Datenbanken  if( _db.dbms_kind() == dbms_mysql )
+                // Wir pr√ºfen bei allen Datenbanken  if( _db.dbms_kind() == dbms_mysql )
                 {
                     Record record = ta.read_single_record( "select `end_time`  from " + _order_history_tablename + "  where `history_id` = -1", Z_FUNCTION );
-                    string end_time = record.as_string( 0 );     // MySQL kann hier Fehler auslˆsen, wenn es 0000-00-00 als Default in die Tabelle schreibt
+                    string end_time = record.as_string( 0 );     // MySQL kann hier Fehler ausl√∂sen, wenn es 0000-00-00 als Default in die Tabelle schreibt
                     if( !record.null( 0 ) )  z::throw_xc( "end_time is not null:", end_time );
                 }
 
@@ -842,7 +842,7 @@ void Database::create_tables_when_needed()
                     
                 if( _db.dbms_kind() == dbms_mysql )
                     ta.execute( S() << "UPDATE " << _order_history_tablename << 
-                                        "  set `end_time`=NULL  where `end_time`='0000-00-00 00:00:00'", Z_FUNCTION );   // Fehler von MySQL 5 korrigieren (fehlender Wert bei NOT NULL-Spalte f¸hrt zu '0000-00-00 00:00:00')
+                                        "  set `end_time`=NULL  where `end_time`='0000-00-00 00:00:00'", Z_FUNCTION );   // Fehler von MySQL 5 korrigieren (fehlender Wert bei NOT NULL-Spalte f√ºhrt zu '0000-00-00 00:00:00')
 
                 ta.commit( Z_FUNCTION );
             }
@@ -864,8 +864,8 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _order_step_history_tablename, S() <<
-                                "`history_id`"  " integer"      " not null,"             // Prim‰rschl¸ssel
-                                "`step`"        " integer"      " not null,"             // Prim‰rschl¸ssel
+                                "`history_id`"  " integer"      " not null,"             // Prim√§rschl√ºssel
+                                "`step`"        " integer"      " not null,"             // Prim√§rschl√ºssel
                                 "`task_id`"     " integer"      " not null,"
                                 "`state`"       " varchar(100)" " not null,"
                                 "`start_time`"  " datetime"     " not null,"
@@ -929,7 +929,7 @@ void Database::create_table(Transaction* ta, const string& tablename, const stri
     _log->info( message_string( "SCHEDULER-909", tablename ) );
 
     try {
-        ta->intermediate_commit( Z_FUNCTION );    // Select und Create table nicht in derselben Transaktion. F¸r Access und PostgresQL
+        ta->intermediate_commit( Z_FUNCTION );    // Select und Create table nicht in derselben Transaktion. F√ºr Access und PostgresQL
         S create_table;
         create_table << "CREATE TABLE " << tablename << " (" << fields << ")";
         if( dbms_kind() == dbms_mysql )  create_table << " ENGINE=InnoDB";    // JS-670: since Version 5.0: ENGINE=innodb, since 5.5. Type=InnoDB does not work anymore
@@ -1102,7 +1102,7 @@ int Database::expand_varchar_column( Transaction* ta, const string& table_name, 
                 {
                     if( table_name == _orders_tablename  &&  lcase(column_name) == "id" )
                     {
-                        cmd << "-split- ";  // F¸r sosdb.cxx: Nicht an Semikolons auftrennen
+                        cmd << "-split- ";  // F√ºr sosdb.cxx: Nicht an Semikolons auftrennen
                         
                         cmd << "DECLARE @pk_id varchar(255); ";
                         cmd << "BEGIN ";
@@ -1132,20 +1132,20 @@ int Database::expand_varchar_column( Transaction* ta, const string& table_name, 
                 case dbms_firebird:
                     /*  Hallo Joacim,
 
-                        damit wir es nicht vergessen, einbauen mˆchte ich es nicht. wir bleiben
-                        dabei, dass wir f¸r Firebird aktuell gar nichts tun (also auskommentiert
+                        damit wir es nicht vergessen, einbauen m√∂chte ich es nicht. wir bleiben
+                        dabei, dass wir f√ºr Firebird aktuell gar nichts tun (also auskommentiert
                         lassen).
 
                         Das Problem ist, dass Firebird 1.5 nur kleine Indizes verwenden kann, die
-                        nicht mehr als 250 Byte lang sind. Abzgl. einiger Metadaten kˆnnen wir
-                        aktuell tats‰chlich nur 2 Attribute zu je 100 Byte aufnehmen. 
+                        nicht mehr als 250 Byte lang sind. Abzgl. einiger Metadaten k√∂nnen wir
+                        aktuell tats√§chlich nur 2 Attribute zu je 100 Byte aufnehmen. 
 
                         Mit Firebird 2.x wird sich das verbessern, da dann Funktionsindizes
-                        unterst¸tzt werden, mit denen ggf. nur ein Teil des Attributs in den Index
-                        aufgenommen wird. Sollte sich diese Version durchgesetzt haben, kˆnnen wir
+                        unterst√ºtzt werden, mit denen ggf. nur ein Teil des Attributs in den Index
+                        aufgenommen wird. Sollte sich diese Version durchgesetzt haben, k√∂nnen wir
                         das wieder reaktivieren.
 
-                        F¸r Firebird geht es so:
+                        F√ºr Firebird geht es so:
 
                         SET TERMINATOR ^;
                         RECREATE PROCEDURE tmp AS DECLARE VARIABLE pk_id varchar(255); 
@@ -1165,7 +1165,7 @@ int Database::expand_varchar_column( Transaction* ta, const string& table_name, 
 
                         TABLE SCHEDULER_ORDER_HISTORY ALTER "ORDER_ID" TYPE VARCHAR(255);
 
-                        Gruﬂ
+                        Gru√ü
                         Andreas
                     */
                     return width;
@@ -1210,7 +1210,7 @@ int Database::expand_varchar_column( Transaction* ta, const string& table_name, 
                 }
             }
 
-            ta->intermediate_commit( Z_FUNCTION );    // Damit Postgres nicht in column_width() h‰ngen bleibt (Linux)
+            ta->intermediate_commit( Z_FUNCTION );    // Damit Postgres nicht in column_width() h√§ngen bleibt (Linux)
         }
         catch( exception& x )
         {
@@ -1235,7 +1235,7 @@ int Database::column_width( Transaction* ta, const string& table_name, const str
 
     Any_file f = ta->open_result_set( S() << "select `" << column_name << "` from " << table_name << " where 1=0", Z_FUNCTION );
     int field_size= +f.spec()._field_type_ptr->field_descr_ptr( 0 )->type_ptr()->field_size();
-    result = max( 0, field_size - 1 );   // Eins weniger f¸rs 0-Byte
+    result = max( 0, field_size - 1 );   // Eins weniger f√ºrs 0-Byte
 
     if( result == 0 )  _log->warn( message_string( "SCHEDULER-348", _orders_tablename, ".id" ) );
 
@@ -1253,7 +1253,7 @@ void Database::close()
 
     try
     {
-        _db.close();  // odbc.cxx und jdbc.cxx unterdr¸cken selbst Fehler.
+        _db.close();  // odbc.cxx und jdbc.cxx unterdr√ºcken selbst Fehler.
     }
     catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }
 
@@ -1300,7 +1300,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
         {
             close();
         }
-        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }       // Fehler beim Schlieﬂen der Datenbank
+        catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }       // Fehler beim Schlie√üen der Datenbank
 
 
         while( !_db.opened()  &&  !too_much_errors )
@@ -1353,7 +1353,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                 {
                     _error = x.what();
 
-                    if( _spooler->_executing_command )  throw;   // Wenn wir ein (TCP-)Kommando ausf¸hren, warten (und blockieren) wir nicht. Der Scheduler-Zustand kann dann vom Datenbank-Zustand abweichen!
+                    if( _spooler->_executing_command )  throw;   // Wenn wir ein (TCP-)Kommando ausf√ºhren, warten (und blockieren) wir nicht. Der Scheduler-Zustand kann dann vom Datenbank-Zustand abweichen!
 
                     _spooler->log()->warn( x.what() );
 
@@ -1362,11 +1362,11 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                     if( !_spooler->_wait_endless_for_db_open )  // need_db=strict?
                     {
                         too_much_errors = true;
-                        warn_msg = message_string( "SCHEDULER-314", _spooler->string_need_db() );   // "Datenbank l‰sst sich nicht ˆffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
+                        warn_msg = message_string( "SCHEDULER-314", _spooler->string_need_db() );   // "Datenbank l√§sst sich nicht √∂ffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
                         break;
                     }
 
-                    _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut geˆffnet wird ..."
+                    _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut ge√∂ffnet wird ..."
                     if (_spooler->_connection_manager)
                         _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
                 }
@@ -1478,7 +1478,7 @@ int Database::get_id( const string& variable_name, Transaction* outer_transactio
     }
     catch( exception& x ) 
     { 
-        _spooler->log()->error( message_string( "SCHEDULER-304", x, variable_name ) );   // "FEHLER BEIM LESEN DER NƒCHSTEN ID: "
+        _spooler->log()->error( message_string( "SCHEDULER-304", x, variable_name ) );   // "FEHLER BEIM LESEN DER N√ÑCHSTEN ID: "
         throw;
     }
 
@@ -1539,7 +1539,7 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
                     catch( exception& x )
                     {
                         if( tries <= 1 )  throw;
-                        _log->warn( x.what() );     // Mˆglicherweise hat gerade ein anderer den Satz eingef¸gt
+                        _log->warn( x.what() );     // M√∂glicherweise hat gerade ein anderer den Satz eingef√ºgt
                     }
                 }
             }
@@ -1640,7 +1640,7 @@ void Transaction::execute( const string& stmt, const string& debug_text, Execute
 
         try
         {
-            _db->_db.put( "%native " + native_sql );    // -split-: Semikolons nicht auftrennen, sondern alles auf einmal ¸bergeben
+            _db->_db.put( "%native " + native_sql );    // -split-: Semikolons nicht auftrennen, sondern alles auf einmal √ºbergeben
         }
         catch( zschimmer::Xc& x )
         {
@@ -1725,7 +1725,7 @@ void Database::spooler_start()
     {
         _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
 
-        if( _db.opened() )   // get_id() kann die DB schlieﬂen (nach Fehler)
+        if( _db.opened() )   // get_id() kann die DB schlie√üen (nach Fehler)
         {
             Transaction ta ( this );
             {
@@ -1818,7 +1818,7 @@ void Transaction::update_clob( const string& table_name, const string& column_na
 void Transaction::update_clob( const string& table_name, const string& column_name, const string& value, const string& where )
 {
     string hostware_filename = S() <<  "-no-blob-record-allowed -table=" << table_name << " -clob=" << column_name << "  " << where;
-    // Falls wir mal auf direkten Aufruf von jdbc umstellen, kann -no-blob-record-allowed wegfallen. Dann kˆnnen wir das genauer programmieren.
+    // Falls wir mal auf direkten Aufruf von jdbc umstellen, kann -no-blob-record-allowed wegfallen. Dann k√∂nnen wir das genauer programmieren.
 
     Any_file clob = open_file( "-out -binary " + db()->db_name(), hostware_filename );
 
@@ -1884,7 +1884,7 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
                     ta.set_transaction_read();
                     task_element.append_new_text_element( "log", read_task_log(task_id));
                 }
-                catch( exception& x ) { _log->warn( message_string( "SCHEDULER-268", task_id, x ) ); }  // "FEHLER BEIM LESEN DES LOGS F‹R TASK "
+                catch( exception& x ) { _log->warn( message_string( "SCHEDULER-268", task_id, x ) ); }  // "FEHLER BEIM LESEN DES LOGS F√úR TASK "
             }
         }
     }
@@ -1988,7 +1988,7 @@ void Job_history::open( Transaction* outer_transaction )
     }
     catch( exception& x )  
     { 
-        _job->_log->warn( message_string( "SCHEDULER-270", x ) );   // "FEHLER BEIM ÷FFNEN DER HISTORIE: "
+        _job->_log->warn( message_string( "SCHEDULER-270", x ) );   // "FEHLER BEIM √ñFFNEN DER HISTORIE: "
         _error = true;
     }
 }
@@ -2017,7 +2017,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
     try {
         if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
-        if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB ver¸bergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+        if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB ver√ºbergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
         if (!_use_db) z::throw_xc("SCHEDULER-136");
         if (_spooler->_db->_db_name == "") z::throw_xc("SCHEDULER-361", Z_FUNCTION);
 
@@ -2259,7 +2259,7 @@ void Task_history::write( bool start )
                         update[ "error"      ] = _task->has_error();
 
                         if( !_task->_error.code().empty() )  update[ "error_code" ] = _task->_error.code();
-                        if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, max_column_length );    // F¸r MySQL 249 statt 250. jz 7.1.04
+                        if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, max_column_length );    // F√ºr MySQL 249 statt 250. jz 7.1.04
 
                         if( _extra_record.type() )
                         {

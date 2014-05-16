@@ -52,14 +52,14 @@ struct Const_area
     unsigned int               _length;
 };
 
-typedef Const_area Area_const;   // Fr js.
+typedef Const_area Area_const;   // FÂr js.
 
        ::std::ostream&          operator<<      ( ::std::ostream&, const Const_area& );
 inline unsigned int             length          ( const Const_area& area )                      { return area.length(); }
 inline unsigned int             position        ( const Const_area&, char, uint pos = 0 );
 
 // Byteweiser Vergleich von links nach rechts.
-// Ist ein Area gleich dem Anfang des anderen, ist der kürzere kleiner.
+// Ist ein Area gleich dem Anfang des anderen, ist der kÃ¼rzere kleiner.
 inline int  compare     ( const Const_area& a, const Const_area& b )  { return a.compare(b); }
 inline Bool operator <  ( const Const_area& a, const Const_area& b )  { return compare(a,b) <  0; }
 inline Bool operator <= ( const Const_area& a, const Const_area& b )  { return compare(a,b) <= 0; }
@@ -85,7 +85,7 @@ struct Area : Const_area
     inline                      Area            ( void*, unsigned int size );
 
     inline void                 length          ( unsigned int );
-    void                        set_length      ( unsigned int i) {length(i);}      // Zur Kompatibilität
+    void                        set_length      ( unsigned int i) {length(i);}      // Zur KompatibilitÃ¤t
 
     inline unsigned int         size            () const;
     inline unsigned int         length          () const;
@@ -121,8 +121,8 @@ struct Area : Const_area
     void                        upper_case      ();
     void                        fill            ( char c )                          { memset( ptr(), c, length() ); }
   //void                        fill            ( char c, int len );
-    void                        resize_min      ( unsigned int size )  /*Behält die Daten*/ { if( size > _size )  _resize_min( size ); }
-    inline void                 allocate_min    ( unsigned int size );  // Exception, wenn size > _size, Löscht Daten!
+    void                        resize_min      ( unsigned int size )  /*BehÃ¤lt die Daten*/ { if( size > _size )  _resize_min( size ); }
+    inline void                 allocate_min    ( unsigned int size );  // Exception, wenn size > _size, LÃ¶scht Daten!
     void                        allocate_length ( uint len )                        { allocate_min( len ); _length = len; }
     virtual void                check           ();
 
@@ -147,8 +147,8 @@ struct Area : Const_area
 };
 
 ::std::istream&                 operator >>     ( ::std::istream&, Area& );
-void                            incr            ( Area* );            // Als vorzeichenlose Binärzahl um eins erhöhen
-void                            decr            ( Area* );            // Als vorzeichenlose Binärzahl um eins erniedrigen
+void                            incr            ( Area* );            // Als vorzeichenlose BinÃ¤rzahl um eins erhÃ¶hen
+void                            decr            ( Area* );            // Als vorzeichenlose BinÃ¤rzahl um eins erniedrigen
 inline void                     lower_case      ( Area* area )           { area->lower_case(); }
 inline void                     upper_case      ( Area* area )           { area->upper_case(); }
        void                     rtrim           ( Area* );
@@ -223,7 +223,7 @@ struct Dynamic_area : Area
     void                        free                ();
     int                         ref_count           () const                                    { return _ptr? collectable_area_ptr()->_ref_count : 1; }
     virtual Bool                resizable           () const                                    { return true; }
-    void                        take                ( Dynamic_area* geber );   // Übernimmt den Puffer und leert geber.
+    void                        take                ( Dynamic_area* geber );   // Ãœbernimmt den Puffer und leert geber.
 
     friend void                 exchange_dynamic_area( Dynamic_area*, Dynamic_area* );
 
@@ -259,7 +259,7 @@ struct /*_CLASSTYPE Borland*/ Area_streambuf : ::std::streambuf
 
   protected:
     Area*                      _area;
-    Dynamic_area               _buffer;                 // Falls kein Area von außen übergeben wird
+    Dynamic_area               _buffer;                 // Falls kein Area von auÃŸen Ã¼bergeben wird
 };
 
 //----------------------------------------------------------------------------------Area_stream
@@ -274,7 +274,7 @@ struct Area_stream : private Area_streambuf, public ::std::iostream
 };
 
 //---------------------------------------------------------------------------------------------
-// Ein/Ausgabe für Strings
+// Ein/Ausgabe fÃ¼r Strings
 
 void        write_char( char, Area* output, char quote, char quote_quote = '\\' );
 void        read_char ( char* p, const Const_area& input, char quote, char quote_quote = '\\' );
@@ -356,7 +356,7 @@ inline Area::Area( void* p, unsigned int size )
 
 inline void Area::length( unsigned int length_ )
 {
-    if( length_ > _size )  length_error( length_ );   // nicht wegoptimieren! wird für String0_area u.a gebraucht
+    if( length_ > _size )  length_error( length_ );   // nicht wegoptimieren! wird fÃ¼r String0_area u.a gebraucht
     _length = length_;
 }
 

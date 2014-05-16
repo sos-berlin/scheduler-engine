@@ -68,7 +68,7 @@ struct Service : Object
     int                        _argc;
     char**                     _argv;
 
-    // Zust‰nde SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht l‰nger als pending_timeout Sekunden:
+    // Zust√§nde SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht l√§nger als pending_timeout Sekunden:
     Event                      _service_main_terminated;
     windows::Handle            _pending_watchdog_signal;
     bool                       _pending_timed_out;

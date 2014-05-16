@@ -1,4 +1,4 @@
-//                                                  ©1996, SOS GmbH Berlin
+//                                                  Â©1996, SOS GmbH Berlin
 
 #ifndef __ODBCTYPE_H
 #define __ODBCTYPE_H
@@ -76,7 +76,7 @@ DEFINE_ADD_FIELD( Odbc_c_date_time, odbc_c_date_time_type )
 
 //-----------------------------------------------------------------------------Sos_odbc_binding
 
-struct Sos_odbc_binding         // Für SQLBindParameter(), SqlGetData() und SQLBindCol()
+struct Sos_odbc_binding         // FÃ¼r SQLBindParameter(), SqlGetData() und SQLBindCol()
 {
                                 Sos_odbc_binding        () : _zero_(this+1),_null_flag(true), _default_length( SQL_NO_TOTAL ) {}
                                 Sos_odbc_binding        ( const Sos_odbc_binding& );
@@ -84,11 +84,11 @@ struct Sos_odbc_binding         // Für SQLBindParameter(), SqlGetData() und SQLB
     Sos_odbc_binding&           operator =              ( const Sos_odbc_binding& );
 
     void                        prepare                 ( Field_type* for_default = 0 );
-    void                        prepare                 ( Field_descr* for_default );    // berücksichtigt _group_type
+    void                        prepare                 ( Field_descr* for_default );    // berÃ¼cksichtigt _group_type
     void*                       rgbValue                () const            { return _field->ptr( 0 ); }
 
     Fill_zero                  _zero_;
-  //Bool                       _valid;                  // Ist das ganze überhaupt gültig
+  //Bool                       _valid;                  // Ist das ganze Ã¼berhaupt gÃ¼ltig
     Sos_ptr<Field_descr>       _field;
     Bool                       _null_flag;              // _field._null_flag_offset == &_null_flag
     SWORD                      _fParamType;             // SQL_PARAM_INPUT, ...
@@ -96,19 +96,19 @@ struct Sos_odbc_binding         // Für SQLBindParameter(), SqlGetData() und SQLB
     SWORD                      _fCType;                 // SQL_C_TYPE_xxx
     SWORD                      _scale;
     SQLUINTEGER                _precision;              //        
-    SDWORD                     _cbValueMax;             // Max. Größe
-    SDWORD*                    _pcbValue;               // Länge, SQL_NTS, SQL_NULL_DATA
+    SDWORD                     _cbValueMax;             // Max. GrÃ¶ÃŸe
+    SDWORD*                    _pcbValue;               // LÃ¤nge, SQL_NTS, SQL_NULL_DATA
     SDWORD                     _default_length;
-    SDWORD                     _length;                 // Für SQLBindParameter
-    Dynamic_area               _buffer;                 // Für SQLPutData
-    SDWORD                     _buffer_length;          // Für SQLPutData: _buffer_length = _buffer.length(); _pcbValue = &_buffer_length
-    bool                       _nullable;               // Neu 25.10.2001 für Oracle und As_decimal, wird nur in odbc.cxx gesetzt
+    SDWORD                     _length;                 // FÃ¼r SQLBindParameter
+    Dynamic_area               _buffer;                 // FÃ¼r SQLPutData
+    SDWORD                     _buffer_length;          // FÃ¼r SQLPutData: _buffer_length = _buffer.length(); _pcbValue = &_buffer_length
+    bool                       _nullable;               // Neu 25.10.2001 fÃ¼r Oracle und As_decimal, wird nur in odbc.cxx gesetzt
 };
 
 /*
     Sos_odbc_binding::_field auf Sos_ptr<> umstellen.
     In odbc.cxx kann der Record_type von der Anwendung noch verwendet werden, wenn
-    die odbc-Datei schon längst geschlossen ist.
+    die odbc-Datei schon lÃ¤ngst geschlossen ist.
 */
 
 

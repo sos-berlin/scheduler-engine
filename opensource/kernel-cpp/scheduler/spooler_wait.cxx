@@ -173,7 +173,7 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
             while( e2 != _events.end()  &&  *e2 != *e )  e2++;
             if( e2 == _events.end() )
             {
-                _events.push_back( *e );                             // Nur verschiedene hinzuf¸gen
+                _events.push_back( *e );                             // Nur verschiedene hinzuf√ºgen
                 Z_WINDOWS_ONLY( _handles.push_back( *h ) );
             }
 
@@ -213,7 +213,7 @@ void Wait_handles::remove( System_event* event )
     }
 
     if( it == _events.end() ) {
-        _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das w‰re nicht gut in einem Destruktor
+        _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das w√§re nicht gut in einem Destruktor
         return;
     }
 
@@ -304,7 +304,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
 
         if( _spooler  &&  _spooler->_print_time_every_second ) {
-            // Regelm‰ssige Ausgabe von Text auf der Konsole
+            // Regelm√§ssige Ausgabe von Text auf der Konsole
             size_t  console_line_length = 0;
             double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
             
@@ -351,7 +351,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, max( 0, t ) ); 
             }
 
-            if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile lˆschen
+            if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile l√∂schen
         } else {
             ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, t ); 
         }
@@ -368,7 +368,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             if( event )
             {
                 if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
-                if( event != &_spooler->_waitable_timer )  event->set_signaled_then_callback( "MsgWaitForMultipleObjects" );            // signal f¸r "event" gesetzt
+                if( event != &_spooler->_waitable_timer )  event->set_signaled_then_callback( "MsgWaitForMultipleObjects" );            // signal f√ºr "event" gesetzt
             }
             else
                 if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
@@ -427,8 +427,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 * \brief Steuerung der weiteren Verarbeitung der Prozess-Handles
 * \detail 
 * Normalerweise werden die Prozesshandles unter Windows durch MsgWaitForMultipleObjects verarbeitet. Diese Funktion
-* kann aber max. 63 Prozesshandles verwalten, deshalb werden bei einer grˆﬂeren Anzahl von Prozessen diese Blockweise
-* an MsgWaitForMultipleObjects ¸bergeben.
+* kann aber max. 63 Prozesshandles verwalten, deshalb werden bei einer gr√∂√üeren Anzahl von Prozessen diese Blockweise
+* an MsgWaitForMultipleObjects √ºbergeben.
 *
 * \version 1.3.8
 * \since 2010-04-01 13:07 JS-471
@@ -438,7 +438,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 * \param pHandles - Array der Handles
 * \param dTimeout - max. Wartezeit in Sekunden
 *
-* \return Nummer des Prozesses, f¸r den ein event ausgelˆst worden ist.
+* \return Nummer des Prozesses, f√ºr den ein event ausgel√∂st worden ist.
 */
 
 DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout)
@@ -474,19 +474,19 @@ DWORD Wait_handles::myMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHa
 //-----------------------------------------------------Wait_handles::sosMsgWaitForMultipleObjects64
 #ifdef Z_WINDOWS
 /**
-* \brief Polling f¸r alle Prozesse
+* \brief Polling f√ºr alle Prozesse
 * \detail 
-* Laufen mehr als 63 Prozesse parallel werden alle Prozesse in Blˆcken zu jeweils 63 regelm‰ssig abgefragt.
+* Laufen mehr als 63 Prozesse parallel werden alle Prozesse in Bl√∂cken zu jeweils 63 regelm√§ssig abgefragt.
 *
 * \version 1.3.8
 * \since 2010-04-01 13:15 JS-471
-* \author Stefan Sch‰dlich
+* \author Stefan Sch√§dlich
 *
 * \param nCount - Anzahl der Handles
 * \param pHandles - Array der Handles
 * \param dTimeout - max. Wartezeit in Sekunden
 *
-* \return Nummer des Prozesses, f¸r den ein event ausgelˆst worden ist.
+* \return Nummer des Prozesses, f√ºr den ein event ausgel√∂st worden ist.
 */
 
 DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout )
@@ -517,8 +517,8 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
             assert(c > 0);
             remainingCount -= c;
             int remainingMillis = (int)((until - now).as_double() * 1000);
-            int timeout = (i == 0) ? min(stepTimeout, remainingMillis ) : 0;  // Wartet 1s f¸r den ersten Block, sonst nur Abfrage der Handles
-            assert(timeout >= 0);   // Ist diese Bedingung NICHT erf¸llt, bricht die Ausf¸hrung ab (nur im Windows debug-Modus)
+            int timeout = (i == 0) ? min(stepTimeout, remainingMillis ) : 0;  // Wartet 1s f√ºr den ersten Block, sonst nur Abfrage der Handles
+            assert(timeout >= 0);   // Ist diese Bedingung NICHT erf√ºllt, bricht die Ausf√ºhrung ab (nur im Windows debug-Modus)
 
 #           ifdef Z_DEBUG
                 Z_LOG2( "scheduler.wait", "block " << (i+1) << ": " << c << " items, " << timeout << "ms, remaining millis=" << remainingMillis << ".\n" );
@@ -823,9 +823,9 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         if( Event::signaled() )  return true;
 
 
-        // Wenn der Job mehrere Verzeichnisse ¸berwacht, wird nur die ƒnderung des ersten signalisiert.
+        // Wenn der Job mehrere Verzeichnisse √ºberwacht, wird nur die √Ñnderung des ersten signalisiert.
         // WaitForMultipleObjects() nur ein signalisiertes Objekt liefert.
-        // F¸r diesen Fall fragen wir das Handle, ob es signalisiert worden ist.
+        // F√ºr diesen Fall fragen wir das Handle, ob es signalisiert worden ist.
         // Das bremst leider den Scheduler ein wenig.
 
         Z_LOGI2( "scheduler.directory", Z_FUNCTION << "  WaitForSingleObject()\n" );
@@ -857,7 +857,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
 
                 new_f->push_back( filename ); 
 
-                if( o == old_f->end()  ||  filename < *o )  // Datei hinzugef¸gt?
+                if( o == old_f->end()  ||  filename < *o )  // Datei hinzugef√ºgt?
                 {
                     changed = true; 
                     Z_LOG2( "scheduler.directory", Z_FUNCTION << " new file     " << filename << "\n" ); 
@@ -884,12 +884,12 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         }
         catch( const exception& x ) 
         {
-            // S.a. set_signaled() f¸r Windows
+            // S.a. set_signaled() f√ºr Windows
 
             if( throw_error )  throw;
 
-            _log->error( message_string( "SCHEDULER-300", _directory, x ) );   // "‹berwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
-            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) ‹berwachung nicht erkennt.
+            _log->error( message_string( "SCHEDULER-300", _directory, x ) );   // "√úberwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) √úberwachung nicht erkennt.
             Event::set_signaled();
             close();
             changed = true;
@@ -916,7 +916,7 @@ void Directory_watcher::set_signaled()
         try
         {
             if( _filename_pattern.empty()  ||  match() )  Event::set_signaled( "Directory_watcher::set_signaled" );
-                                                    else  Event::set_signaled( false );    // Signal von _event zur¸cknehmen
+                                                    else  Event::set_signaled( false );    // Signal von _event zur√ºcknehmen
 
             Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory << "\")\n" );
             BOOL ok = FindNextChangeNotification( _handle );
@@ -924,10 +924,10 @@ void Directory_watcher::set_signaled()
         }
         catch( const exception& x ) 
         {
-            // S.a. has_changed() f¸r Unix
+            // S.a. has_changed() f√ºr Unix
 
-            _log->error( message_string( "SCHEDULER-300", _directory, x ) );   // "‹berwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
-            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) ‹berwachung nicht erkennt.
+            _log->error( message_string( "SCHEDULER-300", _directory, x ) );   // "√úberwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) √úberwachung nicht erkennt.
             Event::set_signaled( "Directory_watcher::set_signaled" );
             close();
         }

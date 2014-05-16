@@ -289,7 +289,7 @@ static void parse_file_type_and_options( const Sos_string& filename,
     *type_name_ptr = as_string( c_str( filename ), type_name_length );
 
     if( type_name_length == 1 )  type_name_length = 0; // zur Erkennung von DOS-Laufwerksbuchstaben
-                                                       // d.h. File-Typen müssen mindestens 2-buchstabig sein!
+                                                       // d.h. File-Typen mÃ¼ssen mindestens 2-buchstabig sein!
     if( !type_name_length || empty( c_str( filename ) + type_name_length ) )  // Nur Dateiname?
     {
         *type_name_ptr = "file";                                 // Default-Dateityp
@@ -409,7 +409,7 @@ void Any_file_obj::select_file_type( Any_file_param* )
     if( !ft_ptr ) {
         ft_ptr = Abs_file_type::_lookup( "object" );
         if( !ft_ptr )  throw_wrong_type_error( "D101" );
-        _parameter_start = 0;           // für Sos_object wiederherstellen
+        _parameter_start = 0;           // fÃ¼r Sos_object wiederherstellen
     }
 
     _f = ft_ptr->create_base_file();
@@ -607,7 +607,7 @@ void Any_file_obj::_prepare_open( Any_file_param* param )
 
 
         callers_type = +_spec._field_type_ptr;
-        if( callers_type )  _spec._field_type_is_from_caller = true;  // Damit Dateityp com _field_type_ptr unterdrückt, jz 18.2.00
+        if( callers_type )  _spec._field_type_is_from_caller = true;  // Damit Dateityp com _field_type_ptr unterdrÃ¼ckt, jz 18.2.00
 
         file = _f;                      // Abs_file halten, falls new_file() gerufen wird
         _f->prepare_open( c_str( _filename ) + _parameter_start, _open_mode, _spec );
@@ -616,11 +616,11 @@ void Any_file_obj::_prepare_open( Any_file_param* param )
 
         if( callers_type  &&  callers_type != _spec._field_type_ptr )
         {
-            // Aufrufer und Datei haben verschiedene Satzbeschreibungen, also Konverter einfügen:
+            // Aufrufer und Datei haben verschiedene Satzbeschreibungen, also Konverter einfÃ¼gen:
             //LOG( "Any_file_obj::_prepare_open: Verschiedene Satzbeschreibungen. Aufrufer: " << *callers_type << ", Dateityp: " << _spec._field_type_ptr << '\n' );
-            throw_xc( "SOS-1232" );     // Dateityp convert einfügen
+            throw_xc( "SOS-1232" );     // Dateityp convert einfÃ¼gen
 /*
-            LOG( "Any_file::prepare_open fügt convert ein vor " << filename << '\n' );
+            LOG( "Any_file::prepare_open fÃ¼gt convert ein vor " << filename << '\n' );
 
             Sos_ptr<Any_file_obj> any_file = SOS_NEW_PTR( Any_file_obj );
             any_file->open( "convert:", this );
@@ -680,10 +680,10 @@ void Any_file_obj::prepare_open_postprocessing( Any_file_param* param )
     if( !empty( param->_key_names          ) )  throw_xc( "SOS-1214", "-key=" );
 
 
-    // Wenn Schlüsselbeschreibung fehlt, aber Satzbeschreibung und keypos&keylen da sind,
-    // kann die Schlüsselbeschreibung aufgebaut werden.
-    // Überlappende Felder im Schlüssel sollten zu einem FEHLER führen!?
-    // Wenn Felder den Schlüssel nicht vollständig abdecken => Fehler!?
+    // Wenn SchlÃ¼sselbeschreibung fehlt, aber Satzbeschreibung und keypos&keylen da sind,
+    // kann die SchlÃ¼sselbeschreibung aufgebaut werden.
+    // Ãœberlappende Felder im SchlÃ¼ssel sollten zu einem FEHLER fÃ¼hren!?
+    // Wenn Felder den SchlÃ¼ssel nicht vollstÃ¤ndig abdecken => Fehler!?
 
     if( _spec._field_type_ptr
      && !_spec.key_specs()._key_spec.field_descr_ptr() )
@@ -720,7 +720,7 @@ void Any_file_obj::new_file( Any_file* any_file )
     _opened                       = any_file->_file->_opened;
     _prepare_open_not_implemented = any_file->_file->_prepare_open_not_implemented;
 
-    any_file->_file->_opened = false;   // damit zweites Any_file_obj die Datei nicht schließt
+    any_file->_file->_opened = false;   // damit zweites Any_file_obj die Datei nicht schlieÃŸt
 
     Sos_ptr<Abs_file> f = any_file->_file->_f;
     _f = f;
@@ -782,11 +782,11 @@ void Any_file_obj::set_parameter( int i, const Dyn_obj& param )
 
     memcpy( f->ptr( _param_record.byte_ptr() ), param.ptr(), f->type_ptr()->field_size() );
 
-/*  Baustelle: Feld in Record_type ändern, sollte nach sosfield.cxx. 
-    Größere Alignments der Felder werden noch nicht berücksichtigt.
+/*  Baustelle: Feld in Record_type Ã¤ndern, sollte nach sosfield.cxx. 
+    GrÃ¶ÃŸere Alignments der Felder werden noch nicht berÃ¼cksichtigt.
 
-    Solange kann set_parameter() den Typ (und damit die Feldlänge!) nicht ändern.
-    Für wiederholtes Setzen der Parameter bind_parameter() sollte also bind_parameter() verwendet werden.
+    Solange kann set_parameter() den Typ (und damit die FeldlÃ¤nge!) nicht Ã¤ndern.
+    FÃ¼r wiederholtes Setzen der Parameter bind_parameter() sollte also bind_parameter() verwendet werden.
 
     while( _param_record_type->field_count() < i )  _param_record_type->add_field( NULL );
 
@@ -874,7 +874,7 @@ void Any_file_obj::open( const Sos_string& filename, Open_mode open_mode, const 
     //LOGI( "Any_file::open( \"" << filename << "\" )\n" );
     Any_file_param param;
 
-    //jz 6.8.97 Nu kan Any_file återvinnas.   if( _prepared )  throw_xc( "SOS-1254", "open" );
+    //jz 6.8.97 Nu kan Any_file Ã¥tervinnas.   if( _prepared )  throw_xc( "SOS-1254", "open" );
     if( _opened )  throw_xc( "SOS-1362", c_str( _filename ) );
 
     _filename  = filename;
@@ -902,7 +902,7 @@ void Any_file_obj::open()
 {
     if( _opened ) {
         if( !_prepare_open_not_implemented )  throw_xc( "SOS-1253", "open" );
-        // Abs_file::prepare_open() hat die Datei bereits geöffnet 
+        // Abs_file::prepare_open() hat die Datei bereits geÃ¶ffnet 
         return;
     }
 

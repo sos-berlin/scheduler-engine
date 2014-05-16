@@ -178,7 +178,7 @@ Listed_type_info::~Listed_type_info()
     else
     {
         Listed_type_info* t = _head;
-        while( t  &&  t->_tail != this )  t = t->_tail;   // Vorgänger suchen
+        while( t  &&  t->_tail != this )  t = t->_tail;   // VorgÃ¤nger suchen
         if( t )  t->_tail = _tail;
     }
 */
@@ -216,7 +216,7 @@ void Field_type::get_param( Type_param* param ) const
 
     param->_std_type     = std_type_none;
     param->_size         = field_size();
-    param->_precision    = is_record? 0 : _info->_radix? _info->_max_precision : param->_size;    // wird in der Regel von _get_param() überschrieben
+    param->_precision    = is_record? 0 : _info->_radix? _info->_max_precision : param->_size;    // wird in der Regel von _get_param() Ã¼berschrieben
     param->_radix        = _info->_radix;
     param->_display_size = _info->_display_size;
     param->_scale        = _info->_min_scale;  // oder _max_scale?
@@ -266,7 +266,7 @@ void Field_type::_get_param( Type_param* ) const
 
 Field_type::~Field_type()
 {
-    // Für Solaris 4.0.1 (?) jz 8.11.95
+    // FÃ¼r Solaris 4.0.1 (?) jz 8.11.95
 }
 
 #endif
@@ -634,7 +634,7 @@ double Field_type::as_double( const Byte* p ) const
 void Field_type::read_other_field( Byte* p, const Field_type* type, const Byte* q,
                                    Area* hilfspuffer, const Text_format& format ) const
 {
-    // Text_format = std_text_format für MS Access 2.0, weil dort (char*)"00" != (short)0
+    // Text_format = std_text_format fÃ¼r MS Access 2.0, weil dort (char*)"00" != (short)0
 
     if( !type  ||  type->null( q ) ) {         // ist NULL nicht schon behandelt?
         set_null( p );
@@ -816,7 +816,7 @@ Bool Field_descr::null( const Byte* p ) const
     if( has_null_flag() && null_flag( p ) )  return true;
     if( !type_ptr()  )  return true;
 
-    // jz 6.6.01: Wenn der Aufrufer (Microsoft Access) "" als NULL interpretiert, dann soll auch "" = NULL gelten. (Für Fehrmann, Dia-Nielsen)
+    // jz 6.6.01: Wenn der Aufrufer (Microsoft Access) "" als NULL interpretiert, dann soll auch "" = NULL gelten. (FÃ¼r Fehrmann, Dia-Nielsen)
     if( _write_null_as_empty )  return simple_type()->empty( const_ptr( p ) );
 
     return type().null( const_ptr( p ) );
@@ -1175,7 +1175,7 @@ void Field_descr::write_null_as_empty( Bool w )
                 _write_null_as_empty = true;
             }
 
-            _type_ptr->write_null_as_empty( true );     // Für Record_type
+            _type_ptr->write_null_as_empty( true );     // FÃ¼r Record_type
         }
     } 
     else 
@@ -1293,11 +1293,11 @@ void Array_field_descr::elem_write_text( int i, const Byte* p, Area* buffer, con
 //-------------------------------------------------------Array_field_descr::set_array_distances
 
 void Array_field_descr::set_array_distances( Array_field_descr* outer )
-// Für Cobol
+// FÃ¼r Cobol
 {
-    if( outer ) {   // äußeres Array?
+    if( outer ) {   // Ã¤uÃŸeres Array?
         for( int i = 0; i < _level; i++ ) {
-            if( _dim[i]._elem_count )  break;   // 19.4.00  Verschachtelte OCCURS-Klausel nicht überschreiben!
+            if( _dim[i]._elem_count )  break;   // 19.4.00  Verschachtelte OCCURS-Klausel nicht Ã¼berschreiben!
             _dim[ i ] = outer->_dim[ i ];
         }
     }
@@ -1457,7 +1457,7 @@ void Record_type::append_fields( const Sos_ptr<Record_type>& record_type )
         if( field ) {
             Sos_ptr<Field_descr> f = Field_descr::create( *field );
             f->_offset = -1;
-            f->_null_flag_offset = -1;  // Läßt sich aber auch ausrechnen mit add_null_flag()
+            f->_null_flag_offset = -1;  // LÃ¤ÃŸt sich aber auch ausrechnen mit add_null_flag()
             f->add_to( this );
         }
         //else ?
@@ -1484,7 +1484,7 @@ void Record_type::construct( Byte* p ) const
 {
     //if( field_size() < 0 )  throw_xc( "field_size undefiniert", this );   //? jz 29.7.97
 
-    memset( p, 0, field_size() );       // Für die Zahnlücken
+    memset( p, 0, field_size() );       // FÃ¼r die ZahnlÃ¼cken
 
     //Erst was anderes testen, dann folgendes freigeben: 6.10.97
     //if( _group_type )
@@ -1530,7 +1530,7 @@ void Record_type::destruct( Byte* p ) const
 
 void Record_type::clear( Byte* p ) const
 {
-    memset( p, 0, field_size() );       // Für die Zahnlücken
+    memset( p, 0, field_size() );       // FÃ¼r die ZahnlÃ¼cken
 
     //Erst was anderes testen, dann folgendes freigeben: 6.10.97
     //if( _group_type ) {
@@ -1815,7 +1815,7 @@ void Record_type::_input_selected( Byte* ptr, istream* s, const Text_format& for
                                                          : i );
 
         if( format.has_separator()  &&  i > 0 ) {
-            // auch feste Feldlänge möglich?
+            // auch feste FeldlÃ¤nge mÃ¶glich?
             if( s->peek() != format.separator() )  throw_xc( "SOS-1168", this );
             s->get();
         }
@@ -1856,7 +1856,7 @@ void Record_type::_print_selected( const Byte* ptr, ostream* s, const Text_forma
     int i_end;
 
     Text_format format2 = format;
-    if( !format.separator() )  format2.raw( true );     // Felder möglichst Orignal ausgeben (Cobol-Gruppe)
+    if( !format.separator() )  format2.raw( true );     // Felder mÃ¶glichst Orignal ausgeben (Cobol-Gruppe)
 
     if( field_numbers ) {
         i_start = field_numbers->first_index();
@@ -1908,7 +1908,7 @@ void Record_type::read_text_selected( Byte* ptr, const Const_area& text, const T
                                                          : i );
 
         if( format.has_separator()  &&  i > 0 ) {
-            // auch feste Feldlänge möglich?
+            // auch feste FeldlÃ¤nge mÃ¶glich?
             if( t == t_end || *t != format.separator() )  throw_xc( "SOS-1168", this );
             t++;
         }
@@ -2000,7 +2000,7 @@ void Record_type::write_text_selected( const Byte* ptr, Area* buffer, const Text
     int i_end;
 
     Text_format format2 = format;
-    if( !format.separator() )  format2.raw( true );     // Felder möglichst Orignal ausgeben (Cobol-Gruppe)
+    if( !format.separator() )  format2.raw( true );     // Felder mÃ¶glichst Orignal ausgeben (Cobol-Gruppe)
 
     if( field_numbers ) {
         i_start = field_numbers->first_index();
@@ -2180,7 +2180,7 @@ Sos_ptr<Record_type> make_record_type(const char* record_type_definition )
 
         if( length( interpretation ) ) 
         {
-            const char* q = c_str( interpretation ) + 1;   // ':' überspringen
+            const char* q = c_str( interpretation ) + 1;   // ':' Ã¼berspringen
             while( isspace( *q ) )  q++;
             
             if( isdigit( *q ) ) 

@@ -1,4 +1,4 @@
-// olereg.h                                        ©1997 SOS GmbH Berlin
+// olereg.h                                        Â©1997 SOS GmbH Berlin
 //                                                 Joacim Zschimmer
 // Funktionen zum Registrieren eines OLE-Servers
 

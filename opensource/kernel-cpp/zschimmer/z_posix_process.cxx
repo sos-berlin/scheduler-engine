@@ -170,7 +170,7 @@ bool try_kill_process_with_descendants_immediately( pid_t pid, Has_log* log, con
     Transparent_input_stream_reader reader    ( &input_stream );
     Line_reader                  line_reader  ( &reader );
 
-    string line = trim( line_reader.read_line() );    // Überschrift
+    string line = trim( line_reader.read_line() );    // Ãœberschrift
     //Z_LOG2( "zschimmer", Z_FUNCTION << " " << line << "\n" );
 
 
@@ -193,7 +193,7 @@ bool try_kill_process_with_descendants_immediately( pid_t pid, Has_log* log, con
         pid_map[ ps_ef_line.pid ] = ps_ef_line;
     }
 
-    Z_FOR_EACH( Pid_map, pid_map, p )   // Über die parent_pid die Kinder ermitteln
+    Z_FOR_EACH( Pid_map, pid_map, p )   // Ãœber die parent_pid die Kinder ermitteln
     {
         Pid_map::iterator it = pid_map.find( p->second.parent_pid );
         if( it != pid_map.end() )  it->second.children.push_back( p->second.pid );
@@ -436,7 +436,7 @@ void Process::start( const string& command_line )
 {
 #   ifndef SYSTEM_WINDOWS
         Z_LOG( "signal(SIGCHLD,SIG_DFL)\n" );
-        ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
+        ::signal( SIGCHLD, SIG_DFL );                 // Java verÃ¤ndert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
 #   endif
 
 
@@ -500,7 +500,7 @@ void Process::start( const vector<string>& command )
     _working_pid = fork();
     if( _working_pid == 0 )
     {
-        Log_ptr::disable_logging(); // fork() kann gesperrte Mutex übernehmen, was zum Deadlock führt (stimmt das?)
+        Log_ptr::disable_logging(); // fork() kann gesperrte Mutex Ã¼bernehmen, was zum Deadlock fÃ¼hrt (stimmt das?)
         // Z_LOG() ist jetzt wirkunglos. Kann cerr auch gesperrt sein? Wenigstens ist es unwahrscheinlich, weil cerr kaum benutzt wird.
 
         try

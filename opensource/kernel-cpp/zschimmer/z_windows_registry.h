@@ -9,7 +9,7 @@ namespace zschimmer {
 namespace windows {
 
 /*
-    Werte für REGSAM:
+    Werte fÃ¼r REGSAM:
 
     DELETE                  The right to delete the object. 
     READ_CONTROL            The right to read the information in the object's security descriptor, not including the information in the SACL. 

@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosstat"
-//#define COPYRIGHT   "© 1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© 1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "sysdep.h"
@@ -34,7 +34,7 @@ int                _argc            = 1;
 static char*        default_argv0   = "(unknown)";
 char**             _argv            = &default_argv0;
 
-z::Mutex            hostware_mutex  ( "hostware" ); // Allgmeine Semaphore für Hostole (und vielleicht andere, z.B. hostphp und C++-Hostware-Programme)
+z::Mutex            hostware_mutex  ( "hostware" ); // Allgmeine Semaphore fÃ¼r Hostole (und vielleicht andere, z.B. hostphp und C++-Hostware-Programme)
 z::Mutex            sosstat_mutex   ("Sos_stat");
 
 //-------------------------------------------------------------------------------------------static
@@ -152,7 +152,7 @@ void Sos_static_0::close0()
 
     try {
         if( _log_ptr ) {
-            //jz 22.1.2001 hostole stürzt hier ab, offenbar weil iostream::num_put() schon beendet ist:  sos_alloc_log_statistic( _log_ptr );
+            //jz 22.1.2001 hostole stÃ¼rzt hier ab, offenbar weil iostream::num_put() schon beendet ist:  sos_alloc_log_statistic( _log_ptr );
             *_log_ptr << "~Sos_static_0 fertig\n\n";
         }
 
@@ -188,8 +188,8 @@ Sos_static::Sos_static()
 
 Sos_static::~Sos_static()
 {
-    //2008-09-22  Folgendes auskommentiert, weil unter hostole.dll am Ende des Prozesses DLLs bereits entladen sein können,
-    //2008-09-22  Destruktoren können diese DLLs aufrufen und abstürzen, weil sie ins Leere greifen.
+    //2008-09-22  Folgendes auskommentiert, weil unter hostole.dll am Ende des Prozesses DLLs bereits entladen sein kÃ¶nnen,
+    //2008-09-22  Destruktoren kÃ¶nnen diese DLLs aufrufen und abstÃ¼rzen, weil sie ins Leere greifen.
     //
     //if( !_valid )  return;
 

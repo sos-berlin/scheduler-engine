@@ -1,4 +1,4 @@
-// sosstat.h                                     © 1995 SOS GmbH Berlin
+// sosstat.h                                     Â© 1995 SOS GmbH Berlin
 
 #ifndef __SOSSTAT_H
 #define __SOSSTAT_H
@@ -7,7 +7,7 @@
     Jede Task hat ein Exemplar von Sos_static. Es soll die task-spezifischen statics ersetzen.
     In einer WIN16-DLL sind die statics system-global.
 
-    Instanzen von Sos_static werden mit Sos_object::operator new() angefordert, sodaß alle
+    Instanzen von Sos_static werden mit Sos_object::operator new() angefordert, sodaÃŸ alle
     nicht initialisierten Elemente 0 sind.
 */
 
@@ -35,7 +35,7 @@ namespace sos
 
 //-------------------------------------------------------------------------------------------static
 
-extern z::Mutex hostware_mutex;     // Allgemeine Semaphore für Hostole (und vielleicht andere, z.B. hostphp und C++-Hostware-Programme)
+extern z::Mutex hostware_mutex;     // Allgemeine Semaphore fÃ¼r Hostole (und vielleicht andere, z.B. hostphp und C++-Hostware-Programme)
 
 //-------------------------------------------------------------------------------------------------
 
@@ -61,9 +61,9 @@ struct Ebo_static;
 struct Cache_file_static;
 
 //-----------------------------------------------------------------------------------Profile_source
-// Für sosprof.cxx (gcc 3.3.2 erlaubt nicht die Vorwärtsdekaration mit enum Profile_source;.
+// FÃ¼r sosprof.cxx (gcc 3.3.2 erlaubt nicht die VorwÃ¤rtsdekaration mit enum Profile_source;.
 
-enum Profile_source         // Gelesene Quellen des Dateinamens für sos.ini. Gibt auch die Priorität an. Niedrige Priorität kann höhere nicht überschreiben.
+enum Profile_source         // Gelesene Quellen des Dateinamens fÃ¼r sos.ini. Gibt auch die PrioritÃ¤t an. Niedrige PrioritÃ¤t kann hÃ¶here nicht Ã¼berschreiben.
 {
     source_default      = 0x01,     // "sos.ini"
     source_environment  = 0x02,     // SOS_INI
@@ -128,7 +128,7 @@ struct Sos_static_0
 #   endif
 
   //uint4                                              _object_count;
-    bool                                               _dont_check_licence;         // Für hostole.dll
+    bool                                               _dont_check_licence;         // FÃ¼r hostole.dll
 };
 
 
@@ -169,7 +169,7 @@ struct Sos_static : Sos_static_0
     int                                                _log_active;
     Bool                                               _multiple_clients;
     enum Profile_source                                _profile_source;            // Woher die aktuelle Einstellung gelesen worden ist.
-    enum Profile_source                                _profile_source_checked;    // Welche Einstellung bereits geprüft worden sind.
+    enum Profile_source                                _profile_source_checked;    // Welche Einstellung bereits geprÃ¼ft worden sind.
   //bool                                               _profile_registry_read;
     string                                             _profile;                   // Name der sos.ini oder leer
   //bool                                               _profile_locked;            // Wenn sos.ini in der Windows-Registrierung festgelegt ist, dann wird der Eintrag gesperrt
@@ -215,7 +215,7 @@ inline Sos_static* sos_static_ptr()
 
 //-------------------------------------------------------------------------------Has_static_ptr
 
-struct SOS_CLASS Has_static_ptr   // Cache für sos_static_ptr()
+struct SOS_CLASS Has_static_ptr   // Cache fÃ¼r sos_static_ptr()
 {
 # if defined SYSTEM_WINDLL  &&  defined SYSTEM_WIN16
 

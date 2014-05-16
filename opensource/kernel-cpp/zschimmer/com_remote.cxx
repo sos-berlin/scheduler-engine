@@ -1,16 +1,16 @@
 // $Id: com_remote.cxx 14221 2011-04-29 14:18:28Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
-// §1669
+// Â§1669
 
 /*
-    WÜNSCHE
+    WÃœNSCHE
 
-    Datentransfer rechnerunabhängig. Besonders double.
-    Die Partner können sich zu Beginn über die Datenformate einigen.
+    Datentransfer rechnerunabhÃ¤ngig. Besonders double.
+    Die Partner kÃ¶nnen sich zu Beginn Ã¼ber die Datenformate einigen.
 
     Strings als UTF-8.
 
-    Datentransfer lesbarer machen: Jeden Parameter mit einem Typ und einer Länge versehen, 
+    Datentransfer lesbarer machen: Jeden Parameter mit einem Typ und einer LÃ¤nge versehen, 
     so dass ein Transfer-String lesbar ist, ohne dass die Methode bekannt ist.
     Also nicht einfach die Parameter aneinanderreihen.
 
@@ -19,47 +19,47 @@
 
         pid bekanntgeben
 
-        kill ermöglichen
-            Der Superserver muss dann seine Kinder überwachen
+        kill ermÃ¶glichen
+            Der Superserver muss dann seine Kinder Ã¼berwachen
             Client schickt Superserver eine UDP-Nachricht (damit Client nicht warten muss)
-            Superserver prüft, ob UDP-Nachricht vom richtigen Client kommt
+            Superserver prÃ¼ft, ob UDP-Nachricht vom richtigen Client kommt
 
         XML-Schnittstelle per TCP
             Zeigt, welche Prozesse laufen
             Beendet Prozesse (ordentlich oder kill -9).
 
         Lastverteilung
-            Wie wird ein Rechner ausgewählt?
+            Wie wird ein Rechner ausgewÃ¤hlt?
             Man sollte den mit der geringsten Last nehmen.
             Wie erfahren wir diese Last?
-            Wir müssen wohl jeden Superserver fragen.
-            Client hält also ständig Verbindungen zu den Superservern
-            Darüber kann er auch XML-Infos erhalten, die ins eigene show_state eingeblendet werden. (Vorsicht: Nicht warten!)
+            Wir mÃ¼ssen wohl jeden Superserver fragen.
+            Client hÃ¤lt also stÃ¤ndig Verbindungen zu den Superservern
+            DarÃ¼ber kann er auch XML-Infos erhalten, die ins eigene show_state eingeblendet werden. (Vorsicht: Nicht warten!)
 
         SCHEDULER
             Der classpath muss lokal beim Server eingestellt werden.
-            Sicherer ist, der Superserver lässt nur ihm bekannte Java-Klassen zum Start zu.
+            Sicherer ist, der Superserver lÃ¤sst nur ihm bekannte Java-Klassen zum Start zu.
             Dann braucht er die spooler.xml.
 
 
     Connection Manager / Operation Manager
         Ein Objekt, dass alle Verbindungen verwaltet.
         Wird vom Spooler angelegt
-        Enthält den select_thread
+        EnthÃ¤lt den select_thread
         Nimmt auch andere Operationen auf, z.B. Job und Task
-        Enthält einen eigenen Mini-Scheduler, der auf ein Signal hin (von select) gezielt eine Operation fortsetzt
-        Operationen sind vom Scheduling ausschließbar, damit der Spooler die Tasks mit eigener Prioritätensteuerung aufrufen kann
+        EnthÃ¤lt einen eigenen Mini-Scheduler, der auf ein Signal hin (von select) gezielt eine Operation fortsetzt
+        Operationen sind vom Scheduling ausschlieÃŸbar, damit der Spooler die Tasks mit eigener PrioritÃ¤tensteuerung aufrufen kann
         _listen_socket ist dann zentral. Wir brauchen nur einen Port (statt alle unter 60000)
 
 
     Spooler und Events  
-        Wenn es keine Threads mehr gibt (außer Comnunication für XML-Schnittstelle), brauchen wir dann noch Ereignisse?
+        Wenn es keine Threads mehr gibt (auÃŸer Comnunication fÃ¼r XML-Schnittstelle), brauchen wir dann noch Ereignisse?
         Auf Unix kann pthread_cond_signal() durch send() auf einen Dummy-Socket ersetzt werden.
         Dann kann auf alles mit select() gewartet werden.
         Der Dummy-Socket kann mit socketpair() angelegt werden.
 
     Java-Compiler
-        Sollten die Module beim Start des Spoolers vom Hauptprozess übersetzt werden?
+        Sollten die Module beim Start des Spoolers vom Hauptprozess Ã¼bersetzt werden?
 
 */
 
@@ -68,9 +68,9 @@
 #include "z_com.h"
 
 #ifdef _WIN32
-#   define _WIN32_DCOM          // Für CoCreateInstanceEx()
+#   define _WIN32_DCOM          // FÃ¼r CoCreateInstanceEx()
 #   include <winsock2.h>        // Vor <winsock.h> einziehen!
-#   include <objbase.h>         // Für CoCreateInstanceEx(), nach winsock2.h einziehen, mit _WIN32_DCOM
+#   include <objbase.h>         // FÃ¼r CoCreateInstanceEx(), nach winsock2.h einziehen, mit _WIN32_DCOM
 #   include <io.h>
 #   include <process.h>
 #else
@@ -79,7 +79,7 @@
 
 #include "mutex.h"
 #include "log.h"
-#include "async_socket.h"       // Für set_socket_not_inheritable()
+#include "async_socket.h"       // FÃ¼r set_socket_not_inheritable()
 #include "com_server.h"
 #include "com_remote.h"
 #include "z_process.h"
@@ -123,15 +123,15 @@ static Message_code_text error_codes[] =
     { "Z-REMOTE-104", "Objectserver: Session-Id ist nicht korrekt" },
     { "Z-REMOTE-105", "Objectserver: Session-Kommando unbekannt (Fehler in der Kommunikation)" },
     { "Z-REMOTE-106", "Objectserver: Session-Klasse unbekannt (Fehler in der Kommunikation)" },
-    { "Z-REMOTE-107", "Objectserver pid=$1: Ungültige Antwort" },
-    { "Z-REMOTE-108", "Objectserver: Variant-Typ $1 ist nicht übertragbar" },
+    { "Z-REMOTE-107", "Objectserver pid=$1: UngÃ¼ltige Antwort" },
+    { "Z-REMOTE-108", "Objectserver: Variant-Typ $1 ist nicht Ã¼bertragbar" },
     { "Z-REMOTE-109", "Objectserver: Fehler in der Kommunikation (Nachricht ist zu kurz)" },
   //{ "Z-REMOTE-110", "Objectserver: Objekt-Id ist doppelt" },
     { "Z-REMOTE-111", "Objectserver: Zwei Operationen gleichzeitig" },
-    { "Z-REMOTE-112", "Objectserver: Programm hat Ergebnis der Operation nicht übernommen" },
-    { "Z-REMOTE-113", "Objectserver: Programm will Ergebnis einer anderen Operation übernehmen" },
-    { "Z-REMOTE-114", "Objectserver: Programm will Ergebnis einer nicht abgeschlossenen Operation übernehmen" },
-    { "Z-REMOTE-115", "Objectserver pid=$1: Nachricht mit zu großer oder ungültiger Länge $2" },
+    { "Z-REMOTE-112", "Objectserver: Programm hat Ergebnis der Operation nicht Ã¼bernommen" },
+    { "Z-REMOTE-113", "Objectserver: Programm will Ergebnis einer anderen Operation Ã¼bernehmen" },
+    { "Z-REMOTE-114", "Objectserver: Programm will Ergebnis einer nicht abgeschlossenen Operation Ã¼bernehmen" },
+    { "Z-REMOTE-115", "Objectserver pid=$1: Nachricht mit zu groÃŸer oder ungÃ¼ltiger LÃ¤nge $2" },
   //{ "Z-REMOTE-116", "Objectserver: GetOverlappedResult() liefert $1, dass ist nicht die Anzahl $2 mit WriteFile() versendeter Bytes" },
   //{ "Z-REMOTE-117", "Objectserver: Der Objektserver kann nicht als einzelnes Programm gestartet werden" },
     { "Z-REMOTE-118", "Objectserver pid=$1: Der Objektserver war nicht innerhalb der Wartezeit von $2s bereit" },
@@ -140,11 +140,11 @@ static Message_code_text error_codes[] =
     { "Z-REMOTE-121", "Objectserver: pop_operation, aber Stack ist leer, Methode=$1" },
     { "Z-REMOTE-122", "Objectserver pid=$1: Der Prozess ist (vom Aufrufer) abgebrochen worden" },
     { "Z-REMOTE-123", "Objectserver pid=$1: Der Prozess hat sich unerwartet beendet" },
-    { "Z-REMOTE-124", "Objectserver: Benannte Parameter sind nicht möglich" },
+    { "Z-REMOTE-124", "Objectserver: Benannte Parameter sind nicht mÃ¶glich" },
     { "Z-REMOTE-125", "Objectserver: DISPID $1 nicht bekannt" },
-    { "Z-REMOTE-126", "Objectserver: Default-Proxy für $1 kennt keine Eigenschaften" },
-    { "Z-REMOTE-127", "Objectserver: Mehr Daten empfangen als angekündigt. Fehlerhafte Daten empfangen." },
-    { "Z-REMOTE-128", "Objectserver: v.vt stimmt nicht mit SafeArrayGetVartype() überein" },
+    { "Z-REMOTE-126", "Objectserver: Default-Proxy fÃ¼r $1 kennt keine Eigenschaften" },
+    { "Z-REMOTE-127", "Objectserver: Mehr Daten empfangen als angekÃ¼ndigt. Fehlerhafte Daten empfangen." },
+    { "Z-REMOTE-128", "Objectserver: v.vt stimmt nicht mit SafeArrayGetVartype() Ã¼berein" },
   //{ "Z-REMOTE-127", "Objectserver: Asynchroner Aufruf einer lokalen Proxy-Methode ist nicht implementiert" },
     { NULL }
 };
@@ -207,7 +207,7 @@ Connection_reset_exception::Connection_reset_exception( const string& code )
 : 
     Xc( code )  
 {
-    set_name( exception_name );        // Für den Scheduler
+    set_name( exception_name );        // FÃ¼r den Scheduler
 }
 
 //-------------------------------------------Connection_reset_exception::Connection_reset_exception
@@ -216,7 +216,7 @@ Connection_reset_exception::Connection_reset_exception( const string& code, int 
 : 
     Xc( code, pid )  
 {
-    set_name( exception_name );        // Für den Scheduler
+    set_name( exception_name );        // FÃ¼r den Scheduler
 }
 
 //---------------------------------------------------------------------------Connection::Connection
@@ -444,7 +444,7 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
     {
         case s_initial:
             _state = s_waiting_for_connection;
-            // Weiter im nächsten case
+            // Weiter im nÃ¤chsten case
 
 
         case s_waiting_for_connection:
@@ -509,14 +509,14 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
                     Z_LOG2("socket", "accept(" << _connection->_listen_socket << ") => " << _connection->_socket << "\n");
                     _connection->_peer = peer_addr;
 
-                    //Prüfung ist zu streng, wenn der Rechner im Cluster ist. Dann hat er zwei IP-Adressen.
+                    //PrÃ¼fung ist zu streng, wenn der Rechner im Cluster ist. Dann hat er zwei IP-Adressen.
                     //if( _connection->_peer.ip()  != _connection->_remote_host )
                     //{
                     //    _connection->close_socket( &_connection->_socket );
                     //    throw_xc( "Z-REMOTE-130", _connection->_peer.as_string() );
                     //}
 
-                    _connection->_peer._host = _connection->_remote_host;    // Hostnamen übernehmen
+                    _connection->_peer._host = _connection->_remote_host;    // Hostnamen Ã¼bernehmen
 
                     set_socket_not_inheritable( _connection->_socket );
                     set_non_blocking( _connection->_socket );
@@ -533,7 +533,7 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
 
         case s_writing_to_stdin:
         {
-#           if  1//def Z_WINDOWS     // Windows kann nicht asynchron (mit select()) zu stdin des Prozesses schreiben. Also nehmen wir eine temporäre Datei
+#           if  1//def Z_WINDOWS     // Windows kann nicht asynchron (mit select()) zu stdin des Prozesses schreiben. Also nehmen wir eine temporÃ¤re Datei
         
                 _state = s_ok;
 
@@ -671,7 +671,7 @@ void Connection::execute( Session* session, Input_message* in, Output_message* o
 void Connection::push_operation( Simple_operation* operation, Different_thread_allowed different_thread_allowed )
 {
     if( !different_thread_allowed )  assert_is_owners_thread();
-    // Nichts am Objekt ändern, wird von verschiedenen Threads gerufen!
+    // Nichts am Objekt Ã¤ndern, wird von verschiedenen Threads gerufen!
 
     Z_LOG2( "object_server.push", "pid=" << pid() << " Connection::push_operation " << operation->async_state_text() << "\n" );
 
@@ -679,9 +679,9 @@ void Connection::push_operation( Simple_operation* operation, Different_thread_a
 
 
 
-    enter_exclusive_mode( __FUNCTION__ );     // Blockiert, wenn wir ein anderer Thread als server_loop() sind und der Server gerade keine Funktion ausführt (also im Leerlauf)
-    // Jetzt haben wir die Connection exklusiv und können sie ändern. 
-    // KEINE EXCEPTION MEHR!, außer mit leave_exclusive_mode()
+    enter_exclusive_mode( __FUNCTION__ );     // Blockiert, wenn wir ein anderer Thread als server_loop() sind und der Server gerade keine Funktion ausfÃ¼hrt (also im Leerlauf)
+    // Jetzt haben wir die Connection exklusiv und kÃ¶nnen sie Ã¤ndern. 
+    // KEINE EXCEPTION MEHR!, auÃŸer mit leave_exclusive_mode()
 
 
     if( !_operation_stack.empty() )
@@ -729,7 +729,7 @@ ptr<Simple_operation> Connection::pop_operation( const IDispatch* object, const 
 
     leave_exclusive_mode( __FUNCTION__ );
 
-    operation->async_check_error( Z_FUNCTION );     // Löst Exception aus!
+    operation->async_check_error( Z_FUNCTION );     // LÃ¶st Exception aus!
 
     return operation;
 }
@@ -750,14 +750,14 @@ void Connection::enter_exclusive_mode( const char* )
 {
     //Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << debug_text << "\")\n" );
 
-    if( !_exclusive_io_mutex.try_enter() )    // Mutex wird von pop_operation() gelöst
+    if( !_exclusive_io_mutex.try_enter() )    // Mutex wird von pop_operation() gelÃ¶st
     {
         Z_LOG2( "object_server", Z_FUNCTION << "()  Warten ...\n" );
         _exclusive_io_mutex.enter();                                       
         Z_LOG2( "object_server", Z_FUNCTION << "()  OK\n" );
     }
 
-    assert( !_in_use_by_thread_id );        //? Wird nach einem schlimmeren Fehler vielleicht pop_operation() nicht gerufen? Dann hätte der exklusive Modus verlassen müssen!!!
+    assert( !_in_use_by_thread_id );        //? Wird nach einem schlimmeren Fehler vielleicht pop_operation() nicht gerufen? Dann hÃ¤tte der exklusive Modus verlassen mÃ¼ssen!!!
     _in_use_by_thread_id = current_thread_id();
 }
 
@@ -1022,7 +1022,7 @@ void Connection::check_async( Async_operation* operation )
 
         if( operation )
         {
-            if( operation->set_async_warning_issued() )  return;  // Nur warnen, wenn nicht schon in dieser oder übergeordneter Operation geschehen
+            if( operation->set_async_warning_issued() )  return;  // Nur warnen, wenn nicht schon in dieser oder Ã¼bergeordneter Operation geschehen
 
             msg2 += " IN " + operation->async_state_text();
         }
@@ -1142,8 +1142,8 @@ bool Connection_to_own_server_process::Wait_for_process_termination::async_conti
     }
     else
     {
-        // In Windows könnten wir auf ein Signal von _process_handle warten. Das müsste spooler.cxx tun.
-//#       ifdef Z_UNIX           // Unter Windows für remote task periodisch prüfen (wir haben hier kein Event)
+        // In Windows kÃ¶nnten wir auf ein Signal von _process_handle warten. Das mÃ¼sste spooler.cxx tun.
+//#       ifdef Z_UNIX           // Unter Windows fÃ¼r remote task periodisch prÃ¼fen (wir haben hier kein Event)
             set_async_delay( 0.1 );  // Alle 1/10 Sekunden probieren, ob Prozess beendet ist
 //#       endif
     }
@@ -1232,7 +1232,7 @@ Connection_to_own_server_process::~Connection_to_own_server_process()
         }
 #   endif
 
-    // Das macht schon ~File, aber nicht in der fürs Protokoll gewünschten Reihenfolge:
+    // Das macht schon ~File, aber nicht in der fÃ¼rs Protokoll gewÃ¼nschten Reihenfolge:
     try_delete_files( NULL );
 }
 
@@ -1241,7 +1241,7 @@ Connection_to_own_server_process::~Connection_to_own_server_process()
 /**
  * \brief Start einer Task in einem eigenen Prozess
  * \detail
- * Aus dem Haupt-Scheduler (server) heraus werden über diese Methode die anstehenden Tasks in einem eigenen
+ * Aus dem Haupt-Scheduler (server) heraus werden Ã¼ber diese Methode die anstehenden Tasks in einem eigenen
  * Prozess gestartet.
  *
  * \version 2.0.224 - 2010-03-02 09:40
@@ -1328,7 +1328,7 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
     argv[argc] = NULL;
 
 
-    // Windows kann nicht asynchron (mit select()) zu stdin des Prozesses schreiben. Also nehmen wir eine temporäre Datei
+    // Windows kann nicht asynchron (mit select()) zu stdin des Prozesses schreiben. Also nehmen wir eine temporÃ¤re Datei
     _stdin_file.open_temporary( File::open_unlink_later | File::open_inheritable );
     _stdin_file.print( _stdin_data );
     _stdin_file.flush();
@@ -1378,7 +1378,7 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         _process_handle.set_handle( process_info.hProcess );
         _process_handle.set_name( "Process " + as_string( _pid ) );
 
-        //_stdin_file.close();        // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindert (ERRNO-13 Permission denied)
+        //_stdin_file.close();        // SchlieÃŸen, damit nicht ein anderer Prozess die Handles erbt und damit das LÃ¶schen verhindert (ERRNO-13 Permission denied)
         //_stdout_file.close();
         //_stderr_file.close();
 
@@ -1402,10 +1402,10 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         _pid = fork();
         if( _pid == 0 )
         {
-            Log_ptr::disable_logging(); // fork() kann gesperrte Mutex übernehmen, was zum Deadlock führt (stimmt das?)
+            Log_ptr::disable_logging(); // fork() kann gesperrte Mutex Ã¼bernehmen, was zum Deadlock fÃ¼hrt (stimmt das?)
             // Z_LOG() ist jetzt wirkunglos. Kann cerr auch gesperrt sein? Wenigstens ist es unwahrscheinlich, weil cerr kaum benutzt wird.
 
-            setpgid(0,0);   // Neue Prozessgruppe für den API Prozess vgl. JS-930
+            setpgid(0,0);   // Neue Prozessgruppe fÃ¼r den API Prozess vgl. JS-930
 
             if( _priority != "" ) 
             {
@@ -1431,11 +1431,11 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
             dup2( _stdout_file.file_no(), STDOUT_FILENO );
             dup2( _stderr_file.file_no(), STDERR_FILENO );
 
-            // Alle Dateien schließen
+            // Alle Dateien schlieÃŸen
             int n = sysconf( _SC_OPEN_MAX );
             for( int i = 3; i < n; i++ )  if( i != other_socket )  ::close(i);
 
-            // stdin haben wir schon geöffnet
+            // stdin haben wir schon geÃ¶ffnet
             //int new_stdin = ::open( "/dev/null", O_RDONLY );
             //if( new_stdin != -1  &&  new_stdin != STDIN_FILENO )  dup2( new_stdin, STDIN_FILENO ),  ::close( new_stdin );
 
@@ -1463,17 +1463,17 @@ void Connection_to_own_server_process::start_process( const Parameters& params )
         else
         if( _pid == -1 )  
         {
-            _pid = 0;   // §1529
+            _pid = 0;   // Â§1529
             throw_errno( errno, "fork" );
         }
 
         Z_LOG( "pid=" << _pid << "\n" );
 
-        //_stdin_file.close();        // Unter Unix können wir die Datei jetzt schon schließen und deren Namen löschen (sie bleibt dem Prozess erhalten)
+        //_stdin_file.close();        // Unter Unix kÃ¶nnen wir die Datei jetzt schon schlieÃŸen und deren Namen lÃ¶schen (sie bleibt dem Prozess erhalten)
         
 #   endif
 
-    _stdin_file.close();        // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindert (ERRNO-13 Permission denied)
+    _stdin_file.close();        // SchlieÃŸen, damit nicht ein anderer Prozess die Handles erbt und damit das LÃ¶schen verhindert (ERRNO-13 Permission denied)
     _stdout_file.close();
     _stderr_file.close();
 
@@ -1717,8 +1717,8 @@ bool Connection_to_own_server_thread::Wait_for_thread_termination::async_continu
     }
     else
     {
-        // In Windows könnten wir auf ein Signal von _process_handle warten. Das müsste spooler.cxx tun.
-//#       ifdef Z_UNIX           // Unter Windows für remote task periodisch prüfen (wir haben hier kein Event)
+        // In Windows kÃ¶nnten wir auf ein Signal von _process_handle warten. Das mÃ¼sste spooler.cxx tun.
+//#       ifdef Z_UNIX           // Unter Windows fÃ¼r remote task periodisch prÃ¼fen (wir haben hier kein Event)
             set_async_delay( 0.1 );  // Alle 1/10 Sekunden probieren, ob Prozess beendet ist
 //#       endif
     }
@@ -1923,7 +1923,7 @@ void Object_entry::obj_print( ostream* s ) const
 
     *s << ' ';
 
-#   if defined Z_WINDOWS      // Manche Zeiger sind (nach Fehler) ungültig. Nur Windows kann das mit ... abfangen.
+#   if defined Z_WINDOWS      // Manche Zeiger sind (nach Fehler) ungÃ¼ltig. Nur Windows kann das mit ... abfangen.
         try 
         { 
             *s << name_of_type( *_iunknown );
@@ -1932,10 +1932,10 @@ void Object_entry::obj_print( ostream* s ) const
           //if( p )  *s << name_of_type( *_iunknown ) << " " << p->title();
           //   else  *s << "Lokal " << name_of_type( *_iunknown ); 
         }
-        catch( ... ) { *s << "(no type information)"; }    // typeid stürzt bei manchen Adressen ab (Microsoft)
+        catch( ... ) { *s << "(no type information)"; }    // typeid stÃ¼rzt bei manchen Adressen ab (Microsoft)
 #   endif
 
-    //_iunknown ist manchmal, nach Exception, ungültig.   *s << ", " << ( _iunknown->AddRef(), _iunknown->Release() ) << " references";
+    //_iunknown ist manchmal, nach Exception, ungÃ¼ltig.   *s << ", " << ( _iunknown->AddRef(), _iunknown->Release() ) << " references";
 }
 
 //------------------------------------------------------------------------------Object_table::clear
@@ -2914,7 +2914,7 @@ void Output_message::write_variant( const VARIANT& v )
           //case VT_CF:
           //case VT_CLSID:
 
-            // Diese Typen werden binär übertragen. Wenn der Zielrechner eine andere Prozessorarchitektur hat, wird's nicht funktionieren!
+            // Diese Typen werden binÃ¤r Ã¼bertragen. Wenn der Zielrechner eine andere Prozessorarchitektur hat, wird's nicht funktionieren!
          //   case VT_R4:         write_bytes   ( &V_R4(&v), 4 );                                                 break;
          //   case VT_R8:         write_bytes   ( &V_R8(&v), 8 );                                                 break;
          ////?case VT_CY:         write_bytes   ( &V_CY(&v), 8 );                                                 break;
@@ -2974,7 +2974,7 @@ void Output_message::write_iunknown( IUnknown* iunknown )
 
 
         // Gibt es zu iunknown eine eigene Implementierung eines Proxy (derzeit spooler::Com_log_proxy)? 
-        // Dann übertragen wir den Klassennamen des Proxys und einige Eigenschaften des Objekts.
+        // Dann Ã¼bertragen wir den Klassennamen des Proxys und einige Eigenschaften des Objekts.
 
         ptr<Reference_with_properties>      ref_with_props;
         ptr<Ihas_reference_with_properties> has_ref_with_props;
@@ -3448,7 +3448,7 @@ void Input_message::read_variant( VARIANT* v )
             case VT_CY:         V_CY(v).int64 = read_int64();            break;
             case VT_DATE:       V_DATE(v)     =  read_double();   break;
 
-            // Diese Typen werden binär übertragen. Wenn der sendende Rechner eine andere Prozessorarchitektur hat, wird's nicht funktionieren!
+            // Diese Typen werden binÃ¤r Ã¼bertragen. Wenn der sendende Rechner eine andere Prozessorarchitektur hat, wird's nicht funktionieren!
          //   case VT_R4:         read_bytes   ( &V_R4(v), 4 );   break;
          //   case VT_R8:         read_bytes   ( &V_R8(v), 8 );   break;
          ////?case VT_CY:         read_bytes   ( &V_CY(v), 8 );   break;
@@ -3569,7 +3569,7 @@ void Simple_operation::close()
             {
                 if( conn->current_operation() == this )
                 {
-                    //Nicht automatisch abräumen! Denn die Antwort vom Server ist ja noch nicht gelesen.
+                    //Nicht automatisch abrÃ¤umen! Denn die Antwort vom Server ist ja noch nicht gelesen.
                     //Z_LOG( "pop_operation\n" );
                     //_session->connection()->pop_operation( _object, _method.c_str() );
                 }
@@ -3732,7 +3732,7 @@ void Simple_operation::async_check_error_()
         }
 
         what += ", method=";
-      //if( _object )  what += _object->obj_name(), what += '.';     (Im ungünstigen Fehlerfall kann das Objekt vielleicht schon weg sein.)
+      //if( _object )  what += _object->obj_name(), what += '.';     (Im ungÃ¼nstigen Fehlerfall kann das Objekt vielleicht schon weg sein.)
         what += _method;
         what + "()";
 
@@ -3782,7 +3782,7 @@ string Simple_operation::async_state_text_() const
     string text = "Simple_operation(";
     if( async_finished() && async_has_error() )  text +="ERROR,";
     text += "state=",  text += state_name();
-  //if( _object )  text += ",object=" + _object->obj_name();       (Im ungünstigen Fehlerfall kann das Objekt vielleicht schon weg sein.)
+  //if( _object )  text += ",object=" + _object->obj_name();       (Im ungÃ¼nstigen Fehlerfall kann das Objekt vielleicht schon weg sein.)
     text += ",method=",  text += _method;
     if( !_debug_text.empty() )  text += '(', text += _debug_text, text += ')';
     text += ")"; 
@@ -3909,11 +3909,11 @@ STDMETHODIMP Proxy::QueryInterface( const IID& iid, void** result )
         return E_NOINTERFACE;
 
 /*
-    Wir brachen QueryInterface für VBScript-Iteratoren (NewEnum bei spooler_task.params(), Variable_set in spooler_com.cxx).
-    Die implementieren wir aber noch nicht, denn VBScript will außerdem den TypeInfo abfragen und der gelieferte Iterator scheint kein Objekt zu sein. usw.
+    Wir brachen QueryInterface fÃ¼r VBScript-Iteratoren (NewEnum bei spooler_task.params(), Variable_set in spooler_com.cxx).
+    Die implementieren wir aber noch nicht, denn VBScript will auÃŸerdem den TypeInfo abfragen und der gelieferte Iterator scheint kein Objekt zu sein. usw.
     Ich breche ab. Gegen einen Tag Berechnung setze ich fort.
 
-    Die Aufrufe von QueryInterace() müssen gefiltert werden, denn VBSript macht davon sehr viele (fragt nach z.B: IDispatchEx und so).
+    Die Aufrufe von QueryInterace() mÃ¼ssen gefiltert werden, denn VBSript macht davon sehr viele (fragt nach z.B: IDispatchEx und so).
     Das bremst. Also klemmen wir den ganzen Aufruf erstmal ab. Obwohl er funktioniert.
 
     Joacim 14.1.2004
@@ -3974,7 +3974,7 @@ STDMETHODIMP Proxy::GetIDsOfNames( const IID& iid, OLECHAR** names, uint names_c
     {
         if( names_count == 1 )  
         {
-            Dispid_map::iterator it = _dispid_map.find( names[0] );     // LCID wird nicht berücksichtigt
+            Dispid_map::iterator it = _dispid_map.find( names[0] );     // LCID wird nicht berÃ¼cksichtigt
             if( it != _dispid_map.end() )
             {
                 *result = it->second;
@@ -3988,7 +3988,7 @@ STDMETHODIMP Proxy::GetIDsOfNames( const IID& iid, OLECHAR** names, uint names_c
         hr = GetIDsOfNames__end  ( names_count, result );
 
 
-        if( names_count == 1 )  _dispid_map[ names[0] ] = *result;      // LCID wird nicht berücksichtigt
+        if( names_count == 1 )  _dispid_map[ names[0] ] = *result;      // LCID wird nicht berÃ¼cksichtigt
     }
     catch( const exception& x ) { hr = Com_set_error(x); }
 
@@ -4392,7 +4392,7 @@ void Server::server( int server_port )
             case 0:
             {
                 zschimmer::main_pid = getpid();
-                //setsid();  // Brauchen wir das? Damit soll dieser Prozess nicht sterben, wenn der Superserver stirbt. ps zeigt dann leider nicht mehr die schöne Baumstruktur
+                //setsid();  // Brauchen wir das? Damit soll dieser Prozess nicht sterben, wenn der Superserver stirbt. ps zeigt dann leider nicht mehr die schÃ¶ne Baumstruktur
 
                 Session session ( this, _connection );
                 session.server_loop();
@@ -4448,8 +4448,8 @@ string Server::stdin_data()
 int Server::main( int argc, char** argv )
 {
 
-        // für Testzwecke auskommentieren
-        // Prozess stoppt hier -> IDE: Extras|An den Prozess anhängen
+        // fÃ¼r Testzwecke auskommentieren
+        // Prozess stoppt hier -> IDE: Extras|An den Prozess anhÃ¤ngen
     //MessageBox(NULL,( "object_server pid=" + as_string(getpid()) ).c_str(),"",0);
     //Z_DEBUG_ONLY( Sleep((connect_timeout*10)*1000); )
     //Z_DEBUG_ONLY( Sleep(10*1000); )

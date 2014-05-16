@@ -1,4 +1,4 @@
-// sosappl.h                                  ©1996 SOS GmbH Berlin
+// sosappl.h                                  Â©1996 SOS GmbH Berlin
 
 #ifndef __SOSAPPL_H
 #define __SOSAPPL_H

@@ -709,7 +709,7 @@ void field_to_variant( Field_type* field_type, const Byte* p, VARIANT* variant, 
                     V_I4( variant ) = type->as_int(p);
                 }
                 else
-                if( type_param._scale <= 4  &&  type_param._precision - type_param._scale <= 15 )   // 15 muss übereinstimmen mit Currency_type::_type_info._max_precision - Currency_type::_scale )
+                if( type_param._scale <= 4  &&  type_param._precision - type_param._scale <= 15 )   // 15 muss Ã¼bereinstimmen mit Currency_type::_type_info._max_precision - Currency_type::_scale )
                 {
                     Sos_limited_text<100> text;
                     type->write_text( p, &text );
@@ -843,7 +843,7 @@ Ole_error::Ole_error( const char* error_code, HRESULT hr, const char* function, 
             string description = bstr_as_string(description_bstr);
             string source      = bstr_as_string(source_bstr);
 
-            // Prüfen, ob description mit einem Fehlercode anfängt:  (s.a. zschimmer/z_com.cxx)
+            // PrÃ¼fen, ob description mit einem Fehlercode anfÃ¤ngt:  (s.a. zschimmer/z_com.cxx)
             // Hostware: XXX-XXX-X9A
             // Rapid:    D999
             Regex regex = "^((([A-Z]+-)+[0-9A-Z]+)|(D[0-9]{3}))( | *$)";       
@@ -1061,7 +1061,7 @@ Variant com_invoke( DWORD flags, IDispatch* dispatch, const string& method, vect
 
     if( flags == DISPATCH_METHOD  &&  method == "()" )
     {
-        dispid = DISPID_VALUE;  // So für Aufruf eines Funktionsobjekts in ECMAScript
+        dispid = DISPID_VALUE;  // So fÃ¼r Aufruf eines Funktionsobjekts in ECMAScript
     }
     else
     {
@@ -1100,7 +1100,7 @@ Variant com_invoke( DWORD flags, IDispatch* dispatch, const string& method, vect
 
     if( result.vt == VT_ERROR ) 
     {
-        if( result.scode != DISP_E_PARAMNOTFOUND )    // Das liefert PerlScript, wenn Funktion keine Rückgabe hat.
+        if( result.scode != DISP_E_PARAMNOTFOUND )    // Das liefert PerlScript, wenn Funktion keine RÃ¼ckgabe hat.
             throw_ole( result.scode, "IDispatch::Invoke (result)", clean_method_name.c_str() );
 
         result.Clear();

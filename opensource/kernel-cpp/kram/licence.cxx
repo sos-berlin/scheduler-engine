@@ -37,30 +37,30 @@ time_t sos_time( time_t* );  // in sysdep.cxx
 DEFINE_SOS_DELETE_ARRAY( const char* );
 
 /*
-    Inhalt des Lizenzschlüssels:
+    Inhalt des LizenzschlÃ¼ssels:
 
     Aussteller "SOS"
-    Kundenkürzel
+    KundenkÃ¼rzel
     Seriennummer
-    Einstellungen: Schlüsselwörter mit jeweils einem Parameter (Text oder int)
+    Einstellungen: SchlÃ¼sselwÃ¶rter mit jeweils einem Parameter (Text oder int)
     Sicherungscode
 
-    - Ein PC kann mehrere Lizenzschlüssel haben.
-    - Die Einstellungen mehrerer Lizenzschlüssel mit der selben Seriennummer werden
-      zusammengefügt. Was bei widersprechenden Einstellungen?
-    - Bei einem Update bleibt die Seriennummer fest - D.h. die alte Lizenz ist überflüssig.
+    - Ein PC kann mehrere LizenzschlÃ¼ssel haben.
+    - Die Einstellungen mehrerer LizenzschlÃ¼ssel mit der selben Seriennummer werden
+      zusammengefÃ¼gt. Was bei widersprechenden Einstellungen?
+    - Bei einem Update bleibt die Seriennummer fest - D.h. die alte Lizenz ist Ã¼berflÃ¼ssig.
     - Die selbe Seriennummer darf nicht an zwei PCs verwendet werden.
-    - Lizenzschlüssel mit verschiedenen Seriennummern? werden auch zusammengefügt.
+    - LizenzschlÃ¼ssel mit verschiedenen Seriennummern? werden auch zusammengefÃ¼gt.
     - Nur eine Seriennummer am PC oder mehrere, die dann aber alle nur an diesen einem
-      PC erlaubt (Maximum muss es geben, alle SOS-KUNDE-NR müssen in einen Broadcast passen).
+      PC erlaubt (Maximum muss es geben, alle SOS-KUNDE-NR mÃ¼ssen in einen Broadcast passen).
 
-    AUFBAU DES LIZENZSCHLÜSSELS:
+    AUFBAU DES LIZENZSCHLÃœSSELS:
     aussteller-kunde-seriennr-einstellungen-sicherungscode
     SOS-XBANK-123-1-2-5-B1999-I119961231-9832YHZDMQ
     SOS-XBANK-124-1-2-5-B1999-I119961231-8734YHZDMR
 
-    Der Lizenzschlüssel besteht also aus durch Bindestrich getrennten Teilen, die aus
-    Ziffern und großen Buchstaben bestehen.
+    Der LizenzschlÃ¼ssel besteht also aus durch Bindestrich getrennten Teilen, die aus
+    Ziffern und groÃŸen Buchstaben bestehen.
 
     Einstellungen und Sicherungscode sind codiert:
     An jeder Stelle ist eines der Zeichen 0-9A-Z.
@@ -75,12 +75,12 @@ DEFINE_SOS_DELETE_ARRAY( const char* );
 
     SICHERUNGSCODE:
     Der Sicherungscode nimmt 6 Stellen ein und errechnet sich aus allen anderen Teilen
-    (2.176.782.336 Zustände).
+    (2.176.782.336 ZustÃ¤nde).
 */
 
 //---------------------------------------------------------------------------------------------
 
-//static const Sos_string empty_value_string  = "\x01";         // Nur das erste Zeichen wird geprüft. Gesetzt, aber ohne Wert. "" == nicht gesetzt
+//static const Sos_string empty_value_string  = "\x01";         // Nur das erste Zeichen wird geprÃ¼ft. Gesetzt, aber ohne Wert. "" == nicht gesetzt
 static const int        zz                  = base*35 + 35;
 static const Sos_date   min_date            ( 1996, 9, 2 );
 
@@ -109,7 +109,7 @@ comp_text[] =
     { licence_e370                  , "e370"                , ""    },      // 12
     { licence_hostapi_hostdde       , "hostAPI & hostDDE"   , NULL  },      // 13
     { licence_fra2rtf               , "frame2rtf"           , ""    },      // 14
-    { licence_saacke                , "Saacke"              , NULL  },      // 15   Wird für scheduler.database.password verwendet, siehe scheduler/spooler.cxx
+    { licence_saacke                , "Saacke"              , NULL  },      // 15   Wird fÃ¼r scheduler.database.password verwendet, siehe scheduler/spooler.cxx
   //{ licence_saacke                , "Saacke"              , ""    },      // 15
     { licence_foxgate               , "FOXgate"             , ""    },      // 17
     { licence_scheduler_database_password, "scheduler.database.password", NULL }, // 18
@@ -141,7 +141,7 @@ struct Sos_licence_entry
     const char*                _value;
 };
 
-static Sos_licence_entry super_licence [] =         // Parameter ZZ für SOS GmbH
+static Sos_licence_entry super_licence [] =         // Parameter ZZ fÃ¼r SOS GmbH
 {
   //{ licence_os                    , "WS" },       // 1  "W" Windows, "S" Solaris,    "N" NT?
     { licence_hostapi               , "" },         // 2
@@ -160,7 +160,7 @@ static Sos_licence_entry super_licence [] =         // Parameter ZZ für SOS GmbH
   //{ licence_hostapi_hostdde       , "" },         // 13  Nur einer von beiden
     { licence_fra2rtf               , "" },         // 14
     { licence_saacke                , "" },         // 15  SAB, SAN Firmenlizenzen
-  //{ licence_fs_demo               , "" }          // 16  Beschränkte Anzahl Clients
+  //{ licence_fs_demo               , "" }          // 16  BeschrÃ¤nkte Anzahl Clients
   //{ licence_verfallsdatum_1900    , "961231" }    // 19
   //{ licence_verfallsdatum_2000    , "000101" }    // 20
     { licence_wbrz_logos_to_loga    , "" },         // 30
@@ -209,7 +209,7 @@ Sos_licence::Sos_licence( const string& key )
 
 void Sos_licence::init()
 {
-    _empty_value_string = "\x01";         // Nur das erste Zeichen wird geprüft. Gesetzt, aber ohne Wert. "" == nicht gesetzt
+    _empty_value_string = "\x01";         // Nur das erste Zeichen wird geprÃ¼ft. Gesetzt, aber ohne Wert. "" == nicht gesetzt
     _seriennr.obj_const_name( "Sos_licence::_seriennr" );
     _seriennr.first_index( 1 );
 
@@ -382,7 +382,7 @@ void Sos_licence::read_key( const char* key )
         _seriennr.last_index( 1 );
         Sos_seriennr& s = _seriennr[ 1 ];
 
-        // Ausstellerkürzel
+        // AusstellerkÃ¼rzel
 
         q = s._ausstellerkuerzel;
         while( *p != '-'  &&  q < s._ausstellerkuerzel + sizeof s._ausstellerkuerzel - 1 ) {
@@ -392,7 +392,7 @@ void Sos_licence::read_key( const char* key )
         if( *p != '-' )  throw_xc( "SOS-1003" );
         p++;
 
-        // Kundenkürzel
+        // KundenkÃ¼rzel
 
         q = s._kundenkuerzel;
         while( *p != '-'  &&  q < s._kundenkuerzel + sizeof s._kundenkuerzel - 1 ) {
@@ -431,7 +431,7 @@ void Sos_licence::read_key( const char* key )
             const char* q = strchr( p, '-' );
             if( !q )  throw_xc( "SOS-1003" );;
 
-            if( n == zz ) {     // Superschlüssel? set_par() verzögern
+            if( n == zz ) {     // SuperschlÃ¼ssel? set_par() verzÃ¶gern
                 if( q != p )  throw_xc( "SOS-1003" );
                 _zz = true;
             } else {
@@ -687,7 +687,7 @@ void Sos_licence::check_key()
             }
         }
 
-        // Rechneruhr zurückgestellt?
+        // Rechneruhr zurÃ¼ckgestellt?
         if( Sos_date::today() < s->_date )  s->_old = s->_invalid = true;
     }
 
@@ -700,7 +700,7 @@ void Sos_licence::check_key()
 #       endif
     }
 
-    if( s->_invalid ) {         // Alle Parameter löschen:
+    if( s->_invalid ) {         // Alle Parameter lÃ¶schen:
         _par.last_index( 0 );
         _zz = false;
     }

@@ -14,7 +14,7 @@ namespace scheduler {
 
 struct Xml_operation_connection;
 
-//inline bool operator < ( const in_addr& a, const in_addr& b )  { return a.s_addr < b.s_addr; }  // Für map<>
+//inline bool operator < ( const in_addr& a, const in_addr& b )  { return a.s_addr < b.s_addr; }  // FÃ¼r map<>
 
 //------------------------------------------------------------------------------------Communication
 
@@ -241,7 +241,7 @@ struct Xml_response : Async_operation, io::Writer
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Async_operation::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Async_operation::Release(); }
 
-    virtual void                close                       ();                                     // Unbedingt rufen, um Zirkel aufzulösen!
+    virtual void                close                       ();                                     // Unbedingt rufen, um Zirkel aufzulÃ¶sen!
     virtual void                write                       ( const io::Char_sequence& )            = 0;
     virtual string              get_part                    ()                                      = 0;
 

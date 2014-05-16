@@ -105,8 +105,8 @@ struct Parameter_list_signature : Signature
 };
 
 //---------------------------------------------------------------------------------------Local_value
-// Wie Jvalue, mit kleinen Änderungen, um Jvalue erstmal nicht anzurühren. Jvalue sollte durch Local_value ersetzt werden.
-// Neben Local_value könnte es noch ein Global_value geben, das jobject als GlobalRef hält und freigibt. Gemeinsame Oberklasse wäre dann ein Simple_value.
+// Wie Jvalue, mit kleinen Ã„nderungen, um Jvalue erstmal nicht anzurÃ¼hren. Jvalue sollte durch Local_value ersetzt werden.
+// Neben Local_value kÃ¶nnte es noch ein Global_value geben, das jobject als GlobalRef hÃ¤lt und freigibt. Gemeinsame Oberklasse wÃ¤re dann ein Simple_value.
 
 struct Local_value : Object
 {
@@ -190,7 +190,7 @@ private:
 
 //-----------------------------------------------------------------------------------Parameter_list
 
-static const int parameter_list_reserve = 10;       // Einige Parameter extra, falls zu wenig übergeben werden
+static const int parameter_list_reserve = 10;       // Einige Parameter extra, falls zu wenig Ã¼bergeben werden
 
 struct Parameter_list
 {
@@ -309,7 +309,7 @@ struct Abstract_jobject : Object
     virtual jobject             get_jobject                 () const                                = 0;
     jobject                     take                        ()                                      { jobject result = get_jobject();  set_jobject(NULL);  return result; }
     void                        assign_                     ( jobject jo )                          { assign_jobject(jo); }
-    void                        steal_local_ref             ( jobject jo );                         // lo wird danach ungültig!
+    void                        steal_local_ref             ( jobject jo );                         // lo wird danach ungÃ¼ltig!
     jobject                     local_ref                   () const; 
 
     //Local_value               loval_value_call                  ( const string& method, const Signature&, const Parameter_list& = Parameter_list::empty ) const;
@@ -426,7 +426,7 @@ private:
 struct Class_register
 {
     struct Entry {
-        const Class_factory*   _class_factory;              // Für Pointer-Vergleich
+        const Class_factory*   _class_factory;              // FÃ¼r Pointer-Vergleich
         ptr<Class>             _class;
     };
 

@@ -46,7 +46,7 @@
     const int Z_EALREADY     = WSAEALREADY;
     const int Z_EISCONN      = WSAEISCONN;
     const int Z_EAFNOSUPPORT = WSAEAFNOSUPPORT;
-    const int SHUT_WR      = SD_SEND;      // Für shutdown()
+    const int SHUT_WR      = SD_SEND;      // FÃ¼r shutdown()
     const int MSG_NOSIGNAL = 0;
 
     const extern int STDIN_FILENO;
@@ -130,7 +130,7 @@ struct Ip_address
 
     bool                        operator ==                 ( const Ip_address& h ) const           { return _ip.s_addr == h._ip.s_addr; }
     bool                        operator !=                 ( const Ip_address& h ) const           { return _ip.s_addr != h._ip.s_addr; }
-    bool                        operator <                  ( const Ip_address& h ) const           { return ntohl( _ip.s_addr ) <  ntohl( h._ip.s_addr ); }  // Für map<>
+    bool                        operator <                  ( const Ip_address& h ) const           { return ntohl( _ip.s_addr ) <  ntohl( h._ip.s_addr ); }  // FÃ¼r map<>
   //int                         compare                     ( const Ip_address& h ) const;
 
                                 operator bool               () const                                { return _ip.s_addr != 0; }
@@ -153,7 +153,7 @@ struct Ip_address
     static std::set<Ip_address> get_host_set_by_name        ( const string& name );
 
   protected:
-    in_addr                    _ip;                         // IP-Nummer. Muss vielleicht für IPv6 angepasst werden?
+    in_addr                    _ip;                         // IP-Nummer. Muss vielleicht fÃ¼r IPv6 angepasst werden?
 
 
   public:
@@ -204,7 +204,7 @@ struct Host_and_port
 
     bool                        operator ==                 ( const Host_and_port& o ) const;
     bool                        operator !=                 ( const Host_and_port& o ) const        { return !( *this == o ); }
-    bool                        operator <                  ( const Host_and_port& o ) const;       // Für map<>
+    bool                        operator <                  ( const Host_and_port& o ) const;       // FÃ¼r map<>
                                 operator bool               () const                                { return !is_empty(); }
     bool                        operator !                  () const                                { return is_empty(); }
 

@@ -162,7 +162,7 @@ class CImpIProvideClassInfo : public IProvideClassInfo
 
 //---------------------------------------------------------------------------------------------
 
-// _bstr_t (für #import)
+// _bstr_t (fÃ¼r #import)
 inline string                   as_string               ( const _bstr_t& bstr )                     { return bstr_as_string( bstr ); }
 inline string                   as_string               ( const _variant_t& variant )               { return variant_as_string(variant); }
 

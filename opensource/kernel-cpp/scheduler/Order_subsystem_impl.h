@@ -75,7 +75,7 @@ struct Order_id_spaces : Order_id_spaces_interface
 
     Fill_zero                      _zero_;
     Order_subsystem_impl*          _order_subsystem;
-    vector< ptr<Order_id_space> >  _array;                  // [0] unbenutzt, Lücken sind NULL
+    vector< ptr<Order_id_space> >  _array;                  // [0] unbenutzt, LÃ¼cken sind NULL
 };
 
 //-----------------------------------------------------------------------------Order_subsystem_impl

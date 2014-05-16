@@ -135,8 +135,8 @@ bool File_logger::flush()
         fflush( stderr );
 
         //#ifdef Z_WINDOWS
-        //    _commit( fileno( stdout ) );        // Debug-assert(), wenn Datei nicht geöffnet
-        //    _commit( fileno( stderr ) );        // Debug-assert(), wenn Datei nicht geöffnet
+        //    _commit( fileno( stdout ) );        // Debug-assert(), wenn Datei nicht geÃ¶ffnet
+        //    _commit( fileno( stderr ) );        // Debug-assert(), wenn Datei nicht geÃ¶ffnet
         //#else
         //    fsync( fileno( stdout ) );
         //    fsync( fileno( stderr ) );

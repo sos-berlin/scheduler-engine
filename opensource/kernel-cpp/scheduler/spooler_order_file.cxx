@@ -4,8 +4,8 @@
     VERBESSERUNG:
 
     request_order() durch ein Abonnement ersetzen: 
-    Job oder Task kann Auftr‰ge abonnieren und das Abonnement auch wieder abbestellen.
-    Dann wird das Verzeichnis auﬂerhalb der <schedule/> nicht ¸berwacht.
+    Job oder Task kann Auftr√§ge abonnieren und das Abonnement auch wieder abbestellen.
+    Dann wird das Verzeichnis au√üerhalb der <schedule/> nicht √ºberwacht.
 
     Wir brauchen ein Verzeichnis der Abonnementen (struct Job/Task : Order_source_abonnent)
 */
@@ -28,7 +28,7 @@ const string                    scheduler_file_path_variable_name         = "sch
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
 const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
-const int                       directory_file_order_source_max_default   = 100;      // Nicht zuviele Auftr‰ge, sonst wird der Scheduler langsam (in remove_order?)
+const int                       directory_file_order_source_max_default   = 100;      // Nicht zuviele Auftr√§ge, sonst wird der Scheduler langsam (in remove_order?)
 const int                       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
 const bool                      alert_when_directory_missing_default      = true;
 
@@ -101,7 +101,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
 
     vector< ptr<zschimmer::file::File_info> > _new_files;
     int                        _new_files_index;
-    int                        _new_files_count;        // _new_files.size() ohne NULL-Eintr‰ge
+    int                        _new_files_count;        // _new_files.size() ohne NULL-Eintr√§ge
     Time                       _new_files_time;
 
 
@@ -234,8 +234,8 @@ void init_file_order_sink( Scheduler* scheduler )
 
     scheduler->root_folder()->job_folder()->add_job( +file_order_sink_job );
 
-    // Der Scheduler f¸hrt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
-    // damit sich die Auftr‰ge nicht stauen (Der interne Job l‰uft nicht in einem eigenen Prozess)
+    // Der Scheduler f√ºhrt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
+    // damit sich die Auftr√§ge nicht stauen (Der interne Job l√§uft nicht in einem eigenen Prozess)
     // Siehe Task_subsystem::step().
 }
 
@@ -298,7 +298,7 @@ void Directory_file_order_source::close()
         _next_order_queue = NULL;
     }
 
-    _job_chain = NULL;   // close() wird von ~Job_chain gerufen, also kann Job_chain ung¸ltig sein
+    _job_chain = NULL;   // close() wird von ~Job_chain gerufen, also kann Job_chain ung√ºltig sein
 }
 
 //-------------------------------------------------------------xml::Element_ptr Node::xml
@@ -389,10 +389,10 @@ string Directory_file_order_source::async_state_text_() const
 void Directory_file_order_source::start_or_continue_notification( bool was_notified )
 {
     // Windows XP:
-    // Ein ¸berwachtes lokales Verzeichnis kann entfernt (rd), aber nicht angelegt (mkdir) werden. Der Name ist gesperrt.
-    // Aber ein ¸berwachtes Verzeichnis im Netzwerk kann entfernt und wieder angelegt werden, 
-    // ohne dass die ‹berwachung das mitbekommt. Sie signaliert keine Ver‰nderung im neuen Verzeichnis, ist also nutzlos.
-    // Deshalb erneuern wir die Verzeichnis¸berwachung, wenn seit _repeat Sekunde kein Signal gekommen ist.
+    // Ein √ºberwachtes lokales Verzeichnis kann entfernt (rd), aber nicht angelegt (mkdir) werden. Der Name ist gesperrt.
+    // Aber ein √ºberwachtes Verzeichnis im Netzwerk kann entfernt und wieder angelegt werden, 
+    // ohne dass die √úberwachung das mitbekommt. Sie signaliert keine Ver√§nderung im neuen Verzeichnis, ist also nutzlos.
+    // Deshalb erneuern wir die Verzeichnis√ºberwachung, wenn seit _repeat Sekunde kein Signal gekommen ist.
 
     try {
         if( !_notification_event.handle()  ||  Time::now() >= _notification_event_time + _repeat )
@@ -405,7 +405,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
                 if (_alert_when_directory_missing)
                     z::throw_mswin( "FindFirstChangeNotification", _path.path() );
             } else {
-                if( _notification_event.handle() )      // Signal retten. Eigentlich ¸berfl¸ssig, weil wir hiernach sowieso das Verzeichnis lesen
+                if( _notification_event.handle() )      // Signal retten. Eigentlich √ºberfl√ºssig, weil wir hiernach sowieso das Verzeichnis lesen
                 {
                     _notification_event.wait( 0 );
                     if( _notification_event.signaled() )      
@@ -447,11 +447,11 @@ void Directory_file_order_source::close_notification()
         if( _notification_event.handle() )
         {
             remove_from_event_manager();
-            set_async_manager( _spooler->_connection_manager );   // remove_from_event_manager() f¸r set_async_next_gmtime() r¸ckg‰ngig machen
+            set_async_manager( _spooler->_connection_manager );   // remove_from_event_manager() f√ºr set_async_next_gmtime() r√ºckg√§ngig machen
 
             Z_LOG2( "scheduler.file_order", "FindCloseChangeNotification(\"" << _path << "\")\n" );
             FindCloseChangeNotification( _notification_event.handle() );
-            _notification_event._handle = NULL;   // set_handle() ruft CloseHandle(), das w‰re nicht gut
+            _notification_event._handle = NULL;   // set_handle() ruft CloseHandle(), das w√§re nicht gut
         }
 #   endif
 }
@@ -486,7 +486,7 @@ void Directory_file_order_source::activate()
 
 
     if( next_job  &&  next_job->state() > Job::s_not_initialized )  
-        next_job->on_order_possibly_available();     // Der Job bestellt den n‰chsten Auftrag (falls in einer Periode)
+        next_job->on_order_possibly_available();     // Der Job bestellt den n√§chsten Auftrag (falls in einer Periode)
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
@@ -498,7 +498,7 @@ bool Directory_file_order_source::request_order( const string& cause )
     if( !result )
     {
         if( _expecting_request_order 
-         || async_next_gmtime_reached() )       // 2007-01-09 nicht l‰nger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
+         || async_next_gmtime_reached() )       // 2007-01-09 nicht l√§nger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
         {
             Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n" );
 
@@ -534,8 +534,8 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
         try
         {
 #           ifdef Z_WINDOWS
-                // Verzeichnis¸berwachung starten oder fortsetzen,
-                // bevor die Dateinamen gelesen werden, damit ƒnderungen w‰hrend oder kurz nach dem Lesen bemerkt werden.
+                // Verzeichnis√ºberwachung starten oder fortsetzen,
+                // bevor die Dateinamen gelesen werden, damit √Ñnderungen w√§hrend oder kurz nach dem Lesen bemerkt werden.
                 // Das kann ein Ereignis zu viel geben. Aber besser als eins zu wenig.
 
                 start_or_continue_notification( was_notified );
@@ -591,7 +591,7 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
 
             _directory_error = x;
 
-            close_notification();  // Schlieﬂen, sonst kann ein entferntes Verzeichnis nicht wieder angelegt werden (Windows blockiert den Namen)
+            close_notification();  // Schlie√üen, sonst kann ein entferntes Verzeichnis nicht wieder angelegt werden (Windows blockiert den Namen)
         }
 
         break;
@@ -688,7 +688,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task,
                 }
 
             }
-            catch( exception& x )   // Mˆglich bei f¸r Order.id zu langem Pfad
+            catch( exception& x )   // M√∂glich bei f√ºr Order.id zu langem Pfad
             {
                 if( _bad_map.find( path ) == _bad_map.end() )
                 {
@@ -762,14 +762,14 @@ bool Directory_file_order_source::read_new_files()
 
     for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
     {
-        if( _spooler->_cluster )  _spooler->_cluster->do_a_heart_beat_when_needed( Z_FUNCTION );    // PROVISORISCH F‹R LANGE VERZEICHNISSE AUF ENTFERNTEM RECHNER, macht bei Bedarf einen Herzschlag
+        if( _spooler->_cluster )  _spooler->_cluster->do_a_heart_beat_when_needed( Z_FUNCTION );    // PROVISORISCH F√úR LANGE VERZEICHNISSE AUF ENTFERNTEM RECHNER, macht bei Bedarf einen Herzschlag
 
         //Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
 
         ptr<zschimmer::file::File_info> file_info = dir.get();
         if( !file_info )  break;
 
-        bool file_still_exists = file_info->try_call_stat();       // last_write_time f¸llen f¸r sort, quick_last_write_less()
+        bool file_still_exists = file_info->try_call_stat();       // last_write_time f√ºllen f√ºr sort, quick_last_write_less()
         if( file_still_exists )
         {
             _new_files.push_back( file_info );
@@ -966,9 +966,9 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
 
     int delay = int_cast(_directory_error        ? delay_after_error().seconds() :
-                         _expecting_request_order? INT_MAX                 // N‰chstes request_order() abwarten
+                         _expecting_request_order? INT_MAX                 // N√§chstes request_order() abwarten
                                                  : _repeat.seconds());     // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
-    set_async_delay( max( 1, delay ) );     // Falls ein Spaﬂvogel es geschafft hat, repeat="0" anzugeben
+    set_async_delay( max( 1, delay ) );     // Falls ein Spa√üvogel es geschafft hat, repeat="0" anzugeben
     //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 

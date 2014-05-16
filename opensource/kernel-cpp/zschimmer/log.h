@@ -31,7 +31,7 @@ struct Log_ptr
     struct Log_streambuf : std::streambuf
     {
                                     Log_streambuf           ();
-                                 //~Log_streambuf           ()                                      { sync(); }      // Kann bei atexit() abstürzen
+                                 //~Log_streambuf           ()                                      { sync(); }      // Kann bei atexit() abstÃ¼rzen
 
         virtual int                 sync                    ();
         virtual int                 underflow               ();
@@ -71,7 +71,7 @@ struct Log_ptr
     static bool                 logging                     ()                                      { return static_log_context_ptr != NULL; }
     static void                 disable_logging             ()                                      { static_stream_ptr = NULL; }   // Nach fork() aufzurufen, weil Mutex gesperrt sein kann
     static void                 set_log_context             ( Log_context** );
-    static Log_context**        get_log_context             ()                                      { return static_log_context_ptr; }  // Für hostole.cxx
+    static Log_context**        get_log_context             ()                                      { return static_log_context_ptr; }  // FÃ¼r hostole.cxx
   //static void                 set_stream_and_system_mutex ( ostream**, System_mutex* );
   //static void                 get_stream_and_system_mutex ( ostream***, System_mutex** );
   //static void                 set_indent_tls_index        ( uint tls_index )                      { static_log_context._indent_tls_index = tls_index; }
@@ -86,7 +86,7 @@ struct Log_ptr
     template<class T>
     Log_ptr& operator<< ( const T& t )                    
     { 
-        using namespace com;  // Für VARIANT und BSTR
+        using namespace com;  // FÃ¼r VARIANT und BSTR
         
         if( _stream )  
         {
@@ -206,7 +206,7 @@ struct Delegated_log : Has_log
 };
 
 //-----------------------------------------------------------------------------Log_categories_cache
-// Fürs scheduler.log, static_log_categories
+// FÃ¼rs scheduler.log, static_log_categories
 
 struct Log_categories_cache
 {

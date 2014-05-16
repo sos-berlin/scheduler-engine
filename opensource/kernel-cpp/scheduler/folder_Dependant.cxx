@@ -155,7 +155,7 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element, i
 {
     int result = 0;
 
-    if (nesting < 10) {  // Einfache Sperre gegen zikul‰re Abh‰ngigkeit
+    if (nesting < 10) {  // Einfache Sperre gegen zikul√§re Abh√§ngigkeit
         Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )  
         {
             File_based_subsystem* subsystem = ds->first;  // ->first = Key ist der Zeiger auf das Subsystem
@@ -173,7 +173,7 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element, i
 
                     if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
                     result++;
-                    if( requisite )  result += requisite->append_requisite_dom_elements(element, nesting + 1);     // Auch indirekte Requisiten (mˆglicherweise doppelt, kˆnnten identifiziert werden)
+                    if( requisite )  result += requisite->append_requisite_dom_elements(element, nesting + 1);     // Auch indirekte Requisiten (m√∂glicherweise doppelt, k√∂nnten identifiziert werden)
                 }
             }
         }

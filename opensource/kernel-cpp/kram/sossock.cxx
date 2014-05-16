@@ -3,13 +3,13 @@
 #include "precomp.h"
 #include "sysdep.h"
 //#define MODULE_NAME "sossock"
-//#define COPYRIGHT   "© 1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© 1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 
 #include <time.h>               // egcs setzt FD_SETSIZE, also vor #define FD_SETSIZE einziehen! jz 1.11.98
 
-#ifdef SYSTEM_LINUX             // Ab Suse 8 nicht mehr nötig
+#ifdef SYSTEM_LINUX             // Ab Suse 8 nicht mehr nÃ¶tig
 #   define __need_timeval
 #   include <bits/time.h>
 #endif
@@ -57,7 +57,7 @@ bool sossock_in_select     = false;
 
 #ifdef SOSSOCK_WND
     bool sossock_dispatch_self = false;     // Wird vom Windows-FS gesetzt
-    bool sossock_scheduling    = false;     // "GetMessage, DispatchMessage in sossock läuft"
+    bool sossock_scheduling    = false;     // "GetMessage, DispatchMessage in sossock lÃ¤uft"
 #endif
 
 
@@ -118,7 +118,7 @@ bool sossock_in_select     = false;
     const int WSAESTALE          = ESTALE;
     const int WSAEREMOTE         = EREMOTE;
 
-    typedef int BOOL;                // für setsockopt() und getsockopt()
+    typedef int BOOL;                // fÃ¼r setsockopt() und getsockopt()
 
     const SOCKET INVALID_SOCKET = (SOCKET)-1;   // von socket()
 

@@ -148,7 +148,7 @@ int priority_class_from_string( const string& priority )
         else
         if( p == "13"  ||  p == "high"         )  return HIGH_PRIORITY_CLASS;           // 0x00000080   11..15 idle: 1  time critical: 15
         else
-      // Realtime verdrängt Maus- und Tastaturroutinen.
+      // Realtime verdrÃ¤ngt Maus- und Tastaturroutinen.
       //if( p == "24"  ||  p == "realtime"     )  return REALTIME_PRIORITY_CLASS;       // 0x00000100   2..31  idle: 16 time critical: 31
       //else
         {
@@ -315,7 +315,7 @@ void Process::start( const string& cmd_line )
 
     CloseHandle( process_info.hThread );
 
-    // Ein Versuch, einem abstürzenden Programm die Messagebox auszutreiben:
+    // Ein Versuch, einem abstÃ¼rzenden Programm die Messagebox auszutreiben:
     //if( creation_flags & DEBUG_PROCESS )  debug();
 }
 
@@ -335,7 +335,7 @@ void Process::create_process(const Login* login, const string& application_name,
         //                    Bstr(_login->password()), 
         //                    0,                              // dwLogonFlags
         //                    Bstr(object_server_filename),   // application name
-        //                    Bstr(command_line),             // command line. API kann String ändern! 
+        //                    Bstr(command_line),             // command line. API kann String Ã¤ndern! 
         //                    creation_flags, 
         //                    environment_bstr,               // NULL: use parent's environment 
         //                    NULL,                           // use parent's current directory 
@@ -354,7 +354,7 @@ void Process::create_process(const Login* login, const string& application_name,
         ok = CreateProcessAsUserW(
             login_handle,
             Bstr(application_name),         // application name
-            Bstr(command_line),             // command line. API kann String ändern! 
+            Bstr(command_line),             // command line. API kann String Ã¤ndern! 
             NULL,                           // process security attributes 
             NULL,                           // primary thread security attributes 
             TRUE,                           // handles are inherited?
@@ -368,7 +368,7 @@ void Process::create_process(const Login* login, const string& application_name,
         Z_LOG( "CreateProcess(\"" << application_name << "\",\"" << command_line << "\")\n" );
         BOOL ok = CreateProcessW(
             Bstr(application_name),         // application name
-            Bstr(command_line),             // command line. API kann String ändern!
+            Bstr(command_line),             // command line. API kann String Ã¤ndern!
             NULL,                           // process security attributes 
             NULL,                           // primary thread security attributes 
             TRUE,                           // handles are inherited?
@@ -665,7 +665,7 @@ string Process::make_environment_string()
     result.reserve( result.length() + 20000 );
 
     
-    // Erst die eigene Umgebung übernehmen
+    // Erst die eigene Umgebung Ã¼bernehmen
 
     if( _inherit_environment )
     {
@@ -685,7 +685,7 @@ string Process::make_environment_string()
     }
 
 
-    // Jetzt die neue Umgebung übernehmen
+    // Jetzt die neue Umgebung Ã¼bernehmen
 
     Z_FOR_EACH( Environment, _environment, e )
     {

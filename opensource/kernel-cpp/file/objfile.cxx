@@ -1,5 +1,5 @@
 //#define MODULE_NAME "objfile"
-//#define COPYRIGHT   "© 1995 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â© 1995 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 
@@ -47,7 +47,7 @@ void Object_file::open( const char* filename, Open_mode open_mode, const File_sp
     //if( _key_length == 0 )  _key_length = 4;   int KEY_LENGTH_RICHTIG_SETZEN;
 
     _object_ptr = sos_factory_ptr()->create( filename, this/*, &file_spec*/ );
-    //_object_ptr->obj_owner( this );  zu spät!
+    //_object_ptr->obj_owner( this );  zu spÃ¤t!
     current_key_ptr( &_current_key );
 }
 

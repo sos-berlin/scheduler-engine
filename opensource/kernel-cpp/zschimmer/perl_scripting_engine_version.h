@@ -1,6 +1,6 @@
 // $Id: perl_scripting_engine_version.h 11394 2005-04-03 08:30:29Z jz $
 
-// Nur für Unix.
+// Nur fÃ¼r Unix.
 
 
 #define VER_PRODUCTVERSION       1,0,0

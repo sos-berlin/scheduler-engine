@@ -296,7 +296,7 @@ void print_all_modules( ostream* s )
 }
 
 //----------------------------------------------------------------------------directory_of_path
-// Liefert alles auﬂer dem Datennamen und Schr‰gstrich
+// Liefert alles au√üer dem Datennamen und Schr√§gstrich
 
 Sos_string directory_of_path( const Sos_string& path )
 {

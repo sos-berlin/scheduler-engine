@@ -75,7 +75,7 @@ string non_xml_latin1_characters_substituted( const io::Char_sequence& seq )
     
 string encode_text( const string& value, bool quote )
 {
-    // Für UTF-8 umstellen!
+    // FÃ¼r UTF-8 umstellen!
 
     string result;
     size_t reserve = value.length() + 10 + value.length() / 10;

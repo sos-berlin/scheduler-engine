@@ -1,6 +1,6 @@
 #include "precomp.h"
 //#define MODULE_NAME "sosopt"
-//#define COPYRIGHT   "©1996 SOS GmbH Berlin"
+//#define COPYRIGHT   "Â©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"
 
 #include "sosstrng.h"
@@ -122,7 +122,7 @@ void Sos_option_iterator::read_option()
 
         //if( _use_argv  &&  strchr( p, ' ' ) )  goto FERTIG;  
         if( _use_argv ) {
-            // Prüfen, ob das nicht doch ein Stellungsparameter ist;  soscopy a "-append b"
+            // PrÃ¼fen, ob das nicht doch ein Stellungsparameter ist;  soscopy a "-append b"
             // Option: "-option", "-option=xx", "-option=' '"
             // Stellungsparamter: "-append b"
             const char* r     = p;
@@ -134,7 +134,7 @@ void Sos_option_iterator::read_option()
                 else
                 if( !quote  &&  *r == ' ' )  goto FERTIG;   // "-append b"  Stellungsparameter!
                 else
-                if( !quote  &&  *r == '=' )  break;         // "-spooler_descr=ein text"  (Windows entfernt Anführungszeichen)
+                if( !quote  &&  *r == '=' )  break;         // "-spooler_descr=ein text"  (Windows entfernt AnfÃ¼hrungszeichen)
                 r++;
             }
         }
@@ -231,7 +231,7 @@ void Sos_option_iterator::read_value()
     }
     else
     {
-        int klammern = 0;     // In Klammern dürfen Blanks sein
+        int klammern = 0;     // In Klammern dÃ¼rfen Blanks sein
         while( *p ) {
             if( *p == '(' )  klammern++;
             if( *p == ')' )  klammern--;
@@ -265,7 +265,7 @@ void Sos_option_iterator::next()
     }
     else
     {
-        if( !_ptr )  throw_xc( "Sos_option-NULL" );  // Falls dem Konstruktor NULL übergeben worden ist
+        if( !_ptr )  throw_xc( "Sos_option-NULL" );  // Falls dem Konstruktor NULL Ã¼bergeben worden ist
         while( sos_isspace( *_ptr ) )  _ptr++;
         _rest_ptr = _ptr;
         if( !*_ptr )  { _end = true; return; }
@@ -288,7 +288,7 @@ void Sos_option_iterator::next()
 
 Bool Sos_option_iterator::pipe()
 {
-    if( !_pipe && param() )  _pipe = true;   // zur Kompatibilität
+    if( !_pipe && param() )  _pipe = true;   // zur KompatibilitÃ¤t
 
     if( _pipe )  _end = true;
 
@@ -380,13 +380,13 @@ Bool Sos_option_iterator::with_value( char n, const char* name )
 }
 
 //--------------------------------------------------------------Sos_option_iterator::skip_param
-// Überspring Programmdateinamen in einer Kommandozeile
+// Ãœberspring Programmdateinamen in einer Kommandozeile
 
 void Sos_option_iterator::skip_param()
 {
     if( param() )  
     {
-        _param_count--;     // Zählung rückgängig machen
+        _param_count--;     // ZÃ¤hlung rÃ¼ckgÃ¤ngig machen
         next();
     }
 }
@@ -427,7 +427,7 @@ string Sos_option_iterator::complete_parameter( char quote, char quote_quote )
     else
         throw_sos_option_error( *this );
 
-    // Das kann hier noch verfeinert werden. Bisher sind nicht alle Zeichen immer möglich. Aber normale Dateinamen gehen. jz 16.2.01
+    // Das kann hier noch verfeinert werden. Bisher sind nicht alle Zeichen immer mÃ¶glich. Aber normale Dateinamen gehen. jz 16.2.01
     string dirty_chars = " <>|()\t\n";          // Shell-Meta-Zeichen
     if( quote == '\'' )  dirty_chars += "`";    // Backtick 
     dirty_chars += quote;
@@ -466,7 +466,7 @@ Sos_string Sos_option_iterator::rest()
             const char* a = _argv[ i ];
 
             if( strchr( a, ' ' ) ) {       // Blank im Parameter (?)
-                rest += '"';                  // In Anführungszeichen setzen
+                rest += '"';                  // In AnfÃ¼hrungszeichen setzen
                 while( *a ) {
                     if( *a == '"' )  a += '"';
                     rest += *a++;

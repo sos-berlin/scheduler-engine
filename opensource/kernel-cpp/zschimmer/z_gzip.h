@@ -25,8 +25,8 @@ struct Simple_byte_queue
     void                        clear                   ();
 
     Byte*                       write_buffer            ( int size )                                { return request_write_buffer_2( size, 0 ); } // 1. Pointer lesen
-    int                         write_buffer_size       ();                                                                                // 2. dann Grˆﬂe des Puffers
-    void                        on_write_buffer_written ( int count )                               { _write_position += count; }          // 3. Schlieﬂlich die L‰nge setzen
+    int                         write_buffer_size       ();                                                                                // 2. dann Gr√∂√üe des Puffers
+    void                        on_write_buffer_written ( int count )                               { _write_position += count; }          // 3. Schlie√ülich die L√§nge setzen
 
     Byte*                       request_write_buffer    ( int length )                              { return request_write_buffer_2( length, length ); }
 

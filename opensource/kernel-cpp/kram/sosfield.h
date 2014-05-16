@@ -1,10 +1,10 @@
-//sosfield.h                                            © 1995 SOS GmbH Berlin
+//sosfield.h                                            Â© 1995 SOS GmbH Berlin
 
 #ifndef __SOSFIELD_H
 #define __SOSFIELD_H
 
 #if !defined __SOSSTRNG_H
-#   include "../kram/sosstrng.h"        // Für Dyn_field_descr und Method_descr
+#   include "../kram/sosstrng.h"        // FÃ¼r Dyn_field_descr und Method_descr
 #endif
 
 #if !defined __XCEPTION_H
@@ -33,9 +33,9 @@ const int default_field_size     = 1024;
 typedef uint Field_descr_flags;
 
                                  // 0x00FF     // zur freien Verwendung
-const Field_descr_flags view_key  = 0x0100;    // Schlüssel
-const Field_descr_flags view_db   = 0x0200;    // Feld für Datenbank
-const Field_descr_flags view_sv   = 0x0400;    // Feld für Dynamic_dialog (Starview)
+const Field_descr_flags view_key  = 0x0100;    // SchlÃ¼ssel
+const Field_descr_flags view_db   = 0x0200;    // Feld fÃ¼r Datenbank
+const Field_descr_flags view_sv   = 0x0400;    // Feld fÃ¼r Dynamic_dialog (Starview)
 
 //---------------------------------------------------------------------------Method_descr_flags
 
@@ -43,7 +43,7 @@ typedef uint Method_descr_flags;
 
 //-------------------------------------------------------------------------Field_copy_direction
 
-enum Field_copy_direction { field_read, field_write };  // für copy_field()
+enum Field_copy_direction { field_read, field_write };  // fÃ¼r copy_field()
 
 //-------------------------------------------------------------------------------------forwards
 
@@ -62,13 +62,13 @@ Bool field_names_are_equal( const char*, const char* );
 
 //----------------------------------------------------------------------------------Text_format
 
-// gehört in ein allgemeines header file:
+// gehÃ¶rt in ein allgemeines header file:
 /*  Textformate:
-    Felder durch TAB getrennt, Strings ohne Anführungszeichen, TAB mit Backslash
-    Felder durch TAB getrennt, Strings in Anführungszeichen, C-Notation mit Backslash
-    MS-Windows-reginale Notation: Felder durch Listentrenner getrennt, Strings ohne Anführungszeichen
-    Feldnamen einfügen mit Gleichheitszeichen: name=value
-    Typnamen einfügen mit Klammern: Typ(value)
+    Felder durch TAB getrennt, Strings ohne AnfÃ¼hrungszeichen, TAB mit Backslash
+    Felder durch TAB getrennt, Strings in AnfÃ¼hrungszeichen, C-Notation mit Backslash
+    MS-Windows-reginale Notation: Felder durch Listentrenner getrennt, Strings ohne AnfÃ¼hrungszeichen
+    Feldnamen einfÃ¼gen mit Gleichheitszeichen: name=value
+    Typnamen einfÃ¼gen mit Klammern: Typ(value)
 */
 
 struct Text_format
@@ -93,22 +93,22 @@ struct Text_format
 
     // folgende Date-Methoden sind in sosdate.cxx implementiert:
     const char*                 date                    () const;    // Datumsformat (s. sosdate.h)
-    void                        date                    ( const char* ); // Nur standardisierte Formate möglich (s. sosdate.h)
+    void                        date                    ( const char* ); // Nur standardisierte Formate mÃ¶glich (s. sosdate.h)
     void                        date_code               ( int i )      { _date_code = i; }  // siehe sosfield.cxx
     int                         date_code               () const        { return _date_code; }
 
     const char*                 date_time               () const;    // Datumzeitformat (s. sosdate.h)
-    void                        date_time               ( const char* ); // Nur standardisierte Formate möglich (s. sosdate.h)
+    void                        date_time               ( const char* ); // Nur standardisierte Formate mÃ¶glich (s. sosdate.h)
     void                        date_time_code          ( int i )      { _date_time_code = i; }  // siehe sosfield.cxx
     int                         date_time_code          () const        { return _date_time_code; }
 
-    DECLARE_PUBLIC_MEMBER( Bool, raw )                  // Möglichst original
+    DECLARE_PUBLIC_MEMBER( Bool, raw )                  // MÃ¶glichst original
     DECLARE_PUBLIC_MEMBER( int , scale )                // Anzahl der Nachkommastellen bei Ganzzahl
     DECLARE_PUBLIC_MEMBER( Bool, text )                 // Text ist als Text, nicht numerisch zu interpertieren.
                                                         // Ebcdic_numeric_type(6).read_text(p,"12") --> F1F200000000
-                                                        // Für sossql4.cxx like-Zugriffsoptimierung
+                                                        // FÃ¼r sossql4.cxx like-Zugriffsoptimierung
   //DECLARE_PUBLIC_MEMBER( Bool, escape_quote )         // true: '\' voranstellen, false: Quote verdoppeln
-    DECLARE_PUBLIC_MEMBER( Bool, german)                // Ebcdic_text soll nach deutscher Code-Variane umsetzen (äöü statt {|})
+    DECLARE_PUBLIC_MEMBER( Bool, german)                // Ebcdic_text soll nach deutscher Code-Variane umsetzen (Ã¤Ã¶Ã¼ statt {|})
 
   private:
   //char                       _char_quote;
@@ -130,9 +130,9 @@ const extern Text_format std_text_format;
 enum Std_type
 {
     std_type_none = 0,
-    std_type_char = 1,              // Feste Länge, Blanks am Ende zählen nicht
-    std_type_varchar = 2,           // variable Länge, Blanks am Ende zählen
-    std_type_decimal = 3,           // Festkomma, mit Präzision und Skalierung
+    std_type_char = 1,              // Feste LÃ¤nge, Blanks am Ende zÃ¤hlen nicht
+    std_type_varchar = 2,           // variable LÃ¤nge, Blanks am Ende zÃ¤hlen
+    std_type_decimal = 3,           // Festkomma, mit PrÃ¤zision und Skalierung
     std_type_integer = 4,           // Big_int (weitester Typ), ohne Skalierung (?)
     std_type_float = 5,             // Big_float (weitester Typ)
     std_type_date = 6,              // Datum
@@ -156,7 +156,7 @@ struct Type_info
                                 Type_info               ();
                                ~Type_info               ();
 
-    void                        normalize               ();     // Nur für statische Variablen aufrufen!
+    void                        normalize               ();     // Nur fÃ¼r statische Variablen aufrufen!
     int                         max_precision_10        () const;
 
     Fill_zero                  _zero_;
@@ -166,7 +166,7 @@ struct Type_info
     Bool                       _nullable;
     int                        _max_size;
     int                        _max_precision;
-    int                        _radix;                      // 0, 2 oder 10: Basis für _max_precision
+    int                        _radix;                      // 0, 2 oder 10: Basis fÃ¼r _max_precision
     int                        _min_scale;
     int                        _max_scale;
     Bool                       _quote;
@@ -181,7 +181,7 @@ struct Type_info
 
 //-----------------------------------------------------------------------------Listed_type_info
 
-struct Listed_type_info : Type_info                             // Nur für statische Variablen!
+struct Listed_type_info : Type_info                             // Nur fÃ¼r statische Variablen!
 {
                                 Listed_type_info        ();
                                ~Listed_type_info        ();
@@ -197,21 +197,21 @@ struct Listed_type_info : Type_info                             // Nur für stati
 };
 
 //-----------------------------------------------------------------------------------Type_param
-// Wird von Type_info::get_param() gefüllt:
+// Wird von Type_info::get_param() gefÃ¼llt:
 
 struct Type_param
 {
-    int                         precision_10        () const;           // Präzision bei radix=10 oder radix=0
+    int                         precision_10        () const;           // PrÃ¤zision bei radix=10 oder radix=0
 
     Std_type                   _std_type;
     int                        _size;               // in Bytes
     int                        _display_size;       // in Bytes oder 0
     int                        _precision;          // Anzahl relevanter Stellen, wenn numerisch
-    int                        _radix;              // 0, 2 oder 10: Basis für _precision
+    int                        _radix;              // 0, 2 oder 10: Basis fÃ¼r _precision
     int                        _scale;              // Anzahl Nachkommastellen
     Bool                       _unsigned;
     const Type_info*           _info_ptr;
-    Bool                       _scale_null;         // true: _scale ist ungültig
+    Bool                       _scale_null;         // true: _scale ist ungÃ¼ltig
 };
 
 //-----------------------------------------------------------------------------------Field_type
@@ -226,7 +226,7 @@ struct Field_type : Sos_self_deleting                   // Beschreibt einen Feld
                                ~Field_type              ();     // (Solaris 4.0.1)
 #   endif
 
-    // Nur übergangsweise:
+    // Nur Ã¼bergangsweise:
     int                         field_count             () const;
     const Field_descr&          field_descr             ( int i ) const;
     Field_descr*                field_descr_ptr         ( int i );
@@ -246,7 +246,7 @@ struct Field_type : Sos_self_deleting                   // Beschreibt einen Feld
     virtual Bool                nullable                () const; // Feldwert kann nichtig sein?
     virtual Bool                null                    ( const Byte* ) const;
     virtual void                set_null                ( Byte* ) const;
-    virtual Bool                empty                   ( const Byte* ) const;  // Liefert Leer-String? Für Field_subtype
+    virtual Bool                empty                   ( const Byte* ) const;  // Liefert Leer-String? FÃ¼r Field_subtype
     Bool                       _empty                   ( const Byte* ) const;  // true, wenn write_text() Leerstring liefert
     virtual Bool                empty_is_null           () const;
     virtual void                write_null_as_empty     ( Bool )                                                                    {}
@@ -279,7 +279,7 @@ struct Field_type : Sos_self_deleting                   // Beschreibt einen Feld
 
     const Type_info*            info                    () const                                { return _info; }
     void                        get_param               ( Type_param* ) const;
-    virtual bool                is_numeric              () const                                { return sos::is_numeric( _info->_std_type ); }     // jz 27.5.01 für Fehrmann, Dia-Nielsen, s. Record_type
+    virtual bool                is_numeric              () const                                { return sos::is_numeric( _info->_std_type ); }     // jz 27.5.01 fÃ¼r Fehrmann, Dia-Nielsen, s. Record_type
 
 
     virtual string              as_string               ( const Byte* ) const;
@@ -308,7 +308,7 @@ struct Field_type : Sos_self_deleting                   // Beschreibt einen Feld
 
 //--------------------------------------------------------------------------------Field_subtype
 
-struct Field_subtype : Field_type   // Für einen Typ, der auf einen anderen Typ aufbaut, also Text_date_type, Numeric_type etc.
+struct Field_subtype : Field_type   // FÃ¼r einen Typ, der auf einen anderen Typ aufbaut, also Text_date_type, Numeric_type etc.
 {
     BASE_CLASS( Field_type )
 
@@ -420,7 +420,7 @@ struct Field_descr : Sos_self_deleting                  // Beschreibt ein Feld i
     Sos_ptr<Field_type>        _type_ptr;
     int                        _precision;
 
-    DECLARE_PRIVATE_MEMBER( Bool, read_only )           // wird von sosfield nicht geprüft!
+    DECLARE_PRIVATE_MEMBER( Bool, read_only )           // wird von sosfield nicht geprÃ¼ft!
     Sos_string                 _remark;
 
   protected:
@@ -469,7 +469,7 @@ struct Array_field_descr : Field_descr
     int                        _elem_count [ 3 ];
     int                        _distance [ 3 ];         // Felddistanzen (wegen Cobol)
     int                        _level;                  // Nummer des ersten hier neu beschriebenen Dimension
-    int                        _dim_count;              // Anzahl der Dimensionen einschließlich diese Felds
+    int                        _dim_count;              // Anzahl der Dimensionen einschlieÃŸlich diese Felds
 
   private:
     void                       _xc_insert_field_name    ( Xc*, int index ) const;
@@ -603,7 +603,7 @@ struct Record_type : Field_type      // Aus Feldern zusammengesetztes Feld (Satz
     Method_descr*              _method_descr            ( int i ) const;
 
     void                        remove_fields           ()                                  { _field_descr_array.size( 0 ); }
-    virtual bool                is_numeric              () const                            { return _group_type? _group_type->is_numeric() : Field_type::is_numeric(); }   // jz 27.5.01 für Fehrmann, Dia-Nielsen
+    virtual bool                is_numeric              () const                            { return _group_type? _group_type->is_numeric() : Field_type::is_numeric(); }   // jz 27.5.01 fÃ¼r Fehrmann, Dia-Nielsen
 
     void                       _obj_print               ( ::std::ostream* s ) const;
     Bool                       _obj_is_type             ( Sos_type_code t ) const       { return t == tc_Record_type || Base_class::_obj_is_type( t ); }
@@ -618,8 +618,8 @@ struct Record_type : Field_type      // Aus Feldern zusammengesetztes Feld (Satz
     Sos_simple_array< Sos_ptr<Field_descr> >  _field_descr_array;
 
   public:
-    Sos_ptr<Field_type>        _group_type;             // Für Cobol: format.raw() ==> diesen Typ für die Gruppe benutzen
-    long                       _offset_base;            // Für Cobol, sonst 0   //jz 16.5.97  
+    Sos_ptr<Field_type>        _group_type;             // FÃ¼r Cobol: format.raw() ==> diesen Typ fÃ¼r die Gruppe benutzen
+    long                       _offset_base;            // FÃ¼r Cobol, sonst 0   //jz 16.5.97  
     Bool                       _byte_type;              // clear: memset(0); field_copy: memcpy auf den ganzen Record (z.B. bei Cobol-Type, nicht bei sos_string_type)
 };
 
@@ -672,7 +672,7 @@ struct Array_type: Record_type
 };
 */
 //-----------------------------------------------------------------------------DEFINE_ADD_FIELD
-// Definiert add_field für die verschienden C-Typen (auch eigene)
+// Definiert add_field fÃ¼r die verschienden C-Typen (auch eigene)
 
 #define DEFINE_ADD_FIELD( TYPE, FIELD_TYPE )                                                \
                                                                                             \
@@ -802,7 +802,7 @@ struct Field_converter : Sos_self_deleting
     int                          _record_size;
     Sos_simple_array<Field_pair> _table;
     Dynamic_area                 _hilfspuffer;
-    Bool                         _set_null_first;       // Wenn nicht alle Felder berücksichtigt sind
+    Bool                         _set_null_first;       // Wenn nicht alle Felder berÃ¼cksichtigt sind
 };
 
 //-------------------------------------------------------------------------Field_converter_as<>

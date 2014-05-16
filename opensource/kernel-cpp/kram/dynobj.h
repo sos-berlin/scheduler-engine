@@ -1,4 +1,4 @@
-// dynobj.h                                             ©1996 SOS GmbH Berlin, Joacim Zschimmer
+// dynobj.h                                             Â©1996 SOS GmbH Berlin, Joacim Zschimmer
 
 #ifndef __DYNOBJ_H
 #define __DYNOBJ_H
@@ -13,7 +13,7 @@ namespace sos
 {
 
 struct _Dyn_obj : Sos_self_deleting  // zur Code-Ersparnis bei den vielen Dyn_obj-Konstruktoren
-{                                    // möglicherweise auf Kosten der Laufzeit (bei Borland)
+{                                    // mÃ¶glicherweise auf Kosten der Laufzeit (bei Borland)
                                 _Dyn_obj                ();
                                ~_Dyn_obj                ();
 

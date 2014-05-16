@@ -21,7 +21,7 @@ struct Thread;
 //-------------------------------------------------------------------------------------------------
 
 void                            windows_message_step        ();
-int                             show_window_value           ( const string& value_name );           // Liefert Wert für ShowWindows()
+int                             show_window_value           ( const string& value_name );           // Liefert Wert fÃ¼r ShowWindows()
 FILETIME                        filetime_from_systemtime    ( const SYSTEMTIME& );
 time_t                          time_t_from_filetime        ( const FILETIME& );
 double                   double_time_t_from_filetime        ( const FILETIME& );

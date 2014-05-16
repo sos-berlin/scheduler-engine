@@ -14,12 +14,12 @@ namespace sos
    -----------------------
    ist eine einfach Listenimplementierung, wie sie aus funktionalen Sprachen
    bekannt ist. Es beschreibt einen Listenknoten.
-   Der Destruktor schließt nicht die folgenden Listenknoten.
+   Der Destruktor schlieÃŸt nicht die folgenden Listenknoten.
    Eine Liste ist dann einfach ein Zeiger auf das erste Listenknoten.
    List: Sos_simple_list_node<T>*.
    Sos_simple_list_node<T>: ( T, Sos_simple_list_node<T>* ).
 
-   Folgende Funktionen unterstützen diese Liste:
+   Folgende Funktionen unterstÃ¼tzen diese Liste:
    empty( Sos_simple_list_node<T>* )
    length( Sos_simple_list_node<T>* )
    store( Sos_simple_list_node<T>*, ostream& )
@@ -33,7 +33,7 @@ namespace sos
    empty(), length(), store() und load() sind als Methoden implementiert.
 */
 
-struct Sos_simple_list_node_0   // Liste ohne Objekte, Hilfsklasse für Sos_simple_list_node<T>
+struct Sos_simple_list_node_0   // Liste ohne Objekte, Hilfsklasse fÃ¼r Sos_simple_list_node<T>
 {
     Sos_simple_list_node_0*    _tail;
 
@@ -114,7 +114,7 @@ struct Sos_simple_list
                                 Sos_simple_list         ( const T& );
   //                            Sos_simple_list         ( const T&, const Sos_simple_list<T>& tail );
                                 Sos_simple_list         ( const T&, Elem* tail );
-                               ~Sos_simple_list         ();             // Löscht die ganze Liste
+                               ~Sos_simple_list         ();             // LÃ¶scht die ganze Liste
 
     Bool                        empty                   () const;
     int                         length                  () const;

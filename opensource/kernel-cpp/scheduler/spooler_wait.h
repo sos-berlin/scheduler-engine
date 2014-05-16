@@ -73,12 +73,12 @@ struct Wait_handles : Non_cloneable
 #endif
 
     bool                        wait_until                  ( const Time&  , const Object* debug_wait_for_object, 
-                                                              const Time& resume_until, const Object* );   // Berücksichtigt Sommerzeitumstellung
+                                                              const Time& resume_until, const Object* );   // BerÃ¼cksichtigt Sommerzeitumstellung
     
 /**
- * \change  JS-471 - Methodendeklaration für eigenes Prozesshandling
+ * \change  JS-471 - Methodendeklaration fÃ¼r eigenes Prozesshandling
  * \version 1.3.8
- * \author  Stefan Schädlich
+ * \author  Stefan SchÃ¤dlich
  * \date    2010-04-01
  * \detail
  * siehe auch MsgWaitForMultipleObjects in windows.h

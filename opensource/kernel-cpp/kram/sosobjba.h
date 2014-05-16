@@ -1,4 +1,4 @@
-// sosobjba.h                       © 1995 SOS GmbH Berlin
+// sosobjba.h                       Â© 1995 SOS GmbH Berlin
 
 
 #ifndef __SOSOBJBA_H
@@ -65,7 +65,7 @@ struct SOS_CLASS Sos_object_base
 
 struct Sos_self_deleting : Sos_object_base
 /*
-    Objekte dieses Typs können static oder automatic sein oder mit SOS_NEW()
+    Objekte dieses Typs kÃ¶nnen static oder automatic sein oder mit SOS_NEW()
     angelegt werden.
     operator new() kann nicht verwendet werden.
 */
@@ -87,11 +87,11 @@ struct Sos_self_deleting : Sos_object_base
     void                        obj_remove_ref          () const/*mutable*//*???*/              { if( InterlockedDecrement( &((Sos_self_deleting*)this)->_obj_ref_count ) == 0 )  ((Sos_self_deleting*)this)->obj_del(); }
     uint                        obj_ref_count           () const                                { return _obj_ref_count; }
 
-    // Nur für SOS_NEW(), sos_new_ptr():
+    // Nur fÃ¼r SOS_NEW(), sos_new_ptr():
     void*                       operator new            ( size_t size, const enum New_type, const char* info = "" )      { return operator new( size, info ); }
-    void                        operator delete         ( void* );                              // Besser mit DELETE löschen!!
+    void                        operator delete         ( void* );                              // Besser mit DELETE lÃ¶schen!!
 #   ifdef SYSTEM_DELETE_WITH_PARAMS
-        void                    operator delete         ( void*, const enum New_type, const char* );  // Für VC++ 6: Sonst warning C4291
+        void                    operator delete         ( void*, const enum New_type, const char* );  // FÃ¼r VC++ 6: Sonst warning C4291
 #   endif
 
     void*                       operator new            ( size_t, void* p )                     { return p; }
@@ -183,11 +183,11 @@ struct Sos_static_ptr : Sos_pointer
 #   else
         friend
 #   endif
-    Sos_self_deleting*          sos_self_deleting_ptr   ( TYPE* );      // nicht inline! muß für jeden Typ mit DEFINE_SOS_STATIC_PTR( TYPE ) implementiert werden
+    Sos_self_deleting*          sos_self_deleting_ptr   ( TYPE* );      // nicht inline! muÃŸ fÃ¼r jeden Typ mit DEFINE_SOS_STATIC_PTR( TYPE ) implementiert werden
 };
 
 //----------------------------------------------------------------------------DEFINE_SOS_STATIC
-// Muß in einem Modul für jeden Typ gegeben werden:
+// MuÃŸ in einem Modul fÃ¼r jeden Typ gegeben werden:
 
 #if defined SYSTEM_SOLARIS
 #   define DEFINE_SOS_STATIC_PTR_ASSIGNMENT( TYPE )
@@ -310,7 +310,7 @@ struct Sos_new_ptr : Sos_ptr<TYPE>
 
 //-----------------------------------------------------------Sos_auto_new_ptr<TYPE,CREATE_FUNC>
 /*
-    Legt bei Benutzung, außer operator!(), das Objekt mit seinem Default-Konstruktur an.
+    Legt bei Benutzung, auÃŸer operator!(), das Objekt mit seinem Default-Konstruktur an.
 */
 
 //#ifndef SYSTEM_GNU
@@ -336,7 +336,7 @@ struct Sos_new_ptr : Sos_ptr<TYPE>
 template< class TYPE > inline TYPE* auto_new_ptr( Sos_ptr<TYPE>* ptr_ptr );
 
 //-----------------------------------------------------------------------------------sos_delete
-// Für DELETE(), s. sos.h
+// FÃ¼r DELETE(), s. sos.h
 
 inline void sos_delete( Sos_pointer& ptr )
 {
@@ -373,7 +373,7 @@ Sos_pointer _obj_copy( const Sos_self_deleting& );
 
 inline Sos_pointer::Sos_pointer( const Sos_self_deleting* ptr, Sos_self_deleting::New_type )
 {
-    // nur für sos_new_ptr()
+    // nur fÃ¼r sos_new_ptr()
     //assert( ptr && ptr->obj_ref_count() == 1 );
     _ptr = (Sos_self_deleting*)ptr;
 }

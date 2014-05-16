@@ -199,7 +199,7 @@ void Local_value::check_type( const Type& type ) const
 //Global_value:             //new_jobject = env->NewLocalRef( jo );
 //Global_value:             //if( !new_jobject || env->ExceptionCheck() )  env.throw_java( "NewLocalRef" );
 //Global_value:
-//Global_value:             //env->DeleteLocalRef( jo );    // jo wird ung¸ltig!
+//Global_value:             //env->DeleteLocalRef( jo );    // jo wird ung√ºltig!
 //Global_value:         }
 //Global_value:
 //Global_value:         if( _jvalue.l )
@@ -223,7 +223,7 @@ string Local_value::as_string() const
 
 //------------------------------------------------------------------------------replaced_characters
 
-static string replaced_characters( const string& value, char oldChar, char newChar )  //TODO Verˆffentlichen
+static string replaced_characters( const string& value, char oldChar, char newChar )  //TODO Ver√∂ffentlichen
 {
     string result = value;
 
@@ -314,7 +314,7 @@ bool Type::is_class_name( const string& class_name )
     if( class_name == "" )
         return false;
 
-    //TODO  Hier vielleicht noch Klassensyntax pr¸fen: Namen mit Punkten voneinander getrennt.
+    //TODO  Hier vielleicht noch Klassensyntax pr√ºfen: Namen mit Punkten voneinander getrennt.
 
     return true;
 }
@@ -364,7 +364,7 @@ bool Signature::is_class_signature_string( const string& signature )
     if( *signature.rbegin() != ';' )
         return false;
 
-    //TODO Hier vielleicht noch Klassensyntax pr¸fen: Namen mit Schr‰gstrichen voneinander getrennt.
+    //TODO Hier vielleicht noch Klassensyntax pr√ºfen: Namen mit Schr√§gstrichen voneinander getrennt.
 
     return true;
 }
@@ -506,7 +506,7 @@ jobject Abstract_jobject::local_ref() const
 //    if( signature.parameter_count() != parameter_list.size() )
 //        throw_xc( Z_FUNCTION, method_name, "Parameteranzahl passt nicht" );
 //
-//    //TODO Auﬂer Anzahl auch die einzelnen Parametertypen vergleichen.
+//    //TODO Au√üer Anzahl auch die einzelnen Parametertypen vergleichen.
 //
 //    Method method ( Class::of_object( get_jobject() ), method_name, signature );
 //    return method.value_call( get_jobject(), parameter_list );

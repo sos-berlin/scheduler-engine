@@ -1,7 +1,7 @@
 // sysxcept.h                           (c) SOS GmbH Berlin
 // $Id: sysxcept.h 11394 2005-04-03 08:30:29Z jz $
 
-// ง1693
+// ยง1693
 
 #ifndef __SYSXCEPT_H
 #define __SYSXCEPT_H
