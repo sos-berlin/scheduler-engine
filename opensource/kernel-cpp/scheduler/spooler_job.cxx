@@ -2699,7 +2699,6 @@ bool Standard_job::on_requisite_loaded( File_based* file_based )
         assert( file_based == _module->process_class() );
         assert( dynamic_cast<Process_class*>( file_based ) );
         if (_waiting_for_process) {
-            _waiting_for_process_try_again = true;
             notify_a_process_is_idle();
         }
     }
