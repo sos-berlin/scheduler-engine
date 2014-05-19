@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.lang.annotation.Annotation
 import java.lang.reflect._
 import scala.collection.mutable
+import scala.language.existentials
 
 object ClassOps {
   type JavaClass = Class[_]

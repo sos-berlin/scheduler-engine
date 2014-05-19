@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.cplusplus.generator.cpp
 
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import java.lang.reflect.Method
+import scala.language.existentials
 
 object Jni {
   private case class TypeMetadata(cppName: String, signature: String) {
@@ -22,18 +23,17 @@ object Jni {
     classOf[String]  -> TypeMetadata("jstring" , signatureStringOfClass(classOf[String]))
   )
 
-  private def metadata(t: Class[_]) = {
+  private def metadata[A](t: Class[A]) = {
     val myType = if (isVoid(t))  classOf[Void]  else t
     jniTypeMap.get(myType)
   }
 
-
-  def typeName(t: Class[_]) = metadata(t) match {
+  def typeName[A](t: Class[A]) = metadata(t) match {
     case Some(m) => m.cppName
     case None => requireIsClass(t); "jobject"
   }
 
-  private def requireIsClass(t: Class[_]) { require(isClass(t), "Unknown type '" + t + "'") }
+  private def requireIsClass[A](t: Class[A]) { require(isClass(t), "Unknown type '" + t + "'") }
 
   def signatureString(t: Class[_]): String = metadata(t) match {
     case Some(m) => m.signature
@@ -42,12 +42,12 @@ object Jni {
       else signatureStringOfClass(t)
   }
 
-  private def signatureStringOfClass(c: Class[_]) = {
+  private def signatureStringOfClass[A](c: Class[A]) = {
       requireIsClass(c)
       "L" + c.getName.replace('.', '/') + ";"
   }
 
-  def jvalueUnionMember(typ: Class[_]) = jniTypeMap(if (jniTypeMap contains typ) typ else classOf[Object]).jvalueUnionMember
+  def jvalueUnionMember[A](typ: Class[A]) = jniTypeMap(if (jniTypeMap contains typ) typ else classOf[Object]).jvalueUnionMember
 
   //def signatureString(m: Method): String = mangled(m.getName) + parameterListSignatureString(m) + signatureString(m.getReturnType)
 

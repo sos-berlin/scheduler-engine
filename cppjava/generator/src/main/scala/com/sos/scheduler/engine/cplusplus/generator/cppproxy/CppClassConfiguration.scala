@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.cplusplus.generator.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation
+import scala.language.existentials
 
 /** Parameter für einen C++-Proxy, angegeben als Annotation @CppClass zum Java-Interface, das den Proxy beschreibt. */
 final case class CppClassConfiguration(

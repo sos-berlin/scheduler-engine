@@ -4,6 +4,7 @@ import StandardCallQueue._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import org.joda.time.DateTimeUtils.currentTimeMillis
 import scala.collection.mutable
+import scala.language.existentials
 import scala.util.control.NonFatal
 
 final class StandardCallQueue extends PoppableCallQueue {

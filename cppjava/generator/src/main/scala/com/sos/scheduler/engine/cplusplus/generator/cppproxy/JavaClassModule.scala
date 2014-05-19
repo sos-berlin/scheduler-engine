@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.cplusplus.generator.module._
 import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.runtime._
+import scala.language.existentials
 
 final class JavaClassModule(config: CppClassConfiguration, procedureSignatures: Seq[ProcedureSignature])
 extends JavaModule {
