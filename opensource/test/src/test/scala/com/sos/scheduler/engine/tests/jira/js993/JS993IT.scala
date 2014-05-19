@@ -39,8 +39,8 @@ final class JS993IT extends FunSuite with ScalaSchedulerTest {
   }
 
   @EventHandler def handle(e: ErrorLogEvent) {
-    if (e.getLine contains "SCHEDULER-428") {    // SCHEDULER-428  Error when reading base file ...
-      e.getLine should include ("SCHEDULER-482")  // SCHEDULER-482  Language 'javascript' is not supported on 64 bit
+    if (e.message contains "SCHEDULER-428") {    // SCHEDULER-428  Error when reading base file ...
+      e.message should include ("SCHEDULER-482")  // SCHEDULER-482  Language 'javascript' is not supported on 64 bit
       errorLogged = true
     }
   }

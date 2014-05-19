@@ -22,6 +22,7 @@ import java.nio.file.Files
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import scala.concurrent.Await
+import com.sos.scheduler.engine.data.message.MessageCode
 
 final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 
@@ -81,11 +82,11 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
 //  }
 
   s"Invalid syntax of $remoteSchedulerParameterName keeps order at same job node and stops job" in {
-    testInvalidJobChain(shellJobChainPath, SchedulerAddress(":INVALID-ADDRESS"), expectedErrorCode = "Z-4003")
+    testInvalidJobChain(shellJobChainPath, SchedulerAddress(":INVALID-ADDRESS"), expectedErrorCode = MessageCode("Z-4003"))
   }
 
   "Not for API jobs" in {
-    testInvalidJobChain(apiJobChainPath, aSlave.extraScheduler.address, expectedErrorCode = "SCHEDULER-484")
+    testInvalidJobChain(apiJobChainPath, aSlave.extraScheduler.address, expectedErrorCode = MessageCode("SCHEDULER-484"))
   }
 
   "File_order_sink_module::create_instance_impl" in {
@@ -151,16 +152,16 @@ final class JS973IT extends FreeSpec with ScalaSchedulerTest {
     eventPipe.nextWithCondition[OrderFinishedWithResultEvent] { _.orderKey == orderKey } .result should startWith (expectedResult)
   }
 
-  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddress, expectedErrorCode: String) {
+  private def testInvalidJobChain(jobChainPath: JobChainPath, remoteScheduler: SchedulerAddress, expectedErrorCode: MessageCode) {
     val eventPipe = controller.newEventPipe()
     val orderKey = newOrderKey(jobChainPath)
     controller.suppressingTerminateOnError {
       val firstJobPath = instance[OrderSubsystem].jobChain(jobChainPath).jobNodes.head.jobPath
-      instance[JobSubsystem].job(firstJobPath).state should equal (JobState.pending)
+      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.pending
       scheduler executeXml newOrder(orderKey, Some(remoteScheduler))
-      eventPipe.nextAny[ErrorLogEvent].getCodeOrNull should equal (expectedErrorCode)
-      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition should equal (OrderStateTransition.keepState)
-      instance[JobSubsystem].job(firstJobPath).state should equal (JobState.stopped)
+      eventPipe.nextAny[ErrorLogEvent].codeOption shouldEqual Some(expectedErrorCode)
+      eventPipe.nextWithCondition[OrderStepEndedEvent] { _.orderKey == orderKey } .stateTransition shouldEqual OrderStateTransition.keepState
+      instance[JobSubsystem].job(firstJobPath).state shouldEqual JobState.stopped
     }
   }
 
