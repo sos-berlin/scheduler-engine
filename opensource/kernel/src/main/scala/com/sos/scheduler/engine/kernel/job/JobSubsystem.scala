@@ -12,11 +12,11 @@ import javax.persistence.EntityManagerFactory
 trait JobSubsystem
 extends FileBasedSubsystem {
 
-  type MySubsystem = JobSubsystem
-  type MyFileBased = Job
-  type MyFile_basedC = JobC
+  type ThisSubsystem = JobSubsystem
+  type ThisFileBased = Job
+  type ThisFile_basedC = JobC
 
-  val companion = JobSubsystem
+  val description = JobSubsystem
 
   def job(path: JobPath) = fileBased(path)
 
@@ -26,4 +26,7 @@ extends FileBasedSubsystem {
 }
 
 
-object JobSubsystem extends FileBasedSubsystem.Companion[JobSubsystem, JobPath, Job](FileBasedType.job, JobPath.apply)
+object JobSubsystem extends FileBasedSubsystem.AbstractDesription[JobSubsystem, JobPath, Job] {
+  val fileBasedType = FileBasedType.job
+  val stringToPath = JobPath.apply _
+}

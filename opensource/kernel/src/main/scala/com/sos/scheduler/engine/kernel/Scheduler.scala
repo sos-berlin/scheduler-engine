@@ -83,8 +83,8 @@ with HasInjector {
   @ForCpp
   private def initialize() {
     val eventSubscription = {
-      val subsystemCompanions = injector.apply[FileBasedSubsystem.Register].companions
-      val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemCompanions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
+      val subsystemDescriptions = injector.apply[FileBasedSubsystem.Register].descriptions
+      val subsystemMap: Map[FileBasedType, FileBasedSubsystem] = subsystemDescriptions.map { o ⇒ o.fileBasedType -> injector.getInstance(o.subsystemClass) }(breakOut)
       EventSubscription[FileBasedEvent] { e ⇒ for (subsystem <- subsystemMap.get(e.typedPath.fileBasedType)) subsystem.onFileBasedEvent(e) }
     }
     eventBus.registerHot(eventSubscription)

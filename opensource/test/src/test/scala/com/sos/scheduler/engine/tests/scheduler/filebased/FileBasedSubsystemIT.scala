@@ -38,14 +38,14 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
   private lazy val fileBasedSubsystemRegister = injector.apply[FileBasedSubsystem.Register]
 
   "FileBasedSubsystem.Register" in {
-    fileBasedSubsystemRegister.companions.toSet shouldEqual (testSettings map { _.subsystemCompanion }).toSet
+    fileBasedSubsystemRegister.descriptions.toSet shouldEqual (testSettings map { _.subsystemDescription }).toSet
   }
 
   for (setting <- testSettings) {
     import setting._
 
-    lazy val subsystem = injector.getInstance(subsystemCompanion.subsystemClass)
-    subsystemCompanion.subsystemClass.getSimpleName - {
+    lazy val subsystem = injector.getInstance(subsystemDescription.subsystemClass)
+    subsystemDescription.subsystemClass.getSimpleName - {
 
       "count" in {
         subsystem.count shouldEqual paths.size
@@ -64,7 +64,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
           FileBasedState.notInitialized -> (paths count pathIsNotInitialized),
           FileBasedState.active -> (paths count { o ⇒ !pathIsNotInitialized(o) }))
         subsystem.overview should have (
-          'fileBasedType (subsystemCompanion.fileBasedType),
+          'fileBasedType (subsystemDescription.fileBasedType),
           'count (paths.size),
           'fileBasedStateCounts (expectedFileBasedStates filter { _._2 != 0 } ))
       }
@@ -86,7 +86,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
             if (pathDontHasXml(path))
               o.configurationXmlBytes.toSeq shouldBe 'empty
             else
-              xmlBytesToString(o.configurationXmlBytes) should include ("<" + subsystem.companion.fileBasedType.cppName + " ")
+              xmlBytesToString(o.configurationXmlBytes) should include ("<" + subsystem.description.fileBasedType.cppName + " ")
           }
 
           "file" in {
@@ -142,7 +142,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
             }
           }
 
-          subsystemCompanion match {
+          subsystemDescription match {
             case ProcessClassSubsystem ⇒
               "stringToPath accepts empty string" in {
                   o.stringToPath("") shouldEqual ProcessClassPath("")  // There is the default process class named ""
@@ -196,7 +196,7 @@ final class FileBasedSubsystemIT extends FreeSpec with ScalaSchedulerTest {
 
 private object FileBasedSubsystemIT {
   private case class TestSubsystemSetting(
-    subsystemCompanion: FileBasedSubsystem.AnyCompanion,
+    subsystemDescription: FileBasedSubsystem.Description,
     predefinedPaths: immutable.Seq[TypedPath],
     testPaths: immutable.Seq[TypedPath],
     predefinedIsVisible: Boolean = false) {

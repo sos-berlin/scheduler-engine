@@ -26,11 +26,11 @@ final class OrderSubsystem @Inject private(
   injector: Injector)
 extends FileBasedSubsystem {
 
-  type MySubsystem = OrderSubsystem
-  type MyFileBased = JobChain
-  type MyFile_basedC = Job_chainC
+  type ThisSubsystem = OrderSubsystem
+  type ThisFileBased = JobChain
+  type ThisFile_basedC = Job_chainC
 
-  val companion = OrderSubsystem
+  val description = OrderSubsystem
 
   private implicit lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
   private lazy val persistentStateStore = injector.getInstance(classOf[HibernateJobChainNodeStore])
@@ -89,4 +89,7 @@ extends FileBasedSubsystem {
 }
 
 
-object OrderSubsystem extends FileBasedSubsystem.Companion[OrderSubsystem, JobChainPath, JobChain](FileBasedType.jobChain, JobChainPath.apply)
+object OrderSubsystem extends FileBasedSubsystem.AbstractDesription[OrderSubsystem, JobChainPath, JobChain] {
+  val fileBasedType = FileBasedType.jobChain
+  val stringToPath = JobChainPath.apply _
+}

@@ -13,11 +13,14 @@ final class LockSubsystem @Inject private(
   implicit val schedulerThreadCallQueue: SchedulerThreadCallQueue)
 extends FileBasedSubsystem {
 
-  type MySubsystem = LockSubsystem
-  type MyFile_basedC = LockC
-  type MyFileBased = Lock
+  type ThisSubsystem = LockSubsystem
+  type ThisFile_basedC = LockC
+  type ThisFileBased = Lock
 
-  val companion = LockSubsystem
+  val description = LockSubsystem
 }
 
-object LockSubsystem extends FileBasedSubsystem.Companion[LockSubsystem, LockPath, Lock](FileBasedType.lock, LockPath.apply)
+object LockSubsystem extends FileBasedSubsystem.AbstractDesription[LockSubsystem, LockPath, Lock] {
+  val fileBasedType = FileBasedType.lock
+  val stringToPath = LockPath.apply _
+}
