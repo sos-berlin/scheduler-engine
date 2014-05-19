@@ -5,10 +5,9 @@ import com.sos.scheduler.engine.newkernel.schedule.{Weekday, Schedule}
 import javax.xml.stream.XMLEventReader
 import org.joda.time.DateTimeZone
 
-final class OldScheduleXMLParser(defaultTimeZone: DateTimeZone, eventReader: XMLEventReader) {
-  private val eventIterator = new ScalaXMLEventReader(eventReader)
+final class OldScheduleXMLParser(defaultTimeZone: DateTimeZone, eventReader: ScalaXMLEventReader) {
 
-  import eventIterator._
+  import eventReader._
 
   def parse(): Schedule =
     parseElement("run_time") {

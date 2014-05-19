@@ -12,10 +12,11 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.newkernel.job.commands.StopJobCommand
 import java.io.ByteArrayInputStream
 import javax.xml.stream.XMLInputFactory
-import javax.xml.stream.events.StartDocument
+import javax.xml.stream.events.{EndDocument, StartDocument}
 import org.joda.time.DateTimeZone
 import org.w3c.dom.{Document, Element}
 import scala.sys.error
+import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 
 @ForCpp
 final class CppNewJob(/*cppProxy: JavaJobC,*/ injector: Injector, jobSister: Job, timeZone: DateTimeZone)
@@ -37,11 +38,12 @@ extends Sister {
     for (j <- jobOption) j.close()
   }
 
-  @ForCpp def setXmlBytes(bytes: Array[Byte]) = {
+  @ForCpp def setXmlBytes(bytes: Array[Byte]) {
     val inputFactory = XMLInputFactory.newInstance()
-    val reader = inputFactory.createXMLEventReader(new ByteArrayInputStream(bytes))
-    reader.nextEvent().asInstanceOf[StartDocument]
-    configuration = JobConfigurationXMLParser.parseWithReader(timeZone)(reader)
+    val reader = new ScalaXMLEventReader(inputFactory.createXMLEventReader(new ByteArrayInputStream(bytes)))
+    configuration = reader.parseDocument {
+      JobConfigurationXMLParser.parseWithReader(timeZone)(reader)
+    }
   }
 
   @ForCpp def onInitialize(): Boolean = {

@@ -5,41 +5,47 @@ import ScalaXMLEventReader._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.cast
 import java.io.StringReader
 import javax.xml.stream.events._
-import javax.xml.stream.{XMLInputFactory, Location, XMLEventReader}
+import javax.xml.stream.{Location, XMLEventReader, XMLInputFactory}
 import javax.xml.transform.Source
 import javax.xml.transform.stream.StreamSource
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
-final class ScalaXMLEventReader(eventReader: XMLEventReader) {
-  def currentEvent = eventReader.peek
+final class ScalaXMLEventReader(val delegate: XMLEventReader) {
 
-  def parseAttributelessElement[A](name: String)(f: ⇒ A): A = {
+  def parseAttributelessElement[A](name: String)(body: ⇒ A): A = {
     requireStartElement(name)
-    parseAttributelessElement[A](f)
+    parseAttributelessElement[A](body)
   }
 
-  def parseAttributelessElement[A](f: ⇒ A): A = {
-    require(!currentEvent.asStartElement.getAttributes.hasNext, s"No attributes expected in element <${currentEvent.asStartElement.getName}>")
+  def parseAttributelessElement[A](body: ⇒ A): A = {
+    require(!peek.asStartElement.getAttributes.hasNext, s"No attributes expected in element <${peek.asStartElement.getName}>")
     next()
-    val result = f
+    val result = body
     eat[EndElement]
     result
   }
 
-  def parseElement[A](name: String)(f: ⇒ A): A = {
-    requireStartElement(name)
-    parseElement(f)
+  def parseDocument[A](body: ⇒ A): A = {
+    eat[StartDocument]
+    val result = body
+    eat[EndDocument]
+    result
   }
 
-  def parseElement[A](f: ⇒ A): A = {
-    val result = f
+  def parseElement[A](name: String)(body: ⇒ A): A = {
+    requireStartElement(name)
+    parseElement(body)
+  }
+
+  def parseElement[A](body: ⇒ A): A = {
+    val result = body
     eat[EndElement]
     result
   }
 
   def forEachAttribute(f: PartialFunction[(String, String), Unit]) {
-    val element = currentEvent.asStartElement
+    val element = peek.asStartElement
 
     def callF(nameValue: (String, String)) =
       try f.applyOrElse(nameValue, { o: (String, String) ⇒ sys.error(s"Unexpected XML attribute ${o._1}") })
@@ -63,7 +69,7 @@ final class ScalaXMLEventReader(eventReader: XMLEventReader) {
       }
     }
 
-    currentEvent match {
+    peek match {
       case e: StartElement ⇒
         callF(e)
         forEachStartElement(f)
@@ -82,36 +88,44 @@ final class ScalaXMLEventReader(eventReader: XMLEventReader) {
   }
 
   def requireStartElement(name: String) = {
-    require(currentEvent.asStartElement.getName.getLocalPart == name)
+    require(peek.asStartElement.getName.getLocalPart == name)
   }
 
   def eatText() = {
     val result = new StringBuilder
-    while (currentEvent.isCharacters)
+    while (peek.isCharacters)
       result append eat[Characters].getData
     result.toString()
   }
 
   def eat[E <: XMLEvent : ClassTag]: E = cast[E](next())
 
-  def locationString = locationStringOf(currentEvent.getLocation)
+  def hasNext = delegate.hasNext
 
-  def hasNext = eventReader.hasNext
+  def next() = delegate.nextEvent()
 
-  def next() = eventReader.nextEvent()
+  def locationString = locationStringOf(peek.getLocation)
+
+  def peek = delegate.peek
 }
 
 
 object ScalaXMLEventReader {
 
-  def parseString[A](xml: String, inputFactory: XMLInputFactory = XMLInputFactory.newInstance())(parse: XMLEventReader ⇒ A): A =
+  def parseString[A](xml: String, inputFactory: XMLInputFactory = XMLInputFactory.newInstance())(parse: ScalaXMLEventReader ⇒ A): A =
     parseDocument(new StreamSource(new StringReader(xml)), inputFactory)(parse)
 
-  def parseDocument[A](source: Source, inputFactory: XMLInputFactory)(parse: XMLEventReader ⇒ A): A = {
-    val reader = inputFactory.createXMLEventReader(source)
-    reader.nextEvent().asInstanceOf[StartDocument]
+  def parseDocument[A](source: Source, inputFactory: XMLInputFactory)(parse: ScalaXMLEventReader ⇒ A): A = {
+    val reader = new ScalaXMLEventReader(inputFactory.createXMLEventReader(source))
+    reader.eat[StartDocument]
     val result = parse(reader)
-    reader.nextEvent().asInstanceOf[EndDocument]
+    reader.eat[EndDocument]
+    result
+  }
+
+  def parse[A](source: Source, inputFactory: XMLInputFactory = XMLInputFactory.newInstance())(parseEvents: ScalaXMLEventReader ⇒ A): A = {
+    val reader = new ScalaXMLEventReader(inputFactory.createXMLEventReader(source))
+    val result = parseEvents(reader)
     result
   }
 

@@ -2,15 +2,14 @@ package com.sos.scheduler.engine.newkernel.job
 
 import com.sos.scheduler.engine.common.scalautil.xml.ScalaXMLEventReader
 import com.sos.scheduler.engine.newkernel.schedule.oldruntime.OldScheduleXMLParser
-import javax.xml.stream.{XMLInputFactory, XMLEventReader}
+import javax.xml.stream.XMLInputFactory
 import javax.xml.transform.Source
 import org.joda.time.DateTimeZone
 import scala.sys.error
 
-class JobConfigurationXMLParser(timeZone: DateTimeZone, eventReader: XMLEventReader) {
-  private val eventIterator = new ScalaXMLEventReader(eventReader)
+class JobConfigurationXMLParser(timeZone: DateTimeZone, eventReader: ScalaXMLEventReader) {
 
-  import eventIterator._
+  import eventReader._
 
   def parse(): JobConfiguration =
     parseElement("new_job") {
@@ -19,7 +18,7 @@ class JobConfigurationXMLParser(timeZone: DateTimeZone, eventReader: XMLEventRea
         case ("title", v) => builder.title = v
       }
       forEachStartElement {
-        case "description" => parseAttributelessElement { builder.description = eventIterator.eatText() }
+        case "description" => parseAttributelessElement { builder.description = eatText() }
         case "run_time" => builder.schedule = Some(new OldScheduleXMLParser(timeZone, eventReader).parse())
         case "script" => builder.script = Some(parseScript())
       }
@@ -48,6 +47,6 @@ object JobConfigurationXMLParser {
   def parseDocument(source: Source, inputFactory: XMLInputFactory, timeZone: DateTimeZone): JobConfiguration =
     ScalaXMLEventReader.parseDocument(source, inputFactory)(parseWithReader(timeZone))
 
-  def parseWithReader(timeZone: DateTimeZone)(reader: XMLEventReader) =
+  def parseWithReader(timeZone: DateTimeZone)(reader: ScalaXMLEventReader) =
     new JobConfigurationXMLParser(timeZone, reader).parse()
 }
