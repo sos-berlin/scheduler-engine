@@ -1344,17 +1344,10 @@ bool Order_queue_node::is_ready_for_order_processing()
 
 Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
-    Order* result = NULL;
-
-    if( is_ready_for_order_processing() )
-    {
-        bool ignore_max_orders = order_queue()->next_order_ignores_max_orders(now);
-        if (ignore_max_orders) Z_LOG2("scheduler", Z_FUNCTION << "  ignore_max_orders is true\n");
-        Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing(ignore_max_orders);
-        result = order_queue()->fetch_and_occupy_order(occupying_task, v, now, cause);
-    }
-
-    return result;
+    if (is_ready_for_order_processing())
+        return order_queue()->fetch_and_occupy_order(occupying_task, _job_chain->untouched_is_allowed(), now, cause);
+    else
+        return NULL;
 }
 
 //--------------------------------------------------------------------Order_queue_node::dom_element
@@ -3219,16 +3212,6 @@ void Job_chain::check_max_orders() const
     }
 }
 
-//-----------------------------------------------------Job_chain::is_ready_for_new_order_processing
-
-Untouched_is_allowed Job_chain::is_ready_for_new_order_processing(bool ignore_max_orders) const
-{
-    bool result = 
-       is_ready_for_order_processing() &&
-       (!is_max_orders_reached() || ignore_max_orders);
-    return result? untouched_allowed : untouched_not_allowed;
-}
-
 //-----------------------------------------------------------------Job_chain::is_max_orders_reached
 
 bool Job_chain::is_max_orders_reached() const
@@ -4262,8 +4245,7 @@ Order* Order_queue::first_processable_order() const
 
 bool Order_queue::has_immediately_processable_order(const Time& now)
 { 
-    Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing();
-    return first_immediately_processable_order(v, now) != NULL; 
+    return first_immediately_processable_order(_job_chain->untouched_is_allowed(), now) != NULL; 
 }
 
 //-------------------------------------------------Order_queue::first_immediately_processable_order
@@ -4278,7 +4260,7 @@ Order* Order_queue::first_immediately_processable_order(Untouched_is_allowed unt
     {
         Order* order = *o;
 
-        if( order->is_immediately_processable( now )  &&  (untouched_is_allowed  ||  order->is_touched()))
+        if( order->is_immediately_processable( now )  &&  (untouched_is_allowed || order->is_touched() || order->is_ignore_max_orders()))
         {
             result = order;
             result->_setback = Time(0);
@@ -4308,21 +4290,12 @@ xml::Element_ptr Order_queue::why_dom_element(const xml::Document_ptr& doc, cons
     return result;
 }
 
-
-bool Order_queue::next_order_ignores_max_orders(const Time& now) const
-{
-    // Aufträge aus unserer Warteschlange im Speicher
-    Order* order = first_immediately_processable_order(untouched_allowed, now);
-    return order && order->_ignore_max_orders;
-}
-
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order
 
 Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_allowed untouched_is_allowed,
     const Time& now, const string& cause)
 {
     assert( occupying_task );
-
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 

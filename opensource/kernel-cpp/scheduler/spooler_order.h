@@ -898,10 +898,10 @@ struct Job_chain : Com_job_chain,
     int                         number_of_touched_orders    () const;
     int                         number_of_touched_orders_ignoring_max_orders     () const;
     bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }
+    Untouched_is_allowed        untouched_is_allowed        () const                                { return is_max_orders_reached()? untouched_not_allowed : untouched_allowed; }
     bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
-    Untouched_is_allowed        is_ready_for_new_order_processing(bool ignore_max_orders = false) const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
     void                        check_max_orders            () const;
