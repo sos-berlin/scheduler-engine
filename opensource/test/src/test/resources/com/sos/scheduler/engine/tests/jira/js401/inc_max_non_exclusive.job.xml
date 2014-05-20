@@ -7,15 +7,14 @@
 
                 spooler_log.info("---------- increase max_non_exclusive ----------");
 
-				var lock1 = locks.lock("lock1");
-				lock1.set_max_non_exclusive(1);
+                var lock1 = locks.lock("lock1");
+                lock1.set_max_non_exclusive(1);
 
-				var lock2 = locks.lock("lock2");
-				lock2.set_max_non_exclusive(1);
+                var lock2 = locks.lock("lock2");
+                lock2.set_max_non_exclusive(1);
 
                 return false;
             }
         ]]>
     </script>
-    <run_time />
 </job>

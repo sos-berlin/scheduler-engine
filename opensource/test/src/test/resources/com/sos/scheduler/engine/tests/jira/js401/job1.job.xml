@@ -3,7 +3,7 @@
     order="yes"
     idle_timeout="0"
 >
-    <lock.use  lock="lock1" exclusive="no"/>
+    <lock.use lock="lock1" exclusive="no"/>
 
     <script language="javax.script:rhino">
         <![CDATA[
@@ -13,5 +13,4 @@
             }
         ]]>
     </script>
-    <run_time />
 </job>
