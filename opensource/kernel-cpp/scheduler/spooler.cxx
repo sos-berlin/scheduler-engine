@@ -3662,12 +3662,14 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             //my_spooler._log ist vielleicht noch nicht geöffnet oder schon geschlossen
             my_spooler._log->error( x.what() );
             my_spooler._log->error( message_string( "SCHEDULER-331" ) );
+            if (!java_main_context) {
             string line = S() << "Error " << x.what();
-            if (java_main_context || !isatty(fileno(stderr)))  cerr << line << "\n" << flush;
-            else show_msg( line );     // Fehlermeldung vor ~Spooler ausgeben
+                if (!isatty(fileno(stderr)))  cerr << line << "\n" << flush;
+                else show_msg( line );     // Fehlermeldung vor ~Spooler ausgeben
+            }
 
             if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
-            if (java_main_context)  throw;
+            if (java_main_context) throw;
             ret = 1;
         }
 
@@ -4017,8 +4019,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
     {
         Z_LOG2( "scheduler", x.what() << "\n" );
         if( is_service )  scheduler::send_error_email( x, argc, argv, parameter_line );
+        if (java_main_context) throw;
         cerr << x << "\n";
-        if (java_main_context)  throw;
         ret = 1;
     }
     catch( const _com_error& x )
@@ -4026,8 +4028,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         string what = string_from_ole( x.Description() );
         Z_LOG2( "scheduler", what << "\n" );
         if( is_service )  scheduler::send_error_email( zschimmer::Xc( x ), argc, argv, parameter_line );
+        if (java_main_context) throw;
         cerr << what << "\n";
-        if (java_main_context)  throw;
         ret = 1;
     }
 
