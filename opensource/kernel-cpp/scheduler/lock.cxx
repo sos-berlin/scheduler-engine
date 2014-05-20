@@ -365,6 +365,7 @@ void Lock::set_max_non_exclusive( int max_non_exclusive )
             log()->warn( message_string( "SCHEDULER-887", max_non_exclusive, string_from_holders() ) );
 
         _config._max_non_exclusive = max_non_exclusive;
+        notify_waiting_requestor();
     }
 }
 
@@ -504,34 +505,7 @@ bool Lock::release_lock_for( Holder* holder, Use* lock_use )
                     holder->log()->info( message_string( "SCHEDULER-856", obj_name() ) );
                 }
 
-
-                // Wartenden Requestor benachrichtigen
-
-                Requestor* next_requestor = NULL; 
-
-                if( !_waiting_queues[ lk_exclusive ].empty() )  
-                {
-                    next_requestor = ( *_waiting_queues[ lk_exclusive ].begin() ) -> requestor();
-                }
-                else
-                if( !_waiting_queues[ lk_non_exclusive ].empty() )  
-                {
-                    next_requestor = ( *_waiting_queues[ lk_non_exclusive ].begin() ) -> requestor();
-                }
-
-                if( next_requestor  &&  next_requestor->locks_are_available() )     // Der Requestor kann auch die anderen Sperren belegen?
-                {
-                    try
-                    {
-                        next_requestor->on_locks_are_available();  
-                    }
-                    catch( exception& x ) 
-                    { 
-                        next_requestor->log()->error( S() << x << ", in on_lock_are_available()" );
-                    }
-                }
-
-
+                notify_waiting_requestor();
                 check_for_replacing_or_removing();
             }
         }
@@ -542,6 +516,35 @@ bool Lock::release_lock_for( Holder* holder, Use* lock_use )
     //  Z_DEBUG_ONLY( assert( !"Unbekannter Holder" ) );
 
     return is_released;
+}
+
+
+
+void Lock::notify_waiting_requestor()
+{
+    Requestor* next_requestor = NULL;
+
+    if (!_waiting_queues[lk_exclusive].empty())
+    {
+        next_requestor = (*_waiting_queues[lk_exclusive].begin())->requestor();
+    }
+    else
+    if (!_waiting_queues[lk_non_exclusive].empty())
+    {
+        next_requestor = (*_waiting_queues[lk_non_exclusive].begin())->requestor();
+    }
+
+    if (next_requestor  &&  next_requestor->locks_are_available())     // Der Requestor kann auch die anderen Sperren belegen?
+    {
+        try
+        {
+            next_requestor->on_locks_are_available();
+        }
+        catch (exception& x)
+        {
+            next_requestor->log()->error(S() << x << ", in on_lock_are_available()");
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------Lock::is_held_by
