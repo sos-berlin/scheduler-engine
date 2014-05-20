@@ -1349,11 +1349,7 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
     if( is_ready_for_order_processing() )
     {
         bool ignore_max_orders = order_queue()->next_order_ignores_max_orders(now);
-        if (ignore_max_orders)
-        {
-            Z_LOGI2("scheduler", Z_FUNCTION << "  ignore_max_orders is set to true\n");
-        }
-
+        if (ignore_max_orders) Z_LOG2("scheduler", Z_FUNCTION << "  ignore_max_orders is true\n");
         Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing(ignore_max_orders);
         result = order_queue()->fetch_and_occupy_order(occupying_task, v, now, cause);
     }
@@ -3216,8 +3212,7 @@ void Job_chain::check_max_orders() const
     if (is_max_orders_reached()) {
         int count = number_of_touched_orders();
         int orders_ignoring_max_orders = number_of_touched_orders_ignoring_max_orders();
-
-        if ( (count - orders_ignoring_max_orders) > _max_orders) {
+        if (count - orders_ignoring_max_orders > _max_orders) {
             _log->error(message_string("SCHEDULER-719", _max_orders, count));
             //Keine Exception nach Order::occupy_for_task() auslösen oder _task=NULL setzen!  Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", _max_orders, count));
         }
@@ -3986,6 +3981,7 @@ int Order_queue::touched_order_count()
     return result;
 }
 
+
 int Order_queue::touched_and_ignoring_max_orders_order_count() const
 {
     int result = 0;
@@ -4315,17 +4311,9 @@ xml::Element_ptr Order_queue::why_dom_element(const xml::Document_ptr& doc, cons
 
 bool Order_queue::next_order_ignores_max_orders(const Time& now) const
 {
-    bool result = false;
-
     // Aufträge aus unserer Warteschlange im Speicher
-    ptr<Order> order = first_immediately_processable_order(virgin_allowed, now);
-
-    if (order)
-    {
-        result = order->_ignore_max_orders;
-    }
-
-    return result;
+    Order* order = first_immediately_processable_order(untouched_allowed, now);
+    return order && order->_ignore_max_orders;
 }
 
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order

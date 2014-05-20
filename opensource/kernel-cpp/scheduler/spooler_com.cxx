@@ -5661,36 +5661,24 @@ STDMETHODIMP Com_order::get_Setback_count( int* result )
 
 STDMETHODIMP Com_order::put_Ignore_max_orders( VARIANT_BOOL b )
 {
-    HRESULT hr = NOERROR;
-
-    try
-    {
-        if( !_order )  return E_POINTER;
-
+    try {
+        if (!_order) return E_POINTER;
         _order->set_ignore_max_orders(b != 0);
+        return NOERROR;
     }
-    catch (const exception& x)  { hr = _set_excepinfo(x, Z_FUNCTION); }
-
-    return hr;
+    catch (const exception& x)  { return _set_excepinfo(x, Z_FUNCTION); }
 }
-
 
 
 STDMETHODIMP Com_order::get_Ignore_max_orders(VARIANT_BOOL* result)
 {
-    HRESULT hr = NOERROR;
-
-    *result = VARIANT_FALSE;
-
-    try
-    {
-        if( !_order )  return E_POINTER;
-
-        *result = _order->ignore_max_orders() ? VARIANT_TRUE : VARIANT_FALSE;
+    try {
+        *result = VARIANT_FALSE;
+        if (!_order) return E_POINTER;
+        *result = _order->is_ignore_max_orders() ? VARIANT_TRUE : VARIANT_FALSE;
+        return NOERROR;
     }
-    catch (const exception&  x)  { hr = _set_excepinfo(x, Z_FUNCTION); }
-
-    return hr;
+    catch (const exception& x)  { return _set_excepinfo(x, Z_FUNCTION); }
 }
 
 //------------------------------------------------------------------------Com_order_queue::_methods

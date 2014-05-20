@@ -265,7 +265,6 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     @SchedulerGetter
     public boolean          ignore_max_orders   ()                                  { return    boolean_com_call( "<ignore_max_orders" ); }
 
-
     public final OrderBean toBean() {
         return new OrderBean(this);
     }

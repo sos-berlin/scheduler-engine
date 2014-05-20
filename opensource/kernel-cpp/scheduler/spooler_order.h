@@ -213,8 +213,8 @@ struct Order : Com_order,
     bool                        suspended               ()                                          { return _suspended; }
     void                    set_suspended               ( bool b = true );
 
-    void                    set_ignore_max_orders       (bool b);
-    bool                        ignore_max_orders       ()                                          { return _ignore_max_orders; }
+    void                    set_ignore_max_orders       (bool b)                                    { _ignore_max_orders = b; }
+    bool                     is_ignore_max_orders       ()                                          { return _ignore_max_orders; }
 
     void                        set_on_blacklist        ();
     void                        remove_from_blacklist   ();
@@ -410,7 +410,6 @@ struct Order : Com_order,
   //Time                       _signaled_next_time;
     ptr<http::Operation>       _http_operation;
     ptr<Com_log>               _com_log;                // COM-H�lle f�r Log
-
     bool                       _ignore_max_orders;
 };
 
