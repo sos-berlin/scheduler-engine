@@ -50,7 +50,7 @@ struct Path : string
     bool                        operator !=                 ( const File_path& path ) const         { return compare( path ) != 0; }
     bool                        operator >=                 ( const File_path& path ) const         { return compare( path ) >= 0; }
     bool                        operator >                  ( const File_path& path ) const         { return compare( path ) >  0; }
-    int                         compare                     ( const File_path& ) const;             // Nicht implementiert, weil Gro�kleinschreibung manchmal beachtet werden muss
+    int                         compare                     ( const File_path& ) const;             // Nicht implementiert, weil Großkleinschreibung manchmal beachtet werden muss
 };
 
 

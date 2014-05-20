@@ -235,8 +235,8 @@ public final class MailMessage {
 
 
     final class File_data_source extends My_data_source {
-        // M�glicherweise kann FileDataSource verwendet werden.
-        // Aber schlie�t die Klasse die Datei? Es gibt keinen close()
+        // Möglicherweise kann FileDataSource verwendet werden.
+        // Aber schließt die Klasse die Datei? Es gibt keinen close()
         private final File file;
 
         File_data_source(File file, File new_filename, String content_type) {

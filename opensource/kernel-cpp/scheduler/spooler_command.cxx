@@ -12,7 +12,7 @@
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/z_gzip.h"
 
-// F�r tempor�re Datei:
+// Für temporäre Datei:
 #include <sys/stat.h>               // S_IREAD, stat()
 #include <fcntl.h>                  // O_RDONLY
 
@@ -147,7 +147,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
             bool ok = _process->try_delete_files( _process->log() );
             if( !ok )
             {
-                // Das k�nnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
+                // Das könnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
                 // Ebenso (aber synchron) mit Remote_module_instance_server::try_delete_files()
 
                 double now = double_from_gmtime();
@@ -335,7 +335,7 @@ void Show_what::set_what(const string& what) {
     {
         while( *p == ' ' )  p++;
 
-        if( string_equals_prefix_then_skip( &p, "none"             ) )  _what = show_standard;       // Setzt Flags zur�ck! (Provisorisch, solange jobs,tasks default ist)
+        if( string_equals_prefix_then_skip( &p, "none"             ) )  _what = show_standard;       // Setzt Flags zurück! (Provisorisch, solange jobs,tasks default ist)
         else
         if( string_equals_prefix_then_skip( &p, "all!"             ) )  _what = _what | show_all;
         else
@@ -532,7 +532,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         Z_DEBUG_ONLY( result.setAttribute( "debug", static_log_categories.debug_string() ) );
 
 
-        // Einstellungen aus static_log_categories �bernehmen
+        // Einstellungen aus static_log_categories übernehmen
 
         Log_categories::Map map = static_log_categories.map_copy();
 
@@ -567,7 +567,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         }
 
 
-        // Einstellung der Dokumentation �bernehmen
+        // Einstellung der Dokumentation übernehmen
 
         xml::Document_ptr doc = xml::Document_ptr::from_xml_string(java_resource_as_string("com/sos/scheduler/enginedoc/common/log_categories.xml"));
         xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
@@ -640,7 +640,7 @@ xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& ele
 * \version 2.1.1 - 2010-05-28
 *
 * \param element - XML-Kommando (<show_subsystem .../>)
-* \param show_what - Attribut @what in Datenstruktur aufgel�st.
+* \param show_what - Attribut @what in Datenstruktur aufgelöst.
 * \return XML-Element mit den Informationen zu den Subsystemen
 */
 xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& element, const Show_what& show_what )
@@ -950,7 +950,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_check_folders( const xml::Element_ptr& )
 {
-    // F�r die HTML-Oberfl�che und Wecksignal vom Supervisor
+    // Für die HTML-Oberfläche und Wecksignal vom Supervisor
 
 
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
@@ -996,8 +996,8 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     Time start_at;
 
     if( at_str == ""       )  at_str = "now";
-    if( at_str == "period" )  start_at = Time(0);                               // start="period" => start_at = 0 (sobald eine Periode es zul�sst)
-                        else  start_at = Time::of_date_time_with_now( at_str, _spooler->_time_zone_name );         // "now+..." m�glich
+    if( at_str == "period" )  start_at = Time(0);                               // start="period" => start_at = 0 (sobald eine Periode es zulässt)
+                        else  start_at = Time::of_date_time_with_now( at_str, _spooler->_time_zone_name );         // "now+..." möglich
 
     if( !after_str.empty() )  start_at = Time::now() + Duration( as_int( after_str ) );     // Entweder at= oder after=
 
@@ -1041,7 +1041,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
     process->set_controller_address(Host_and_port(client_host(), tcp_port));
     process->set_run_in_thread( kind == "process" );
-    process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst �ber COM/TCP protokollieren
+    process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
     process->set_java_options(start_task_element.getAttribute("java_options"));
     process->set_java_classpath(start_task_element.getAttribute("java_classpath"));
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
@@ -1417,10 +1417,10 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             
             //if( ta.record_count() == 0 )
             //{
-            //    // Sollte Exception ausl�sen: nicht da oder belegt
+            //    // Sollte Exception auslösen: nicht da oder belegt
             //    _spooler->order_subsystem()->load_order_from_database( job_chain_path, id );
             //    
-            //    // Der Auftrag ist gerade freigegeben oder hinzugef�gt worden
+            //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
             //    delete_stmt.remove_where_condition( "occupying_cluster_member_id" );
             //    ta.execute_single( delete_stmt, Z_FUNCTION ); 
             //}
@@ -1490,7 +1490,7 @@ xml::Element_ptr Command_processor::execute_get_events( const xml::Element_ptr& 
 
     _response->write( "<events>\n" );
 
-    return xml::Element_ptr();    // Antwort wird asynchron �bergeben
+    return xml::Element_ptr();    // Antwort wird asynchron übergeben
 }
 
 //----------------------------------------------------------Command_processor::execute_job_chain_command
@@ -1536,7 +1536,7 @@ void Get_events_command_response::write_event( const Scheduler_event& event )
 {
     write( event.xml_bytes() );
 
-    if( _append_0_byte )  write( io::Char_sequence( "\0", 1 ) );       // 0-Byte anh�ngen
+    if( _append_0_byte )  write( io::Char_sequence( "\0", 1 ) );       // 0-Byte anhängen
                     else  write( "\n" );
 }
 
@@ -1554,7 +1554,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         _log->info( m );
     }
 
-    Show_what show = show_jobs | show_tasks;        // Zur Kompatibilit�t. Besser: <show_state what="jobs,tasks"/>
+    Show_what show = show_jobs | show_tasks;        // Zur Kompatibilität. Besser: <show_state what="jobs,tasks"/>
     show.set_dom(*_spooler, element);
 
     string element_name = element.nodeName();
@@ -1705,7 +1705,7 @@ string xml_as_string( const xml::Document_ptr& document)
     try 
     {
         result = document.xml_string();
-        //if( indent_string != "" && result.find('\r') == string::npos)  result = replace_regex( result, "\n", "\r\n" );      // F�r Windows-telnet
+        //if( indent_string != "" && result.find('\r') == string::npos)  result = replace_regex( result, "\n", "\r\n" );      // Für Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }

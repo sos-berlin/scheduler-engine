@@ -83,7 +83,7 @@ struct Directory_entry
     bool                       _is_removed;                 // _is_removed -> _is_aging_until > 0
     Configuration_origin       _configuration_origin;
     int                        _version;
-    int                        _duplicate_version;          // F�r merged_new_entries() und Meldung SCHEDULER-703
+    int                        _duplicate_version;          // Für merged_new_entries() und Meldung SCHEDULER-703
     string                     _normalized_name;
 };
 

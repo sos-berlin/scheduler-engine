@@ -15,7 +15,7 @@ namespace sos
 {
     typedef std::string Sos_string;
     
-    inline std::string   as_string( const char* strng, size_t length  )   { return zschimmer::make_string( strng, length ); }   // F�r gcc 3.1 (ab gcc 3.2.2 nicht mehr n�tig)
+    inline std::string   as_string( const char* strng, size_t length  )   { return zschimmer::make_string( strng, length ); }   // Für gcc 3.1 (ab gcc 3.2.2 nicht mehr nötig)
 
     inline const char*   c_str    ( const std::string& strng )                  { return strng.c_str();   }
     inline size_t        length   ( const std::string& strng )                  { return strng.length(); }
@@ -104,7 +104,7 @@ inline Sos_string quoted_string  ( const Sos_string& str, char q1 = '"' , char q
 inline Sos_string cond_quoted_string  ( const Sos_string& str, char q1 = '"' , char q2 = '\\' ) { return cond_quoted_string( c_str( str ), q1, q2 ); }
 
        void       append_option( Sos_string*, const char* opt, const char* value );
-// append_option( &param, "-option=", value );  // setzt bei Bedarf Anf�hrungszeichen
+// append_option( &param, "-option=", value );  // setzt bei Bedarf Anführungszeichen
 inline void       append_option( Sos_string* str , const char* opt, const Sos_string& value ) { append_option( str, opt, c_str( value ) ); }
        string     right_string ( const string&, int len );
 
@@ -112,7 +112,7 @@ const int NO_POS = -1;
 
 inline unsigned int find( const Sos_string& str, const Sos_string& to_find, unsigned int pos = 0 )
 {
-#   if !defined SYSTEM_SOLARIS   /* Borland kann sich nicht f�r das richtige position() entscheiden */
+#   if !defined SYSTEM_SOLARIS   /* Borland kann sich nicht für das richtige position() entscheiden */
         uint p = position( c_str( str ), c_str( to_find ), pos );
 #    else
         uint p = position( str, to_find, pos );

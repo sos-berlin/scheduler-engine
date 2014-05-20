@@ -134,7 +134,7 @@ bool File_based::on_requisite_loaded( File_based* )
 {
     bool result = false;
 
-    if( is_in_folder() )  check_for_replacing_or_removing();    // F�r Standing_order: Wenn Jobkette gel�scht, Auftragsdatei ge�ndert und Jobkette wieder geladen wird, 2008-02-01
+    if( is_in_folder() )  check_for_replacing_or_removing();    // Für Standing_order: Wenn Jobkette gelöscht, Auftragsdatei geändert und Jobkette wieder geladen wird, 2008-02-01
     if( is_in_folder() )  result = activate();                  // (Besser: nur wenn s_incomplete?)
     
     return result;
@@ -220,7 +220,7 @@ void File_based::set_replacement( File_based* replacement )
     if( replacement  &&  
         _configuration_origin == confdir_cache &&  
         replacement->_configuration_origin != confdir_cache &&
-        _base_file_info._path.exists() )    // Au�er, die zentrale Datei ist gel�scht
+        _base_file_info._path.exists() )    // Außer, die zentrale Datei ist gelöscht
     {
         z::throw_xc( "SCHEDULER-460", subsystem()->object_type_name() );  // Original ist zentral konfiguriert, aber Ersatz nicht
     }
@@ -291,7 +291,7 @@ bool File_based::remove( Remove_flag remove_flag )
     else  
     {
         _remove_xc = remove_error();
-        log()->info( _remove_xc.what() );   // Kein Fehler, L�schen ist nur verz�gert
+        log()->info( _remove_xc.what() );   // Kein Fehler, Löschen ist nur verzögert
     }
 
 
@@ -416,7 +416,7 @@ File_based* File_based::on_replace_now()
     assert( can_be_replaced_now() );
 
     typed_folder->remove_file_based( this );
-    // this ist ung�ltig
+    // this ist ungültig
 
     typed_folder->add_file_based( replacement );
 
@@ -434,9 +434,9 @@ File_based* File_based::replace_now()
 
     File_based* new_file_based = on_replace_now();
 
-    if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte �bernommen
+    if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
     {                                       
-        set_base_file_info( file_info );        // Alte Werte ge�nderten Objekts �berschreiben
+        set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
         _source_xml_bytes  = replacement->_source_xml_bytes;
         _base_file_xc      = zschimmer::Xc();
         _base_file_xc_time = 0;
@@ -444,10 +444,10 @@ File_based* File_based::replace_now()
     }
     else
     {
-        // this ist ung�ltig
+        // this ist ungültig
     }
 
-    //SS: replacement->report_event_replace ... (weil "this" ung�ltig)
+    //SS: replacement->report_event_replace ... (weil "this" ungültig)
     new_file_based->activate();
     return new_file_based;
 }
@@ -690,7 +690,7 @@ void File_based::set_name( const string& name )
 
     if( normalized_name != _file_based_subsystem->normalized_name( name ) )
     {
-        if( _name_is_fixed )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht ge�ndert werden, au�er Gro�schreibung
+        if( _name_is_fixed )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geändert werden, außer Großschreibung
         _name = name;
         log()->set_prefix(obj_name() + "*");    // Provisorisch, noch ohne Pfad
 
@@ -707,7 +707,7 @@ void File_based::set_name( const string& name )
 Folder* File_based::folder() const
 { 
     return _typed_folder? _typed_folder->folder()
-                        : spooler()->folder_subsystem()->folder( folder_path() );   // _state < s_initialized, noch nicht im Typed_folder eingeh�ngt, replacement()
+                        : spooler()->folder_subsystem()->folder( folder_path() );   // _state < s_initialized, noch nicht im Typed_folder eingehängt, replacement()
 }
 
 //-------------------------------------------------------------------------File_based::handle_event

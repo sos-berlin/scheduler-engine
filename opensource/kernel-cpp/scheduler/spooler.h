@@ -76,7 +76,7 @@ extern const string             temporary_process_class_name;
 extern volatile int             ctrl_c_pressed;
 extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;
-const int                       max_memory_file_size          = 10*1024*1024;   // F�r Dateien, die komplett in den Speicher geladen werden
+const int                       max_memory_file_size          = 10*1024*1024;   // Für Dateien, die komplett in den Speicher geladen werden
 extern const int                max_open_log_files;
 extern const Duration           delete_temporary_files_delay;
 extern const Duration           delete_temporary_files_retry;
@@ -508,10 +508,10 @@ struct Spooler : Object,
     void                        send_cmd                    ();
 
     // Prozesse
-    void                        register_process_handle     ( Process_handle );                 // F�r abort_immediately()
-    void                        unregister_process_handle   ( Process_handle );                 // F�r abort_immediately()
-    void                        register_pid                ( int, bool is_process_group = false ); // F�r abort_immediately()
-    void                        unregister_pid              ( int );                            // F�r abort_immediately()
+    void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
+    void                        unregister_process_handle   ( Process_handle );                 // Für abort_immediately()
+    void                        register_pid                ( int, bool is_process_group = false ); // Für abort_immediately()
+    void                        unregister_pid              ( int );                            // Für abort_immediately()
 
     bool                        is_machine_suspendable      () const                            { return _dont_suspend_machine_counter == 0; }
     void                        begin_dont_suspend_machine  ();
@@ -558,7 +558,7 @@ struct Spooler : Object,
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();
-    void                        write_to_scheduler_log      (const string& category, const string& text) { Z_LOG2(category, text); }  // F�r Java nicht mit Mutex abgesichert
+    void                        write_to_scheduler_log      (const string& category, const string& text) { Z_LOG2(category, text); }  // Für Java nicht mit Mutex abgesichert
 
   private:
     //void                        on_call                     (const Pause_scheduler_call&);
@@ -578,20 +578,20 @@ struct Spooler : Object,
     ptr<Settings>              _settings;
 
   public:
-    Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, f�r Zugriff auf _db.
+    Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
     string                     _spooler_id;                 // -id=
     string                     _log_directory;              // -log-dir=
-    bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, �berschreibt Angabe in spooler.xml
+    bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _log_filename;
-    bool                       _log_to_stderr;              // Zus�tzlich nach stdout schreiben
+    bool                       _log_to_stderr;              // Zusätzlich nach stdout schreiben
     Log_level                  _log_to_stderr_level;
     ptr<log::cache::Request_cache> _log_file_cache;
     Cached_log_category        _scheduler_wait_log_category;
     File_path                  _include_path;
-    bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, �berschreibt Angabe in spooler.xml
+    bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _temp_dir;
-    string                     _spooler_param;              // -param= Parameter f�r Skripten
-    bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, �berschreibt Angabe in spooler.xml
+    string                     _spooler_param;              // -param= Parameter für Skripten
+    bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
   //int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
     bool                       _tcp_port_as_option_set;
@@ -607,11 +607,11 @@ struct Spooler : Object,
     bool                       _is_service;                 // NT-Dienst
     bool                       _debug;
     Log_level                  _log_level;
-    bool                       _mail_on_warning;            // F�r Job-Protokolle
-    bool                       _mail_on_error;              // F�r Job-Protokolle
-    int                        _mail_on_process;            // F�r Job-Protokolle
-    bool                       _mail_on_success;            // F�r Job-Protokolle
-    First_and_last             _mail_on_delay_after_error;  // F�r Job-Protokolle
+    bool                       _mail_on_warning;            // Für Job-Protokolle
+    bool                       _mail_on_error;              // Für Job-Protokolle
+    int                        _mail_on_process;            // Für Job-Protokolle
+    bool                       _mail_on_success;            // Für Job-Protokolle
+    First_and_last             _mail_on_delay_after_error;  // Für Job-Protokolle
     string                     _mail_encoding;
 
     Mail_defaults              _mail_defaults;
@@ -640,7 +640,7 @@ struct Spooler : Object,
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
     ptr<Database>              _db;
-    bool                       _need_db;                    // need_db=yes|strict  Wenn DB sich nicht �ffnen l�sst, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
+    bool                       _need_db;                    // need_db=yes|strict  Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
     bool                       _wait_endless_for_db_open;   // need_db=yes
     int                        _max_db_errors;              // Nach so vielen Fehlern im Scheduler-Leben DB abschalten (wie need_db)
     bool                       _db_check_integrity;
@@ -650,12 +650,12 @@ struct Spooler : Object,
     int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)
     string                     _waiting_errno_filename;
 
-    bool                       _interactive;                // Kommandos �ber stdin zulassen
+    bool                       _interactive;                // Kommandos über stdin zulassen
     bool                       _manual;
   //string                     _job_name;                   // Bei manuellem Betrieb
 
     string                     _send_cmd_xml_bytes;         // Der Spooler soll nur dem eigentlichen Spooler dieses Kommando schicken und sich dann beenden.
-    string                     _cmd_xml_bytes;              // Parameter -cmd, ein zuerst auszuf�hrendes Kommando.
+    string                     _cmd_xml_bytes;              // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
 
@@ -682,8 +682,8 @@ struct Spooler : Object,
     Event                      _scheduler_event;
     typed_call_register<Spooler> _call_register;
 
-    int                        _loop_counter;               // Z�hler der Schleifendurchl�ufe in spooler.cxx
-    int                        _wait_counter;               // Z�hler der Aufrufe von wait_until()
+    int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
+    int                        _wait_counter;               // Zähler der Aufrufe von wait_until()
     time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
     Rotating_bar               _wait_rotating_bar;
 
@@ -700,7 +700,7 @@ struct Spooler : Object,
     Absolute_path              _configuration_start_job_after_added;
     Absolute_path              _configuration_start_job_after_modified;
     Absolute_path              _configuration_start_job_after_deleted;
-    file::File_path            _central_configuration_directory;         // F�r den Supervisor zur Replikation
+    file::File_path            _central_configuration_directory;         // Für den Supervisor zur Replikation
     bool                       _central_configuration_directory_as_option_set;
 
     bool                       _executing_command;          // true: database wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
@@ -708,18 +708,18 @@ struct Spooler : Object,
     int                        _process_count;
 
     bool                       _subprocess_own_process_group_default;
-    Process_handle             _process_handles[ max_processes ];   // F�r abort_immediately(), mutex-frei alle abh�ngigen Prozesse
+    Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
     struct Killpid { int _pid; bool _is_process_group; };
-    Killpid                    _pids[ max_processes ];              // F�r abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
+    Killpid                    _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
     bool                       _are_all_tasks_killed;
 
-    schedule::Holidays         _holidays;                   // Feiertage f�r alle Jobs
+    schedule::Holidays         _holidays;                   // Feiertage für alle Jobs
 
-    State_changed_handler      _state_changed_handler;      // Callback f�r NT-Dienst SetServiceStatus()
+    State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
-    xml::Document_ptr          _config_document_to_load;    // F�r cmd_load_config(), das Dokument zu _config_element_to_load
-    xml::Element_ptr           _config_element_to_load;     // F�r cmd_load_config()
-    string                     _config_source_filename;     // F�r cmd_load_config(), der Dateiname der Quelle
+    xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
+    xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
+    string                     _config_source_filename;     // Für cmd_load_config(), der Dateiname der Quelle
 
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Die gerade geladene Konfiguration (und Job hat einen Verweis auf <job>)
@@ -740,8 +740,8 @@ struct Spooler : Object,
     bool                       _ignore_process_classes_set;
 
 
-    Time                       _last_wait_until;            // F�r <show_state>
-    Time                       _last_resume_at;             // F�r <show_state>
+    Time                       _last_wait_until;            // Für <show_state>
+    Time                       _last_resume_at;             // Für <show_state>
     bool                       _print_time_every_second;
 
     Thread_id                  _thread_id;                  // Haupt-Thread
@@ -750,7 +750,7 @@ struct Spooler : Object,
     State_cmd                  _state_cmd;
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
     bool                       _shutdown_ignore_running_tasks;
-    time_t                     _termination_gmtimeout_at;   // F�r sc_terminate und sc_terminate_with_restart
+    time_t                     _termination_gmtimeout_at;   // Für sc_terminate und sc_terminate_with_restart
     string                     _terminate_continue_exclusive_operation;
     bool                       _terminate_all_schedulers;
     bool                       _terminate_all_schedulers_with_restart;
@@ -772,7 +772,7 @@ struct Spooler : Object,
     bool                       _is_waitable_timer_set;
 
     ptr<Com_variable_set>      _environment;
-    Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; f�r <params>, Com_variable_set::set_dom()
+    Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
     
     ptr<cluster::Cluster_subsystem_interface>      _cluster;
     cluster::Configuration     _cluster_configuration;

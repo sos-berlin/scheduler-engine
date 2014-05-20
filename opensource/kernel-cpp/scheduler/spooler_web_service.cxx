@@ -558,7 +558,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
 
         _spooler->_executing_command = false;   // Command_processor() hat es true gesetzt. Trotzdem bei Datenbank-Fehler auf DB warten
 
-        command_processor.set_validate( false );            // <content> enth�lt unbekannte XML-Elemente <task> und <order>
+        command_processor.set_validate( false );            // <content> enthält unbekannte XML-Elemente <task> und <order>
         command_processor.execute_2( command_document );
     }
     catch( exception& x )
@@ -646,7 +646,7 @@ void Web_service_operation::begin()
         ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
 
         order->inhibit_distribution();
-        order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausf�hrt
+        order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt
         order->place_in_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_path ) );
         _http_operation->link_order( order );                // ~Order ruft Http_operation::unlink_order()
         
@@ -655,7 +655,7 @@ void Web_service_operation::begin()
         if( _web_service->_timeout != INT_MAX )
         {
             _http_operation->set_gmtimeout( (double)( ::time(NULL) + 0.999 + _web_service->_timeout ) );
-            // Auftrag ruft vor der Entjungferung http::Operation::on_order_processing() auf, der den Timeout zur�cksetzt
+            // Auftrag ruft vor der Entjungferung http::Operation::on_order_processing() auf, der den Timeout zurücksetzt
         }
     }
 }
@@ -746,8 +746,8 @@ STDMETHODIMP Web_service_operation::Execute_stylesheets()
 
 void Web_service_operation::execute_stylesheets()
 {
-    // Erstmal nicht: Die Operation wird im Task-Prozess ausgef�hrt.
-    // Erstmal nicht: Scheduler-Methoden, die im Hauptprozess ausgef�hrt werden sollen, nur �ber Invoke() aufrufen!
+    // Erstmal nicht: Die Operation wird im Task-Prozess ausgeführt.
+    // Erstmal nicht: Scheduler-Methoden, die im Hauptprozess ausgeführt werden sollen, nur über Invoke() aufrufen!
 
 
     xml::Document_ptr request_document;
@@ -777,7 +777,7 @@ void Web_service_operation::execute_stylesheets()
 
 
     xml::Element_ptr service_request_element = request_document.createElement( "service_request" );
-    service_request_element.appendChild( _web_service->dom_element( request_document ) );           // <web_service> anh�ngen
+    service_request_element.appendChild( _web_service->dom_element( request_document ) );           // <web_service> anhängen
     service_request_element.setAttribute( "url", http_request()->url() );
 
     xml::Element_ptr content_element = service_request_element.append_new_element( "content" );
@@ -785,11 +785,11 @@ void Web_service_operation::execute_stylesheets()
     //if( is_xml )
     {
         xml::Element_ptr data_element = request_document.replaceChild( service_request_element, request_document.documentElement() );
-        content_element.appendChild( data_element );      // request_data anh�ngen
+        content_element.appendChild( data_element );      // request_data anhängen
     }
     //else
     //{
-    //    content_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anh�ngen (nicht spezifiziert)
+    //    content_element.appendChild( request_document.createTextNode( request_data ) );     // POST-Daten als Text anhängen (nicht spezifiziert)
     //}
 
 
@@ -816,7 +816,7 @@ void Web_service_operation::execute_stylesheets()
 
 
 
-    // KOMMANDO AUSF�HREN
+    // KOMMANDO AUSFÜHREN
 
     xml::Document_ptr response_document;
 

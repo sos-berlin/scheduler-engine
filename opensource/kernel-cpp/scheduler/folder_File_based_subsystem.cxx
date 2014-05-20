@@ -88,7 +88,7 @@ string File_based_subsystem::name_from_xml_attributes( const xml::Element_ptr& e
     for( int i = 0; i < name_attributes.size(); i++ )  
     {
         if( i > 0 )  name += folder_name_separator;
-        name += element.getAttribute_mandatory( name_attributes[ i ] );     // name=  oder, f�r Order, job_chain= und id= durch Komma getrennt
+        name += element.getAttribute_mandatory( name_attributes[ i ] );     // name=  oder, für Order, job_chain= und id= durch Komma getrennt
 
         if( handle_attributes == remove_attributes )  element.removeAttribute( name_attributes[ i ] );
     }

@@ -180,7 +180,7 @@ string expand_class_path( const string& class_path_with_wildcards )
             else
                 new_class_path << Z_PATH_SEPARATOR << path;
         }
-        else; // Leere Eintr�ge ignorieren
+        else; // Leere Einträge ignorieren
     }
 
     string result = new_class_path;
@@ -340,7 +340,7 @@ Vm::~Vm()
 
     try
     {
-        //Java bleibt bei Prozessende h�ngen  close(); 
+        //Java bleibt bei Prozessende hängen  close(); 
     }
     catch( const exception& x ) { Z_LOG( Z_FUNCTION << ": " << x << "\n" ); }
 
@@ -439,7 +439,7 @@ void Vm::start()
             }
 /*
             else
-            if( static_foreign_jvm )        // veraltet (noch f�r hostjava -> hostole)
+            if( static_foreign_jvm )        // veraltet (noch für hostjava -> hostole)
             {
                 _vm = static_foreign_jvm;
                 _foreign = true;
@@ -585,7 +585,7 @@ void Vm::start()
 
     new_instances( _new_instances );
 
-//    load_standard_classes();           // Wirkt nat�rlich nur f�r dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes() TU 1.11.13
+//    load_standard_classes();           // Wirkt natürlich nur für dieses Vm. Es kann in einer DLL aber noch eines geben, deshalb standard_classes() TU 1.11.13
 }
 
 //----------------------------------------------------------------------------------Vm::load_module
@@ -693,7 +693,7 @@ void Vm::close()
 
 void Vm::set_destroy_vm( bool destroy )
 { 
-    if( !destroy  &&  !_dont_destroy )  AddRef();       // Nie freigeben, static_vm bleibt erhalten f�r erneute Verwendung
+    if( !destroy  &&  !_dont_destroy )  AddRef();       // Nie freigeben, static_vm bleibt erhalten für erneute Verwendung
     if( destroy   &&   _dont_destroy )  Release();      // AddRef() wieder aufheben
 
     _dont_destroy = !destroy; 
@@ -1065,7 +1065,7 @@ void Env::delete_global_ref(jobject jo)
 }
 
 //--------------------------------------------------------------------------Env::is_byte_array_class
-// Das k�nnte man optimieren.
+// Das könnte man optimieren.
 
 bool Env::is_byte_array_class( jobject jo )
 {
@@ -1085,7 +1085,7 @@ bool Env::is_byte_array_class( jobject jo )
 }
 
 //-----------------------------------------------------------------------Env::is_string_array_class
-// Das k�nnte man optimieren.
+// Das könnte man optimieren.
 
 bool Env::is_string_array_class( jobject jo )
 {
@@ -1167,7 +1167,7 @@ void Env::throw_java( const string& text1, const string& text2 )
 
         if (jthrowable x = jenv->ExceptionOccurred()) {
             Z_LOG2( Vm::java_log_category, "Vm::static_vm=" << (void*)Vm::static_vm << "  _debug=" << ( Vm::static_vm? Vm::static_vm->_debug : false ) << "\n" );
-            if( Vm::static_vm && Vm::static_vm->_debug )  { Z_LOG2( Vm::java_log_category, "jenv->ExceptionDescribe()\n" ); jenv->ExceptionDescribe(); }     // Ausgabe �ber java_vfprintf()
+            if( Vm::static_vm && Vm::static_vm->_debug )  { Z_LOG2( Vm::java_log_category, "jenv->ExceptionDescribe()\n" ); jenv->ExceptionDescribe(); }     // Ausgabe über java_vfprintf()
             jenv->ExceptionClear();
 
             if (jclass c = jenv->GetObjectClass(x)) {
@@ -1773,7 +1773,7 @@ void Global_jobject::assign_add_ref( jobject jo )
         if( jo )
         {
             new_jobject = env.new_global_ref(jo);
-            env->DeleteLocalRef(jo);  // jo wird ung�ltig!
+            env->DeleteLocalRef(jo);  // jo wird ungültig!
         }
 
         if( _jvalue.l )

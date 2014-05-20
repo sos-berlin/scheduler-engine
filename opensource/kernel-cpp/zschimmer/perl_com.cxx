@@ -416,7 +416,7 @@ XS( XS_Zschimmer_call )
     catch( const exception&  x ) { error = true;  error_text = x.what(); }
     catch( const _com_error& x ) { error = true;  error_text = string_from_bstr( x.Description() ); }
 
-    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zur�ck!
+    if( error )  croak( error_text.c_str() );   // ACHTUNG: croak() kehrt nicht zurück!
 
     switch( result_type )
     {

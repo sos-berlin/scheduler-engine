@@ -6,13 +6,13 @@ package sos.spooler;
  * 
  * <p>
  * Ein Auftrag, der in der Auftragswarteschlange eines Jobs steht, veranlasst diesen, einen Jobschritt 
- * (also {@link Job_impl#spooler_process()}) durchzuf�hren.
+ * (also {@link Job_impl#spooler_process()}) durchzuführen.
  *
  * <p><br/><b>Beispiel</b>
  * <pre>
  *     Order order = spooler.create_order();
  *     order.set_id   ( "10001" );
- *     order.set_title( "Auftrag f�r Datensatz 10001" );
+ *     order.set_title( "Auftrag für Datensatz 10001" );
  *     order.set_state( "100" );
  *     spooler.job_chain( "jobkette1" ).add_order( order );
  * </pre>
@@ -21,7 +21,7 @@ package sos.spooler;
  * <pre>
  *     var order = spooler.create_order();
  *     order.id    = "10001";
- *     order.title = "Auftrag f�r Datensatz 10001";
+ *     order.title = "Auftrag für Datensatz 10001";
  *     order.state = 100;
  *     spooler.job_chain( "jobkette1" ).add_order( order );
  * </pre>
@@ -51,7 +51,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
      * <p>
      * Jeder Auftrag hat eine (innerhalb der Jobkette oder der Auftragswarteschlange des Jobs eindeutige) Kennung.
      * Diese Kennung sollten den zu verarbeitenden Daten entsprechen.
-     * �berlicherweise wird der Schl�ssel eines Datenbanksatzes verwendet.  
+     * Übrlicherweise wird der Schlüssel eines Datenbanksatzes verwendet.
      * <p>
      * Ohne diesen Aufruf vergibt der Aufruf {@link Job_chain#add_order(Order)} bzw. {@link Order_queue#add_order(Order)} eine Kennung.
      *  
@@ -79,12 +79,12 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     
     
     
-    /*+ Auftr�ge mit h�herer Priorit�t werden zuerst verarbeitet. */
+    /*+ Aufträge mit höherer Priorität werden zuerst verarbeitet. */
     public void         set_priority            ( int value )                       {                   com_call( ">priority", value    ); }
     
 
     
-    /*+ Auftr�ge mit h�herer Priorit�t werden zuerst abgearbeitet. */
+    /*+ Aufträge mit höherer Priorität werden zuerst abgearbeitet. */
     @SchedulerGetter
     public int              priority            ()                                  { return        int_com_call( "<priority"           ); }
     
@@ -101,7 +101,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     public Job_chain_node   job_chain_node      ()                                  { return (Job_chain_node)com_call( "<job_chain_node" ); }
 
     
-    /*+ Stellt den Zustand des Auftrags auf den Zustand ein, f�r den in der Jobkette der angegebene Job eingestellt ist.
+    /*+ Stellt den Zustand des Auftrags auf den Zustand ein, für den in der Jobkette der angegebene Job eingestellt ist.
      * 
      * <p>
      * Besser ist der Aufruf von {@link #set_state(String)}.
@@ -157,7 +157,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     
     
     /*+ Die Nutzlast, also Parameter des Auftrags.
-     * Neben der Auftragskennung (id), die den Auftrag identifiziert, k�nnen hier zus�tzliche
+     * Neben der Auftragskennung (id), die den Auftrag identifiziert, können hier zusätzliche
      * Angaben gemacht werden. 
      * 
      * @param payload Ein String oder ein {@link Variable_set}.
@@ -181,7 +181,7 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     
     
     
-    /*+ Pr�ft den COM-Typ der Nutzlast.
+    /*+ Prüft den COM-Typ der Nutzlast.
      * 
      * @param name "Spooler.Variable_set", "Hostware.Dyn_obj" oder "Hostware.Record".  
      * @return true, wenn die Nutzlast vom angegebenen COM-Typ ist. 
