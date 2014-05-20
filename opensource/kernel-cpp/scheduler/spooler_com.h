@@ -829,6 +829,9 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP            get_Setback_count           ( int* );
 
+    STDMETHODIMP            put_Ignore_max_orders       (VARIANT_BOOL);
+    STDMETHODIMP            get_Ignore_max_orders       (VARIANT_BOOL*);
+
   private:
     Fill_zero                  _zero_;
     Order*                     _order;

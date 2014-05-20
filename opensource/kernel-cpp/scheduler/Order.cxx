@@ -61,7 +61,8 @@ Order::Order( Standing_order_subsystem* subsystem )
     Com_order(this),
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
     javabridge::has_proxy<Order>(subsystem->spooler()),
-    _zero_(this+1)
+    _zero_(this+1),
+    _ignore_max_orders(false)
 {
     _com_log = new Com_log;
     _com_log->set_log( log() );
@@ -2929,6 +2930,12 @@ void Order::set_suspended( bool suspended )
 
         handle_changed_processable_state();
     }
+}
+
+
+void Order::set_ignore_max_orders(bool b)
+{
+    _ignore_max_orders = b;
 }
 
 //---------------------------------------------------------------------------------Order::start_now

@@ -213,6 +213,9 @@ struct Order : Com_order,
     bool                        suspended               ()                                          { return _suspended; }
     void                    set_suspended               ( bool b = true );
 
+    void                    set_ignore_max_orders       (bool b);
+    bool                        ignore_max_orders       ()                                          { return _ignore_max_orders; }
+
     void                        set_on_blacklist        ();
     void                        remove_from_blacklist   ();
     bool                        is_on_blacklist         ()                                          { return _is_on_blacklist; }
@@ -407,6 +410,8 @@ struct Order : Com_order,
   //Time                       _signaled_next_time;
     ptr<http::Operation>       _http_operation;
     ptr<Com_log>               _com_log;                // COM-H�lle f�r Log
+
+    bool                       _ignore_max_orders;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -892,11 +897,12 @@ struct Job_chain : Com_job_chain,
     Order_subsystem_impl*       order_subsystem             () const;
 
     int                         number_of_touched_orders    () const;
+    int                         number_of_touched_orders_ignoring_max_orders     () const;
     bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }
     bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
-    Untouched_is_allowed        is_ready_for_new_order_processing() const;
+    Untouched_is_allowed        is_ready_for_new_order_processing(bool ignore_max_orders = false) const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
     void                        check_max_orders            () const;
@@ -979,6 +985,7 @@ struct Order_queue : Com_order_queue,
     int                         order_count                 ( Read_transaction* ) const;
     int                         java_order_count            () const { return order_count((Read_transaction*)NULL); }  // Provisorisch, solange Java Read_transaction nicht kennt
     int                         touched_order_count         ();
+    int                         touched_and_ignoring_max_orders_order_count() const;
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
     Order*                      first_immediately_processable_order(Untouched_is_allowed, const Time& now ) const;
@@ -988,6 +995,7 @@ struct Order_queue : Com_order_queue,
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
+    bool                        next_order_ignores_max_orders(const Time& now) const;
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, Untouched_is_allowed, const Time& now, const string& cause );
     Time                        next_time                   ();
     bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }

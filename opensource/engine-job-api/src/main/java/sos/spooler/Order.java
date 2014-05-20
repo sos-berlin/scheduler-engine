@@ -261,6 +261,11 @@ public class Order extends Idispatch implements HasBean<OrderBean>
     @SchedulerGetter
     public int              setback_count       ()                                  { return ((Integer) com_call( "<setback_count"     )).intValue(); }
 
+    public void         set_ignore_max_orders   ( boolean b )                       {                   com_call( ">ignore_max_orders", b ); }
+    @SchedulerGetter
+    public boolean          ignore_max_orders   ()                                  { return    boolean_com_call( "<ignore_max_orders" ); }
+
+
     public final OrderBean toBean() {
         return new OrderBean(this);
     }
