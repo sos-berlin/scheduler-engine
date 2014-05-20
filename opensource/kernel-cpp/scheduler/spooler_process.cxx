@@ -1143,6 +1143,8 @@ void Process_class::set_max_processes( int max_processes )
     if( _process_set.size() > max_processes )  log()->warn( message_string( "SCHEDULER-419", max_processes, _process_set.size() ) );
 
     _max_processes = max_processes;
+
+    notify_a_process_is_idle();
 }
 
 //------------------------------------------------------------Process_class::check_remote_scheduler
