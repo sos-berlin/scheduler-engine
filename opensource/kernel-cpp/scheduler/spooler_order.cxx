@@ -3204,8 +3204,7 @@ void Job_chain::check_max_orders() const
 {
     if (is_max_orders_reached()) {
         int count = number_of_touched_orders();
-        int orders_ignoring_max_orders = number_of_touched_orders_ignoring_max_orders();
-        if (count - orders_ignoring_max_orders > _max_orders) {
+        if (count - number_of_touched_orders_ignoring_max_orders() > _max_orders) {
             _log->error(message_string("SCHEDULER-719", _max_orders, count));
             //Keine Exception nach Order::occupy_for_task() auslösen oder _task=NULL setzen!  Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", _max_orders, count));
         }
