@@ -485,7 +485,6 @@ struct Spooler : Object,
     void                        assert_are_orders_distributed( const string& message_text );
     string                      cluster_member_id           ();
     string                      distributed_member_id       ();
-    string                      db_cluster_member_id        ();
     string                      db_distributed_member_id    ();
 
 

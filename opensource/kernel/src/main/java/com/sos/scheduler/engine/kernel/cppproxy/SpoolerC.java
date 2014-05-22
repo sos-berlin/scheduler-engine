@@ -103,7 +103,6 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     void assert_are_orders_distributed(String message_text);
     String cluster_member_id();
     String distributed_member_id();
-    String db_cluster_member_id();
     String db_distributed_member_id();
     SettingsC modifiable_settings();
 //    Process_id                  get_next_process_id         ()                                  { return _next_process_id++; }

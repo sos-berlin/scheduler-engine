@@ -817,7 +817,7 @@ struct Job_chain : Com_job_chain,
     bool                     is_visible                     () const                                { return _visible == visible_yes; }
 
     bool                     is_distributed                 () const                                { return _is_distributed; }
-    string                      db_cluster_member_id        () const;
+    string                      db_distributed_member_id    () const;
 
     void                    set_orders_are_recoverable      ( bool b )                              { _orders_are_recoverable = b; }
     bool                        orders_are_recoverable      () const                                { return _orders_are_recoverable; }
