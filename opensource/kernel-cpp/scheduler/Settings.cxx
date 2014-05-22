@@ -60,35 +60,35 @@ void Settings::set(int number, const string& value) {
     if (_freezed) z::throw_xc("FREEZED", Z_FUNCTION);
 
     // number wird in Java SettingName festgelegt.
-    switch (number) {
-        case 1: 
+    switch ((Setting_name)number) {
+        case setting_db_name: 
             _db_name = value; 
             break;
-        case 2: 
+        case setting_job_java_class_pass:
             _job_java_classpath = value; 
             break;
-        case 3:
+        case setting_html_dir:
             _html_dir = value;
             break;
-        case 4:
+        case setting_job_java_options:
             _job_java_options = value;
             break;
-        case 5:
+        case setting_use_java_persistence:
             _use_java_persistence = as_bool(value);
             break;
-        case 7:
+        case setting_order_distributed_balanced:
             _order_distributed_balanced = as_bool(value);
             break;
-        case 8:
+        case setting_supervisor_configuration_polling_interval:
             _supervisor_configuration_polling_interval = as_int(value);
             break;
-        case 9:
+        case setting_cluster_restart_after_emergency_abort:
             _cluster_restart_after_emergency_abort = as_bool(value);
             break;
-        case 12:
+        case setting_always_create_database_tables:
             _always_create_database_tables = as_bool(value);
             break;
-        case 13: {
+        case setting_roles: {
             _roles.clear();
             vector<string> role_strings = vector_split("( +)|( *, *)", value);
             Z_FOR_EACH(vector<string>, role_strings, i) {

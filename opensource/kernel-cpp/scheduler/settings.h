@@ -11,37 +11,32 @@ namespace com_objects {
 }
 
 enum Setting_name {
-    setting_0,
+    // Dieselben Codes wir in CppSettings.java
 
     /** Wie -db= */
-    setting_db_name,
+    setting_db_name = 1,
 
-    /** Erweitert den Class-Path für einen Java-Job. */
-    setting_job_java_class_pass,
+    /** Erweitert den Class-Path fÃ¼r einen Java-Job. */
+    setting_job_java_class_pass = 2,
 
-    /** Default für factory.ini [spooler] html_dir */
-    setting_html_dir,
+    /** Default fÃ¼r factory.ini [spooler] html_dir */
+    setting_html_dir = 3,
 
-    /** Grundeinstellung der Java-Optionen für alle Jobs. */
-    setting_job_java_options,
+    /** Grundeinstellung der Java-Optionen fÃ¼r alle Jobs. */
+    setting_job_java_options = 4,
 
-    /** Datenbank über neue Java-Schnittstelle statt über die alte Hostware. */
-    setting_use_java_persistence,
+    /** Datenbank Ã¼ber neue Java-Schnittstelle statt Ã¼ber die alte Hostware. */
+    setting_use_java_persistence = 5,
 
-    settings_6,
+    setting_order_distributed_balanced = 7,
 
-    setting_order_distributed_balanced,
+    setting_supervisor_configuration_polling_interval = 8,
 
-    setting_supervisor_configuration_polling_interval,
+    setting_cluster_restart_after_emergency_abort = 9,
 
-    setting_cluster_restart_after_emergency_abort,
-
-    setting_10,
-    setting_11,
-
-    setting_always_create_database_tables,
+    setting_always_create_database_tables = 12,
     
-    setting_roles
+    setting_roles = 13
 };
 
 
