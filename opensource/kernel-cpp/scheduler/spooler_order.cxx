@@ -2,6 +2,7 @@
 
 #include "spooler.h"
 #include "Order_subsystem_impl.h"
+#include "../javaproxy/java__lang__Class.h"
 
 using stdext::hash_set;
 using stdext::hash_map;
@@ -147,7 +148,7 @@ bool Standing_order_subsystem::subsystem_activate()
 
 //---------------------------------------------------------Standing_order_subsystem::new_file_based
 
-ptr<Order> Standing_order_subsystem::new_file_based()
+ptr<Order> Standing_order_subsystem::new_file_based(const string& source)
 {
     return new Order( this );
 }
@@ -439,6 +440,8 @@ ptr<Order_subsystem> new_order_subsystem( Scheduler* scheduler )
 Order_subsystem::Order_subsystem( Scheduler* scheduler ) 
 : 
     file_based_subsystem<Job_chain>( scheduler, this, Scheduler_object::type_order_subsystem )
+    //javabridge::has_proxy<Order_subsystem>(scheduler)
+    //_typed_java_sister(java_sister())
 {
 }
 
@@ -469,6 +472,15 @@ void Order_subsystem_impl::close()
 
 
     file_based_subsystem<Job_chain>::close();
+}
+
+//----------------------------------------------------------Order_subsystem_impl::typed_java_sister
+
+OrderSubsystemJ& Order_subsystem_impl::typed_java_sister() {
+    // OrderSubsystem is a @Singleton in Dependency Injector and constructed by the injector configuration module. So we don't construct OrderSubsystem via CppProxy
+    if (!_typed_java_sister) 
+        _typed_java_sister = spooler()->schedulerJ().instance(OrderSubsystemJ::java_class_()->get_jobject());
+    return _typed_java_sister;
 }
 
 //-------------------------------------------------------Order_subsystem_impl::subsystem_initialize
@@ -519,7 +531,7 @@ ptr<Job_chain_folder_interface> Order_subsystem_impl::new_job_chain_folder( Fold
 
 //-------------------------------------------------------------Order_subsystem_impl::new_file_based
 
-ptr<Job_chain> Order_subsystem_impl::new_file_based()
+ptr<Job_chain> Order_subsystem_impl::new_file_based(const string& source)
 {
     return new Job_chain( _spooler );
 }
@@ -980,9 +992,7 @@ namespace job_chain {
 Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )         
 : 
     Scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
-    javabridge::has_proxy<Node>(job_chain->spooler()),
     _zero_(this+1), 
-    _typed_java_sister(java_sister()),
     _job_chain(job_chain),
     _type(type),
     _order_state(order_state)
@@ -1179,7 +1189,7 @@ void Node::database_record_store()
     if (_state == s_active) {
         if(_db_action != _action) {
             if (_spooler->settings()->_use_java_persistence)
-                _typed_java_sister.persistState();
+                _spooler->order_subsystem()->typed_java_sister().persistNodeState(java_sister());
             else
             if (_db_action != _action) {
                 for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
@@ -1255,6 +1265,14 @@ Absolute_path Node::job_chain_path() const
     return _job_chain->path(); 
 }
 
+//-------------------------------------------------------------------------------End_node::End_node
+
+End_node::End_node(Job_chain* job_chain, const Order::State& state) 
+: 
+    Node(job_chain, state, n_end), 
+    javabridge::has_proxy<End_node>(job_chain->spooler()) 
+{}
+
 //----------------------------------------------------------------Order_queue_node::why_dom_element
 
 xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc, const Time& now) const {
@@ -1270,8 +1288,7 @@ xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc,
 
 Order_queue_node::Order_queue_node( Job_chain* job_chain, const Order::State& state, Node::Type type ) 
 : 
-    Node( job_chain, state, type ),
-    javabridge::has_proxy<Order_queue_node>(job_chain->spooler())
+    Node( job_chain, state, type )
 {
     _order_queue = new Order_queue( this );
 }
@@ -1337,7 +1354,7 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
 
     if( is_ready_for_order_processing() )
     {
-        Virgin_is_allowed v = _job_chain->is_ready_for_new_order_processing();
+        Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing();
         result = order_queue()->fetch_and_occupy_order(occupying_task, v, now, cause);
     }
 
@@ -1549,6 +1566,7 @@ Job* Job_node::job_or_null() const
 Nested_job_chain_node::Nested_job_chain_node( Job_chain* job_chain, const Order::State& state, const Absolute_path& job_chain_path ) 
 : 
     Node( job_chain, state, n_job_chain ),
+    javabridge::has_proxy<Nested_job_chain_node>(spooler()),
     _nested_job_chain_path( job_chain_path ),
     _nested_job_chain(this)
 {
@@ -1864,7 +1882,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "file_order_source" ) )      // Wegen _is_on_blacklist und _is_virgin
+        if( e.nodeName_is( "file_order_source" ) )      // Wegen _is_on_blacklist und _is_touched
         {
             ptr<Directory_file_order_source_interface> d = new_directory_file_order_source( this, e );
             _order_sources._order_source_list.push_back( +d );
@@ -3198,12 +3216,12 @@ void Job_chain::check_max_orders() const
 
 //-----------------------------------------------------Job_chain::is_ready_for_new_order_processing
 
-Virgin_is_allowed Job_chain::is_ready_for_new_order_processing() const
+Untouched_is_allowed Job_chain::is_ready_for_new_order_processing() const
 {
     bool result = 
        is_ready_for_order_processing() &&
        !is_max_orders_reached();
-    return result? virgin_allowed : virgin_not_allowed;
+    return result? untouched_allowed : untouched_not_allowed;
 }
 
 //-----------------------------------------------------------------Job_chain::is_max_orders_reached
@@ -4179,7 +4197,8 @@ void Order_queue::tip_for_new_distributed_order()
     {
         _has_tip_for_new_order = true;
         if( Job_node* job_node = Job_node::try_cast( _order_queue_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal( Z_FUNCTION );
+            if( Job* job = job_node->job_or_null() )  
+                job->on_order_possibly_available();
     }
 }
 
@@ -4211,13 +4230,13 @@ Order* Order_queue::first_processable_order() const
 
 bool Order_queue::has_immediately_processable_order(const Time& now)
 { 
-    Virgin_is_allowed v = _job_chain->is_ready_for_new_order_processing();
+    Untouched_is_allowed v = _job_chain->is_ready_for_new_order_processing();
     return first_immediately_processable_order(v, now) != NULL; 
 }
 
 //-------------------------------------------------Order_queue::first_immediately_processable_order
 
-Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin_is_allowed, const Time& now) const
+Order* Order_queue::first_immediately_processable_order(Untouched_is_allowed untouched_is_allowed, const Time& now) const
 {
     // now kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
 
@@ -4227,7 +4246,7 @@ Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin
     {
         Order* order = *o;
 
-        if( order->is_immediately_processable( now )  &&  (virgin_is_allowed  ||  !order->is_virgin()))
+        if( order->is_immediately_processable( now )  &&  (untouched_is_allowed  ||  order->is_touched()))
         {
             result = order;
             result->_setback = Time(0);
@@ -4259,7 +4278,7 @@ xml::Element_ptr Order_queue::why_dom_element(const xml::Document_ptr& doc, cons
 
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order
 
-Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allowed virgin_is_allowed,
+Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Untouched_is_allowed untouched_is_allowed,
     const Time& now, const string& cause)
 {
     assert( occupying_task );
@@ -4267,7 +4286,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
-    ptr<Order> order = first_immediately_processable_order(virgin_is_allowed, now);
+    ptr<Order> order = first_immediately_processable_order(untouched_is_allowed, now);
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
@@ -4276,7 +4295,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
     {
         withdraw_distributed_order_request();
 
-        if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
+        if (ptr<Order> o = load_and_occupy_next_distributed_order_from_database(occupying_task, untouched_is_allowed, now)) {  // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
             assert(o->_is_distributed);
             if (o->_state != o->_occupied_state) {  // Bei <job_chain_node action="next_state">. Siehe Order::set_state1(), SCHEDULER-859. Order::set_dom() ändert _state, was wir hier speichern.
                 o->_task = NULL;
@@ -4291,7 +4310,7 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
     // Die Dateiaufträge (File_order_source)
 
-    if( !order && virgin_is_allowed)
+    if( !order && untouched_is_allowed)
     {
         Z_FOR_EACH( Order_source_list, _order_source_list, it )
         {
@@ -4330,9 +4349,9 @@ Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allow
 
 //--------------------------------Order_queue::load_and_occupy_next_distributed_order_from_database
 
-Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Virgin_is_allowed virgin_is_allowed, const Time& now)
+Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Untouched_is_allowed untouched_is_allowed, const Time& now)
 {
-    if (!virgin_is_allowed)  _job_chain->assert_is_not_distributed(Z_FUNCTION);
+    if (!untouched_is_allowed)  _job_chain->assert_is_not_distributed(Z_FUNCTION);
 
     Order* result    = NULL;
     S      select_sql;

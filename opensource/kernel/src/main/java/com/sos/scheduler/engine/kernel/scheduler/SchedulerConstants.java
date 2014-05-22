@@ -14,6 +14,7 @@ public final class SchedulerConstants {
     public static final Charset logFileEncoding = schedulerEncoding;
     public static final DateTimeZone schedulerTimeZone = UTC;
     public static final int taskIdOffset = 3;   // 1 wird nicht benutzt; 2 ist für Schedulerstartsatz; 3 ist die erste TaskId
+    public static final String remoteSchedulerParameterName = "scheduler.remote_scheduler";
 
     private SchedulerConstants() {}
 }

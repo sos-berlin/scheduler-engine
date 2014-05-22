@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js866
 
 import JS866IT._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.{TaskEndedEvent, TaskStartedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent, TaskStartedEvent}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
@@ -16,7 +15,7 @@ import org.scalatest.junit.JUnitRunner
 final class JS866IT extends FunSuite with ScalaSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(
-    testClass = getClass,
+      testClass = getClass,
       mainArguments = List("-tcp-port="+ findAvailablePort()),
       terminateOnError = false)
 

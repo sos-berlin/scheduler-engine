@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1081
 import JS1081IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderKey}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest

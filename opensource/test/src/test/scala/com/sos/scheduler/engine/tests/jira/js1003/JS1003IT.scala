@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1003
 
 import JS1003IT._
-import com.sos.scheduler.engine.data.folder.JobChainPath
 import com.sos.scheduler.engine.data.order._
-import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.Action
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ModifyOrderCommand}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem

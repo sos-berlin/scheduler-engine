@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.test.schedulertest;
 
 import com.google.common.collect.ImmutableList;
-import com.sos.scheduler.engine.eventbus.EventHandler;
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.scheduler.SchedulerCloseEvent;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;
-import com.sos.scheduler.engine.data.event.Event;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.contains;

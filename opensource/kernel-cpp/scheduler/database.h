@@ -57,7 +57,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
     string                      db_name                 ()                                          { return _db_name; }
     void                    set_db_name                 (const string& o)                           { _db_name = o; }
     sql::Database_descriptor*   database_descriptor     ()                                          { return &_database_descriptor; }
-    string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
+    string                      error                   ()                                          { return _error; }
     bool                        is_waiting              () const                                    { return _waiting; }
     int                         order_id_length_max     ()                                          { return opened()? _order_id_length_max : const_order_id_length_max; }
 
@@ -93,8 +93,6 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object
 
 
     Fill_zero                  _zero_;
-    Thread_semaphore           _lock;
-    Thread_semaphore           _error_lock;
     
     string                     _variables_tablename;
     string                     _orders_tablename;
@@ -184,7 +182,6 @@ struct Read_transaction
     Database*                  _db;
     bool                       _log_sql;
     Prefix_log*                _log;
-    Mutex_guard                _guard;
     Spooler*                   _spooler;
 };
 

@@ -7,8 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.eventbus.{SchedulerEventBus, HotEventHandler}
 import com.sos.scheduler.engine.kernel.job.Task
 import com.sos.scheduler.engine.test.EventPipe.TimeoutException

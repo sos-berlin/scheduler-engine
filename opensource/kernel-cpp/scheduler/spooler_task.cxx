@@ -1,12 +1,4 @@
 // $Id: spooler_task.cxx 15048 2011-08-26 08:59:42Z ss $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-/*
-    Hier sind implementiert
-
-    Spooler_object
-    Object_set
-    Task
-*/
-
 #include "spooler.h"
 #include "file_logger.h"
 #include "../kram/sleep.h"
@@ -28,35 +20,54 @@ namespace scheduler {
 static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
+//--------------------------------------------------------------------------------------------Calls
+
+namespace job {
+    DEFINE_SIMPLE_CALL(Task, Task_starting_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_opening_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_step_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Try_next_step_call)
+    DEFINE_SIMPLE_CALL(Task, Task_end_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Next_spooler_process_call)
+    DEFINE_SIMPLE_CALL(Task, Next_order_step_call)
+    DEFINE_SIMPLE_CALL(Task, Task_idle_timeout_call)
+    DEFINE_SIMPLE_CALL(Task, Task_end_with_period_call)
+    DEFINE_SIMPLE_CALL(Task, Task_locks_are_available_call)
+    DEFINE_SIMPLE_CALL(Task, Task_check_for_order_call)
+    DEFINE_SIMPLE_CALL(Task, Remote_task_running_call)
+    DEFINE_SIMPLE_CALL(Task, Task_on_success_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_on_error_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_exit_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_release_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_wait_for_subprocesses_completed_call)
+    DEFINE_SIMPLE_CALL(Task, Task_ended_completed_call)
+    DEFINE_SIMPLE_CALL(Task, End_task_call)
+    DEFINE_SIMPLE_CALL(Task, Warn_longer_than_call)
+    DEFINE_SIMPLE_CALL(Task, Task_timeout_call)
+    DEFINE_SIMPLE_CALL(Task, Try_deleting_files_call)
+    DEFINE_SIMPLE_CALL(Task, Killing_task_call)
+    DEFINE_SIMPLE_CALL(Task, Subprocess_timeout_call)
+}
+
+using namespace job;
+
 //------------------------------------------------------------------------------Task_lock_requestor
 
-struct Task_lock_requestor : lock::Requestor
-{
-    Task_lock_requestor( Task* task )
-    : 
+struct Task_lock_requestor : lock::Requestor {
+    Task_lock_requestor( Task* task ) : 
         Requestor( task ), 
         _task(task) 
-    {
-    }
+    {}
 
-    ~Task_lock_requestor()
-    {
-    }
+    ~Task_lock_requestor() {}
 
-
-    // Requestor:
-
-    bool locks_are_available() const
-    {
+    bool locks_are_available() const {
         return locks_are_available_for_holder( _task->_lock_holder );
     }
 
-    void on_locks_are_available()                                      
-    { 
+    void on_locks_are_available() { 
         _task->on_locks_are_available( this );
     }
-
-  //void                        on_removing_lock            ( lock::Lock* l )                       { _job->on_removing_lock( l ); }
 
   private:
     Task*                      _task;
@@ -66,8 +77,7 @@ struct Task_lock_requestor : lock::Requestor
 
 string start_cause_name( Start_cause cause )
 {
-    switch( cause )
-    {
+    switch( cause ) {
         case cause_none               : return "none";
         case cause_period_once        : return "period_once";
         case cause_period_single      : return "period_single";
@@ -90,11 +100,9 @@ string start_cause_name( Start_cause cause )
 xml::Element_ptr Task_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
 {
     xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
-    
     xml::Element_ptr task_subsystem_element = dom_document.createElement( "task_subsystem" );
 
-    if( show_what.is_set( show_statistics ) ) {
-        
+    if( show_what.is_set( show_statistics ) ) {        
         xml::Element_ptr statistics_element = task_subsystem_element.append_new_element( "task_subsystem.statistics" );
         xml::Element_ptr task_statistics_element = statistics_element.append_new_element( "task.statistics" );
         task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_running ));
@@ -104,8 +112,6 @@ xml::Element_ptr Task_subsystem::dom_element( const xml::Document_ptr& dom_docum
 
     result.appendChild( task_subsystem_element );
     return result;
-
-  //  return Subsystem::dom_element( dom_document, show_what );
 }
 
 //-------------------------------------------------------Task_subsystem::state_task_statistic_element
@@ -161,12 +167,13 @@ int Task_subsystem::count_tasks_exist( ) const
 
 //---------------------------------------------------------------------------------------Task::Task
 
-Task::Task( Job* job )
+Task::Task(Standard_job* job)
 :
     Scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
     javabridge::has_proxy<Task>(job->_spooler),
     _zero_(this+1),
     _job(job),
+    _call_register(this),
     _history(&job->_history,this),
     _timeout(Duration::eternal),
     _lock_requestors( 1+lock_level__max ),
@@ -203,10 +210,10 @@ Task::Task( Job* job )
 
 Task::~Task()
 {
-    if( _file_logger )  _file_logger->set_async_manager( NULL );
+    if( _file_logger )  
+        _file_logger->set_async_manager( NULL );
 
-    try
-    {
+    try {
         close();
     }
     catch( const exception& x ) { _log->warn( x.what() ); }
@@ -227,57 +234,42 @@ void Task::job_close()
 
 void Task::close()
 {
-    if( !_closed )
-    {
-        if( _file_logger )
-        {
+    if( !_closed ) {
+        if( _file_logger ) {
             _file_logger->set_async_manager( NULL );
             _file_logger->close();
         }
 
-        FOR_EACH( Registered_pids, _registered_pids, p )  p->second->close();
+        FOR_EACH( Registered_pids, _registered_pids, p )  
+            p->second->close();
 
-        if( _operation )
-        {
-            // Was machen wir jetzt?
-            // _operation->kill()?
+        if( _operation ) {
             Z_LOG2( "scheduler", *this << ".close(): Operation active: " << _operation->async_state_text() << "\n" );
-
-            try
-            {
+            try {
                 _operation->async_kill();  // do_kill() macht nachher das gleiche
             }
             catch( exception& x )  { Z_LOG2( "scheduler", "Task::close() _operation->async_kill() ==> " << x.what() << "\n" ); }
-
-            _operation = NULL;
+            close_operation();
         }
-
 
         _order_for_task_end = NULL;
         
-        if( _order )  
-        {
+        if( _order ) {
             _order->remove_from_job_chain();
             _order->close();  //detach_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
         }
 
-
-        if( _module_instance )
-        {
-            try
-            {
+        if( _module_instance ) {
+            try {
                 do_kill();
             }
             catch( exception& x )  { Z_LOG2( "scheduler", "Task::close() do_kill() ==> " << x.what() << "\n" ); }
-
             _module_instance->detach_task();
             _module_instance->close();
         }
 
 /* 2005-09-24 nicht blockieren. Scheduler kann sich beenden (nach timeout), auch wenn Tasks laufen
-        try
-        {
-            //do_close();
+        try {
             Async_operation* op = do_close__start();
             if( !op->async_finished() )  _log->warn( "Warten auf Abschluss der Task ..." );
             do_close__end();
@@ -286,18 +278,17 @@ void Task::close()
 */
 
         // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
-        THREAD_LOCK_DUMMY( _terminated_events_lock )
-        {
+        THREAD_LOCK_DUMMY( _terminated_events_lock ) {
             FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
             _terminated_events.clear();
         }
 
         _closed = true;
-
         _history.end();    // DB-Operation, kann Exception auslösen
     }
 
-    if( _lock_holder )  _lock_holder->release_locks(),  _lock_holder = NULL;
+    if( _lock_holder )  
+        _lock_holder->release_locks(),  _lock_holder = NULL;
 
     set_state_direct( s_closed );
 }
@@ -307,7 +298,6 @@ void Task::close()
 void Task::init()
 {
     set_state_direct( s_loading );
-
     _file_logger = Z_NEW( File_logger( _log ) );
     _file_logger->set_object_name( obj_name() );
     _spooler->_task_subsystem->add_task( this );
@@ -318,16 +308,13 @@ void Task::init()
 void Task::set_dom( const xml::Element_ptr& element )
 {
     _force_start = element.bool_getAttribute( "force_start" );
-
+    
     string web_service_name = element.getAttribute( "web_service" );
     if( web_service_name != "" )  set_web_service( web_service_name );
 
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
+    DOM_FOR_EACH_ELEMENT( element, e ) {
         if( e.nodeName_is( "environment" ) )
-        {
             _environment->set_dom( e, NULL, "variable" );
-        }
     }
 }
 
@@ -338,8 +325,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 {
     xml::Element_ptr task_element = document.createElement( "task" );
 
-    if( !show.is_set( show_for_database_only ) )
-    {
+    if( !show.is_set( show_for_database_only ) ) {
         if( _job )
         task_element.setAttribute( "job"             , _job->path() );
 
@@ -377,29 +363,18 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
         task_element.setAttribute( "log_file"        , _log->filename() );
 
-        if( const Module_task* t = dynamic_cast<const Module_task*>( this ) )
-        {
-            if( t->_module_instance )
-            {
-                if( t->_module_instance->_in_call )
-                task_element.setAttribute( "calling"         , t->_module_instance->_in_call->name() );
-
-                task_element.setAttribute_optional( "process", t->_module_instance->process_name() );
-
-                int pid = t->_module_instance->pid();
-                if( pid )
-                {
-                    task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
-
-                    try
-                    {
-                        zschimmer::Process process ( pid );
-                        task_element.setAttribute( "priority", process.priority_class() );
-                    }
-                    catch( exception& x )
-                    {
-                        Z_LOG2( "scheduler", Z_FUNCTION << " priority_class() ==> " << x.what() << "\n" );
-                    }
+        if( _module_instance ) {
+            if( _module_instance->_in_call )
+                task_element.setAttribute( "calling", _module_instance->_in_call->name() );
+            task_element.setAttribute_optional( "process", _module_instance->process_name() );
+            if (int pid = _module_instance->pid()) {
+                task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
+                try {
+                    zschimmer::Process process ( pid );
+                    task_element.setAttribute( "priority", process.priority_class() );
+                }
+                catch( exception& x ) {
+                    Z_LOG2( "scheduler", Z_FUNCTION << " priority_class() ==> " << x.what() << "\n" );
                 }
             }
         }
@@ -412,61 +387,50 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         if( Order* order = _order? _order : _order_for_task_end )  dom_append_nl( task_element ),  task_element.appendChild( order->dom_element( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
 
-        if( !_registered_pids.empty() )
-        {
+        if( !_registered_pids.empty() ) {
             xml::Element_ptr subprocesses_element = document.createElement( "subprocesses" );
-            FOR_EACH_CONST( Registered_pids, _registered_pids, it )
-            {
-                const Registered_pid* p = it->second;
-
-                if( p )
-                {
+            FOR_EACH_CONST( Registered_pids, _registered_pids, it ) {
+                if (const Registered_pid* p = it->second) {
                     xml::Element_ptr subprocess_element = document.createElement( "subprocess" );
                     subprocess_element.setAttribute( "pid", p->_pid );
-
-                    try
-                    {
+                    try {
                         zschimmer::Process process ( p->_pid );
                         subprocess_element.setAttribute( "priority", process.priority_class() );
                     }
-                    catch( exception& x )
-                    {
+                    catch( exception& x ) {
                         Z_LOG2( "scheduler", Z_FUNCTION << " priority_class() ==> " << x.what() << "\n" );
                     }
 
-
                     if( p->_timeout_at != Time::never )
-                    subprocess_element.setAttribute( "timeout_at", p->_timeout_at.xml_value() );
+                        subprocess_element.setAttribute( "timeout_at", p->_timeout_at.xml_value() );
 
                     if( p->_title != "" )
-                    subprocess_element.setAttribute( "title", p->_title );
+                        subprocess_element.setAttribute( "title", p->_title );
 
                     if( p->_killed )
-                    subprocess_element.setAttribute( "killed", "yes" );
+                        subprocess_element.setAttribute( "killed", "yes" );
 
                     if( p->_ignore_error )
-                    subprocess_element.setAttribute( "ignore_error", "yes" );
+                        subprocess_element.setAttribute( "ignore_error", "yes" );
 
                     if( p->_ignore_signal )
-                    subprocess_element.setAttribute( "ignore_signal", "yes" );
+                        subprocess_element.setAttribute( "ignore_signal", "yes" );
 
                     if( p->_wait )
-                    subprocess_element.setAttribute( "wait", "yes" );
+                        subprocess_element.setAttribute( "wait", "yes" );
 
                     subprocesses_element.appendChild( subprocess_element );
                 }
             }
-
             task_element.appendChild( subprocesses_element );
         }
-
         task_element.appendChild( _log->dom_element( document, show ) );
     }
 
     task_element.setAttribute( "force_start", _force_start? "yes" : "no" );
 
     if( _web_service )
-    task_element.setAttribute( "web_service"     , _web_service->name() );
+        task_element.setAttribute( "web_service"     , _web_service->name() );
 
     if( _environment  &&  !_environment->is_empty() )
         task_element.appendChild( _environment->dom_element( document, "environment", "variable" ) );
@@ -479,10 +443,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 xml::Document_ptr Task::dom( const Show_what& show ) const
 {
     xml::Document_ptr document;
-
     document.create();
     document.appendChild( dom_element( document, show ) );
-
     return document;
 }
 
@@ -496,7 +458,7 @@ void Task::write_element_attributes( const xml::Element_ptr& element ) const
 
 //----------------------------------------------------------------------------------------Task::job
 
-Job* Task::job()
+Standard_job* Task::job()
 {
     if( !_job )  assert(0), throw_xc( "TASK-WITHOUT-JOB", obj_name() );
     return _job;
@@ -506,19 +468,13 @@ Job* Task::job()
 
 Time Task::calculated_start_time( const Time& now )
 {
-    Time result;
-
-    if( _force_start )
-    {
-        result = _start_at;
-    }
+    if( _force_start ) 
+        return _start_at;
     else
     if( _job->file_based_state() == Job::s_active )
-    {
-        result = _job->schedule_use()->next_allowed_start( max( _start_at, now ) );
-    }
-
-    return result;
+        return _job->schedule_use()->next_allowed_start( max( _start_at, now ) );
+    else
+        return Time(0);
 }
 
 //------------------------------------------------------------------------------------Task::cmd_end
@@ -527,25 +483,23 @@ void Task::cmd_end( End_mode end_mode )
 {
     assert( end_mode != end_none );
 
-        //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-        if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
+    //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+    if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
-        if( _end != end_kill_immediately )  _end = end_mode;
-        if( !_ending_since )  _ending_since = Time::now();
+    if( _end != end_kill_immediately )  _end = end_mode;
+    if( !_ending_since )  _ending_since = Time::now();
 
-        if( end_mode == end_kill_immediately  &&  !_kill_tried )
-        {
-            //_log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-            try_kill();
-        }
+    if( end_mode == end_kill_immediately  &&  !_kill_tried ) {
+        //_log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+        try_kill();
+    }
 
-        if( end_mode != end_kill_immediately )  signal( "end" );
-
-        if( _state == s_none )
-        {
-            if( _job )  _job->kill_queued_task( _id );
-            // this ist hier möglicherweise ungültig!
-        }
+    if( _state == s_none ) {
+        if( _job )  _job->kill_queued_task( _id );
+        // this ist hier möglicherweise ungültig!
+    }
+    else
+        _call_register.call<End_task_call>();
 }
 
 //-------------------------------------------------------------------------------Task::cmd_nice_end
@@ -553,7 +507,6 @@ void Task::cmd_end( End_mode end_mode )
 void Task::cmd_nice_end( Job* for_job )
 {
     _log->info( message_string( "SCHEDULER-271", for_job->name() ) );   //"Task wird dem Job " + for_job->name() + " zugunsten beendet" );
-
     cmd_end( end_nice );
 }
 
@@ -564,17 +517,12 @@ void Task::set_error_xc_only( const zschimmer::Xc& x )
     string code = x.code();
     
     //if( dynamic_cast<const com::object_server::Connection_reset_exception*>( &x )    Funktioniert nicht mit gcc 3.4.3
-    if( x.name() == com::object_server::Connection_reset_exception::exception_name 
-     || x.code() == "SCHEDULER-202" )
-    {
-        if( !_is_connection_reset_error )  // Bisheriger _error ist kein Connection_reset_error?
-        {
+    if( x.name() == com::object_server::Connection_reset_exception::exception_name  ||  x.code() == "SCHEDULER-202") {
+        if( !_is_connection_reset_error ) { // Bisheriger _error ist kein Connection_reset_error?
             _non_connection_reset_error = _error;  // Bisherigen Fehler (evtl. NULL) merken, falls Verbindungsverlust wegen ignore_signals=".." ignoriert wird
             _is_connection_reset_error = true;
         }
-    }
-    else
-    {
+    } else {
         _non_connection_reset_error = NULL;
         _is_connection_reset_error = false;
     }
@@ -597,8 +545,10 @@ void Task::set_error_xc_only( const Xc& x )
 void Task::set_error_xc_only_base( const Xc& x )
 {
     _error = x;
-    if( _job )  _job->set_error_xc_only( x );
-    if( _order )  _order->set_task_error( x );
+    if( _job )  
+        _job->set_error_xc_only( x );
+    if( _order )  
+        _order->set_task_error( x );
 
     _exit_code = 1;
 }
@@ -611,23 +561,17 @@ void Task::set_error_xc( const zschimmer::Xc& x )
     set_error_xc_only( x );
     _log->error( x.what() );
 
-
-    if( _is_connection_reset_error  &&  !_non_connection_reset_error )  
-    {
+    if( _is_connection_reset_error  &&  !_non_connection_reset_error ) {
         S s;
 
-        if( !_job )
-        {
+        if( !_job ) {
             s << "(no job)";
         }
-        else
-        {
+        else {
             if( _job->_ignore_every_signal )  
                 s << "all";
-            else
-            {
-                Z_FOR_EACH( stdext::hash_set<int>, _job->_ignore_signals_set, it )
-                {
+            else {
+                Z_FOR_EACH( stdext::hash_set<int>, _job->_ignore_signals_set, it ) {
                     if( s.length() > 0 )  s << " ";
                     s << signal_name_from_code( *it );
                 }
@@ -652,16 +596,11 @@ void Task::set_error_xc( const Xc& x )
 void Task::set_error( const exception& x )
 {
     if( dynamic_cast< const zschimmer::Xc* >( &x ) )
-    {
         set_error_xc( *(zschimmer::Xc*)&x );
-    }
     else
     if( dynamic_cast< const Xc* >( &x ) )
-    {
         set_error_xc( *(Xc*)&x );
-    }
-    else
-    {
+    else {
         Xc xc ( "SOS-2000", x.what(), exception_name(x).c_str() );      // Siehe auch Spooler_com::set_error_silently
         set_error_xc( xc );
     }
@@ -672,8 +611,7 @@ void Task::set_error( const exception& x )
 
 void Task::set_error( const _com_error& x )
 {
-    try
-    {
+    try {
         throw_mswin_error( x.Error(), x.Description() );
     }
     catch( const Xc& x )
@@ -684,24 +622,6 @@ void Task::set_error( const _com_error& x )
 
 #endif
 
-//------------------------------------------------------------------------------Task::set_exit_code
-/*
-void Task::set_exit_code( int exit_code )
-{
-    if( !_module_instance )  z::throw_xc( message_string( "SCHEDULER-323" ) );
-
-    _module_instance->set_exit_code( exit_code );
-}
-
-//----------------------------------------------------------------------------------Task::exit_code
-
-int Task::exit_code()
-{
-    if( !_module_instance )  z::throw_xc( message_string( "SCHEDULER-323" ) );
-
-    return _module_instance->exit_code( exit_code );
-}
-*/
 //----------------------------------------------------------------------------------Task::set_state
 
 /**
@@ -767,80 +687,63 @@ void Task::set_state_direct( State new_state )
         _enqueued_state = s_none;
     }
 
-    if( new_state != s_running_waiting_for_order )  _idle_since = Time(0);
+    if( new_state != s_running_waiting_for_order )  
+        _idle_since = Time(0);
 
-    if( new_state != _state )
-    {
-        switch( _state )
-        {
+    if( new_state != _state ) {
+        switch( _state ) {
             case s_running:
-                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )  
-                {
+                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )   {
                     _lock_holder->release_locks( lock_requestor );
                     lock_requestor->dequeue_lock_requests();
                 }
-
                 break;
 
-            default:
+            case s_waiting_for_process:
                 break;
+
+            default: ;
         }
-    }
 
-    switch( new_state )
-    {
-        case s_waiting_for_process:
-            _next_time = Time::never;
-            break;
+        switch( new_state ) {
+            case s_opening_waiting_for_locks:
+            case s_running_process:
+                break;
 
-        case s_opening_waiting_for_locks:
-            _next_time = Time::never;
-            break;
+            case s_running_delayed:
+                _call_register.call_at<Next_spooler_process_call>(_next_spooler_process);
+                break;
 
-        case s_running_process:
-            _next_time = Time::never;
-            break;
+            case s_running_waiting_for_locks:
+                break;
 
-        case s_running_delayed:
-            _next_time = _next_spooler_process;
-            break;
-
-        case s_running_waiting_for_locks:
-            _next_time = Time::never;
-            break;
-
-        case s_running_waiting_for_order:
-        {
-            _next_time  = _job->combined_job_nodes()->next_time();
-
-            if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
-
-            if( _idle_timeout_at != Time::never )
-            {
-                _next_time = min( _next_time, _idle_timeout_at );
+            case s_running_waiting_for_order: {
+                _call_register.call_at<Next_order_step_call>(_job->next_order_time());
+                if (_state != s_running_waiting_for_order)  
+                    _idle_since = Time::now();
+                if (_idle_timeout_at != Time::never)
+                    _call_register.call_at<Task_idle_timeout_call>(_idle_timeout_at);
+                break;
             }
 
-            break;
-        }
+            case s_closed: {
+                report_event_code(taskClosedEvent, java_sister());
+                _call_register.call(Z_NEW(Task_closed_call(this)));
+                break;
+            }
 
-        default:
-            _next_time = Time(0);
+            default: ;
+        }
     }
 
-
-    if( _next_time.not_zero() && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
-
-    if( _end )  _next_time = Time(0);   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
-
-    if( new_state != _state )
-    {
-        if( _job  &&  _spooler->_task_subsystem )
-        {
+    if( new_state != _state ) {
+        if( _job  &&  _spooler->_task_subsystem ) {
             if( new_state == s_starting ||  new_state == s_opening  ||  new_state == s_running )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
             if( _state    == s_starting ||  _state    == s_opening  ||  _state    == s_running )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
         }
 
-        if( new_state != s_running_delayed )  _next_spooler_process = Time(0);
+        if( new_state != s_running_delayed )  
+            _next_spooler_process = Time(0);
 
         State old_state = _state;
         _state = new_state;
@@ -848,17 +751,12 @@ void Task::set_state_direct( State new_state )
         if( is_idle()  &&  _job )
             if( Process_class* process_class = _job->_module->process_class_or_null() )  process_class->notify_a_process_is_idle();
 
-
         Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
-        if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
-        {
+        if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) ) {
             S details;
-            if( _next_time.not_zero() )  details << " (" << _next_time.as_string(_job->time_zone_name()) << ")";
             if( new_state == s_starting  &&  _start_at.not_zero() )  details << " (at=" << _start_at.as_string(_job->time_zone_name()) << ")";
             if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
-
             _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
-
         }
     }
 }
@@ -872,7 +770,6 @@ string Task::state_name( State state )
         case s_none:                        return "none";
         case s_loading:                     return "loading";
         case s_waiting_for_process:         return "waiting_for_process";
-      //case s_start_task:                  return "start_task";
         case s_starting:                    return "starting";
         case s_opening:                     return "opening";
         case s_opening_waiting_for_locks:   return "opening_waiting_for_locks";
@@ -883,7 +780,6 @@ string Task::state_name( State state )
         case s_running_process:             return "running_process";
         case s_running_remote_process:      return "running_remote_process";
         case s_suspended:                   return "suspended";
-      //case s_end:                         return "end";
         case s_ending:                      return "ending";
         case s_ending_waiting_for_subprocesses: return "ending_waiting_for_subprocesses";
         case s_on_success:                  return "on_success";
@@ -896,17 +792,6 @@ string Task::state_name( State state )
         case s_closed:                      return "closed";
         default:                            return as_string( (int)state );
     }
-}
-
-//-------------------------------------------------------------------------------------Task::signal
-
-void Task::signal( const string& signal_name )
-{
-        _signaled = true;
-        set_next_time(Time(0));
-
-        if( _spooler->_task_subsystem )  _spooler->_task_subsystem->signal( signal_name );
-               //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
 }
 
 //----------------------------------------------------------------------------------Task::set_cause
@@ -929,8 +814,6 @@ bool Task::has_parameters()
 
 void Task::set_history_field( const string& name, const Variant& value )
 {
-  //if( !_job->its_current_task(this) )  z::throw_xc( "SCHEDULER-138" );
-
     _history.set_extra_field( name, value );
 }
 
@@ -1017,67 +900,174 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
         case s_running_waiting_for_locks:   set_state_direct( s_running );  break;
         default:                            z::throw_xc( Z_FUNCTION );
     }
-    
-    signal( Z_FUNCTION );
+
+    _call_register.call<Task_locks_are_available_call>();
 }
 
 //------------------------------------------------------------------------------Task::set_next_time
 
-void Task::set_next_time( const Time& next_time )
-{
-    _next_time = next_time;
-}
+//void Task::set_next_time( const Time& t )
+//{
+//    Time t = min(t, next_time());
+//    if (_state == s_closed)
+//        _call_register.cancel<Next_time_task_call>();
+//    else
+//        _call_register.call_at<Next_time_task_call>(t);
+//}
 
 //----------------------------------------------------------------------------------Task::next_time
 
-Time Task::next_time()
+//Time Task::next_time()
+//{
+//    Time result;
+//
+//    if( _operation )
+//    {
+//        if( _operation->async_finished() ) {
+//            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
+//        } else {
+//            Duration t = _timeout;
+//            result = t.is_eternal()? Time::never 
+//                                   : _last_operation_time + t;     // _timeout sollte nicht zu groß sein
+//        }                 
+//    }
+//    else
+//    if( _state == s_running_process  &&  !_timeout.is_eternal() )
+//    {
+//        result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groß sein
+//    }
+//    else
+//    {
+//        result = _next_time;
+//        if( _state == s_running_delayed  &&  result > _next_spooler_process )  result = _next_spooler_process;
+//    }
+//
+//    if( result > _subprocess_timeout )  result = _subprocess_timeout;
+//
+//    return result;
+//}
+
+//---------------------------------------------------------------------Task::on_remote_task_running
+
+void Task::on_remote_task_running() {
+    _call_register.call<Remote_task_running_call>();
+}
+
+//------------------------------------------------------------------------------------Task::on_call
+
+void Task::on_call(const Task_starting_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_opening_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_step_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Try_next_step_call&) {
+    do_something();
+}
+
+void Task::on_call(const Next_spooler_process_call&) {
+    do_something();
+}
+
+void Task::on_call(const Next_order_step_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_idle_timeout_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_locks_are_available_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_check_for_order_call&) {
+    do_something();
+}
+
+void Task::on_call(const Subprocess_timeout_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_end_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Remote_task_running_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_end_with_period_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_on_success_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_on_error_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_exit_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_release_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_ended_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const End_task_call&) {
+    do_something();
+}
+
+void Task::on_call(const Warn_longer_than_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Task_timeout_call&) {
+    do_something();
+}
+
+void Task::on_call(const Killing_task_call&) {
+    do_something();
+}
+
+void Task::on_call(const Task_process_ended_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Task_wait_for_subprocesses_completed_call&) {
+    do_something();
+}
+
+void Task::on_call(const job::Try_deleting_files_call&) {
+    do_something();
+}
+
+//----------------------------------------------------------------------Task::wake_when_longer_than
+
+void Task::wake_when_longer_than() 
 {
-    // Besser, ein neues _next_time wird an der Stelle gesetzt, wo das Ereignis auftritt //
-
-
-    Time result;
-
-    if( _end == end_kill_immediately  &&  !_kill_tried )
-    {
-        result = Time(0);
-    }
-    else
-    if( _operation )
-    {
-        if( _operation->async_finished() ) {
-            result = Time(0);   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
-        } else {
-            Duration t = _timeout;
-            if( _state == s_running ||
-                _state == s_running_process ||
-                _state == s_running_remote_process )  t = min( t, _warn_if_longer_than );
-
-            result = t.is_eternal()? Time::never 
-                                   : _last_operation_time + t;     // _timeout sollte nicht zu groß sein
-        }                 
-    }
-    else
-    if( _state == s_running_process  &&  !_timeout.is_eternal() )
-    {
-        result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groß sein
-    }
-    else
-    {
-        result = _next_time;
-        if( _state == s_running_delayed  &&  result > _next_spooler_process )  result = _next_spooler_process;
-    }
-
-    if( result > _subprocess_timeout )  result = _subprocess_timeout;
-
-    return result;
+    if (!_warn_if_longer_than.is_eternal())
+        _call_register.call_at<Warn_longer_than_call>(Time::now() + _warn_if_longer_than);
 }
 
 //------------------------------------------------------------------------------Task::check_timeout
 
 bool Task::check_timeout( const Time& now )
 {
-    if( !_timeout.is_eternal()  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
-    {
+    if( !_timeout.is_eternal()  &&  now > _last_operation_time + _timeout  &&  !_kill_tried ) {
         _log->error( message_string( "SCHEDULER-272", _timeout.seconds() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
     }
@@ -1115,27 +1105,16 @@ bool Task::check_if_longer_than( const Time& now )
 {
     bool something_done = false;
 
-    if( !_warn_if_longer_than.is_eternal() ) 
-    {
+    if( !_warn_if_longer_than.is_eternal() ) {
         Duration step_time = now - _last_operation_time;   // JS-448
-        // double task_duration = now - _running_since;  
         
-        //S s;
-        //s << "id:" << _id <<",now: " << now  << ",task_duration:" << task_duration << ",_running_since:" << _running_since;
-        //_log->info( s );
-
-        if( step_time > _warn_if_longer_than )
-        {
+        if( step_time > _warn_if_longer_than ) {
             // JS-448 something_done = true;
-            if( _last_warn_if_longer_operation_time != _last_operation_time )     // Merker, damit nur einmal gewarnt wird
-            {                                                                     
+            if( _last_warn_if_longer_operation_time != _last_operation_time ) {    // Merker, damit nur einmal gewarnt wird
                 something_done = true;  // JS-448
-
                 _last_warn_if_longer_operation_time = _last_operation_time;       
-
                 string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( time::without_ms ) );
                 _log->warn( msg );
-
                 Scheduler_event scheduler_event ( evt_task_step_too_long, log_error, _spooler );
                 Mail_defaults mail_defaults( _spooler );
                 mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
@@ -1154,17 +1133,12 @@ bool Task::check_if_longer_than( const Time& now )
 
 void Task::add_pid( int pid, const Duration& timeout )
 {
-    if( _module_instance->is_remote_host() )
-    {
-        //int REMOTE_SUBPROCESS_KILLEN;
+    if( _module_instance->is_remote_host() ) {
         _log->warn( message_string( "SCHEDULER-849", pid ) );
-    }
-    else
-    {
+    } else {
         Time timeout_at = Time::never;
 
-        if(!timeout.is_eternal())
-        {
+        if(!timeout.is_eternal()) {
             timeout_at = Time::now() + timeout;
             _log->debug9( message_string( "SCHEDULER-912", pid, timeout_at ) );
         }
@@ -1183,7 +1157,6 @@ void Task::add_pid( int pid, const Duration& timeout )
 void Task::remove_pid( int pid )
 {
     _registered_pids.erase( pid );
-
     set_subprocess_timeout();
 }
 
@@ -1194,17 +1167,9 @@ void Task::add_subprocess( int pid, const Duration& timeout, bool ignore_exitcod
     Z_LOG2( "scheduler", Z_FUNCTION << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
     Z_LOG2( "scheduler", Z_FUNCTION << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
     
-    if( _module_instance->is_remote_host() )
-    {
-        //int REMOTE_SUBPROCESS_KILLEN;
-        //_log->warn( message_string( "SCHEDULER-849", pid ) );
-    }
-    else
-    {
+    if( !_module_instance->is_remote_host() ) {
         Time timeout_at = timeout.is_eternal()? Time::never : Time::now() + timeout;
-
         _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, is_process_group, title ) );
-
         set_subprocess_timeout();
     }
 }
@@ -1240,8 +1205,7 @@ Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_a
 
 void Task::Registered_pid::close()
 {
-    if( _spooler )
-    {
+    if( _spooler ) {
         if( _task->_module_instance  &&  !_task->_module_instance->is_remote_host() )  _spooler->unregister_pid( _pid );
         _spooler = NULL;
     }
@@ -1251,21 +1215,16 @@ void Task::Registered_pid::close()
 
 void Task::Registered_pid::try_kill()
 {
-    if( !_killed  )
-    {
-        if( _task->_module_instance->is_remote_host() )
-        {
+    if (!_killed) {
+        if( _task->_module_instance->is_remote_host() ) {
             //int REMOTE_SUBPROCESS_KILLEN;
             _task->log()->warn( message_string( "SCHEDULER-849", _pid ) );
             // Asynchron <remote_scheduler.subprocess.kill task="..." pid="..."/>
             // ohne Ende abzuwarten?
             // Operation für solche asynchronen XML-Befehle mit Warteschlange
             // spooler_communication.cxx muss mehrere XML-Dokumente aufeinander empfangen und trennen können.
-        }
-        else
-        {
-            try
-            {
+        } else {
+            try {
 #               ifdef Z_UNIX
                     if( _is_process_group )  posix::kill_process_group_immediately( _pid, obj_name() );
                   else
@@ -1274,15 +1233,12 @@ void Task::Registered_pid::try_kill()
 
                 _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
             }
-            catch( exception& x )
-            {
+            catch( exception& x ) {
                 _task->_log->warn( message_string( "SCHEDULER-274", _pid, x ) );   // "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x
             }
         }
-
         _killed = true;
         _timeout_at = Time::never;
-
         close();
     }
 }
@@ -1293,9 +1249,7 @@ void Task::set_subprocess_timeout()
 {
     _subprocess_timeout = Time::never;
     FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout_at )  _subprocess_timeout = p->second->_timeout_at;
-
-    if( !_subprocess_timeout.is_never() )  signal( "subprocess_timeout" );
-    //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
+    _call_register.call_at<Subprocess_timeout_call>(_subprocess_timeout);
 }
 
 //-------------------------------------------------------------------Task::check_subprocess_timeout
@@ -1303,21 +1257,15 @@ void Task::set_subprocess_timeout()
 bool Task::check_subprocess_timeout( const Time& now )
 {
     bool something_done = false;
-
-    if( _subprocess_timeout <= now )
-    {
-        FOR_EACH( Registered_pids, _registered_pids, p )
-        {
-            Registered_pid* subprocess = p->second;
-
-            if( subprocess->_timeout_at <= now )
-            {
+    if( _subprocess_timeout <= now ) {
+        FOR_EACH( Registered_pids, _registered_pids, p ) {
+            Registered_pid* subprocess = p->second; 
+            if( subprocess->_timeout_at <= now ) {
                 _log->warn( message_string( "SCHEDULER-275", subprocess->_pid ) );
                 subprocess->try_kill();
                 something_done = true;
             }
         }
-
         set_subprocess_timeout();
     }
 
@@ -1330,16 +1278,13 @@ bool Task::try_kill()
 {
     _kill_tried = true;
 
-    try
-    {
+    try {
         _killed = do_kill();
-
         FOR_EACH( Registered_pids, _registered_pids, p )  p->second->try_kill();
-
         if( !_killed ) _log->warn( message_string( "SCHEDULER-276" ) );
     }
     catch( const exception& x ) { _log->warn( x.what() ); }
-
+    
     return _killed;
 }
 
@@ -1347,35 +1292,19 @@ bool Task::try_kill()
 
 bool Task::do_something()
 {
-    //Z_DEBUG_ONLY( _log->debug9( "do_something() state=" + state_name() ); )
-
     bool had_operation      = _operation != NULL;
     bool something_done     = false;
     Time now                = Time::now();
-    Time next_time_at_begin = _next_time;
-
-    _signaled = false;
-
-    //if( _end == end_kill_immediately  &&  !_kill_tried )
-    //{
-    //    _log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-    //    return try_kill();
-    //}
 
     something_done |= check_subprocess_timeout( now );
 
-    if( _operation &&  !_operation->async_finished() )
-    {
+    if( _operation &&  !_operation->async_finished() ) {
         // Die Operation tut was und wir wollen prüfen, ob sie es solange darf
         something_done |= check_timeout( now );
         something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running prüfen?
-    }
-    else
-    {
+    } else {
         // Periode endet?
-        if( !_operation )
-        {
-
+        if( !_operation ) {
             something_done |= check_timeout( now );
             something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running prüfen?
 
@@ -1385,69 +1314,53 @@ bool Task::do_something()
              || _state == s_running_waiting_for_order )
             {
                 bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
-
-                if( !let_run )
-                {
+                if( !let_run ) {
                     _log->info( message_string( "SCHEDULER-278" ) );   // "Laufzeitperiode ist abgelaufen, Task wird beendet"
                     cmd_end();
                 }
             }
         }
 
-
         int error_count = 0;
 
-        bool loop = true;
-        while( loop )
-        {
-            try
-            {
-                try
-                {
+        for (bool loop = true; loop;) {
+            try {
+                try {
                     loop = false;
                     bool ok = true;
 
-                    if( !_operation  &&  _state != s_running_process )
-                    {
-                        if( _module_instance && !_module_instance_async_error )
-                        {
-                            try
-                            {
+                    if( !_operation  &&  _state != s_running_process ) {
+                        if( _module_instance && !_module_instance_async_error ) {
+                            try {
                                 _module_instance->check_connection_error();
                             }
-                            catch( exception& x )
-                            {
+                            catch( exception& x ) {
                                 _module_instance_async_error = true;
-                                //z::throw_xc( "SCHEDULER-202", x.what() );
                                 set_error( z::Xc( "SCHEDULER-202", state_name(), x.what() ) );
                                 if( _state < s_killing )  set_state_direct( s_killing );
                             }
                         }
 
-                        if( _state < s_ending  &&  _end )      // Task beenden?
-                        {
-                            if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 )   // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
-                            {
-                                if( !_scheduler_815_logged )
-                                {
+                        if( _state < s_ending  &&  _end ) {     // Task beenden?
+                            if( _end == end_nice  &&  _state <= s_running  &&  _order  &&  _step_count == 0 ) {  // SCHEDULER-226 (s.u.) nach SCHEDULER-271 (Task-Ende wegen Prozessmangels)
+                                if( !_scheduler_815_logged ) {
                                     _log->info( message_string( "SCHEDULER-815", _order->obj_name() ) );    // Task einen Schritt machen lassen, um den Auftrag auszuführen
                                     _scheduler_815_logged = true;
                                 }
                             }
                             else
-                            if( !loaded() )         set_state_direct( s_ended );
+                            if( !loaded() )  
+                                set_state_direct( s_ended );
                             else
-                            if( !_begin_called )    set_state_direct( s_release );
+                            if( !_begin_called )    
+                                set_state_direct( s_release );
                             else
-                                                    set_state_direct( s_ending );
+                                set_state_direct( s_ending );
                         }
                     }
 
-
-                    switch( _state ) // nächster Status
-                    {
-                        case s_loading:
-                        {
+                    switch( _state ) { // nächster Status
+                        case s_loading: {
                             bool ok = load();
                             if( ok )  set_state_direct( s_waiting_for_process );
                                 else  set_state_direct( s_release );
@@ -1457,27 +1370,20 @@ bool Task::do_something()
                             break;
                         }
 
-
-                        case s_waiting_for_process:
-                        {
+                        case s_waiting_for_process: {
                             bool ok = !_module_instance || _module_instance->try_to_get_process();
                             if( ok )  set_state_direct( s_starting ), something_done = true, loop = true;
                                 else  set_state_direct( s_waiting_for_process );
-                            
                             break;
                         }
 
-
-                        case s_starting:
-                        {
+                        case s_starting: {
                             _begin_called = true;
-
-                            if( !_operation )
-                            {
+                            if( !_operation ) {
                                 _operation = begin__start();
-                            }
-                            else
-                            {
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_starting_completed_call>());
+                            } else {
                                 ok = operation__end();
 
                                 if( _job->_history.min_steps() == 0 )  _history.start();
@@ -1485,71 +1391,55 @@ bool Task::do_something()
                                 _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
                                 _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
 
-                                if( _file_logger->has_files() )
-                                {
+                                if( _file_logger->has_files() ) {
                                     _file_logger->set_async_manager( _spooler->_connection_manager );
                                     _file_logger->start();
                                 }
 
                                 set_state_direct( !ok? s_ending :
-                                           _module_instance->_module->kind() == Module::kind_process?
+                                                _module_instance->_module->kind() == Module::kind_process?
                                                 _module_instance->kind() == Module::kind_remote? s_running_remote_process 
                                                                                                : s_running_process
                                            : s_opening );
                                 report_event_code(taskStartedEvent, java_sister());
                                 loop = true;
                             }
-
                             something_done = true;
                             break;
                         }
 
-
-                        case s_opening:
-                        {
-                            if( !_operation )
-                            {
-                                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_task_api ] )
-                                {
+                        case s_opening: {
+                            if( !_operation ) {
+                                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_task_api ] ) {
                                     _lock_holder->hold_locks( lock_requestor );
                                     lock_requestor->dequeue_lock_requests();
                                 }
-
                                 _operation = do_call__start( spooler_open_name );
-                            }
-                            else
-                            {
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_opening_completed_call>());
+                            } else {
                                 bool ok = operation__end();
-
-                                if( _delay_until_locks_available )
-                                {
+                                if( _delay_until_locks_available ) {
                                     _delay_until_locks_available = false;
                                     _lock_requestors[ lock_level_task_api ]->enqueue_lock_requests( _lock_holder );
                                     set_state_direct( s_opening_waiting_for_locks );
                                     ok = true;
-                                }
-                                else
-                                {
+                                } else {
                                     set_state_direct( ok? s_running : s_ending );
                                 }
-
                                 loop = true;
                             }
-
                             something_done = true;
                             break;
                         }
 
-
                         case s_opening_waiting_for_locks: 
                             break;
 
-
                         case s_running_process:
                             assert( _module_instance->_module->kind() == Module::kind_process );
-                            
-                            if( _module_instance->process_has_signaled() )
-                            {
+                            if( _module_instance->process_has_signaled() ) {
+                                _call_register.cancel<Warn_longer_than_call>();
                                 _file_logger->flush();
                                 _log->info( message_string( "SCHEDULER-915" ) );
                                 check_if_shorter_than( now );
@@ -1557,230 +1447,177 @@ bool Task::do_something()
                                 count_step();
                                 set_state_direct( s_ending );
                                 loop = true;
-                            }
-                            else {
                                 check_timeout( now );
                                 if (!_running_state_reached) {
-                                    if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
                                     _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
-                                    _next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                                    wake_when_longer_than();
+                                    if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
+                                    //_next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                                    if (!_timeout.is_eternal()) 
+                                        _call_register.call_at<Task_timeout_call>(now + _timeout);
                                 }
                             }
-
                             break;
-
 
                         case s_running_remote_process:
                             assert( _module_instance->_module->kind() == Module::kind_process &&
                                     _module_instance->kind()          == Module::kind_remote     );
 
-                            if( !_operation )
-                            {
+                            if( !_operation ) {
                                 _operation = do_step__start();
-                            }
-                            else
-                            {
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_step_completed_call>());
+                                wake_when_longer_than();
+                            } else {
+                                _call_register.cancel<Warn_longer_than_call>();
                                 string result = remote_process_step__end();
                                 check_if_shorter_than( now );
                                 // JS-448 something_done |= check_if_longer_than( now );
                                 set_state_direct( s_release );
                                 loop = true;
                             }
-
                             break;
 
-
-                        case s_running:
-                        {
-                            if( !_operation )
-                            {
-                                if( _next_spooler_process.not_zero() )
-                                {
+                        case s_running: {
+                            if( !_operation ) {
+                                if( _next_spooler_process.not_zero() ) {
                                     set_state_direct( s_running_delayed );
                                     something_done = true;
-                                }
-                                else
-                                {
-                                    if( _job->is_order_controlled() )
-                                    {
-                                        if( !fetch_and_occupy_order( now, state_name() ) )
-                                        {
+                                } else {
+                                    if( _job->is_order_controlled() ) {
+                                        if( !fetch_and_occupy_order( now, state_name() ) ) {
                                             _idle_timeout_at = now + _job->_idle_timeout;
                                             set_state_direct( s_running_waiting_for_order );
                                             break;
                                         }
                                     }
-
                                     _running_state_reached = true;
                                     _last_process_start_time = now;
-
-                                    
-                                    if( _step_count + 1 == _job->_history.min_steps() )  _history.start();
-
-                                    if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )
-                                    {
+                                    if( _step_count + 1 == _job->_history.min_steps() )  
+                                        _history.start();
+                                    if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] ) {
                                         _lock_holder->hold_locks( lock_requestor );
                                         lock_requestor->dequeue_lock_requests();
                                     }
-
                                     _operation = do_step__start();
-
+                                    if (!_operation->async_finished())
+                                        _operation->on_async_finished_call(_call_register.new_async_call<Task_step_completed_call>());
+                                    wake_when_longer_than();
                                     something_done = true;
                                 }
-                            }
-                            else
-                            {
+                            } else {
+                                _call_register.cancel<Warn_longer_than_call>();
                                 ok = step__end();
-                                _operation = NULL;
+                                close_operation();
 
-                                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )   
-                                {
+                                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] ) {
                                     if( ok  &&  !_delay_until_locks_available  &&  !_lock_holder->is_holding_all_of( lock_requestor ) )  
                                         log()->warn( message_string( "SCHEDULER-469" ) );    // Try_hold_lock() hat versagt und Call_me_again_when_locks_available() nicht aufgerufen
 
                                     _lock_holder->release_locks( lock_requestor );  // Task.Try_hold_lock() wieder aufheben
 
-                                    if( _delay_until_locks_available )
-                                    {
+                                    if( _delay_until_locks_available ) {
                                         _delay_until_locks_available = false;
                                         set_state_direct( s_running_waiting_for_locks );
                                         lock_requestor->enqueue_lock_requests( _lock_holder );
                                         ok = true;
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         _lock_holder->remove_requestor( lock_requestor );
                                         _lock_requestors[ lock_level_process_api ] = NULL;
                                     }
                                 }
                                 assert( !_delay_until_locks_available );
-
                                 check_if_shorter_than( now );
                                 // JS-448 something_done |= check_if_longer_than( now );
-
                                 if( !ok || has_error() )  set_state_direct( s_ending ), loop = true;
-
                                 if( _state != s_ending  &&  !_end )  _order_for_task_end = NULL;
-
+                                _call_register.call<Try_next_step_call>();
                                 something_done = true;
                             }
-
                             break;
                         }
 
-
-                        case s_running_waiting_for_order:
-                        {
-                            if( fetch_and_occupy_order( now, state_name() ) )
-                            {
+                        case s_running_waiting_for_order: {
+                            if( fetch_and_occupy_order( now, state_name() ) ) {
                                 set_state_direct( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
                                 loop = true;                // _order wird in step__end() wieder abgeräumt
                             }
                             else
-                            if( now >= _idle_timeout_at )
-                            {
-                                if( _job->_force_idle_timeout  ||  _job->above_min_tasks() )
-                                {
+                            if( now >= _idle_timeout_at ) {
+                                if( _job->_force_idle_timeout  ||  _job->above_min_tasks() ) {
                                     _log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     _end = end_normal;
                                     loop = true;
-                                }
-                                else
-                                {
+                                } else {
                                     _idle_timeout_at = now + _job->_idle_timeout;
                                     set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
                                     Z_LOG2( "scheduler", obj_name() << ": idle_timeout has been elapsed but force_idle_timeout=\"no\" and not more than min_tasks tasks are running, now=" << 
-                                        now.as_string(_job->time_zone_name()) << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << "\n" );
+                                        now.as_string(_job->time_zone_name()) << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     something_done = true;
                                 }
                             }
                             else
                                 _running_state_reached = true;   // Also nicht bei idle_timeout="0"
-
                             break;
                         }
 
-
-                        case s_running_delayed:
-                        {
-                            if( now >= _next_spooler_process )
-                            {
+                        case s_running_delayed: {
+                            if( now >= _next_spooler_process ) {
                                 _next_spooler_process = Time(0);
                                 set_state_direct( s_running ), loop = true;
                             }
-
                             _running_state_reached = true;
                             break;
                         }
 
-
                         case s_running_waiting_for_locks: 
                             break;
 
-
-                        case s_ending:
-                        {
-                            if( !_operation )
-                            {
-                                if( !_ending_since )  _ending_since = now;   // Wird auch von cmd_end() gesetzt
-
-                                if( has_error()  ||  _log->highest_level() >= log_error )  _history.start();
-
-                                if( _begin_called )
-                                {
+                        case s_ending: {
+                            if( !_operation ) {
+                                if( !_ending_since )  
+                                    _ending_since = now;   // Wird auch von cmd_end() gesetzt
+                                if( has_error()  ||  _log->highest_level() >= log_error )  
+                                    _history.start();
+                                if( _begin_called ) {
                                     _operation = do_end__start();
-                                }
-                                else
-                                {
+                                    if (!_operation->async_finished())
+                                        _operation->on_async_finished_call(_call_register.new_async_call<Task_end_completed_call>());
+                                } else {
                                     set_state_direct( s_exit );
                                     loop = true;
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 operation__end();
-
                                 set_state_direct( loaded()? s_ending_waiting_for_subprocesses
                                                           : s_release );
                                 loop = true;
                             }
-
                             something_done = true;
-
                             break;
                         }
 
-
-                        case s_ending_waiting_for_subprocesses:
-                        {
-                            if( !_operation )
-                            {
-                                if( shall_wait_for_registered_pid() )
-                                {
-                                    if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
-                                    {
+                        case s_ending_waiting_for_subprocesses: {
+                            if( !_operation ) {
+                                if( shall_wait_for_registered_pid() ) {
+                                    if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) ) {
                                         _operation = m->_remote_instance->call__start( "Wait_for_subprocesses" );
-                                    }
-                                    else
-                                    {
-                                        try
-                                        {
+                                        if (!_operation->async_finished())
+                                            _operation->on_async_finished_call(_call_register.new_async_call<Task_wait_for_subprocesses_completed_call>());
+                                    } else {
+                                        try {
                                             _subprocess_register.wait();
                                         }
                                         catch( exception& x ) { set_error( x ); }
                                     }
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 operation__end();
                             }
 
-                            if( !_operation )
-                            {
-                                set_state_direct( has_error()? s_on_error
-                                                             : s_on_success );
+                            if( !_operation ) {
+                                set_state_direct( has_error()? s_on_error : s_on_success );
                                 loop = true;
                             }
 
@@ -1788,80 +1625,83 @@ bool Task::do_something()
                             break;
                         }
 
-
-                        case s_on_success:
-                        {
-                            if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                         else  operation__end(), set_state_direct( s_exit ), loop = true;
-
-                            something_done = true;
-                            break;
-                        }
-
-
-                        case s_on_error:
-                        {
-                            if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                         else  operation__end(), set_state_direct( s_exit ), loop = true;
+                        case s_on_success: {
+                            if( !_operation ) {
+                                _operation = do_call__start( spooler_on_success_name );
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_on_success_completed_call>());
+                            } else {
+                                operation__end();
+                                set_state_direct( s_exit );
+                                loop = true;
+                            } 
 
                             something_done = true;
                             break;
                         }
 
-
-                        case s_exit:
-                        {
-                            if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                            else  operation__end(), set_state_direct( s_release ), loop = true;
-
-                            something_done = true;
-                            break;
-                        }
-
-
-                        case s_release:
-                        {
-                            if( !_operation )  _operation = do_release__start();
-                                         else  operation__end(), set_state_direct( s_killing ), loop = true;
-
-                            something_done = true;
-                            break;
-                        }
-
-
-                        case s_killing:
-                        {
-                            if( _module_instance  &&  _module_instance->is_kill_thread_running() )
-                            {
-                                _next_time = Time::now() + Duration(0.1);
+                        case s_on_error: {
+                            if( !_operation ) {
+                                _operation = do_call__start( spooler_on_error_name );
+                               if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_on_error_completed_call>());
                             }
-                            else
-                            {
+                            else  
+                                operation__end(), set_state_direct( s_exit ), loop = true;
+                            something_done = true;
+                            break;
+                        }
+
+                        case s_exit: {
+                            if( !_operation ) {
+                                _operation = do_call__start( spooler_exit_name );
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_exit_completed_call>());
+                            } else {
+                                operation__end();
+                                set_state_direct( s_release );
+                                loop = true;
+                            }
+                            something_done = true;
+                            break;
+                        }
+
+                        case s_release: {
+                            if( !_operation ) {
+                                _operation = do_release__start();
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_release_completed_call>());
+                            } else  {
+                                operation__end();
+                                set_state_direct( s_killing );
+                                loop = true;
+                            }
+                            something_done = true;
+                            break;
+                        }
+
+                        case s_killing: {
+                            if( _module_instance  &&  _module_instance->is_kill_thread_running() ) {
+                                _call_register.call_at<Killing_task_call>(Time::now() + Duration(0.1));
+                            } else {
                                 set_state_direct( s_ended );
                                 loop = true;
                             }
-
                             break;
                         }
 
-                        case s_ended:
-                        {
-                            if( !_operation )
-                            {
+                        case s_ended: {
+                            if( !_operation ) {
                                 _operation = do_close__start();
-                            }
-                            else
-                            {
+                                if (!_operation->async_finished())
+                                    _operation->on_async_finished_call(_call_register.new_async_call<Task_ended_completed_call>());
+                            } else {
                                 operation__end();
-
-                                if( _module_instance  && _module_instance->_module->kind() == Module::kind_process )
-                                {
-                                    if( Process_module_instance* process_module_instance = dynamic_cast<Process_module_instance*>( +_module_instance ) )
-                                    {
+                                if( _module_instance  && _module_instance->_module->kind() == Module::kind_process ) {
+                                    if( Process_module_instance* process_module_instance = dynamic_cast<Process_module_instance*>( +_module_instance ) ) {
                                         set_state_texts_from_stdout( process_module_instance->get_first_line_as_state_text() );
 
-                                        if( _order )
-                                        {
+                                        if( _order ) {
                                             //Process_module_instance::attach_task() hat temporäre Datei zur Rückgabe der Auftragsparameter geöffnet
                                             process_module_instance->fetch_parameters_from_process( _order->params() );
                                             if( !has_error() ) {
@@ -1890,22 +1730,16 @@ bool Task::do_something()
                             break;
                         }
 
-
-                        case s_deleting_files:
-                        {
+                        case s_deleting_files: {
                             bool ok;
 
-                            if( !_module_instance )
-                            {
+                            if( !_module_instance ) {
                                 ok = true;
-                            }
-                            else
-                            {
+                            } else {
                                 ok = false;
                                 Time now = Time::now();
 
-                                if( !_trying_deleting_files_until  ||  now >= _next_time )     // do_something() wird zu oft gerufen, deshalb prüfen, ob_next_time erreicht ist.
-                                {
+                                if (!_trying_deleting_files_until  ||  now >= _call_register.at<Try_deleting_files_call>()) {     // do_something() wird zu oft gerufen, deshalb prüfen, ob_next_time erreicht ist.
                                     // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. Das soll kein Task-Problem sein!
                                     // Siehe auch ~Process_module_instance
                                     Has_log* my_log = NULL; //_trying_deleting_files_until? NULL : _job->log();
@@ -1913,180 +1747,131 @@ bool Task::do_something()
                                     // Folgendes könnte zusammengefasst werden mit Remote_task_close_command_response::async_continue_() als eigene Async_operation
 
                                     ok = _module_instance->try_delete_files( my_log );
-                                    if( ok )
-                                    {
+                                    if (ok) {
                                         if( _trying_deleting_files_until.not_zero() )  
-                                        {
                                             _log->debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if( !_trying_deleting_files_until )  
-                                        {
+                                    } else {
+                                        if (!_trying_deleting_files_until) {
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
                                         }
-
-                                        //if( _end == end_kill_immediately  &&  // Bei kill_immediately nur einmal warten (1/10s, das ist zu kurz!)
-                                        if( _trying_deleting_files_until.not_zero()  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
-                                        {
+                                        
+                                        if (_trying_deleting_files_until.not_zero()  &&  now >= _trying_deleting_files_until) {   // Nach Fristablauf geben wir auf
                                             string paths = join( ", ", _module_instance->undeleted_files() );
                                             _log->info( message_string( "SCHEDULER-878", paths ) );
                                             _job->log()->warn( message_string( "SCHEDULER-878", paths ) );
                                             ok = true;
-                                        }
-                                        else
-                                        {
-                                            // Funktioniert in lokaler Zeit. Zum Beginn der Winterzeit: +1h, zum Beginn der Sommerzeit: 0s.
-                                            if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay;
-                                            _next_time = min( now + delete_temporary_files_retry, _trying_deleting_files_until );
-                                        }
+                                        } 
+                                        else 
+                                        if (!_trying_deleting_files_until)  
+                                            _trying_deleting_files_until = now + delete_temporary_files_delay;
                                     }
 
                                     something_done = true;
                                 }
                             }
                             
-                            if( ok )
-                            {
+                            if (!ok) {
+                                _call_register.call_at<Try_deleting_files_call>(min(now + delete_temporary_files_retry, _trying_deleting_files_until));
+                            } else {
                                 if( _module_instance )  _module_instance->detach_process();
                                 _module_instance = NULL;
                                 finish();
                                 set_state_direct( s_closed );
                                 something_done = true;
                                 loop = true;
-                            }
-                            
+                            } 
                             break;
                         }
-
 
                         case s_suspended:
                             break;
 
                         case s_closed:
-                            report_event_code(taskClosedEvent, java_sister());
                             break;
 
                         case s_none:
                         case s__max:
                             assert(0), throw_xc( "state=none?" );
-                    }  // switch( _state )
-
-
-                    if( _operation )
-                    {
-                        loop |= _operation->async_finished();   // Falls Sync_operation
                     }
-                    else
-                    {
+
+                    if( _operation ) {
+                        loop |= _operation->async_finished();   // Falls Sync_operation
+                    } else {
                         set_enqueued_state();   // Wegen _operation verzögerten Zustand setzen
 
-                        if( !ok || has_error() )
-                        {
-                            if( _state < s_ending )  set_state_direct( s_ending ), loop = true;
-                        }
-
-                        if( _killed  &&  _state < s_ending )  set_state_direct( s_ending ), loop = true;
+                        if( (!ok || has_error() || _killed) && _state < s_ending )  
+                             set_state_direct( s_ending ), loop = true;
                     }
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }
             }
-            catch( const exception& x )
-            {
+            catch( const exception& x ) {
                 if( error_count == 0 )  set_error( x );
-                                 else  _log->error( x.what() );
-
-                try
-                {
+                else _log->error( x.what() );
+                try  {
                     detach_order_after_error();
                 }
                 catch( exception& x ) { _log->error( "detach_order_after_error: " + string(x.what()) ); }
 
-                if( error_count == 0  &&  _state < s_ending )
-                {
+                if( error_count == 0  &&  _state < s_ending ) {
                     _end = end_normal;
                     loop = true;
                 }
                 else
-                if( error_count <= 1 )
-                {
+                if( error_count <= 1 ) {
                     loop = false;
-
-                    try
-                    {
+                    try {
                         finish();
                     }
                     catch( exception& x ) { _log->error( "finish(): " + string( x.what() ) ); }
-
-                    try
-                    {
+                    try  {
                         if( _job )  _job->stop_after_task_error( x.what() );
                     }
                     catch( exception& x ) { _log->error( "Job->stop_after_task_error(): " + string( x.what() ) ); }
-
                     set_state_direct( s_closed );
                 }
                 else
                     throw x;    // Fehlerschleife, Scheduler beenden. Sollte nicht passieren.
-
                 error_count++;
-
                 something_done = true;
+            }
+        }  // for
 
-                //sos_sleep( 5 );  // Bremsen, falls sich der Fehler wiederholt
-            } // catch( const exception& x )
-        }  // while 
+        if( _operation && !had_operation ) {
+            _last_operation_time = now;
+            if (!_timeout.is_eternal())
+                _call_register.call_at<Task_timeout_call>(_last_operation_time + _timeout);
+        }
 
-        if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
-
-        if( !something_done  &&  _next_time <= now  &&  !_signaled )    // Obwohl _next_time erreicht, ist nichts getan?
+        if( !something_done )    // Obwohl _next_time erreicht, ist nichts getan?
         {
             // Das kann bei s_running_waiting_for_order passieren, wenn zunächst ein Auftrag da ist (=> _next_time = 0),
             // der dann aber von einer anderen Task genommen wird. Dann ist der Auftrag weg und something_done == false.
 
             set_state_direct( state() );  // _next_time neu setzen
 
-            if( _next_time <= now )
+            //if( _next_time <= now )
+            //{
+            //    Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << ", delayed\n" );
+            //    //set_next_time(Time::now() + Duration(0.1));
+            //}
+            //else
             {
-                Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time.as_string(_job->time_zone_name()) << ", delayed\n" );
-                _next_time = Time::now() + Duration(0.1);
-            }
-            else
-            {
-                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin.as_string(_job->time_zone_name()) << "\n" );
+                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << "\n" );
             }
         }
     }  // if( _operation &&  !_operation->async_finished() )
-
-  //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
-
-/*
-    if( _state != s_running
-     && _state != s_running_delayed
-     && _state != s_running_waiting_for_order
-     && _state != s_running_process
-     && _state != s_suspended                 )  send_collected_log();
-*/
 
 
     return something_done;
 }
 
-//------------------------------------------------------------------------------------do_something2
-/*
-bool Task::do_something2()
-{
-}
-*/
-
 //---------------------------------------------------------------------------------------Task::load
 
 bool Task::load()
 {
-    if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
-    {
+    if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' ) {
         bool   remove_after_close = false;
         string filename           = _spooler->log_directory() + "/task." + _job->path().to_filename();
 
@@ -2099,17 +1884,19 @@ bool Task::load()
         _log->open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
     }
 
-
     _job->count_task();
     _spooler->_task_subsystem->count_task();
-    //(nur für altes use_engine="job", löscht Fehlermeldung von Job::do_somethin() init_start_when_directory_changed: reset_error();
 
     Time now = Time::now();
     _running_since = now;
     _last_operation_time = now;
     _timeout = _job->_task_timeout;
 
-    if( _job->is_machine_resumable() )  _spooler->begin_dont_suspend_machine();
+    if( _job->is_machine_resumable() ) 
+        _spooler->begin_dont_suspend_machine();
+
+    if (!_let_run) 
+        _call_register.call_at<Task_end_with_period_call>(_job->_period.end());   // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
     return do_load();
 }
@@ -2118,7 +1905,8 @@ bool Task::load()
 
 Async_operation* Task::begin__start()
 {
-    return do_begin__start();
+    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
+    return _module_instance->begin__start();
 }
 
 //-----------------------------------------------------------------------------------Task::step__end
@@ -2127,36 +1915,32 @@ bool Task::step__end()
 {
     bool continue_task;
 
-    try
-    {
+    try {
         bool    result;
         Variant spooler_process_result = do_step__end();
 
-        if( spooler_process_result.vt == VT_ERROR  &&  V_ERROR( &spooler_process_result ) == DISP_E_UNKNOWNNAME )
-        {
+        if( spooler_process_result.vt == VT_ERROR  &&  V_ERROR( &spooler_process_result ) == DISP_E_UNKNOWNNAME ) {
             result = true;
             continue_task = false;
-        }
-        else
-        {
+        } else {
             continue_task = result = check_result( spooler_process_result );
         }
 
-        if( _job->is_order_controlled() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state_direct(), §1495 )
+        if( _job->is_order_controlled() )  
+            continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state_direct(), §1495 )
 
         count_step();
 
-        if( _order )  
-        {
+        if( _order )   {
             postprocess_order( _delay_until_locks_available? Order::post_keep_state :
                                result                      ? Order::post_success 
                                                            : Order::post_error        );
         }
 
-        if( _next_spooler_process.not_zero() )  continue_task = true;
+        if( _next_spooler_process.not_zero() )  
+            continue_task = true;
     }
-    catch( const exception& x ) 
-    { 
+    catch( const exception& x ) { 
         set_error(x); 
         if( _order )  detach_order_after_error();
         continue_task = false; 
@@ -2169,8 +1953,7 @@ bool Task::step__end()
 
 void Task::count_step()
 {
-    if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
-    {
+    if( has_step_count()  ||  _step_count == 0 ) {      // Bei kind_process nur einen Schritt zählen
         _spooler->_task_subsystem->count_step();        // Siehe auch remote_process_step__end()
         _job->count_step();
         _step_count++;
@@ -2186,8 +1969,7 @@ string Task::remote_process_step__end()
 
     string result;
 
-    try
-    {
+    try {
         result = do_step__end().as_string();
 
         xml::Document_ptr dom_document = xml::Document_ptr::from_xml_string(result);
@@ -2200,10 +1982,8 @@ string Task::remote_process_step__end()
 
         set_state_texts_from_stdout( process_result_element.getAttribute( "state_text" ) );
 
-        if( _order )
-        {
-            if( xml::Element_ptr order_params_element = process_result_element.select_node( "order.params" ) )
-            {
+        if( _order ) {
+            if( xml::Element_ptr order_params_element = process_result_element.select_node( "order.params" ) ) {
                 ptr<Com_variable_set> p = new Com_variable_set( order_params_element );
                 _order->params()->merge( p );
             }
@@ -2218,8 +1998,7 @@ string Task::remote_process_step__end()
         _job->count_step();
         _step_count++;
     }
-    catch( const exception& x ) 
-    { 
+    catch( const exception& x )  { 
         set_error(x); 
         if( _order ) {
             _order_state_transition = _job->stops_on_task_error()? Order::post_keep_state : Order::post_error;
@@ -2229,76 +2008,91 @@ string Task::remote_process_step__end()
         } 
     }
 
-    _operation = NULL;
-
+    close_operation();
     return result;
 }
 
 //-----------------------------------------------------------------------------Task::operation__end
 
-bool Task::operation__end()
+bool Task::operation__end() 
 {
     bool result = false;
 
-    try
-    {
-        switch( _state )
-        {
-            case s_starting:                        result = do_begin__end();    break;
-            case s_opening:                         result = do_call__end();     break;
-            case s_ending:                                   do_end__end();      break;
-
-            case s_ending_waiting_for_subprocesses: if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
-                                                        m->_remote_instance->call__end();
-                                                    else assert(0), throw_xc( "NO_REMOTE_INSTANCE" );
-                                                    break;
-
-            case s_on_error:                        result = do_call__end();     break;
-            case s_on_success:                      result = do_call__end();     break;
-            case s_exit:                            result = do_call__end();     break;
-            case s_release:                                  do_release__end();  break;
-            case s_ended:                                    do_close__end();    break;
-            default:                                assert(0), throw_xc( "Task::operation__end" );
+    try {
+        switch( _state ) {
+            case s_starting:
+                result = do_begin__end();    
+                break;
+            case s_opening:
+                result = do_call__end();     
+                break;
+            case s_ending:
+                do_end__end();
+                break;
+            case s_ending_waiting_for_subprocesses: 
+                if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
+                    m->_remote_instance->call__end();
+                else 
+                    assert(0), throw_xc( "NO_REMOTE_INSTANCE" );
+                break;
+            case s_on_error:   
+                result = do_call__end();     
+                break;
+            case s_on_success:   
+                result = do_call__end();     
+                break;
+            case s_exit:
+                result = do_call__end();     
+                break;
+            case s_release: 
+                do_release__end();  
+                break;
+            case s_ended:
+                do_close__end();    
+                break;
+            default: 
+                assert(0), throw_xc( "Task::operation__end" );
         }
     }
     catch( const exception& x ) { set_error(x); result = false; }
 
-    _operation = NULL;
-
+    close_operation();
     return result;
+}
+//----------------------------------------------------------------------------Task::close_operation
+
+void Task::close_operation() {
+    if (_operation) {
+        _operation->async_close();
+        _operation = NULL;
+    }
 }
 
 //---------------------------------------------------------------------Task::fetch_and_occupy_order
 
 Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
-
 // Wird auch von Job gerufen, wenn ein neuer Auftrag zum Start einer neuen Task führt
-
 {
     assert( !_operation );
     assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
 
-
     if( !_order  
      && !_end   )   // Kann beim Aufruf aus Job::do_something() passieren 
     {
-        if( Order* order = _job->combined_job_nodes()->fetch_and_occupy_order(this, now, cause) )
-        {
-            if( order->is_file_order() )  _trigger_files = order->file_path();
-
+        if( Order* order = _job->fetch_and_occupy_order(this, now, cause) ) {
+            if( order->is_file_order() )  
+                _trigger_files = order->file_path();
             _order = order;
             _order_for_task_end = order;                // Damit bei Task-Ende im Fehlerfall noch der Auftrag gezeigt wird, s. dom_element()
-
             _log->set_order_log( _order->_log );
             _log->info( message_string( "SCHEDULER-842", _order->obj_name(), _order->state(), _spooler->http_url() ) );
-        }
-        else
-        {
+        } else {
             _job->request_order( now, cause );
         }
     }
 
-    if( _order )  _order->assert_task( Z_FUNCTION );
+    if( _order )  
+        _order->assert_task( Z_FUNCTION );
 
     return _order;
 }
@@ -2307,20 +2101,17 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
 void Task::postprocess_order( Order::Order_state_transition state_transition, bool due_to_exception )
 {
-    if( _order )
-    {
+    if( _order ) {
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         
         if (!_order->job_chain_path().empty())
             report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), state_transition), _order->java_sister());
         _order->postprocessing( state_transition );
         
-        if( due_to_exception )
-        {
-            if( !_order->setback_called() )  _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
-        }
-
+        if( due_to_exception && !_order->setback_called() ) 
+            _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
         detach_order();
+        //_call_register.call<Task_check_for_order_call>();
     }
 }
 
@@ -2328,23 +2119,17 @@ void Task::postprocess_order( Order::Order_state_transition state_transition, bo
 
 void Task::detach_order_after_error()
 {
-    if( _order )
-    {
-        if( _job->stops_on_task_error() )  
-        {
+    if( _order ) {
+        if( _job->stops_on_task_error() ) {
             // Job wird stoppt, deshalb bleibt der Auftrag in der Warteschlange.
-
             _log->warn( message_string( "SCHEDULER-845" ) );
             _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
             if (!_order->job_chain_path().empty())
                 report_event( CppEventFactoryJ::newOrderStepEndedEvent(_order->job_chain_path(), _order->string_id(), Order::post_keep_state), _order->java_sister());
             _order->processing_error();
             detach_order();
-        }
-        else
-        {
+        } else {
             // Job stoppt nicht, deshalb wechselt der Auftrag in den Fehlerzustand
-
             postprocess_order( Order::post_error, true );
             // _order ist NULL
         }
@@ -2355,7 +2140,8 @@ void Task::detach_order_after_error()
 
 void Task::detach_order()
 {
-    if( _order->is_file_order() )  _trigger_files = "";
+    if( _order->is_file_order() )  
+        _trigger_files = "";
     _log->set_order_log( NULL );
     _order = NULL;
 }
@@ -2365,57 +2151,43 @@ void Task::detach_order()
 void Task::finish()
 {
     _job->init_start_when_directory_changed( this );
-
     process_on_exit_commands();
-
-    if( _order )    // Auftrag nicht verarbeitet? spooler_process() nicht ausgeführt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
-    {
+    if( _order ) {   // Auftrag nicht verarbeitet? spooler_process() nicht ausgeführt, z.B. weil spooler_init() oder spooler_open() false geliefert haben.
         if( !has_error()  &&  _spooler->state() != Spooler::s_stopping )  set_error( Xc( "SCHEDULER-226" ) );
         detach_order_after_error();  // Nur rufen, wenn _move_order_to_error_state, oder der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
     }
 
-    if( has_error()  &&  _job->repeat().is_zero()  &&  _job->_delay_after_error.empty() )
-    {
+    if( has_error()  &&  _job->repeat().is_zero()  &&  _job->_delay_after_error.empty() ) {
         _job->stop_after_task_error( _error.what() );
     }
     else
-    if( _job->_temporary  &&  _job->repeat().is_zero() )
-    {
+    if( _job->_temporary  &&  _job->repeat().is_zero() ) {
         _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
     }
 
     // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verzögern?
 
-    if( has_error()  &&  _job->_delay_after_error.size() > 0 )
-    {
+    if( has_error()  &&  _job->_delay_after_error.size() > 0 ) {
         InterlockedIncrement( &_job->_error_steps );
-
         _is_first_job_delay_after_error = _job->_error_steps == 1;
-
-        if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
-        {
+        if( !_job->repeat() ) {  // spooler_task.repeat hat Vorrang
             Duration delay = _job->_delay_after_error.empty()? Duration::eternal : Duration(0);
 
-            FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )
+            FOR_EACH( Standard_job::Delay_after_error, _job->_delay_after_error, it )
                 if( _job->_error_steps >= it->first )  delay = it->second;
 
-            if(delay.is_eternal())
-            {
+            if(delay.is_eternal()) {
                 _is_last_job_delay_after_error = true;
                 _job->stop( false );
-            }
-            else
-            {
+            } else {
                 _job->_delay_until = Time::now() + delay;
 
                 if (_cause == cause_queue) {
-                    try
-                    {
-                        ptr<Task> task = _job->start( +_params, _name );   // Keine Startzeit: Nach Periode und _delay_until richten
+                    try {
+                        ptr<Task> task = _job->start_task( +_params, _name );   // Keine Startzeit: Nach Periode und _delay_until richten
                         task->_delayed_after_error_task_id = id();
                     }
-                    catch( exception& x )
-                    {
+                    catch( exception& x ) {
                         _log->error( x.what() );
                         _job->_delay_until = Time(0);
                         _job->stop_after_task_error( x.what() );
@@ -2423,33 +2195,24 @@ void Task::finish()
                 }
             }
         }
-    }
-    else
-    {
+    } else {
        _job->_error_steps = 0;
     }
 
     if( _web_service )
-    {
         _web_service->forward_task( *this );
-    }
-
 
     _job->on_task_finished( this );
 
-
-    // eMail versenden
     {
+        // eMail versenden
         // Vor Task::close(), damit _order_for_task_end genutzt werden kann, s. Task::dom_element()
         Scheduler_event event ( evt_task_ended, _log->highest_level(), this );
         trigger_event( &event );
     }
 
-
     close();
-
     task_subsystem()->count_finished_tasks();
-
     if( _job->is_machine_resumable() )  _spooler->end_dont_suspend_machine();
 }
 
@@ -2458,20 +2221,19 @@ void Task::finish()
 void Task::set_state_texts_from_stdout( const string& state_text )
 {
     _job->set_state_text( state_text );
-    if( _order )  _order->set_state_text( state_text );
+    if( _order )  
+        _order->set_state_text( state_text );
 }
 
 //-------------------------------------------------------------------Task::process_on_exit_commands
 
 void Task::process_on_exit_commands()
 {
-    if( _job->_commands_document )
-    {
+    if( _job->_commands_document ) {
         xml::Element_ptr commands_element = xml::Element_ptr();
 
-        Job::Exit_code_commands_map::iterator it = _job->_exit_code_commands_map.find( _exit_code );
-        if( it != _job->_exit_code_commands_map.end() )
-        {
+        Standard_job::Exit_code_commands_map::iterator it = _job->_exit_code_commands_map.find( _exit_code );
+        if( it != _job->_exit_code_commands_map.end() ) {
             commands_element = it->second;
         }
 #       ifdef Z_UNIX
@@ -2485,8 +2247,7 @@ void Task::process_on_exit_commands()
         if(_exit_code != 0) // JS-550
             commands_element = _job->_commands_document.select_node( "/*/commands [ @on_exit_code='error' ]" );
 
-        if( commands_element )
-        {
+        if( commands_element ) {
             _log->debug( message_string( "SCHEDULER-328", commands_element.getAttribute( "on_exit_code" ) ) );
 
             Command_processor cp ( _spooler, Security::seclev_all );
@@ -2496,14 +2257,11 @@ void Task::process_on_exit_commands()
             if (_order_for_task_end) 
                 cp.set_variable_set("order", _order_for_task_end->params_or_null());
 
-            DOM_FOR_EACH_ELEMENT( commands_element, c )
-            {
-                try
-                {
+            DOM_FOR_EACH_ELEMENT( commands_element, c ) {
+                try {
                     cp.execute_command( c );
                 }
-                catch( exception& x )
-                {
+                catch( exception& x ) {
                     _log->error( x.what() );
                     _log->error( message_string( "SCHEDULER-327", c.xml_string() ) );
                 }
@@ -2516,8 +2274,7 @@ void Task::process_on_exit_commands()
 
 void Task::trigger_event( Scheduler_event* scheduler_event )
 {
-    try
-    {
+    try {
         _log->set_mail_default( "from_name", _spooler->name() + " " + obj_name() );    // "Scheduler host:port -id=xxx Task jobname:id"
 
         scheduler_event->set_message( _log->highest_msg() );
@@ -2531,45 +2288,30 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         if( _order )  body << _order->obj_name() << "\n";
         body << "Scheduler -id=" << _spooler->id() << "  host=" << _spooler->_complete_hostname << "\n\n";
 
-        if( !is_error )
-        {
+        if( !is_error ) {
             S subject;
             subject << obj_name();
-
-            if( _log->highest_level() == log_error )
-            {
+            if( _log->highest_level() == log_error ) {
                 subject << " ended with error";
                 body << _log->highest_msg() << "\n\n";
             }
             else
-            if( _log->highest_level() == log_warn )
-            {
+            if( _log->highest_level() == log_warn ) {
                 subject << " ended with warning";
                 body << _log->highest_msg() << "\n\n";
-            }
-            else
-            {
+            } else {
                 subject << " succeeded";
             }
-
             _log->set_mail_default( "subject", subject, false );
-        }
-        else
-        {
+        } else {
             string errmsg = _error? _error->what() : _log->highest_msg();
             _log->set_mail_default( "subject", string("ERROR ") + errmsg, true );
-
             body << errmsg << "\n\n";
         }
-
         _log->set_mail_default( "body", body + "This message contains the job protocol." );   //, is_error );
 
-
-
         bool mail_it = _log->_mail_it;
-
-        if( !mail_it )
-        {
+        if( !mail_it ) {
             bool mail_due_to_error_or_warning = false;
 
 //          JS-425:  if( _log->_mail_on_error | _log->_mail_on_warning  &&  ( has_error() || _log->highest_level() >= log_error ) )  mail_due_to_error_or_warning = true;
@@ -2578,10 +2320,8 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
 //          JS-425: if( _log->_mail_on_warning  &&  _log->has_line_for_level( log_warn ) )  mail_due_to_error_or_warning = true;
             if( _log->_mail_on_warning &&  ( _log->highest_level() == log_warn ) )  mail_due_to_error_or_warning = true;
 
-            if( _job->_delay_after_error.size() > 0 )
-            {
-                switch( _log->_mail_on_delay_after_error )
-                {
+            if( _job->_delay_after_error.size() > 0 ) {
+                switch( _log->_mail_on_delay_after_error ) {
                     case fl_all:                    break;
                     case fl_first_only:             if( !_is_first_job_delay_after_error )  mail_due_to_error_or_warning = false;  break;
                     case fl_last_only:              if( !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
@@ -2594,16 +2334,16 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
             mail_it = mail_due_to_error_or_warning;
         }
 
-        if( !mail_it  &&  _log->_mail_on_success  &&  _step_count >= 0                      )  mail_it = true;
-        if( !mail_it  &&  _log->_mail_on_process  &&  _step_count >= _log->_mail_on_process )  mail_it = true;
+        if( !mail_it  &&  _log->_mail_on_success  &&  _step_count >= 0)  
+            mail_it = true;
+        if( !mail_it  &&  _log->_mail_on_process  &&  _step_count >= _log->_mail_on_process )  
+            mail_it = true;
 
-
-        if( _log->_mail_it )  mail_it = true;
+        if( _log->_mail_it )  
+            mail_it = true;
 
         if( mail_it )
-        {
             _log->send( scheduler_event );
-        }
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
     catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }
@@ -2622,9 +2362,7 @@ bool Task::wait_until_terminated( double )
 void Task::set_web_service( const string& name )
 { 
     if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
-
-    set_web_service( name == ""? NULL 
-                               : _spooler->_web_services->web_service_by_name( name ) );
+    set_web_service( name == ""? NULL  : _spooler->_web_services->web_service_by_name( name ) );
 }
 
 //----------------------------------------------------------------------------Task::set_web_service
@@ -2632,7 +2370,6 @@ void Task::set_web_service( const string& name )
 void Task::set_web_service( Web_service* web_service )                
 { 
     if( _is_in_database )  z::throw_xc( "SCHEDULER-243", "web_service" );
-
     _web_service = web_service; 
 }
 
@@ -2645,31 +2382,31 @@ Web_service* Task::web_service() const
     return result;
 }
 
-//---------------------------------------------------------------------Module_task::do_close__start
+//----------------------------------------------------------------------------Task::do_close__start
 
-Async_operation* Module_task::do_close__start()
+Async_operation* Task::do_close__start()
 {
-    if( !_module_instance )  return &dummy_sync_operation;
-
-    _module_instance->detach_task();
-
-    return _module_instance->close__start();
+    if( !_module_instance ) {
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
+    } else {
+        _module_instance->detach_task();
+        return _module_instance->close__start();
+    }
 }
 
-//-----------------------------------------------------------------------Module_task::do_close__end
+//------------------------------------------------------------------------------Task::do_close__end
 
-void Module_task::do_close__end()
+void Task::do_close__end()
 {
-    if( _module_instance )
-    {
+    if( _module_instance ) {
         _file_logger->flush();      // JS-986 JS-1039
         _module_instance->close__end();
         _file_logger->flush();
 
         // Siehe auch remote_process_step__end()
         int exit_code = _module_instance->kind() == Module::kind_process? _module_instance->exit_code() : _exit_code;
-        if( exit_code )
-        {
+        if( exit_code ) {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
             if( _module_instance->_module->kind() == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
                 set_error( x );
@@ -2679,8 +2416,7 @@ void Module_task::do_close__end()
             _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
         }
                                           
-        if( int termination_signal = _module_instance->termination_signal() )
-        {
+        if( int termination_signal = _module_instance->termination_signal() ) {
             z::Xc x ( "SCHEDULER-279", termination_signal, signal_name_from_code( termination_signal ) + " " + signal_title_from_code( termination_signal ) );
 
             if( !_job->_ignore_every_signal 
@@ -2688,9 +2424,7 @@ void Module_task::do_close__end()
              && ( _module_instance->_module->kind() != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
             {
                 set_error( x );
-            }
-            else  
-            {
+            } else {
                 _log->warn( x.what() );
                 _log->debug( message_string( "SCHEDULER-973" ) ); //, signal_name_from_code( termination_signal ) ) );
                 
@@ -2702,11 +2436,9 @@ void Module_task::do_close__end()
                 }
             }
 
-            //if( _module_instance->_module->kind() == Module::kind_process )  
             _exit_code = -termination_signal;
         }
  
-
         _file_logger->finish();
         _file_logger->close();
 
@@ -2714,144 +2446,133 @@ void Module_task::do_close__end()
     }
 }
 
-//--------------------------------------------------------------------------Job_module_task::do_kill
+//------------------------------------------------------------------------------------Task::do_kill
 
-bool Job_module_task::do_kill()
+bool Task::do_kill()
 {
     return _module_instance? _module_instance->kill() :
            _operation      ? _operation->async_kill()
                            : false;
 }
 
-//-------------------------------------------------------------------------Job_module_task::do_load
+//------------------------------------------------------------------------------------Task::do_load
 
-bool Job_module_task::do_load()
+bool Task::do_load()
 {
-    ptr<Module_instance> module_instance;
-    bool                 is_new = false;
+    Host_and_port remote_scheduler = read_remote_scheduler_parameter();
+    
+    if (ptr<Module_instance> module_instance = _job->create_module_instance(remote_scheduler)) {
+        module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
 
-    module_instance = _job->create_module_instance();
-    if( !module_instance )  return false;
+        _module_instance = module_instance;
+        _module_instance->attach_task( this, _log );
 
-    is_new = true;
-    module_instance->set_close_instance_at_end( true );
-    module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
+        if( !module_instance->loaded() ) {
+            module_instance->init();
+            module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
+            module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
+            module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
+            module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
+            bool ok =  module_instance->load();
+            if( !ok ) return false;
+            module_instance->start();
+        }
 
+        return true;
+    } else
+        return false;
+}
 
-    _module_instance = module_instance;
-    _module_instance->attach_task( this, _log );
+//------------------------------------------------------------Task::read_remote_scheduler_parameter
 
-    if( !module_instance->loaded() )
-    {
-        module_instance->init();
-
-        module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
-        module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
-        module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
-        module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
-
-        bool ok =  module_instance->load();
-        if( !ok ) return false;
-
-        module_instance->start();
+Host_and_port Task::read_remote_scheduler_parameter() {
+    Host_and_port remote_scheduler = _order? _order->params()->get_string("scheduler.remote_scheduler") : "";
+    if (remote_scheduler) {
+        if (_spooler->is_cluster())  z::throw_xc("SCHEDULER-483");
+        if (_job->module()->kind() != Module::kind_process)  z::throw_xc("SCHEDULER-484");   // Ein API-Prozess kann mehrere Order nacheinander ausführen. Die Tasks könnten dann für jeden Order wechseln.
     }
-
-    return true;
+    return remote_scheduler;
 }
 
-//------------------------------------------------------------------Job_module_task::do_begin_start
+//------------------------------------------------------------------------------Task::do_begin__end
 
-Async_operation* Job_module_task::do_begin__start()
+bool Task::do_begin__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-
-    return _module_instance->begin__start();
+    return _module_instance->begin__end();
 }
 
-//-------------------------------------------------------------------Job_module_task::do_begin__end
+//------------------------------------------------------------------------------Task::do_end__start
 
-bool Job_module_task::do_begin__end()
+Async_operation* Task::do_end__start()
 {
-    bool ok;
-
-    if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-
-    ok = _module_instance->begin__end();
-
-    return ok;
+    if (!_module_instance ) {
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
+    } else {
+        return _module_instance->end__start( !has_error() );        // Parameter wird nicht benutzt
+    }
 }
 
-//-------------------------------------------------------------------Job_module_task::do_end__start
+//--------------------------------------------------------------------------------Task::do_end__end
 
-Async_operation* Job_module_task::do_end__start()
+void Task::do_end__end()
 {
-    if( !_module_instance )  return &dummy_sync_operation;
-
-    return _module_instance->end__start( !has_error() );        // Parameter wird nicht benutzt
+    if( _module_instance ) 
+        _module_instance->end__end();
 }
 
-//---------------------------------------------------------------------Job_module_task::do_end__end
+//-----------------------------------------------------------------------------Task::do_step__start
 
-void Job_module_task::do_end__end()
-{
-    if( !_module_instance )  return;
-
-    _module_instance->end__end();
-}
-
-//------------------------------------------------------------------Job_module_task::do_step__start
-
-Async_operation* Job_module_task::do_step__start()
+Async_operation* Task::do_step__start()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-
     if (_order) report_event_code(orderStepStartedEvent, _order->java_sister());
     return _module_instance->step__start();
 }
 
-//--------------------------------------------------------------------Job_module_task::do_step__end
+//-------------------------------------------------------------------------------Task::do_step__end
 
-Variant Job_module_task::do_step__end()
+Variant Task::do_step__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-
     _file_logger->flush();      // JS-986 JS-1039
     return _module_instance->step__end();
 }
 
-//------------------------------------------------------------------Job_module_task::do_call__start
+//------------------------------------------------------------------------------Task::do_call__start
 
-Async_operation* Job_module_task::do_call__start( const string& method )
+Async_operation* Task::do_call__start( const string& method )
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-
     return _module_instance->call__start( method );
 }
 
-//--------------------------------------------------------------------Job_module_task::do_call__end
+//-------------------------------------------------------------------------------Task::do_call__end
 
-bool Job_module_task::do_call__end()
+bool Task::do_call__end()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
-
     return check_result( _module_instance->call__end() );
 }
 
-//---------------------------------------------------------------Job_module_task::do_release__start
+//--------------------------------------------------------------------------Task::do_release__start
 
-Async_operation* Job_module_task::do_release__start()
+Async_operation* Task::do_release__start()
 {
-    if( !_module_instance )  return &dummy_sync_operation; //z::throw_xc( "SCHEDULER-199" );
-
-    return _module_instance->release__start();
+    if (!_module_instance ) {
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
+    } else {
+        return _module_instance->release__start();
+    }
 }
 
-//-----------------------------------------------------------------Job_module_task::do_release__end
+//----------------------------------------------------------------------------Task::do_release__end
 
-void Job_module_task::do_release__end()
+void Task::do_release__end()
 {
     if( !_module_instance )  return;  //z::throw_xc( "SCHEDULER-199" );
-
     _module_instance->release__end();
 }
 

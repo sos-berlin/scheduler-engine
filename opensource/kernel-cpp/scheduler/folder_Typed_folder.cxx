@@ -198,7 +198,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                     } else {   
                         something_changed = true;
 
-                        file_based = subsystem()->call_new_file_based();
+                        file_based = subsystem()->call_new_file_based(source_xml_bytes);
                         file_based->set_reread(!is_new);
                         file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
                         file_based->set_base_file_info( Base_file_info( *directory_entry ) );
@@ -224,17 +224,9 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                         if( !content_xc.is_empty() )  throw content_xc;
 
-                        xml::Document_ptr dom_document = xml::Document_ptr::from_xml_bytes(source_xml_bytes);
-                        xml::Element_ptr  element      = dom_document.documentElement();
-                        subsystem()->assert_xml_element_name( element );
-                        if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
-
-                        assert_empty_attribute( element, "spooler_id" );
-                        if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
                         Z_LOG2( "scheduler", directory_entry->_file_info->path() << ":\n" << source_xml_bytes << "\n" );
-
+                        file_based->set_xml_bytes(source_xml_bytes);         // Ruft clear_source_xml()
                         file_based->_source_xml_bytes = source_xml_bytes;   
-                        file_based->set_dom( element );
                         file_based->set_file_based_state( File_based::s_not_initialized );
                         file_based->initialize();
 
@@ -351,7 +343,7 @@ ptr<File_based> Typed_folder::new_initialized_file_based_xml( const xml::Element
     subsystem()->check_file_based_element( element );
     //assert_empty_attribute( element, "replace"    );
 
-    ptr<File_based> file_based = subsystem()->call_new_file_based();
+    ptr<File_based> file_based = subsystem()->call_new_file_based("");
     file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
     file_based->set_folder_path( folder()->path() );
     file_based->set_name( element.getAttribute( "name", default_name ) );

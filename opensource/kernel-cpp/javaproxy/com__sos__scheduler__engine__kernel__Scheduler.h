@@ -59,6 +59,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     void cancelCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
     void enqueueCall(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::async::CppCall >& p0) const;
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem() const;
+    void initialize() const;
     ::javaproxy::java::lang::Object instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Class >& p0) const;
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) const;
     void log(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, jint p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;

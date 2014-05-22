@@ -36,6 +36,12 @@ final class SchedulerConfiguration @Inject private(spoolerC: SpoolerC) {
   def tcpPort: Int =
     spoolerC.tcp_port
 
+  def udpPort: Option[Int] =
+    spoolerC.udp_port match {
+      case 0 ⇒ None
+      case n => Some(n)
+    }
+
   def webDirectoryOption: Option[File] =
     setting(htmlDir) match {
       case "" => None

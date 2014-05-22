@@ -32,7 +32,7 @@ struct Scheduler_script_subsystem : Scheduler_script_subsystem_interface
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
     void                        assert_xml_element_name     ( const xml::Element_ptr& ) const;
     string                      normalized_name             ( const string& name ) const            { return name; }
-    ptr<Scheduler_script>       new_file_based              ()                                      { return Z_NEW( Scheduler_script( this ) ); }
+    ptr<Scheduler_script>       new_file_based              (const string& source)                  { return Z_NEW( Scheduler_script( this ) ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "scheduler_scripts" ); }
     ptr<Scheduler_script_folder> new_scheduler_script_folder( Folder* );
 
@@ -41,7 +41,6 @@ struct Scheduler_script_subsystem : Scheduler_script_subsystem_interface
     void                        set_dom                     ( const xml::Element_ptr& script_element );
     Scheduler_script*           default_scheduler_script    ();
     Scheduler_script*           default_scheduler_script_or_null();
-    bool                        needs_java                  () const;
 
     vector<Scheduler_script*>   ordered_file_baseds         ();
 
@@ -315,22 +314,6 @@ bool Scheduler_script_subsystem::subsystem_activate()
     _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen
     file_based_subsystem<Scheduler_script>::subsystem_activate();
     return true;
-}
-
-//-----------------------------------------------------------Scheduler_script_subsystem::needs_java
-
-bool Scheduler_script_subsystem::needs_java() const
-{
-    bool result = false;
-
-    Z_FOR_EACH_CONST( File_based_map, _file_based_map, fb )
-    {
-        Scheduler_script* script = fb->second;
-        result = script->module()->kind() == Module::kind_java;
-        if( result )  break;
-    }
-
-    return result;
 }
 
 //-------------------------------------------------------------------------------------------------

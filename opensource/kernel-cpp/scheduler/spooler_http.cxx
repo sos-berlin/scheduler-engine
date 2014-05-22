@@ -796,7 +796,7 @@ bool Operation::async_continue_( Continue_flags flags )
 
     if( flags & cont_next_gmtime_reached )
     {
-        if( _response &&  !_response->is_ready()  &&  _order  &&  _order->is_virgin() )         // is_virgin() sollte immer true sein
+        if( _response &&  !_response->is_ready()  &&  _order  &&  !_order->is_touched() )         // is_touched() sollte immer false sein
         {
             if( _connection )  _connection->_log.error( message_string( "SCHEDULER-290", _order->obj_name() ) );   // "HTTP-Operation wird nach Fristablauf abgebrochen"
             

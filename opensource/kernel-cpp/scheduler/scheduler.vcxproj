@@ -139,6 +139,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -155,8 +156,7 @@
       <MapExports>true</MapExports>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>
-      </LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
@@ -197,6 +197,8 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -212,8 +214,7 @@
       <MapExports>true</MapExports>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>
-      </LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
@@ -360,6 +361,7 @@
     <ClCompile Include="folder_Typed_folder.cxx" />
     <ClCompile Include="log_cache_Request.cxx" />
     <ClCompile Include="log_cache_Request_cache.cxx" />
+    <ClCompile Include="spooler_job_java.cxx" />
     <ClCompile Include="Timed_call.cxx" />
     <ClCompile Include="Settings.cxx" />
     <ClCompile Include="_precompiled_headers.cxx">
@@ -428,11 +430,11 @@
     <ClCompile Include="jni__sos__scheduler__Job.cxx" />
     <ClCompile Include="jni__sos__scheduler__order__Job_chain.cxx" />
     <ClCompile Include="jni__sos__scheduler__Job_subsystem.cxx" />
-    <ClCompile Include="jni__sos__scheduler__order__job_chain__Node.cxx" />
+    
     <ClCompile Include="jni__sos__scheduler__order__Order.cxx" />
     <ClCompile Include="jni__sos__scheduler__order__Order_queue.cxx" />
-    <ClCompile Include="jni__sos__scheduler__order__job_chain__Order_queue_node.cxx" />
-    <ClCompile Include="jni__sos__scheduler__order__Order_subsystem.cxx" />
+    
+    
     <ClCompile Include="jni__sos__scheduler__Prefix_log.cxx" />
     <ClCompile Include="scheduler_messages.cxx" />
     <ClCompile Include="..\kram\sosmain.cxx">
@@ -463,13 +465,39 @@
     <ClCompile Include="jni__sos__scheduler__http__Chunk_reader.cxx" />
     <ClCompile Include="jni__sos__scheduler__Spooler.cxx" />
     <ClCompile Include="jni__sos__scheduler__Timed_call.cxx" />
-  <ClCompile Include="jni__sos__scheduler__Task_subsystem.cxx" />
+  
+    <ClCompile Include="jni__sos__scheduler__Task_subsystem.cxx" />
+    <ClCompile Include="jni__sos__scheduler__Folder.cxx" />
+    
+    
+    <ClCompile Include="jni__sos__scheduler__Process_class.cxx" />
+    
+    
+    
+    <ClCompile Include="jni__sos__scheduler__lock__Lock.cxx" />
+    <ClCompile Include="jni__sos__scheduler__lock__Lock_subsystem.cxx" />
+    
+    <ClCompile Include="jni__sos__scheduler__schedule__Schedule.cxx" />
+    
+    <ClCompile Include="jni__sos__scheduler__Process_class_subsystem.cxx" />
+    <ClCompile Include="jni__sos__scheduler__order__Standing_order_subsystem.cxx" />
+    <ClCompile Include="jni__sos__scheduler__schedule__Schedule_subsystem_interface.cxx" />
+    
+    
+    
+    <ClCompile Include="jni__sos__scheduler__order__Order_subsystem.cxx" />
+    
+    
+    <ClCompile Include="jni__sos__scheduler__order__job_chain__End_node.cxx" />
+    <ClCompile Include="jni__sos__scheduler__order__job_chain__Nested_job_chain_node.cxx" />
+    <ClCompile Include="jni__sos__scheduler__order__job_chain__Sink_node.cxx" />
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event_code.h" />
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="log_cache_Request.h" />
     <ClInclude Include="log_cache_Request_cache.h" />
+    <ClInclude Include="spooler_job_java.h" />
     <ClInclude Include="Timed_call.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="spooler_xslt_stylesheet.h" />

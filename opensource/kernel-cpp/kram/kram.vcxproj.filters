@@ -150,37 +150,10 @@
     <ClCompile Include="olestd.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sossql_group_by.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossql1.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossql2.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossql2a.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossql3.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossql4.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossqlfl.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossqlty.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sosset.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sqlutil.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sossqlfn.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sysdep.cxx">

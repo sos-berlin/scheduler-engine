@@ -217,6 +217,7 @@ struct File_based : Scheduler_object,
     File_path                   configuration_root_directory() const;
     const string&               source_xml_bytes            () const                                { return _source_xml_bytes; }
     File_path                   file                        () const                                { return _base_file_info._path; }
+    time_t                      file_modification_time_t    () const                                { return _base_file_info._last_write_time; }
 
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
@@ -253,7 +254,8 @@ struct File_based : Scheduler_object,
     void                        handle_event                ( Base_file_event );
 
     virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
-    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
+    virtual void                set_xml_bytes               (const string&);
+    virtual void                set_dom                     (const xml::Element_ptr&);              // Falls Unterklasse set_xml() nicht implementiert
 
     // Alle on_xxx() sollten protected sein.
     virtual bool                on_initialize               ()                                      = 0;
@@ -405,6 +407,7 @@ struct typed_folder : Typed_folder
 // Bislang gibt es nur einen Ordner im Scheduler.
 
 struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >, 
+                javabridge::has_proxy<Folder>,
                 Object
 {
     static int                  position_of_extension_point ( const string& filename );
@@ -420,6 +423,8 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Object::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Folder>::java_sister(); }
 
     void                        close                       ();
     bool                        on_initialize               ();
@@ -535,7 +540,7 @@ struct File_based_subsystem : Subsystem
 
     virtual File_based*         file_based_or_null_         ( const Absolute_path& path ) const     = 0;
     virtual File_based*         file_based_                 ( const Absolute_path& path ) const     = 0;
-    virtual ptr<File_based>     call_new_file_based         ()                                      = 0;
+    virtual ptr<File_based>     call_new_file_based         (const string& source_xml)              = 0;
     virtual void                add_file_based              ( File_based* )                         = 0;
     virtual void                remove_file_based           ( File_based* )                         = 0;
     virtual void                replace_file_based          ( File_based*, File_based* )            = 0;
@@ -572,9 +577,8 @@ struct file_based_subsystem : File_based_subsystem
     }
 
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
-    ptr<File_based>             call_new_file_based         ()                                      { return +new_file_based(); }
-    virtual ptr<FILE_BASED>     new_file_based              ()                                      = 0;
-
+    ptr<File_based>             call_new_file_based         (const string& source)                  { return +new_file_based(source); }
+    virtual ptr<FILE_BASED>     new_file_based              (const string& source)                  = 0;
 
     void close()
     {
@@ -661,12 +665,12 @@ struct file_based_subsystem : File_based_subsystem
         return result;
     }
 
-    virtual vector<string> file_based_names(bool visibleOnly) const {
+    virtual vector<string> file_based_paths(bool visibleOnly) const {
         vector<string> result;
         result.reserve(_file_based_map.size());
         Z_FOR_EACH_CONST(typename File_based_map, _file_based_map, i) {
             const File_based* f = i->second;
-            if (!visibleOnly || f->is_visible()) result.push_back(f->name());
+            if (!visibleOnly || f->is_visible()) result.push_back(f->path());
         }
         return result;
     }
@@ -715,6 +719,17 @@ struct file_based_subsystem : File_based_subsystem
         return result;
     }
 
+    FILE_BASED* java_file_based(const string& path) const {
+        return file_based(Absolute_path(path));
+    }
+
+    FILE_BASED* java_file_based_or_null(const string& path) const {
+        return file_based_or_null(Absolute_path(path));
+    }
+
+    FILE_BASED* java_active_file_based(const string& path) const {
+        return active_file_based(Absolute_path(path));
+    }
 
     javaproxy::java::util::ArrayList java_file_baseds() 
     {
@@ -723,12 +738,6 @@ struct file_based_subsystem : File_based_subsystem
             if (FILE_BASED* file_based = it->second)
                 result.add(file_based->java_sister());
         return result;
-    }
-
-
-    javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased java_file_based_or_null(const string& absolute_path) {
-        FILE_BASED* f = file_based_or_null(Absolute_path(absolute_path));
-        return f? f->java_sister() : NULL;
     }
 
 
@@ -831,7 +840,7 @@ struct Folder_subsystem : Object,
     string                      xml_element_name            () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
   //string                      normalized_name             ( const string& name ) const            { return name; }
-    ptr<Folder>                 new_file_based              ();
+    ptr<Folder>                 new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "folders" ); }
 
 

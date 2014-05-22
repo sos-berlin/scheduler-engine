@@ -438,10 +438,15 @@ bool Host_and_port::operator < ( const Host_and_port& o ) const
 
 void Host_and_port::operator = ( const string& str )
 {
-    vector<string> host_port = vector_split( ":", str, 2 );
-
-    _host = host_port.size() > 0? host_port[ 0 ] : "";
-    _port = host_port.size() > 1? as_int( host_port[ 1 ] ) : 0;
+    try {
+        vector<string> host_port = vector_split( ":", str, 2 );
+        _host = host_port.size() > 0? host_port[ 0 ] : "";
+        _port = host_port.size() > 1? as_int( host_port[ 1 ] ) : 0;
+    }
+    catch (z::Xc& x) {
+        x.append_text("Host_and_port");
+        throw;
+    }
 }
 
 //--------------------------------------------------------------------Host_and_port::as_sockaddr_in

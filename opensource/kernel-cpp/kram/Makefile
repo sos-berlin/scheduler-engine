@@ -40,14 +40,6 @@ objects = \
  sosscrpt.o\
  sosset.o\
  sossock.o\
- sossql1.o\
- sossql2.o\
- sossql2a.o\
- sossql3.o\
- sossql4.o\
- sossql_group_by.o\
- sossqlfl.o\
- sossqlfn.o\
  sossqlty.o\
  sosstat.o\
  sosstrea.o\

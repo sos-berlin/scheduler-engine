@@ -16,10 +16,6 @@
 
 #include "../kram/sysdep.h"
 
-//#if defined SYSTEM_RTTI
-//#   include <typeinfo.h>
-//#endif
-
 #include "../kram/sos.h"
 #include "../kram/log.h"
 #include "../kram/sosalloc.h"
@@ -54,11 +50,7 @@ Sos_object_base* Sos_object_base::obj_cast( Sos_type_code type_code, const char*
 
 string Sos_object_base::_obj_name() const
 {
-#   if defined SYSTEM_RTTI
-        return z::name_of_type( *this );
-#    else
-        return "Sos_object_base";
-#   endif
+    return z::name_of_type( *this );
 }
 
 //------------------------------------------------------------------Sos_object_base::_obj_print
@@ -75,10 +67,6 @@ Sos_self_deleting::Sos_self_deleting()
     _obj_ref_count ( 1 ),
     _obj_const_name( 0 )
 {
-#   if !defined SYSTEM_WIN16DLL             // das sparen wir uns
-        //Nicht threadsicher Sos_static* s = sos_static_ptr();
-        //Nicht threadsicher if( s )  s->_object_count++;
-#   endif
 }
 
 //---------------------------------------------------------Sos_self_deleting::Sos_self_deleting
@@ -88,10 +76,6 @@ Sos_self_deleting::Sos_self_deleting( const Sos_self_deleting& )
     _obj_ref_count ( 1 ),
     _obj_const_name( 0 )
 {
-#   if !defined SYSTEM_WIN16DLL             // das sparen wir uns
-        //Nicht threadsicher Sos_static* s = sos_static_ptr();
-        //Nicht threadsicher if( s )  s->_object_count++;
-#   endif
 }
 
 //--------------------------------------------------------Sos_self_deleting::~Sos_self_deleting
@@ -109,30 +93,10 @@ Sos_self_deleting::~Sos_self_deleting()
     {
         const char* name = _obj_const_name? _obj_const_name : "Sos_self_deleting";
         LOG_ERR( "\n******* ~" << name << " mit " << _obj_ref_count << " Referenzen *******\n\n" );
-/*
-        static Bool ich_war_hier = false;
-#       if defined SYSTEM_WIN
-        if( !ich_war_hier )
-#       endif
-        {
-            ich_war_hier = true;
-            if ( read_profile_bool( "", "debug", "check-new", false ) )
-*/
-        //if( sosalloc_check )
-        //    {
-        //        SHOW_ERR( '~' << name << " mit " << (long)_obj_ref_count << " Referenzen" );
-        //    }
-        //}
-
         if( _obj_ref_count > 1 ) {
             _obj_ref_count = 0;     // Damit weiteres ~Sos_self_deleting oder ~Sos_pointer keinen Unsinn macht
         }
     }
-
-#   if !defined SYSTEM_WIN16DLL             // das sparen wir uns
-        //Nicht threadsicher Sos_static* s = sos_static_ptr();
-        //Nicht threadsicher if( s )  s->_object_count--;
-#   endif
 }
 
 //--------------------------------------------------------------Sos_self_deleting::operator new
@@ -182,12 +146,6 @@ void Sos_self_deleting::obj_del()
         delete this;
     }
 }
-
-//------------------------------------------------------------------AB HIER KEINE STACK-PRÜFUNG
-
-#if defined __BORLANDC__
-#   pragma option -N-
-#endif
 
 //-------------------------------------------------------------------------------throw_sos_1126
 

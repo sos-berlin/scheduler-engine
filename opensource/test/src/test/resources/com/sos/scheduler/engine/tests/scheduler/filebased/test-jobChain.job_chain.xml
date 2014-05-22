@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.6-M3/scheduler.xsd">
+    <job_chain_node state="A" job="/test-job-a" delay="111" error_state="ERROR"/>
+    <file_order_sink state="SINK" delay="333" move_to="/tmp/MOVED/"/>
+    <job_chain_node.end state="ERROR"/>
+</job_chain>

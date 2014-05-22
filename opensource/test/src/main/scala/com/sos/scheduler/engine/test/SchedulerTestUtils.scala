@@ -3,10 +3,11 @@ package com.sos.scheduler.engine.test
 import _root_.scala.concurrent.{Await, Future}
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.folder.{JobChainPath, JobPath}
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.job.TaskClosedEvent
 import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._

@@ -54,6 +54,7 @@ objects = \
  spooler_event.o\
  spooler_http.o\
  spooler_job.o\
+ spooler_job_java.o\
  spooler_log.o\
  spooler_mail.o\
  spooler_module.o\

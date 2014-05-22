@@ -291,8 +291,7 @@ static int my_write( Spooler* spooler, const string& filename, int file, const c
 Log::Log( Spooler* spooler )         
 : 
     _zero_(this+1),
-    _spooler(spooler),
-    _semaphore("Log")
+    _spooler(spooler)
 {
     _file = -1;
 }
@@ -301,10 +300,7 @@ Log::Log( Spooler* spooler )
 
 Log::~Log()         
 {
-    Z_MUTEX( _semaphore )
-    {
-        if( _file != -1  &&  _file != fileno(stderr) )  ::close( _file ),  _file = -1;
-    }
+    if( _file != -1  &&  _file != fileno(stderr) )  ::close( _file ),  _file = -1;
 }
 
 //-------------------------------------------------------------------------------Log::set_directory
@@ -324,61 +320,58 @@ void Log::set_directory( const string& directory )
 
 void Log::open_new()
 {
-    Z_MUTEX( _semaphore )
+    int       old_file     = _file;
+    File_path old_filename = _filename;
+
+    _file     = -1;
+    _filename = "";
+
+    if( _directory == "*stderr" )
     {
-        int       old_file     = _file;
-        File_path old_filename = _filename;
+        _filename = "*stderr";
+        _file = fileno(stderr);
+    }
+    else
+    if( _directory == "*none" )
+    {
+        _filename = "*none";
+    }
+    else
+    {
+        Sos_optional_date_time time = Time::now().as_time_t();
+        string filename = _directory;
 
-        _file     = -1;
-        _filename = "";
+        filename += "/scheduler-";
+        filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
+        if( !_spooler->id().empty() )  filename += "." + _spooler->id();
+        if( _spooler->_cluster_configuration._is_backup_member )  filename += "_backup";
+        filename += ".log";
 
-        if( _directory == "*stderr" )
+        Z_LOG2( "scheduler.log", "open(\"" << filename << "\")\n" );
+        _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_NOINHERIT, 0666 );
+        if( _file == -1 )  throw_errno( errno, filename.c_str() );
+        Z_LOG2( "scheduler.log", "open() => " << _file << "\n" );
+
+        _filename = filename;
+    }
+
+    if( old_file != -1  &&  old_file != fileno(stderr) )
+    {
+        string line = "\nDas Protokoll wird fortgefuehrt in " + _filename + "\n";
+        ::write( old_file, line.c_str(), int_cast(line.length()) );
+        ::close( old_file );
+    }
+
+    if( _log_buffer.length() > 0  &&  _file != -1 )
+    {
+        int ret = my_write( _spooler, _filename, _file, _log_buffer.c_str(), int_cast(_log_buffer.length()) );
+        if( ret != _log_buffer.length() )  
         {
-            _filename = "*stderr";
-            _file = fileno(stderr);
-        }
-        else
-        if( _directory == "*none" )
-        {
-            _filename = "*none";
-        }
-        else
-        {
-            Sos_optional_date_time time = Time::now().as_time_t();
-            string filename = _directory;
-
-            filename += "/scheduler-";
-            filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
-            if( !_spooler->id().empty() )  filename += "." + _spooler->id();
-            if( _spooler->_cluster_configuration._is_backup_member )  filename += "_backup";
-            filename += ".log";
-
-            Z_LOG2( "scheduler.log", "open(\"" << filename << "\")\n" );
-            _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_NOINHERIT, 0666 );
-            if( _file == -1 )  throw_errno( errno, filename.c_str() );
-            Z_LOG2( "scheduler.log", "open() => " << _file << "\n" );
-
-            _filename = filename;
+            _err_no = errno;
+            throw_errno( errno, "write", _filename.c_str() );
         }
 
-        if( old_file != -1  &&  old_file != fileno(stderr) )
-        {
-            string line = "\nDas Protokoll wird fortgefuehrt in " + _filename + "\n";
-            ::write( old_file, line.c_str(), int_cast(line.length()) );
-            ::close( old_file );
-        }
-
-        if( _log_buffer.length() > 0  &&  _file != -1 )
-        {
-            int ret = my_write( _spooler, _filename, _file, _log_buffer.c_str(), int_cast(_log_buffer.length()) );
-            if( ret != _log_buffer.length() )  
-            {
-                _err_no = errno;
-                throw_errno( errno, "write", _filename.c_str() );
-            }
-
-            _log_buffer = "";
-        }
+        _log_buffer = "";
     }
 }
 
@@ -460,25 +453,13 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 {
     if( this == NULL )  return;
 
-    if( !log_to_files )
-    {
-        if( !log_category_is_set( "scheduler" ) )  return;
-
-#       ifndef Z_DEBUG
-            if( !_spooler->_zschimmer_mode )  return;   // eMail von Uwe Risse 2007-07-12 15:18, Jira JS-50
-#       endif
-    }
-
-    string line = line_;
-    for( size_t i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
-
-    
-    THREAD_LOCK( _semaphore )
-    {
+    if (log_to_files || log_category_is_set("scheduler.mainlog")) {
         Log_set_console_colors console_colors ( _spooler );
 
         char time_buffer [50];   time_buffer[0] = '\0';
         char level_buffer[50];
+        string line = line_;
+        for( size_t i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
 
         if( log_to_files )
         {
@@ -518,7 +499,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             size_t len = next - begin;
             while (len > 1  &&  line.c_str()[begin+len-1] == '\r')  len--;
             
-            if (z::Log_ptr log = "scheduler") {
+            if (z::Log_ptr log = "scheduler.mainlog") {
                 log->write(level_buffer + 1, level_len - 1);
                 log << prefix_string;
                 log->write(line.data() + begin, len);
@@ -1091,34 +1072,31 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
         return;
     }
 
-    Z_MUTEX( _log->_semaphore )
+    if( _in_log )
     {
-        if( _in_log )
-        {
-            Z_LOG2( "scheduler", "Recursive log output: " << line );
-            return;
-        }
+        Z_LOG2( "scheduler", "Recursive log output: " << line );
+        return;
+    }
 
-        Prefix_log_deny_recursion deny_recursion ( this );
+    Prefix_log_deny_recursion deny_recursion ( this );
 
 
  
-        if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
+    if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
 
-        if( _highest_level < level )  _highest_level = level, _highest_msg = line;
+    if( _highest_level < level )  _highest_level = level, _highest_msg = line;
 
-        _last_level = level;
-        _last[ level ] = line;
+    _last_level = level;
+    _last[ level ] = line;
 
-        string my_prefix = _task? _task->obj_name() : _prefix;
-        if (_spooler && _spooler->schedulerJ())
-            _spooler->schedulerJ().log(my_prefix, level, line_par);
+    string my_prefix = _task? _task->obj_name() : _prefix;
+    if (_spooler && _spooler->schedulerJ())
+        _spooler->schedulerJ().log(my_prefix, level, line_par);
 
-        {
-            ptr<cache::Request> request = _spooler->_log_file_cache->request(this);
-            bool log_to_files = level >= log_level();
-            _log->log2( level, log_to_files, my_prefix, line, this, _order_log );
-        }
+    {
+        ptr<cache::Request> request = _spooler->_log_file_cache->request(this);
+        bool log_to_files = level >= log_level();
+        _log->log2( level, log_to_files, my_prefix, line, this, _order_log );
     }
 
     if (_object  &&  javabridge::Vm::is_active())

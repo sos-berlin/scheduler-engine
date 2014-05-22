@@ -108,13 +108,6 @@ Scheduler_object::~Scheduler_object()
 {
 }
 
-//----------------------------------------------------------------------Scheduler_object::idispatch
-    
-IDispatch* Scheduler_object::idispatch()
-{
-    z::throw_xc( Z_FUNCTION, obj_name() );
-}
-
 //-------------------------------------------------------------------Scheduler_object::report_event
 
 void Scheduler_object::report_event(const AbstractEventJ& e)

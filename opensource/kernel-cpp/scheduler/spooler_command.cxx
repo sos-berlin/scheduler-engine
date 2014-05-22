@@ -814,6 +814,18 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
     return _answer.createElement( "ok" );
 }
 
+//----------------------------------------------------------Command_processor::execute_settings_set
+
+xml::Element_ptr Command_processor::execute_settings_set(const xml::Element_ptr& element)
+{
+    string name = element.getAttribute("name");
+    string value = element.getAttribute("value");
+    ptr<Com_variable_set> v = new Com_variable_set();
+    v->set_var(name, value);
+    _spooler->modify_settings(*v);
+    return _answer.createElement( "ok" );
+}
+
 //-------------------------------------------------------------Command_processor::execute_terminate
 
 xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& element )
@@ -891,7 +903,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "run_time" ) )  { job->schedule_use()->set_dom( (File_based*)NULL, e );  break; }
+        if( e.nodeName_is( "run_time" ) )  { job->set_schedule_dom(e);  break; }
     }
 
 
@@ -1000,14 +1012,10 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "environment" ) )   environment = new Com_variable_set,  environment->set_dom( e, NULL, "variable" );
     }
 
-    Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) );
-    ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(params), task_name, force, start_at );
-    task->set_web_service( web_service_name );
-    if( environment )  task->merge_environment( environment );
-    job->enqueue_task( task );
+    ptr<Task> task = _spooler->job_subsystem()->job(Absolute_path(root_path, job_path))->start_task(params, environment, start_at, force, task_name, web_service_name);
 
     xml::Element_ptr result = _answer.createElement( "ok" ); 
-    result.appendChild( task->dom_element( _answer, Show_what() ) );
+    if (task)  result.appendChild( task->dom_element( _answer, Show_what() ) );
     return result;
 }
 
@@ -1029,7 +1037,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
-    ptr<Process> process = Z_NEW( Process( _spooler ) );
+    ptr<Process> process = Z_NEW( Process( _spooler, Host_and_port()) );
 
     process->set_controller_address(Host_and_port(client_host(), tcp_port));
     process->set_run_in_thread( kind == "process" );
@@ -1666,7 +1674,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "remove_job_chain" ) )  result = execute_remove_job_chain( element );
     else
-    if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
+    if( element.nodeName_is( "service_request"  ) )  result = execute_settings_set( element );
+    else
+    if( element.nodeName_is( "settings.set"  ) )  result = execute_service_request( element );
     else
     if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );   // Nicht offiziell, nur Test
     else
@@ -1853,14 +1863,14 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                 {
                     Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, http_request->parameter( "job" ) ) );
                     
-                    if( job->_description == "" )  throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
+                    if( job->description() == "" )  throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
 
                     response_content_type = "text/html";
 
                     response_body = "<html><head><title>Scheduler-Job " + job->name() + "</title>";
                     response_body += "<style type='text/css'> @import 'scheduler.css'; @import 'custom.css';</style>";
                     response_body += "<body id='job_description'>";
-                    response_body += job->_description;
+                    response_body += job->description();
                     response_body += "</body></html>";
                 }
                 else
@@ -1991,7 +2001,7 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
     ptr<Command_response> result = _response;
     if( !result )
     {
-        _spooler->signal("execute_xml");    // Sonst schläft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
+        //_spooler->signal("execute_xml");    // Sonst schläft der Scheduler unter SchedulerTest (Java) weiter, wenn executeXml() nach Start aufgerufen wird.
         ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( _answer.xml_bytes(string_encoding, indent_string != "") ) );
         result = +r;
     }

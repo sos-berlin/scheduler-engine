@@ -160,6 +160,11 @@
                         <artifactId>kernel</artifactId>
                         <version>${cplusplusVersion}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>engine-newkernel</artifactId>
+                        <version>${cplusplusVersion}</version>
+                    </dependency>
                 </dependencies>
             </plugin>
 

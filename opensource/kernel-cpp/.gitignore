@@ -29,6 +29,10 @@ Release/
 /ntdll.pdb/
 /pingme.txt
 
+# Visual Studio Profiling
+/*.psess
+/*.vspx
+
 # Eclipse
 /.classpath
 /.project

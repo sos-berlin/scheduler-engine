@@ -82,7 +82,6 @@ struct Scheduler_script_subsystem_interface : file_based_subsystem<Scheduler_scr
 
     virtual ptr<Scheduler_script_folder> new_scheduler_script_folder( Folder* )                     = 0;
     virtual void                set_dom                     ( const xml::Element_ptr& script_element ) = 0;
-    virtual bool                needs_java                  () const                                = 0;
 
   protected:                  
                                 Scheduler_script_subsystem_interface( Scheduler*, Type_code );

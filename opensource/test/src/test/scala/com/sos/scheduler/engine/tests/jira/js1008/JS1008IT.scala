@@ -3,8 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js1008
 import JS1008IT._
 import com.google.common.io.Files
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.data.folder.JobChainPath
-import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction}
 import com.sos.scheduler.engine.data.order.{OrderState, OrderStepEndedEvent}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest

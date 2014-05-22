@@ -1,35 +1,32 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.google.inject.Injector
 import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.cplusplus.runtime.Sister
-import com.sos.scheduler.engine.cplusplus.runtime.SisterType
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.folder.FileBasedType
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
+import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderState}
 import com.sos.scheduler.engine.eventbus.HasUnmodifiableDelegate
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC
-import com.sos.scheduler.engine.kernel.folder.FileBased
-import com.sos.scheduler.engine.kernel.log.PrefixLog
+import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 import com.sos.scheduler.engine.kernel.scheduler.{HasInjector, SchedulerException}
 import com.sos.scheduler.engine.kernel.time.CppJodaConversions.eternalCppMillisToNoneInstant
 import com.sos.scheduler.engine.kernel.variable.VariableSet
 import org.joda.time.Instant
 
-@ForCpp final class Order(protected val cppProxy: OrderC, injector: Injector)
+@ForCpp
+final class Order private(
+  protected val cppProxy: OrderC,
+  protected val subsystem: StandingOrderSubsystem)
 extends FileBased
 with UnmodifiableOrder
 with HasUnmodifiableDelegate[UnmodifiableOrder]
-with OrderPersistence
-with Sister {
+with OrderPersistence {
 
   type Path = OrderKey
 
   lazy val unmodifiableDelegate = new UnmodifiableOrderDelegate(this)
-
-  protected val orderSubsystem = injector.apply[OrderSubsystem]
 
   def onCppProxyInvalidated() {}
 
@@ -37,11 +34,9 @@ with Sister {
     cppProxy.java_remove()
   }
 
-  def fileBasedType: FileBasedType =
-    FileBasedType.order
+  def stringToPath(o: String) = OrderKey(o)
 
-  def path: OrderKey =
-    OrderKey(cppProxy.path)
+  def fileBasedType = FileBasedType.order
 
   def key: OrderKey =
     jobChainPath orderKey id
@@ -95,9 +90,6 @@ with Sister {
   def parameters: VariableSet =
     cppProxy.params.getSister
 
-  def log: PrefixLog =
-    cppProxy.log.getSister
-
   def nextInstantOption: Option[Instant] =
     eternalCppMillisToNoneInstant(cppProxy.next_time_millis)
 
@@ -105,16 +97,17 @@ with Sister {
 
   override def toString = {
     val result = getClass.getSimpleName
-    if (cppProxy.cppReferenceIsValid) s"$result $id"
+    if (cppProxy.cppReferenceIsValid) s"$result $jobChainPath:$id"
     else result
   }
 }
 
 
-@ForCpp object Order {
-
+object Order {
   final class Type extends SisterType[Order, OrderC] {
-    def sister(proxy: OrderC, context: Sister): Order =
-      new Order(proxy, context.asInstanceOf[HasInjector].injector)
+    def sister(proxy: OrderC, context: Sister): Order = {
+      val injector = context.asInstanceOf[HasInjector].injector
+      new Order(proxy, injector.apply[StandingOrderSubsystem])
+    }
   }
 }

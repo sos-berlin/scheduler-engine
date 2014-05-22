@@ -10,6 +10,35 @@ namespace scheduler {
 
 struct Task_lock_requestor;
 
+namespace job {
+    struct Task_closed_call;
+    struct Task_starting_completed_call;
+    struct Task_opening_completed_call;
+    struct Task_step_completed_call;
+    struct Try_next_step_call;
+    struct Task_end_completed_call;
+    struct Next_spooler_process_call;
+    struct Next_order_step_call;
+    struct Task_idle_timeout_call;
+    struct Task_end_with_period_call;
+    struct Task_locks_are_available_call;
+    struct Task_check_for_order_call;
+    struct Task_on_success_completed_call;
+    struct Task_on_error_completed_call;
+    struct Task_exit_completed_call;
+    struct Task_release_completed_call;
+    struct Task_wait_for_subprocesses_completed_call;
+    struct Task_ended_completed_call;
+    DEFINE_SIMPLE_CALL(Task, Task_process_ended_call);
+    struct Remote_task_running_call;
+    struct End_task_call;
+    struct Warn_longer_than_call;
+    struct Task_timeout_call;
+    struct Subprocess_timeout_call;
+    struct Try_deleting_files_call;
+    struct Killing_task_call;
+}
+
 //--------------------------------------------------------------------------------------Start_cause
 
 enum Start_cause
@@ -18,7 +47,6 @@ enum Start_cause
     cause_period_once           = 1,    // <schedule once="yes">
     cause_period_single         = 2,    // <schedule single_start="yes">
     cause_period_repeat         = 3,    // <schedule repeat="..">
-  //cause_job_repeat            = 4,    // spooler_job.repeat = ..
     cause_queue                 = 5,    // <start_job at="">
     cause_queue_at              = 6,    // <start_job at="..">
     cause_directory             = 7,    // start_when_directory_changed
@@ -81,7 +109,6 @@ struct Task : Object,
 
     enum Lock_level 
     {
-      //lock_level_task_static,     // <lock.use>, Sperre ist am <job> definiert und gilt für die Task
         lock_level_task_api,        // Task.try_hold_lock() in spooler_open() oder spooler_init(), gilt für die Task
         lock_level_process_api,     // Task.try_hold_lock() in spooler_process(), gilt für nur für spooler_process()
         lock_level__max = lock_level_process_api
@@ -115,7 +142,7 @@ struct Task : Object,
 
 
 
-                                Task                        ( Job* );
+                                Task                        ( Standard_job* );
                                ~Task                        ();
 
     // Scheduler_object::
@@ -130,7 +157,7 @@ struct Task : Object,
 
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
-    void                        move_to_new_job             ( Job* new_job )                        { assert( _state == s_none );  _job = new_job; }
+    void                        move_to_new_job             ( Standard_job* new_job )               { assert( _state == s_none );  _job = new_job; }
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     xml::Document_ptr           dom                         ( const Show_what& ) const;
@@ -139,9 +166,35 @@ struct Task : Object,
     void                        init                        ();
     bool                        do_something                ();
 
-    Job*                        job                         ();
+    Standard_job*               job                         ();
     Time                        calculated_start_time       ( const Time& now );
-    Time                        next_time                   ();
+    void                        on_remote_task_running      ();
+    void                        on_call                     (const job::Task_starting_completed_call&);
+    void                        on_call                     (const job::Task_opening_completed_call&);
+    void                        on_call                     (const job::Task_step_completed_call& );
+    void                        on_call                     (const job::Next_spooler_process_call& );
+    void                        on_call                     (const job::Try_next_step_call& );
+    void                        on_call                     (const job::Next_order_step_call& );
+    void                        on_call                     (const job::Task_end_completed_call&);
+    void                        on_call                     (const job::Task_idle_timeout_call&);
+    void                        on_call                     (const job::Remote_task_running_call&);
+    void                        on_call                     (const job::Task_end_with_period_call&);
+    void                        on_call                     (const job::Task_locks_are_available_call&);
+    void                        on_call                     (const job::Task_check_for_order_call&);
+    void                        on_call                     (const job::Task_on_success_completed_call&);
+    void                        on_call                     (const job::Task_on_error_completed_call&);
+    void                        on_call                     (const job::Task_exit_completed_call&);
+    void                        on_call                     (const job::Task_release_completed_call&);
+    void                        on_call                     (const job::Task_process_ended_call&);
+    void                        on_call                     (const job::Task_ended_completed_call&);
+    void                        on_call                     (const job::Task_wait_for_subprocesses_completed_call&);
+    void                        on_call                     (const job::End_task_call&);
+    void                        on_call                     (const job::Warn_longer_than_call&);
+    void                        on_call                     (const job::Task_timeout_call&);
+    void                        on_call                     (const job::Subprocess_timeout_call&);
+    void                        on_call                     (const job::Try_deleting_files_call&);
+    void                        on_call                     (const job::Killing_task_call&);
+
     Task_subsystem*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
@@ -163,7 +216,6 @@ struct Task : Object,
     void                        merge_environment           ( const Com_variable_set* e )           { _environment->merge( e ); }
     Com_variable_set*           environment_or_null         () const                                { return _environment; }
 
-    void                        signal                      ( const string& signal_name );
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const zschimmer::Xc& );
     void                    set_error_xc_only               ( const Xc& );
@@ -177,9 +229,7 @@ struct Task : Object,
     Web_service*                web_service                 () const;
     Web_service*                web_service_or_null         () const                                { return _web_service; }
 
-  //bool                        occupy_order                ( Order*, const Time& now );
     Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause );
-  //void                        set_order                   ( Order* );
     void                        postprocess_order           ( Order::Order_state_transition, bool due_to_exception = false );
 
     void                        add_pid                     ( int pid, const Duration& timeout = Duration::eternal);
@@ -211,17 +261,13 @@ struct Task : Object,
     void                        process_on_exit_commands    ();
     bool                        load                        ();
     Async_operation*            begin__start                ();
-  //bool                        begin__end                  ();
-  //void                        end__start                  ();
-  //void                        end__end                    ();
-  //void                        step__start                 ();
     bool                        step__end                   ();
     void                        count_step                  ();
     string                      remote_process_step__end    ();
     bool                        operation__end              ();
+    void                        close_operation             ();
 
     void                        set_mail_defaults           ();
-  //void                        clear_mail                  ();
     void                        trigger_event               ( Scheduler_event* );
     void                        send_collected_log          ();
 
@@ -229,11 +275,11 @@ struct Task : Object,
     Start_cause                 cause                       () const                                { return _cause; }
 
     void                        set_history_field           ( const string& name, const Variant& value );
-    virtual void                set_close_engine            ( bool )                                {}      // Für Module_task
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom( Com_variable_set::xml_element_name(), "variable" ); }
 
 
+    void                        wake_when_longer_than       ();
     bool                        check_timeout               ( const Time& now );
     void                        check_if_shorter_than       ( const Time& now );
     bool                        check_if_longer_than        ( const Time& now );
@@ -256,53 +302,34 @@ struct Task : Object,
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
     void                        reset_error                 ()                                      { _error = NULL,  _non_connection_reset_error = NULL,  _is_connection_reset_error = false,  _log->reset_highest_level(); }
-
-    void                    set_next_time                   ( const Time& );
-
-
   
-    friend struct               Job;
-    friend struct               Job::Task_queue;
-    friend struct               Object_set;
+    friend struct               Standard_job;
+    friend struct               Standard_job::Task_queue;
     friend struct               com_objects::Com_task;
     friend struct               database::Task_history;
 
-    virtual bool                do_load                     ()                                      { return true; }
-    virtual bool                do_kill                     ()                                      { return false; }
-    virtual Async_operation*    do_close__start             ()                                      { return &dummy_sync_operation; }
-    virtual void                do_close__end               ()                                      {}
-  //virtual void                do_close                    ()                                      {}
-    virtual Async_operation*    do_begin__start             ()                                      { return &dummy_sync_operation; }
-    virtual bool                do_begin__end               () = 0;
-    virtual Async_operation*    do_end__start               ()                                      { return &dummy_sync_operation; }
-    virtual void                do_end__end                 () = 0;
-    virtual Async_operation*    do_step__start              ()                                      { return &dummy_sync_operation; }
-    virtual Variant             do_step__end                () = 0;
-    virtual Async_operation*    do_call__start              ( const string& )                       { return &dummy_sync_operation; }
-    virtual bool                do_call__end                ()                                      { return true; }           // Default: Nicht implementiert
-    virtual Async_operation*    do_release__start           ()                                      { return &dummy_sync_operation; }
-    virtual void                do_release__end             ()                                      {}
+    bool                        do_kill                     ();
+    bool                        do_load                     ();
+    bool                        do_begin__end               ();
+    Async_operation*            do_end__start               ();
+    void                        do_end__end                 ();
+    Async_operation*            do_step__start              ();
+    Variant                     do_step__end                ();
+    Async_operation*            do_call__start              ( const string& method );
+    bool                        do_call__end                ();
+    Async_operation*            do_release__start           ();
+    void                        do_release__end             ();
 
-    virtual bool                loaded                      ()                                      { return true; }
-/*
-    virtual bool                do_start                    () = 0;
-    virtual void                do_end                      () = 0;
-    virtual bool                do_step                     () = 0;
-    virtual void                do_on_success               () = 0;
-    virtual void                do_on_error                 () = 0;
-*/
+    Async_operation*            do_close__start             ();
+    void                        do_close__end               ();
+
+    bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
     virtual bool                has_step_count              ()                                      { return true; }
 
-/**
- * \change 2.1.1 - JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
- * \detail
- * Mit der Funktion set_enqueued_state() wird der zu setzende Status zwischengespeichert, wenn eine Operation aktiv ist
- * (z.B. spooler.process). Erst wenn spooler.process beendet ist, wird der Status über set_state() gesetzt.
- * set_state_direct() ist die alte Methode set_state(), die einen Status für eine Task sofort übernimmt.
- */
  private:
     void                        set_enqueued_state          ();
     void                        set_state_direct            ( State );
+    Host_and_port               read_remote_scheduler_parameter();
 
  protected:
     Fill_zero                  _zero_;
@@ -313,9 +340,11 @@ struct Task : Object,
     State                      _enqueued_state;
     string                     _obj_name;
 
-    Job*                       _job;
+    Standard_job*              _job;
     Task_subsystem*            _thread;
     Task_history               _history;
+    typed_call_register<Task>  _call_register;
+    ptr<Async_operation>       _sync_operation;
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;
@@ -330,9 +359,7 @@ struct Task : Object,
     End_mode                   _end;
     bool                       _scheduler_815_logged;
     bool                       _closed;
-    bool                       _signaled;
     int                        _delayed_after_error_task_id;
-
 
     Time                       _enqueue_time;
     bool                       _force_start;                // Auch um _start_at starten, wenn gerade keine <run_time>-Periode vorliegt
@@ -342,7 +369,6 @@ struct Task : Object,
     Time                       _last_process_start_time;
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
-    Time                       _next_time;
     Duration                   _timeout;                    // Frist für eine Operation (oder INT_MAX)
     Time                       _last_warn_if_longer_operation_time;
     Time                       _idle_since;
@@ -391,83 +417,10 @@ struct Task : Object,
 //----------------------------------------------------------------------------------------Task_list
 
 typedef list< ptr<Task> >   Task_list;
+typedef stdext::hash_set< ptr<Task> >   Task_set;
 
-#define FOR_EACH_TASK( ITERATOR, TASK )  FOR_EACH( Task_list, _task_list, ITERATOR )  if( Task* TASK = *ITERATOR )
-#define FOR_EACH_TASK_CONST( ITERATOR, TASK )  FOR_EACH_CONST( Task_list, _task_list, ITERATOR )  if( Task* TASK = *ITERATOR )
-
-//--------------------------------------------------------------------------------------Module_task
-
-struct Module_task : Task       // Oberklasse für Object_set_task und Job_module_task
-{
-                                Module_task                 ( Job* j )                              : Task(j) {}
-
-    virtual void                set_close_engine            ( bool b )                              { if( _module_instance )  _module_instance->set_close_instance_at_end(b); }
-
-  //virtual void                do_load                     ();
-    virtual Async_operation*    do_close__start             ();
-    virtual void                do_close__end               ();
-  //virtual void                do_kill                     ()                                      {}
-/*
-  //bool                        do_start                    ();
-  //void                        do_end                      ();
-  //bool                        do_step                     ();
-    void                        do_on_success               ();
-    void                        do_on_error                 ();
-*/
-    bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
-  //bool                        load_module_instance        ();
-  //void                        close_engine                ();
-};
-
-//----------------------------------------------------------------------------------Object_set_task
-/*
-struct Object_set_task : Module_task
-{
-                                Object_set_task             ( Job* j )                              : Module_task(j) {}
-
-  //virtual void                do_load                     ();
-    virtual void                do_close__end               ();
-    virtual void                do_begin__start             ();
-    virtual bool                do_begin__end               ();
-    virtual void                do_end__start               ();
-    virtual void                do_end__end                 ();
-    virtual void                do_step__start              ();
-    virtual bool                do_step__end                ();
-    bool                        loaded                      ()                                      { return _object_set && Module_task::loaded(); }
-
-
-    Sos_ptr<Object_set>        _object_set;
-    ptr<Com_object_set>        _com_object_set;
-};
-*/
-//----------------------------------------------------------------------------------Job_module_task
-
-struct Job_module_task : Module_task
-{
-                                Job_module_task             ( Job* j )                              : Module_task(j) {}
-
-    virtual bool                do_kill                     ();
-    virtual bool                do_load                     ();
-  //virtual void                do_close__end               ();
-    virtual Async_operation*    do_begin__start             ();
-    virtual bool                do_begin__end               ();
-    virtual Async_operation*    do_end__start               ();
-    virtual void                do_end__end                 ();
-    virtual Async_operation*    do_step__start              ();
-    virtual Variant             do_step__end                ();
-    virtual Async_operation*    do_call__start              ( const string& method );
-    virtual bool                do_call__end                ();
-    virtual Async_operation*    do_release__start           ();
-    virtual void                do_release__end             ();
-/*
-  //virtual bool                loaded                      ();
-    bool                        do_start                    ();
-    void                        do_end                      ();
-    bool                        do_step                     ();
-  //void                        do_on_success               ();
-  //void                        do_on_error                 ();
-*/
-};
+#define FOR_EACH_TASK( ITERATOR, TASK )  FOR_EACH( Task_set, _task_set, ITERATOR )  if( Task* TASK = *ITERATOR )
+#define FOR_EACH_TASK_CONST( ITERATOR, TASK )  FOR_EACH_CONST( Task_set, _task_set, ITERATOR )  if( Task* TASK = *ITERATOR )
 
 //-------------------------------------------------------------------------------------------------
 

@@ -48,13 +48,12 @@ struct Text_with_includes : Non_cloneable
     int                         text_element_linenr         ( const xml::Element_ptr& );
     string                      text_element_filepath       ( const xml::Element_ptr& );
 
-    string                      xml_string                  ()                                      { return _dom_document.xml_string(); }
-    void                    set_xml_string                  ( const string& x )                     { _dom_document.load_xml_string( x ); }
+    string                      xml_string                  () const                                { return _xml_string; }
+    void                    set_xml_string                  ( const string& x )                     { _xml_string = x; }
     xml::Document_ptr           includes_resolved           () const;
 
-    xml::Element_ptr            dom_element                 ()                                      { return _dom_document.documentElement(); }
+    xml::Element_ptr            dom_element                 () const                                { return xml::Document_ptr::from_xml_string(_xml_string).documentElement(); }
     void                        append_dom                  ( const xml::Element_ptr& dom );
-    void                        initialize                  ();
 
   private:
     string                      read_text                   (bool xml_only);
@@ -64,7 +63,7 @@ struct Text_with_includes : Non_cloneable
     Spooler*                   _spooler;
     File_based*                _file_based;
     File_path                  _include_path;
-    xml::Document_ptr          _dom_document;
+    string                     _xml_string;
 };
 
 //-------------------------------------------------------------------------------------------Module
@@ -98,8 +97,8 @@ struct Module : Object
     void                        init0                       ();
     void                        init                        ();
 
-    ptr<Module_instance>        create_instance             ();
-    virtual ptr<Module_instance> create_instance_impl       ();
+    ptr<Module_instance>        create_instance             (const Host_and_port& remote_scheduler = Host_and_port());
+    virtual ptr<Module_instance> create_instance_impl       (const Host_and_port& remote_scheduler);
     bool                        set                         ()                                      { return _set; }
     bool                        has_api                     () const;
     Kind                        kind                        () const                                { return _kind; }
@@ -108,7 +107,6 @@ struct Module : Object
 
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
     string                      read_source_script          ()                                      { return _text_with_includes.read_plain_or_xml_string(); }
-    bool                        needs_java                  ();
 
     Process_class*              process_class               () const;
     Process_class*              process_class_or_null       () const;
@@ -217,7 +215,6 @@ struct Module_instance : Object
     void                    set_log                         ( Prefix_log* );
     void                    set_log                         ( Has_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
-    void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schlie�en
 
     virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();
@@ -288,12 +285,14 @@ struct Module_instance : Object
     Module::Kind               _kind;
     Delegated_log              _log;
     ptr<Module>                _module;
+    ptr<Async_operation>       _sync_operation;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
     int                        _exit_code;
     int                        _termination_signal;
     bool                       _initialized;
     bool                       _load_called;
 
+    Host_and_port              _remote_scheduler;           // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
     ptr<Process>               _process;                    // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
     ptr<Com_variable_set>      _process_environment;
     bool                       _has_order;
@@ -346,7 +345,6 @@ struct Module_monitors : Object
     void                        add_monitor                 ( Module_monitor* monitor )             { _monitor_map[ monitor->name() ] = monitor; }
     Module_monitor*             monitor_or_null             ( const string& );
     bool                        is_empty                    () const                                { return _monitor_map.empty(); }
-    bool                        needs_java                  ();
     vector<Module_monitor*>     ordered_monitors            ();
 
 

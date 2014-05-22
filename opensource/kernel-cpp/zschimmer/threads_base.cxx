@@ -24,6 +24,13 @@ string Event_base::as_text() const
     return result;
 }
 
+void Event_base::set_signaled_then_callback(const string& name) {
+    _signaled = true;
+    _signal_name = name;
+    if (Call* c = _call) 
+        c->call();
+}
+
 //--------------------------------------------------------------------Thread_base::thread_call_main
 
 void Thread_base::thread_call_main()

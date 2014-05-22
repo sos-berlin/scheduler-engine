@@ -567,6 +567,28 @@ xml::Element_ptr File_based::execute_xml( Command_processor* command_processor, 
     return command_processor->_answer.createElement( "ok" );
 }
 
+//------------------------------------------------------------------------File_based::set_xml_bytes
+
+void File_based::set_xml_bytes(const string& x) 
+{
+    xml::Document_ptr dom_document = xml::Document_ptr::from_xml_bytes(x);
+    xml::Element_ptr  element      = dom_document.documentElement();
+    subsystem()->assert_xml_element_name( element );
+    if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
+
+    assert_empty_attribute( element, "spooler_id" );
+    if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
+    
+    set_dom(element);
+}
+
+//-----------------------------------------------------------------------------File_based::set_dom
+
+void File_based::set_dom(const xml::Element_ptr&)
+{
+    z::throw_xc("set_dom() not implemented");   // Entweder set_xml() oder set_dom() überschreiben!
+}
+
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
@@ -718,11 +740,8 @@ void File_based::handle_event( Base_file_event base_file_event )
                                                                  base_file_event == bfevt_removed ? "deleted"  : "" );
 
                 Z_FOR_EACH( Com_variable_set::Map, environment->_map, v )  parameters->set_var( lcase( v->second->name() ), v->second->string_value() );
-                
-                Job*  job  = spooler()->job_subsystem()->job( job_path );
-                ptr<Task> task = job->create_task( +parameters , "", 0 );
-                task->merge_environment( environment );
-                job->enqueue_task( task );
+
+                spooler()->job_subsystem()->job(job_path)->start_task(parameters, environment);
             }
             catch( exception& x )
             {

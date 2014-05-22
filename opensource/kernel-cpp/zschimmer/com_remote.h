@@ -715,6 +715,7 @@ struct Session : Object
     ptr<Connection>            _connection;
     Object_table               _object_table;
     bool                       _connection_has_only_this_session;
+    ptr<Async_operation>       _sync_operation;
 
   //typedef stdext::hash_map<CLSID,ptr<Object>> Class_storage;
   //Class_storage              _class_storage;
@@ -793,6 +794,7 @@ struct Proxy : idispatch_base_implementation< IDispatch >  //Object
     bool                       _no_operation;
     Object_id                  _object_id;
     string                     _title;
+    ptr<Async_operation>       _sync_operation;
 
     typedef std::map< com::Bstr, DISPID >  Dispid_map;
     Dispid_map                 _dispid_map;             // Cache für DISPIDs

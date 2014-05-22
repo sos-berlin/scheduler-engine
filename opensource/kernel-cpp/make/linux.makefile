@@ -12,7 +12,7 @@ CFLAGS += -m64
 LINK_FLAGS += -m64
 endif	
 
-COPTIMIZE += -O2
+COPTIMIZE += -O3
 
 
 # MAKE_UBUNTU setzen

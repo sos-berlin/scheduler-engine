@@ -59,6 +59,7 @@ struct Object_call : Timed_call {
 };
 
 //-------------------------------------------------------------------------------------Type_int_map
+// Bildet Typnamen auf natürliche Zahlen ab
 
 struct Type_int_map {
     static Type_int_map static_singleton;
@@ -157,10 +158,29 @@ struct object_call : Object_call {
 //    //}
 //};
 
+//---------------------------------------------------------------------------------------Async_call
+
+struct Typed_call_register;
+
+struct Async_call : Call {
+    template<typename CALL>
+    Async_call(Typed_call_register* r, ptr<CALL> c) : _typed_call_register(r), _timed_call(c), _type_id(CALL::type_id()) {}
+        
+    void call() const;
+
+  private:
+    Typed_call_register* const _typed_call_register;
+    ptr<Timed_call> const _timed_call;
+    int const _type_id;
+};
+
 //------------------------------------------------------------------------------Typed_call_register
 
 struct Typed_call_register {
+    friend struct Async_call;
+
   private:
+    mutable z::Mutex _mutex;
     Spooler* _spooler;
     typedef stdext::hash_map<int, ptr<Timed_call> > Map;
     Map _map;
@@ -170,13 +190,14 @@ struct Typed_call_register {
 
   public:
     ~Typed_call_register();
-
     Time next_time() const;
 
   protected:
-    void enqueue_id(int id, Timed_call* o);
+    void enqueue_id(int id, Timed_call*);
     void cancel_id(int id);
     void cancel_entry(ptr<Timed_call>*);
+    Time at(int id) const;
+    const Timed_call* get(int id) const;
 };
 
 //----------------------------------------------------------------------------typed_call_register<>
@@ -193,14 +214,11 @@ struct typed_call_register : Typed_call_register {
     {}
 
     template<typename CALL>
-    void cancel() {
-        cancel_id(CALL::type_id());
-    }
-    
-    template<typename CALL>
-    void call_at(const Time& at) {
-        if (at.is_never()) cancel<CALL>();
-        else call<CALL>(Z_NEW(CALL(at, _object)));
+    void call_at(const Time& t) {
+        if (t != at<CALL>()) {
+            if (t.is_never()) cancel<CALL>();
+            else call<CALL>(Z_NEW(CALL(t, _object)));
+        }
     }
     
     template<typename CALL>
@@ -216,6 +234,27 @@ struct typed_call_register : Typed_call_register {
     template<typename CALL>
     void call(const ptr<CALL>& call) {
         enqueue_id(CALL::type_id(), call);
+    }
+
+    template<typename CALL>
+    void cancel() {
+        cancel_id(CALL::type_id());
+    }
+    
+    template<typename CALL>
+    Time at() const {
+        return Typed_call_register::at(CALL::type_id());
+    }
+
+    //template<typename CALL>
+    //const CALL* get() const {
+    //    return (CALL*)get(CALL::type_id());
+    //}
+
+    // Zur Koppelung mit Async_operation
+    template<typename CALL>
+    ptr<Async_call> new_async_call() {
+        return Z_NEW(Async_call(this, Z_NEW(CALL(_object))));
     }
 };
 

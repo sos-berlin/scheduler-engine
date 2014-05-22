@@ -1,33 +1,29 @@
 package com.sos.scheduler.engine.kernel.job
 
-import com.google.inject.Injector
-import com.sos.scheduler.engine.common.inject.GuiceImplicits._
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC
-import com.sos.scheduler.engine.kernel.folder.FileBasedSubsystem
+import com.google.inject.ImplementedBy
+import com.sos.scheduler.engine.data.filebased.FileBasedType
+import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.kernel.cppproxy.JobC
+import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateTaskStore, HibernateJobStore}
-import javax.inject.{Singleton, Inject}
 import javax.persistence.EntityManagerFactory
 
-@ForCpp
-@Singleton
-final class JobSubsystem @Inject private(cppproxy: Job_subsystemC, injector: Injector)
+@ImplementedBy(classOf[CppJobSubsystem])
+trait JobSubsystem
 extends FileBasedSubsystem {
 
-  private[job] lazy val entityManagerFactory = injector.apply[EntityManagerFactory]
-  private[job] lazy val jobStore = injector.apply[HibernateJobStore]
-  private[job] lazy val taskStore = injector.apply[HibernateTaskStore]
+  type MySubsystem = JobSubsystem
+  type MyFileBased = Job
+  type MyFile_basedC = JobC
 
-  def job(path: JobPath): Job =
-    cppproxy.job_by_string(path.string).getSister
+  val companion = JobSubsystem
 
-  def names: Seq[String] =
-    fetchNames(visibleOnly = false)
+  def job(path: JobPath) = fileBased(path)
 
-  def visibleNames: Seq[String] =
-    fetchNames(visibleOnly = true)
-
-  private def fetchNames(visibleOnly: Boolean): Seq[String] =
-    cppproxy.file_based_names(visibleOnly)
+  private[job] def entityManagerFactory: EntityManagerFactory
+  private[job] def jobStore: HibernateJobStore
+  private[job] def taskStore: HibernateTaskStore
 }
+
+
+object JobSubsystem extends FileBasedSubsystem.Companion[JobSubsystem, JobPath, Job](FileBasedType.job, JobPath.apply)

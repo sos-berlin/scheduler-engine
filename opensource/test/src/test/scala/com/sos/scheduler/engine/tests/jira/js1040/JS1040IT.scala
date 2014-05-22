@@ -2,9 +2,11 @@ package com.sos.scheduler.engine.tests.jira.js1040
 
 import JS1040IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, FileBasedActivatedEvent, JobChainPath}
+import com.sos.scheduler.engine.data.filebased.{FileBasedRemovedEvent, FileBasedActivatedEvent}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
+import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith

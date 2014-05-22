@@ -3,7 +3,6 @@
     Hier sind implementiert
 
     Com_log                     COM-H�lle f�r Task_log
-    Com_object_set              COM-H�lle f�r Object_set
     Com_task                    COM-H�lle f�r Task
     Com_spooler                 COM-H�lle f�r Spooler
 */
@@ -39,8 +38,6 @@ DESCRIBE_CLASS( &spooler_typelib, Com_variable_set_enumerator, variable_set_enum
 DESCRIBE_CLASS( &spooler_typelib, Com_log            , log            , CLSID_Log            , "Spooler.Log"           , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job            , job            , CLSID_Job            , "Spooler.Job"           , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_task           , task           , CLSID_Task           , "Spooler.Task"          , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_object_set     , object_set     , CLSID_Object_set     , "Spooler.Object_set"    , "1.0" )
-//DESCRIBE_CLASS( &spooler_typelib, Com_thread        , thread        , CLSID_thread         , "Spooler.Thread"        , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler        , spooler        , CLSID_Spooler        , "Spooler.Spooler"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler_context, spooler_context, CLSID_Spooler_context, "Spooler.Context"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job_chain      , job_chain      , CLSID_Job_chain      , "Spooler.Job_chain"     , "1.0" )
@@ -117,7 +114,6 @@ const Com_method Com_error::_methods[] =
 Com_error::Com_error( const Xc_copy& x )
 : 
     Sos_ole_object( error_class_ptr, (Ierror*)this ),
-    _lock("lock"),
     _xc(x) 
 {
 }
@@ -135,21 +131,14 @@ STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
 
 void Com_error::close()
 { 
-    THREAD_LOCK( _lock )
-    {
-        _xc = NULL; 
-    }
+    _xc = NULL; 
 }
 
 //------------------------------------------------------------------------------Com_error::is_error
 
 STDMETHODIMP Com_error::get_Is_error( VARIANT_BOOL* result )
 {
-    THREAD_LOCK( _lock )
-    {
-        *result = _xc != NULL;
-    }
-
+    *result = _xc != NULL;
     return NOERROR;
 }
 
@@ -159,7 +148,6 @@ STDMETHODIMP Com_error::get_Code( BSTR* code_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_xc )  *code_bstr = NULL;
@@ -177,7 +165,6 @@ STDMETHODIMP Com_error::get_Text( BSTR* text_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_xc )  *text_bstr = NULL;
@@ -219,12 +206,10 @@ void get_variable_name_and_value( const xml::Element_ptr& element, string* name,
 
 Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 :
-    Sos_ole_object( variable_class_ptr, (Ivariable*)this ),
-    _lock("Com_variable")
+    Sos_ole_object( variable_class_ptr, (Ivariable*)this )
 {
     if( SysStringLen( name ) == 0 )  z::throw_xc( "SCHEDULER-198" );
 
-    THREAD_LOCK( _lock )
     {
         _name = name;
         _value = value;
@@ -260,11 +245,8 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 { 
     HRESULT hr = NOERROR; 
     
-    THREAD_LOCK( _lock )
-    {
-        *result = new Com_variable(_name,_value); 
-        (*result)->AddRef();
-    }
+    *result = new Com_variable(_name,_value); 
+    (*result)->AddRef();
 
     return hr;
 }
@@ -364,7 +346,6 @@ const Com_method Com_variable_set::_methods[] =
 Com_variable_set::Com_variable_set()
 :
     Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this ),
-    _lock("Com_variable_set"),
     _ignore_case(true)
 {
 }
@@ -374,7 +355,6 @@ Com_variable_set::Com_variable_set()
 Com_variable_set::Com_variable_set( const xml::Element_ptr& element, const string& variable_element_name )
 :
     Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this ),
-    _lock("Com_variable_set"),
     _ignore_case(true)
 {
     set_dom( element, NULL, variable_element_name );
@@ -387,18 +367,15 @@ Com_variable_set::Com_variable_set( const Com_variable_set& o )
     Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this ),
     _ignore_case(o._ignore_case)
 {
-    THREAD_LOCK( _lock )
+    for( Map::const_iterator it = o._map.begin(); it != o._map.end(); it++ )
     {
-        for( Map::const_iterator it = o._map.begin(); it != o._map.end(); it++ )
+        Com_variable* v = it->second;
+        if( v )
         {
-            Com_variable* v = it->second;
-            if( v )
-            {
-                ptr<Ivariable> clone;
+            ptr<Ivariable> clone;
 
-                v->Clone( clone.pp() );
-                _map[ it->first ] = static_cast<Com_variable*>( +clone );
-            }
+            v->Clone( clone.pp() );
+            _map[ it->first ] = static_cast<Com_variable*>( +clone );
         }
     }
 }
@@ -429,49 +406,46 @@ void Com_variable_set::register_include_and_set_dom( Scheduler* scheduler, File_
 {
     if( !params )  return;
 
-    THREAD_LOCK( _lock )
+    DOM_FOR_EACH_ELEMENT( params, e )
     {
-        DOM_FOR_EACH_ELEMENT( params, e )
+        if( e.nodeName_is( variable_element_name ) ) 
         {
-            if( e.nodeName_is( variable_element_name ) ) 
-            {
-                set_variable( e, variable_sets );
-            }
-            else
-            if( e.nodeName_is( "copy_params" ) )
-            {
-                string from = e.getAttribute( "from" );
-                if( !variable_sets )  z::throw_xc( "SCHEDULER-329", from );
-                Variable_set_map::iterator it = variable_sets->find( from );
-                if( it == variable_sets->end() )  z::throw_xc( "SCHEDULER-329", from );
-
-                if( it->second )  merge( it->second );
-            }
-            else
-            if( e.nodeName_is( "include" )  &&  scheduler )
-            {
-                string xpath = e.getAttribute( "node" );
-                if( xpath == "" )  xpath = "/params/*";
-
-                Include_command include_command ( scheduler, source_file_based, e, scheduler->include_path() );
-
-                try
-                {
-                    xml::Document_ptr included_doc   = xml::Document_ptr::from_xml_bytes(include_command.register_include_and_read_content_bytes(source_file_based));  // Registrierung nur wenn source_file_based != NULL
-                    xml::Node_list    nodes          = included_doc.select_nodes( xpath );
-
-                    for( int i = 0; i < nodes.count(); i++ )
-                    {
-                        xml::Element_ptr ee = nodes[i];
-                        if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-409", variable_element_name, ee.nodeName() );
-                        set_variable( ee, variable_sets );
-                    }
-                }
-                catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
-            }
-            else
-                z::throw_xc( "SCHEDULER-182", e.nodeName() );
+            set_variable( e, variable_sets );
         }
+        else
+        if( e.nodeName_is( "copy_params" ) )
+        {
+            string from = e.getAttribute( "from" );
+            if( !variable_sets )  z::throw_xc( "SCHEDULER-329", from );
+            Variable_set_map::iterator it = variable_sets->find( from );
+            if( it == variable_sets->end() )  z::throw_xc( "SCHEDULER-329", from );
+
+            if( it->second )  merge( it->second );
+        }
+        else
+        if( e.nodeName_is( "include" )  &&  scheduler )
+        {
+            string xpath = e.getAttribute( "node" );
+            if( xpath == "" )  xpath = "/params/*";
+
+            Include_command include_command ( scheduler, source_file_based, e, scheduler->include_path() );
+
+            try
+            {
+                    xml::Document_ptr included_doc   = xml::Document_ptr::from_xml_bytes(include_command.register_include_and_read_content_bytes(source_file_based));  // Registrierung nur wenn source_file_based != NULL
+                xml::Node_list    nodes          = included_doc.select_nodes( xpath );
+
+                for( int i = 0; i < nodes.count(); i++ )
+                {
+                    xml::Element_ptr ee = nodes[i];
+                    if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-409", variable_element_name, ee.nodeName() );
+                    set_variable( ee, variable_sets );
+                }
+            }
+            catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
+        }
+        else
+            z::throw_xc( "SCHEDULER-182", e.nodeName() );
     }
 }
 
@@ -642,22 +616,19 @@ STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
 
     try
     {
-        THREAD_LOCK( _lock )  
+        Bstr lname = name;
+
+        if( _ignore_case )  lname.to_lower();
+
+        Map::iterator it = _map.find( lname );
+        if( it != _map.end()  &&  it->second )
         {
-            Bstr lname = name;
-
-            if( _ignore_case )  lname.to_lower();
-
-            Map::iterator it = _map.find( lname );
-            if( it != _map.end()  &&  it->second )
-            {
-                it->second->put_Value( value );
-            }
-            else
-            {
-                ptr<Com_variable> v = new Com_variable( name, *value );
-                _map[lname] = v;
-            }
+            it->second->put_Value( value );
+        }
+        else
+        {
+            ptr<Com_variable> v = new Com_variable( name, *value );
+            _map[lname] = v;
         }
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::var" ); }
@@ -692,14 +663,11 @@ Com_variable* Com_variable_set::variable_or_null( const Bstr& name ) const
 
 void Com_variable_set::get_var( BSTR name, VARIANT* value ) const
 {
-    THREAD_LOCK( _lock )  
-    {
-        VariantInit( value );
+    VariantInit( value );
 
-        if( Com_variable* v = variable_or_null( name  ) )
-        {
-            v->get_Value( value );
-        }
+    if( Com_variable* v = variable_or_null( name  ) )
+    {
+        v->get_Value( value );
     }
 }
 
@@ -744,7 +712,7 @@ int Com_variable_set::estimated_byte_count() const
 
 STDMETHODIMP Com_variable_set::get_Count( int* result )
 {
-    THREAD_LOCK( _lock )  *result = count();
+    *result = count();
     return NOERROR;
 }
 
@@ -794,16 +762,13 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
     result.setAttribute("count",count());
     //result.setAttribute("estimated_byte_count",estimated_byte_count());
 
-    THREAD_LOCK( _lock )
+    for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
     {
-        for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
+        Com_variable* v = it->second;
+        if( v )
         {
-            Com_variable* v = it->second;
-            if( v )
-            {
-                xml::Element_ptr variable_element = v->dom_element( doc, subelement_name );
-                result.appendChild( variable_element );
-            }
+            xml::Element_ptr variable_element = v->dom_element( doc, subelement_name );
+            result.appendChild( variable_element );
         }
     }
 
@@ -838,28 +803,25 @@ string Com_variable_set::to_environment_string() const
 
 void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log* warning_log )
 {
-    THREAD_LOCK( _lock )
+    result->allocate( int_cast(_map.size()) );
+
+    int i = 0;
+    for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
     {
-        result->allocate( int_cast(_map.size()) );
-
-        int i = 0;
-        for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
+        if( Com_variable* v = it->second )
         {
-            if( Com_variable* v = it->second )
-            {
-                string name  = string_from_bstr   ( v->_name );
-                string value = string_from_variant( v->_value );
+            string name  = string_from_bstr   ( v->_name );
+            string value = string_from_variant( v->_value );
 
-                try
-                {
-                    result->set_string( i, name, value );
-                    i++;  // Nur, wenn kein Fehler aufgetreten ist (z.B. wegen " und ' im String).
-                }
-                catch( exception& x )
-                {
-                    if( !warning_log )  throw;
-                    warning_log->warn( x.what() );
-                }
+            try
+            {
+                result->set_string( i, name, value );
+                i++;  // Nur, wenn kein Fehler aufgetreten ist (z.B. wegen " und ' im String).
+            }
+            catch( exception& x )
+            {
+                if( !warning_log )  throw;
+                warning_log->warn( x.what() );
             }
         }
     }
@@ -871,7 +833,6 @@ STDMETHODIMP Com_variable_set::Clone( Ivariable_set** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         *result = NULL;
@@ -900,7 +861,6 @@ STDMETHODIMP Com_variable_set::Merge( Ivariable_set* other )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         Com_variable_set* o = dynamic_cast<Com_variable_set*>( other );
@@ -998,46 +958,19 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
     try
     {
         hr = String_to_bstr(dom(xml_element_name(), "variable").xml_string(), xml_doc);
- }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-
-    return hr;
-}
-
-//----------------------------------------------------------------Com_variable_set::get_Names_array
-/*
-STDMETHODIMP Com_variable_set::get_Names_array( SAFEARRAY** result )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        *result = SafeArrayCreateVector( VT_VARIANT, 0, _map.size() );
-        if( !*result )  return E_OUTOFMEMORY;
-
-        Locked_safearray a ( *result );
-
-        int i = 0;
-        Z_FOR_EACH( Map, _map, m )
-        {
-            a[ i++ ] = m->first;
-        }
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
-*/
+
 //----------------------------------------------------------------------Com_variable_set::get_Names
 
 STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         int length = int_cast(_map.size()) - 1;  // Anzahl der Semikolons
@@ -1080,7 +1013,6 @@ STDMETHODIMP Com_variable_set::Substitute( BSTR bstr, BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         hr = String_to_bstr( subst_env( string_from_bstr( bstr ), this ), result );
@@ -1284,7 +1216,6 @@ ptr<object_server::Reference_with_properties> Com_log::get_reference_with_proper
     //if( iid != IID_Ilog )  return E_NOINTERFACE;
 
     
-    THREAD_LOCK( _lock )
     {
         if( !_log )  throw_com( E_POINTER, "Com_log::get_reference_with_properties" );
 
@@ -1301,10 +1232,7 @@ ptr<object_server::Reference_with_properties> Com_log::get_reference_with_proper
 
 void Com_log::set_log( Prefix_log* log )
 { 
-    THREAD_LOCK( _lock )
-    {
-        _log = log; 
-    }
+    _log = log; 
 }
 
 //----------------------------------------------------------------------------------------Com_log::
@@ -1330,7 +1258,6 @@ STDMETHODIMP Com_log::Log( spooler_com::Log_level level, BSTR line )
 { 
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1349,7 +1276,6 @@ STDMETHODIMP Com_log::Log_file( BSTR path )
 { 
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1368,7 +1294,6 @@ STDMETHODIMP Com_log::get_Mail( Imail** mail )
 { 
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1388,7 +1313,6 @@ STDMETHODIMP Com_log::put_Mail_on_error( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1407,7 +1331,6 @@ STDMETHODIMP Com_log::get_Mail_on_error( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1426,7 +1349,6 @@ STDMETHODIMP Com_log::put_Mail_on_warning( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1445,7 +1367,6 @@ STDMETHODIMP Com_log::get_Mail_on_warning( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1464,7 +1385,6 @@ STDMETHODIMP Com_log::put_Mail_on_success( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1483,7 +1403,6 @@ STDMETHODIMP Com_log::get_Mail_on_success( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1502,7 +1421,6 @@ STDMETHODIMP Com_log::put_Mail_on_process( int level )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1521,7 +1439,6 @@ STDMETHODIMP Com_log::get_Mail_on_process( int* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1540,7 +1457,6 @@ STDMETHODIMP Com_log::put_Level( int level )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1559,7 +1475,6 @@ STDMETHODIMP Com_log::get_Level( int* level )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1578,7 +1493,6 @@ STDMETHODIMP Com_log::get_Filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1597,7 +1511,6 @@ STDMETHODIMP Com_log::put_New_filename( BSTR filename_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1615,7 +1528,6 @@ STDMETHODIMP Com_log::get_New_filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1634,7 +1546,6 @@ STDMETHODIMP Com_log::put_Collect_within( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1653,7 +1564,6 @@ STDMETHODIMP Com_log::get_Collect_within( double* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1672,7 +1582,6 @@ STDMETHODIMP Com_log::put_Collect_max( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1691,7 +1600,6 @@ STDMETHODIMP Com_log::get_Collect_max( double* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1710,7 +1618,6 @@ STDMETHODIMP Com_log::put_Mail_it( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1729,7 +1636,6 @@ STDMETHODIMP Com_log::get_Last_error_line( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1748,7 +1654,6 @@ STDMETHODIMP Com_log::get_Last( VARIANT* level, BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1767,7 +1672,6 @@ STDMETHODIMP Com_log::Start_new_file()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -1938,56 +1842,6 @@ void Com_log_proxy::log2( zschimmer::Log_level log_level, const string&, const s
     }
 }
 
-//-------------------------------------------------------------------------Com_object_set::_methods
-#ifdef Z_COM
-
-const Com_method Com_object_set::_methods[] =
-{ 
-   // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "low_level"            , (Com_method_ptr)&Com_object_set::get_Low_level    , VT_I4         },
-    { DISPATCH_PROPERTYGET,  2, "high_level"           , (Com_method_ptr)&Com_object_set::get_High_level   , VT_I4         },
-    {}
-};
-
-#endif
-//-------------------------------------------------------------------Com_object_set::Com_object_set
-
-//Com_object_set::Com_object_set( Object_set* object_set )
-//:
-//    Sos_ole_object( object_set_class_ptr, this ),
-//    _object_set(object_set)
-//{
-//}
-
-//--------------------------------------------------------------------Com_object_set::get_low_level
-
-//STDMETHODIMP Com_object_set::get_Low_level( int* result )
-//{
-//    THREAD_LOCK( _lock )
-//    {
-//        if( !_object_set )  return E_POINTER;
-//        //if( current_thread_id() != _object_set->thread()->thread_id() )  return E_ACCESSDENIED;
-//
-//        *result = _object_set->_object_set_descr->_level_interval._low_level;
-//    }
-//
-//    return NOERROR;
-//}
-
-//-------------------------------------------------------------------Com_object_set::get_high_level
-
-//STDMETHODIMP Com_object_set::get_High_level( int* result )
-//{
-//    THREAD_LOCK( _lock )
-//    {
-//        if( !_object_set )  return E_POINTER;
-//      //if( current_thread_id() != _object_set->thread()->thread_id() )  return E_ACCESSDENIED;
-//
-//        *result = _object_set->_object_set_descr->_level_interval._high_level;
-//    }
-//    return NOERROR;
-//}
-
 //--------------------------------------------------------------------------------Com_job::_methods
 #ifdef Z_COM
 
@@ -1997,7 +1851,6 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_METHOD     ,  1, "start_when_directory_changed"  , (Com_method_ptr)&Com_job::Start_when_directory_changed, VT_EMPTY      , { VT_BSTR, VT_BSTR }, 1 },
     { DISPATCH_METHOD     ,  2, "clear_when_directory_changed"  , (Com_method_ptr)&Com_job::Clear_when_directory_changed },
     { DISPATCH_METHOD     ,  3, "start"                         , (Com_method_ptr)&Com_job::Start                       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
-  //{ DISPATCH_PROPERTYGET,  4, "thread"                        , (Com_method_ptr)&Com_job::get_Thread                  , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET,  5, "include_path"                  , (Com_method_ptr)&Com_job::get_Include_path            , VT_BSTR       },
     { DISPATCH_PROPERTYGET,  6, "name"                          , (Com_method_ptr)&Com_job::get_Name                    , VT_BSTR       },
     { DISPATCH_METHOD     ,  7, "wake"                          , (Com_method_ptr)&Com_job::Wake                        },
@@ -2023,7 +1876,7 @@ const Com_method Com_job::_methods[] =
 #endif
 //---------------------------------------------------------------------------------Com_job::Com_job
 
-Com_job::Com_job( Job* job )
+Com_job::Com_job( Standard_job* job )
 :
     Sos_ole_object( job_class_ptr, (Ijob*)this ),
     _job(job)
@@ -2045,7 +1898,6 @@ STDMETHODIMP Com_job::Start_when_directory_changed( BSTR directory_name, BSTR fi
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  return E_POINTER;
@@ -2064,7 +1916,6 @@ STDMETHODIMP Com_job::Clear_when_directory_changed()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  return E_POINTER;
@@ -2082,7 +1933,6 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  return E_POINTER;
@@ -2111,11 +1961,10 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
             start_at = Time::now() + Duration(start_after_vt.dblVal);
         }
 
-        //THREAD_LOCK( _job->_lock )
-        {
-            string name = bstr_as_string( task_name_vt.bstrVal );
-            task = _job->start( pars, name, start_at );
-        }
+        string name = bstr_as_string( task_name_vt.bstrVal );
+        Com_variable_set* variable_set = dynamic_cast<Com_variable_set*>(+pars);
+        if (!variable_set) z::throw_xc("Ivariable_set is not a Com_variable_set");
+        task = _job->start_task( variable_set, name, start_at );
 
         *itask = new Com_task( task );
         (*itask)->AddRef();
@@ -2132,7 +1981,6 @@ STDMETHODIMP Com_job::Wake()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  return E_POINTER;
@@ -2144,34 +1992,14 @@ STDMETHODIMP Com_job::Wake()
     return hr;
 }
 
-//------------------------------------------------------------------------------Com_job::get_thread
-/*
-STDMETHODIMP Com_job::get_Thread( Ithread** thread )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    {
-        if( !_job )  return E_POINTER;
-
-        *thread = _job->_thread->_com_thread;
-        if( *thread )  (*thread)->AddRef();
-    }
-
-    return hr;
-}
-*/
 //------------------------------------------------------------------------Com_job::get_include_path
 
 STDMETHODIMP Com_job::get_Include_path( BSTR* result )
 {
-    THREAD_LOCK( _lock )
-    {
-        if( !_job )  return E_POINTER;
-      //if( current_thread_id() != _job->thread()->thread_id() )  return E_ACCESSDENIED;
+    if( !_job )  return E_POINTER;
+    //if( current_thread_id() != _job->thread()->thread_id() )  return E_ACCESSDENIED;
 
-        *result = SysAllocString_string( _job->_spooler->include_path() );
-    }
+    *result = SysAllocString_string( _job->_spooler->include_path() );
 
     return NOERROR;
 }
@@ -2180,13 +2008,10 @@ STDMETHODIMP Com_job::get_Include_path( BSTR* result )
 
 STDMETHODIMP Com_job::get_Name( BSTR* result )
 {
-    THREAD_LOCK( _lock )
-    {
-        if( !_job )  return E_POINTER;
-        //if( current_thread_id() != _job->thread()->thread_id() )  return E_ACCESSDENIED;
+    if( !_job )  return E_POINTER;
+    //if( current_thread_id() != _job->thread()->thread_id() )  return E_ACCESSDENIED;
 
-        *result = SysAllocString_string( _job->path().without_slash() );
-    }
+    *result = SysAllocString_string( _job->path().without_slash() );
 
     return NOERROR;
 }
@@ -2197,7 +2022,6 @@ STDMETHODIMP Com_job::put_State_text( BSTR text )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2217,7 +2041,6 @@ STDMETHODIMP Com_job::get_Title( BSTR* title )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2236,7 +2059,6 @@ STDMETHODIMP Com_job::put_Delay_after_error( int error_steps, VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2255,7 +2077,6 @@ STDMETHODIMP Com_job::Clear_delay_after_error()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2274,7 +2095,6 @@ STDMETHODIMP Com_job::Remove()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2293,7 +2113,6 @@ STDMETHODIMP Com_job::Execute_command( BSTR command_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2312,7 +2131,6 @@ STDMETHODIMP Com_job::get_Order_queue( Iorder_queue** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2332,7 +2150,6 @@ STDMETHODIMP Com_job::put_Delay_order_after_setback( int setback_number, VARIANT
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2351,7 +2168,6 @@ STDMETHODIMP Com_job::put_Max_order_setbacks( int count )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2370,7 +2186,6 @@ STDMETHODIMP Com_job::put_Machine_resumable( VARIANT_BOOL machine_resumable )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2390,7 +2205,6 @@ STDMETHODIMP Com_job::get_Process_class( spooler_com::Iprocess_class** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2418,7 +2232,6 @@ STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2440,7 +2253,6 @@ STDMETHODIMP Com_job::get_Configuration_directory( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2466,7 +2278,6 @@ STDMETHODIMP Com_job::get_Max_order_setbacks(int* result)
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  return E_POINTER;
@@ -2485,7 +2296,6 @@ STDMETHODIMP Com_job::get_Script_code( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
@@ -2503,7 +2313,6 @@ STDMETHODIMP Com_job::get_Script_code( BSTR* result )
 const Com_method Com_task::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "object_set"                , (Com_method_ptr)&Com_task::get_Object_set         , VT_DISPATCH  },
     { DISPATCH_PROPERTYPUT,  2, "error"                     , (Com_method_ptr)&Com_task::put_Error              , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET,  2, "error"                     , (Com_method_ptr)&Com_task::get_Error              , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  3, "job"                       , (Com_method_ptr)&Com_task::get_Job                , VT_DISPATCH  },
@@ -2516,7 +2325,6 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT,  9, "history_field"             , (Com_method_ptr)&Com_task::put_History_field      , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 10, "id"                        , (Com_method_ptr)&Com_task::get_Id                 , VT_I4         },
     { DISPATCH_PROPERTYPUT, 11, "delay_spooler_process"     , (Com_method_ptr)&Com_task::put_Delay_spooler_process, VT_EMPTY    , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_Close_engine       , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_Order              , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_Java_class_name    , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_Changed_directories, VT_BSTR       },
@@ -2577,7 +2385,6 @@ ptr<object_server::Reference_with_properties> Com_spooler::get_reference_with_pr
 {
     ptr<object_server::Reference_with_properties> result;
 
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  throw_com( E_POINTER, "Com_spooler::get_reference_with_properties" );
 
@@ -2593,7 +2400,6 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
 {
     ptr<object_server::Reference_with_properties> result;
 
-    THREAD_LOCK( _lock )
     {
         if( !_task )  throw_com( E_POINTER, "Com_task::get_reference_with_properties" );
 
@@ -2617,35 +2423,7 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
 
 void Com_task::set_task( Task* task )
 { 
-    THREAD_LOCK( _lock )
-    {
-        _task = task; 
-    }
-}
-
-//-------------------------------------------------------------------------Com_task::get_object_set
-
-STDMETHODIMP Com_task::get_Object_set( Iobject_set** )
-{
-    return E_NOTIMPL;
-/*
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
-
-        if( !_task->_job->object_set_descr() )  return E_ACCESSDENIED;
-        THREAD_LOCK( _task->_job->_lock )  *result = (dynamic_cast<Object_set_task*>(+_task))->_com_object_set;
-        if( *result )  (*result)->AddRef();
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
-
-    return hr;
-*/
+    _task = task; 
 }
 
 //----------------------------------------------------------------------------------Com_task::error
@@ -2654,7 +2432,6 @@ STDMETHODIMP Com_task::put_Error( VARIANT* error_par )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2755,7 +2532,6 @@ STDMETHODIMP Com_task::End()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( _task )  _task->cmd_end();
@@ -2867,7 +2643,6 @@ STDMETHODIMP Com_task::put_Delay_spooler_process( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2876,24 +2651,6 @@ STDMETHODIMP Com_task::put_Delay_spooler_process( VARIANT* time )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
-
-    return hr;
-}
-
-//-----------------------------------------------------------------------Com_task::put_close_engine
-
-STDMETHODIMP Com_task::put_Close_engine( VARIANT_BOOL b )
-{
-    HRESULT hr = NOERROR;
-
-    try
-    {
-        if( !_task )  z::throw_xc( "SCHEDULER-122" );
-
-        _task->set_close_engine( b != 0 );
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
 
     return hr;
 }
@@ -3248,7 +3005,6 @@ STDMETHODIMP Com_task::put_Exit_code( int exit_code )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3266,7 +3022,6 @@ STDMETHODIMP Com_task::get_Exit_code( int* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3335,7 +3090,6 @@ STDMETHODIMP Com_task::get_Web_service( Iweb_service** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3354,7 +3108,6 @@ STDMETHODIMP Com_task::get_Web_service_or_null( Iweb_service** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3374,7 +3127,6 @@ STDMETHODIMP Com_task::get_Params_xml( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3393,7 +3145,6 @@ STDMETHODIMP Com_task::put_Params_xml( BSTR xml_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3412,7 +3163,6 @@ STDMETHODIMP Com_task::get_Order_params_xml( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3431,7 +3181,6 @@ STDMETHODIMP Com_task::put_Order_params_xml( BSTR xml_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  return E_POINTER;
@@ -3647,104 +3396,6 @@ void Com_task_proxy::wait_for_subprocesses()
     _subprocess_register->wait();
 }
 
-//-----------------------------------------------------------------------------Com_thread::_methods
-/*
-#ifdef Z_COM
-
-const Com_method Com_thread::_methods[] =
-{ 
-   // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_thread::get_Log              , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  2, "script"                    , (Com_method_ptr)&Com_thread::get_Script           , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  3, "include_path"              , (Com_method_ptr)&Com_thread::get_Include_path     , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  4, "name"                      , (Com_method_ptr)&Com_thread::get_Name             , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  5, "java_class_name"           , (Com_method_ptr)&Com_thread::get_Java_class_name  , VT_BSTR },
-    {}
-};
-
-#endif
-*/
-//---------------------------------------------------------------------------Com_thread::Com_thread
-/*
-Com_thread::Com_thread( Task_subsystem* thread )
-:
-    Sos_ole_object( thread_class_ptr, (Ithread*)this ),
-    _thread(thread)
-{
-}
-
-//-----------------------------------------------------------------------Com_thread::QueryInterface
-
-STDMETHODIMP Com_thread::QueryInterface( const IID& iid, void** result )
-{
-    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
-
-    return Sos_ole_object::QueryInterface( iid, result );
-}
-
-//------------------------------------------------------------------------------Com_thread::get_Log
-
-STDMETHODIMP Com_thread::get_log( Ilog** com_log )
-{
-    THREAD_LOCK( _lock )
-    {
-        if( !_thread )  return E_POINTER;
-        if( current_thread_id() != _thread->thread_id() )  return E_ACCESSDENIED;
-
-        *com_log = _thread->_com_log;
-        if( *com_log )  (*com_log)->AddRef();
-    }
-
-    return NOERROR;
-}
-
-//---------------------------------------------------------------------------Com_thread::get_script
-
-STDMETHODIMP Com_thread::get_script( IDispatch** script_object )
-{
-    THREAD_LOCK( _lock )
-    {
-        if( !_thread )  return E_POINTER;
-        if( current_thread_id() != _thread->thread_id() )  return E_ACCESSDENIED;
-        if( !_thread->_module_instance )  return E_ACCESSDENIED;
-
-        *script_object = _thread->_module_instance->dispatch();
-        if( *script_object )  (*script_object)->AddRef();
-    }
-
-    return NOERROR;
-}
-
-//---------------------------------------------------------------------Com_thread::get_include_path
-
-STDMETHODIMP Com_thread::get_include_path( BSTR* result )
-{
-    THREAD_LOCK( _lock )
-    {
-        if( !_thread )  return E_POINTER;
-        if( current_thread_id() != _thread->thread_id() )  return E_ACCESSDENIED;
-
-        *result = SysAllocString_string( _thread->_include_path );
-    }
-
-    return NOERROR;
-}
-
-//-----------------------------------------------------------------------------Com_thread::get_name
-
-STDMETHODIMP Com_thread::get_name( BSTR* result )
-{
-    THREAD_LOCK( _lock )
-    {
-        if( !_thread )  return E_POINTER;
-        if( current_thread_id() != _thread->thread_id() )  return E_ACCESSDENIED;
-
-        *result = SysAllocString_string( _thread->_name );
-    }
-
-    return NOERROR;
-}
-*/
 //----------------------------------------------------------------------------Com_spooler::_methods
 #ifdef Z_COM
 
@@ -3819,7 +3470,6 @@ STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
 
 STDMETHODIMP Com_spooler::get_Log( Ilog** com_log )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -3834,7 +3484,6 @@ STDMETHODIMP Com_spooler::get_Log( Ilog** com_log )
 
 STDMETHODIMP Com_spooler::get_Id( BSTR* id_bstr )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -3848,7 +3497,6 @@ STDMETHODIMP Com_spooler::get_Id( BSTR* id_bstr )
 
 STDMETHODIMP Com_spooler::get_Param( BSTR* param_bstr )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -3862,7 +3510,6 @@ STDMETHODIMP Com_spooler::get_Param( BSTR* param_bstr )
 
 STDMETHODIMP Com_spooler::get_Script( IDispatch** script_object )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
         if( !_spooler->scheduler_script_subsystem()->default_scheduler_script_or_null() )  return E_ACCESSDENIED;
@@ -3880,7 +3527,6 @@ STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_spooler )  return E_POINTER;
@@ -3897,7 +3543,6 @@ STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
 
 STDMETHODIMP Com_spooler::Create_variable_set( Ivariable_set** result )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -3912,10 +3557,9 @@ STDMETHODIMP Com_spooler::Create_variable_set( Ivariable_set** result )
 
 STDMETHODIMP Com_spooler::get_Include_path( BSTR* result )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
-        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_include_path );
+        *result = SysAllocString_string( _spooler->_include_path );
     }
 
     return NOERROR;
@@ -3925,10 +3569,9 @@ STDMETHODIMP Com_spooler::get_Include_path( BSTR* result )
 
 STDMETHODIMP Com_spooler::get_Log_dir( BSTR* result )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
-        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_log_directory );
+        *result = SysAllocString_string( _spooler->_log_directory );
     }
 
     return NOERROR;
@@ -3938,7 +3581,6 @@ STDMETHODIMP Com_spooler::get_Log_dir( BSTR* result )
 
 STDMETHODIMP Com_spooler::Let_run_terminate_and_restart()
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -3952,7 +3594,6 @@ STDMETHODIMP Com_spooler::Let_run_terminate_and_restart()
 
 STDMETHODIMP Com_spooler::get_Variables( Ivariable_set** result )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -4003,10 +3644,9 @@ STDMETHODIMP Com_spooler::get_Var( BSTR name, VARIANT* value )
 
 STDMETHODIMP Com_spooler::get_Db_name( BSTR* result )
 {
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
-        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->settings()->_db_name );
+        *result = SysAllocString_string( _spooler->settings()->_db_name );
     }
 
     return NOERROR;
@@ -4032,7 +3672,6 @@ STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* ijob_chain )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_spooler )  return E_POINTER;
@@ -4059,7 +3698,6 @@ STDMETHODIMP Com_spooler::get_Job_chain( BSTR name, spooler_com::Ijob_chain** re
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_spooler )  return E_POINTER;
@@ -4079,7 +3717,6 @@ STDMETHODIMP Com_spooler::Create_order( Iorder** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_spooler )  return E_POINTER;
@@ -4098,7 +3735,6 @@ STDMETHODIMP Com_spooler::get_Is_service( VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -4114,7 +3750,6 @@ STDMETHODIMP Com_spooler::get_Directory( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
 
@@ -4130,7 +3765,6 @@ STDMETHODIMP Com_spooler::get_Hostname( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_spooler )  return E_POINTER;
@@ -4149,7 +3783,6 @@ STDMETHODIMP Com_spooler::Job_chain_exists( BSTR name, VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_spooler )  return E_POINTER;
@@ -4463,7 +4096,6 @@ STDMETHODIMP Com_spooler::get_Configuration_directory( BSTR* result )
 
     if( !_spooler )  return E_POINTER;
 
-    THREAD_LOCK( _lock )
     try
     {
         string dir = _spooler->_configuration_directories[ confdir_local ];
@@ -4640,7 +4272,6 @@ Com_context::Com_context()
 
 void Com_context::close()
 { 
-    THREAD_LOCK(_lock)
     {
         _log     = NULL;
         _spooler = NULL; 
@@ -4697,30 +4328,12 @@ STDMETHODIMP Com_job_chain::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
-//------------------------------------------------------------------------Com_job_chain::get_length
-/*
-STDMETHODIMP Com_job_chain::get_length( int* result )
-{ 
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        *result = _job_chain->length(); 
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.length" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.length" ); }
-
-    return hr;
-}
-*/
 //--------------------------------------------------------------------------Com_job_chain::put_name
 
 STDMETHODIMP Com_job_chain::put_Name( BSTR name_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4739,7 +4352,6 @@ STDMETHODIMP Com_job_chain::get_Name( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4758,7 +4370,6 @@ STDMETHODIMP Com_job_chain::get_Order_count( int* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4781,7 +4392,6 @@ STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4822,7 +4432,6 @@ STDMETHODIMP Com_job_chain::Add_end_state( VARIANT* state )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4836,25 +4445,6 @@ STDMETHODIMP Com_job_chain::Add_end_state( VARIANT* state )
     return hr;
 }
 
-//----------------------------------------------------------------------------Com_job_chain::finish
-/*
-STDMETHODIMP Com_job_chain::finish()
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_job_chain )  return E_POINTER;
-
-        _job_chain->finish();
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.finish" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.finish" ); }
-
-    return hr;
-}
-*/
 //-------------------------------------------------------------------------Com_job_chain::add_order
 
 STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::Iorder** result )
@@ -4863,7 +4453,6 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
 
     //Z_LOGI2( "scheduler", "Job_chain.add_order\n" );
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4898,7 +4487,6 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4925,9 +4513,6 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
 {
     HRESULT hr = NOERROR;
 
-    //Z_LOGI2( "scheduler", "Job_chain.add_order\n" );
-
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4955,7 +4540,6 @@ STDMETHODIMP Com_job_chain::get_Order_queue( VARIANT* state, Iorder_queue** resu
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -4980,7 +4564,6 @@ STDMETHODIMP Com_job_chain::get_Node( VARIANT* state, Ijob_chain_node** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
@@ -5326,7 +4909,6 @@ STDMETHODIMP Com_order::put_Id( VARIANT* id )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5345,7 +4927,6 @@ STDMETHODIMP Com_order::get_Id( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5364,7 +4945,6 @@ STDMETHODIMP Com_order::put_Title( BSTR title_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5383,7 +4963,6 @@ STDMETHODIMP Com_order::get_Title( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5402,7 +4981,6 @@ STDMETHODIMP Com_order::put_Priority( int priority )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5421,7 +4999,6 @@ STDMETHODIMP Com_order::get_Priority( int* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5442,7 +5019,6 @@ STDMETHODIMP Com_order::get_Job_chain( Ijob_chain** result )
 
     *result = NULL;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5466,7 +5042,6 @@ STDMETHODIMP Com_order::get_Job_chain_node( Ijob_chain_node** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     {
         if( !_order )  return E_POINTER;
 
@@ -5477,60 +5052,12 @@ STDMETHODIMP Com_order::get_Job_chain_node( Ijob_chain_node** result )
     return hr;
 }
 
-//-------------------------------------------------------------------------------Com_order::put_job
-
-//STDMETHODIMP Com_order::put_Job( VARIANT* job_or_jobname )
-//{
-//    HRESULT hr = NOERROR;
-//
-//    THREAD_LOCK( _lock )
-//    try
-//    {
-//        if( !_order )  return E_POINTER;
-//
-//        switch( job_or_jobname->vt )
-//        {
-//            case VT_BSTR:       
-//                _order->set_job_by_name( Absolute_path( root_path, string_from_bstr( V_BSTR(job_or_jobname) ) ) ); 
-//                break;
-//
-//            default:            
-//                return DISP_E_TYPEMISMATCH;
-//        }
-//    }
-//    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-//    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-//
-//    return hr;
-//}
-
-//-------------------------------------------------------------------------------Com_order::get_job
-
-//STDMETHODIMP Com_order::get_Job( Ijob** result )
-//{
-//    HRESULT hr = NOERROR;
-//
-//    THREAD_LOCK( _lock )
-//    try
-//    {
-//        if( !_order )  return E_POINTER;
-//
-//        *result = _order->com_job();
-//        if( *result )  (*result)->AddRef();
-//    }
-//    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-//    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-//
-//    return hr;
-//}
-
 //-----------------------------------------------------------------------------Com_order::put_state
 
 STDMETHODIMP Com_order::put_State( VARIANT* state )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5549,7 +5076,6 @@ STDMETHODIMP Com_order::get_State( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5568,7 +5094,6 @@ STDMETHODIMP Com_order::put_State_text( BSTR state_text_bstr )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5587,7 +5112,6 @@ STDMETHODIMP Com_order::get_State_text( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5606,7 +5130,6 @@ STDMETHODIMP Com_order::get_Error( Ierror** )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5625,7 +5148,6 @@ STDMETHODIMP Com_order::put_Payload( VARIANT* payload )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5644,7 +5166,6 @@ STDMETHODIMP Com_order::putref_Payload( IUnknown* payload )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5672,7 +5193,6 @@ STDMETHODIMP Com_order::get_Payload( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5693,7 +5213,6 @@ STDMETHODIMP Com_order::Payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
 
     *result = false;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5741,7 +5260,6 @@ STDMETHODIMP Com_order::Setback()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5760,7 +5278,6 @@ STDMETHODIMP Com_order::put_At( VARIANT* datetime )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5782,7 +5299,6 @@ STDMETHODIMP Com_order::get_At( DATE* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5801,7 +5317,6 @@ STDMETHODIMP Com_order::get_Run_time( Irun_time** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5821,7 +5336,6 @@ STDMETHODIMP Com_order::Remove_from_job_chain()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5839,7 +5353,6 @@ STDMETHODIMP Com_order::get_String_next_start_time( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5857,7 +5370,6 @@ STDMETHODIMP Com_order::get_Xml( BSTR, BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5875,7 +5387,6 @@ STDMETHODIMP Com_order::get_Web_service( Iweb_service** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5894,7 +5405,6 @@ STDMETHODIMP Com_order::get_Web_service_or_null( Iweb_service** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5913,7 +5423,6 @@ STDMETHODIMP Com_order::get_Web_service_operation( Iweb_service_operation** resu
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5932,7 +5441,6 @@ STDMETHODIMP Com_order::get_Web_service_operation_or_null( Iweb_service_operatio
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5951,7 +5459,6 @@ STDMETHODIMP Com_order::put_Xml_payload( BSTR xml_payload )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5970,7 +5477,6 @@ STDMETHODIMP Com_order::get_Xml_payload( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -5989,7 +5495,6 @@ STDMETHODIMP Com_order::put_Params( Ivariable_set* variable_set )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6011,7 +5516,6 @@ STDMETHODIMP Com_order::get_Params( Ivariable_set** result )
 
     *result = NULL;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6030,7 +5534,6 @@ STDMETHODIMP Com_order::put_Suspended( VARIANT_BOOL suspended )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6050,7 +5553,6 @@ STDMETHODIMP Com_order::get_Suspended( VARIANT_BOOL* result )
 
     *result = VARIANT_FALSE;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6068,7 +5570,6 @@ STDMETHODIMP Com_order::get_Log( Ilog** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6087,7 +5588,6 @@ STDMETHODIMP Com_order::put_End_state( VARIANT* state )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6106,7 +5606,6 @@ STDMETHODIMP Com_order::get_End_state( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6125,7 +5624,6 @@ STDMETHODIMP Com_order::get_Setback_count( int* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_order )  return E_POINTER;
@@ -6138,24 +5636,6 @@ STDMETHODIMP Com_order::get_Setback_count( int* result )
     return hr;
 }
 
-//-----------------------------------------------------------------------------Com_order::Start_now
-/*
-STDMETHODIMP Com_order::Start_now()
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_order )  return E_POINTER;
-
-        _order->start_now();
-    }
-    catch( const exception& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-
-    return hr;
-}
-*/
 //------------------------------------------------------------------------Com_order_queue::_methods
 #ifdef Z_COM
 
@@ -6191,7 +5671,6 @@ STDMETHODIMP Com_order_queue::QueryInterface( const IID& iid, void** result )
 
 STDMETHODIMP Com_order_queue::get_Length( int* result )
 {
-    THREAD_LOCK( _lock )
     {
         Order_queue* order_queue = dynamic_cast<Order_queue*>( this );
 

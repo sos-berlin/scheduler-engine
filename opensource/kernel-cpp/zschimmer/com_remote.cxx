@@ -318,7 +318,8 @@ Async_operation* Connection::close__start()
         _manager->remove_connection( this ), _manager = NULL;
     }
 
-    return &dummy_sync_operation;
+    _my_operation = Z_NEW(Sync_operation);
+    return _my_operation;
 }
 
 //---------------------------------------------------------------------------Connection::close__end
@@ -484,7 +485,6 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
 
                 _connection->_socket = ::accept( _connection->_listen_socket, (sockaddr*)&peer_addr, &len );
 
-                //Z_LOG2( "socket", "accept(" << _connection->_listen_socket << ")\n" );
                 int err = _connection->_socket == SOCKET_ERROR? socket_errno() : 0;
 
                 Z_LOG2( err == Z_EWOULDBLOCK? "zschimmer" : "", "pid=" << _connection->pid() << " accept()  errno=" << err << "\n" );
@@ -506,6 +506,7 @@ bool Connection::Connect_operation::async_continue_( Continue_flags flags )
                 }
                 else
                 {
+                    Z_LOG2("socket", "accept(" << _connection->_listen_socket << ") => " << _connection->_socket << "\n");
                     _connection->_peer = peer_addr;
 
                     //Prüfung ist zu streng, wenn der Rechner im Cluster ist. Dann hat er zwei IP-Adressen.
@@ -953,6 +954,7 @@ int Connection::read_async( void* buffer, int size, bool* eof )
     {
         if( length == 0 )
         {
+            Z_LOG2( "socket.recv", "pid=" << pid() << " socket=" << _socket << " EOF\n");
             if( !eof )  throw_xc( Connection_reset_exception( "Z-REMOTE-101", pid() ) );
             *eof = true; 
         }
@@ -2093,7 +2095,8 @@ Session::~Session()
 
 Async_operation* Session::close__start()
 {
-    Async_operation* operation = &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    Async_operation* operation = _sync_operation;
 
     if( !_object_table.empty() )  Z_LOG( "pid=" << pid() << " Open objects:\n" << _object_table << "\n" );
 
@@ -3847,7 +3850,8 @@ Async_operation* Proxy::release__start()
     if( _session->connection()->has_error() )
     {
         _no_operation = true;
-        return &dummy_sync_operation;
+        _sync_operation = Z_NEW(Sync_operation);
+        return _sync_operation;
     }
 
 

@@ -1,21 +1,20 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
-import javax.inject.Inject
-import javax.inject.Singleton
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import javax.servlet.http.HttpServletResponse.SC_MOVED_PERMANENTLY
-import org.slf4j.LoggerFactory
+import CppServlet._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyInvalidatedException, DisposableCppProxyRegister}
 import com.sos.scheduler.engine.kernel.scheduler.{SchedulerIsClosed, SchedulerHttpService}
+import javax.inject.Inject
+import javax.inject.Singleton
+import javax.servlet.http.HttpServletResponse.SC_MOVED_PERMANENTLY
+import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 @Singleton
-class CppServlet @Inject()(
+final class CppServlet @Inject private(
     schedulerHttpService: SchedulerHttpService,
     cppProxyRegister: DisposableCppProxyRegister,
     schedulerIsClosed: SchedulerIsClosed)
   extends HttpServlet {
-
-  import CppServlet._
 
   override def service(request: HttpServletRequest, response: HttpServletResponse) {
     if (request.getMethod == "GET" && request.getPathInfo == null) {
@@ -25,7 +24,7 @@ class CppServlet @Inject()(
       normalService(request, response)
   }
 
-  def normalService(request: HttpServletRequest, response: HttpServletResponse) {
+  private def normalService(request: HttpServletRequest, response: HttpServletResponse) {
     val attributeName = classOf[CppServlet].getName
 
     def startOperation() {
@@ -54,5 +53,5 @@ class CppServlet @Inject()(
 }
 
 object CppServlet {
-  private val logger = LoggerFactory.getLogger(classOf[CppServlet])
+  private val logger = Logger(getClass)
 }

@@ -26,15 +26,12 @@ struct Kill_thread : Thread
 
     int thread_main()
     {
-        try
-        {
-            posix::try_kill_process_with_descendants_immediately( _pid, _log, &_message, _process_name );
+        try {
+            posix::try_kill_process_with_descendants_immediately( _pid, NULL, &_message, _process_name );
             posix::try_kill_process_group_immediately           ( _pid,                  _process_name );
         }
-        catch( exception& x )
-        {
-            if( _log )  _log->warn( x.what() );
-                  else  Z_LOG( Z_FUNCTION << " " << x.what() << "\n" );
+        catch( exception& x ) {
+            Z_LOG( Z_FUNCTION << " " << x.what() << "\n" );
         }
 
         return 0;
@@ -44,7 +41,6 @@ struct Kill_thread : Thread
     Fill_zero              _zero_;
     pid_t                  _pid;
     string                 _process_name;
-    ptr<Prefix_log>        _log;
     Message_string         _message;
 };
 
@@ -345,6 +341,7 @@ bool Process_module_instance::begin__end()
     
     if( _spooler )  
     {
+        if (_task) _process_handle.on_signaled_call(Z_NEW(job::Task_process_ended_call(_task)));
         _process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle );
     }
@@ -677,6 +674,7 @@ bool Process_module_instance::begin__end()
 
     if( _spooler )
     {
+        if (_task) _process_handle.on_signaled_call(Z_NEW(job::Task_process_ended_call(_task)));
         _process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle._pid );
         _pid_to_unregister = _process_handle._pid;
@@ -777,7 +775,6 @@ bool Process_module_instance::kill()
         ptr<Kill_thread> kill_thread = Z_NEW( Kill_thread );
 
         kill_thread->_pid          = _process_handle._pid;
-        kill_thread->_log          = dynamic_cast<Prefix_log*>( _log.base_log() );
         kill_thread->_message      = m;
         kill_thread->_process_name = _task? _task->obj_name() : "";
         kill_thread->set_thread_name( S() << "Kill_thread pid=" << _process_handle._pid );

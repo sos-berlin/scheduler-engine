@@ -3,6 +3,8 @@
 #ifndef __SCHEDULER_SCHEDULE_H
 #define __SCHEDULER_SCHEDULE_H
 
+#include <bitset>
+
 namespace sos {
 namespace scheduler {
 namespace schedule {
@@ -254,16 +256,16 @@ struct Holidays
 {
                                 Holidays                    ( Spooler* spooler )                    : _spooler(spooler) {}
 
-    void                        clear                       ()                                      { _set.clear(); }
-    bool                        is_filled                   () const                                { return !_set.empty(); }
+    void                        clear                       ()                                      { _day_set.clear(); }
+    bool                        is_filled                   () const                                { return !_day_set.empty(); }
     void                        set_dom                     ( File_based* source_file_based, const xml::Element_ptr&, int include_nesting = 0 );
-    void                        include                     ( time_t t )                            { _set.insert( t ); }
+    void                        include_day                 (int o)                                 { _day_set.insert(o); }
     bool                        is_included                 ( const Time& );
 
     Spooler*                   _spooler;
-    typedef stdext::hash_set<time_t> Set;
-    Set                        _set;
-    stdext::hash_set<int>      _weekdays;
+    typedef stdext::hash_set<int> Set;
+    Set                        _day_set;
+    std::bitset<7>             _weekdays;
 };
 
 //--------------------------------------------------------------------------------------------Date
@@ -405,7 +407,8 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
 
 struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>, 
                   spooler_com::Ihas_java_class_name,
-                  file_based< Schedule, Schedule_folder, Schedule_subsystem_interface >
+                  file_based< Schedule, Schedule_folder, Schedule_subsystem_interface >,
+                  javabridge::has_proxy<Schedule>
 {
     static Class_descriptor     class_descriptor;
     static const Com_method    _methods[];
@@ -449,6 +452,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         Monthday_set               _monthday_set;
         Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
         vector< ptr<Month> >       _months;
+        bool                       _has_month;
         Holidays                   _holidays;
         xml::Document_ptr          _dom;
         string                     _start_time_function;
@@ -464,6 +468,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
                                 Schedule                    ( Schedule_subsystem_interface*, Scheduler_holidays_usage = with_scheduler_holidays );
                                ~Schedule                    ();
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Schedule>::java_sister(); }
 
     // Scheduler_object
 
@@ -588,15 +593,17 @@ struct Schedule_folder : typed_folder< Schedule >
 //---------------------------------------------------------------------Schedule_subsystem_interface
 
 struct Schedule_subsystem_interface : Object,
-                                      file_based_subsystem< Schedule >
+                                      file_based_subsystem< Schedule >,
+                                      javabridge::has_proxy<Schedule_subsystem_interface>
 {
                                 Schedule_subsystem_interface( Scheduler*, Type_code );
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Schedule_subsystem_interface>::java_sister(); }
 
     virtual ptr<Schedule_folder> new_schedule_folder        ( Folder* )                             = 0;
     Schedule*                   schedule                    ( const Absolute_path& path ) const     { return file_based( path ); }
     Schedule*                   schedule_or_null            ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
-    ptr<Schedule>               new_schedule                ()                                      { return new_file_based(); }
+    ptr<Schedule>               new_schedule                ()                                      { return new_file_based(""); }
   //virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& ) = 0;
 };
 

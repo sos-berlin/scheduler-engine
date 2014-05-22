@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.jetty.services
 
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import javax.inject.Inject
 import javax.ws.rs._
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerInstanceId
 import javax.ws.rs.core._
 
 @Path("")

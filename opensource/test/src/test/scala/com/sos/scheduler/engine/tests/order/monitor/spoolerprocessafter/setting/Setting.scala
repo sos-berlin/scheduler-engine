@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.setting
 
-import com.sos.scheduler.engine.data.folder.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.job.JobPath
 
 case class Setting(details: SettingDetail*) {
 

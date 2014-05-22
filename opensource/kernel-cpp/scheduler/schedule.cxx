@@ -37,7 +37,7 @@ struct Schedule_subsystem : Schedule_subsystem_interface
     string                      object_type_name            () const                                { return "Schedule"; }
     string                      filename_extension          () const                                { return ".schedule.xml"; }
   //string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
-    ptr<Schedule>               new_file_based              ();
+    ptr<Schedule>               new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "schedules" ); }
     ptr<Schedule_folder>        new_schedule_folder         ( Folder* folder )                      { return Z_NEW( Schedule_folder( folder ) ); }
 
@@ -206,7 +206,7 @@ void Schedule_subsystem::assert_xml_element_name( const xml::Element_ptr& elemen
 
 //-----------------------------------------------------Schedule_subsystem<Schedule>::new_file_based
 
-ptr<Schedule> Schedule_subsystem::new_file_based()
+ptr<Schedule> Schedule_subsystem::new_file_based(const string&)
 {
     return Z_NEW( Schedule( this ) );
 }
@@ -616,7 +616,8 @@ Schedule::Schedule( Schedule_subsystem_interface* schedule_subsystem_interface, 
     Idispatch_implementation( &class_descriptor ),
     My_file_based( schedule_subsystem_interface, static_cast<spooler_com::Ischedule*>( this ), type_schedule ),
     _scheduler_holidays_usage(scheduler_holidays_usage),
-    _zero_(this+1)
+    _zero_(this+1),
+    javabridge::has_proxy<Schedule>(spooler())
 {
     _inlay = Z_NEW( Inlay( this ) );
 }
@@ -1316,6 +1317,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
             {
                 if( _months[ *it ] )  z::throw_xc( "SCHEDULER-443", month_names[ *it ] );
                 _months[ *it ] = month;
+                _has_month = true;
             }
         }
         if( e.nodeName_is( "holidays" ) )
@@ -1351,10 +1353,8 @@ bool Schedule::Inlay::is_filled() const
                || _monthday_set.is_filled()
                || _ultimo_set  .is_filled();
 
-    if( !result )
-    {
-        for( int i = 0; i < 12; i++ )
-        {
+    if (!result && _has_month) {
+        for (int i = 0; i < 12; i++) {
             result = _months[ i ]  &&  _months[ i ]->is_filled();
             if( result )  break;
         }
@@ -1459,17 +1459,15 @@ Period Schedule::Inlay::next_period_of_same_day( const Time& t, With_single_star
     if( _at_set  .is_filled() )  result = min( result, _at_set  .next_period_of_same_day( t, single_start ) );
     if( _date_set.is_filled() )  result = min( result, _date_set.next_period_of_same_day( t, single_start ) );
 
-    int m = t.month_nr() - 1;
-    if( _months[ m ] )
-    {
-        result = min( result, _months[ m ]->next_period_of_same_day( t, single_start ) );
+    if (_has_month) {
+        int m = t.month_nr() - 1;
+        if (_months[m]) 
+            return min(result, _months[m]->next_period_of_same_day(t, single_start));
     }
-    else
-    {
-        if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( t, single_start ) );
-        if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( t, single_start ) );
-        if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( t, single_start ) );
-    }
+    
+    if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( t, single_start ) );
+    if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( t, single_start ) );
+    if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( t, single_start ) );
 
     return result;
 }
@@ -2122,7 +2120,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
                     if( e3.nodeName_is( "day" ) )
                     {
                         list<int> weekdays = get_weekday_numbers( e3.getAttribute( "day" ) );
-                        Z_FOR_EACH( list<int>, weekdays, w )  _weekdays.insert( *w );
+                        Z_FOR_EACH( list<int>, weekdays, w )  _weekdays[*w] = true;
                     }
                 }
             }
@@ -2131,7 +2129,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
             {
                 Sos_optional_date_time dt;
                 dt.assign( e2.getAttribute( "date" ) );
-                include( dt.as_time_t() );
+                include_day( dt.as_time_t() / (24*60*60) );
             }
             else
             if( e2.nodeName_is( "include" ) )
@@ -2166,7 +2164,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
     {   
         Sos_optional_date dt;
         dt.assign( e.getAttribute( "date" ) );
-        include( dt.as_time_t() );
+        include_day(dt.as_time_t() / (24*60*60));
     }
     else
         z::throw_xc( "SCHEDULER-319", e.nodeName(), Z_FUNCTION );
@@ -2176,8 +2174,8 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
 
 bool Holidays::is_included( const Time& t )
 { 
-    return _set.find( t.midnight().as_time_t() ) != _set.end()  ||
-           _weekdays.find( weekday_of_day_number( t.day_nr() ) ) != _weekdays.end();
+    int day = t.day_nr();
+    return _day_set.find(day) != _day_set.end()  ||  _weekdays[weekday_of_day_number(day)];
 }
 
 //--------------------------------------------------------------------------------------Date::print

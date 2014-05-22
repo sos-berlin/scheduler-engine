@@ -4,6 +4,7 @@
 #define __Z_ASYNC_H
 
 #include "threads.h"
+#include "Call.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -29,6 +30,7 @@ struct Async_operation : Object
 
     virtual string              obj_name                () const                                    { return async_state_text(); }  //"Async_operation"; }
 
+    void                        async_close             ();
 
     void                    set_async_manager           ( Async_manager* );
     Async_manager*              async_manager           () const                                    { return _manager; }
@@ -45,6 +47,7 @@ struct Async_operation : Object
     bool                        async_continue          ( Continue_flags = cont_default );          // Operation fortsetzen
     bool                        async_has_error         () const;
     bool                        async_finished          () const                                    { return async_has_error() || async_finished_(); }
+    bool                        async_finished_then_call();
     void                        async_check_error       ( const string& text = "" )                 { async_check_error( text, true ); }
     void                        async_check_exception   ( const string& text = "" )                 { async_check_error( text, false ); }
     void                        async_reset_error       ()                                          { _error = false; _error_name = _error_code = _error_what = ""; }
@@ -63,6 +66,7 @@ struct Async_operation : Object
     void                        async_clear_signaled    ()                                          { async_clear_signaled_(); }
   //void                        async_on_signal_from_child( Async_operation* op )                   { async_on_signal_from_child_( op ); }
   //virtual Socket_event*       async_event             ()                                          { throw_xc( "NO ASYNC_EVENT" ); }
+    void                        on_async_finished_call  (Call*);
 
   protected:
     void                        async_check_error       ( const string& text, bool check_finished );
@@ -91,6 +95,7 @@ struct Async_operation : Object
     ptr<Async_manager>         _manager;
     ptr<Async_operation>       _child;
     Async_operation*           _parent;                 // Diese Operation (this) kann Bestandteil einer komplexeren (_parent) sein
+    ptr<Call>                  _call;
 
     double                     _next_gmtime;
     bool                       _async_warning_issued;   // Um mehrfache Warnungen zu vermeiden, wenn Operation wartet, obwohl Verbindung asynchron ist
@@ -112,8 +117,6 @@ struct Sync_operation : Async_operation
     virtual bool                async_finished_         () const                                    { return true; }
     virtual string              async_state_text_       () const                                    { return "Sync_operation"; }
 };
-
-extern Sync_operation           dummy_sync_operation;
 
 //----------------------------------------------------------------------------------Operation_is_ok
 

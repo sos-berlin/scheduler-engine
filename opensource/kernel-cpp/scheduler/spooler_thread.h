@@ -19,6 +19,7 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
 
     virtual void                close                       ();
 
+    bool                        do_something                ();
     string                      name                        () const                                { return "task"; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     
@@ -28,10 +29,9 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
     int                         count_tasks_exist           () const;
     xml::Element_ptr            exist_task_statistic_element( const xml::Document_ptr& dom_document ) const;
     
-    bool                        has_tasks                   ()                                      { return !_task_list.empty(); }
+    bool                        has_tasks                   ()                                      { return !_task_set.empty(); }
 
-    bool                        process                     ( const Time& now );                    // Einen Schritt im (Pseudo-)Thread ausführen
-    void                        add_task                    ( Task* task )                          { _task_list.push_back( task );  signal( task->obj_name() ); }
+    void                        add_task                    ( Task* task )                          { _task_set.insert(task);  signal( task->obj_name() ); }
 
     string                      task_log                    (int task_id) const;
     ptr<Task>                   get_task_or_null            ( int task_id ) const;
@@ -57,12 +57,8 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
 
 
 
-//private:
-    bool                        step                        ( const Time& now );
-    bool                        do_something                ( Task*, const Time& now );
-// RB    void                        wait                        ();
     Task*                       get_next_task_to_run        ();
-    void                        remove_ended_tasks          ();
+    void                        remove_task                 (Task*);
     void                        build_prioritized_order_job_array();
 
 
@@ -70,7 +66,7 @@ struct Task_subsystem : Object, Subsystem, javabridge::has_proxy<Task_subsystem>
 
     Event*                     _event;
 
-    Task_list                  _task_list;
+    Task_set                   _task_set;
     bool                       _task_closed;
 
     vector<Job*>               _prioritized_order_job_array;            // Jobs am Ende einer Jobkette priorisieren

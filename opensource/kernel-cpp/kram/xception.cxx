@@ -465,33 +465,18 @@ void Xc_base::set_name( const char* n )
 
 void Xc_base::_obj_print( ostream* s ) const
 {
-#   if defined SYSTEM_RTTI
-        const char* type_name = typeid( *this ).name();
-        if( memcmp( type_name, "const ", 6 ) == 0 )  type_name += 6;
-      //if( memcmp( type_name, "struct sos::", 12 ) == 0 )  type_name += 12;
-        //*s << type_name << "( ";
-#       if defined __BORLANDC__
-            if( strncmp( type_name, "sos::", 5 ) != 0 )
-#       elif defined SYSTEM_MICROSOFT
-            if( strncmp( type_name, "struct sos::", 12 ) != 0 )
-#       elif defined SYSTEM_GNU
-            if( strncmp( type_name, "N3sos2XcE", 9 ) != 0 )
-#       endif
-        *s << type_name << ": ";
-#   else
-        //*s << "Xc(";
+    const char* type_name = typeid( *this ).name();
+    if( memcmp( type_name, "const ", 6 ) == 0 )  type_name += 6;
+    //if( memcmp( type_name, "struct sos::", 12 ) == 0 )  type_name += 12;
+    //*s << type_name << "( ";
+#   if defined SYSTEM_MICROSOFT
+        if( strncmp( type_name, "struct sos::", 12 ) != 0 )
+#   elif defined SYSTEM_GNU
+        if( strncmp( type_name, "N3sos2XcE", 9 ) != 0 )
 #   endif
+    *s << type_name << ": ";
 
     print_text( *s );
-    //*s << ')'; //"in " << _constructions_module_name;
-
-#   if 0 /* defined( __BORLANDC__ ) */
-        if( __throwFileName  &&  __throwFileName[ 0 ] ) {
-            const char* f = __throwFileName + strlen( __throwFileName ) - 1;
-            while( f >= __throwFileName  &&  *f != '/'  &&  *f != '\\'  &&  *f != ':' )  f--;
-            *s << " [" << (f+1) << '/' << __throwLineNumber << ']';
-        }
-#   endif
 }
 
 //--------------------------------------------------------------------------Xc_base::print_text

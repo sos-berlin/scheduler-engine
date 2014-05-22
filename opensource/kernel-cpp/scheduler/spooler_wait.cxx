@@ -66,26 +66,20 @@ void Event::close()
 
 void Event::add_to( Wait_handles* w )                 
 { 
-    Z_MUTEX( _mutex )
-    {
-        _wait_handles.push_back(w); 
-        w->add( this );
-    }
+    _wait_handles.push_back(w); 
+    w->add( this );
 }
 
 //-------------------------------------------------------------------------------Event::remove_from
 
 void Event::remove_from( Wait_handles* w )
 {
-    Z_MUTEX( _mutex )
+    FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
     {
-        FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
-        {
-            if( *it == w )  _wait_handles.erase( it );
-        }
-
-        w->remove( this );
+        if( *it == w )  _wait_handles.erase( it );
     }
+
+    w->remove( this );
 }
 
 //------------------------------------------------------------------------ait_handles::Wait_handles
@@ -94,8 +88,7 @@ Wait_handles::Wait_handles( Spooler* spooler )
 : 
     _zero_(this+1),
     _spooler(spooler),
-    _log( spooler->log() ),
-    _lock("Wait_handles") 
+    _log( spooler->log() )
 {
 }
 
@@ -106,7 +99,6 @@ Wait_handles::Wait_handles( const Wait_handles& o )
     _zero_(this+1),
     _spooler ( o._spooler ),
     _log     ( o._log ),
-    _lock    ( "Wait_handles" ),
     _events  ( o._events )
 #ifdef Z_WINDOWS
    ,_handles ( o._handles )
@@ -125,7 +117,6 @@ Wait_handles::~Wait_handles()
 
 void Wait_handles::close()
 {
-    //THREAD_LOCK( _lock )
     {
         FOR_EACH( Event_vector, _events, it )  
         {
@@ -142,7 +133,6 @@ void Wait_handles::close()
 
 void Wait_handles::clear()
 {
-    //THREAD_LOCK( _lock )
     {
         _events.clear();
 
@@ -156,13 +146,11 @@ void Wait_handles::clear()
 
 bool Wait_handles::signaled()
 {
-    //THREAD_LOCK( _lock )
     {
         FOR_EACH( Event_vector, _events, it )  
         {
             if( *it  &&  (*it)->signaled() )  
             { 
-                _catched_event = *it;
                 //Z_LOG2( _spooler->_scheduler_wait_log_category, **it << " signaled!\n" );  
                 return true; 
             }
@@ -214,27 +202,26 @@ void Wait_handles::remove( System_event* event )
 {
     if( !event )  return;
 
-        // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
+    // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
 
-            Event_vector::iterator it = _events.begin();
+    Event_vector::iterator it = _events.begin();
 
-            while( it != _events.end() )
-            {
-                if( *it == event )  break;
-                it++;
-            }
+    while( it != _events.end() )
+    {
+        if( *it == event )  break;
+        it++;
+    }
 
-            if( it == _events.end() ) {
-                _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
-                return;
-            }
+    if( it == _events.end() ) {
+        _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+        return;
+    }
 
-            Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
-            _events.erase( it );
+    Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
+    _events.erase( it );
 }
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
-// Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
 bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
 {
@@ -250,7 +237,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
 
     // until kann 0 sein
-    _catched_event = NULL;
 
     //2006-06-18: Nicht gut bei "nichts_getan": Wir brauchen auch neue Ereignisse, v.a. TCP.    if( signaled() )  return true;
 
@@ -317,9 +303,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         handles = new HANDLE [ _handles.size()+1 ];
         for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
 
-        // Regelmässige Ausgabe von Text auf der Konsole
-        if( _spooler  &&  _spooler->_print_time_every_second )
-        {
+        if( _spooler  &&  _spooler->_print_time_every_second ) {
+            // Regelmässige Ausgabe von Text auf der Konsole
             size_t  console_line_length = 0;
             double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
             
@@ -328,13 +313,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 double remaining = (until - Time::now()).as_double();
                 if( remaining < 0.7 )  break;
 
-                /**
-                 * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
-                 * \b oldcode from 2010-04-01
-                 * \code
-                    ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT ); 
-                   \endcode
-                 */
                 ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, (int)( ceil( min( step, remaining ) * 1000 ) ) ); 
                 if( ret != SOS_WAIT_TIMEOUT )  break;
 
@@ -370,28 +348,12 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             if( ret == SOS_WAIT_TIMEOUT )
             {
                 if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
-                /**
-                 * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
-                 * \b oldcode from 2010-04-01
-                 * \code
-                    ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
-                   \endcode
-                 */
                 ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, max( 0, t ) ); 
             }
 
             if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
-
-        // normale Bearbeitung von scheduler-Prozessen
         } else {
-        /**
-         * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
-         * \b oldcode from 2010-04-01
-         * \code
-           ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
-           \endcode
-         */
-         ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, t ); 
+            ret = sosMsgWaitForMultipleObjects( int_cast(_handles.size()), handles, t ); 
         }
         
         delete [] handles;  handles = NULL;
@@ -400,21 +362,19 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )           // "normales" handle
         {
-                int            index = ret - WAIT_OBJECT_0;
-                z::Event_base* event = _events[ index ];                                // scheduler-internes event-object
+            int            index = ret - WAIT_OBJECT_0;
+            z::Event_base* event = _events[ index ];                                // scheduler-internes event-object
             
-                if( event )
-                {
-                    if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
-                    if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );            // signal für "event" gesetzt
-                }
-                else
-                    if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
+            if( event )
+            {
+                if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
+                if( event != &_spooler->_waitable_timer )  event->set_signaled_then_callback( "MsgWaitForMultipleObjects" );            // signal für "event" gesetzt
+            }
+            else
+                if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
 
-                _catched_event = event;
-
-                if( event != &_spooler->_waitable_timer )  result = true;                // PC aufwecken
-                break;
+            if( event != &_spooler->_waitable_timer )  result = true;                // PC aufwecken
+            break;
         }
         else
         if( ret == WAIT_OBJECT_0 + _handles.size() )
@@ -599,7 +559,6 @@ string Wait_handles::as_string()
 {
     string result;
 
-    //THREAD_LOCK( _lock )
     {
         if( _events.empty() )
         {
@@ -984,11 +943,8 @@ void Directory_watcher::set_signaled()
 
 void Directory_watcher::reset()
 {
-    Z_MUTEX( _mutex )
-    {
-        _signaled = false;
-        _signal_name = "";
-    }
+    _signaled = false;
+    _signal_name = "";
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -277,11 +277,12 @@ int Process::Com_server_thread::thread_main()
 
 //---------------------------------------------------------------------------------Process::Process
 
-Process::Process( Spooler* sp )
+Process::Process(Spooler* sp, const Host_and_port& remote_scheduler)
 : 
     Scheduler_object( sp, this, type_process ), 
     _zero_(this+1),
-    _process_id( _spooler->get_next_process_id() )
+    _process_id( _spooler->get_next_process_id() ),
+    _remote_scheduler(remote_scheduler)
 {
 }
 
@@ -289,10 +290,13 @@ Process::Process( Spooler* sp )
 
 Process::~Process()
 {
-    if( _async_remote_operation )
-    {
+    if (_async_remote_operation) {
         _async_remote_operation->set_async_manager( NULL );
         _async_remote_operation = NULL;
+    }
+    if (_close_operation) {
+        _close_operation->set_async_manager(NULL);
+        _close_operation = NULL;
     }
 
     if( _process_handle_copy )  _spooler->unregister_process_handle( _process_handle_copy );
@@ -327,9 +331,11 @@ void Process::close_async()
 
 Async_operation* Process::close__start( bool run_independently )
 {
+    assert(!_close_operation);
     _close_operation = Z_NEW( Close_operation( this, run_independently ) );
+    _close_operation->set_async_next_gmtime((time_t)0);
     _close_operation->set_async_manager( _spooler->_connection_manager );
-    _close_operation->async_continue();
+    //_close_operation->async_continue();
 
     return _close_operation;
 }
@@ -338,6 +344,7 @@ Async_operation* Process::close__start( bool run_independently )
 
 void Process::close__end()
 {
+    if (_close_operation) _close_operation->set_async_manager(NULL);
     _close_operation = NULL;
     _session = NULL;
 }
@@ -387,8 +394,6 @@ void Process::start()
 {
     if( started() )  assert(0), z::throw_xc( Z_FUNCTION );
 
-    if( _process_class )  _remote_scheduler = _process_class->remote_scheduler();
-
     if( is_remote_host() )
     {
         assert( _process_class );
@@ -405,7 +410,7 @@ void Process::start()
     }
 
 #   ifdef Z_WINDOWS
-        if( _spooler )  _connection->set_event( &_spooler->_event );
+        if( _spooler )  _connection->set_event( &_spooler->_scheduler_event );
 #   endif
 
     _log->set_prefix( obj_name() );
@@ -601,6 +606,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             //if( _spooler->_validate_xml )  _spooler->_schema.validate( dom_document );
 
             _remote_process_id = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "process_id", 0 );
+            assert(_remote_process_id);
             _remote_pid        = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "pid", 0 );
 
             _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
@@ -610,7 +616,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
 
         case Async_remote_operation::s_running:    
         {
-            if( _module_instance  &&  _module_instance->_task )  _module_instance->_task->signal( Z_FUNCTION );
+            if( _module_instance  &&  _module_instance->_task )  _module_instance->_task->on_remote_task_running();
             break;
         }
 
@@ -646,10 +652,8 @@ bool Process::async_continue()
 
 void Process::Async_remote_operation::close_remote_task( bool kill )
 {
-    if( _state <= s_connecting )
-    {
-        if( _process->_xml_client_connection )  
-        {
+    if( _state <= s_connecting ) {
+        if( _process->_xml_client_connection ) {
             _process->_xml_client_connection->close();
             _process->_xml_client_connection->set_async_parent( NULL );
             _process->_xml_client_connection = NULL;
@@ -657,27 +661,18 @@ void Process::Async_remote_operation::close_remote_task( bool kill )
         }
     }
     else
-    if( _state >= s_starting  &&  _state < s_closing )
-    {
-        if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() )
-        {
-            try
-            {
+    if( _state > s_starting  &&  _state < s_closing ) {
+        if( _process->_xml_client_connection  &&  _process->_xml_client_connection->is_send_possible() ) {
+            try {
+                assert(_process->_remote_process_id);
                 S xml;
                 xml << "<remote_scheduler.remote_task.close process_id='" << _process->_remote_process_id << "'";
                 if( kill )  xml << " kill='yes'";
                 xml << "/>";
-
                 _process->_xml_client_connection->send( xml );
-
                 _state = s_closing;
             }
             catch( exception& x )  { _process->_log->warn( x.what() ); }
-        }
-        else
-        { 
-            //_process->_xml_client_connection->close();
-            //_state = s_closed;
         }
     }
 }
@@ -1034,6 +1029,7 @@ STDMETHODIMP Process_class_configuration::Remove()
 Process_class::Process_class( Scheduler* scheduler, const string& name )
 :
     Process_class_configuration( scheduler, name ),
+    javabridge::has_proxy<Process_class>(spooler()),
     _zero_(this+1)
 {
 }
@@ -1161,6 +1157,7 @@ void Process_class::add_process( Process* process )
 {
     process->_process_class = this;
     _process_set.insert( process );
+    _process_set_version++;
 }
 
 //--------------------------------------------------------------------------Spooler::remove_process
@@ -1172,6 +1169,7 @@ void Process_class::remove_process( Process* process )
 
     process->_process_class = NULL; 
     _process_set.erase( it ); 
+    _process_set_version++;
 
     if( is_to_be_removed()  &&  can_be_removed_now() )
     {
@@ -1188,13 +1186,14 @@ void Process_class::remove_process( Process* process )
 
 //------------------------------------------------------------------------Process_class::new_process
 
-Process* Process_class::new_process()
+Process* Process_class::new_process(const Host_and_port& remote_scheduler)
 {
     assert_is_active();
 
     ptr<Process> process;
 
-    process = Z_NEW( Process( _spooler ) );        
+    Host_and_port r = remote_scheduler.is_empty()? _remote_scheduler : remote_scheduler;
+    process = Z_NEW( Process(_spooler, r));        
 
     process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
 
@@ -1205,14 +1204,14 @@ Process* Process_class::new_process()
 
 //--------------------------------------------------------Process_class::select_process_if_available
 
-Process* Process_class::select_process_if_available()
+Process* Process_class::select_process_if_available(const Host_and_port& remote_scheduler)
 {
     if (!is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active &&
         _process_set.size() < _max_processes
          && _spooler->_process_count < scheduler::max_processes)
     {
-        return new_process();
+        return new_process(remote_scheduler);
     }
     else
         return NULL;
@@ -1257,13 +1256,6 @@ void Process_class::remove_waiting_job( Job* waiting_job )
 
 bool Process_class::need_process()
 { 
-/*
-    for( Job_list::iterator j = _waiting_jobs.begin(); j != _waiting_jobs.end(); )
-    {
-        if( !(*j)->_waiting_for_process )  _waiting_jobs.erase( j );   // Hat sich erledigt
-                                     else  j++;
-    }
-*/
     return !_waiting_jobs.empty(); 
 }
 
@@ -1390,9 +1382,11 @@ bool Process_class_subsystem::async_continue()
 
     FOR_EACH_FILE_BASED( Process_class, process_class )
     {
+        int v = process_class->_process_set_version;
         FOR_EACH( Process_class::Process_set, process_class->_process_set, p )
         {
             something_done |= (*p)->async_continue();
+            if (process_class->_process_set_version != v) break;
         }
     }
 
@@ -1401,9 +1395,9 @@ bool Process_class_subsystem::async_continue()
 
 //---------------------------------------------------Process_class_subsystem::new_temporary_process
 
-Process* Process_class_subsystem::new_temporary_process()
+Process* Process_class_subsystem::new_temporary_process(const Host_and_port& remote_scheduler)
 {
-    ptr<Process> process = Z_NEW( Process( _spooler ) );
+    ptr<Process> process = Z_NEW( Process( _spooler, remote_scheduler) );
 
     process->set_temporary( true );
     temporary_process_class()->add_process( process );

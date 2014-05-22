@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.scheduler.remote
 
 import RemoteSchedulerStressIT._
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.folder.JobPath
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest

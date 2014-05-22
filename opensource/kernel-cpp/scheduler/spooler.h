@@ -40,7 +40,6 @@
 #include "../kram/sossock1.h"
 #include "../kram/sosdate.h"
 #include "../kram/sosprof.h"
-#include "../kram/thread_semaphore.h"
 #include "../kram/com_simple_standards.h"
 #include "../kram/log.h"
 
@@ -126,6 +125,12 @@ struct Web_service_request;
 struct Web_service_response;
 struct Xml_client_connection;
 struct Xslt_stylesheet;
+
+//struct Pause_scheduler_call;
+//struct Continue_scheduler_call;
+//struct Reload_scheduler_call;
+//struct Terminate_scheduler_call;
+//struct Let_run_terminate_and_restart_scheduler_call;
 
 namespace database
 {
@@ -370,7 +375,7 @@ struct Spooler : Object,
     File_path                   include_path                () const                            { return _include_path; }
     string                      temp_dir                    () const                            { return _temp_dir; }
   //int                         priority_max                () const                            { return _priority_max; }
-    State                       state                       () const                            { return _state; }
+    State                       state                       () const                            { return _state; }      // Thread-sicher!
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
     const string&               log_directory               () const                            { return _log_directory; }                      
@@ -382,6 +387,7 @@ struct Spooler : Object,
     string                      directory                   () const                            { return _directory; }
     string                      home_directory              () const                            { return _home_directory; }
     string                      local_configuration_directory() const                           { return _configuration_directories[confdir_local]; }
+    string                      time_zone_name              () const                            { return _time_zone_name; }
 
     Timed_call*                 enqueue_call                (Timed_call*);
     void                        cancel_call                 (Timed_call*);
@@ -398,7 +404,7 @@ struct Spooler : Object,
     http::Java_response*        java_execute_http           (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&);
     http::Java_response*        java_execute_http_with_security_level (const SchedulerHttpRequestJ&, const SchedulerHttpResponseJ&, const string& security_level);
     void                        cmd_reload                  ();
-    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
+    void                        cmd_pause                   ();
     void                        cmd_continue                ();
     void                        cmd_terminate_after_error   ( const string& function_name, const string& message_text );
     void                        cmd_terminate               ( bool restart = false, int timeout = INT_MAX, 
@@ -436,6 +442,7 @@ struct Spooler : Object,
     void                        set_check_memory_leak       (bool);
     void                        load                        ();
     void                        open_pid_file               ();
+    int                         pid                         () const { return _pid; }
     void                        fetch_hostname              ();
     void                        read_xml_configuration      ();
     void                        initialize_java_subsystem     ();
@@ -495,9 +502,7 @@ struct Spooler : Object,
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
 
     void                        signal                      ();
-    void                        signal                      ( const string& signal_name );
-    void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
-    bool                        signaled                    ()                                  { return _event.signaled(); }
+    void                        async_signal                ( const char* signal_name = "" )    { _scheduler_event.async_signal( signal_name ); }
 
     void                        send_cmd                    ();
 
@@ -553,6 +558,13 @@ struct Spooler : Object,
 
     void                        detect_warning_and_send_mail();
     void                        write_to_scheduler_log      (const string& category, const string& text) { Z_LOG2(category, text); }  // F�r Java nicht mit Mutex abgesichert
+
+  private:
+    //void                        on_call                     (const Pause_scheduler_call&);
+    //void                        on_call                     (const Continue_scheduler_call&);
+    //void                        on_call                     (const Reload_scheduler_call&);
+    //void                        on_call                     (const Terminate_scheduler_call&);
+    //void                        on_call                     (const Let_run_terminate_and_restart_scheduler_call&);
 
 
   private:
@@ -662,7 +674,8 @@ struct Spooler : Object,
 
     Wait_handles               _wait_handles;
 
-    Event                      _event;                      // F�r Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
+    Event                      _scheduler_event;
+    typed_call_register<Spooler> _call_register;
 
     int                        _loop_counter;               // Z�hler der Schleifendurchl�ufe in spooler.cxx
     int                        _wait_counter;               // Z�hler der Aufrufe von wait_until()
@@ -710,7 +723,7 @@ struct Spooler : Object,
 
     ptr<Com_variable_set>      _variables;
     Security                   _security;                   // <security>
-    Communication              _communication;              // TCP und UDP (ein Thread)
+    Communication              _communication;              // TCP und UDP
 
     ptr<supervisor::Supervisor_interface>        _supervisor;
     ptr<supervisor::Supervisor_client_interface> _supervisor_client;

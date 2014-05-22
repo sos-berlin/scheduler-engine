@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.persistence.entities
 
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.JobPersistentState
+import com.sos.scheduler.engine.data.job.{JobPath, JobPersistentState}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
 import com.sos.scheduler.engine.persistence.SchedulerDatabases._
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter

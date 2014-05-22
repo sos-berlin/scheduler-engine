@@ -1,15 +1,14 @@
 package com.sos.scheduler.engine.plugins.jetty.log
 
-import java.io._
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import com.google.common.io.ByteStreams.copy
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFileEncoding
-import java.util.concurrent.atomic.AtomicBoolean
 import com.google.common.io.Closeables.closeQuietly
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.logFileEncoding
+import java.io._
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eclipse.jetty.http.HttpException
 
-class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServletResponse) {
-//  import FileServletAsyncOperation._
+final class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServletResponse) {
 
   private var file: File = null
   private var in: FileInputStream = null
@@ -62,7 +61,3 @@ class FileServletAsyncOperation(request: HttpServletRequest, response: HttpServl
 
   override def toString = classOf[FileServletAsyncOperation].getName+"("+file+")"
 }
-
-//object FileServletAsyncOperation {
-//  private val logger = Logger.getLogger(classOf[FileServletAsyncOperation])
-//}

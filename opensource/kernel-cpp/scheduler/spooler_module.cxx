@@ -34,21 +34,15 @@ Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based
     _file_based(file_based),
     _include_path(include_path)
 { 
-    initialize(); 
+    _xml_string = "<source/>";
     if( e )  append_dom( e ); 
-}
-
-//-------------------------------------------------------------------Text_with_includes::initialize
-
-void Text_with_includes::initialize()
-{
-    _dom_document.load_xml_string( "<source/>" );
 }
 
 //--------------------------------------------------------------------Text_with_includes::append_dom
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
+    xml::Document_ptr dom_document = xml::Document_ptr::from_xml_string(_xml_string);
     size_t linenr_base = element.line_number();
 
     for( xml::Node_ptr node = element.firstChild(); node; node = node.nextSibling() )
@@ -81,8 +75,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
 
                 if( *p )    // Nur nicht leeren Text berücksichtigen
                 {
-                    xml::Element_ptr e = _dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
-
+                    xml::Element_ptr e = dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
                     e.setAttribute( "linenr", linenr_base );
                 }
 
@@ -104,11 +97,11 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
 
                 if( e.nodeName_is( "include" ) )
                 {
-                    xml::Element_ptr include_element = _dom_document.createElement( "include" );
+                    xml::Element_ptr include_element = dom_document.createElement( "include" );
                     include_element.setAttribute( "file"     , e.getAttribute( "file"      ) );
                     include_element.setAttribute( "live_file", e.getAttribute( "live_file" ) );
 
-                    _dom_document.documentElement().appendChild( include_element );
+                    dom_document.documentElement().appendChild( include_element );
                 }
                 else
                     z::throw_xc( Z_FUNCTION, e.nodeName() );
@@ -119,6 +112,8 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
             default: ;
         }
     }
+
+    _xml_string = dom_document.xml_string();
 }
 
 //------------------------------------------------------------Text_with_includes::includes_resolved
@@ -127,10 +122,7 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
 {
     // Löst die <include> auf und macht sie zu <source_part>
 
-    xml::Document_ptr result;
-
-    result.create();
-    result.importAndAppendChild(_dom_document.documentElement());
+    xml::Document_ptr result = xml::Document_ptr::from_xml_string(_xml_string);
 
     DOM_FOR_EACH_ELEMENT( result.documentElement(), element )
     {
@@ -205,16 +197,8 @@ string Text_with_includes::text_element_filepath( const xml::Element_ptr& elemen
 
 bool Text_with_includes::is_empty() const
 { 
-    if( !_dom_document )  return true;
-    if( !_dom_document.documentElement().firstChild() )  return true;
-
-    return !_dom_document.documentElement().first_child_element();
-
-    // Jira JS-60: Die SOS schreibt gerne <script> </script>, was dasselbe sein soll wie <script/>.
-    //string text = _dom_document.documentElement().text();
-    //const char* p = text.c_str();
-    //while( *p  &&  isspace( (unsigned char)*p ) )  p++;
-    //return *p == '\0';
+    if (_xml_string.empty()) return true;
+    return !dom_element().first_child_element();
 }
 
 //-----------------------------------------------------------------------------------Module::Module
@@ -463,9 +447,9 @@ void Module::init()
 
 //--------------------------------------------------------------------------Module::create_instance
 
-ptr<Module_instance> Module::create_instance()
+ptr<Module_instance> Module::create_instance(const Host_and_port& remote_scheduler)
 {
-    ptr<Module_instance> result = create_instance_impl();
+    ptr<Module_instance> result = create_instance_impl(remote_scheduler);
 
     if( !_monitors->is_empty() )
     {
@@ -482,7 +466,7 @@ ptr<Module_instance> Module::create_instance()
 
 //---------------------------------------------------------------------Module::create_instance_impl
 
-ptr<Module_instance> Module::create_instance_impl()
+ptr<Module_instance> Module::create_instance_impl(const Host_and_port& remote_scheduler)
 {
     ptr<Module_instance> result;
 
@@ -490,7 +474,7 @@ ptr<Module_instance> Module::create_instance_impl()
     Kind kind = _kind;
     
     if( _use_process_class  &&
-        ( has_api() || process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+        ( has_api() || process_class()->is_remote_host() || !remote_scheduler.is_empty() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
     {
         kind = kind_remote;                 
     }
@@ -557,7 +541,7 @@ ptr<Module_instance> Module::create_instance_impl()
 
         case kind_remote:
         {
-            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this ) );
+            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this, remote_scheduler) );
             result = +p;
             break;
         }
@@ -609,18 +593,6 @@ Process_class* Module::process_class() const
     // Besser wäre das Limit zu berücksichtigen (über Dummy-Process?).
 
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
-}
-
-//-------------------------------------------------------------------------------Module::needs_java
-
-bool Module::needs_java() 
-{
-    bool result = _kind == Module::kind_java  &&  has_source_script();
-    if( !result )  result = _kind == Module::kind_scripting_engine_java  &&  has_source_script();           // JS-498
-
-    if( !result )  result = _monitors->needs_java();
-
-    return result;
 }
 
 //----------------------------------------------------------------Module_instance::In_call::In_call
@@ -889,11 +861,11 @@ bool Module_instance::try_to_get_process()
             &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
         {
             // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
-            _process = _spooler->process_class_subsystem()->new_temporary_process();
+            _process = _spooler->process_class_subsystem()->new_temporary_process(_remote_scheduler);
         }
         else
         {
-            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available();
+            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available(_remote_scheduler);
         }
 
         if( _process )
@@ -949,7 +921,8 @@ void Module_instance::close()
 
 Async_operation* Module_instance::close__start()
 { 
-    return &dummy_sync_operation; 
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //----------------------------------------------------------------------Module_instance::close__end
@@ -982,7 +955,8 @@ void Module_instance::close_monitor()
 
 Async_operation* Module_instance::begin__start()
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //---------------------------------------------------------Module_instance::implicit_load_and_start
@@ -1029,7 +1003,8 @@ bool Module_instance::begin__end()
 
 Async_operation* Module_instance::end__start( bool )
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //------------------------------------------------------------------------Module_instance::end__end
@@ -1049,7 +1024,8 @@ void Module_instance::end__end()
 
 Async_operation* Module_instance::step__start()
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //-----------------------------------------------------------------------Module_instance::step__end
@@ -1100,7 +1076,9 @@ Variant Module_instance::step__end()
 Async_operation* Module_instance::call__start( const string& method )
 {
     _call_method = method;
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //-----------------------------------------------------------------------Module_instance::call__end
@@ -1138,7 +1116,8 @@ Variant Module_instance::call__end()
 
 Async_operation* Module_instance::release__start()
 {
-    return &dummy_sync_operation;
+    _sync_operation = Z_NEW(Sync_operation);
+    return _sync_operation;
 }
 
 //--------------------------------------------------------------------Module_instance::release__end
@@ -1185,21 +1164,6 @@ void Module_monitors::set_dom( const xml::Element_ptr& element )
     }
 }
 
-//----------------------------------------------------------------------Module_monitors::needs_java
-
-bool Module_monitors::needs_java() 
-{
-    bool result = false;
-
-    Z_FOR_EACH( Module_monitors::Monitor_map, _monitor_map, m )
-    {
-        Module_monitor* monitor = m->second;
-        result = monitor->_module->needs_java();
-        if( result )  break;
-    }
-
-    return result;
-}
 //-----------------------------------------------------------------Module_monitors::monitor_or_null
 
 Module_monitor* Module_monitors::monitor_or_null( const string& name )

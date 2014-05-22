@@ -1,15 +1,14 @@
 package com.sos.scheduler.engine.tests.scheduler.variables;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import com.sos.scheduler.engine.kernel.variable.VariableSet;
+import com.sos.scheduler.engine.test.SchedulerTest;
+import org.junit.Test;
 
 import java.util.Collection;
 
-import org.junit.Test;
-
-import com.sos.scheduler.engine.kernel.variable.VariableSet;
-import com.sos.scheduler.engine.test.SchedulerTest;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public final class VariablesIT extends SchedulerTest {
     @Test public void test() {

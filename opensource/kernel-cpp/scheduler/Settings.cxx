@@ -22,7 +22,8 @@ Settings::Settings()
     _keep_order_content_on_reschedule(true),
     _max_length_of_blob_entry(INT_MAX),
     _supervisor_configuration_polling_interval(15 * 60),
-    _cluster_restart_after_emergency_abort(true)
+    _cluster_restart_after_emergency_abort(true),
+    _use_old_microscheduling_for_tasks(true)  // JS-1140 Fehlerbehandlung in Task mit Async_operation-Kindern funktioniert nicht (weil Task async_finished() pollt)
 {
     if (SOS_LICENCE(licence_scheduler)) 
         _roles.insert(role_scheduler);
@@ -52,6 +53,8 @@ void Settings::set_from_variables(const Com_variable_set& p) {
         _supervisor_configuration_polling_interval = p.get_int("scheduler.configuration.client.polling_interval", _supervisor_configuration_polling_interval);
         _cluster_restart_after_emergency_abort = p.get_bool("scheduler.cluster.restart_after_emergency_abort", _cluster_restart_after_emergency_abort);
     }
+    _use_old_microscheduling_for_jobs = p.get_bool("scheduler.old_microscheduling.enable_for_jobs", _use_old_microscheduling_for_jobs);
+    _use_old_microscheduling_for_tasks = p.get_bool("scheduler.old_microscheduling.enable_for_tasks", _use_old_microscheduling_for_tasks);
 }
 
 //------------------------------------------------------------------------------------Settings::set
@@ -84,6 +87,12 @@ void Settings::set(int number, const string& value) {
             break;
         case setting_cluster_restart_after_emergency_abort:
             _cluster_restart_after_emergency_abort = as_bool(value);
+            break;
+        case 10:
+            _use_old_microscheduling_for_jobs = as_bool(value);
+            break;
+        case 11:
+            _use_old_microscheduling_for_tasks = as_bool(value);
             break;
         case setting_always_create_database_tables:
             _always_create_database_tables = as_bool(value);

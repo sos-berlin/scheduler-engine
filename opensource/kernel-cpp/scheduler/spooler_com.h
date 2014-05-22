@@ -34,30 +34,11 @@
 namespace sos {
 namespace scheduler {
 
-//typedef spooler_com::Log_level Log_level;
-/*
-using spooler_com::Log_level; //enum   Log_level;
-using spooler_com::log_debug9;
-using spooler_com::log_debug8;
-using spooler_com::log_debug7;
-using spooler_com::log_debug6;
-using spooler_com::log_debug5;
-using spooler_com::log_debug4;
-using spooler_com::log_debug3;
-using spooler_com::log_debug2;
-using spooler_com::log_debug1;
-using spooler_com::log_debug;
-using spooler_com::log_info;
-using spooler_com::log_warn;
-using spooler_com::log_error;
-*/
-
 const Log_level log_debug_spooler = log_debug3;
 
 struct Prefix_log;
 struct Log;
-struct Object_set;
-struct Job;
+struct Standard_job;
 struct Task;
 struct Spooler;
 
@@ -107,7 +88,6 @@ struct Com_error: spooler_com::Ierror,
                                 Com_error                   ( const Com_error& );
     void                        operator =                  ( const Com_error& );
 
-    Thread_semaphore           _lock;
     Xc_copy                    _xc;
 };
 
@@ -132,8 +112,8 @@ struct Com_variable: spooler_com::Ivariable,
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable"; }
 
-    STDMETHODIMP            put_Value                       ( VARIANT* v )                          { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
-    STDMETHODIMP            get_Value                       ( VARIANT* result )                     { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
+    STDMETHODIMP            put_Value                       ( VARIANT* v )                          { HRESULT hr = NOERROR; _value = *v; return hr; }
+    STDMETHODIMP            get_Value                       ( VARIANT* result )                     { HRESULT hr = NOERROR; hr = VariantCopy( result, &_value ); return hr; }
     STDMETHODIMP            get_Name                        ( BSTR* result )                        { return _name.CopyTo(result); }
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
 
@@ -142,7 +122,6 @@ struct Com_variable: spooler_com::Ivariable,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name );
 
 //private:
-    Thread_semaphore           _lock;
     Bstr                       _name;
     Variant                    _value;
 };
@@ -225,7 +204,6 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     void                        operator =                  ( const Com_variable_set& );
 
-    mutable Thread_semaphore   _lock;
     Map                        _map;
     bool                       _ignore_case;
 };
@@ -340,7 +318,6 @@ struct Com_log : spooler_com::Ilog,
 
   private:
     Fill_zero                  _zero_;
-    Thread_semaphore           _lock;
     Prefix_log*                _log;
 };
 
@@ -397,30 +374,6 @@ struct Com_log_proxy: object_server::Proxy,
     int                        _level;
 };
 
-//----------------------------------------------------------------------------------Com_object_set
-
-struct Com_object_set : spooler_com::Iobject_set, 
-                      //spooler_com::Ihas_java_class_name, 
-                        Sos_ole_object               
-{
-    Z_GNU_ONLY(                 Com_object_set              ();  )                                  // F�r gcc 3.2. Nicht implementiert.
-                                Com_object_set              ( Object_set* );
-
-    USE_SOS_OLE_OBJECT
-
-  //STDMETHODIMP            get_java_class_name             ( BSTR* result );
-
-    void                        clear                       ()                                      { THREAD_LOCK(_lock)  _object_set = NULL; }
-
-    STDMETHODIMP            get_Low_level                   ( int* );
-    STDMETHODIMP            get_High_level                  ( int* );
-
-
-  private:
-    Thread_semaphore           _lock;
-    Object_set*                _object_set;
-};
-
 //------------------------------------------------------------------------------------------Com_job
 
 struct Com_job : spooler_com::Ijob, 
@@ -428,7 +381,7 @@ struct Com_job : spooler_com::Ijob,
                  Sos_ole_object               
 {
     Z_GNU_ONLY(                 Com_job                     ();  )                                  // F�r gcc 3.2. Nicht implementiert.
-                                Com_job                     ( Job* );
+                                Com_job                     ( Standard_job* );
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
@@ -437,7 +390,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Job"; }
 
-    void                        close                       ()                                      { THREAD_LOCK(_lock)  _job = NULL; }
+    void                        close                       ()                                      { _job = NULL; }
 
     STDMETHODIMP                Start_when_directory_changed( BSTR directory_name, BSTR filename_pattern );
     STDMETHODIMP                Clear_when_directory_changed();
@@ -465,8 +418,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            get_Max_order_setbacks(int*);
 
   private:
-    Thread_semaphore           _lock;
-    Job*                       _job;                        // Es gibt nur einen Com_job pro Job
+    Standard_job*              _job;                        // Es gibt nur einen Com_job pro Job
 };
 
 //-----------------------------------------------------------------------------------------Com_task
@@ -500,7 +452,6 @@ struct Com_task : spooler_com::Itask,
     void                        set_task                    ( Task* );
     Task*                       task                        ()                                      { return _task; }
 
-    STDMETHODIMP            get_Object_set                  ( spooler_com::Iobject_set** );
     STDMETHODIMP            put_Error                       ( VARIANT* error_text );
     STDMETHODIMP            get_Error                       ( spooler_com::Ierror** );
     STDMETHODIMP            get_Job                         ( spooler_com::Ijob** );
@@ -513,7 +464,6 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            put_History_field               ( BSTR name, VARIANT* value );
     STDMETHODIMP            get_Id                          ( int* value );
     STDMETHODIMP            put_Delay_spooler_process       ( VARIANT* time );
-    STDMETHODIMP            put_Close_engine                ( VARIANT_BOOL );
     STDMETHODIMP            get_Order                       ( spooler_com::Iorder** );
     STDMETHODIMP            get_Changed_directories         ( BSTR* );
     STDMETHODIMP                Add_pid                     ( int, VARIANT* );
@@ -549,7 +499,6 @@ struct Com_task : spooler_com::Itask,
     ptr<Task>                   task                        () const                                { return _task; }
 
   private:
-    Thread_semaphore           _lock;
     ptr<Task>                  _task;
 };
 
@@ -582,7 +531,6 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
     STDMETHODIMP            get_Stdout_path                 ( BSTR* );
 
     void                        wait_for_subprocesses       ();
-  //Com_remote_module_instance_server::Class_data* remote_module_instance_server_class_data();
     xml::Element_ptr            task_process_element        ();
 
 
@@ -592,33 +540,6 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
     File_path                  _stderr_path;
 };
 
-//---------------------------------------------------------------------------------------Com_thread
-/*
-struct Com_thread : spooler_com::Ithread, 
-                    spooler_com::Ihas_java_class_name, 
-                    Sos_ole_object               
-{
-                                Com_thread                  ( Task_subsystem* );
-
-    STDMETHODIMP                QueryInterface              ( const IID&, void** );
-
-    USE_SOS_OLE_OBJECT_WITHOUT_QI
-
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( "sos.spooler.Thread", result ); }
-
-    void                        close                       ()                                      { THREAD_LOCK(_lock)  _thread = NULL; }
-
-    STDMETHODIMP                get_Log                     ( spooler_com::Ilog** );
-    STDMETHODIMP                get_Script                  ( IDispatch** );
-  //STDMETHODIMP                put_Include_path            ( BSTR );
-    STDMETHODIMP                get_Include_path            ( BSTR* );
-    STDMETHODIMP                get_Name                    ( BSTR* );
-
-  protected:
-    Thread_semaphore           _lock;
-    Task_subsystem*            _thread;                     // Es gibt nur einen Com_thread pro Task_subsystem
-};
-*/
 //--------------------------------------------------------------------------------------Com_spooler
 
 struct Com_spooler : spooler_com::Ispooler, 
@@ -686,13 +607,12 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Schedule                    ( BSTR, spooler_com::Ischedule** );
 
 
-    void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
+    void                        close                       ()                                      { _spooler = NULL; }
     string                      stdout_path                 ();
     string                      stderr_path                 ();
 
 
   protected:
-    Thread_semaphore           _lock;
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
 };
 
@@ -730,25 +650,14 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 
     STDMETHODIMP            get_Log                         ( IDispatch** o )        { return _log    .CopyTo(o); }
     STDMETHODIMP            get_Spooler                     ( IDispatch** o )        { return _spooler.CopyTo(o); }
-  //STDMETHODIMP            get_Thread                      ( IDispatch** o )        { return _thread .CopyTo(o); }
     STDMETHODIMP            get_Job                         ( IDispatch** o )        { return _job    .CopyTo(o); }
     STDMETHODIMP            get_Task                        ( IDispatch** o )        { return _task   .CopyTo(o); }
 
 
-    Thread_semaphore           _lock;
-
     ptr<IDispatch>             _log;
     ptr<IDispatch>             _spooler;
-  //ptr<IDispatch>             _thread;
     ptr<IDispatch>             _job;
     ptr<IDispatch>             _task;
-/*
-    ptr<spooler_com::Ilog>     _log;
-    ptr<spooler_com::Ispooler> _spooler;
-  //ptr<spooler_com::Ithread>  _thread;
-    ptr<spooler_com::Ijob>     _job;
-    ptr<spooler_com::Itask>    _task;
-*/
 };
 
 //------------------------------------------------------------------------------------Com_job_chain
@@ -763,7 +672,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    void                        close                   ()                                          { THREAD_LOCK( _lock )  _job_chain = NULL; }
+    void                        close                   ()                                          { _job_chain = NULL; }
 
     STDMETHODIMP            get_Java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Job_chain"; }
@@ -799,7 +708,6 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     
 
   private:
-    Thread_semaphore           _lock;
     Job_chain*       _job_chain;
 };
 
@@ -846,7 +754,7 @@ struct Com_order : spooler_com::Iorder,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    void                        close                   ()                                          { THREAD_LOCK( _lock )  _order = NULL; }
+    void                        close                   ()                                          { _order = NULL; }
 
     STDMETHODIMP            get_Java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Order"; }
@@ -921,7 +829,6 @@ struct Com_order : spooler_com::Iorder,
 
   private:
     Fill_zero                  _zero_;
-    Thread_semaphore           _lock;
     Order*                     _order;
 };
 
@@ -947,7 +854,6 @@ struct Com_order_queue : spooler_com::Iorder_queue,
 
   private:
     Fill_zero                  _zero_;
-    Thread_semaphore           _lock;
 };
 
 //-----------------------------------------------------------------------------------Com_subprocess
@@ -981,7 +887,6 @@ struct Com_subprocess : spooler_com::Isubprocess,
 
   private:
     Fill_zero                  _zero_;
-    Thread_semaphore           _lock;
     ptr<Subprocess>            _subprocess;
 };
 

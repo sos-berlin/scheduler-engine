@@ -46,11 +46,11 @@ extern const string             scheduler_file_path_variable_name;
 
 typedef stdext::hash_set<Job_chain*>   Job_chain_set;
 
-//--------------------------------------------------------------------------------Virgin_is_allowed
+//--------------------------------------------------------------------------------Untouched_is_allowed
 
-enum Virgin_is_allowed {
-    virgin_not_allowed = false,
-    virgin_allowed = true
+enum Untouched_is_allowed {
+    untouched_not_allowed = false,
+    untouched_allowed = true
 };
 
 //--------------------------------------------------------------------------------------------Order
@@ -76,7 +76,6 @@ struct Order : Com_order,
 
     void                        close                       ();
     virtual string              obj_name                    () const;
-    virtual IDispatch*          idispatch                   ()                                      { return this; }
 
 
     // file_based<>
@@ -138,8 +137,8 @@ struct Order : Com_order,
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
 
-    bool                        is_virgin               () const                                    { return _is_virgin; }
-    bool                        is_touched              () const                                    { return !_is_virgin; }
+    void                        touch                   ()                                          { _is_touched = true; }
+    bool                        is_touched              () const                                    { return _is_touched; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -359,7 +358,7 @@ struct Order : Com_order,
     State                      _initial_state;          // F�r Wiederholung mit <run_time> oder <schedule>. Bei verschachtelten Jobkette in der �bergeordneten Jobkette
     ptr<Web_service>           _web_service;
 
-    bool                       _is_virgin;              // Noch von keiner Task ber�hrt
+    bool                       _is_touched;             // Von einer Task ber�hrt
     int                        _setback_count;
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
@@ -463,8 +462,7 @@ namespace job_chain {
 //----------------------------------------------------------------------------------job_chain::Node
 
 struct Node : Com_job_chain_node,
-              Scheduler_object,
-              javabridge::has_proxy<Node>
+              Scheduler_object
 {
     //---------------------------------------------------------------------------------------------
 
@@ -533,11 +531,14 @@ struct Node : Com_job_chain_node,
 
                                 Node                        ( Job_chain*, const Order::State& state, Type );
 
+    virtual jobject             java_sister                 () = 0;
+
     virtual void                close                       ();
     string                      obj_name                    () const;
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     State                       state                       () const                                { return _state; }
     string                      state_name                  () const                                { return string_from_state( _state ); }
+
 
     virtual bool                initialize                  ();
     virtual void                activate                    ();
@@ -588,7 +589,6 @@ struct Node : Com_job_chain_node,
 
     void                        database_record_store       ();
 
-    const NodeJ                _typed_java_sister;
     Order::State               _order_state;                // Bezeichnung des Zustands
     Order::State               _next_state;                 // Bezeichnung des Folgezustands
     Order::State               _error_state;                // Bezeichnung des Fehlerzustands
@@ -610,26 +610,27 @@ struct Node : Com_job_chain_node,
 
 //------------------------------------------------------------------------------job_chain::End_node
 
-struct End_node : Node
+struct End_node : Node, javabridge::has_proxy<End_node>
 {
     typedef Node                Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( End_node, n_end )
 
-                                End_node                    ( Job_chain* job_chain, const Order::State& state ) : Node( job_chain, state, n_end ) {}
+                                End_node                    ( Job_chain* job_chain, const Order::State& state );
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<End_node>::java_sister(); }
+
+
 };
 
 //----------------------------------------------------------------------job_chain::Order_queue_node
 
-struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
+struct Order_queue_node : Node
 {
     typedef Node                Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Order_queue_node, n_order_queue )
 
 
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
-
-    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Order_queue_node>::java_sister(); }
-
     void                        close                       ();
   //void                        replace                     ( Node* old_node );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -696,7 +697,7 @@ struct Job_node : Order_queue_node,
 
 //-----------------------------------------------------------------job_chain::Nested_job_chain_node
 
-struct Nested_job_chain_node : Node
+struct Nested_job_chain_node : Node, javabridge::has_proxy<Nested_job_chain_node>
 {
     typedef Node                Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Nested_job_chain_node, n_job_chain )
@@ -704,6 +705,8 @@ struct Nested_job_chain_node : Node
 
                                 Nested_job_chain_node       ( Job_chain*, const Order::State&, const Absolute_path& job_chain_path );
                                ~Nested_job_chain_node       ();
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Nested_job_chain_node>::java_sister(); }
 
     void                        close                       ();
     bool                        initialize                  ();
@@ -725,7 +728,7 @@ struct Nested_job_chain_node : Node
 
 //-----------------------------------------------------------------------------job_chain::Sink_node
 
-struct Sink_node : Job_node
+struct Sink_node : Job_node, javabridge::has_proxy<Sink_node>
 {
     typedef Job_node            Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Sink_node, n_file_order_sink )
@@ -893,7 +896,7 @@ struct Job_chain : Com_job_chain,
     bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
-    Virgin_is_allowed           is_ready_for_new_order_processing() const;
+    Untouched_is_allowed        is_ready_for_new_order_processing() const;
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
     void                        check_max_orders            () const;
@@ -978,14 +981,14 @@ struct Order_queue : Com_order_queue,
     int                         touched_order_count         ();
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
-    Order*                      first_immediately_processable_order(Virgin_is_allowed, const Time& now ) const;
+    Order*                      first_immediately_processable_order(Untouched_is_allowed, const Time& now ) const;
     Order*                      fetch_order                 ( const Time& now );
-    Order*                      load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Virgin_is_allowed, const Time& now);
+    Order*                      load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Untouched_is_allowed, const Time& now);
     bool                        has_immediately_processable_order( const Time& now = Time(0) );
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
-    Order*                      fetch_and_occupy_order      ( Task* occupying_task, Virgin_is_allowed, const Time& now, const string& cause );
+    Order*                      fetch_and_occupy_order      ( Task* occupying_task, Untouched_is_allowed, const Time& now, const string& cause );
     Time                        next_time                   ();
     bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }
     time_t                      next_distributed_order_check_time() const                           { return _next_distributed_order_check_time; }
@@ -1053,6 +1056,7 @@ struct Order_subsystem: Object,
 
                                 Order_subsystem             ( Scheduler* );
 
+    virtual OrderSubsystemJ&    typed_java_sister           ()                                      = 0;
 
     virtual ptr<Job_chain_folder_interface> new_job_chain_folder( Folder* )                         = 0;
     virtual void                check_exception             ()                                      = 0;
@@ -1103,6 +1107,7 @@ struct Standing_order_folder : typed_folder< Order >
 //-------------------------------------------------------------------------Standing_order_subsystem
 
 struct Standing_order_subsystem : file_based_subsystem< Order >,
+                                  javabridge::has_proxy<Standing_order_subsystem>,
                                   Object
 {
                                 Standing_order_subsystem    ( Scheduler* );
@@ -1114,6 +1119,7 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Standing_order_subsystem>::java_sister(); }
 
 
     // File_based_subsystem
@@ -1124,13 +1130,13 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     string                      xml_element_name            () const                                { return "order"; }
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
     string                      normalized_name             ( const string& ) const;
-    ptr<Order>                  new_file_based              ();
+    ptr<Order>                  new_file_based              (const string& source);
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "orders" ); }
     string                      name_attributes             () const                                { return "job_chain id"; }
 
 
     ptr<Standing_order_folder>  new_standing_order_folder   ( Folder* folder )                      { return Z_NEW( Standing_order_folder( folder ) ); }
-    ptr<Order>                  new_order                   ()                                      { return new_file_based(); }
+    ptr<Order>                  new_order                   ()                                      { return new_file_based(""); }
 
 
     Order*                      order                       ( const Absolute_path& job_chain_path, const string& order_id ) const  { return file_based        ( make_path( job_chain_path, order_id ) ); }

@@ -18,7 +18,7 @@
 #include "sosstrng.h"       // empty()
 #include "sos.h"
 
-#if defined __BORLANDC__ || defined _MSC_VER
+#if defined _MSC_VER
 #   include <io.h>
 #elif defined SYSTEM_SOLARIS || defined SYSTEM_LINUX
 #   include <unistd.h>

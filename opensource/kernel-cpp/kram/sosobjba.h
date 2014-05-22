@@ -33,12 +33,8 @@ struct SOS_CLASS Sos_object_base
 };
 
 //-----------------------------------------------------------------------------DEFINE_OBJ_PRINT
-#if defined SYSTEM_RTTI
-#   define DEFINE_OBJ_PRINT( TYPE )
-# else
-#   define DEFINE_OBJ_PRINT( TYPE )  \
-       virtual void _obj_print( ::std::ostream* s ) const  { *s << #TYPE; }
-#endif
+#define DEFINE_OBJ_PRINT( TYPE )  \
+    virtual void _obj_print( ::std::ostream* s ) const  { *s << #TYPE; }
 //------------------------------------------------------------------------------DEFINE_OBJ_COPY
 
 #define DEFINE_OBJ_COPY( TYPE )                                                             \

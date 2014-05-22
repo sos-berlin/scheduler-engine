@@ -92,7 +92,7 @@ struct Process : zschimmer::Object, Scheduler_object
 
 
 
-                                Process                     ( Spooler* );
+                                Process                     ( Spooler*, const Host_and_port& remote_scheduler);
     Z_GNU_ONLY(                 Process                     (); )
                                ~Process                     ();
 
@@ -179,7 +179,7 @@ struct Process : zschimmer::Object, Scheduler_object
     string                     _java_options;
     string                     _java_classpath;
     bool                       _run_in_thread;
-    Host_and_port              _remote_scheduler;
+    Host_and_port const        _remote_scheduler;
     Process_id                 _remote_process_id;
     pid_t                      _remote_pid;
     ptr<Async_remote_operation> _async_remote_operation;
@@ -240,11 +240,14 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
 //------------------------------------------------------------------------------------Process_class
 // <process_class>
 
-struct Process_class : Process_class_configuration
+struct Process_class : Process_class_configuration,
+                       javabridge::has_proxy<Process_class>
 {
                                 Process_class               ( Scheduler*, const string& name = "" );
     Z_GNU_ONLY(                 Process_class               (); )
                                ~Process_class               ();
+
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Process_class>::java_sister(); }
 
 
     // file_based<Process_class>
@@ -268,8 +271,8 @@ struct Process_class : Process_class_configuration
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
 
-    Process*                    new_process                 ();
-    Process*                    select_process_if_available ();                                     // Startet bei Bedarf. Bei _max_processes: return NULL
+    Process*                    new_process                 (const Host_and_port& remote_scheduler);
+    Process*                    select_process_if_available (const Host_and_port& remote_scheduler);        // Startet bei Bedarf. Bei _max_processes: return NULL
     bool                        process_available           ( Job* for_job );
     void                        enqueue_waiting_job         ( Job* );
     void                        remove_waiting_job          ( Job* );
@@ -291,6 +294,7 @@ struct Process_class : Process_class_configuration
   public:
     typedef stdext::hash_set< ptr<Process> >  Process_set;
     Process_set                _process_set;
+    int                        _process_set_version;
 };
 
 //-----------------------------------------------------------------------------Process_class_folder
@@ -317,7 +321,8 @@ struct Process_class_folder : typed_folder<Process_class>
 //--------------------------------------------------------------------------Process_class_subsystem
 
 struct Process_class_subsystem : idispatch_implementation< Process_class_subsystem, spooler_com::Iprocess_classes>, 
-                                 file_based_subsystem< Process_class >
+                                 file_based_subsystem< Process_class >,
+                                 javabridge::has_proxy<Process_class_subsystem>
 {
                                 Process_class_subsystem     ( Scheduler* );
 
@@ -327,19 +332,21 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
+    jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Process_class_subsystem>::java_sister(); }
+
     // file_based_subsystem< Process_class >
     string                      object_type_name            () const                                { return "Process_class"; }
     string                      filename_extension          () const                                { return ".process_class.xml"; }
     string                      xml_element_name            () const                                { return "process_class"; }
     string                      xml_elements_name           () const                                { return "process_classes"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
-    ptr<Process_class>          new_file_based              ()                                      { return Z_NEW( Process_class( spooler() ) ); }
+    ptr<Process_class>          new_file_based              (const string& source)                  { return Z_NEW( Process_class( spooler() ) ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "process_classes" ); }
 
     ptr<Process_class_folder>   new_process_class_folder    ( Folder* folder )                      { return Z_NEW( Process_class_folder( folder ) ); }
     Process_class*              process_class               ( const Absolute_path& path )           { return file_based( path ); }
     Process_class*              process_class_or_null       ( const Absolute_path& path )           { return file_based_or_null( path ); }
-    Process*                    new_temporary_process       ();
+    Process*                    new_temporary_process       (const Host_and_port& remote_scheduler);
     Process_class*              temporary_process_class     ();
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();

@@ -44,7 +44,6 @@ with EventHandlerAnnotated {
   private val thread = Thread.currentThread
   private val debugMode = testConfiguration.binariesDebugMode getOrElse CppBinariesDebugMode.debug
   private val logCategories = testConfiguration.logCategories + " " + sys.props.getOrElse("scheduler.logCategories", "").trim
-
   private var isPrepared: Boolean = false
   private var _scheduler: Scheduler = null
   @volatile private var errorLogEventIsTolerated: ErrorLogEvent ⇒ Boolean = Set()
@@ -191,9 +190,9 @@ with EventHandlerAnnotated {
           case t: Throwable =>
             terminateAfterException(t)
             throw propagate(t)
+          }
         }
       }
-    }
 
   /** Rechtzeitig aufrufen, dass kein Event verloren geht. */
   def newEventPipe(): EventPipe = {

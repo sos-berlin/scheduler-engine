@@ -1,28 +1,30 @@
 package com.sos.scheduler.engine.plugins.jms;
 
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.TextMessage;
+
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.scala.DefaultScalaModule$;
+import com.sos.scheduler.engine.data.configuration.EngineJacksonConfiguration;
 import com.sos.scheduler.engine.data.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.data.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException;
 import com.sos.scheduler.engine.test.util.CommandBuilder;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
 public class JmsEventFilterTest extends JMSConnection {
@@ -42,11 +44,10 @@ public class JmsEventFilterTest extends JMSConnection {
     private final BlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(50);
     
     // This object is needed for serializing and deserializing of the event objects
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = EngineJacksonConfiguration.newObjectMapper();
 
     public JmsEventFilterTest() throws Exception {
     	super(providerUrl,eventsToListen);
-        mapper.registerModule(DefaultScalaModule$.MODULE$);
         mapper.registerSubtypes(OrderTouchedEvent.class);
     	setMessageListener( new MyListener() );
     }

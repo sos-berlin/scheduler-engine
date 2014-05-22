@@ -2,9 +2,10 @@ package com.sos.scheduler.engine.tests.database
 
 import EntitiesIT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.data.folder.{FileBasedRemovedEvent, FileBasedActivatedEvent, JobChainPath, JobPath}
-import com.sos.scheduler.engine.data.job.TaskClosedEvent
-import com.sos.scheduler.engine.data.order.jobchain.JobChainNodeAction
+import com.sos.scheduler.engine.common.time.ScalaJoda._
+import com.sos.scheduler.engine.data.filebased.{FileBasedRemovedEvent, FileBasedActivatedEvent}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosedEvent}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobChainNodeAction}
 import com.sos.scheduler.engine.data.order.{OrderState, OrderId}
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.{JobState, JobSubsystem}
@@ -22,7 +23,6 @@ import com.sos.scheduler.engine.test.util.time.WaitForCondition.waitForCondition
 import javax.persistence.EntityManagerFactory
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
-import org.joda.time.Duration.{millis, standardSeconds}
 import org.joda.time.format.DateTimeFormat
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -38,6 +38,9 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     cppSettings = CppSettings.testMap + (CppSettingName.useJavaPersistence -> true.toString))
 
   private val testStartTime = now() withMillisOfSecond 0
+  private lazy val jobSubsystem = controller.scheduler.instance[JobSubsystem]
+  private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
+
 
   override def onSchedulerActivated() {
     autoClosing(controller.newEventPipe()) { eventPipe =>
@@ -49,14 +52,17 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
       job(simpleJobPath).forceFileReread()
       instance[FolderSubsystem].updateFolders()
       eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
+      simpleJob.forceFileReread()
+      scheduler.instance[FolderSubsystem].updateFolders()
+      eventPipe.nextKeyed[FileBasedActivatedEvent](simpleJobPath)
     }
   }
 
-  def entityManager =
-    instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
+  private def simpleJob =
+    scheduler.instance[JobSubsystem].job(simpleJobPath)
 
-  private lazy val taskHistoryEntities: Seq[TaskHistoryEntity] =
-    entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
+  private def entityManager =
+    instance[EntityManagerFactory].createEntityManager()   // Jedes Mal einen neuen EntityManager, um Cache-Effekt zu vermeiden
 
   test("TaskHistoryEntity") {
     taskHistoryEntities should have size 2
@@ -129,8 +135,8 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
     for (q <- queuedTaskElems) {
       val enqueuedString = (q \ "@enqueued").text
       val t = xmlDateTimeFormatter.parseDateTime(enqueuedString)
-      assert(!(t isBefore testStartTime), "<queued_task enqueued="+enqueuedString+"> should not be before testStartTime="+testStartTime)
-      assert(!(t isAfter now()), "<queued_task enqueued="+enqueuedString+"> should not be after now")
+      assert(!(t isBefore testStartTime), s"<queued_task enqueued=$enqueuedString> should not be before testStartTime=$testStartTime")
+      assert(!(t isAfter now()), s"<queued_task enqueued=$enqueuedString> should not be after now")
     }
     queuedTaskElems(0).attribute("start_at") shouldBe 'empty
     queuedTaskElems(1).attribute("start_at").head.text shouldEqual "2029-10-11T20:33:44.000Z"
@@ -240,7 +246,7 @@ final class EntitiesIT extends FunSuite with ScalaSchedulerTest {
 
   private def stopJobAndWait(jobPath: JobPath) {
     scheduler executeXml <modify_job job={jobPath.string} cmd="stop"/>
-    waitForCondition(TimeoutWithSteps(standardSeconds(3), millis(10))) { job(orderJobPath).state == JobState.stopped }
+    waitForCondition(TimeoutWithSteps(3.s, 10.ms)) { job(orderJobPath).state == JobState.stopped }
   }
 
   private def job(o: JobPath) =

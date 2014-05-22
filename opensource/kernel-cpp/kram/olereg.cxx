@@ -92,22 +92,6 @@ void reg_write_key( HKEY hkey, const Sos_string& key_name, const Sos_string& nam
     }
 }
 
-//--------------------------------------------------------------------------------reg_write_key
-#if !defined SYSTEM_MICROSOFT
-/*
-inline void reg_write_key( HKEY hkey, const Sos_string& key_name, const Sos_string& name, const Sos_string& value )
-{
-    reg_write_key( hkey, key_name, name, c_str( value ) );
-}
-
-//--------------------------------------------------------------------------------reg_write_key
-
-inline reg_write_key( HKEY hkey, const Sos_string& key_name, const char* name, const Sos_string& value )
-{
-    reg_write_key( hkey, c_str( key_name ), name, c_str( value ) );
-}
-*/
-#endif
 //-------------------------------------------------------------------------------reg_key_exists
 
 Bool reg_key_exists( HKEY key, const char* key_name )
@@ -132,14 +116,6 @@ static Sos_string major_version( const Sos_string& version )
     return as_string( c_str( version ), position( c_str( version ), '.' ) );
 }
 
-//--------------------------------------------------------------------------------major_version
-/*
-static Sos_string minor_version( const Sos_string& version )
-{
-    
-    return as_string( c_str( version ) + position( c_str( version ), '.' ) + 1  );
-}
-*/
 //----------------------------------------------------------------------hostole_register_typelib
 
 HRESULT hostole_register_typelib( const IID& typelib_id, const Sos_string& name, const Sos_string& version,
@@ -156,49 +132,17 @@ HRESULT hostole_register_typelib( const IID& typelib_id, const Sos_string& name,
             typelib_filename = directory_of_path( module_filename() ) + '\\' + basename_of_path( module_filename() ) + ".tlb";
 #       endif
 
-#       if 1  // Ab OLE 2.2:
-            HRESULT   hr;
-            ITypeLib* type_lib            = NULL;
-            BSTR      type_lib_filename_w = SysAllocStringLen_char( c_str( typelib_filename ), length( typelib_filename ) );
+        HRESULT   hr;
+        ITypeLib* type_lib            = NULL;
+        BSTR      type_lib_filename_w = SysAllocStringLen_char( c_str( typelib_filename ), length( typelib_filename ) );
 
-            hr = LoadTypeLib( type_lib_filename_w, &type_lib );
-            if( FAILED( hr ) )  return (HRESULT)SELFREG_E_TYPELIB;
+        hr = LoadTypeLib( type_lib_filename_w, &type_lib );
+        if( FAILED( hr ) )  return (HRESULT)SELFREG_E_TYPELIB;
 
-            hr = RegisterTypeLib( type_lib, type_lib_filename_w, NULL );
-            if( FAILED( hr ) )  return (HRESULT)SELFREG_E_TYPELIB;
+        hr = RegisterTypeLib( type_lib, type_lib_filename_w, NULL );
+        if( FAILED( hr ) )  return (HRESULT)SELFREG_E_TYPELIB;
 
-            SysFreeString( type_lib_filename_w );
-#        else
-            Sos_string  key_typelib;
-            Sos_string  typelib_dir;
-            Sos_string  key;
-            OLECHAR     typelib_id_text [ 38+1 ];
-
-            key_typelib = "TypeLib\\";
-            typelib_dir = directory_of_path( typelib_filename );
-
-            len = StringFromGUID2( typelib_id, typelib_id_text, sizeof typelib_id_text );
-            if( len == 0 )  throw_mswin_error( "StringFromGUID2" );
-
-            key_typelib += typelib_id_text;
-
-            key = key_typelib + "\\DIR";
-            RegDeleteKey( HKEY_CLASSES_ROOT, c_str( key ) );
-
-            key = key_typelib + "\\HELPDIR";
-            RegDeleteKey( HKEY_CLASSES_ROOT, c_str( key ) );
-
-            reg_write_key( HKEY_CLASSES_ROOT, key_typelib                       , "", name );
-          //reg_write_key( HKEY_CLASSES_ROOT, key_typelib + "\\DIR"             , "", c_str( typelib_dir ) );
-          //reg_write_key( HKEY_CLASSES_ROOT, key_typelib + "\\HELPDIR"         , "", c_str( typelib_dir ) );
-            reg_write_key( HKEY_CLASSES_ROOT, key_typelib + "\\" + version      , "", name );  // + " (Version " + version + ")" 
-
-#           ifdef SYSTEM_WIN16
-                reg_write_key( HKEY_CLASSES_ROOT, key_typelib + "\\" + version + "\\0\\win16", "", c_str( typelib_filename ) );
-#            else
-                reg_write_key( HKEY_CLASSES_ROOT, key_typelib + "\\" + version + "\\0\\win32", "", c_str( typelib_filename ) );
-#           endif
-#       endif
+        SysFreeString( type_lib_filename_w );
 
         return NOERROR;
     }
@@ -213,43 +157,15 @@ HRESULT hostole_register_typelib( const IID& typelib_id, const Sos_string& name,
 
 HRESULT hostole_unregister_typelib( const IID& typelib_id, const Sos_string& name, const Sos_string& version )
 {
-#   if 1 // OLE2.2, OLE 2.1 kennt UnRegisterTypeLib() nicht
-        UnRegisterTypeLib( typelib_id,
-                           1,1, //major_version( version ), minor_version( version ),
-                           LANG_NEUTRAL,
-#                          if defined SYSTEM_WIN16
-                               SYS_WIN16
-#                          elif defined SYSTEM_WIN32
-                               SYS_WIN32
-#                          else
-#                              error SYSKIND
-#                          endif
-                         );
-#   else
-        Sos_string  k;
-        Sos_string  str;
-        int         len;
-
-        OLECHAR     typelib_id_text [ 38+1 ];
-        Sos_string  key_typelib      = "TypeLib\\";
-        Sos_string  typelib_filename = module_filename();  
-        Sos_string  typelib_dir      = directory_of_path( typelib_filename );
-
-        len = StringFromGUID2( typelib_id, typelib_id_text, sizeof typelib_id_text );
-        if( len == 0 )  throw_mswin_error( "StringFromGUID2" );
-
-        key_typelib += typelib_id_text;
-        Sos_string entry = key_typelib + "\\" + version + "\\0\\win" _16_32;
-        RegDeleteKey( HKEY_CLASSES_ROOT, c_str( entry ) );
-        //if( keine typelib mehr )  RegDeleteKey( HKEY_CLASSES_ROOT, key_typelib );
-
-        RegDeleteKey( HKEY_CLASSES_ROOT, c_str( k ) );
-        str = name + '.' + major_version( version );
-        RegDeleteKey( HKEY_CLASSES_ROOT, c_str( str ) );
-        RegDeleteKey( HKEY_CLASSES_ROOT, c_str( name ) );
-
-#   endif
-
+    UnRegisterTypeLib( typelib_id,
+                       1,1, //major_version( version ), minor_version( version ),
+                       LANG_NEUTRAL,
+#                      if defined SYSTEM_WIN32
+                           SYS_WIN32
+#                      else
+#                          error SYSKIND
+#                      endif
+                     );
 
     return NOERROR;
 }
@@ -330,13 +246,6 @@ HRESULT hostole_register_class( const IID& typelib_id, const IID& clsid, const S
 
         string server_type = _dll? "InprocServer" _32 : "LocalServer" _32;
         reg_write_key( key, server_type, "", module_filename() );
-/*
-        if( _dll ) {
-            reg_write_key( key, "InprocServer" _32    , "", module_filename() );
-        } else {
-            reg_write_key( key, "LocalServer" _32     , "", module_filename() ) ; //+ " -automation" );
-        }
-*/
         reg_write_key( key, server_type, "ThreadingModel", "Both" );
 
         reg_write_key( key, "NotInsertable"           , "", "" );   // damit erscheint Objekt nicht in "Insert Object Dialog boxes"
@@ -386,15 +295,6 @@ HRESULT hostole_unregister_class( const IID& typelib_id, const IID& clsid, const
         RegDeleteKey( key, "Programmable" );
         RegDeleteKey( key, "TypeLib" );
         RegDeleteKey( key, "VersionIndependentProgID" );
-/*
-        if( !reg_key_exists( key, "InprocServer"   )
-         && !reg_key_exists( key, "InprocServer32" )
-         && !reg_key_exists( key, "LocalServer"    )
-         && !reg_key_exists( key, "LocalServer32"  ) )
-        {
-            delete_all = true;
-        }
-*/
         RegCloseKey( key );
         RegDeleteKey( HKEY_CLASSES_ROOT, c_str( k ) );
     }
@@ -412,121 +312,8 @@ HRESULT hostole_unregister_class( const IID& typelib_id, const IID& clsid, const
     RegDeleteKey( HKEY_CLASSES_ROOT, c_str(name_major + "\\NotInsertable") );
     RegDeleteKey( HKEY_CLASSES_ROOT, c_str(name_major) );
 
-/*  Auf die Typ-Bibliothek verweisen noch andere Klassen:
-    if( delete_all ) {
-#       ifdef _WIN32_XX // OLE 2.1 kennt UnRegisterTypeLib() nicht
-            UnRegisterTypeLib( typelib_id,
-                               major_version( version ), minor_version( version ),
-                               LANG_NEUTRAL,
-#                              if defined SYSTEM_WIN16
-                                   SYS_WIN16
-#                              elif defined SYSTEM_WIN32
-                                   SYS_WIN32
-#                              else
-#                                  error SYSKIND
-#                              endif
-                             );
-#       else
-            OLECHAR     typelib_id_text [ 38+1 ];
-            Sos_string  key_typelib      = "TypeLib\\";
-            Sos_string  typelib_filename = module_filename();  //directory_of_path( module_filename() );
-            Sos_string  typelib_dir      = directory_of_path( typelib_filename );
-
-            len = StringFromGUID2( typelib_id, typelib_id_text, sizeof typelib_id_text );
-            if( len == 0 )  throw_mswin_error( "StringFromGUID2" );
-
-            key_typelib += typelib_id_text;
-            Sos_string entry = key_typelib + "\\" + version + "\\0\\win" _16_32;
-            RegDeleteKey( HKEY_CLASSES_ROOT, c_str( entry ) );
-            //if( keine typelib mehr )  RegDeleteKey( HKEY_CLASSES_ROOT, key_typelib );
-#       endif
-
-        RegDeleteKey( HKEY_CLASSES_ROOT, c_str( k ) );
-        str = name + '.' + major_version( version );
-        RegDeleteKey( HKEY_CLASSES_ROOT, c_str( str ) );
-        RegDeleteKey( HKEY_CLASSES_ROOT, c_str( name ) );
-    }
-*/
     return S_OK;
 }
-
-//----------------------------------------------------------------------hostole_register_server
-/*
-HRESULT hostole_register_server( Typelib_descr* typelib )
-{
-    Sos_appl appl ( false );        // Sos_static 
-
-    try {
-        HKEY        key = 0;
-        Sos_string  k;
-
-        appl.init();                // Sos_static initialisieren
-
-        //if( !SOS_LICENCE( licence_hostole ) )  throw_xc( "SOS-1000", "hostWare OLE-Server" );
-    
-        try {
-            hostole_register_typelib( typelib._typelib_id, c_str( typelib._name ), c_str( typelib._version ), typelib._typelib_filename );
-        }
-        catch( const Xc& x ) {
-            LOG( "hostOLE: Fehler bei der Registrierung: " << x << '\n' );
-            SHOW_MSG( "Fehler: " << x );
-#           if defined SYSTEM_WIN16
-                return (HRESULT)E_FAIL;
-#            else
-                return (HRESULT)SELFREG_E_TYPELIB;
-#           endif
-        }
-
-        try {
-            Ole_class_descr* cls = Ole_class_descr::head;
-            while( cls ) {
-                if( cls->_creatable )  cls->register_class();
-                cls = cls->_next;
-            }
-        }
-        catch( const Xc& x ) {
-            LOG( "Fehler bei der Registrierung: " << x << '\n' );
-            SHOW_MSG( "Fehler: " << x );
-#           if defined SYSTEM_WIN16
-                return (HRESULT)E_FAIL;
-#            else
-                return (HRESULT)SELFREG_E_CLASS;
-#           endif
-        }
-    }
-    catch( const Xc& x ) {
-        SHOW_MSG( "Fehler: " << x );
-        return (HRESULT)E_FAIL;
-    }
-
-    return S_OK;
-}
-*/
-//--------------------------------------------------------------------hostole_unregister_server
-/*
-HRESULT hostole_unregister_server()
-{
-    HRESULT hr;
-    HRESULT hr2 = NOERROR;
-
-    try {
-        Ole_class_descr* cls = Ole_class_descr::head;
-        while( cls ) {
-            if( cls->_creatable ) {
-                hr = cls->unregister_class();
-                if( FAILED( hr ) )  hr2 = hr;
-            }
-            cls = cls->_next;
-        }
-
-        return hr2;
-    }
-    catch( const Xc& x ) {
-        SHOW_ERR( "Fehler beim Entfernen der Registrierung: " << x );
-        return (HRESULT)E_FAIL;
-    }
-}
-*/
 
 
 } //namespace sos

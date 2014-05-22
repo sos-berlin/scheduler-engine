@@ -22,7 +22,11 @@ public enum CppSettingName {
 
     clusterRestartAfterEmergencyAbort(9),
 
-    alwaysCreateDatabaseTables(12),
+    useOldMicroschedulingForJobs(10),
+
+    useOldMicroschedulingForTasks(11),
+
+    alwaysCreateDatabaseTables(12);
 
     roles(13);
 

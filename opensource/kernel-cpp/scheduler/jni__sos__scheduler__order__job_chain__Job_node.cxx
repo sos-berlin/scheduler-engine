@@ -17,23 +17,6 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jobject JNICALL error_1node(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::error_node()");
-        return Has_proxy::jobject_of(o_->error_node());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jobject();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
 static jobject JNICALL job(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -68,16 +51,16 @@ static jstring JNICALL job_1chain_1path(JNIEnv* jenv, jobject, jlong cppReferenc
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jobject JNICALL next_1node(JNIEnv* jenv, jobject, jlong cppReference)
+static jstring JNICALL job_1path(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::next_node()");
-        return Has_proxy::jobject_of(o_->next_node());
+        ::sos::scheduler::order::job_chain::Job_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Job_node::job_path()");
+        return env.jstring_from_string(o_->job_path());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
-        return jobject();
+        return jstring();
     }
 }
 
@@ -185,10 +168,9 @@ static jstring JNICALL string_1order_1state(JNIEnv* jenv, jobject, jlong cppRefe
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-    { (char*)"error_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/NodeC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::error_1node },
     { (char*)"job__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job },
     { (char*)"job_chain_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1chain_1path },
-    { (char*)"next_node__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/NodeC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1node },
+    { (char*)"job_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1path },
     { (char*)"order_queue__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Order_queueC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::order_1queue },
     { (char*)"set_action_string__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::set_1action_1string__Ljava_lang_String_2 },
     { (char*)"string_action__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::string_1action },
@@ -202,7 +184,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::order::job_chain::Job_node >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::order::job_chain::Job_node >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 10);
+        int ret = env->RegisterNatives(*cls, native_methods, 9);
         if (ret < 0)  env.throw_java("RegisterNatives", "com.sos.scheduler.engine.kernel.cppproxy.Job_nodeCImpl");
     }
 

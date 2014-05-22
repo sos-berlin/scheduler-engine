@@ -80,7 +80,7 @@ call prepare-setup.sh <version> to use this pom
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.sos.scheduler.enginedoc</groupId>
-                                    <artifactId>enginedoc-kernel</artifactId>
+                                    <artifactId>enginedoc-setup</artifactId>
                                     <version>${enginedoc.version}</version>
                                     <type>jar</type>
                                     <destFileName>com.sos.scheduler.enginedoc-kernel-${enginedoc.version}.jar</destFileName>

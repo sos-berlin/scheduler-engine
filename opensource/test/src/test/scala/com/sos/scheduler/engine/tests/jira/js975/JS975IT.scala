@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js975
 
 import JS975IT._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskEndedEvent
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEndedEvent}
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._
 import org.junit.runner.RunWith

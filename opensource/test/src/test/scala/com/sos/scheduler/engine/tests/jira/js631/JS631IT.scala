@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js631
 
 import JS631IT._
-import com.sos.scheduler.engine.data.folder.JobChainPath
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderFinishedEvent, OrderStateChangedEvent, OrderState}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem
 import com.sos.scheduler.engine.test.configuration.DefaultDatabaseConfiguration

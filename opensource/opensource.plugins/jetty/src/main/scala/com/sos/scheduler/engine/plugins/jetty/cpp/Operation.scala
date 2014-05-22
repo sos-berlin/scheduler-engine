@@ -1,25 +1,24 @@
 package com.sos.scheduler.engine.plugins.jetty.cpp
 
+import Operation._
+import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse
 import com.sos.scheduler.engine.kernel.scheduler.{SchedulerIsClosed, SchedulerHttpService}
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.servlet.{AsyncEvent, AsyncListener}
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.annotation.Nullable
-import org.slf4j.{LoggerFactory, Logger}
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet.{AsyncEvent, AsyncListener}
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel
 import com.sos.scheduler.engine.plugins.jetty.SchedulerSecurityRequest
 
-class Operation(
+private[cpp] final class Operation(
     request: HttpServletRequest,
     response: HttpServletResponse,
     schedulerHttpService: SchedulerHttpService,
     cppProxyRegister: DisposableCppProxyRegister,
     schedulerIsClosed: SchedulerIsClosed
 ) extends SchedulerHttpResponse {
-
-  import Operation._
 
   private val _isClosed = new AtomicBoolean(false)
 
@@ -33,14 +32,14 @@ class Operation(
     }
 
     def onError(event: AsyncEvent) {
-      for (t <- Option(event.getThrowable)) logger.error("AsyncListener.onError: "+t, t)
+      for (t <- Option(event.getThrowable)) logger.error(s"AsyncListener.onError: $t", t)
       close()
     }
 
     def onStartAsync(event: AsyncEvent) {}
   }
 
-  /**Das C++-Objekt httpResponseC MUSS mit Release() wieder freigegeben werden, sonst Speicherleck. */
+  /** Das C++-Objekt httpResponseC MUSS mit Release() wieder freigegeben werden, sonst Speicherleck. */
   private lazy val httpResponseCRef = cppProxyRegister.reference(
     schedulerHttpService.executeHttpRequestWithSecurityLevel(new ServletSchedulerHttpRequest(request), this, SchedulerSecurityRequest.securityLevel(request)))
 
@@ -105,11 +104,11 @@ class Operation(
     }
   }
 
-  final def isClosed = _isClosed.get
+  def isClosed = _isClosed.get
 }
 
 object Operation {
-  private implicit val logger: Logger = LoggerFactory.getLogger(classOf[Operation])
+  private val logger = Logger(classOf[Operation])
 
   private def splittedHeaders(headers: String): Iterable[(String, String)] = headers match {
     case "" => Iterable()

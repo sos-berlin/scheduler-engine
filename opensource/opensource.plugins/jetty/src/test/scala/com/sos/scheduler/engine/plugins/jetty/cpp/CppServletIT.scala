@@ -5,9 +5,9 @@ import com.google.common.io.Files
 import com.google.inject.Injector
 import com.sos.scheduler.engine.data.job.TaskStartedEvent
 import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
-import com.sos.scheduler.engine.plugins.jetty.Config._
-import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests
-import com.sos.scheduler.engine.plugins.jetty.JettyPluginTests._
+import com.sos.scheduler.engine.plugins.jetty.configuration.Config._
+import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests
+import com.sos.scheduler.engine.plugins.jetty.tests.commons.JettyPluginTests._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scala.ScalaSchedulerTest
 import com.sos.scheduler.engine.test.scala.SchedulerTestImplicits._

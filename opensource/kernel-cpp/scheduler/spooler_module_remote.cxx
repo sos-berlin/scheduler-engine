@@ -50,10 +50,6 @@ bool Remote_module_instance_proxy::load()
 
 Async_operation* Remote_module_instance_proxy::close__start()
 {
-    Async_operation* result;
-
-  //if( _session )  _session->close_current_operation();
-    
     if( _remote_instance )
     {
         if( _process  &&  _process->connected() )
@@ -81,16 +77,12 @@ Async_operation* Remote_module_instance_proxy::close__start()
 
     _idispatch = NULL;
 
-    if( _process )  result = _process->close__start();
-              else  result = &dummy_sync_operation;
-
-
-    //if( _session )
-    //{
-    //    return _session->close__start();
-    //}
-
-    return result;
+    if (_process)  
+        return _process->close__start();
+    else {
+        _operation = Z_NEW(Sync_operation);
+        return _operation;
+    }
 }
 
 //---------------------------------------------------------Remote_module_instance_proxy::close__end
@@ -238,12 +230,13 @@ bool Remote_module_instance_proxy::begin__end()
 
 Async_operation* Remote_module_instance_proxy::end__start( bool success )
 {
-    if( !_remote_instance )  return &dummy_sync_operation; //NULL;
+    if( !_remote_instance ) {
+        _operation = Z_NEW(Sync_operation);
+        return _operation;
+    }
 
     _end_success = success;
-
-    _operation = _remote_instance->call__start( "end", success );
-    
+    _operation = _remote_instance->call__start( "end", success );    
     return _operation;
 }
 
@@ -331,7 +324,7 @@ Variant Remote_module_instance_proxy::call__end()
 Async_operation* Remote_module_instance_proxy::release__start()
 {
     if( _remote_instance )  _operation = _remote_instance->release__start();
-                      else  _operation = &dummy_sync_operation;
+                      else  _operation = Z_NEW(Sync_operation);
 
     return _operation;
 }
@@ -342,7 +335,7 @@ void Remote_module_instance_proxy::release__end()
 {
     if( !_operation->async_finished() )  z::throw_xc( "SCHEDULER-191", "release__end", _operation->async_state_text() );
 
-    if( _operation == &dummy_sync_operation )
+    if (dynamic_cast<Sync_operation*>(+_operation))
     {
         _operation = NULL;
     }
@@ -432,9 +425,13 @@ AGAIN:
 
             ptr<Async_operation> connection_operation = _session->connect_server__start();
             connection_operation->set_async_manager( _spooler->_connection_manager );
-            operation->set_async_child( connection_operation );
-
+            operation->set_async_child( connection_operation );            
             operation->_call_state = c_connect;
+
+            #if defined Z_UNIX
+                if (connection_operation->async_finished())     // Immer bei socketpair()
+                    goto AGAIN;
+            #endif
             break;
         }
 
@@ -602,41 +599,6 @@ AGAIN:
             break;
         }
 
-        //operation->_bool_result = check_result( _remote_instance->call__end() );
-
-
-        // end__start() .. end__end()
-/*
-        case c_end:
-        {
-            operation->set_async_child( _remote_instance->call__start( "end", _end_success ) );
-            operation->_call_state = c_call_end;
-          //something_done = true;
-            break;
-        }
-
-
-        case c_call_end:
-        {
-            operation->set_async_child( NULL );
-            _remote_instance->call__end();
-          //something_done = true;
-        }
-*/
-        // Nächste Operation
-/*
-        {
-            if( _close_instance_at_end )
-            {
-                operation->set_async_child( _remote_instance->release__start() );
-                operation->_call_state = c_release;
-            }
-            else
-                operation->_call_state = c_finished;
-            break;
-        }
-
-*/
         case c_release_begin:     // Nur, wenn Construct() NULL geliefert hat (weil Module_monitor.spooler_task_before() false lieferte)
         {
             operation->set_async_child( NULL );
@@ -652,10 +614,6 @@ AGAIN:
             _idispatch = NULL;
             operation->_call_state = c_finished;
         }
-
-//      operation->_call_state = c_finished;
-//      break;
-
 
         default:
             throw_xc( "Remote_module_instance_proxy::Operation::process" );

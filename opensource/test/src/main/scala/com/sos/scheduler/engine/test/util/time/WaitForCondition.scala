@@ -18,6 +18,15 @@ object WaitForCondition {
   def waitForCondition(t: TimeoutWithSteps)(condition: => Boolean) =
     waitAtInstantsFor(t.toMillisInstantIterator(now()))(condition)
 
+  /** Wartet bis zu den relative Zeitpunkten, bis condition wahr wird.
+    * Die relative Zeitpunkt gelten ab jetzt (Instant.now).
+    * condition wird am Anfang und am Ende geprüft.
+    * @return letztes Ergebnis von condition */
+  def waitFromNowFor(relativeInstants: TraversableOnce[Long])(condition: => Boolean) = {
+    val nw = now()
+    waitAtInstantsFor(relativeInstants map nw.getMillis.+)(condition)
+  }
+
   /** Wartet bis zu den Zeitpunkten, bis condition wahr wird.
     * condition wird am Anfang und am Ende geprüft.
     * @return letztes Ergebnis von condition */

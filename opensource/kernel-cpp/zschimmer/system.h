@@ -229,7 +229,7 @@ namespace zschimmer
 
 //----------------------------------------------------------------------------------------exception
 
-#if defined __GNUC__ || defined __BORLANDC__
+#if defined __GNUC__
 #   include <exception>
 #endif
 

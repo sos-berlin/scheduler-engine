@@ -7,7 +7,7 @@ import com.google.common.base.Charsets._
 import com.google.common.io.CharStreams
 import java.net.URLDecoder
 
-class ServletSchedulerHttpRequest(request: HttpServletRequest) extends SchedulerHttpRequest {
+final class ServletSchedulerHttpRequest(request: HttpServletRequest) extends SchedulerHttpRequest {
   def hasParameter(name: String) = request.getParameter(name) != null
 
   def parameter(name: String) = firstNonNull(request.getParameter(name), "")

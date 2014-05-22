@@ -3,7 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js806
 import JS806IT._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.ScalaXmls.implicits._
-import com.sos.scheduler.engine.data.folder.{FileBasedActivatedEvent, JobChainPath}
+import com.sos.scheduler.engine.data.filebased.FileBasedActivatedEvent
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.LogEvent
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._

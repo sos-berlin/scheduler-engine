@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.persistence.entities
 
 import com.google.common.base.Strings._
-import com.sos.scheduler.engine.data.folder.JobPath
-import com.sos.scheduler.engine.data.job.TaskHistoryEntry
+import com.sos.scheduler.engine.data.job.{JobPath, TaskHistoryEntry}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.persistence.SchedulerDatabases._
 import com.sos.scheduler.engine.persistence.entity.ObjectEntityConverter

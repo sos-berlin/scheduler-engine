@@ -42,6 +42,7 @@ struct Duration {
     Duration&                   operator -=                 (const Duration& o)                     { _seconds -= o._seconds; return *this; }
 
     double                      as_double                   () const                                { return _seconds; }
+    int64                       millis                      () const                                { return floor(_seconds * 1000 + 0.5); }
     Duration                    rounded_to_next_second      () const                                { return Duration( floor( _seconds + 0.9995 ) ); }
     bool                        not_zero                    () const                                { return _seconds != 0.0; }
     bool                        is_zero                     () const                                { return _seconds == 0.0; }
@@ -80,7 +81,8 @@ struct Time
     static Time                 of_millis                   (int64 millis)                  { return Time(millis / 1000.0); }
 
 
-    explicit                    Time                        ( double t = 0.0 )              { set(t); }
+                                Time                        ()                              : _time(0.0) {}
+    explicit                    Time                        ( double t)                     { set(t); }
                                 Time                        ( double t, Is_utc )            { set_utc( t ); }
 #if !defined Z_AIX_32
     explicit                    Time                        ( time_t t )                    { set((double)t); }
@@ -95,29 +97,12 @@ struct Time
     Time                        operator +                  ( const Duration& ) const;
     Duration                    operator -                  ( const Time& ) const;
 
-    bool                        operator <                  ( const Time& t ) const         { return compare(t) < 0; }
-    bool                        operator <=                 ( const Time& t ) const         { return compare(t) <= 0; }
-    bool                        operator ==                 ( const Time& t ) const         { return compare(t) == 0; }
-    bool                        operator !=                 ( const Time& t ) const         { return compare(t) != 0; }
-    bool                        operator >=                 ( const Time& t ) const         { return compare(t) >= 0; }
-    bool                        operator >                  ( const Time& t ) const         { return compare(t) > 0; }
-
-private:
-    bool                        operator <                  ( double t ) const;
-    bool                        operator <=                 ( double t ) const;
-    bool                        operator ==                 ( double t ) const;
-    bool                        operator !=                 ( double t ) const;
-    bool                        operator >=                 ( double t ) const;
-    bool                        operator >                  ( double t ) const;
-
-    bool                        operator <                  ( int t ) const;
-    bool                        operator <=                 ( int t ) const;
-    bool                        operator ==                 ( int t ) const;
-    bool                        operator !=                 ( int t ) const;
-    bool                        operator >=                 ( int t ) const;
-    bool                        operator >                  ( int t ) const;
-public:
-
+    bool                        operator <                  ( const Time& t ) const         { return _time <  t._time; }
+    bool                        operator <=                 ( const Time& t ) const         { return _time <= t._time; }
+    bool                        operator ==                 ( const Time& t ) const         { return _time == t._time; }
+    bool                        operator !=                 ( const Time& t ) const         { return _time != t._time; }
+    bool                        operator >=                 ( const Time& t ) const         { return _time >= t._time; }
+    bool                        operator >                  ( const Time& t ) const         { return _time >  t._time; }
     bool                        operator !                  () const                        { return is_zero(); }
     int                         compare                     (const Time& t) const;
 

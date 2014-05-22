@@ -75,7 +75,6 @@ static string quote_and_prepend_comma( const string& s )
 Read_transaction::Read_transaction( Database* db )
 : 
     _zero_(this+1),
-    _guard(&db->_lock),
     _spooler(db->_spooler),
     _log(db->_log)
 {
@@ -101,8 +100,6 @@ void Read_transaction::assert_is_commitable( const string& debug_text ) const
     
 void Read_transaction::begin_transaction( Database* db )
 { 
-    if( !_guard )  _guard.enter( &db->_lock, Z_FUNCTION );
-
     _db = db; 
 }
 
@@ -316,8 +313,6 @@ void Transaction::commit( const string& debug_text )
 
     _db->_transaction = _outer_transaction;
     _db = NULL;
-    _guard.leave(); 
-
 
     if( !_suppress_heart_beat_timeout_check  &&  !_outer_transaction )  _spooler->assert_is_still_active( Z_FUNCTION, debug_text );
 }
@@ -352,14 +347,12 @@ void Transaction::rollback( const string& debug_text, Execute_flags flags )
             {
                 _db->_transaction = _outer_transaction;
                 _db = NULL; 
-                _guard.leave(); 
                 throw;
             }
         }
 
         _db->_transaction = _outer_transaction;
         _db = NULL; 
-        _guard.leave(); 
 
         //Wir sind vielleicht in einer Exception, also keine weitere Exception auslösen:  if( !db->_transaction )  _spooler->assert_is_still_active( Z_FUNCTION, debug_text );
     }
@@ -438,7 +431,6 @@ Database::Database( Spooler* spooler )
 :
     Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
-    _lock("Database"),
     _database_descriptor( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names ),
     _jobs_table           ( &_database_descriptor, "scheduler_jobs"           , "spooler_id,cluster_member_id,path" ),
     _job_chains_table     ( &_database_descriptor, "scheduler_job_chains"     , "spooler_id,cluster_member_id,path" ),
@@ -508,8 +500,7 @@ void Database::open()
 void Database::open2()
 {
     require_database();
-    Z_MUTEX( _lock )
-    {
+    if (_db_name != "") {
         _log->info( message_string( "SCHEDULER-907", _db_name ) );     // Datenbank wird geöffnet
 
         try
@@ -1263,8 +1254,6 @@ int Database::column_width( Transaction* ta, const string& table_name, const str
 
 void Database::close()
 {
-    Z_MUTEX( _lock )
-    {
         _history_table.close();
         _history_table.destroy();
 
@@ -1276,7 +1265,6 @@ void Database::close()
         catch( exception& x ) { _log->warn( message_string( "SCHEDULER-310", x ) ); }
 
         _db.destroy();
-    }
 }
 
 //---------------------------------------------------------------------Database::open_history_table
@@ -1285,7 +1273,6 @@ void Database::open_history_table( Read_transaction* ta )
 {
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
 
-    THREAD_LOCK( _lock )
     {
         if( !_history_table.opened() )
         {
@@ -1325,7 +1312,7 @@ bool Database::try_reopen_after_error(const exception& callers_exception, const 
     
     try {
         _is_reopening_database_after_error = true;
-        THREAD_LOCK( _error_lock )  _error = callers_exception.what();
+        _error = callers_exception.what();
 
         _spooler->log()->error( message_string( "SCHEDULER-303", callers_exception, function ) );
 
@@ -1855,6 +1842,7 @@ void Job_history::set_dom_settings( xml::Element_ptr settings_element )
 void Job_history::open( Transaction* outer_transaction )
 {
     string section = _job->profile_section();
+    _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift
 
     _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 
@@ -1864,7 +1852,6 @@ void Job_history::open( Transaction* outer_transaction )
 
         Transaction ta ( +_spooler->_db, outer_transaction );
         {
-
             set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
 
             _spooler->_db->open_history_table( &ta );
@@ -1911,21 +1898,16 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
     xml::Element_ptr history_element;
 
-    if( !_error )  
-    {
+    if (_error) throw_xc("SCHEDULER-270", "(previous open error)");
+
         history_element = doc.createElement( "history" );
         dom_append_nl( history_element );
 
         with_log &= _history_enabled;
 
-        try
-        {
-            try
-            {
+    try {
                 if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
-
                 if( _history_enabled  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
-
                 if (!_history_enabled) z::throw_xc("SCHEDULER-136");
                 if (_spooler->_db->_db_name == "") z::throw_xc("SCHEDULER-361", Z_FUNCTION);
 
@@ -2040,14 +2022,11 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                 }
                 catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", _spooler->db()->_job_history_tablename, x), Z_FUNCTION); }
             }
-            catch( const _com_error& x )  { throw_com_error( x, "Job_history::read_tail" ); }
-        }
         catch( exception& x ) 
         { 
             if( !use_task_schema )  throw x;
             history_element.appendChild( create_error_element( doc, x, 0 ) );
         }
-    }
 
     return history_element;
 }

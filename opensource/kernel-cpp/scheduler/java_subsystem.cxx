@@ -83,18 +83,19 @@ void Java_subsystem::close()
     _subsystem_state = subsys_stopped;
 }
 
-//-------------------------------------------------------------Java_subsystem::subsystem_initialize
-
-bool Java_subsystem::subsystem_initialize()
-{
-    _subsystem_state = subsys_initialized;
-    return true;
-}
-
 //-----------------------------------------------------------Java_subsystem::initialize_java_sister
 
 void Java_subsystem::initialize_java_sister() {
     _schedulerJ.assign_(SchedulerJ::of(_spooler->j(), _spooler->java_main_context(), string_from_file(_spooler->_configuration_file_path)));
+}
+
+//-------------------------------------------------------------Java_subsystem::subsystem_initialize
+
+bool Java_subsystem::subsystem_initialize()
+{
+    _schedulerJ.initialize();
+    _subsystem_state = subsys_initialized;
+    return true;
 }
 
 //-------------------------------------------------------------------Java_subsystem::subsystem_load
