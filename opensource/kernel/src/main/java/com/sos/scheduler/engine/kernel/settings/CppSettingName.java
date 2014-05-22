@@ -26,7 +26,7 @@ public enum CppSettingName {
 
     useOldMicroschedulingForTasks(11),
 
-    alwaysCreateDatabaseTables(12);
+    alwaysCreateDatabaseTables(12),
 
     roles(13);
 

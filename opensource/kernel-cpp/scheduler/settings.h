@@ -34,6 +34,10 @@ enum Setting_name {
 
     setting_cluster_restart_after_emergency_abort = 9,
 
+    setting_use_old_microscheduling_for_jobs = 10,
+
+    setting_use_old_microscheduling_for_tasks = 11,
+
     setting_always_create_database_tables = 12,
     
     setting_roles = 13
