@@ -88,10 +88,10 @@ void Settings::set(int number, const string& value) {
         case setting_cluster_restart_after_emergency_abort:
             _cluster_restart_after_emergency_abort = as_bool(value);
             break;
-        case 10:
+        case setting_use_old_microscheduling_for_jobs:
             _use_old_microscheduling_for_jobs = as_bool(value);
             break;
-        case 11:
+        case setting_use_old_microscheduling_for_tasks:
             _use_old_microscheduling_for_tasks = as_bool(value);
             break;
         case setting_always_create_database_tables:
